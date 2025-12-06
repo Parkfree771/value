@@ -34,14 +34,14 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Logo/Title */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             워렌버핏 따라잡기
           </h1>
-          <p className="text-gray-600">투자 리포트로 성과를 추적하세요</p>
+          <p className="text-gray-600 dark:text-gray-400">투자 리포트로 성과를 추적하세요</p>
         </div>
 
         <Card className="p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">로그인</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">로그인</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
@@ -67,9 +67,9 @@ export default function LoginPage() {
             <div className="flex items-center justify-between text-sm">
               <label className="flex items-center gap-2">
                 <input type="checkbox" className="rounded" />
-                <span className="text-gray-700">로그인 상태 유지</span>
+                <span className="text-gray-700 dark:text-gray-300">로그인 상태 유지</span>
               </label>
-              <Link href="/forgot-password" className="text-blue-600 hover:text-blue-700">
+              <Link href="/forgot-password" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
                 비밀번호 찾기
               </Link>
             </div>
@@ -81,9 +81,9 @@ export default function LoginPage() {
 
           {/* Divider */}
           <div className="my-6 flex items-center">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-4 text-sm text-gray-500">또는</span>
-            <div className="flex-1 border-t border-gray-300"></div>
+            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="px-4 text-sm text-gray-500 dark:text-gray-400">또는</span>
+            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
           </div>
 
           {/* Social Login */}
@@ -101,8 +101,8 @@ export default function LoginPage() {
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">계정이 없으신가요? </span>
-            <Link href="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <span className="text-gray-600 dark:text-gray-400">계정이 없으신가요? </span>
+            <Link href="/signup" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold">
               회원가입
             </Link>
           </div>

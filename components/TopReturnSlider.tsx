@@ -74,16 +74,13 @@ export default function TopReturnSlider() {
                 }`}
                 onMouseEnter={() => setCurrentIndex(index)}
               >
-                {/* Rank + Stock Info */}
+                {/* Rank + Author */}
                 <div className="flex items-start gap-3 mb-3">
                   <div className="text-2xl font-bold text-gray-400 dark:text-gray-500 flex-shrink-0">
                     {getMedal(item.rank)}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="text-base font-bold text-gray-900 dark:text-white">{item.stockName}</h3>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">{item.ticker}</span>
-                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{item.author}</h3>
                     <h4 className="text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2">{item.title}</h4>
                   </div>
                 </div>
@@ -95,9 +92,10 @@ export default function TopReturnSlider() {
                   </div>
                 </div>
 
-                {/* Author and Date */}
+                {/* Stock Info and Date */}
                 <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                  <span>{item.author}</span>
+                  <span className="font-semibold">{item.stockName}</span>
+                  <span>{item.ticker}</span>
                   <span>·</span>
                   <span>{item.createdAt}</span>
                 </div>

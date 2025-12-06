@@ -28,24 +28,45 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/reports/new" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/write" className="text-gray-400 hover:text-white transition-colors">
                   리포트 작성
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Legal */}
           <div>
-            <h3 className="text-lg font-bold mb-4">문의</h3>
-            <p className="text-gray-400 text-sm">
-              이메일: contact@warren-tracker.com
-            </p>
+            <h3 className="text-lg font-bold mb-4">법적 고지</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                  이용약관
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                  개인정보처리방침
+                </Link>
+              </li>
+              <li>
+                <p className="text-gray-400 text-sm">
+                  이메일: contact@warren-tracker.com
+                </p>
+              </li>
+            </ul>
           </div>
         </div>
 
-        <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; 2025 워렌버핏 따라잡기. All rights reserved.</p>
+        <div className="border-t border-gray-700 mt-8 pt-8">
+          <div className="text-center text-xs text-gray-500 mb-4 max-w-3xl mx-auto">
+            <p className="mb-2">
+              <strong className="text-yellow-400">⚠️ 투자 유의사항:</strong> 본 사이트에서 제공되는 모든 투자 리포트는 작성자 개인의 의견이며,
+              투자 권유 또는 투자 조언이 아닙니다. 투자의 최종 결정은 본인의 판단과 책임 하에 이루어져야 하며,
+              투자로 인한 손실에 대해 회사는 어떠한 책임도 지지 않습니다.
+            </p>
+          </div>
+          <p className="text-center text-sm text-gray-400">&copy; 2025 워렌버핏 따라잡기. All rights reserved.</p>
         </div>
       </div>
     </footer>

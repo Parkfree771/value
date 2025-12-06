@@ -149,9 +149,93 @@ const topInvestors = [
   { rank: 5, name: '가치투자자', avgReturnRate: 21.2, totalReports: 22, totalLikes: 654 },
 ];
 
+// 인기글 데이터 (조회수/좋아요 기준)
+const trendingReports = [
+  {
+    id: '1',
+    title: 'NVIDIA AI 칩 수요 폭발적 증가 분석',
+    author: 'AI투자자',
+    stockName: 'NVIDIA',
+    ticker: 'NVDA',
+    opinion: 'buy' as const,
+    returnRate: 18.5,
+    initialPrice: 450,
+    currentPrice: 533.25,
+    createdAt: '2025-11-01',
+    views: 8234,
+    likes: 567,
+    daysElapsed: 34,
+    priceHistory: [],
+  },
+  {
+    id: '2',
+    title: '삼성전자 반도체 업황 회복 기대',
+    author: '투자왕김부자',
+    stockName: '삼성전자',
+    ticker: '005930',
+    opinion: 'buy' as const,
+    returnRate: 45.8,
+    initialPrice: 50000,
+    currentPrice: 72900,
+    createdAt: '2025-09-01',
+    views: 7821,
+    likes: 498,
+    daysElapsed: 95,
+    priceHistory: [],
+  },
+  {
+    id: '3',
+    title: 'Tesla 자율주행 FSD 베타 완성도 분석',
+    author: '일론팬',
+    stockName: 'Tesla',
+    ticker: 'TSLA',
+    opinion: 'buy' as const,
+    returnRate: 38.2,
+    initialPrice: 220,
+    currentPrice: 304.04,
+    createdAt: '2025-09-15',
+    views: 6543,
+    likes: 445,
+    daysElapsed: 81,
+    priceHistory: [],
+  },
+  {
+    id: '4',
+    title: 'SK하이닉스 HBM3E 양산 본격화',
+    author: '반도체전문가',
+    stockName: 'SK하이닉스',
+    ticker: '000660',
+    opinion: 'buy' as const,
+    returnRate: 35.4,
+    initialPrice: 120000,
+    currentPrice: 162480,
+    createdAt: '2025-10-01',
+    views: 5987,
+    likes: 412,
+    daysElapsed: 65,
+    priceHistory: [],
+  },
+  {
+    id: '5',
+    title: 'Microsoft AI Copilot 매출 급증',
+    author: '클라우드왕',
+    stockName: 'Microsoft',
+    ticker: 'MSFT',
+    opinion: 'buy' as const,
+    returnRate: 28.9,
+    initialPrice: 350,
+    currentPrice: 451.15,
+    createdAt: '2025-10-10',
+    views: 5234,
+    likes: 389,
+    daysElapsed: 56,
+    priceHistory: [],
+  },
+];
+
 export default function RankingPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
-  const [activeTab, setActiveTab] = useState<'reports' | 'investors'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('reports');
 
   const getPeriodLabel = (period: TimePeriod) => {
     const labels = {
@@ -172,45 +256,45 @@ export default function RankingPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          수익률 랭킹
-        </h1>
-        <p className="text-lg text-gray-600">
-          작성일부터 지금까지 얼마나 수익이 났을까요?
-        </p>
-      </div>
-
       {/* Tab Navigation */}
       <div className="flex gap-4 mb-8">
         <button
           onClick={() => setActiveTab('reports')}
-          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
             activeTab === 'reports'
               ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
           리포트 랭킹
         </button>
         <button
           onClick={() => setActiveTab('investors')}
-          className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
             activeTab === 'investors'
               ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
           투자자 랭킹
+        </button>
+        <button
+          onClick={() => setActiveTab('trending')}
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            activeTab === 'trending'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+          }`}
+        >
+          인기글
         </button>
       </div>
 
       {activeTab === 'reports' && (
         <>
           {/* Time Period Filter */}
-          <div className="mb-8 bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">기간별 수익률</h3>
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">기간별 수익률</h3>
             <div className="flex gap-3 flex-wrap">
               {(['1week', '1month', '3months', 'all'] as TimePeriod[]).map((period) => (
                 <button
@@ -219,7 +303,7 @@ export default function RankingPage() {
                   className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
                     selectedPeriod === period
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {getPeriodLabel(period)}
@@ -238,37 +322,52 @@ export default function RankingPage() {
       )}
 
       {activeTab === 'investors' && (
-        <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
             상위 투자자 랭킹
           </h2>
           <div className="space-y-3">
             {topInvestors.map((investor) => (
               <div
                 key={investor.rank}
-                className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-4">
-                  <div className="text-2xl font-bold text-gray-400 w-8 text-center">
+                  <div className="text-2xl font-bold text-gray-400 dark:text-gray-500 w-8 text-center">
                     {getMedalEmoji(investor.rank)}
                   </div>
                   <div>
-                    <div className="font-bold text-lg text-gray-900">{investor.name}</div>
-                    <div className="text-sm text-gray-500">
+                    <div className="font-bold text-lg text-gray-900 dark:text-white">{investor.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
                       리포트 {investor.totalReports}개 · 좋아요 {investor.totalLikes}
                     </div>
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-red-600">
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
                     +{investor.avgReturnRate}%
                   </div>
-                  <div className="text-xs text-gray-500">평균 수익률</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">평균 수익률</div>
                 </div>
               </div>
             ))}
           </div>
         </div>
+      )}
+
+      {activeTab === 'trending' && (
+        <>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">인기글</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-400">조회수와 좋아요가 많은 인기 리포트</p>
+          </div>
+
+          <div className="space-y-4">
+            {trendingReports.map((report, index) => (
+              <RankingReportCard key={report.id} report={report} rank={index + 1} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

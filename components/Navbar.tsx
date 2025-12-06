@@ -48,14 +48,14 @@ export default function Navbar() {
               랭킹
             </Link>
             <Link
-              href="/reports/new"
+              href="/write"
               className={`text-base font-medium transition-colors ${
-                isActive('/reports/new')
+                isActive('/write')
                   ? 'text-blue-600 dark:text-blue-400'
                   : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
-              리포트 작성
+              글쓰기
             </Link>
             <Link
               href="/mypage"

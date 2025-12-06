@@ -67,17 +67,7 @@ const mockReports = [
 export default function HomePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Hero Section */}
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
-          투자 리포트 커뮤니티
-        </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400">
-          개인 투자자들의 실시간 투자 아이디어와 성과를 확인하세요
-        </p>
-      </div>
-
-      {/* TOP 5 Return Rate Slider */}
+      {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider />
 
       {/* Filters */}

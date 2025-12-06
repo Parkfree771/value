@@ -77,14 +77,14 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         {/* Logo/Title */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             워렌버핏 따라잡기
           </h1>
-          <p className="text-gray-600">지금 가입하고 투자 성과를 추적하세요</p>
+          <p className="text-gray-600 dark:text-gray-400">지금 가입하고 투자 성과를 추적하세요</p>
         </div>
 
         <Card className="p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">회원가입</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">회원가입</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
@@ -133,12 +133,12 @@ export default function SignUpPage() {
 
             <div className="flex items-start gap-2">
               <input type="checkbox" required className="mt-1 rounded" />
-              <label className="text-sm text-gray-700">
-                <Link href="/terms" className="text-blue-600 hover:text-blue-700">
+              <label className="text-sm text-gray-700 dark:text-gray-300">
+                <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
                   이용약관
                 </Link>
                 {' '}및{' '}
-                <Link href="/privacy" className="text-blue-600 hover:text-blue-700">
+                <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
                   개인정보처리방침
                 </Link>
                 에 동의합니다. *
@@ -152,9 +152,9 @@ export default function SignUpPage() {
 
           {/* Divider */}
           <div className="my-6 flex items-center">
-            <div className="flex-1 border-t border-gray-300"></div>
-            <span className="px-4 text-sm text-gray-500">또는</span>
-            <div className="flex-1 border-t border-gray-300"></div>
+            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
+            <span className="px-4 text-sm text-gray-500 dark:text-gray-400">또는</span>
+            <div className="flex-1 border-t border-gray-300 dark:border-gray-600"></div>
           </div>
 
           {/* Social Sign Up */}
@@ -172,8 +172,8 @@ export default function SignUpPage() {
 
           {/* Login Link */}
           <div className="mt-6 text-center text-sm">
-            <span className="text-gray-600">이미 계정이 있으신가요? </span>
-            <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+            <span className="text-gray-600 dark:text-gray-400">이미 계정이 있으신가요? </span>
+            <Link href="/login" className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold">
               로그인
             </Link>
           </div>
