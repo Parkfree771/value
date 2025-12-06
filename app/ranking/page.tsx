@@ -1,7 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import RankingReportCard from '@/components/RankingReportCard';
+import Podium from '@/components/Podium';
 
 type TimePeriod = '1week' | '1month' | '3months' | 'all';
 
@@ -235,7 +237,7 @@ const trendingReports = [
 
 export default function RankingPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
-  const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('investors');
 
   const getPeriodLabel = (period: TimePeriod) => {
     const labels = {
@@ -322,37 +324,46 @@ export default function RankingPage() {
       )}
 
       {activeTab === 'investors' && (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
-            상위 투자자 랭킹
-          </h2>
-          <div className="space-y-3">
-            {topInvestors.map((investor) => (
-              <div
-                key={investor.rank}
-                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="text-2xl font-bold text-gray-400 dark:text-gray-500 w-8 text-center">
-                    {getMedalEmoji(investor.rank)}
-                  </div>
-                  <div>
-                    <div className="font-bold text-lg text-gray-900 dark:text-white">{investor.name}</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      리포트 {investor.totalReports}개 · 좋아요 {investor.totalLikes}
+        <>
+          {/* Podium for Top 3 */}
+          <Podium topThree={topInvestors.slice(0, 3)} />
+
+          {/* All Rankings */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+              전체 투자자 랭킹
+            </h2>
+            <div className="space-y-3">
+              {topInvestors.map((investor) => (
+                <Link
+                  key={investor.rank}
+                  href={`/user/${encodeURIComponent(investor.name)}`}
+                  className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="text-2xl font-bold text-gray-400 dark:text-gray-500 w-8 text-center">
+                      {getMedalEmoji(investor.rank)}
+                    </div>
+                    <div>
+                      <div className="font-bold text-lg text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                        {investor.name}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        리포트 {investor.totalReports}개 · 좋아요 {investor.totalLikes}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    +{investor.avgReturnRate}%
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-red-600 dark:text-red-400">
+                      +{investor.avgReturnRate}%
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">평균 수익률</div>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">평균 수익률</div>
-                </div>
-              </div>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {activeTab === 'trending' && (

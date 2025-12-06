@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import ReportCard from '@/components/ReportCard';
 import FilterBar from '@/components/FilterBar';
 import TopReturnSlider from '@/components/TopReturnSlider';
+import SearchBar from '@/components/SearchBar';
 
 // Mock data - 실제로는 API에서 가져올 데이터
 const mockReports = [
@@ -65,10 +67,28 @@ const mockReports = [
 ];
 
 export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // 검색 필터링
+  const filteredReports = mockReports.filter((report) => {
+    if (!searchQuery.trim()) return true;
+
+    const query = searchQuery.toLowerCase();
+    return (
+      report.stockName.toLowerCase().includes(query) ||
+      report.ticker.toLowerCase().includes(query) ||
+      report.author.toLowerCase().includes(query) ||
+      report.title.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider />
+
+      {/* Search Bar */}
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={mockReports} />
 
       {/* Filters */}
       <FilterBar />
@@ -85,9 +105,20 @@ export default function HomePage() {
 
       {/* Reports Grid */}
       <div className="space-y-4">
-        {mockReports.map((report) => (
-          <ReportCard key={report.id} {...report} />
-        ))}
+        {filteredReports.length > 0 ? (
+          filteredReports.map((report) => (
+            <ReportCard key={report.id} {...report} />
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">
+              검색 결과가 없습니다.
+            </p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+              다른 검색어를 입력해보세요.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Load More Button */}

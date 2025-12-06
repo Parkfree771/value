@@ -9,7 +9,10 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nInitial commit: 워렌버핏 따라잡기 프로젝트\n\n- 수익률 TOP 10 가로 스크롤 슬라이더\n- 수익률 랭킹 페이지 (리포트/투자자)\n- 다크모드 지원 (화이트/다크 토글)\n- 반응형 네비게이션\n- 리포트 카드 컴포넌트\n- 필터바 (기간/시장/의견/정렬)\n- 파비콘 및 로고 추가\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(if exist .next rmdir /s /q .next)",
+      "Bash(if exist node_modules.cache rmdir /s /q node_modules.cache)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []
