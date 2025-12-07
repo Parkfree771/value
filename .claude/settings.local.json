@@ -12,7 +12,9 @@
       "Bash(git push:*)",
       "Bash(if exist .next rmdir /s /q .next)",
       "Bash(if exist node_modules.cache rmdir /s /q node_modules.cache)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm install:*)"
     ],
     "deny": [],
     "ask": []
