@@ -9,15 +9,23 @@ import Textarea from '@/components/Textarea';
 import StockSearchInput from '@/components/StockSearchInput';
 import Card from '@/components/Card';
 
-interface Stock {
-  ticker: string;
+interface StockData {
+  symbol: string;
   name: string;
-  market: string;
+  currentPrice: number;
+  currency: string;
+  marketCap: number;
+  per: number | null;
+  pbr: number | null;
+  eps: number | null;
+  exchange: string;
+  industry?: string;
+  sector?: string;
 }
 
 export default function NewReportPage() {
   const router = useRouter();
-  const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
+  const [selectedStock, setSelectedStock] = useState<StockData | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     opinion: 'buy',
@@ -27,10 +35,13 @@ export default function NewReportPage() {
     riskFactors: '',
   });
 
+  // 투자 의견에 따라 포지션 타입 자동 결정
+  const positionType = formData.opinion === 'sell' ? 'short' : 'long';
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // API 호출 로직이 여기 들어갈 예정
-    console.log('Submit:', { selectedStock, ...formData });
+    console.log('Submit:', { selectedStock, ...formData, positionType });
     // 임시로 메인 페이지로 이동
     router.push('/');
   };
@@ -60,34 +71,46 @@ export default function NewReportPage() {
         {/* Stock Search */}
         <Card className="p-6">
           <StockSearchInput
-            onSelect={setSelectedStock}
+            onStockSelect={setSelectedStock}
             selectedStock={selectedStock}
           />
         </Card>
 
         {/* Stock Profile Card - Show only when stock is selected */}
         {selectedStock && (
-          <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">종목 프로필</h3>
+          <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">종목 프로필</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
-                <div className="text-sm text-gray-600">현재가</div>
-                <div className="text-lg font-bold text-gray-900">52,000원</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">현재가</div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">
+                  {selectedStock.currency} {selectedStock.currentPrice.toFixed(2)}
+                </div>
               </div>
               <div>
-                <div className="text-sm text-gray-600">시가총액</div>
-                <div className="text-lg font-bold text-gray-900">310조원</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">시가총액</div>
+                <div className="text-lg font-bold text-gray-900 dark:text-white">
+                  {(selectedStock.marketCap / 1e9).toFixed(2)}B
+                </div>
               </div>
-              <div>
-                <div className="text-sm text-gray-600">PER</div>
-                <div className="text-lg font-bold text-gray-900">15.2</div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600">PBR</div>
-                <div className="text-lg font-bold text-gray-900">1.8</div>
-              </div>
+              {selectedStock.per && (
+                <div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">PER</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                    {selectedStock.per.toFixed(2)}
+                  </div>
+                </div>
+              )}
+              {selectedStock.pbr && (
+                <div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">PBR</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                    {selectedStock.pbr.toFixed(2)}
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               이 데이터는 리포트 작성 시점의 스냅샷으로 자동 저장됩니다.
             </div>
           </Card>
@@ -110,14 +133,23 @@ export default function NewReportPage() {
             name="opinion"
             label="투자 의견 *"
             options={[
-              { value: 'buy', label: '매수' },
-              { value: 'sell', label: '매도' },
+              { value: 'buy', label: '매수 (롱 포지션 - 상승 예상)' },
+              { value: 'sell', label: '매도 (숏 포지션 - 하락 예상)' },
               { value: 'hold', label: '보유' },
             ]}
             value={formData.opinion}
             onChange={handleChange}
             required
           />
+
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
+              <strong>포지션 타입 안내:</strong><br />
+              • <strong>매수 (롱):</strong> 가격이 상승하면 수익률이 플러스(+)로 표시됩니다<br />
+              • <strong>매도 (숏):</strong> 가격이 하락하면 수익률이 플러스(+)로 표시됩니다<br />
+              • <strong>보유:</strong> 현재 포지션 유지 (롱 포지션으로 계산)
+            </p>
+          </div>
 
           <Textarea
             name="content"

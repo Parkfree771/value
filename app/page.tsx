@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import ReportCard from '@/components/ReportCard';
 import FilterBar from '@/components/FilterBar';
 import TopReturnSlider from '@/components/TopReturnSlider';
@@ -66,8 +67,11 @@ const mockReports = [
   },
 ];
 
+type FeedTab = 'all' | 'following' | 'popular' | 'return';
+
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<FeedTab>('all');
 
   // 검색 필터링
   const filteredReports = mockReports.filter((report) => {
@@ -87,20 +91,113 @@ export default function HomePage() {
       {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider />
 
-      {/* Search Bar */}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={mockReports} />
+      {/* 데스크탑: 검색바 + 필터바 */}
+      <div className="hidden md:block">
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={mockReports} />
+        <FilterBar />
+      </div>
 
-      {/* Filters */}
-      <FilterBar />
+      {/* 모바일: 검색 버튼 */}
+      <div className="md:hidden mb-4">
+        <Link href="/search">
+          <button className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-left text-gray-500 dark:text-gray-400 flex items-center gap-3 hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <span>종목명, 티커, 작성자로 검색...</span>
+          </button>
+        </Link>
+      </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-4 mb-6">
-        <button className="px-6 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors">
-          전체 피드
-        </button>
-        <button className="px-6 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 transition-colors">
-          팔로우 피드
-        </button>
+      <div className="mb-4 sm:mb-6">
+        {/* 모바일: 4개 탭 한 줄 */}
+        <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              activeTab === 'all'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            전체
+          </button>
+          <button
+            onClick={() => setActiveTab('following')}
+            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              activeTab === 'following'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            팔로우
+          </button>
+          <button
+            onClick={() => setActiveTab('popular')}
+            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              activeTab === 'popular'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            인기
+          </button>
+          <button
+            onClick={() => setActiveTab('return')}
+            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+              activeTab === 'return'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            수익률
+          </button>
+        </div>
+
+        {/* 데스크탑: 4개 탭 */}
+        <div className="hidden md:flex gap-4">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+              activeTab === 'all'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            전체 피드
+          </button>
+          <button
+            onClick={() => setActiveTab('following')}
+            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+              activeTab === 'following'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            팔로우 피드
+          </button>
+          <button
+            onClick={() => setActiveTab('popular')}
+            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+              activeTab === 'popular'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            인기순
+          </button>
+          <button
+            onClick={() => setActiveTab('return')}
+            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+              activeTab === 'return'
+                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            수익률순
+          </button>
+        </div>
       </div>
 
       {/* Reports Grid */}
@@ -122,8 +219,8 @@ export default function HomePage() {
       </div>
 
       {/* Load More Button */}
-      <div className="text-center mt-8">
-        <button className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+      <div className="text-center mt-6 sm:mt-8">
+        <button className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors">
           더 보기
         </button>
       </div>

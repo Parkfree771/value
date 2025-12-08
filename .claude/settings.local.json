@@ -14,7 +14,8 @@
       "Bash(if exist node_modules.cache rmdir /s /q node_modules.cache)",
       "Bash(npm run dev:*)",
       "Bash(npm outdated:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []

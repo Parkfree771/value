@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Card from './Card';
+import { calculateReturn, formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 
 interface ReportCardProps {
   id: string;
@@ -8,9 +9,9 @@ interface ReportCardProps {
   stockName: string;
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
-  returnRate: number;
   initialPrice: number;
   currentPrice: number;
+  positionType?: 'long' | 'short'; // 포지션 타입 추가
   createdAt: string;
   views: number;
   likes: number;
@@ -23,13 +24,16 @@ export default function ReportCard({
   stockName,
   ticker,
   opinion,
-  returnRate,
   initialPrice,
   currentPrice,
+  positionType = 'long', // 기본값은 long
   createdAt,
   views,
   likes,
 }: ReportCardProps) {
+  // 포지션 타입에 따라 수익률 계산
+  const returnRate = calculateReturn(initialPrice, currentPrice, positionType);
+
   const getOpinionBadge = () => {
     const styles = {
       buy: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
@@ -50,55 +54,52 @@ export default function ReportCard({
     );
   };
 
-  const getReturnRateColor = () => {
-    if (returnRate > 0) return 'text-red-600 dark:text-red-400';
-    if (returnRate < 0) return 'text-blue-600 dark:text-blue-400';
-    return 'text-gray-600 dark:text-gray-400';
-  };
-
   return (
     <Link href={`/reports/${id}`}>
-      <Card className="p-6 hover:border-blue-300 dark:hover:border-blue-500 border border-transparent dark:border-transparent">
+      <Card className="p-4 sm:p-6 hover:border-blue-300 dark:hover:border-blue-500 border border-transparent dark:border-transparent">
         {/* Header */}
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white">{stockName}</h3>
-              <span className="text-sm text-gray-500 dark:text-gray-400">{ticker}</span>
+        <div className="flex justify-between items-start mb-3 sm:mb-4 gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{stockName}</h3>
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{ticker}</span>
               {getOpinionBadge()}
             </div>
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">{title}</h2>
+            <h2 className="text-sm sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2 line-clamp-2">{title}</h2>
           </div>
-          <div className={`text-right ${getReturnRateColor()}`}>
-            <div className="text-2xl font-bold">
-              {returnRate > 0 ? '+' : ''}{returnRate.toFixed(2)}%
+          <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
+            <div className="text-xl sm:text-2xl font-bold">
+              {formatReturn(returnRate)}
             </div>
           </div>
         </div>
 
         {/* Price Info */}
-        <div className="flex gap-6 mb-4 text-sm">
+        <div className="grid grid-cols-2 sm:flex sm:gap-6 gap-2 mb-3 sm:mb-4 text-xs sm:text-sm">
           <div>
-            <span className="text-gray-500 dark:text-gray-400">작성시 주가:</span>
-            <span className="ml-2 font-semibold text-gray-900 dark:text-white">{initialPrice.toLocaleString()}원</span>
+            <span className="text-gray-500 dark:text-gray-400 block sm:inline">작성시:</span>
+            <span className="ml-0 sm:ml-2 font-semibold text-gray-900 dark:text-white block sm:inline">{initialPrice.toLocaleString()}원</span>
           </div>
           <div>
-            <span className="text-gray-500 dark:text-gray-400">현재 주가:</span>
-            <span className={`ml-2 font-semibold ${getReturnRateColor()}`}>
+            <span className="text-gray-500 dark:text-gray-400 block sm:inline">현재:</span>
+            <span className={`ml-0 sm:ml-2 font-semibold ${getReturnColorClass(returnRate)} block sm:inline`}>
               {currentPrice.toLocaleString()}원
             </span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-3">
-          <div className="flex items-center gap-4">
-            <span className="font-medium text-gray-700 dark:text-gray-300">{author}</span>
-            <span>{createdAt}</span>
+        <div className="flex justify-between items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <span className="font-medium text-gray-700 dark:text-gray-300 truncate">{author}</span>
+            <span className="hidden sm:inline">{createdAt}</span>
+            <span className="sm:hidden">{createdAt.slice(5)}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span>조회 {views}</span>
-            <span>좋아요 {likes}</span>
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+            <span className="hidden sm:inline">조회 {views}</span>
+            <span className="sm:hidden">👁 {views}</span>
+            <span className="hidden sm:inline">좋아요 {likes}</span>
+            <span className="sm:hidden">❤️ {likes}</span>
           </div>
         </div>
       </Card>

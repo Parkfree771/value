@@ -120,7 +120,7 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
   }, []);
 
   return (
-    <div className="mb-6" ref={searchRef}>
+    <div className="mb-4 sm:mb-6" ref={searchRef}>
       <div className="relative">
         <input
           type="text"
@@ -133,10 +133,10 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
           onFocus={() => setShowSuggestions(true)}
           onKeyDown={handleKeyDown}
           placeholder="종목명, 티커, 작성자로 검색..."
-          className="w-full px-5 py-3 pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 sm:px-5 py-2.5 sm:py-3 pl-10 sm:pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
         />
         <svg
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500"
+          className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -154,9 +154,9 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
               setSearchQuery('');
               setShowSuggestions(false);
             }}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -169,21 +169,21 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
 
         {/* 자동완성 드롭다운 */}
         {showSuggestions && suggestions.length > 0 && (
-          <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-80 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 sm:max-h-80 overflow-y-auto">
             {suggestions.map((suggestion, index) => (
               <button
                 key={`${suggestion.type}-${suggestion.value}`}
                 onClick={() => handleSelectSuggestion(suggestion.value)}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
                   focusedIndex === index ? 'bg-gray-50 dark:bg-gray-700' : ''
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <span className="px-2 py-0.5 text-xs font-semibold rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <span className="px-1.5 sm:px-2 py-0.5 text-xs font-semibold rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 flex-shrink-0">
                     {suggestion.type}
                   </span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-sm sm:text-base text-gray-900 dark:text-white truncate">
                     {highlightMatch(suggestion.label, searchQuery)}
                   </span>
                 </div>
@@ -194,7 +194,7 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
       </div>
 
       {searchQuery && !showSuggestions && (
-        <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <span className="font-semibold">&ldquo;{searchQuery}&rdquo;</span> 검색 중...
         </div>
       )}

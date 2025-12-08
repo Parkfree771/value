@@ -3,16 +3,31 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import StockSearchInput from '@/components/StockSearchInput';
 
 type EditorMode = 'text' | 'html';
 type Opinion = 'buy' | 'sell' | 'hold';
+type PositionType = 'long' | 'short';
+
+interface StockData {
+  symbol: string;
+  name: string;
+  currentPrice: number;
+  currency: string;
+  marketCap: number;
+  per: number | null;
+  pbr: number | null;
+  eps: number | null;
+  exchange: string;
+  industry?: string;
+  sector?: string;
+}
 
 export default function WritePage() {
   const router = useRouter();
   const [mode, setMode] = useState<EditorMode>('text');
   const [title, setTitle] = useState('');
-  const [stockName, setStockName] = useState('');
-  const [ticker, setTicker] = useState('');
+  const [stockData, setStockData] = useState<StockData | null>(null);
   const [opinion, setOpinion] = useState<Opinion>('buy');
   const [targetPrice, setTargetPrice] = useState('');
   const [content, setContent] = useState('');
@@ -20,6 +35,19 @@ export default function WritePage() {
   const [cssContent, setCssContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+
+  // 투자 의견에 따라 포지션 타입 자동 결정
+  const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
+
+  // 주식 선택 시
+  const handleStockSelect = (data: StockData) => {
+    setStockData(data);
+
+    // 자동으로 제목 업데이트 (비어있을 경우만)
+    if (!title) {
+      setTitle(`${data.name} 투자 리포트`);
+    }
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -61,26 +89,74 @@ export default function WritePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!stockData) {
+      alert('종목을 선택해주세요.');
+      return;
+    }
+
+    // 종목 프로필 데이터를 본문 앞에 자동으로 추가
+    let finalContent = '';
+
+    if (mode === 'text') {
+      // 텍스트 모드: 마크다운 표 형식으로 프로필 생성
+      const stockProfile = `## ${stockData.name} (${stockData.symbol}) 기업 개요\n\n` +
+        `| 항목 | 값 |\n` +
+        `|------|------|\n` +
+        `| 현재 주가 | ${stockData.currency} ${stockData.currentPrice.toLocaleString()} |\n` +
+        `| 시가총액 | ${(stockData.marketCap / 1e9).toFixed(2)}B ${stockData.currency} |\n` +
+        (stockData.per ? `| PER | ${stockData.per.toFixed(2)} |\n` : '') +
+        (stockData.pbr ? `| PBR | ${stockData.pbr.toFixed(2)} |\n` : '') +
+        (stockData.eps ? `| EPS | ${stockData.eps.toFixed(2)} |\n` : '') +
+        `| 거래소 | ${stockData.exchange} |\n` +
+        (stockData.sector ? `| 섹터 | ${stockData.sector} |\n` : '') +
+        (stockData.industry ? `| 산업 | ${stockData.industry} |\n` : '') +
+        `\n---\n\n`;
+
+      finalContent = stockProfile + content;
+    } else {
+      // HTML 모드: HTML 테이블로 프로필 생성
+      const stockProfile = `<div class="stock-profile">
+  <h2>${stockData.name} (${stockData.symbol}) 기업 개요</h2>
+  <table class="profile-table">
+    <tbody>
+      <tr><th>현재 주가</th><td>${stockData.currency} ${stockData.currentPrice.toLocaleString()}</td></tr>
+      <tr><th>시가총액</th><td>${(stockData.marketCap / 1e9).toFixed(2)}B ${stockData.currency}</td></tr>
+      ${stockData.per ? `<tr><th>PER</th><td>${stockData.per.toFixed(2)}</td></tr>` : ''}
+      ${stockData.pbr ? `<tr><th>PBR</th><td>${stockData.pbr.toFixed(2)}</td></tr>` : ''}
+      ${stockData.eps ? `<tr><th>EPS</th><td>${stockData.eps.toFixed(2)}</td></tr>` : ''}
+      <tr><th>거래소</th><td>${stockData.exchange}</td></tr>
+      ${stockData.sector ? `<tr><th>섹터</th><td>${stockData.sector}</td></tr>` : ''}
+      ${stockData.industry ? `<tr><th>산업</th><td>${stockData.industry}</td></tr>` : ''}
+    </tbody>
+  </table>
+  <hr />
+</div>\n\n`;
+
+      finalContent = stockProfile + htmlContent;
+    }
+
     // 새 리포트 객체 생성
     const newReport = {
       id: Date.now().toString(),
       title,
       author: '현재사용자', // TODO: 실제 로그인 사용자 정보로 대체
-      stockName,
-      ticker,
+      stockName: stockData.name,
+      ticker: stockData.symbol,
       opinion,
       targetPrice: parseFloat(targetPrice),
-      content: mode === 'text' ? content : htmlContent,
+      content: finalContent, // 프로필 + 본문 합친 내용
       cssContent: mode === 'html' ? cssContent : '',
       mode,
       images: images.map((img) => img.name), // TODO: 실제로는 서버에 업로드 후 URL 저장
       files: files.map((file) => file.name), // TODO: 실제로는 서버에 업로드 후 URL 저장
       createdAt: new Date().toISOString().split('T')[0],
-      initialPrice: 0, // TODO: API에서 현재 가격 가져오기
-      currentPrice: 0,
+      initialPrice: stockData.currentPrice,
+      currentPrice: stockData.currentPrice,
+      positionType, // 포지션 타입 저장 (long/short)
       returnRate: 0,
       views: 0,
       likes: 0,
+      stockData, // 전체 주식 데이터 저장
     };
 
     // localStorage에 저장 (실제로는 API 호출)
@@ -116,50 +192,119 @@ export default function WritePage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  종목명
-                </label>
-                <input
-                  type="text"
-                  value={stockName}
-                  onChange={(e) => setStockName(e.target.value)}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="예: 삼성전자"
-                />
-              </div>
+            {/* 종목 검색 (StockSearchInput 컴포넌트 사용) */}
+            <StockSearchInput
+              onStockSelect={handleStockSelect}
+              selectedStock={stockData}
+            />
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  티커
-                </label>
-                <input
-                  type="text"
-                  value={ticker}
-                  onChange={(e) => setTicker(e.target.value)}
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                  placeholder="예: 005930"
-                />
+            {/* 종목 프로필 카드 */}
+            <div className="mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20
+                          border-2 border-blue-200 dark:border-blue-800 rounded-lg">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                종목 프로필
+              </h3>
+
+              {stockData ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">현재 주가</div>
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {stockData.currency} {stockData.currentPrice.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">시가총액</div>
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {(stockData.marketCap / 1e9).toFixed(2)}B
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PER</div>
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PBR</div>
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">EPS</div>
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">거래소</div>
+                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      {stockData.exchange}
+                    </div>
+                  </div>
+                  {stockData.sector && (
+                    <div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">섹터</div>
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {stockData.sector}
+                      </div>
+                    </div>
+                  )}
+                  {stockData.industry && (
+                    <div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">산업</div>
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {stockData.industry}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
+                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">시가총액</div>
+                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PER</div>
+                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
+                  </div>
+                  <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PBR</div>
+                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-blue-200 dark:border-blue-800">
+                이 프로필 데이터는 리포트 제출 시 자동으로 본문 상단에 표시됩니다.
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  투자 의견
+                  투자 의견 *
                 </label>
                 <select
                   value={opinion}
                   onChange={(e) => setOpinion(e.target.value as Opinion)}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                 >
-                  <option value="buy">매수</option>
+                  <option value="buy">매수 (롱 포지션 - 상승 예상)</option>
+                  <option value="sell">매도 (숏 포지션 - 하락 예상)</option>
                   <option value="hold">보유</option>
-                  <option value="sell">매도</option>
                 </select>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {opinion === 'buy' && '매수: 가격 상승 시 수익률 증가'}
+                  {opinion === 'sell' && '매도: 가격 하락 시 수익률 증가'}
+                  {opinion === 'hold' && '보유: 현재 포지션 유지'}
+                </p>
               </div>
 
               <div>
@@ -221,7 +366,7 @@ export default function WritePage() {
                 required
                 rows={15}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono"
-                placeholder="리포트 내용을 입력하세요..."
+                placeholder="리포트 본문을 입력하세요... (종목 프로필은 자동으로 상단에 추가됩니다)"
               />
             </div>
           )}
@@ -383,7 +528,7 @@ export default function WritePage() {
                   required
                   rows={10}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                  placeholder="<div>HTML 코드를 입력하세요...</div>"
+                  placeholder="<div>HTML 본문을 입력하세요... (종목 프로필은 자동으로 상단에 추가됩니다)</div>"
                 />
               </div>
 
