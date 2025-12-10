@@ -50,6 +50,11 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/disclaimer" className="text-yellow-400 hover:text-yellow-300 transition-colors font-semibold">
+                  투자 면책 조항
+                </Link>
+              </li>
+              <li>
                 <p className="text-gray-400 text-sm">
                   이메일: contact@warren-tracker.com
                 </p>

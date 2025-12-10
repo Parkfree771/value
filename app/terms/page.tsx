@@ -51,17 +51,50 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제5조 (면책 조항)</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제5조 (투자 면책 조항)</h2>
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded mb-4">
+              <p className="font-bold text-red-700 dark:text-red-400 mb-2">
+                ⚠️ 중요: 본 서비스는 투자 자문 또는 투자 권유를 제공하지 않습니다.
+              </p>
+              <p className="text-red-600 dark:text-red-300">
+                자세한 투자 면책 조항은{' '}
+                <a href="/disclaimer" target="_blank" className="underline font-semibold hover:text-red-700 dark:hover:text-red-200">
+                  여기
+                </a>
+                에서 확인하실 수 있습니다.
+              </p>
+            </div>
             <ol className="list-decimal list-inside space-y-2">
               <li className="font-bold text-red-600 dark:text-red-400">
-                본 서비스에서 제공되는 모든 투자 리포트는 작성자 개인의 의견이며, 투자 권유 또는 투자 조언이 아닙니다.
+                본 서비스에서 제공되는 모든 투자 리포트, 의견, 분석은 작성자 개인의 의견이며,
+                <strong className="underline"> 특정 종목의 매수 또는 매도를 권유하는 것이 아닙니다</strong>.
               </li>
               <li className="font-bold text-red-600 dark:text-red-400">
-                회사는 회원이 서비스를 이용하여 투자한 결과에 대해 어떠한 책임도 지지 않습니다.
+                회사 및 콘텐츠 작성자는 회원이 서비스를 이용하여 투자한 결과로 발생하는
+                <strong className="underline"> 모든 손실, 이익 및 결과에 대해 어떠한 법적 책임도 지지 않습니다</strong>.
               </li>
-              <li>회사는 리포트의 정확성, 신뢰성, 적시성에 대해 보증하지 않습니다.</li>
-              <li>회사는 회원 간 또는 회원과 제3자 간에 발생한 분쟁에 대해 개입할 의무가 없습니다.</li>
-              <li>투자의 최종 결정은 본인의 판단과 책임 하에 이루어져야 합니다.</li>
+              <li className="font-bold text-red-600 dark:text-red-400">
+                투자의 최종 결정은 전적으로 투자자 본인의 판단과 책임 하에 이루어져야 하며,
+                투자 전 반드시 공식 공시 자료 및 전문가 상담을 통해 정보를 확인하시기 바랍니다.
+              </li>
+              <li>
+                회사는 게시된 리포트 및 정보의 정확성, 완전성, 신뢰성, 적시성에 대해 보증하지 않습니다.
+              </li>
+              <li>
+                게시된 수익률은 과거의 성과이며, 미래 수익을 보장하지 않습니다.
+                과거의 수익률이 미래에도 동일하게 반복되지 않을 수 있습니다.
+              </li>
+              <li>
+                주식 투자는 원금 손실의 위험이 있으며, 투자 자산의 가치는 시장 상황에 따라 크게 변동될 수 있습니다.
+              </li>
+              <li>
+                회사는 회원 간 또는 회원과 제3자 간에 발생한 분쟁에 대해 개입할 의무가 없으며,
+                이에 대한 책임을 지지 않습니다.
+              </li>
+              <li>
+                본 서비스는 금융투자상품 판매업이 아니며, 회사는 자본시장과 금융투자업에 관한 법률에 따른
+                투자자문업자 또는 투자일임업자가 아닙니다.
+              </li>
             </ol>
           </section>
 

@@ -5,10 +5,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const pathname = usePathname();
   const { theme, toggleTheme } = useTheme();
+  const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path: string) => {
@@ -17,6 +19,15 @@ export default function Navbar() {
 
   const closeMobileMenu = () => {
     setMobileMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      closeMobileMenu();
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+    }
   };
 
   return (
@@ -114,18 +125,34 @@ export default function Navbar() {
               )}
             </button>
 
-            <Link
-              href="/login"
-              className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
-            >
-              로그인
-            </Link>
-            <Link
-              href="/signup"
-              className="px-3 py-1.5 text-sm bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-            >
-              회원가입
-            </Link>
+            {user ? (
+              <>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {user.displayName || user.email}
+                </span>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/signup"
+                  className="px-3 py-1.5 text-sm bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                >
+                  회원가입
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button + Theme Toggle */}
@@ -255,22 +282,36 @@ export default function Navbar() {
 
           {/* Sidebar Footer */}
           <div className="border-t border-gray-200 dark:border-gray-700 p-3">
-            <div className="flex flex-col space-y-2">
-              <Link
-                href="/login"
-                onClick={closeMobileMenu}
-                className="px-4 py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-center"
-              >
-                로그인
-              </Link>
-              <Link
-                href="/signup"
-                onClick={closeMobileMenu}
-                className="px-4 py-2.5 text-base bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-center font-medium"
-              >
-                회원가입
-              </Link>
-            </div>
+            {user ? (
+              <div className="flex flex-col space-y-2">
+                <div className="px-4 py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 text-center">
+                  {user.displayName || user.email}
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="px-4 py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-center"
+                >
+                  로그아웃
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2">
+                <Link
+                  href="/login"
+                  onClick={closeMobileMenu}
+                  className="px-4 py-2.5 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors text-center"
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={closeMobileMenu}
+                  className="px-4 py-2.5 text-base bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-center font-medium"
+                >
+                  회원가입
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>
