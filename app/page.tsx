@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import ReportCard from '@/components/ReportCard';
-import FilterBar from '@/components/FilterBar';
-import TopReturnSlider from '@/components/TopReturnSlider';
-import SearchBar from '@/components/SearchBar';
+import dynamic from 'next/dynamic';
+
+const ReportCard = dynamic(() => import('@/components/ReportCard'), {
+  loading: () => <div className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+});
+const FilterBar = dynamic(() => import('@/components/FilterBar'));
+const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
+  loading: () => <div className="animate-pulse h-64 bg-gray-200 dark:bg-gray-700 rounded-lg mb-8" />,
+});
+const SearchBar = dynamic(() => import('@/components/SearchBar'));
 
 // Mock data - 실제로는 API에서 가져올 데이터
 const mockReports = [

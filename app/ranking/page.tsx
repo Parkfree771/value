@@ -2,8 +2,14 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import RankingReportCard from '@/components/RankingReportCard';
-import Podium from '@/components/Podium';
+import dynamic from 'next/dynamic';
+
+const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
+  loading: () => <div className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+});
+const Podium = dynamic(() => import('@/components/Podium'), {
+  loading: () => <div className="animate-pulse h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+});
 
 type TimePeriod = '1week' | '1month' | '3months' | 'all';
 

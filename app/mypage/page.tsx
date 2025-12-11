@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Card from '@/components/Card';
-import ReportCard from '@/components/ReportCard';
-import Button from '@/components/Button';
+import dynamic from 'next/dynamic';
 import { getCurrentUser, getUserReports } from '@/lib/reportStore';
 import { Report } from '@/types/report';
+
+const Card = dynamic(() => import('@/components/Card'));
+const ReportCard = dynamic(() => import('@/components/ReportCard'), {
+  loading: () => <div className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+});
+const Button = dynamic(() => import('@/components/Button'));
 
 // Mock user data
 const mockUser = {

@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
+import { uploadMultipleImages } from '@/utils/imageOptimization';
 
 type EditorMode = 'text' | 'html';
 type Opinion = 'buy' | 'sell' | 'hold';
@@ -35,6 +36,8 @@ export default function WritePage() {
   const [cssContent, setCssContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
@@ -86,13 +89,33 @@ export default function WritePage() {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!stockData) {
       alert('종목을 선택해주세요.');
       return;
     }
+
+    if (isUploading) {
+      alert('이미지 업로드 중입니다. 잠시만 기다려주세요.');
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      let imageUrls: string[] = [];
+
+      if (images.length > 0) {
+        imageUrls = await uploadMultipleImages(
+          images,
+          `reports/${Date.now()}`,
+          { maxWidth: 1920, maxHeight: 1920, quality: 0.85, maxSizeMB: 2 },
+          (progress) => setUploadProgress(progress)
+        );
+      }
 
     // 종목 프로필 데이터를 본문 앞에 자동으로 추가
     let finalContent = '';
@@ -135,37 +158,44 @@ export default function WritePage() {
       finalContent = stockProfile + htmlContent;
     }
 
-    // 새 리포트 객체 생성
-    const newReport = {
-      id: Date.now().toString(),
-      title,
-      author: '현재사용자', // TODO: 실제 로그인 사용자 정보로 대체
-      stockName: stockData.name,
-      ticker: stockData.symbol,
-      opinion,
-      targetPrice: parseFloat(targetPrice),
-      content: finalContent, // 프로필 + 본문 합친 내용
-      cssContent: mode === 'html' ? cssContent : '',
-      mode,
-      images: images.map((img) => img.name), // TODO: 실제로는 서버에 업로드 후 URL 저장
-      files: files.map((file) => file.name), // TODO: 실제로는 서버에 업로드 후 URL 저장
-      createdAt: new Date().toISOString().split('T')[0],
-      initialPrice: stockData.currentPrice,
-      currentPrice: stockData.currentPrice,
-      positionType, // 포지션 타입 저장 (long/short)
-      returnRate: 0,
-      views: 0,
-      likes: 0,
-      stockData, // 전체 주식 데이터 저장
-    };
+      // 새 리포트 객체 생성
+      const newReport = {
+        id: Date.now().toString(),
+        title,
+        author: '현재사용자', // TODO: 실제 로그인 사용자 정보로 대체
+        stockName: stockData.name,
+        ticker: stockData.symbol,
+        opinion,
+        targetPrice: parseFloat(targetPrice),
+        content: finalContent, // 프로필 + 본문 합친 내용
+        cssContent: mode === 'html' ? cssContent : '',
+        mode,
+        images: imageUrls,
+        files: files.map((file) => file.name),
+        createdAt: new Date().toISOString().split('T')[0],
+        initialPrice: stockData.currentPrice,
+        currentPrice: stockData.currentPrice,
+        positionType,
+        returnRate: 0,
+        views: 0,
+        likes: 0,
+        stockData,
+      };
 
-    // localStorage에 저장 (실제로는 API 호출)
-    const existingReports = JSON.parse(localStorage.getItem('userReports') || '[]');
-    existingReports.push(newReport);
-    localStorage.setItem('userReports', JSON.stringify(existingReports));
+      // localStorage에 저장 (실제로는 API 호출)
+      const existingReports = JSON.parse(localStorage.getItem('userReports') || '[]');
+      existingReports.push(newReport);
+      localStorage.setItem('userReports', JSON.stringify(existingReports));
 
-    alert('리포트가 성공적으로 작성되었습니다!');
-    router.push('/');
+      alert('리포트가 성공적으로 작성되었습니다!');
+      router.push('/');
+    } catch (error) {
+      console.error('리포트 작성 실패:', error);
+      alert('리포트 작성 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
   };
 
   return (
@@ -558,18 +588,44 @@ export default function WritePage() {
             </div>
           )}
 
+          {/* 업로드 진행 상태 */}
+          {isUploading && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>이미지 업로드 중...</span>
+                <span>{Math.round(uploadProgress)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div
+                  className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
+
           {/* 제출 버튼 */}
           <div className="flex gap-4 pt-4">
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              disabled={isUploading}
+              className={`flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold transition-colors ${
+                isUploading
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-blue-700'
+              }`}
             >
-              작성 완료
+              {isUploading ? '업로드 중...' : '작성 완료'}
             </button>
             <button
               type="button"
               onClick={() => router.push('/')}
-              className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              disabled={isUploading}
+              className={`px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold transition-colors ${
+                isUploading
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-gray-300 dark:hover:bg-gray-600'
+              }`}
             >
               취소
             </button>

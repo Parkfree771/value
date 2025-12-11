@@ -40,9 +40,6 @@ export default function NewReportPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // API 호출 로직이 여기 들어갈 예정
-    console.log('Submit:', { selectedStock, ...formData, positionType });
-    // 임시로 메인 페이지로 이동
     router.push('/');
   };
 
