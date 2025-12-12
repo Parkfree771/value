@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 
 interface TopReturn {
@@ -14,29 +14,49 @@ interface TopReturn {
   createdAt: string;
 }
 
-const mockTopReturns: TopReturn[] = [
-  { id: '1', rank: 1, title: '삼성전자 반도체 업황 회복 기대', stockName: '삼성전자', ticker: '005930', returnRate: 45.8, author: '투자왕김부자', createdAt: '2025-09-01' },
-  { id: '2', rank: 2, title: 'Tesla 자율주행 기술 혁신', stockName: 'Tesla', ticker: 'TSLA', returnRate: 38.2, author: '일론팬', createdAt: '2025-09-15' },
-  { id: '3', rank: 3, title: 'SK하이닉스 HBM 시장 독점', stockName: 'SK하이닉스', ticker: '000660', returnRate: 35.4, author: '반도체전문가', createdAt: '2025-10-01' },
-  { id: '4', rank: 4, title: 'Microsoft AI 클라우드 성장', stockName: 'Microsoft', ticker: 'MSFT', returnRate: 28.9, author: '클라우드왕', createdAt: '2025-10-10' },
-  { id: '5', rank: 5, title: '카카오 실적 턴어라운드', stockName: '카카오', ticker: '035720', returnRate: 22.3, author: '가치투자자', createdAt: '2025-10-20' },
-  { id: '6', rank: 6, title: 'NVIDIA AI 칩 수요 폭발', stockName: 'NVIDIA', ticker: 'NVDA', returnRate: 18.5, author: 'AI투자자', createdAt: '2025-11-01' },
-  { id: '7', rank: 7, title: 'Apple 신제품 발표 기대', stockName: 'Apple', ticker: 'AAPL', returnRate: 15.2, author: '애플매니아', createdAt: '2025-11-05' },
-  { id: '8', rank: 8, title: 'LG에너지솔루션 배터리 수주', stockName: 'LG에너지솔루션', ticker: '373220', returnRate: 12.8, author: '2차전지왕', createdAt: '2025-11-10' },
-  { id: '9', rank: 9, title: '네이버 AI 검색 강화', stockName: '네이버', ticker: '035420', returnRate: 10.5, author: '테크분석가', createdAt: '2025-11-15' },
-  { id: '10', rank: 10, title: '현대차 전기차 판매 호조', stockName: '현대차', ticker: '005380', returnRate: 8.9, author: '주린이탈출', createdAt: '2025-11-20' },
-];
+interface TopReturnSliderProps {
+  reports?: Array<{
+    id: string;
+    title: string;
+    stockName: string;
+    ticker: string;
+    returnRate: number;
+    author: string;
+    createdAt: string;
+  }>;
+}
 
-export default function TopReturnSlider() {
+export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // 수익률 상위 10개 리포트 추출
+  const topReturns = useMemo(() => {
+    if (reports.length === 0) return [];
+
+    return reports
+      .filter((r) => r.returnRate > 0) // 양수 수익률만
+      .sort((a, b) => b.returnRate - a.returnRate) // 수익률 높은 순
+      .slice(0, 10) // 상위 10개
+      .map((report, index) => ({
+        ...report,
+        rank: index + 1,
+      }));
+  }, [reports]);
+
   useEffect(() => {
+    if (topReturns.length === 0) return;
+
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % mockTopReturns.length);
+      setCurrentIndex((prev) => (prev + 1) % topReturns.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [topReturns.length]);
+
+  // 리포트가 없으면 표시하지 않음
+  if (topReturns.length === 0) {
+    return null;
+  }
 
   const getMedal = (rank: number) => {
     if (rank === 1) return '🥇';
@@ -64,7 +84,7 @@ export default function TopReturnSlider() {
       {/* Horizontal Scrollable List of TOP 10 */}
       <div className="relative">
         <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 sm:pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 -mx-1 px-1">
-          {mockTopReturns.map((item, index) => (
+          {topReturns.map((item, index) => (
             <Link key={item.id} href={`/reports/${item.id}`}>
               <div
                 className={`flex-shrink-0 w-64 sm:w-80 p-3 sm:p-4 rounded-lg transition-all cursor-pointer snap-start ${

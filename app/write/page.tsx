@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
 import { uploadMultipleImages } from '@/utils/imageOptimization';
+import { useAuth } from '@/contexts/AuthContext';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
 type EditorMode = 'text' | 'html';
 type Opinion = 'buy' | 'sell' | 'hold';
@@ -26,6 +29,7 @@ interface StockData {
 
 export default function WritePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [mode, setMode] = useState<EditorMode>('text');
   const [title, setTitle] = useState('');
   const [stockData, setStockData] = useState<StockData | null>(null);
@@ -92,6 +96,12 @@ export default function WritePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+
     if (!stockData) {
       alert('종목을 선택해주세요.');
       return;
@@ -117,75 +127,67 @@ export default function WritePage() {
         );
       }
 
-    // 종목 프로필 데이터를 본문 앞에 자동으로 추가
-    let finalContent = '';
+    // 사용자가 작성한 내용만 저장 (기업 프로필은 상세 페이지 상단에 표시됨)
+    const finalContent = mode === 'html' ? htmlContent : content;
 
-    if (mode === 'text') {
-      // 텍스트 모드: 마크다운 표 형식으로 프로필 생성
-      const stockProfile = `## ${stockData.name} (${stockData.symbol}) 기업 개요\n\n` +
-        `| 항목 | 값 |\n` +
-        `|------|------|\n` +
-        `| 현재 주가 | ${stockData.currency} ${stockData.currentPrice.toLocaleString()} |\n` +
-        `| 시가총액 | ${(stockData.marketCap / 1e9).toFixed(2)}B ${stockData.currency} |\n` +
-        (stockData.per ? `| PER | ${stockData.per.toFixed(2)} |\n` : '') +
-        (stockData.pbr ? `| PBR | ${stockData.pbr.toFixed(2)} |\n` : '') +
-        (stockData.eps ? `| EPS | ${stockData.eps.toFixed(2)} |\n` : '') +
-        `| 거래소 | ${stockData.exchange} |\n` +
-        (stockData.sector ? `| 섹터 | ${stockData.sector} |\n` : '') +
-        (stockData.industry ? `| 산업 | ${stockData.industry} |\n` : '') +
-        `\n---\n\n`;
+      // 사용자 프로필에서 닉네임 가져오기
+      let authorName = '익명';
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (userDocSnap.exists()) {
+          authorName = userDocSnap.data().nickname || user.displayName || user.email || '익명';
+        } else {
+          authorName = user.displayName || user.email || '익명';
+        }
+      } catch (error) {
+        console.error('사용자 프로필 가져오기 실패:', error);
+        authorName = user.displayName || user.email || '익명';
+      }
 
-      finalContent = stockProfile + content;
-    } else {
-      // HTML 모드: HTML 테이블로 프로필 생성
-      const stockProfile = `<div class="stock-profile">
-  <h2>${stockData.name} (${stockData.symbol}) 기업 개요</h2>
-  <table class="profile-table">
-    <tbody>
-      <tr><th>현재 주가</th><td>${stockData.currency} ${stockData.currentPrice.toLocaleString()}</td></tr>
-      <tr><th>시가총액</th><td>${(stockData.marketCap / 1e9).toFixed(2)}B ${stockData.currency}</td></tr>
-      ${stockData.per ? `<tr><th>PER</th><td>${stockData.per.toFixed(2)}</td></tr>` : ''}
-      ${stockData.pbr ? `<tr><th>PBR</th><td>${stockData.pbr.toFixed(2)}</td></tr>` : ''}
-      ${stockData.eps ? `<tr><th>EPS</th><td>${stockData.eps.toFixed(2)}</td></tr>` : ''}
-      <tr><th>거래소</th><td>${stockData.exchange}</td></tr>
-      ${stockData.sector ? `<tr><th>섹터</th><td>${stockData.sector}</td></tr>` : ''}
-      ${stockData.industry ? `<tr><th>산업</th><td>${stockData.industry}</td></tr>` : ''}
-    </tbody>
-  </table>
-  <hr />
-</div>\n\n`;
-
-      finalContent = stockProfile + htmlContent;
-    }
-
-      // 새 리포트 객체 생성
-      const newReport = {
-        id: Date.now().toString(),
+      // Firebase Firestore에 저장할 리포트 데이터
+      const reportData = {
         title,
-        author: '현재사용자', // TODO: 실제 로그인 사용자 정보로 대체
+        authorId: user.uid,
+        authorName: authorName,
+        authorEmail: user.email,
         stockName: stockData.name,
         ticker: stockData.symbol,
         opinion,
         targetPrice: parseFloat(targetPrice),
-        content: finalContent, // 프로필 + 본문 합친 내용
+        content: finalContent,
         cssContent: mode === 'html' ? cssContent : '',
         mode,
         images: imageUrls,
         files: files.map((file) => file.name),
-        createdAt: new Date().toISOString().split('T')[0],
         initialPrice: stockData.currentPrice,
         currentPrice: stockData.currentPrice,
         positionType,
         returnRate: 0,
         views: 0,
         likes: 0,
-        stockData,
+        likedBy: [],
+        stockData: {
+          symbol: stockData.symbol,
+          name: stockData.name,
+          currentPrice: stockData.currentPrice,
+          currency: stockData.currency,
+          marketCap: stockData.marketCap,
+          per: stockData.per,
+          pbr: stockData.pbr,
+          eps: stockData.eps,
+          exchange: stockData.exchange,
+          industry: stockData.industry,
+          sector: stockData.sector,
+        },
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       };
 
-      // localStorage에 저장 (실제로는 API 호출)
-      const existingReports = JSON.parse(localStorage.getItem('userReports') || '[]');
-      existingReports.push(newReport);
-      localStorage.setItem('userReports', JSON.stringify(existingReports));
+      // Firestore posts 컬렉션에 저장
+      const docRef = await addDoc(collection(db, 'posts'), reportData);
+
+      console.log('리포트가 저장되었습니다. ID:', docRef.id);
 
       alert('리포트가 성공적으로 작성되었습니다!');
       router.push('/');
@@ -217,7 +219,7 @@ export default function WritePage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="리포트 제목을 입력하세요"
               />
             </div>
@@ -312,7 +314,7 @@ export default function WritePage() {
               )}
 
               <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-blue-200 dark:border-blue-800">
-                이 프로필 데이터는 리포트 제출 시 자동으로 본문 상단에 표시됩니다.
+                이 프로필 데이터는 리포트 상세 페이지 상단에 자동으로 표시됩니다.
               </div>
             </div>
 
@@ -324,7 +326,7 @@ export default function WritePage() {
                 <select
                   value={opinion}
                   onChange={(e) => setOpinion(e.target.value as Opinion)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="buy">매수 (롱 포지션 - 상승 예상)</option>
                   <option value="sell">매도 (숏 포지션 - 하락 예상)</option>
@@ -346,7 +348,7 @@ export default function WritePage() {
                   value={targetPrice}
                   onChange={(e) => setTargetPrice(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="예: 85000"
                 />
               </div>
@@ -395,8 +397,8 @@ export default function WritePage() {
                 onChange={(e) => setContent(e.target.value)}
                 required
                 rows={15}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono"
-                placeholder="리포트 본문을 입력하세요... (종목 프로필은 자동으로 상단에 추가됩니다)"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+                placeholder="리포트 본문을 입력하세요..."
               />
             </div>
           )}
@@ -557,8 +559,8 @@ export default function WritePage() {
                   onChange={(e) => setHtmlContent(e.target.value)}
                   required
                   rows={10}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
-                  placeholder="<div>HTML 본문을 입력하세요... (종목 프로필은 자동으로 상단에 추가됩니다)</div>"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                  placeholder="<div>HTML 본문을 입력하세요...</div>"
                 />
               </div>
 
@@ -570,7 +572,7 @@ export default function WritePage() {
                   value={cssContent}
                   onChange={(e) => setCssContent(e.target.value)}
                   rows={8}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white font-mono text-sm"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
                   placeholder=".custom-class { color: blue; }"
                 />
               </div>

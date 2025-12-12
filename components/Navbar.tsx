@@ -3,12 +3,13 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,6 +28,14 @@ export default function Navbar() {
       closeMobileMenu();
     } catch (error) {
       console.error('로그아웃 오류:', error);
+    }
+  };
+
+  const handleWriteClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      alert('로그인이 필요한 서비스입니다.');
+      router.push('/login');
     }
   };
 
@@ -86,6 +95,7 @@ export default function Navbar() {
             </Link>
             <Link
               href="/write"
+              onClick={handleWriteClick}
               className={`text-sm font-medium transition-colors ${
                 isActive('/write')
                   ? 'text-blue-600 dark:text-blue-400'
@@ -257,7 +267,10 @@ export default function Navbar() {
               </Link>
               <Link
                 href="/write"
-                onClick={closeMobileMenu}
+                onClick={(e) => {
+                  handleWriteClick(e);
+                  if (user) closeMobileMenu();
+                }}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/write')
                     ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'

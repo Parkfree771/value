@@ -18,6 +18,16 @@ export interface Report {
   returnRate: number;
   views: number;
   likes: number;
+  images?: string[];
+  files?: string[];
+  positionType?: 'long' | 'short';
+  stockData?: {
+    currency?: string;
+    marketCap?: number;
+    per?: number;
+    pbr?: number;
+    [key: string]: any;
+  };
 }
 
 export interface UserProfile {

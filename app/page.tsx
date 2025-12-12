@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
   loading: () => <div className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
@@ -13,74 +15,80 @@ const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
 });
 const SearchBar = dynamic(() => import('@/components/SearchBar'));
 
-// Mock data - 실제로는 API에서 가져올 데이터
-const mockReports = [
-  {
-    id: '1',
-    title: '삼성전자 반도체 업황 회복 기대',
-    author: '투자왕김부자',
-    stockName: '삼성전자',
-    ticker: '005930',
-    opinion: 'buy' as const,
-    returnRate: 24.5,
-    initialPrice: 50000,
-    currentPrice: 62250,
-    createdAt: '2025-11-01',
-    views: 1234,
-    likes: 89,
-  },
-  {
-    id: '2',
-    title: 'NVIDIA AI 시장 과열 우려',
-    author: '월가의늑대',
-    stockName: 'NVIDIA',
-    ticker: 'NVDA',
-    opinion: 'sell' as const,
-    returnRate: -12.3,
-    initialPrice: 500,
-    currentPrice: 438.5,
-    createdAt: '2025-10-15',
-    views: 2341,
-    likes: 156,
-  },
-  {
-    id: '3',
-    title: '현대차 전기차 판매 호조',
-    author: '주린이탈출',
-    stockName: '현대차',
-    ticker: '005380',
-    opinion: 'buy' as const,
-    returnRate: 18.7,
-    initialPrice: 180000,
-    currentPrice: 213660,
-    createdAt: '2025-11-10',
-    views: 876,
-    likes: 67,
-  },
-  {
-    id: '4',
-    title: 'Apple 신제품 발표 기대',
-    author: '애플매니아',
-    stockName: 'Apple',
-    ticker: 'AAPL',
-    opinion: 'hold' as const,
-    returnRate: 5.2,
-    initialPrice: 175,
-    currentPrice: 184.1,
-    createdAt: '2025-11-20',
-    views: 1567,
-    likes: 112,
-  },
-];
-
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
+
+interface Report {
+  id: string;
+  title: string;
+  author: string;
+  stockName: string;
+  ticker: string;
+  opinion: 'buy' | 'sell' | 'hold';
+  returnRate: number;
+  initialPrice: number;
+  currentPrice: number;
+  createdAt: string;
+  views: number;
+  likes: number;
+}
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Firestore에서 리포트 데이터 가져오기
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        setLoading(true);
+        const postsRef = collection(db, 'posts');
+        const q = query(postsRef, orderBy('createdAt', 'desc'), limit(50));
+        const querySnapshot = await getDocs(q);
+
+        const fetchedReports: Report[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          // createdAt을 문자열로 변환
+          let createdAtStr = '';
+          if (data.createdAt instanceof Timestamp) {
+            createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
+          } else if (typeof data.createdAt === 'string') {
+            createdAtStr = data.createdAt;
+          } else {
+            createdAtStr = new Date().toISOString().split('T')[0];
+          }
+
+          return {
+            id: doc.id,
+            title: data.title || '',
+            author: data.authorName || '익명',
+            stockName: data.stockName || '',
+            ticker: data.ticker || '',
+            opinion: data.opinion || 'hold',
+            returnRate: data.returnRate || 0,
+            initialPrice: data.initialPrice || 0,
+            currentPrice: data.currentPrice || 0,
+            createdAt: createdAtStr,
+            views: data.views || 0,
+            likes: data.likes || 0,
+          };
+        });
+
+        setReports(fetchedReports);
+      } catch (error) {
+        console.error('리포트 가져오기 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   // 검색 필터링
-  const filteredReports = mockReports.filter((report) => {
+  const filteredReports = reports.filter((report) => {
     if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
@@ -95,11 +103,11 @@ export default function HomePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* TOP 10 Return Rate Slider */}
-      <TopReturnSlider />
+      <TopReturnSlider reports={reports} />
 
       {/* 데스크탑: 검색바 + 필터바 */}
       <div className="hidden md:block">
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={mockReports} />
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={reports} />
         <FilterBar />
       </div>
 
@@ -208,17 +216,24 @@ export default function HomePage() {
 
       {/* Reports Grid */}
       <div className="space-y-4">
-        {filteredReports.length > 0 ? (
+        {loading ? (
+          // 로딩 중
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+            ))}
+          </div>
+        ) : filteredReports.length > 0 ? (
           filteredReports.map((report) => (
             <ReportCard key={report.id} {...report} />
           ))
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 text-lg">
-              검색 결과가 없습니다.
+              {searchQuery ? '검색 결과가 없습니다.' : '아직 작성된 리포트가 없습니다.'}
             </p>
             <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
-              다른 검색어를 입력해보세요.
+              {searchQuery ? '다른 검색어를 입력해보세요.' : '첫 번째 리포트를 작성해보세요!'}
             </p>
           </div>
         )}

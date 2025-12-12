@@ -20,7 +20,8 @@
       "Bash(timeout /t 10 /nobreak)",
       "Bash(del componentswarren.png)",
       "Bash(del nul)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(copy warren.png favicon.png:*)"
     ],
     "deny": [],
     "ask": []

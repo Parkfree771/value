@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 
 const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
   loading: () => <div className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
@@ -13,8 +15,25 @@ const Podium = dynamic(() => import('@/components/Podium'), {
 
 type TimePeriod = '1week' | '1month' | '3months' | 'all';
 
-// Mock data for ranking with time-based tracking
-const mockTopReports = [
+interface RankedReport {
+  id: string;
+  title: string;
+  author: string;
+  stockName: string;
+  ticker: string;
+  opinion: 'buy' | 'sell' | 'hold';
+  returnRate: number;
+  initialPrice: number;
+  currentPrice: number;
+  createdAt: string;
+  views: number;
+  likes: number;
+  daysElapsed: number;
+  priceHistory: Array<{ date: string; price: number; returnRate: number }>;
+}
+
+// Mock data for ranking with time-based tracking - 백업용
+const mockTopReports: RankedReport[] = [
   {
     id: '1',
     title: '삼성전자 반도체 업황 회복 기대',
@@ -244,6 +263,67 @@ const trendingReports = [
 export default function RankingPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
   const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('investors');
+  const [reports, setReports] = useState<RankedReport[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Firestore에서 리포트 데이터 가져오기
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        setLoading(true);
+        const postsRef = collection(db, 'posts');
+        const q = query(postsRef, orderBy('returnRate', 'desc'), limit(100));
+        const querySnapshot = await getDocs(q);
+
+        const fetchedReports: RankedReport[] = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+
+          // createdAt을 문자열로 변환
+          let createdAtStr = '';
+          if (data.createdAt instanceof Timestamp) {
+            createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
+          } else if (typeof data.createdAt === 'string') {
+            createdAtStr = data.createdAt;
+          } else {
+            createdAtStr = new Date().toISOString().split('T')[0];
+          }
+
+          // daysElapsed 계산
+          const createdDate = new Date(createdAtStr);
+          const today = new Date();
+          const diffTime = Math.abs(today.getTime() - createdDate.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          return {
+            id: doc.id,
+            title: data.title || '',
+            author: data.authorName || '익명',
+            stockName: data.stockName || '',
+            ticker: data.ticker || '',
+            opinion: data.opinion || 'hold',
+            returnRate: data.returnRate || 0,
+            initialPrice: data.initialPrice || 0,
+            currentPrice: data.currentPrice || 0,
+            createdAt: createdAtStr,
+            views: data.views || 0,
+            likes: data.likes || 0,
+            daysElapsed: diffDays,
+            priceHistory: data.priceHistory || [],
+          };
+        });
+
+        setReports(fetchedReports);
+      } catch (error) {
+        console.error('리포트 가져오기 실패:', error);
+        // 에러 시 목 데이터 사용
+        setReports(mockTopReports);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   const getPeriodLabel = (period: TimePeriod) => {
     const labels = {
@@ -324,7 +404,7 @@ export default function RankingPage() {
           <div className="md:hidden mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">TOP 3 리포트</h2>
             <div className="flex gap-3 justify-center items-end">
-              {mockTopReports.slice(0, 3).map((report, index) => (
+              {reports.slice(0, 3).map((report, index) => (
                 <Link
                   key={report.id}
                   href={`/reports/${report.id}`}
@@ -422,9 +502,21 @@ export default function RankingPage() {
 
           {/* All Rankings */}
           <div className="space-y-4">
-            {mockTopReports.map((report, index) => (
-              <RankingReportCard key={report.id} report={report} rank={index + 1} />
-            ))}
+            {loading ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                ))}
+              </div>
+            ) : reports.length > 0 ? (
+              reports.map((report, index) => (
+                <RankingReportCard key={report.id} report={report} rank={index + 1} />
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">아직 작성된 리포트가 없습니다.</p>
+              </div>
+            )}
           </div>
         </>
       )}
