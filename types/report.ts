@@ -1,12 +1,15 @@
 export type Opinion = 'buy' | 'sell' | 'hold';
 export type EditorMode = 'text' | 'html';
+export type MarketCategory = 'KOSPI' | 'KOSDAQ' | 'NASDAQ' | 'NYSE' | 'NIKKEI' | 'HANGSENG' | 'OTHER';
 
 export interface Report {
   id: string;
   title: string;
   author: string;
+  authorId: string;
   stockName: string;
   ticker: string;
+  category?: MarketCategory;
   opinion: Opinion;
   targetPrice?: number;
   content: string;

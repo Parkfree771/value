@@ -46,7 +46,7 @@ export default function OnboardingPage() {
     checkOnboarding();
   }, [user, router]);
 
-  // 닉네임 중복 체크 (debounce 적용)
+  // 닉네임 유효성 검사 및 중복 체크 (debounce 적용)
   useEffect(() => {
     const checkNickname = async () => {
       const nickname = formData.nickname.trim();
@@ -58,10 +58,18 @@ export default function OnboardingPage() {
         return;
       }
 
-      // 닉네임 길이 체크 (2-20자)
-      if (nickname.length > 20) {
+      // 닉네임 길이 체크 (2-12자)
+      if (nickname.length > 12) {
         setNicknameAvailable(false);
-        setNicknameError('닉네임은 20자 이하여야 합니다.');
+        setNicknameError('닉네임은 12자 이하여야 합니다.');
+        return;
+      }
+
+      // 한글, 영문, 숫자만 허용 (특수문자 및 공백 제외)
+      const nicknameRegex = /^[a-zA-Z0-9가-힣]+$/;
+      if (!nicknameRegex.test(nickname)) {
+        setNicknameAvailable(false);
+        setNicknameError('닉네임은 한글, 영문, 숫자만 사용할 수 있습니다.');
         return;
       }
 
@@ -122,8 +130,15 @@ export default function OnboardingPage() {
       return;
     }
 
-    if (nickname.length > 20) {
-      setError('닉네임은 20자 이하여야 합니다.');
+    if (nickname.length > 12) {
+      setError('닉네임은 12자 이하여야 합니다.');
+      return;
+    }
+
+    // 한글, 영문, 숫자만 허용
+    const nicknameRegex = /^[a-zA-Z0-9가-힣]+$/;
+    if (!nicknameRegex.test(nickname)) {
+      setError('닉네임은 한글, 영문, 숫자만 사용할 수 있습니다.');
       return;
     }
 
@@ -177,7 +192,7 @@ export default function OnboardingPage() {
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            환영합니다! 🎉
+            환영합니다!
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             서비스 이용을 위해 몇 가지 정보를 입력해주세요
@@ -209,7 +224,7 @@ export default function OnboardingPage() {
                   name="nickname"
                   type="text"
                   label="닉네임"
-                  placeholder="사용할 닉네임을 입력하세요 (2-20자)"
+                  placeholder="한글, 영문, 숫자 2-12자"
                   value={formData.nickname}
                   onChange={handleChange}
                   required
@@ -221,15 +236,15 @@ export default function OnboardingPage() {
                       <p className="text-sm text-blue-600 dark:text-blue-400">닉네임 확인 중...</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === true && (
-                      <p className="text-sm text-green-600 dark:text-green-400">✓ 사용 가능한 닉네임입니다</p>
+                      <p className="text-sm text-green-600 dark:text-green-400">사용 가능한 닉네임입니다</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === false && nicknameError && (
-                      <p className="text-sm text-red-600 dark:text-red-400">✗ {nicknameError}</p>
+                      <p className="text-sm text-red-600 dark:text-red-400">{nicknameError}</p>
                     )}
                   </div>
                 )}
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  다른 사용자에게 표시될 이름입니다
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  2-12자 이내, 한글/영문/숫자만 사용 가능 (특수문자 및 공백 불가)
                 </p>
               </div>
             </div>

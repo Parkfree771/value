@@ -37,6 +37,7 @@ async function getReportData(id: string): Promise<Report | null> {
       id: docSnap.id,
       title: data.title || '',
       author: data.authorName || '익명',
+      authorId: data.authorId || '',
       stockName: data.stockName || '',
       ticker: data.ticker || '',
       opinion: data.opinion || 'hold',

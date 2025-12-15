@@ -21,7 +21,14 @@
       "Bash(del componentswarren.png)",
       "Bash(del nul)",
       "Bash(rm:*)",
-      "Bash(copy warren.png favicon.png:*)"
+      "Bash(copy warren.png favicon.png:*)",
+      "Bash(taskkill:*)",
+      "WebSearch",
+      "Bash(dir:*)",
+      "Bash(git commit:*)",
+      "Bash(node:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)"
     ],
     "deny": [],
     "ask": []

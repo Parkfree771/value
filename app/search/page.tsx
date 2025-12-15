@@ -145,7 +145,7 @@ export default function SearchPage() {
       )}
 
       {/* Reports Grid */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {filteredReports.length > 0 ? (
           filteredReports.map((report) => (
             <ReportCard key={report.id} {...report} />

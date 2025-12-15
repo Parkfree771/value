@@ -1,12 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
+import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
+import { db } from '@/lib/firebase';
+import { doc, deleteDoc } from 'firebase/firestore';
 
 const mockComments = [
   {
@@ -34,6 +36,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const { user } = useAuth();
   const [commentText, setCommentText] = useState('');
 
+  // HTML 모드일 때 <style> 태그 추출
+  const { css, html } = useMemo(() => {
+    if (report.mode === 'html') {
+      return extractStyleTag(report.content);
+    }
+    return { css: '', html: report.content };
+  }, [report.content, report.mode]);
+
   const getOpinionBadge = () => {
     const styles = {
       buy: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
@@ -59,6 +69,30 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     if (report.returnRate < 0) return 'text-blue-600 dark:text-blue-400';
     return 'text-gray-600 dark:text-gray-400';
   };
+
+  // 수정 버튼 클릭
+  const handleEdit = () => {
+    router.push(`/write?id=${report.id}`);
+  };
+
+  // 삭제 버튼 클릭
+  const handleDelete = async () => {
+    if (!confirm('정말로 이 리포트를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'posts', report.id));
+      alert('리포트가 삭제되었습니다.');
+      router.push('/');
+    } catch (error) {
+      console.error('리포트 삭제 실패:', error);
+      alert('리포트 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 현재 사용자가 작성자인지 확인
+  const isAuthor = user && report.authorId === user.uid;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -90,31 +124,57 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                     <span>조회 {report.views}</span>
                     <span>좋아요 {report.likes}</span>
                   </div>
-                  <Button variant="outline" size="sm" className="flex-shrink-0">팔로우</Button>
+                  {isAuthor ? (
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={handleEdit} className="flex-shrink-0">수정</Button>
+                      <Button variant="outline" size="sm" onClick={handleDelete} className="flex-shrink-0 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">삭제</Button>
+                    </div>
+                  ) : (
+                    <Button variant="outline" size="sm" className="flex-shrink-0">팔로우</Button>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* 모바일 액션 버튼 (상단) */}
             <div className="lg:hidden mb-4 flex items-center justify-center gap-2 pb-4 border-b dark:border-gray-700">
-              <button className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-                </svg>
-                <span>{report.likes}</span>
-              </button>
-              <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                <span className="hidden xs:inline">북마크</span>
-              </button>
-              <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-                <span className="hidden xs:inline">공유</span>
-              </button>
+              {isAuthor ? (
+                <>
+                  <button onClick={handleEdit} className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>수정</span>
+                  </button>
+                  <button onClick={handleDelete} className="flex items-center gap-1.5 px-3 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>삭제</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+                    </svg>
+                    <span>{report.likes}</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    <span className="hidden xs:inline">북마크</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span className="hidden xs:inline">공유</span>
+                  </button>
+                </>
+              )}
             </div>
 
             {/* 기업 정보 카드 */}
@@ -187,13 +247,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           <Card className="p-4 sm:p-6 lg:p-8">
             {/* HTML/CSS 모드로 작성된 리포트 */}
             {report.mode === 'html' && (
-              <div>
-                <style>{report.cssContent || ''}</style>
+              <>
+                {/* 추출된 CSS를 별도로 렌더링 */}
+                {css && <style>{css}</style>}
                 <div
                   className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(report.content) }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
                 />
-              </div>
+              </>
             )}
 
             {/* 텍스트 모드로 작성된 리포트 */}

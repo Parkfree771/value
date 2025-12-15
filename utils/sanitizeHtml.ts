@@ -1,4 +1,28 @@
 /**
+ * HTML에서 <style> 태그를 추출합니다.
+ * @param html HTML 문자열
+ * @returns { css: string, html: string } - 추출된 CSS와 CSS가 제거된 HTML
+ */
+export function extractStyleTag(html: string): { css: string; html: string } {
+  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+  const cssMatches: string[] = [];
+
+  // 모든 <style> 태그의 내용 추출
+  let match;
+  while ((match = styleRegex.exec(html)) !== null) {
+    cssMatches.push(match[1]);
+  }
+
+  // HTML에서 <style> 태그 제거
+  const cleanedHtml = html.replace(styleRegex, '');
+
+  return {
+    css: cssMatches.join('\n'),
+    html: cleanedHtml
+  };
+}
+
+/**
  * HTML을 안전하게 정화하되, 이미지와 기본적인 서식 태그는 허용합니다.
  * @param html 정화할 HTML 문자열
  * @returns 정화된 HTML 문자열
@@ -59,6 +83,12 @@ export function sanitizeHtml(html: string): string {
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     ALLOW_DATA_ATTR: false,
     ADD_ATTR: ['target'],
+    // CSS 관련 설정 - 인라인 스타일 허용
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'], // 이벤트 핸들러만 차단
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    // 더 관대한 CSS 필터링
+    SANITIZE_DOM: true,
+    KEEP_CONTENT: true,
   });
 }
 

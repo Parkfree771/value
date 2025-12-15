@@ -87,11 +87,13 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
               onChange={(e) => handleFilterChange('market', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
-              <option value="all">🌍 시장: 전체</option>
-              <option value="kospi">🇰🇷 코스피</option>
-              <option value="kosdaq">🇰🇷 코스닥</option>
-              <option value="nasdaq">🇺🇸 나스닥</option>
-              <option value="nyse">🇺🇸 NYSE</option>
+              <option value="all">시장: 전체</option>
+              <option value="KOSPI">코스피</option>
+              <option value="KOSDAQ">코스닥</option>
+              <option value="NASDAQ">나스닥</option>
+              <option value="NYSE">NYSE</option>
+              <option value="NIKKEI">니케이</option>
+              <option value="HANGSENG">항셍</option>
             </select>
 
             <select
@@ -163,10 +165,12 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
               <option value="all">전체</option>
-              <option value="kospi">코스피</option>
-              <option value="kosdaq">코스닥</option>
-              <option value="nasdaq">나스닥</option>
-              <option value="nyse">NYSE</option>
+              <option value="KOSPI">코스피</option>
+              <option value="KOSDAQ">코스닥</option>
+              <option value="NASDAQ">나스닥</option>
+              <option value="NYSE">NYSE</option>
+              <option value="NIKKEI">니케이</option>
+              <option value="HANGSENG">항셍</option>
             </select>
           </div>
 

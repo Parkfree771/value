@@ -481,9 +481,9 @@ export default function RankingPage() {
           </div>
 
           {/* All Rankings */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {loading ? (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
                 ))}
@@ -653,7 +653,7 @@ export default function RankingPage() {
             <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">조회수와 좋아요가 많은 인기 리포트</p>
           </div>
 
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-4 sm:space-y-6">
             {trendingReports.map((report, index) => (
               <RankingReportCard key={report.id} report={report} rank={index + 1} />
             ))}

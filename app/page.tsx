@@ -21,6 +21,7 @@ interface Report {
   author: string;
   stockName: string;
   ticker: string;
+  category?: string;
   opinion: 'buy' | 'sell' | 'hold';
   returnRate: number;
   initialPrice: number;
@@ -35,6 +36,12 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    period: 'all',
+    market: 'all',
+    opinion: 'all',
+    sortBy: 'returnRate',
+  });
 
   // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
   useEffect(() => {
@@ -59,17 +66,31 @@ export default function HomePage() {
     fetchReports();
   }, []);
 
-  // 검색 필터링
+  // 검색 및 필터링
   const filteredReports = reports.filter((report) => {
-    if (!searchQuery.trim()) return true;
+    // 검색어 필터링
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchesSearch = (
+        report.stockName.toLowerCase().includes(query) ||
+        report.ticker.toLowerCase().includes(query) ||
+        report.author.toLowerCase().includes(query) ||
+        report.title.toLowerCase().includes(query)
+      );
+      if (!matchesSearch) return false;
+    }
 
-    const query = searchQuery.toLowerCase();
-    return (
-      report.stockName.toLowerCase().includes(query) ||
-      report.ticker.toLowerCase().includes(query) ||
-      report.author.toLowerCase().includes(query) ||
-      report.title.toLowerCase().includes(query)
-    );
+    // 시장 카테고리 필터링
+    if (filters.market !== 'all') {
+      if (!report.category || report.category !== filters.market) return false;
+    }
+
+    // 의견 필터링
+    if (filters.opinion !== 'all') {
+      if (report.opinion !== filters.opinion) return false;
+    }
+
+    return true;
   });
 
   return (
@@ -80,7 +101,7 @@ export default function HomePage() {
       {/* 데스크탑: 검색바 + 필터바 */}
       <div className="hidden md:block">
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={reports} />
-        <FilterBar />
+        <FilterBar onFilterChange={setFilters} />
       </div>
 
       {/* 모바일: 검색 버튼 */}
@@ -187,10 +208,10 @@ export default function HomePage() {
       </div>
 
       {/* Reports Grid */}
-      <div className="space-y-4">
+      <div className="space-y-6">
         {loading ? (
           // 로딩 중
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[1, 2, 3].map((i) => (
               <div key={i} className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />
             ))}

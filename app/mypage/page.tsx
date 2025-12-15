@@ -73,6 +73,7 @@ export default function MyPage() {
             id: doc.id,
             title: data.title || '',
             author: data.authorName || '익명',
+            authorId: data.authorId || '',
             stockName: data.stockName || '',
             ticker: data.ticker || '',
             opinion: data.opinion || 'hold',
@@ -258,7 +259,7 @@ export default function MyPage() {
               </Card>
 
               {/* Reports List */}
-              <div className="space-y-3 sm:space-y-4">
+              <div className="space-y-4 sm:space-y-6">
                 {myReports.length > 0 ? (
                   myReports.map((report) => (
                     <ReportCard key={report.id} {...report} />
