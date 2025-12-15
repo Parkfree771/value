@@ -85,9 +85,24 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
     try {
       const response = await fetch(`/api/stocks/${stock.symbol}`);
       const stockData = await response.json();
+
+      // API 응답 에러 체크
+      if (!response.ok) {
+        alert(stockData.error || `${stock.symbol} 주가 데이터를 가져올 수 없습니다.`);
+        return;
+      }
+
+      // 주가 데이터 유효성 체크
+      if (!stockData.currentPrice || stockData.currentPrice === 0) {
+        alert(`${stock.symbol}의 주가 정보가 없습니다. 다른 종목을 선택해주세요.`);
+        return;
+      }
+
+      console.log('Stock data loaded:', stockData);
       onStockSelect(stockData);
     } catch (error) {
       console.error('Failed to fetch stock data:', error);
+      alert(`주가 조회 중 오류가 발생했습니다: ${stock.symbol}`);
     } finally {
       setIsLoading(false);
     }

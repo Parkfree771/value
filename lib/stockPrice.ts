@@ -36,8 +36,13 @@ export async function getCurrentStockPrice(ticker: string): Promise<StockQuote |
       hasData: !!quote
     });
 
-    if (!quote || !quote.regularMarketPrice) {
-      console.error(`[StockPrice] 주가 정보를 찾을 수 없습니다: ${ticker} (응답: ${JSON.stringify(quote)})`);
+    if (!quote || typeof quote !== 'object') {
+      console.error(`[StockPrice] 주가 정보를 찾을 수 없습니다: ${ticker} - 티커가 존재하지 않거나 잘못되었습니다.`);
+      return null;
+    }
+
+    if (!quote.regularMarketPrice) {
+      console.error(`[StockPrice] 주가 데이터가 없습니다: ${ticker} (symbol: ${quote.symbol})`);
       return null;
     }
 
