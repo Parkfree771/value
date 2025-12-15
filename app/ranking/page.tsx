@@ -323,7 +323,7 @@ export default function RankingPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Tab Navigation */}
       <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8">
         <button

@@ -60,7 +60,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Main Content - 넓게 */}
         <div className="lg:col-span-3 space-y-4 sm:space-y-6">
