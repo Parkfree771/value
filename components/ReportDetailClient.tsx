@@ -6,6 +6,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 const mockComments = [
   {
@@ -190,7 +191,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 <style>{report.cssContent || ''}</style>
                 <div
                   className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: report.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(report.content) }}
                 />
               </div>
             )}

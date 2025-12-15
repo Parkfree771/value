@@ -8,6 +8,7 @@ import { uploadMultipleImages } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 type EditorMode = 'text' | 'html';
 type Opinion = 'buy' | 'sell' | 'hold';
@@ -584,8 +585,11 @@ export default function WritePage() {
                 </label>
                 <div className="w-full min-h-[200px] px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-900">
                   <style>{cssContent}</style>
-                  <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }} />
                 </div>
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                  💡 이미지는 &lt;img src="이미지URL" alt="설명" /&gt; 태그를 사용하세요
+                </p>
               </div>
             </div>
           )}
