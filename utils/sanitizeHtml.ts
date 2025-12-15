@@ -1,11 +1,17 @@
-import DOMPurify from 'isomorphic-dompurify';
-
 /**
  * HTML을 안전하게 정화하되, 이미지와 기본적인 서식 태그는 허용합니다.
  * @param html 정화할 HTML 문자열
  * @returns 정화된 HTML 문자열
  */
 export function sanitizeHtml(html: string): string {
+  // 서버 사이드에서는 정화하지 않고 그대로 반환 (클라이언트에서 정화됨)
+  if (typeof window === 'undefined') {
+    return html;
+  }
+
+  // 클라이언트 사이드에서만 DOMPurify 사용
+  const DOMPurify = require('isomorphic-dompurify');
+
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
       // 텍스트 서식
@@ -61,6 +67,13 @@ export function sanitizeHtml(html: string): string {
  * 더 엄격한 정화가 필요한 경우 사용합니다.
  */
 export function sanitizeHtmlStrict(html: string): string {
+  // 서버 사이드에서는 정화하지 않고 그대로 반환
+  if (typeof window === 'undefined') {
+    return html;
+  }
+
+  const DOMPurify = require('isomorphic-dompurify');
+
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li'],
     ALLOWED_ATTR: ['href', 'target', 'rel'],
