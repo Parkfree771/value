@@ -1,4 +1,6 @@
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
+
+const yahooFinance = new YahooFinance();
 
 export interface StockQuote {
   symbol: string;
@@ -15,47 +17,62 @@ export interface StockQuote {
  */
 export async function getCurrentStockPrice(ticker: string): Promise<StockQuote | null> {
   try {
+    console.log(`[StockPrice] 주가 조회 시작: ${ticker}`);
+
     // 한국 주식의 경우 .KS 또는 .KQ 접미사 추가
     let formattedTicker = ticker;
     if (/^\d{6}$/.test(ticker)) {
       // 6자리 숫자인 경우 한국 주식으로 간주
       formattedTicker = `${ticker}.KS`; // 코스피
+      console.log(`[StockPrice] 6자리 티커 감지, .KS 추가: ${formattedTicker}`);
     }
 
+    console.log(`[StockPrice] Yahoo Finance API 호출 중: ${formattedTicker}`);
     const quote: any = await yahooFinance.quote(formattedTicker);
+    console.log(`[StockPrice] API 응답:`, {
+      symbol: quote?.symbol,
+      price: quote?.regularMarketPrice,
+      currency: quote?.currency,
+      hasData: !!quote
+    });
 
     if (!quote || !quote.regularMarketPrice) {
-      console.error(`주가 정보를 찾을 수 없습니다: ${ticker}`);
+      console.error(`[StockPrice] 주가 정보를 찾을 수 없습니다: ${ticker} (응답: ${JSON.stringify(quote)})`);
       return null;
     }
 
-    return {
+    const result = {
       symbol: quote.symbol,
       price: quote.regularMarketPrice,
       currency: quote.currency || 'KRW',
       marketCap: quote.marketCap,
       regularMarketChangePercent: quote.regularMarketChangePercent,
     };
+    console.log(`[StockPrice] 주가 조회 성공:`, result);
+    return result;
   } catch (error) {
-    console.error(`주가 조회 실패 (${ticker}):`, error);
+    console.error(`[StockPrice] 주가 조회 실패 (${ticker}):`, error);
 
     // .KS로 실패한 경우 .KQ 시도 (코스닥)
     if (ticker.endsWith('.KS')) {
       try {
         const kosdaqTicker = ticker.replace('.KS', '.KQ');
+        console.log(`[StockPrice] 코스닥 티커로 재시도: ${kosdaqTicker}`);
         const quote: any = await yahooFinance.quote(kosdaqTicker);
 
         if (quote && quote.regularMarketPrice) {
-          return {
+          const result = {
             symbol: quote.symbol,
             price: quote.regularMarketPrice,
             currency: quote.currency || 'KRW',
             marketCap: quote.marketCap,
             regularMarketChangePercent: quote.regularMarketChangePercent,
           };
+          console.log(`[StockPrice] 코스닥 조회 성공:`, result);
+          return result;
         }
       } catch (kosdaqError) {
-        console.error(`코스닥 조회도 실패 (${ticker}):`, kosdaqError);
+        console.error(`[StockPrice] 코스닥 조회도 실패 (${ticker}):`, kosdaqError);
       }
     }
 
@@ -102,9 +119,22 @@ export async function updateReportReturnRate(
   currency: string;
   stockData: any;
 } | null> {
+  console.log(`[UpdateReturnRate] 수익률 업데이트 시작:`, {
+    ticker,
+    initialPrice,
+    positionType
+  });
+
+  // initialPrice 유효성 검증
+  if (!initialPrice || initialPrice <= 0) {
+    console.error(`[UpdateReturnRate] 유효하지 않은 initialPrice: ${initialPrice}`);
+    return null;
+  }
+
   const stockQuote = await getCurrentStockPrice(ticker);
 
   if (!stockQuote) {
+    console.error(`[UpdateReturnRate] 주가 조회 실패 - ticker: ${ticker}`);
     return null;
   }
 
@@ -114,7 +144,7 @@ export async function updateReportReturnRate(
     positionType
   );
 
-  return {
+  const result = {
     currentPrice: stockQuote.price,
     returnRate: parseFloat(returnRate.toFixed(2)),
     currency: stockQuote.currency,
@@ -124,6 +154,9 @@ export async function updateReportReturnRate(
       regularMarketChangePercent: stockQuote.regularMarketChangePercent,
     },
   };
+
+  console.log(`[UpdateReturnRate] 수익률 계산 완료:`, result);
+  return result;
 }
 
 /**

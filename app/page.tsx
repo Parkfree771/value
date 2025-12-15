@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
   loading: () => <div className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
@@ -38,45 +36,19 @@ export default function HomePage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Firestore에서 리포트 데이터 가져오기
+  // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
   useEffect(() => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const postsRef = collection(db, 'posts');
-        const q = query(postsRef, orderBy('createdAt', 'desc'), limit(50));
-        const querySnapshot = await getDocs(q);
+        const response = await fetch('/api/reports?sortBy=createdAt&limit=50');
+        const data = await response.json();
 
-        const fetchedReports: Report[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-
-          // createdAt을 문자열로 변환
-          let createdAtStr = '';
-          if (data.createdAt instanceof Timestamp) {
-            createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-          } else if (typeof data.createdAt === 'string') {
-            createdAtStr = data.createdAt;
-          } else {
-            createdAtStr = new Date().toISOString().split('T')[0];
-          }
-
-          return {
-            id: doc.id,
-            title: data.title || '',
-            author: data.authorName || '익명',
-            stockName: data.stockName || '',
-            ticker: data.ticker || '',
-            opinion: data.opinion || 'hold',
-            returnRate: data.returnRate || 0,
-            initialPrice: data.initialPrice || 0,
-            currentPrice: data.currentPrice || 0,
-            createdAt: createdAtStr,
-            views: data.views || 0,
-            likes: data.likes || 0,
-          };
-        });
-
-        setReports(fetchedReports);
+        if (data.success) {
+          setReports(data.reports);
+        } else {
+          console.error('리포트 가져오기 실패:', data.error);
+        }
       } catch (error) {
         console.error('리포트 가져오기 실패:', error);
       } finally {

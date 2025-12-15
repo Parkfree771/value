@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import YahooFinance from 'yahoo-finance2';
-
-const yahooFinance = new YahooFinance();
+import yahooFinance from 'yahoo-finance2';
 
 export async function GET(
   request: NextRequest,
@@ -10,10 +8,17 @@ export async function GET(
   try {
     const { symbol } = await params;
 
+    console.log(`[API /stocks/${symbol}] 주식 데이터 조회 시작`);
+
     // Yahoo Finance에서 주식 데이터 조회
     const quote: any = await yahooFinance.quote(symbol);
     const summaryDetail: any = await yahooFinance.quoteSummary(symbol, {
       modules: ['summaryDetail', 'defaultKeyStatistics', 'financialData']
+    });
+
+    console.log(`[API /stocks/${symbol}] 조회 성공:`, {
+      symbol: quote.symbol,
+      price: quote.regularMarketPrice
     });
 
     // 필요한 데이터 추출

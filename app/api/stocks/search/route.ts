@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import YahooFinance from 'yahoo-finance2';
-
-const yahooFinance = new YahooFinance();
+import yahooFinance from 'yahoo-finance2';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,8 +13,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    console.log(`[API /stocks/search] 검색 시작: ${query}`);
+
     // Yahoo Finance에서 기업 검색
     const result: any = await yahooFinance.search(query);
+
+    console.log(`[API /stocks/search] 검색 완료: ${result.quotes?.length || 0}개 결과`);
 
     // 주식 종목만 필터링
     const stocks = (result.quotes || [])

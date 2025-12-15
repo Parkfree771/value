@@ -58,6 +58,13 @@ async function getReportData(id: string): Promise<Report | null> {
 
     // 실시간 주가 및 수익률 업데이트
     if (report.ticker && report.initialPrice) {
+      console.log(`[ReportPage] 수익률 업데이트 시도:`, {
+        id: docSnap.id,
+        ticker: report.ticker,
+        initialPrice: report.initialPrice,
+        positionType: report.positionType
+      });
+
       const updatedData = await updateReportReturnRate(
         report.ticker,
         report.initialPrice,
@@ -65,13 +72,24 @@ async function getReportData(id: string): Promise<Report | null> {
       );
 
       if (updatedData) {
+        console.log(`[ReportPage] 수익률 업데이트 성공:`, updatedData);
         report.currentPrice = updatedData.currentPrice;
         report.returnRate = updatedData.returnRate;
         report.stockData = {
           ...report.stockData,
           ...updatedData.stockData,
         };
+      } else {
+        console.error(`[ReportPage] 수익률 업데이트 실패 - updatedData가 null`);
       }
+    } else {
+      console.warn(`[ReportPage] 수익률 업데이트 건너뛰기:`, {
+        id: docSnap.id,
+        ticker: report.ticker,
+        initialPrice: report.initialPrice,
+        hasTicker: !!report.ticker,
+        hasInitialPrice: !!report.initialPrice
+      });
     }
 
     return report;

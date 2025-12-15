@@ -122,8 +122,12 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
 
               {/* Return Rate - Large Display */}
               <div className="text-right flex-shrink-0">
-                <div className="text-xl sm:text-3xl font-extrabold text-red-600 dark:text-red-400">
-                  +{report.returnRate}%
+                <div className={`text-xl sm:text-3xl font-extrabold ${
+                  report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
+                  report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
+                  'text-gray-600 dark:text-gray-400'
+                }`}>
+                  {report.returnRate > 0 ? '+' : ''}{report.returnRate}%
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {report.daysElapsed}일
@@ -141,14 +145,22 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
               </div>
               <div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 block mb-0.5">현재 주가</span>
-                <span className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">
+                <span className={`text-xs sm:text-sm font-bold ${
+                  report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
+                  report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
+                  'text-gray-900 dark:text-white'
+                }`}>
                   {report.currentPrice.toLocaleString()}원
                 </span>
               </div>
               <div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 block mb-0.5">수익</span>
-                <span className="text-xs sm:text-sm font-bold text-red-600 dark:text-red-400">
-                  +{(report.currentPrice - report.initialPrice).toLocaleString()}원
+                <span className={`text-xs sm:text-sm font-bold ${
+                  report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
+                  report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
+                  'text-gray-600 dark:text-gray-400'
+                }`}>
+                  {report.returnRate > 0 ? '+' : ''}{(report.currentPrice - report.initialPrice).toLocaleString()}원
                 </span>
               </div>
             </div>

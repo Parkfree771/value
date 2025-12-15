@@ -33,15 +33,15 @@ export function formatReturn(returnRate: number, decimalPlaces: number = 2): str
 }
 
 /**
- * 수익률에 따라 색상 클래스를 반환하는 함수
+ * 수익률에 따라 색상 클래스를 반환하는 함수 (한국 주식 시장 스타일)
  * @param returnRate - 수익률 (백분율)
  * @returns Tailwind CSS 색상 클래스
  */
 export function getReturnColorClass(returnRate: number): string {
   if (returnRate > 0) {
-    return 'text-green-600 dark:text-green-400';
+    return 'text-red-600 dark:text-red-400'; // 수익: 빨간색
   } else if (returnRate < 0) {
-    return 'text-red-600 dark:text-red-400';
+    return 'text-blue-600 dark:text-blue-400'; // 손실: 파란색
   } else {
     return 'text-gray-600 dark:text-gray-400';
   }

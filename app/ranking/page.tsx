@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 
 const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
   loading: () => <div className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
@@ -266,53 +264,35 @@ export default function RankingPage() {
   const [reports, setReports] = useState<RankedReport[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Firestore에서 리포트 데이터 가져오기
+  // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
   useEffect(() => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const postsRef = collection(db, 'posts');
-        const q = query(postsRef, orderBy('returnRate', 'desc'), limit(100));
-        const querySnapshot = await getDocs(q);
+        const response = await fetch('/api/reports?sortBy=returnRate&limit=100');
+        const data = await response.json();
 
-        const fetchedReports: RankedReport[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
+        if (data.success) {
+          // daysElapsed 계산 추가
+          const reportsWithDays: RankedReport[] = data.reports.map((report: any) => {
+            const createdDate = new Date(report.createdAt);
+            const today = new Date();
+            const diffTime = Math.abs(today.getTime() - createdDate.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-          // createdAt을 문자열로 변환
-          let createdAtStr = '';
-          if (data.createdAt instanceof Timestamp) {
-            createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-          } else if (typeof data.createdAt === 'string') {
-            createdAtStr = data.createdAt;
-          } else {
-            createdAtStr = new Date().toISOString().split('T')[0];
-          }
+            return {
+              ...report,
+              daysElapsed: diffDays,
+              priceHistory: report.priceHistory || [],
+            };
+          });
 
-          // daysElapsed 계산
-          const createdDate = new Date(createdAtStr);
-          const today = new Date();
-          const diffTime = Math.abs(today.getTime() - createdDate.getTime());
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-          return {
-            id: doc.id,
-            title: data.title || '',
-            author: data.authorName || '익명',
-            stockName: data.stockName || '',
-            ticker: data.ticker || '',
-            opinion: data.opinion || 'hold',
-            returnRate: data.returnRate || 0,
-            initialPrice: data.initialPrice || 0,
-            currentPrice: data.currentPrice || 0,
-            createdAt: createdAtStr,
-            views: data.views || 0,
-            likes: data.likes || 0,
-            daysElapsed: diffDays,
-            priceHistory: data.priceHistory || [],
-          };
-        });
-
-        setReports(fetchedReports);
+          setReports(reportsWithDays);
+        } else {
+          console.error('리포트 가져오기 실패:', data.error);
+          // 에러 시 목 데이터 사용
+          setReports(mockTopReports);
+        }
       } catch (error) {
         console.error('리포트 가져오기 실패:', error);
         // 에러 시 목 데이터 사용
