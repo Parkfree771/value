@@ -40,6 +40,7 @@ export default function WritePage() {
   const [htmlContent, setHtmlContent] = useState('');
   const [cssContent, setCssContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -57,7 +58,7 @@ export default function WritePage() {
     }
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const imageFiles = files.filter((file) => file.type.startsWith('image/'));
 
@@ -68,7 +69,29 @@ export default function WritePage() {
       alert('일부 이미지가 10MB를 초과하여 제외되었습니다.');
     }
 
-    setImages((prev) => [...prev, ...validImages]);
+    if (validImages.length === 0) return;
+
+    // 즉시 Firebase에 업로드
+    setIsUploading(true);
+    try {
+      const urls = await uploadMultipleImages(
+        validImages,
+        `reports/${Date.now()}`,
+        { maxWidth: 1920, maxHeight: 1920, quality: 0.85, maxSizeMB: 2 },
+        (progress) => setUploadProgress(progress)
+      );
+
+      setImages((prev) => [...prev, ...validImages]);
+      setUploadedImageUrls((prev) => [...prev, ...urls]);
+      alert(`${validImages.length}개 이미지 업로드 완료!`);
+    } catch (error) {
+      console.error('이미지 업로드 실패:', error);
+      alert('이미지 업로드에 실패했습니다.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+
     e.target.value = ''; // input 초기화
   };
 
@@ -88,6 +111,13 @@ export default function WritePage() {
 
   const removeImage = (index: number) => {
     setImages((prev) => prev.filter((_, i) => i !== index));
+    setUploadedImageUrls((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const copyImageCode = (url: string, index: number) => {
+    const imgTag = `<img src="${url}" alt="이미지 ${index + 1}" style="max-width: 100%; height: auto;" />`;
+    navigator.clipboard.writeText(imgTag);
+    alert('HTML 코드가 복사되었습니다!\n\nHTML 편집기에 붙여넣기(Ctrl+V) 하세요.');
   };
 
   const removeFile = (index: number) => {
@@ -117,16 +147,8 @@ export default function WritePage() {
     setUploadProgress(0);
 
     try {
-      let imageUrls: string[] = [];
-
-      if (images.length > 0) {
-        imageUrls = await uploadMultipleImages(
-          images,
-          `reports/${Date.now()}`,
-          { maxWidth: 1920, maxHeight: 1920, quality: 0.85, maxSizeMB: 2 },
-          (progress) => setUploadProgress(progress)
-        );
-      }
+      // 이미 업로드된 이미지 URL 사용
+      const imageUrls = uploadedImageUrls;
 
     // 사용자가 작성한 내용만 저장 (기업 프로필은 상세 페이지 상단에 표시됨)
     const finalContent = mode === 'html' ? htmlContent : content;
@@ -441,32 +463,63 @@ export default function WritePage() {
 
               {/* 업로드된 이미지 미리보기 */}
               {images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <div className="w-full h-32 relative rounded-lg border border-gray-300 dark:border-gray-600 overflow-hidden">
-                        <Image
-                          src={URL.createObjectURL(image)}
-                          alt={`preview-${index}`}
-                          fill
-                          className="object-cover"
-                          sizes="(max-width: 768px) 50vw, 25vw"
-                        />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {images.map((image, index) => (
+                      <div key={index} className="relative group border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
+                        <div className="flex gap-3">
+                          <div className="w-20 h-20 relative rounded border border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0">
+                            <Image
+                              src={uploadedImageUrls[index] || URL.createObjectURL(image)}
+                              alt={`preview-${index}`}
+                              fill
+                              className="object-cover"
+                              sizes="80px"
+                            />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {image.name}
+                            </div>
+                            {uploadedImageUrls[index] ? (
+                              <>
+                                <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                  ✓ 업로드 완료
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => copyImageCode(uploadedImageUrls[index], index)}
+                                  className="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                >
+                                  📋 HTML 코드 복사
+                                </button>
+                              </>
+                            ) : (
+                              <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                업로드 중...
+                              </div>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                      <div className="mt-1 text-xs text-gray-600 dark:text-gray-400 truncate">
-                        {image.name}
-                      </div>
+                    ))}
+                  </div>
+                  {mode === 'html' && uploadedImageUrls.length > 0 && (
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                      <p className="text-sm text-blue-900 dark:text-blue-100">
+                        💡 <strong>HTML 모드 사용법:</strong> 각 이미지의 "HTML 코드 복사" 버튼을 클릭한 후 HTML 편집기에 붙여넣기(Ctrl+V) 하세요.
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
             </div>
