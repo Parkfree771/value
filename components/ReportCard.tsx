@@ -55,7 +55,7 @@ export default function ReportCard({
   };
 
   return (
-    <Link href={`/reports/${id}`}>
+    <Link href={`/reports/${id}`} className="block">
       <Card className="p-4 sm:p-6 hover:border-blue-300 dark:hover:border-blue-500 border border-transparent dark:border-transparent">
         {/* Header */}
         <div className="flex justify-between items-start mb-3 sm:mb-4 gap-3">

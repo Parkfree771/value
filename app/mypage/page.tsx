@@ -22,6 +22,7 @@ export default function MyPage() {
   const [myReports, setMyReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [updatingPrices, setUpdatingPrices] = useState(false);
 
   // 로그인 체크
   useEffect(() => {
@@ -104,6 +105,78 @@ export default function MyPage() {
 
     fetchUserData();
   }, [user]);
+
+  // 실시간 주가 및 수익률 업데이트
+  useEffect(() => {
+    if (myReports.length === 0) return;
+
+    const updatePrices = async () => {
+      setUpdatingPrices(true);
+      console.log('[MyPage] 실시간 주가 업데이트 시작');
+
+      try {
+        const updatedReports = await Promise.all(
+          myReports.map(async (report) => {
+            // ticker와 initialPrice가 없으면 기존 리포트 반환
+            if (!report.ticker || !report.initialPrice || report.initialPrice === 0) {
+              console.log(`[MyPage] ${report.id}: ticker 또는 initialPrice 없음`);
+              return report;
+            }
+
+            try {
+              // API를 통해 실시간 주가 및 수익률 조회
+              const response = await fetch('/api/update-return-rate', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  ticker: report.ticker,
+                  initialPrice: report.initialPrice,
+                  positionType: report.positionType || 'long',
+                }),
+              });
+
+              if (!response.ok) {
+                console.log(`[MyPage] ${report.id}: API 호출 실패 (${response.status})`);
+                return report;
+              }
+
+              const priceData = await response.json();
+
+              if (priceData && !priceData.error) {
+                console.log(`[MyPage] ${report.id} 수익률 업데이트:`, priceData);
+                return {
+                  ...report,
+                  currentPrice: priceData.currentPrice,
+                  returnRate: priceData.returnRate,
+                  stockData: {
+                    ...report.stockData,
+                    ...priceData.stockData,
+                  },
+                };
+              }
+
+              console.log(`[MyPage] ${report.id}: 가격 조회 실패, 기존 데이터 유지`);
+              return report;
+            } catch (error) {
+              console.error(`[MyPage] ${report.id} 가격 업데이트 실패:`, error);
+              return report;
+            }
+          })
+        );
+
+        setMyReports(updatedReports);
+        console.log('[MyPage] 모든 리포트 수익률 업데이트 완료');
+      } catch (error) {
+        console.error('[MyPage] 가격 업데이트 중 오류:', error);
+      } finally {
+        setUpdatingPrices(false);
+      }
+    };
+
+    updatePrices();
+  }, [myReports.length]); // myReports.length를 의존성으로 사용하여 초기 로드 시에만 실행
 
   // 통계 계산
   const totalReports = myReports.length;
@@ -235,6 +308,14 @@ export default function MyPage() {
           {/* Tab Content */}
           {activeTab === 'reports' && (
             <div>
+              {/* 실시간 업데이트 상태 */}
+              {updatingPrices && (
+                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                  <span className="text-sm text-blue-900 dark:text-blue-100">실시간 주가 및 수익률 업데이트 중...</span>
+                </div>
+              )}
+
               {/* Performance Summary */}
               <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">포트폴리오 성과</h3>
@@ -259,7 +340,7 @@ export default function MyPage() {
               </Card>
 
               {/* Reports List */}
-              <div className="space-y-4 sm:space-y-6">
+              <div className="space-y-6">
                 {myReports.length > 0 ? (
                   myReports.map((report) => (
                     <ReportCard key={report.id} {...report} />
