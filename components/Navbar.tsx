@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { isAdmin } from '@/lib/admin/adminCheck';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -114,6 +115,18 @@ export default function Navbar() {
             >
               마이페이지
             </Link>
+            {user && isAdmin(user.email) && (
+              <Link
+                href="/admin"
+                className={`text-sm font-medium transition-colors ${
+                  isActive('/admin')
+                    ? 'text-blue-600 dark:text-blue-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                }`}
+              >
+                ⚙️ 관리자
+              </Link>
+            )}
           </div>
 
           {/* Auth Buttons + Theme Toggle */}
@@ -290,6 +303,19 @@ export default function Navbar() {
               >
                 마이페이지
               </Link>
+              {user && isAdmin(user.email) && (
+                <Link
+                  href="/admin"
+                  onClick={closeMobileMenu}
+                  className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                    isActive('/admin')
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  ⚙️ 관리자
+                </Link>
+              )}
             </div>
           </div>
 

@@ -23,6 +23,9 @@ export default function MyPage() {
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [updatingPrices, setUpdatingPrices] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [newNickname, setNewNickname] = useState('');
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // 로그인 체크
   useEffect(() => {
@@ -195,6 +198,68 @@ export default function MyPage() {
   const totalViews = myReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = myReports.reduce((sum, r) => sum + r.likes, 0);
 
+  // 프로필 수정 모달 열기
+  const handleOpenEditModal = () => {
+    setNewNickname(userProfile?.nickname || user?.displayName || user?.email || '');
+    setIsEditModalOpen(true);
+  };
+
+  // 프로필 업데이트 핸들러
+  const handleUpdateProfile = async () => {
+    if (!user || !newNickname.trim()) {
+      alert('닉네임을 입력해주세요.');
+      return;
+    }
+
+    if (newNickname.trim().length < 2 || newNickname.trim().length > 20) {
+      alert('닉네임은 2~20자 사이여야 합니다.');
+      return;
+    }
+
+    setIsUpdating(true);
+
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.uid,
+          nickname: newNickname.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || '프로필 업데이트에 실패했습니다.');
+      }
+
+      // 프로필 정보 갱신
+      setUserProfile({
+        ...userProfile,
+        nickname: data.nickname,
+      });
+
+      // 내 리포트의 작성자 이름도 업데이트
+      setMyReports(prevReports =>
+        prevReports.map(report => ({
+          ...report,
+          author: data.nickname,
+        }))
+      );
+
+      alert('프로필이 성공적으로 업데이트되었습니다!');
+      setIsEditModalOpen(false);
+    } catch (error: any) {
+      console.error('프로필 업데이트 오류:', error);
+      alert(error.message || '프로필 업데이트 중 오류가 발생했습니다.');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   // 사용자 정보
   const userName = userProfile?.nickname || user?.displayName || user?.email || '익명';
   const userEmail = user?.email || '';
@@ -257,7 +322,13 @@ export default function MyPage() {
 
             {/* Actions */}
             <div className="space-y-2">
-              <Button variant="outline" className="w-full text-sm sm:text-base">프로필 수정</Button>
+              <Button
+                variant="outline"
+                className="w-full text-sm sm:text-base"
+                onClick={handleOpenEditModal}
+              >
+                프로필 수정
+              </Button>
               <Button variant="outline" className="w-full text-sm sm:text-base">설정</Button>
             </div>
 
@@ -401,6 +472,66 @@ export default function MyPage() {
           )}
         </div>
       </div>
+
+      {/* 프로필 수정 모달 */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">프로필 수정</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  닉네임
+                </label>
+                <input
+                  id="nickname"
+                  type="text"
+                  value={newNickname}
+                  onChange={(e) => setNewNickname(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="닉네임을 입력하세요 (2-20자)"
+                  maxLength={20}
+                  disabled={isUpdating}
+                />
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                  {newNickname.length}/20자
+                </p>
+              </div>
+
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ 닉네임을 변경하면 이미 작성한 모든 게시글의 작성자 이름도 함께 변경됩니다.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => setIsEditModalOpen(false)}
+                disabled={isUpdating}
+                className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleUpdateProfile}
+                disabled={isUpdating || !newNickname.trim() || newNickname.trim().length < 2}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isUpdating ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                    <span>업데이트 중...</span>
+                  </>
+                ) : (
+                  '저장'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
