@@ -33,6 +33,28 @@ async function getReportData(id: string): Promise<Report | null> {
       createdAtStr = new Date().toISOString().split('T')[0];
     }
 
+    // updatedAt을 문자열 배열로 변환
+    let updatedAtArray: string[] = [];
+    if (data.updatedAt) {
+      if (Array.isArray(data.updatedAt)) {
+        // 이미 배열인 경우
+        updatedAtArray = data.updatedAt.map((item: any) => {
+          if (item instanceof Timestamp) {
+            return item.toDate().toISOString().split('T')[0];
+          } else if (typeof item === 'string') {
+            return item;
+          }
+          return '';
+        }).filter((date: string) => date !== '');
+      } else if (data.updatedAt instanceof Timestamp) {
+        // Timestamp인 경우 (기존 데이터 호환)
+        updatedAtArray = [data.updatedAt.toDate().toISOString().split('T')[0]];
+      } else if (typeof data.updatedAt === 'string') {
+        // 문자열인 경우 (기존 데이터 호환)
+        updatedAtArray = [data.updatedAt];
+      }
+    }
+
     const report: Report = {
       id: docSnap.id,
       title: data.title || '',
@@ -46,6 +68,7 @@ async function getReportData(id: string): Promise<Report | null> {
       currentPrice: data.currentPrice || 0,
       targetPrice: data.targetPrice || 0,
       createdAt: createdAtStr,
+      updatedAt: updatedAtArray.length > 0 ? updatedAtArray : undefined,
       views: data.views || 0,
       likes: data.likes || 0,
       mode: data.mode || 'text',

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
+import RichTextEditor, { RichTextEditorRef } from '@/components/RichTextEditor';
 import { uploadMultipleImages } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
@@ -35,6 +36,7 @@ export default function WritePage() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('id'); // URL에서 수정할 리포트 ID 가져오기
   const { user } = useAuth();
+  const editorRef = useRef<RichTextEditorRef>(null);
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -183,10 +185,15 @@ export default function WritePage() {
     setUploadedImageUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const copyImageCode = (url: string, index: number) => {
-    const imgTag = `<img src="${url}" alt="이미지 ${index + 1}" style="max-width: 100%; height: auto;" />`;
-    navigator.clipboard.writeText(imgTag);
-    alert('HTML 코드가 복사되었습니다!\n\nHTML 편집기에 붙여넣기(Ctrl+V) 하세요.');
+  const insertImageToEditor = (url: string) => {
+    if (mode === 'text' && editorRef.current) {
+      editorRef.current.insertImage(url);
+    } else if (mode === 'html') {
+      // HTML 모드에서는 HTML 코드 복사
+      const imgTag = `<img src="${url}" alt="이미지" style="max-width: 100%; height: auto;" />`;
+      navigator.clipboard.writeText(imgTag);
+      alert('HTML 코드가 복사되었습니다!\n\nHTML 편집기에 붙여넣기(Ctrl+V) 하세요.');
+    }
   };
 
   const removeFile = (index: number) => {
@@ -277,15 +284,28 @@ export default function WritePage() {
           sector: stockData.sector,
         },
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
       };
 
       if (isEditMode && editId) {
         // 수정 모드: 기존 리포트 업데이트
+
+        // 오늘 날짜 (YYYY-MM-DD)
+        const today = new Date().toISOString().split('T')[0];
+
+        // 기존 updatedAt 배열 가져오기
         const reportRef = doc(db, 'posts', editId);
+        const reportSnap = await getDoc(reportRef);
+        const existingUpdatedAt = reportSnap.exists() ? (reportSnap.data().updatedAt || []) : [];
+
+        // 오늘 날짜가 배열에 없으면 추가
+        const updatedAtArray = Array.isArray(existingUpdatedAt) ? [...existingUpdatedAt] : [];
+        if (!updatedAtArray.includes(today)) {
+          updatedAtArray.push(today);
+        }
+
         await updateDoc(reportRef, {
           ...reportData,
-          updatedAt: serverTimestamp(),
+          updatedAt: updatedAtArray,
         });
 
         console.log('리포트가 수정되었습니다. ID:', editId);
@@ -514,14 +534,15 @@ export default function WritePage() {
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 내용
               </label>
-              <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                rows={15}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
+              <RichTextEditor
+                ref={editorRef}
+                content={content}
+                onChange={setContent}
                 placeholder="리포트 본문을 입력하세요..."
               />
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                툴바를 사용하여 텍스트 서식을 지정할 수 있습니다. 굵게, 기울임, 밑줄, 폰트 크기 등을 조정하세요.
+              </p>
             </div>
           )}
 
@@ -573,10 +594,10 @@ export default function WritePage() {
                                 </div>
                                 <button
                                   type="button"
-                                  onClick={() => copyImageCode(uploadedImageUrls[index], index)}
+                                  onClick={() => insertImageToEditor(uploadedImageUrls[index])}
                                   className="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                                 >
-                                  HTML 코드 복사
+                                  {mode === 'text' ? '에디터에 삽입' : 'HTML 코드 복사'}
                                 </button>
                               </>
                             ) : (
@@ -598,10 +619,10 @@ export default function WritePage() {
                       </div>
                     ))}
                   </div>
-                  {mode === 'html' && uploadedImageUrls.length > 0 && (
+                  {uploadedImageUrls.length > 0 && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                       <p className="text-sm text-blue-900 dark:text-blue-100">
-                        <strong>HTML 모드 사용법:</strong> 각 이미지의 "HTML 코드 복사" 버튼을 클릭한 후 HTML 편집기에 붙여넣기(Ctrl+V) 하세요.
+                        <strong>사용법:</strong> {mode === 'text' ? '각 이미지의 "에디터에 삽입" 버튼을 클릭하면 에디터에 자동으로 삽입됩니다.' : '각 이미지의 "HTML 코드 복사" 버튼을 클릭한 후 HTML 편집기에 붙여넣기(Ctrl+V) 하세요.'}
                       </p>
                     </div>
                   )}

@@ -432,6 +432,29 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">작성일</div>
                 <div className="text-base font-semibold text-gray-900 dark:text-white">{report.createdAt}</div>
               </div>
+
+              {/* 수정일 표시 (작성일과 다른 날짜만) */}
+              {(() => {
+                // 작성일과 다른 수정일만 필터링
+                const filteredUpdates = report.updatedAt?.filter(date => date !== report.createdAt) || [];
+
+                return filteredUpdates.length > 0 && (
+                  <>
+                    <div className="border-t dark:border-gray-700 my-3"></div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">수정일</div>
+                      <div className="space-y-1">
+                        {filteredUpdates.map((date, index) => (
+                          <div key={index} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            {date}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+
               <div className="border-t dark:border-gray-700 my-3"></div>
               <div className="text-center">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">조회수</div>

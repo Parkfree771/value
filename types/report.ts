@@ -16,6 +16,7 @@ export interface Report {
   cssContent?: string;
   mode: EditorMode;
   createdAt: string;
+  updatedAt?: string[];
   initialPrice: number;
   currentPrice: number;
   returnRate: number;
