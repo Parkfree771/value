@@ -31,7 +31,8 @@
       "Bash(findstr:*)",
       "Bash(mkdir:*)",
       "Bash(timeout /t 5 /nobreak)",
-      "Bash(npm uninstall:*)"
+      "Bash(npm uninstall:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []

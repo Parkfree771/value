@@ -313,22 +313,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
             {/* 텍스트 모드로 작성된 리포트 */}
             {(!report.mode || report.mode === 'text') && (
-              <div className="space-y-3 sm:space-y-4">
-                {report.content.split('\n').map((line, index) => {
-                  if (line.startsWith('# ')) {
-                    return <h1 key={index} className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 mt-6 sm:mt-8 text-gray-900 dark:text-white">{line.slice(2)}</h1>;
-                  } else if (line.startsWith('## ')) {
-                    return <h2 key={index} className="text-lg sm:text-xl lg:text-2xl font-bold mb-3 sm:mb-4 mt-4 sm:mt-6 text-gray-900 dark:text-white">{line.slice(3)}</h2>;
-                  } else if (line.startsWith('### ')) {
-                    return <h3 key={index} className="text-base sm:text-lg lg:text-xl font-bold mb-2 sm:mb-3 mt-3 sm:mt-5 text-gray-900 dark:text-white">{line.slice(4)}</h3>;
-                  } else if (line.startsWith('- ')) {
-                    return <li key={index} className="ml-4 sm:ml-6 mb-2 text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">{line.slice(2)}</li>;
-                  } else if (line.trim() === '') {
-                    return <div key={index} className="h-2 sm:h-4" />;
-                  } else {
-                    return <p key={index} className="mb-3 sm:mb-4 text-sm sm:text-base lg:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">{line}</p>;
-                  }
-                })}
+              <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed whitespace-pre-wrap break-words">
+                {report.content}
               </div>
             )}
           </Card>

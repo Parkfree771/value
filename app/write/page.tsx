@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
-import RichTextEditor, { RichTextEditorRef } from '@/components/RichTextEditor';
 import { uploadMultipleImages } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
@@ -36,7 +35,6 @@ export default function WritePage() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('id'); // URL에서 수정할 리포트 ID 가져오기
   const { user } = useAuth();
-  const editorRef = useRef<RichTextEditorRef>(null);
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -186,8 +184,10 @@ export default function WritePage() {
   };
 
   const insertImageToEditor = (url: string) => {
-    if (mode === 'text' && editorRef.current) {
-      editorRef.current.insertImage(url);
+    if (mode === 'text') {
+      // 텍스트 모드에서는 textarea에 이미지 URL 삽입
+      const imgMarkdown = `![이미지](${url})`;
+      setContent(prev => prev + '\n' + imgMarkdown);
     } else if (mode === 'html') {
       // HTML 모드에서는 HTML 코드 복사
       const imgTag = `<img src="${url}" alt="이미지" style="max-width: 100%; height: auto;" />`;
@@ -534,14 +534,17 @@ export default function WritePage() {
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 내용
               </label>
-              <RichTextEditor
-                ref={editorRef}
-                content={content}
-                onChange={setContent}
-                placeholder="리포트 본문을 입력하세요..."
+              <textarea
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                required
+                rows={20}
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm whitespace-pre-wrap"
+                placeholder="리포트 본문을 입력하세요...&#10;&#10;줄바꿈과 띄어쓰기가 그대로 유지됩니다."
+                style={{ fontFamily: 'inherit' }}
               />
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                툴바를 사용하여 텍스트 서식을 지정할 수 있습니다. 굵게, 기울임, 밑줄, 폰트 크기 등을 조정하세요.
+                작성한 텍스트가 줄바꿈과 띄어쓰기를 포함하여 그대로 표시됩니다.
               </p>
             </div>
           )}
@@ -597,7 +600,7 @@ export default function WritePage() {
                                   onClick={() => insertImageToEditor(uploadedImageUrls[index])}
                                   className="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                                 >
-                                  {mode === 'text' ? '에디터에 삽입' : 'HTML 코드 복사'}
+                                  {mode === 'text' ? '이미지 URL 복사' : 'HTML 코드 복사'}
                                 </button>
                               </>
                             ) : (
@@ -622,7 +625,7 @@ export default function WritePage() {
                   {uploadedImageUrls.length > 0 && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                       <p className="text-sm text-blue-900 dark:text-blue-100">
-                        <strong>사용법:</strong> {mode === 'text' ? '각 이미지의 "에디터에 삽입" 버튼을 클릭하면 에디터에 자동으로 삽입됩니다.' : '각 이미지의 "HTML 코드 복사" 버튼을 클릭한 후 HTML 편집기에 붙여넣기(Ctrl+V) 하세요.'}
+                        <strong>사용법:</strong> {mode === 'text' ? '각 이미지의 "이미지 URL 복사" 버튼을 클릭하면 이미지 URL이 본문에 추가됩니다. ![이미지](URL) 형식으로 표시됩니다.' : '각 이미지의 "HTML 코드 복사" 버튼을 클릭한 후 HTML 편집기에 붙여넣기(Ctrl+V) 하세요.'}
                       </p>
                     </div>
                   )}
