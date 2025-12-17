@@ -62,6 +62,19 @@ export default function AdminPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [users, setUsers] = useState<User[]>([]);
 
+  // 확인 모달 상태
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {},
+  });
+
   // 관리자 권한 체크
   useEffect(() => {
     if (!authLoading) {
@@ -143,32 +156,39 @@ export default function AdminPage() {
   const handleDeletePost = async (postId: string, title: string) => {
     if (!user || !isAdmin(user.email)) return;
 
-    if (!confirm(`"${title}" 게시글을 삭제하시겠습니까?`)) return;
+    setConfirmModal({
+      isOpen: true,
+      title: '게시글 삭제',
+      message: `"${title}" 게시글을 삭제하시겠습니까?`,
+      onConfirm: async () => {
+        setConfirmModal({ ...confirmModal, isOpen: false });
 
-    try {
-      const response = await fetch('/api/admin/posts', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          adminEmail: user.email,
-          postId,
-        }),
-      });
+        try {
+          const response = await fetch('/api/admin/posts', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              adminEmail: user.email,
+              postId,
+            }),
+          });
 
-      const data = await response.json();
+          const data = await response.json();
 
-      if (data.success) {
-        alert('게시글이 삭제되었습니다.');
-        fetchPosts();
-      } else {
-        alert(data.error || '게시글 삭제에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('게시글 삭제 오류:', error);
-      alert('게시글 삭제 중 오류가 발생했습니다.');
-    }
+          if (data.success) {
+            alert('게시글이 삭제되었습니다.');
+            fetchPosts();
+          } else {
+            alert(data.error || '게시글 삭제에 실패했습니다.');
+          }
+        } catch (error) {
+          console.error('게시글 삭제 오류:', error);
+          alert('게시글 삭제 중 오류가 발생했습니다.');
+        }
+      },
+    });
   };
 
   // 사용자 정지/해제
@@ -176,33 +196,41 @@ export default function AdminPage() {
     if (!user || !isAdmin(user.email)) return;
 
     const action = isSuspended ? '정지 해제' : '정지';
-    if (!confirm(`"${nickname}" 사용자를 ${action}하시겠습니까?`)) return;
 
-    try {
-      const response = await fetch('/api/admin/users', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          adminEmail: user.email,
-          userId,
-          isSuspended: !isSuspended,
-        }),
-      });
+    setConfirmModal({
+      isOpen: true,
+      title: `사용자 ${action}`,
+      message: `"${nickname}" 사용자를 ${action}하시겠습니까?`,
+      onConfirm: async () => {
+        setConfirmModal({ ...confirmModal, isOpen: false });
 
-      const data = await response.json();
+        try {
+          const response = await fetch('/api/admin/users', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              adminEmail: user.email,
+              userId,
+              isSuspended: !isSuspended,
+            }),
+          });
 
-      if (data.success) {
-        alert(`사용자가 ${action}되었습니다.`);
-        fetchUsers();
-      } else {
-        alert(data.error || `사용자 ${action}에 실패했습니다.`);
-      }
-    } catch (error) {
-      console.error('사용자 정지/해제 오류:', error);
-      alert('사용자 정지/해제 중 오류가 발생했습니다.');
-    }
+          const data = await response.json();
+
+          if (data.success) {
+            alert(`사용자가 ${action}되었습니다.`);
+            fetchUsers();
+          } else {
+            alert(data.error || `사용자 ${action}에 실패했습니다.`);
+          }
+        } catch (error) {
+          console.error('사용자 정지/해제 오류:', error);
+          alert('사용자 정지/해제 중 오류가 발생했습니다.');
+        }
+      },
+    });
   };
 
   // 탭 변경 시 데이터 로드
@@ -236,7 +264,7 @@ export default function AdminPage() {
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
-          📊 대시보드
+          대시보드
         </button>
         <button
           onClick={() => setActiveTab('posts')}
@@ -246,7 +274,7 @@ export default function AdminPage() {
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
-          📝 게시글 관리
+          게시글 관리
         </button>
         <button
           onClick={() => setActiveTab('users')}
@@ -256,7 +284,7 @@ export default function AdminPage() {
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
-          👥 사용자 관리
+          사용자 관리
         </button>
       </div>
 
@@ -318,8 +346,8 @@ export default function AdminPage() {
                         <div className="text-xs text-gray-600 dark:text-gray-400">{post.authorName}</div>
                       </div>
                       <div className="flex-shrink-0 text-right">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">👁️ {post.views.toLocaleString()}</div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">❤️ {post.likes.toLocaleString()}</div>
+                        <div className="text-sm font-semibold text-gray-900 dark:text-white">조회 {post.views.toLocaleString()}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">좋아요 {post.likes.toLocaleString()}</div>
                       </div>
                       <div className="flex-shrink-0">
                         <div className={`text-sm font-bold ${post.returnRate >= 0 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
@@ -345,7 +373,7 @@ export default function AdminPage() {
                         <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email}</div>
                       </div>
                       <div className="flex-shrink-0">
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">📝 {user.postCount}개</div>
+                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">게시글 {user.postCount}개</div>
                       </div>
                     </div>
                   ))}
@@ -483,6 +511,34 @@ export default function AdminPage() {
               )}
             </Card>
           )}
+        </div>
+      )}
+
+      {/* 확인 모달 */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
+              {confirmModal.title}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {confirmModal.message}
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={confirmModal.onConfirm}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+              >
+                확인
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

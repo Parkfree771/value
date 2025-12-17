@@ -34,8 +34,7 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
     if (reports.length === 0) return [];
 
     return reports
-      .filter((r) => r.returnRate > 0) // 양수 수익률만
-      .sort((a, b) => b.returnRate - a.returnRate) // 수익률 높은 순
+      .sort((a, b) => b.returnRate - a.returnRate) // 수익률 높은 순 (양수든 음수든)
       .slice(0, 10) // 상위 10개
       .map((report, index) => ({
         ...report,
@@ -59,9 +58,6 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
   }
 
   const getMedal = (rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
     return rank;
   };
 
@@ -107,8 +103,14 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
 
                 {/* Return Rate */}
                 <div className="mb-2">
-                  <div className="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400">
-                    +{item.returnRate}%
+                  <div className={`text-2xl sm:text-3xl font-bold ${
+                    item.returnRate > 0
+                      ? 'text-red-600 dark:text-red-400'
+                      : item.returnRate < 0
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
                   </div>
                 </div>
 

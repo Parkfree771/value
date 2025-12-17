@@ -1,173 +1,36 @@
 'use client';
 
 import { useParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import ReportCard from '@/components/ReportCard';
 import Link from 'next/link';
-
-// Mock data - 실제로는 API에서 가져와야 합니다
-const mockUserReports: Record<string, any[]> = {
-  '투자왕김부자': [
-    {
-      id: '1',
-      title: '삼성전자 반도체 업황 회복 기대',
-      author: '투자왕김부자',
-      stockName: '삼성전자',
-      ticker: '005930',
-      opinion: 'buy' as const,
-      returnRate: 45.8,
-      initialPrice: 50000,
-      currentPrice: 72900,
-      createdAt: '2025-09-01',
-      views: 5234,
-      likes: 432,
-      daysElapsed: 95,
-    },
-    {
-      id: '7',
-      title: '삼성전자 AI 칩 사업 확대',
-      author: '투자왕김부자',
-      stockName: '삼성전자',
-      ticker: '005930',
-      opinion: 'buy' as const,
-      returnRate: 22.5,
-      initialPrice: 60000,
-      currentPrice: 73500,
-      createdAt: '2025-10-15',
-      views: 3421,
-      likes: 289,
-      daysElapsed: 51,
-    },
-  ],
-  '반도체전문가': [
-    {
-      id: '3',
-      title: 'SK하이닉스 HBM 시장 독점',
-      author: '반도체전문가',
-      stockName: 'SK하이닉스',
-      ticker: '000660',
-      opinion: 'buy' as const,
-      returnRate: 35.4,
-      initialPrice: 120000,
-      currentPrice: 162480,
-      createdAt: '2025-10-01',
-      views: 3821,
-      likes: 301,
-      daysElapsed: 65,
-    },
-    {
-      id: '8',
-      title: 'SK하이닉스 HBM3E 양산 본격화',
-      author: '반도체전문가',
-      stockName: 'SK하이닉스',
-      ticker: '000660',
-      opinion: 'buy' as const,
-      returnRate: 28.3,
-      initialPrice: 115000,
-      currentPrice: 147545,
-      createdAt: '2025-10-20',
-      views: 2987,
-      likes: 245,
-      daysElapsed: 46,
-    },
-  ],
-  '일론팬': [
-    {
-      id: '2',
-      title: 'Tesla 자율주행 기술 혁신',
-      author: '일론팬',
-      stockName: 'Tesla',
-      ticker: 'TSLA',
-      opinion: 'buy' as const,
-      returnRate: 38.2,
-      initialPrice: 220,
-      currentPrice: 304.04,
-      createdAt: '2025-09-15',
-      views: 4567,
-      likes: 389,
-      daysElapsed: 81,
-    },
-  ],
-  '월가의늑대': [
-    {
-      id: '9',
-      title: 'Apple Vision Pro 시장 전망',
-      author: '월가의늑대',
-      stockName: 'Apple',
-      ticker: 'AAPL',
-      opinion: 'buy' as const,
-      returnRate: 19.2,
-      initialPrice: 180,
-      currentPrice: 214.56,
-      createdAt: '2025-11-01',
-      views: 2543,
-      likes: 198,
-      daysElapsed: 34,
-    },
-  ],
-  '가치투자자': [
-    {
-      id: '5',
-      title: '카카오 실적 턴어라운드',
-      author: '가치투자자',
-      stockName: '카카오',
-      ticker: '035720',
-      opinion: 'buy' as const,
-      returnRate: 22.3,
-      initialPrice: 45000,
-      currentPrice: 55035,
-      createdAt: '2025-10-20',
-      views: 2890,
-      likes: 234,
-      daysElapsed: 46,
-    },
-  ],
-};
-
-// 사용자 통계 mock data
-const mockUserStats: Record<string, any> = {
-  '투자왕김부자': {
-    totalReports: 24,
-    avgReturnRate: 32.5,
-    totalLikes: 1234,
-    totalViews: 15678,
-    successRate: 78.5,
-  },
-  '반도체전문가': {
-    totalReports: 18,
-    avgReturnRate: 28.7,
-    totalLikes: 987,
-    totalViews: 12456,
-    successRate: 72.3,
-  },
-  '일론팬': {
-    totalReports: 15,
-    avgReturnRate: 23.8,
-    totalLikes: 765,
-    totalViews: 9876,
-    successRate: 68.2,
-  },
-  '월가의늑대': {
-    totalReports: 31,
-    avgReturnRate: 25.3,
-    totalLikes: 876,
-    totalViews: 11234,
-    successRate: 70.1,
-  },
-  '가치투자자': {
-    totalReports: 22,
-    avgReturnRate: 21.2,
-    totalLikes: 654,
-    totalViews: 8765,
-    successRate: 65.4,
-  },
-};
 
 export default function UserPage() {
   const params = useParams();
   const username = decodeURIComponent(params.username as string);
+  const [userReports, setUserReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const userReports = mockUserReports[username] || [];
-  const userStats = mockUserStats[username] || {
+  useEffect(() => {
+    const fetchUserReports = async () => {
+      try {
+        const response = await fetch(`/api/user/profile?username=${encodeURIComponent(username)}`);
+        const data = await response.json();
+
+        if (data.success && data.user) {
+          setUserReports(data.user.reports || []);
+        }
+      } catch (error) {
+        console.error('사용자 리포트 가져오기 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserReports();
+  }, [username]);
+
+  const userStats = {
     totalReports: 0,
     avgReturnRate: 0,
     totalLikes: 0,

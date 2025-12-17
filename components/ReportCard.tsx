@@ -96,10 +96,8 @@ export default function ReportCard({
             <span className="sm:hidden">{createdAt.slice(5)}</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            <span className="hidden sm:inline">조회 {views}</span>
-            <span className="sm:hidden">👁 {views}</span>
-            <span className="hidden sm:inline">좋아요 {likes}</span>
-            <span className="sm:hidden">❤️ {likes}</span>
+            <span>조회 {views}</span>
+            <span>좋아요 {likes}</span>
           </div>
         </div>
       </Card>

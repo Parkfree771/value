@@ -1,105 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ReportCard from '@/components/ReportCard';
 import FilterBar from '@/components/FilterBar';
 import SearchBar from '@/components/SearchBar';
 
-// Mock data - 실제로는 API에서 가져올 데이터
-const mockReports = [
-  {
-    id: '1',
-    title: '삼성전자 반도체 업황 회복 기대',
-    author: '투자왕김부자',
-    stockName: '삼성전자',
-    ticker: '005930',
-    opinion: 'buy' as const,
-    returnRate: 24.5,
-    initialPrice: 50000,
-    currentPrice: 62250,
-    createdAt: '2025-11-01',
-    views: 1234,
-    likes: 89,
-  },
-  {
-    id: '2',
-    title: 'NVIDIA AI 시장 과열 우려',
-    author: '월가의늑대',
-    stockName: 'NVIDIA',
-    ticker: 'NVDA',
-    opinion: 'sell' as const,
-    returnRate: -12.3,
-    initialPrice: 500,
-    currentPrice: 438.5,
-    createdAt: '2025-10-15',
-    views: 2341,
-    likes: 156,
-  },
-  {
-    id: '3',
-    title: '현대차 전기차 판매 호조',
-    author: '주린이탈출',
-    stockName: '현대차',
-    ticker: '005380',
-    opinion: 'buy' as const,
-    returnRate: 18.7,
-    initialPrice: 180000,
-    currentPrice: 213660,
-    createdAt: '2025-11-10',
-    views: 876,
-    likes: 67,
-  },
-  {
-    id: '4',
-    title: 'Apple 신제품 발표 기대',
-    author: '애플매니아',
-    stockName: 'Apple',
-    ticker: 'AAPL',
-    opinion: 'hold' as const,
-    returnRate: 5.2,
-    initialPrice: 175,
-    currentPrice: 184.1,
-    createdAt: '2025-11-20',
-    views: 1567,
-    likes: 112,
-  },
-  {
-    id: '5',
-    title: '네이버 AI 검색 강화 전략',
-    author: '테크분석가',
-    stockName: '네이버',
-    ticker: '035420',
-    opinion: 'buy' as const,
-    returnRate: 15.3,
-    initialPrice: 200000,
-    currentPrice: 230600,
-    createdAt: '2025-11-15',
-    views: 987,
-    likes: 54,
-  },
-  {
-    id: '6',
-    title: 'Tesla 자율주행 기술 혁신',
-    author: '일론팬',
-    stockName: 'Tesla',
-    ticker: 'TSLA',
-    opinion: 'buy' as const,
-    returnRate: 28.4,
-    initialPrice: 220,
-    currentPrice: 282.5,
-    createdAt: '2025-10-25',
-    views: 2100,
-    likes: 178,
-  },
-];
-
 export default function SearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // API에서 리포트 가져오기
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch('/api/reports');
+        const data = await response.json();
+
+        if (data.success) {
+          setReports(data.reports);
+        }
+      } catch (error) {
+        console.error('리포트 가져오기 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
 
   // 검색 필터링
-  const filteredReports = mockReports.filter((report) => {
+  const filteredReports = reports.filter((report) => {
     if (!searchQuery.trim()) return true;
 
     const query = searchQuery.toLowerCase();
@@ -129,7 +63,7 @@ export default function SearchPage() {
       </div>
 
       {/* Search Bar */}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={mockReports} />
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={reports} />
 
       {/* Filters */}
       <FilterBar />

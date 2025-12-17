@@ -6,6 +6,7 @@ interface Investor {
   rank: number;
   name: string;
   avgReturnRate: number;
+  linkPath?: string; // 선택적 링크 경로
 }
 
 interface PodiumProps {
@@ -59,7 +60,7 @@ export default function Podium({ topThree }: PodiumProps) {
           {second && (
             <div className="flex-1 flex flex-col items-center">
               <Link
-                href={`/user/${encodeURIComponent(second.name)}`}
+                href={second.linkPath || `/user/${encodeURIComponent(second.name)}`}
                 className="w-full flex flex-col items-center group cursor-pointer"
               >
                 {/* 프로필 영역 */}
@@ -74,8 +75,12 @@ export default function Podium({ topThree }: PodiumProps) {
                   <div className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-amber-500 transition-colors mb-2 px-2">
                     {second.name}
                   </div>
-                  <div className="inline-block px-3 py-1 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold rounded-full text-xs shadow-md">
-                    +{second.avgReturnRate}%
+                  <div className={`inline-block px-3 py-1 ${
+                    second.avgReturnRate >= 0
+                      ? 'bg-gradient-to-r from-red-500 to-rose-600'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                  } text-white font-bold rounded-full text-xs shadow-md`}>
+                    {second.avgReturnRate >= 0 ? '+' : ''}{second.avgReturnRate.toFixed(2)}%
                   </div>
                 </div>
 
@@ -95,7 +100,7 @@ export default function Podium({ topThree }: PodiumProps) {
           {first && (
             <div className="flex-1 flex flex-col items-center">
               <Link
-                href={`/user/${encodeURIComponent(first.name)}`}
+                href={first.linkPath || `/user/${encodeURIComponent(first.name)}`}
                 className="w-full flex flex-col items-center group cursor-pointer"
               >
                 {/* 프로필 영역 */}
@@ -139,8 +144,12 @@ export default function Podium({ topThree }: PodiumProps) {
                   <div className="font-black text-base text-gray-900 dark:text-white group-hover:text-cyan-500 transition-colors mb-2 px-2">
                     {first.name}
                   </div>
-                  <div className="inline-block px-4 py-1 bg-gradient-to-r from-red-500 via-rose-600 to-pink-600 text-white font-black rounded-full shadow-lg text-sm">
-                    +{first.avgReturnRate}%
+                  <div className={`inline-block px-4 py-1 ${
+                    first.avgReturnRate >= 0
+                      ? 'bg-gradient-to-r from-red-500 via-rose-600 to-pink-600'
+                      : 'bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-600'
+                  } text-white font-black rounded-full shadow-lg text-sm`}>
+                    {first.avgReturnRate >= 0 ? '+' : ''}{first.avgReturnRate.toFixed(2)}%
                   </div>
                 </div>
 
@@ -192,7 +201,7 @@ export default function Podium({ topThree }: PodiumProps) {
           {third && (
             <div className="flex-1 flex flex-col items-center">
               <Link
-                href={`/user/${encodeURIComponent(third.name)}`}
+                href={third.linkPath || `/user/${encodeURIComponent(third.name)}`}
                 className="w-full flex flex-col items-center group cursor-pointer"
               >
                 {/* 프로필 영역 */}
@@ -207,8 +216,12 @@ export default function Podium({ topThree }: PodiumProps) {
                   <div className="font-bold text-sm text-gray-900 dark:text-white group-hover:text-slate-500 transition-colors mb-2 px-2">
                     {third.name}
                   </div>
-                  <div className="inline-block px-3 py-1 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold rounded-full text-xs shadow-md">
-                    +{third.avgReturnRate}%
+                  <div className={`inline-block px-3 py-1 ${
+                    third.avgReturnRate >= 0
+                      ? 'bg-gradient-to-r from-red-500 to-rose-600'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                  } text-white font-bold rounded-full text-xs shadow-md`}>
+                    {third.avgReturnRate >= 0 ? '+' : ''}{third.avgReturnRate.toFixed(2)}%
                   </div>
                 </div>
 

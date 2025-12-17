@@ -80,12 +80,12 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
   };
 
   const getShareUrl = () => {
-    const text = `${report.stockName} ${report.returnRate > 0 ? '+' : ''}${report.returnRate}% 수익률 달성! 워렌버핏 따라잡기`;
+    const text = `${report.stockName} ${report.returnRate >= 0 ? '+' : ''}${report.returnRate.toFixed(2)}% 수익률 달성! 워렌버핏 따라잡기`;
     return `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
   };
 
   const copyToClipboard = async () => {
-    const text = `${report.stockName} ${report.daysElapsed}일 만에 ${report.returnRate}% 수익률! - 워렌버핏 따라잡기`;
+    const text = `${report.stockName} ${report.daysElapsed}일 만에 ${report.returnRate >= 0 ? '+' : ''}${report.returnRate.toFixed(2)}% 수익률! - 워렌버핏 따라잡기`;
     try {
       await navigator.clipboard.writeText(text);
       alert('클립보드에 복사되었습니다!');
@@ -127,7 +127,7 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
                   'text-gray-600 dark:text-gray-400'
                 }`}>
-                  {report.returnRate > 0 ? '+' : ''}{report.returnRate}%
+                  {report.returnRate >= 0 ? '+' : ''}{report.returnRate.toFixed(2)}%
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                   {report.daysElapsed}일
@@ -160,7 +160,7 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
                   'text-gray-600 dark:text-gray-400'
                 }`}>
-                  {report.returnRate > 0 ? '+' : ''}{(report.currentPrice - report.initialPrice).toLocaleString()}원
+                  {report.returnRate >= 0 ? '+' : ''}{(report.currentPrice - report.initialPrice).toLocaleString()}원
                 </span>
               </div>
             </div>
@@ -172,10 +172,8 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
                 <span className="font-semibold text-gray-700 dark:text-gray-300 truncate">{report.author}</span>
                 <span className="hidden sm:inline">{report.createdAt}</span>
                 <span className="sm:hidden">{report.createdAt.slice(5)}</span>
-                <span className="hidden sm:inline">조회 {report.views.toLocaleString()}</span>
-                <span className="sm:hidden">👁 {report.views.toLocaleString()}</span>
-                <span className="hidden sm:inline">좋아요 {report.likes.toLocaleString()}</span>
-                <span className="sm:hidden">❤️ {report.likes.toLocaleString()}</span>
+                <span>조회 {report.views.toLocaleString()}</span>
+                <span>좋아요 {report.likes.toLocaleString()}</span>
               </div>
 
               {/* Share Buttons */}

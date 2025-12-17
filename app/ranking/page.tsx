@@ -11,7 +11,7 @@ const Podium = dynamic(() => import('@/components/Podium'), {
   loading: () => <div className="animate-pulse h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
 });
 
-type TimePeriod = '1week' | '1month' | '3months' | 'all';
+type TimePeriod = '1month' | '3months' | '6months' | '1year' | 'all';
 
 interface RankedReport {
   id: string;
@@ -30,239 +30,13 @@ interface RankedReport {
   priceHistory: Array<{ date: string; price: number; returnRate: number }>;
 }
 
-// Mock data for ranking with time-based tracking - 백업용
-const mockTopReports: RankedReport[] = [
-  {
-    id: '1',
-    title: '삼성전자 반도체 업황 회복 기대',
-    author: '투자왕김부자',
-    stockName: '삼성전자',
-    ticker: '005930',
-    opinion: 'buy' as const,
-    returnRate: 45.8,
-    initialPrice: 50000,
-    currentPrice: 72900,
-    createdAt: '2025-09-01',
-    views: 5234,
-    likes: 432,
-    daysElapsed: 95,
-    priceHistory: [
-      { date: '2025-09-01', price: 50000, returnRate: 0 },
-      { date: '2025-09-15', price: 54000, returnRate: 8.0 },
-      { date: '2025-10-01', price: 59500, returnRate: 19.0 },
-      { date: '2025-10-15', price: 63200, returnRate: 26.4 },
-      { date: '2025-11-01', price: 68800, returnRate: 37.6 },
-      { date: '2025-11-15', price: 71500, returnRate: 43.0 },
-      { date: '2025-12-05', price: 72900, returnRate: 45.8 },
-    ],
-  },
-  {
-    id: '2',
-    title: 'Tesla 자율주행 기술 혁신',
-    author: '일론팬',
-    stockName: 'Tesla',
-    ticker: 'TSLA',
-    opinion: 'buy' as const,
-    returnRate: 38.2,
-    initialPrice: 220,
-    currentPrice: 304.04,
-    createdAt: '2025-09-15',
-    views: 4567,
-    likes: 389,
-    daysElapsed: 81,
-    priceHistory: [
-      { date: '2025-09-15', price: 220, returnRate: 0 },
-      { date: '2025-10-01', price: 238, returnRate: 8.2 },
-      { date: '2025-10-15', price: 252, returnRate: 14.5 },
-      { date: '2025-11-01', price: 275, returnRate: 25.0 },
-      { date: '2025-11-15', price: 289, returnRate: 31.4 },
-      { date: '2025-12-05', price: 304.04, returnRate: 38.2 },
-    ],
-  },
-  {
-    id: '3',
-    title: 'SK하이닉스 HBM 시장 독점',
-    author: '반도체전문가',
-    stockName: 'SK하이닉스',
-    ticker: '000660',
-    opinion: 'buy' as const,
-    returnRate: 35.4,
-    initialPrice: 120000,
-    currentPrice: 162480,
-    createdAt: '2025-10-01',
-    views: 3821,
-    likes: 301,
-    daysElapsed: 65,
-    priceHistory: [
-      { date: '2025-10-01', price: 120000, returnRate: 0 },
-      { date: '2025-10-15', price: 128400, returnRate: 7.0 },
-      { date: '2025-11-01', price: 138000, returnRate: 15.0 },
-      { date: '2025-11-15', price: 150000, returnRate: 25.0 },
-      { date: '2025-12-05', price: 162480, returnRate: 35.4 },
-    ],
-  },
-  {
-    id: '4',
-    title: 'Microsoft AI 클라우드 성장',
-    author: '클라우드왕',
-    stockName: 'Microsoft',
-    ticker: 'MSFT',
-    opinion: 'buy' as const,
-    returnRate: 28.9,
-    initialPrice: 350,
-    currentPrice: 451.15,
-    createdAt: '2025-10-10',
-    views: 3456,
-    likes: 278,
-    daysElapsed: 56,
-    priceHistory: [
-      { date: '2025-10-10', price: 350, returnRate: 0 },
-      { date: '2025-10-25', price: 371, returnRate: 6.0 },
-      { date: '2025-11-10', price: 399, returnRate: 14.0 },
-      { date: '2025-11-25', price: 427, returnRate: 22.0 },
-      { date: '2025-12-05', price: 451.15, returnRate: 28.9 },
-    ],
-  },
-  {
-    id: '5',
-    title: '카카오 실적 턴어라운드',
-    author: '가치투자자',
-    stockName: '카카오',
-    ticker: '035720',
-    opinion: 'buy' as const,
-    returnRate: 22.3,
-    initialPrice: 45000,
-    currentPrice: 55035,
-    createdAt: '2025-10-20',
-    views: 2890,
-    likes: 234,
-    daysElapsed: 46,
-    priceHistory: [
-      { date: '2025-10-20', price: 45000, returnRate: 0 },
-      { date: '2025-11-05', price: 47700, returnRate: 6.0 },
-      { date: '2025-11-20', price: 51300, returnRate: 14.0 },
-      { date: '2025-12-05', price: 55035, returnRate: 22.3 },
-    ],
-  },
-  {
-    id: '6',
-    title: 'NVIDIA AI 칩 수요 폭발',
-    author: 'AI투자자',
-    stockName: 'NVIDIA',
-    ticker: 'NVDA',
-    opinion: 'buy' as const,
-    returnRate: 18.5,
-    initialPrice: 450,
-    currentPrice: 533.25,
-    createdAt: '2025-11-01',
-    views: 2456,
-    likes: 198,
-    daysElapsed: 34,
-    priceHistory: [
-      { date: '2025-11-01', price: 450, returnRate: 0 },
-      { date: '2025-11-15', price: 486, returnRate: 8.0 },
-      { date: '2025-12-05', price: 533.25, returnRate: 18.5 },
-    ],
-  },
-];
-
-const topInvestors = [
-  { rank: 1, name: '투자왕김부자', avgReturnRate: 32.5, totalReports: 24, totalLikes: 1234 },
-  { rank: 2, name: '반도체전문가', avgReturnRate: 28.7, totalReports: 18, totalLikes: 987 },
-  { rank: 3, name: '월가의늑대', avgReturnRate: 25.3, totalReports: 31, totalLikes: 876 },
-  { rank: 4, name: '일론팬', avgReturnRate: 23.8, totalReports: 15, totalLikes: 765 },
-  { rank: 5, name: '가치투자자', avgReturnRate: 21.2, totalReports: 22, totalLikes: 654 },
-];
-
-// 인기글 데이터 (조회수/좋아요 기준)
-const trendingReports = [
-  {
-    id: '1',
-    title: 'NVIDIA AI 칩 수요 폭발적 증가 분석',
-    author: 'AI투자자',
-    stockName: 'NVIDIA',
-    ticker: 'NVDA',
-    opinion: 'buy' as const,
-    returnRate: 18.5,
-    initialPrice: 450,
-    currentPrice: 533.25,
-    createdAt: '2025-11-01',
-    views: 8234,
-    likes: 567,
-    daysElapsed: 34,
-    priceHistory: [],
-  },
-  {
-    id: '2',
-    title: '삼성전자 반도체 업황 회복 기대',
-    author: '투자왕김부자',
-    stockName: '삼성전자',
-    ticker: '005930',
-    opinion: 'buy' as const,
-    returnRate: 45.8,
-    initialPrice: 50000,
-    currentPrice: 72900,
-    createdAt: '2025-09-01',
-    views: 7821,
-    likes: 498,
-    daysElapsed: 95,
-    priceHistory: [],
-  },
-  {
-    id: '3',
-    title: 'Tesla 자율주행 FSD 베타 완성도 분석',
-    author: '일론팬',
-    stockName: 'Tesla',
-    ticker: 'TSLA',
-    opinion: 'buy' as const,
-    returnRate: 38.2,
-    initialPrice: 220,
-    currentPrice: 304.04,
-    createdAt: '2025-09-15',
-    views: 6543,
-    likes: 445,
-    daysElapsed: 81,
-    priceHistory: [],
-  },
-  {
-    id: '4',
-    title: 'SK하이닉스 HBM3E 양산 본격화',
-    author: '반도체전문가',
-    stockName: 'SK하이닉스',
-    ticker: '000660',
-    opinion: 'buy' as const,
-    returnRate: 35.4,
-    initialPrice: 120000,
-    currentPrice: 162480,
-    createdAt: '2025-10-01',
-    views: 5987,
-    likes: 412,
-    daysElapsed: 65,
-    priceHistory: [],
-  },
-  {
-    id: '5',
-    title: 'Microsoft AI Copilot 매출 급증',
-    author: '클라우드왕',
-    stockName: 'Microsoft',
-    ticker: 'MSFT',
-    opinion: 'buy' as const,
-    returnRate: 28.9,
-    initialPrice: 350,
-    currentPrice: 451.15,
-    createdAt: '2025-10-10',
-    views: 5234,
-    likes: 389,
-    daysElapsed: 56,
-    priceHistory: [],
-  },
-];
-
 export default function RankingPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
   const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('investors');
   const [reports, setReports] = useState<RankedReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [investors, setInvestors] = useState<any[]>([]);
+  const [trending, setTrending] = useState<RankedReport[]>([]);
 
   // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
   useEffect(() => {
@@ -288,15 +62,50 @@ export default function RankingPage() {
           });
 
           setReports(reportsWithDays);
+
+          // 인기글 데이터 설정 (조회수 + 좋아요 기준으로 정렬)
+          const trendingData = [...reportsWithDays].sort((a, b) => {
+            const scoreA = (a.views || 0) + (a.likes || 0) * 2; // 좋아요에 2배 가중치
+            const scoreB = (b.views || 0) + (b.likes || 0) * 2;
+            return scoreB - scoreA;
+          });
+          setTrending(trendingData);
+
+          // 투자자 데이터 설정 (작성자별 평균 수익률)
+          const authorMap = new Map<string, { totalReturn: number; count: number; author: string }>();
+          reportsWithDays.forEach(report => {
+            const existing = authorMap.get(report.author);
+            if (existing) {
+              existing.totalReturn += report.returnRate;
+              existing.count += 1;
+            } else {
+              authorMap.set(report.author, {
+                totalReturn: report.returnRate,
+                count: 1,
+                author: report.author,
+              });
+            }
+          });
+
+          const investorsData = Array.from(authorMap.values())
+            .map(({ author, totalReturn, count }) => ({
+              rank: 0,
+              name: author,
+              avgReturnRate: totalReturn / count,
+              totalReports: count,
+              totalLikes: reportsWithDays
+                .filter(r => r.author === author)
+                .reduce((sum, r) => sum + (r.likes || 0), 0),
+            }))
+            .sort((a, b) => b.avgReturnRate - a.avgReturnRate)
+            .map((investor, index) => ({ ...investor, rank: index + 1 }));
+
+          setInvestors(investorsData);
         } else {
           console.error('리포트 가져오기 실패:', data.error);
-          // 에러 시 목 데이터 사용
-          setReports(mockTopReports);
         }
       } catch (error) {
         console.error('리포트 가져오기 실패:', error);
-        // 에러 시 목 데이터 사용
-        setReports(mockTopReports);
       } finally {
         setLoading(false);
       }
@@ -307,12 +116,63 @@ export default function RankingPage() {
 
   const getPeriodLabel = (period: TimePeriod) => {
     const labels = {
-      '1week': '1주일',
-      '1month': '1개월',
-      '3months': '3개월',
+      '1month': '1달',
+      '3months': '3달',
+      '6months': '6달',
+      '1year': '1년',
       'all': '전체',
     };
     return labels[period];
+  };
+
+  // 기간에 따라 필터링된 리포트 가져오기
+  const getFilteredReports = () => {
+    if (selectedPeriod === 'all') {
+      return reports;
+    }
+
+    const today = new Date();
+    const periodDays = {
+      '1month': 30,
+      '3months': 90,
+      '6months': 180,
+      '1year': 365,
+      'all': Infinity,
+    };
+
+    const maxDays = periodDays[selectedPeriod];
+
+    return reports.filter((report) => {
+      const createdDate = new Date(report.createdAt);
+      const diffTime = today.getTime() - createdDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= maxDays;
+    });
+  };
+
+  // 기간에 따라 필터링된 인기글 가져오기
+  const getFilteredTrending = () => {
+    if (selectedPeriod === 'all') {
+      return trending;
+    }
+
+    const today = new Date();
+    const periodDays = {
+      '1month': 30,
+      '3months': 90,
+      '6months': 180,
+      '1year': 365,
+      'all': Infinity,
+    };
+
+    const maxDays = periodDays[selectedPeriod];
+
+    return trending.filter((report) => {
+      const createdDate = new Date(report.createdAt);
+      const diffTime = today.getTime() - createdDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= maxDays;
+    });
   };
 
   const getMedalEmoji = (rank: number) => {
@@ -360,31 +220,23 @@ export default function RankingPage() {
 
       {activeTab === 'reports' && (
         <>
-          {/* Time Period Filter */}
-          <div className="mb-4 sm:mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">기간별 수익률</h3>
-            <div className="flex gap-2 sm:gap-3 flex-wrap">
-              {(['1week', '1month', '3months', 'all'] as TimePeriod[]).map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setSelectedPeriod(period)}
-                  className={`px-3 sm:px-6 py-1.5 sm:py-2 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
-                    selectedPeriod === period
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {getPeriodLabel(period)}
-                </button>
-              ))}
-            </div>
+          {/* Podium for Top 3 - Desktop only */}
+          <div className="hidden md:block mb-6">
+            <Podium topThree={getFilteredReports().slice(0, 3).map((report, index) => ({
+              rank: index + 1,
+              name: report.stockName,
+              avgReturnRate: report.returnRate,
+              totalReports: 0,
+              totalLikes: report.likes,
+              linkPath: `/reports/${report.id}`,
+            }))} />
           </div>
 
           {/* Mobile: Top 3 Badges */}
-          <div className="md:hidden mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+          <div className="md:hidden mb-4 p-4">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">TOP 3 리포트</h2>
             <div className="flex gap-3 justify-center items-end">
-              {reports.slice(0, 3).map((report, index) => (
+              {getFilteredReports().slice(0, 3).map((report, index) => (
                 <Link
                   key={report.id}
                   href={`/reports/${report.id}`}
@@ -470,14 +322,35 @@ export default function RankingPage() {
                   }`}>
                     {report.stockName}
                   </div>
-                  <div className={`inline-block px-2 py-0.5 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold rounded-full mt-1 ${
+                  <div className={`inline-block px-2 py-0.5 ${
+                    report.returnRate >= 0
+                      ? 'bg-gradient-to-r from-red-500 to-rose-600'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                  } text-white font-bold rounded-full mt-1 ${
                     index === 0 ? 'text-xs' : 'text-[10px]'
                   }`}>
-                    +{report.returnRate}%
+                    {report.returnRate >= 0 ? '+' : ''}{report.returnRate.toFixed(2)}%
                   </div>
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* Time Period Filter */}
+          <div className="mb-4 sm:mb-6 flex gap-2 flex-wrap justify-center">
+            {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-xs sm:text-base font-semibold transition-all ${
+                  selectedPeriod === period
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {getPeriodLabel(period)}
+              </button>
+            ))}
           </div>
 
           {/* All Rankings */}
@@ -488,13 +361,13 @@ export default function RankingPage() {
                   <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
                 ))}
               </div>
-            ) : reports.length > 0 ? (
-              reports.map((report, index) => (
+            ) : getFilteredReports().length > 0 ? (
+              getFilteredReports().map((report, index) => (
                 <RankingReportCard key={report.id} report={report} rank={index + 1} />
               ))
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">아직 작성된 리포트가 없습니다.</p>
+                <p className="text-gray-500 dark:text-gray-400">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
@@ -505,14 +378,14 @@ export default function RankingPage() {
         <>
           {/* Podium for Top 3 - Desktop only */}
           <div className="hidden md:block">
-            <Podium topThree={topInvestors.slice(0, 3)} />
+            <Podium topThree={investors.slice(0, 3)} />
           </div>
 
           {/* Mobile: Top 3 Badges */}
-          <div className="md:hidden mb-4 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
+          <div className="md:hidden mb-4 p-4">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">TOP 3 투자자</h2>
             <div className="flex gap-3 justify-center items-end">
-              {topInvestors.slice(0, 3).map((investor, index) => (
+              {investors.slice(0, 3).map((investor, index) => (
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
@@ -598,14 +471,35 @@ export default function RankingPage() {
                   }`}>
                     {investor.name}
                   </div>
-                  <div className={`inline-block px-2 py-0.5 bg-gradient-to-r from-red-500 to-rose-600 text-white font-bold rounded-full mt-1 ${
+                  <div className={`inline-block px-2 py-0.5 ${
+                    investor.avgReturnRate >= 0
+                      ? 'bg-gradient-to-r from-red-500 to-rose-600'
+                      : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                  } text-white font-bold rounded-full mt-1 ${
                     investor.rank === 1 ? 'text-xs' : 'text-[10px]'
                   }`}>
-                    +{investor.avgReturnRate}%
+                    {investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%
                   </div>
                 </Link>
               ))}
             </div>
+          </div>
+
+          {/* Time Period Filter */}
+          <div className="mb-4 sm:mb-6 flex gap-2 flex-wrap justify-center">
+            {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-xs sm:text-base font-semibold transition-all ${
+                  selectedPeriod === period
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {getPeriodLabel(period)}
+              </button>
+            ))}
           </div>
 
           {/* All Rankings */}
@@ -614,7 +508,7 @@ export default function RankingPage() {
               전체 투자자 랭킹
             </h2>
             <div className="space-y-2 sm:space-y-3">
-              {topInvestors.map((investor) => (
+              {investors.map((investor) => (
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
@@ -634,8 +528,12 @@ export default function RankingPage() {
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2">
-                    <div className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400">
-                      +{investor.avgReturnRate}%
+                    <div className={`text-lg sm:text-2xl font-bold ${
+                      investor.avgReturnRate >= 0
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-blue-600 dark:text-blue-400'
+                    }`}>
+                      {investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">평균 수익률</div>
                   </div>
@@ -649,14 +547,37 @@ export default function RankingPage() {
       {activeTab === 'trending' && (
         <>
           <div className="mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2">인기글</h2>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">조회수와 좋아요가 많은 인기 리포트</p>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2 text-center">인기글</h2>
+            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center">조회수와 좋아요가 많은 인기 리포트</p>
+          </div>
+
+          {/* Time Period Filter */}
+          <div className="mb-6 sm:mb-8 flex gap-2 flex-wrap justify-center">
+            {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
+              <button
+                key={period}
+                onClick={() => setSelectedPeriod(period)}
+                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-xs sm:text-base font-semibold transition-all ${
+                  selectedPeriod === period
+                    ? 'bg-blue-600 text-white shadow-lg'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                }`}
+              >
+                {getPeriodLabel(period)}
+              </button>
+            ))}
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-            {trendingReports.map((report, index) => (
-              <RankingReportCard key={report.id} report={report} rank={index + 1} />
-            ))}
+            {getFilteredTrending().length > 0 ? (
+              getFilteredTrending().map((report, index) => (
+                <RankingReportCard key={report.id} report={report} rank={index + 1} />
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 dark:text-gray-400">선택한 기간에 작성된 리포트가 없습니다.</p>
+              </div>
+            )}
           </div>
         </>
       )}
