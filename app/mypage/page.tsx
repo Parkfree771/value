@@ -260,6 +260,11 @@ export default function MyPage() {
     }
   };
 
+  // 리포트 삭제 후 목록에서 제거
+  const handleReportDelete = (reportId: string) => {
+    setMyReports(prevReports => prevReports.filter(report => report.id !== reportId));
+  };
+
   // 사용자 정보
   const userName = userProfile?.nickname || user?.displayName || user?.email || '익명';
   const userEmail = user?.email || '';
@@ -522,7 +527,12 @@ export default function MyPage() {
               <div className="space-y-6">
                 {myReports.length > 0 ? (
                   myReports.map((report) => (
-                    <ReportCard key={report.id} {...report} />
+                    <ReportCard
+                      key={report.id}
+                      {...report}
+                      showActions={true}
+                      onDelete={() => handleReportDelete(report.id)}
+                    />
                   ))
                 ) : (
                   <Card className="p-8 sm:p-12 text-center">
@@ -631,7 +641,12 @@ export default function MyPage() {
             <div className="space-y-6">
               {myReports.length > 0 ? (
                 myReports.map((report) => (
-                  <ReportCard key={report.id} {...report} />
+                  <ReportCard
+                    key={report.id}
+                    {...report}
+                    showActions={true}
+                    onDelete={() => handleReportDelete(report.id)}
+                  />
                 ))
               ) : (
                 <Card className="p-8 text-center">

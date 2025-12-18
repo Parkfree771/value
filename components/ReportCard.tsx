@@ -1,4 +1,8 @@
+'use client';
+
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import Card from './Card';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 
@@ -15,6 +19,8 @@ interface ReportCardProps {
   createdAt: string;
   views: number;
   likes: number;
+  showActions?: boolean; // 수정/삭제 버튼 표시 여부
+  onDelete?: () => void; // 삭제 후 콜백
 }
 
 export default function ReportCard({
@@ -30,8 +36,49 @@ export default function ReportCard({
   createdAt,
   views,
   likes,
+  showActions = false,
+  onDelete,
 }: ReportCardProps) {
+  const router = useRouter();
+  const [isDeleting, setIsDeleting] = useState(false);
   // API에서 이미 계산된 returnRate를 사용하므로 별도 계산 불필요
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/write?id=${id}`);
+  };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!confirm('정말 이 리포트를 삭제하시겠습니까?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/reports/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('삭제 실패');
+      }
+
+      alert('리포트가 삭제되었습니다.');
+      if (onDelete) {
+        onDelete();
+      }
+    } catch (error) {
+      console.error('삭제 오류:', error);
+      alert('리포트 삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const getOpinionBadge = () => {
     const styles = {
@@ -53,9 +100,13 @@ export default function ReportCard({
     );
   };
 
+  const handleCardClick = () => {
+    router.push(`/reports/${id}`);
+  };
+
   return (
-    <Link href={`/reports/${id}`} className="block">
-      <Card className="p-4 sm:p-6 hover:border-blue-300 dark:hover:border-blue-500 border border-transparent dark:border-transparent">
+    <div onClick={handleCardClick} className="block cursor-pointer">
+      <Card className="p-4 sm:p-6 hover:border-blue-300 dark:hover:border-blue-500 border border-transparent dark:border-transparent transition-colors">
         {/* Header */}
         <div className="flex justify-between items-start mb-3 sm:mb-4 gap-3">
           <div className="flex-1 min-w-0">
@@ -90,16 +141,46 @@ export default function ReportCard({
         {/* Footer */}
         <div className="flex justify-between items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3">
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <span className="font-medium text-gray-700 dark:text-gray-300 truncate">{author}</span>
+            <Link
+              href={`/user/${encodeURIComponent(author)}`}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              className="font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
+            >
+              {author}
+            </Link>
             <span className="hidden sm:inline">{createdAt}</span>
             <span className="sm:hidden">{createdAt.slice(5)}</span>
           </div>
           <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            <span>조회 {views}</span>
-            <span>좋아요 {likes}</span>
+            {!showActions && (
+              <>
+                <span>조회 {views}</span>
+                <span>좋아요 {likes}</span>
+              </>
+            )}
+            {showActions && (
+              <>
+                <button
+                  onClick={handleEdit}
+                  disabled={isDeleting}
+                  className="px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors disabled:opacity-50"
+                >
+                  수정
+                </button>
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
+                >
+                  {isDeleting ? '삭제 중...' : '삭제'}
+                </button>
+              </>
+            )}
           </div>
         </div>
       </Card>
-    </Link>
+    </div>
   );
 }
