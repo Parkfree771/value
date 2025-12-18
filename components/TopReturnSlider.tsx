@@ -79,7 +79,7 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
 
       {/* Horizontal Scrollable List of TOP 10 */}
       <div className="relative">
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 sm:pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 -mx-1 px-1">
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 sm:pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent -mx-1 px-1">
           {topReturns.map((item, index) => (
             <Link key={item.id} href={`/reports/${item.id}`}>
               <div

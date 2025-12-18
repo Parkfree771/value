@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Card from './Card';
-import { calculateReturn, formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
+import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 
 interface ReportCardProps {
   id: string;
@@ -11,7 +11,7 @@ interface ReportCardProps {
   opinion: 'buy' | 'sell' | 'hold';
   initialPrice: number;
   currentPrice: number;
-  positionType?: 'long' | 'short'; // 포지션 타입 추가
+  returnRate: number; // API에서 이미 계산된 수익률 사용
   createdAt: string;
   views: number;
   likes: number;
@@ -26,13 +26,12 @@ export default function ReportCard({
   opinion,
   initialPrice,
   currentPrice,
-  positionType = 'long', // 기본값은 long
+  returnRate, // API에서 이미 계산된 수익률 사용
   createdAt,
   views,
   likes,
 }: ReportCardProps) {
-  // 포지션 타입에 따라 수익률 계산
-  const returnRate = calculateReturn(initialPrice, currentPrice, positionType);
+  // API에서 이미 계산된 returnRate를 사용하므로 별도 계산 불필요
 
   const getOpinionBadge = () => {
     const styles = {

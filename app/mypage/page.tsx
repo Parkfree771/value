@@ -280,42 +280,138 @@ export default function MyPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-        {/* Profile Sidebar */}
-        <div className="lg:col-span-1">
-          <Card className="p-4 sm:p-6 lg:sticky lg:top-20">
-            {/* Profile Picture */}
-            <div className="text-center mb-4 sm:mb-6">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+      {/* 모바일: 통합 프로필 카드 */}
+      <div className="lg:hidden mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-3">
+          {/* 상단: 프로필 + 평균 수익률 */}
+          <div className="grid grid-cols-3 gap-1.5 mb-3">
+            {/* 왼쪽: 프로필 (2칸) */}
+            <div className="col-span-2 flex items-center gap-2 min-w-0">
+              <div className="w-14 h-14 bg-blue-600 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0">
                 {userName[0]}
               </div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1 truncate px-2">{userName}</h2>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate px-2">{userEmail}</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-white truncate mb-0.5">{userName}</h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-1">{userEmail}</p>
+                <button
+                  onClick={handleOpenEditModal}
+                  className="text-[11px] py-1 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition-colors inline-flex items-center justify-center"
+                >
+                  프로필 수정
+                </button>
+              </div>
+            </div>
+
+            {/* 오른쪽: 평균 수익률 (1칸) */}
+            <div className={`col-span-1 flex flex-col items-center justify-center py-2.5 rounded-lg ${
+              parseFloat(avgReturnRate) > 0
+                ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'
+                : parseFloat(avgReturnRate) < 0
+                ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-808'
+                : 'bg-gray-50 dark:bg-gray-700/30 border border-gray-200 dark:border-gray-700'
+            }`}>
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap mb-1">평균 수익률</div>
+              <div className={`text-2xl font-bold leading-tight ${
+                parseFloat(avgReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
+                parseFloat(avgReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
+                'text-gray-600 dark:text-gray-400'
+              }`}>
+                {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
+              </div>
+            </div>
+          </div>
+
+          {/* 통계 그리드 3x2 */}
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-2 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">전체</div>
+              <div className={`text-sm font-bold ${
+                parseFloat(avgReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
+                parseFloat(avgReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
+                'text-gray-600 dark:text-gray-400'
+              }`}>
+                {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-2 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">최고</div>
+              <div className={`text-sm font-bold ${
+                parseFloat(maxReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
+                parseFloat(maxReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
+                'text-gray-600 dark:text-gray-400'
+              }`}>
+                {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-2 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">승률</div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">{winRate}%</div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-2 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">리포트</div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">{totalReports}</div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-2 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">조회</div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">{totalViews > 999 ? Math.floor(totalViews/1000) + 'k' : totalViews}</div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-md p-2 text-center border border-gray-200 dark:border-gray-600">
+              <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">좋아요</div>
+              <div className="text-sm font-bold text-gray-900 dark:text-white">{totalLikes}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 데스크톱: 기존 레이아웃 */}
+      <div className="hidden lg:grid lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+        {/* Profile Sidebar */}
+        <div className="lg:col-span-1">
+          <Card className="p-6 lg:sticky lg:top-20">
+            {/* Profile Picture */}
+            <div className="text-center mb-6">
+              <div className="w-24 h-24 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mb-4">
+                {userName[0]}
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 truncate px-2">{userName}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 truncate px-2">{userEmail}</p>
             </div>
 
             {/* Stats */}
-            <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
-              <div className="text-center p-3 sm:p-4 bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30 rounded-lg">
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">평균 수익률</div>
-                <div className="text-xl sm:text-2xl font-bold text-red-600 dark:text-red-400">+{avgReturnRate}%</div>
+            <div className="space-y-4 mb-6">
+              <div className={`text-center p-4 rounded-lg ${
+                parseFloat(avgReturnRate) > 0
+                  ? 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/30 dark:to-orange-900/30'
+                  : parseFloat(avgReturnRate) < 0
+                  ? 'bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/30 dark:to-cyan-900/30'
+                  : 'bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/30 dark:to-gray-700/30'
+              }`}>
+                <div className="text-sm text-gray-600 dark:text-gray-400">평균 수익률</div>
+                <div className={`text-2xl font-bold ${
+                  parseFloat(avgReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
+                  parseFloat(avgReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
+                  'text-gray-600 dark:text-gray-400'
+                }`}>
+                  {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">리포트</div>
-                  <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{totalReports}</div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">리포트</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">{totalReports}</div>
                 </div>
-                <div className="p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">총 조회</div>
-                  <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{totalViews.toLocaleString()}</div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">총 조회</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">{totalViews.toLocaleString()}</div>
                 </div>
-                <div className="p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">총 좋아요</div>
-                  <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{totalLikes}</div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">총 좋아요</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">{totalLikes}</div>
                 </div>
-                <div className="p-2.5 sm:p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">승률</div>
-                  <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{winRate}%</div>
+                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">승률</div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">{winRate}%</div>
                 </div>
               </div>
             </div>
@@ -324,60 +420,60 @@ export default function MyPage() {
             <div className="space-y-2">
               <Button
                 variant="outline"
-                className="w-full text-sm sm:text-base"
+                className="w-full text-base"
                 onClick={handleOpenEditModal}
               >
                 프로필 수정
               </Button>
-              <Button variant="outline" className="w-full text-sm sm:text-base">설정</Button>
+              <Button variant="outline" className="w-full text-base">설정</Button>
             </div>
 
             {joinDate && (
-              <div className="mt-4 sm:mt-6 text-xs sm:text-sm text-gray-500 text-center">
+              <div className="mt-6 text-sm text-gray-500 text-center">
                 가입일: {joinDate}
               </div>
             )}
           </Card>
         </div>
 
-        {/* Main Content */}
+        {/* Main Content (Desktop only) */}
         <div className="lg:col-span-3">
           {/* Tab Navigation */}
-          <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-6 overflow-x-auto pb-2">
-            <button
-              onClick={() => setActiveTab('reports')}
-              className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
-                activeTab === 'reports'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              내 리포트
-            </button>
-            <button
-              onClick={() => setActiveTab('bookmarks')}
-              className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
-                activeTab === 'bookmarks'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              북마크
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
-                activeTab === 'settings'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              설정
-            </button>
-          </div>
+          <div className="flex gap-4 mb-6 overflow-x-auto pb-2">
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
+              activeTab === 'reports'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            내 리포트
+          </button>
+          <button
+            onClick={() => setActiveTab('bookmarks')}
+            className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
+              activeTab === 'bookmarks'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            북마크
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
+              activeTab === 'settings'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            설정
+          </button>
+        </div>
 
-          {/* Tab Content */}
-          {activeTab === 'reports' && (
+        {/* Tab Content */}
+        {activeTab === 'reports' && (
             <div>
               {/* 실시간 업데이트 상태 */}
               {updatingPrices && (
@@ -393,11 +489,23 @@ export default function MyPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
                   <div className="text-center">
                     <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">전체 평균</div>
-                    <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 dark:text-red-400">+{avgReturnRate}%</div>
+                    <div className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                      parseFloat(avgReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
+                      parseFloat(avgReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
+                      'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">최고 수익률</div>
-                    <div className="text-lg sm:text-xl lg:text-2xl font-bold text-red-600 dark:text-red-400">+{maxReturnRate}%</div>
+                    <div className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                      parseFloat(maxReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
+                      parseFloat(maxReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
+                      'text-gray-600 dark:text-gray-400'
+                    }`}>
+                      {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">승률</div>
@@ -471,6 +579,114 @@ export default function MyPage() {
             </Card>
           )}
         </div>
+      </div>
+
+      {/* 모바일: Tab Navigation */}
+      <div className="lg:hidden mb-4">
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+          <button
+            onClick={() => setActiveTab('reports')}
+            className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${
+              activeTab === 'reports'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            내 리포트
+          </button>
+          <button
+            onClick={() => setActiveTab('bookmarks')}
+            className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${
+              activeTab === 'bookmarks'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            북마크
+          </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-4 py-2 rounded-lg font-semibold text-sm whitespace-nowrap ${
+              activeTab === 'settings'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+            }`}
+          >
+            설정
+          </button>
+        </div>
+
+        {/* 모바일 Tab Content */}
+        {activeTab === 'reports' && (
+          <div>
+            {/* 실시간 업데이트 상태 */}
+            {updatingPrices && (
+              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
+                <span className="text-sm text-blue-900 dark:text-blue-100">실시간 주가 및 수익률 업데이트 중...</span>
+              </div>
+            )}
+
+            {/* Reports List */}
+            <div className="space-y-6">
+              {myReports.length > 0 ? (
+                myReports.map((report) => (
+                  <ReportCard key={report.id} {...report} />
+                ))
+              ) : (
+                <Card className="p-8 text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">아직 작성한 리포트가 없습니다.</p>
+                  <Link
+                    href="/write"
+                    className="inline-block px-5 py-2.5 text-sm bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                  >
+                    첫 리포트 작성하기
+                  </Link>
+                </Card>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'bookmarks' && (
+          <Card className="p-4">
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-600 dark:text-gray-400">북마크한 리포트가 없습니다.</p>
+            </div>
+          </Card>
+        )}
+
+        {activeTab === 'settings' && (
+          <Card className="p-4">
+            <h3 className="text-base font-bold text-gray-900 dark:text-white mb-4">계정 설정</h3>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-2">이메일</h4>
+                <p className="text-sm text-gray-600 dark:text-gray-400 break-all">{userEmail}</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-sm text-gray-900 dark:text-white mb-2">알림 설정</h4>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">새 댓글 알림</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">새 팔로워 알림</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="rounded" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">마케팅 이메일 수신</span>
+                  </label>
+                </div>
+              </div>
+              <div>
+                <Button variant="danger" className="text-sm">회원 탈퇴</Button>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       {/* 프로필 수정 모달 */}
