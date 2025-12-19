@@ -98,11 +98,11 @@ export default function Navbar() {
               href="/guru-tracker"
               className={`text-sm font-medium transition-colors ${
                 isActive('/guru-tracker')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  ? 'text-orange-600 dark:text-orange-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400'
               }`}
             >
-              구루 트래커
+              GURU
             </Link>
             <Link
               href="/word-watch"
@@ -303,11 +303,11 @@ export default function Navbar() {
                 onClick={closeMobileMenu}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/guru-tracker')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
-                구루 트래커
+                GURU
               </Link>
               <Link
                 href="/word-watch"

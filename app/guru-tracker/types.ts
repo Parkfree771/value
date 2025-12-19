@@ -71,8 +71,8 @@ export const GURU_LIST: GuruInfo[] = [
 export type DataType = 'PORTFOLIO' | 'MENTION';
 
 // PORTFOLIO일 때: "NEW BUY", "SOLD OUT", "ADD", "TRIM"
-// MENTION일 때: "BULLISH", "BEARISH", "WARNING", "OPINION"
-export type BadgeLabel = 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM' | 'BULLISH' | 'BEARISH' | 'WARNING' | 'OPINION';
+// MENTION일 때: "BULLISH", "BEARISH", "WARNING", "OPINION", "BUY", "SELL"
+export type BadgeLabel = 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM' | 'BULLISH' | 'BEARISH' | 'WARNING' | 'OPINION' | 'BUY' | 'SELL';
 
 export type BadgeIntensity = 'HIGH' | 'MEDIUM' | 'LOW';
 
@@ -95,6 +95,9 @@ export interface GuruTrackingEvent {
   data_type: DataType; // PORTFOLIO or MENTION
   event_date: string; // YYYY-MM-DD
   target_ticker: string | null; // 관련 종목 티커
+  company_name?: string; // 기업명
+  exchange?: string; // 상장 거래소 (NYSE, NASDAQ, etc.)
+  source_url?: string; // 출처 링크
   badge_info: BadgeInfo;
   title: string; // 클릭을 유도하는 매력적인 헤드라인
   summary: string; // 메인 리스트에 노출될 2줄 요약

@@ -1,13 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { GURU_LIST } from './types';
-import PortfolioTable from '@/components/PortfolioTable';
-import { GURU_PORTFOLIOS } from './portfolioData';
 
 export default function GuruTrackerPage() {
-  const [selectedGuru, setSelectedGuru] = useState<string | null>(null);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -71,14 +68,10 @@ export default function GuruTrackerPage() {
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {GURU_LIST.map((guru) => (
-            <button
+            <Link
               key={guru.name_en}
-              onClick={() => setSelectedGuru(selectedGuru === guru.name_kr ? null : guru.name_kr)}
-              className={`text-left p-5 sm:p-6 rounded-xl border-2 transition-all hover:shadow-lg ${
-                selectedGuru === guru.name_kr
-                  ? 'border-amber-600 bg-amber-50 dark:bg-amber-900/20 shadow-lg'
-                  : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-amber-400 dark:hover:border-amber-600'
-              }`}
+              href={`/portfolio/${guru.name_en.toLowerCase().replace(/\s+/g, '-')}`}
+              className="text-left p-5 sm:p-6 rounded-xl border-2 transition-all hover:shadow-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-amber-400 dark:hover:border-amber-600"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3 flex-1">
@@ -99,15 +92,6 @@ export default function GuruTrackerPage() {
                     </p>
                   </div>
                 </div>
-                {selectedGuru === guru.name_kr && (
-                  <div className="flex-shrink-0 ml-2">
-                    <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                  </div>
-                )}
               </div>
 
               <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-600">
@@ -126,58 +110,10 @@ export default function GuruTrackerPage() {
               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 {guru.catchphrase}
               </p>
-            </button>
+            </Link>
           ))}
         </div>
-
-        {selectedGuru && (
-          <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-lg">
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong className="text-amber-700 dark:text-amber-400">{selectedGuru}</strong>의 13F 공시 데이터를 표시합니다.
-              <button
-                onClick={() => setSelectedGuru(null)}
-                className="ml-3 text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 font-semibold underline"
-              >
-                전체 보기
-              </button>
-            </p>
-          </div>
-        )}
       </section>
-
-      {/* Portfolio Display */}
-      {selectedGuru ? (
-        (() => {
-          const guruInfo = GURU_LIST.find(g => g.name_kr === selectedGuru);
-          const portfolio = guruInfo ? GURU_PORTFOLIOS[guruInfo.name_en] : null;
-
-          if (portfolio) {
-            return <PortfolioTable portfolio={portfolio} />;
-          } else {
-            return (
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
-                <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  포트폴리오 데이터 준비중
-                </h3>
-                <p className="text-gray-500 dark:text-gray-400 text-sm">
-                  {selectedGuru}의 13F 공시 데이터를 곧 추가할 예정입니다.
-                </p>
-              </div>
-            );
-          }
-        })()
-      ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
-          <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-            구루를 선택해주세요
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            위에서 투자 거장을 선택하면 해당 구루의 13F 포트폴리오를 확인할 수 있습니다.
-          </p>
-        </div>
-      )}
 
       {/* 면책 조항 */}
       <section className="mt-12 p-6 sm:p-8 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 border-l-4 border-amber-600 dark:border-amber-500 rounded-r-lg shadow-lg">

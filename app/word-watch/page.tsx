@@ -82,6 +82,7 @@ export default function WordWatchPage() {
               <option value="스탠리 드러켄밀러">스탠리 드러켄밀러</option>
               <option value="캐시 우드">캐시 우드</option>
               <option value="리 루">리 루</option>
+              <option value="데이비드 스워츠">데이비드 스워츠</option>
             </select>
             <select
               value={selectedOpinion}
