@@ -95,6 +95,26 @@ export default function Navbar() {
               랭킹
             </Link>
             <Link
+              href="/guru-tracker"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/guru-tracker')
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+              }`}
+            >
+              구루 트래커
+            </Link>
+            <Link
+              href="/word-watch"
+              className={`text-sm font-medium transition-colors ${
+                isActive('/word-watch')
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+              }`}
+            >
+              워드 워치
+            </Link>
+            <Link
               href="/write"
               onClick={handleWriteClick}
               className={`text-sm font-medium transition-colors ${
@@ -277,6 +297,28 @@ export default function Navbar() {
                 }`}
               >
                 랭킹
+              </Link>
+              <Link
+                href="/guru-tracker"
+                onClick={closeMobileMenu}
+                className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                  isActive('/guru-tracker')
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                구루 트래커
+              </Link>
+              <Link
+                href="/word-watch"
+                onClick={closeMobileMenu}
+                className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
+                  isActive('/word-watch')
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                워드 워치
               </Link>
               <Link
                 href="/write"
