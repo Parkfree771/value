@@ -15,7 +15,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Warren Buffett',
     filing_name: 'Berkshire Hathaway',
     style: '정통 가치투자',
-    catchphrase: '설명이 필요 없는 투자의 신, 자본주의의 역사.',
+    catchphrase: '살아있는 자본주의의 역사. 시간이 증명한 가치 투자의 영원한 아이콘.',
     image_filename: 'buffett.webp'
   },
   {
@@ -23,7 +23,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Stanley Druckenmiller',
     filing_name: 'Duquesne Family Office',
     style: '공격적 성장/매크로',
-    catchphrase: '30년간 무패 신화, 시장의 주도주를 가장 빨리 낚아채는 승부사.',
+    catchphrase: '30년 무패의 신화. 거시 경제의 흐름을 읽고 주도주를 선점하는 승부사.',
     image_filename: 'Druckenmiller.webp'
   },
   {
@@ -31,7 +31,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Bill Ackman',
     filing_name: 'Pershing Square Capital',
     style: '집중 투자',
-    catchphrase: '확신이 없다면 사지 않는다. 단 8~10개 종목에 인생을 거는 전략.',
+    catchphrase: '확신이 없다면 배팅하지 않는다. 소수 정예 종목에 집중하는 행동주의 거물.',
     image_filename: 'ackman.webp'
   },
   {
@@ -39,7 +39,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Li Lu',
     filing_name: 'Himalaya Capital',
     style: '글로벌 가치투자',
-    catchphrase: '찰리 멍거가 유일하게 돈을 맡긴 남자, 버핏의 투자 철학을 잇는 후계자.',
+    catchphrase: '찰리 멍거가 인정한 유일한 파트너. 동서양을 잇는 현대적 가치 투자의 정석.',
     image_filename: 'riru.png'
   },
   {
@@ -47,7 +47,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Seth Klarman',
     filing_name: 'The Baupost Group',
     style: '절대 안전마진',
-    catchphrase: '잃지 않는 것이 버는 것이다. 극도로 보수적인 저평가 사냥꾼.',
+    catchphrase: '잃지 않는 투자의 미학. 남들이 외면한 저평가 자산을 찾는 안전마진의 대가.',
     image_filename: 'ses.jpg'
   },
   {
@@ -55,7 +55,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Howard Marks',
     filing_name: 'Oaktree Capital',
     style: '심층 가치/부실채권',
-    catchphrase: '시장의 사이클을 읽는 현자. 남들이 공포에 떨 때 기회를 줍는다.',
+    catchphrase: '시장의 사이클을 지배하는 현자. 2차적 사고(Second-level thinking)로 리스크를 제어한다.',
     image_filename: 'max.jpg'
   },
   {
@@ -63,7 +63,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_en: 'Ray Dalio',
     filing_name: 'Bridgewater Associates',
     style: '자산 배분',
-    catchphrase: '경제의 사계절을 대비한다. 어떤 위기에도 무너지지 않는 올웨더 전략.',
+    catchphrase: '경제라는 기계를 해부하다. 어떤 위기에도 무너지지 않는 \'올웨더\' 원칙주의자.',
     image_filename: 'rai.webp'
   },
 ];

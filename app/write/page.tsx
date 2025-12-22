@@ -541,7 +541,6 @@ export default function WritePage() {
                 rows={20}
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm whitespace-pre-wrap"
                 placeholder="리포트 본문을 입력하세요...&#10;&#10;줄바꿈과 띄어쓰기가 그대로 유지됩니다."
-                style={{ fontFamily: 'inherit' }}
               />
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 작성한 텍스트가 줄바꿈과 띄어쓰기를 포함하여 그대로 표시됩니다.

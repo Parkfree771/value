@@ -52,9 +52,11 @@ export default function GuruTrackerPage() {
 
             <div className="mt-5 sm:mt-7 pt-4 sm:pt-5 border-t border-amber-600/30">
               <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light">
-                이곳에서는 구루들의 <strong className="text-white font-semibold">말(Mention)</strong>과 <strong className="text-white font-semibold">지갑(Portfolio)</strong>을 추적하여,
-                그들이 시장을 어떻게 예측했는지, 실제로는 어떤 종목을 샀는지 데이터를 통해 검증하고
-                <strong className="text-amber-300 font-semibold"> "만약 그때 그들을 따라 했다면?"</strong>이라는 가정의 수익률을 추적합니다.
+                구루들의 13F 공시가 발표된 당일, 그들과 똑같이 매수했다면 내 계좌는 어떻게 변했을까요?<br className="hidden sm:block" />
+                이곳에서는 <strong className="text-amber-300 font-semibold">'만약 그때 그들을 따라 했다면?'</strong>이라는 가정을 실제 데이터로 추적하여, 그 결과값을 있는 그대로 보여드립니다.
+              </p>
+              <p className="text-xs sm:text-sm text-gray-300 leading-relaxed font-light mt-3">
+                비록 실제 매매와 공시 사이에는 최대 135일의 시차가 존재하지만, 그럼에도 불구하고 시장을 꿰뚫는 그들의 지혜와 통찰은 여전히 우리에게 훌륭한 길잡이가 되어줄 것입니다.
               </p>
             </div>
           </div>

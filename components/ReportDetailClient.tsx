@@ -313,7 +313,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
             {/* 텍스트 모드로 작성된 리포트 */}
             {(!report.mode || report.mode === 'text') && (
-              <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed whitespace-pre-wrap break-words">
+              <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-gray-300">
                 {report.content}
               </div>
             )}
