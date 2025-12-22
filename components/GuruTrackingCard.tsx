@@ -12,16 +12,55 @@ export default function GuruTrackingCard({ event }: GuruTrackingCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   // 실시간 주식 가격 가져오기
-  const { currentPrice, returnRate, loading: priceLoading, lastUpdated } = useStockPrice(
+  const { currentPrice, currency, returnRate, loading: priceLoading, lastUpdated } = useStockPrice(
     event.target_ticker ?? undefined,
     event.base_price,
     event.tracking_data.action_direction,
     60000 // 1분마다 갱신
   );
 
+  // 거래소나 티커 기반으로 통화 추론
+  const inferCurrencyFromExchange = (exchange?: string, ticker?: string): string => {
+    // 거래소 기반 추론
+    if (exchange) {
+      const exchangeUpper = exchange.toUpperCase();
+      if (exchangeUpper.includes('TSE') || exchangeUpper.includes('TOKYO')) return 'JPY';
+      if (exchangeUpper.includes('KRX') || exchangeUpper.includes('KOREA') || exchangeUpper.includes('KOSPI') || exchangeUpper.includes('KOSDAQ')) return 'KRW';
+      if (exchangeUpper.includes('NYSE') || exchangeUpper.includes('NASDAQ') || exchangeUpper.includes('AMEX')) return 'USD';
+      if (exchangeUpper.includes('LSE') || exchangeUpper.includes('LONDON')) return 'GBP';
+      if (exchangeUpper.includes('SSE') || exchangeUpper.includes('SHANGHAI') || exchangeUpper.includes('SHENZHEN')) return 'CNY';
+    }
+
+    // 티커 suffix 기반 추론
+    if (ticker) {
+      if (ticker.endsWith('.T')) return 'JPY';
+      if (ticker.endsWith('.KS') || ticker.endsWith('.KQ')) return 'KRW';
+      if (ticker.endsWith('.L')) return 'GBP';
+      if (ticker.endsWith('.SS') || ticker.endsWith('.SZ')) return 'CNY';
+    }
+
+    return 'USD'; // 기본값
+  };
+
   // 실시간 가격이 있으면 사용, 없으면 기존 가격 사용
   const displayPrice = currentPrice ?? event.current_price;
   const displayReturnRate = returnRate ?? event.return_rate;
+  const displayCurrency = currency ?? inferCurrencyFromExchange(event.exchange, event.target_ticker ?? undefined);
+
+  // 통화 기호 가져오기
+  const getCurrencySymbol = (curr: string) => {
+    switch (curr.toUpperCase()) {
+      case 'USD': return '$';
+      case 'JPY': return '¥';
+      case 'KRW': return '₩';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'CNY': return '¥';
+      default: return '$';
+    }
+  };
+
+  const currencySymbol = getCurrencySymbol(displayCurrency);
 
   const getBadgeStyles = (label: BadgeLabel, intensity: string) => {
     const baseStyles = 'px-3 py-1 rounded-full text-xs font-bold uppercase';
@@ -153,22 +192,22 @@ export default function GuruTrackingCard({ event }: GuruTrackingCardProps) {
 
           {/* Middle: Stock Info */}
           {event.target_ticker && (
-            <div className="px-4 py-3 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 border border-cyan-500/20 rounded-lg flex-shrink-0 h-[86px] flex items-center">
-              <div className="grid grid-cols-3 gap-6 text-xs w-[240px]">
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400 mb-1.5">Company</div>
+            <div className="px-4 py-3 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 border border-cyan-500/20 rounded-lg flex-shrink-0 h-[90px] flex items-center">
+              <div className="flex gap-3 text-xs w-[280px]">
+                <div className="w-[100px]">
+                  <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Company</div>
                   <div className="font-semibold text-gray-900 dark:text-white text-sm leading-tight">
                     Nike, Inc.
                   </div>
                 </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400 mb-1.5">Ticker</div>
+                <div className="w-[70px]">
+                  <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Ticker</div>
                   <div className="font-mono font-bold text-cyan-700 dark:text-cyan-300 text-sm">
                     {event.target_ticker}
                   </div>
                 </div>
-                <div>
-                  <div className="text-gray-500 dark:text-gray-400 mb-1.5">Exchange</div>
+                <div className="w-[80px]">
+                  <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Exchange</div>
                   <div className="font-semibold text-gray-900 dark:text-white text-sm">
                     {event.exchange || '-'}
                   </div>
@@ -179,9 +218,9 @@ export default function GuruTrackingCard({ event }: GuruTrackingCardProps) {
 
           {/* Right: Return Rate */}
           {displayReturnRate !== undefined && (
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-lg px-4 py-3 text-center border border-gray-200 dark:border-gray-600 flex-shrink-0 w-[145px] h-[86px] flex flex-col justify-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center justify-center gap-1">
-                언급 후 수익률
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-lg px-4 py-3 text-center border border-gray-200 dark:border-gray-600 flex-shrink-0 w-[160px] h-[90px] flex flex-col justify-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center justify-center gap-1.5 leading-tight whitespace-nowrap">
+                수익률
                 {priceLoading && <span className="text-yellow-500 animate-spin">⟳</span>}
               </div>
               <div className={`text-2xl font-black mb-1 ${
@@ -192,22 +231,22 @@ export default function GuruTrackingCard({ event }: GuruTrackingCardProps) {
                 {displayReturnRate >= 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
               </div>
               {event.base_price && displayPrice && (
-                <div className="text-xs text-gray-600 dark:text-gray-400 font-mono">
-                  ${event.base_price.toFixed(2)} → ${displayPrice.toFixed(2)}
+                <div className="text-xs text-gray-600 dark:text-gray-400 font-mono leading-tight">
+                  {currencySymbol}{event.base_price.toFixed(2)} → {currencySymbol}{displayPrice.toFixed(2)}
                 </div>
               )}
             </div>
           )}
 
           {/* Far Right: Price Update Time */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-lg px-4 py-3 text-center border border-gray-200 dark:border-gray-600 flex-shrink-0 w-[110px] h-[86px] flex flex-col justify-center">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">가격 갱신</div>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-lg px-4 py-3 text-center border border-gray-200 dark:border-gray-600 flex-shrink-0 w-[120px] h-[90px] flex flex-col justify-center">
+            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 leading-tight whitespace-nowrap">가격갱신</div>
             {lastUpdated ? (
               <>
-                <div className="text-sm font-bold text-gray-900 dark:text-white">
+                <div className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
                   {lastUpdated.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
                 </div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-tight">
                   {lastUpdated.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </>

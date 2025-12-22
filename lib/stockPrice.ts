@@ -10,6 +10,12 @@ export interface StockQuote {
   regularMarketChangePercent?: number;
 }
 
+export interface HistoricalPrice {
+  date: string;
+  close: number;
+  symbol: string;
+}
+
 /**
  * Yahoo Finance API를 사용하여 실시간 주가 정보를 가져옵니다.
  * @param ticker 주식 티커 심볼 (예: 'AAPL', '005930.KS')
@@ -194,4 +200,66 @@ export function getReturnRateBackground(returnRate: number): string {
 export function formatReturnRate(returnRate: number): string {
   const sign = returnRate > 0 ? '+' : '';
   return `${sign}${returnRate.toFixed(2)}%`;
+}
+
+/**
+ * 특정 날짜의 주식 종가를 가져옵니다.
+ * @param ticker 주식 티커 심볼 (예: 'AAPL')
+ * @param date 조회할 날짜 (YYYY-MM-DD 형식)
+ * @returns 해당 날짜의 종가 정보
+ */
+export async function getHistoricalPrice(
+  ticker: string,
+  date: string
+): Promise<HistoricalPrice | null> {
+  try {
+    console.log(`[HistoricalPrice] 과거 주가 조회 시작: ${ticker} at ${date}`);
+
+    // 날짜를 Date 객체로 변환
+    const targetDate = new Date(date);
+    const startDate = new Date(targetDate);
+    startDate.setDate(startDate.getDate() - 5); // 5일 전부터 조회 (주말/공휴일 대비)
+    const endDate = new Date(targetDate);
+    endDate.setDate(endDate.getDate() + 5); // 5일 후까지 조회
+
+    console.log(`[HistoricalPrice] Yahoo Finance API 호출: ${ticker} from ${startDate.toISOString()} to ${endDate.toISOString()}`);
+
+    const queryOptions = {
+      period1: startDate,
+      period2: endDate,
+      interval: '1d' as const,
+    };
+
+    const result = await yahooFinance.historical(ticker, queryOptions);
+
+    if (!result || result.length === 0) {
+      console.error(`[HistoricalPrice] 데이터 없음: ${ticker} at ${date}`);
+      return null;
+    }
+
+    // 목표 날짜에 가장 가까운 데이터 찾기
+    const targetTime = targetDate.getTime();
+    let closestData = result[0];
+    let minDiff = Math.abs(closestData.date.getTime() - targetTime);
+
+    for (const data of result) {
+      const diff = Math.abs(data.date.getTime() - targetTime);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closestData = data;
+      }
+    }
+
+    const historicalPrice: HistoricalPrice = {
+      date: closestData.date.toISOString().split('T')[0],
+      close: closestData.close,
+      symbol: ticker,
+    };
+
+    console.log(`[HistoricalPrice] 조회 성공:`, historicalPrice);
+    return historicalPrice;
+  } catch (error) {
+    console.error(`[HistoricalPrice] 조회 실패 (${ticker} at ${date}):`, error);
+    return null;
+  }
 }

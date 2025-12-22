@@ -25,11 +25,61 @@ interface RankingReportCardProps {
     likes: number;
     daysElapsed: number;
     priceHistory: PriceHistoryItem[];
+    category?: string;
+    stockData?: {
+      currency?: string;
+      [key: string]: any;
+    };
   };
   rank: number;
 }
 
 export default function RankingReportCard({ report, rank }: RankingReportCardProps) {
+
+  // 통화 추론 함수
+  const inferCurrency = (): string => {
+    // stockData에 currency가 있으면 사용
+    if (report.stockData?.currency) {
+      return report.stockData.currency;
+    }
+
+    // category 기반 추론
+    if (report.category) {
+      const categoryUpper = report.category.toUpperCase();
+      if (categoryUpper.includes('KOSPI') || categoryUpper.includes('KOSDAQ')) return 'KRW';
+      if (categoryUpper.includes('NIKKEI')) return 'JPY';
+      if (categoryUpper.includes('NYSE') || categoryUpper.includes('NASDAQ')) return 'USD';
+      if (categoryUpper.includes('HANGSENG')) return 'HKD';
+    }
+
+    // 티커 suffix 기반 추론
+    if (report.ticker) {
+      if (report.ticker.endsWith('.T')) return 'JPY';
+      if (report.ticker.endsWith('.KS') || report.ticker.endsWith('.KQ')) return 'KRW';
+      if (report.ticker.endsWith('.L')) return 'GBP';
+      if (report.ticker.endsWith('.HK')) return 'HKD';
+      if (report.ticker.endsWith('.SS') || report.ticker.endsWith('.SZ')) return 'CNY';
+    }
+
+    return 'USD'; // 기본값
+  };
+
+  // 통화 기호 가져오기
+  const getCurrencySymbol = (curr: string): string => {
+    switch (curr.toUpperCase()) {
+      case 'USD': return '$';
+      case 'JPY': return '¥';
+      case 'KRW': return '₩';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'CNY': case 'CNH': return '¥';
+      case 'HKD': return 'HK$';
+      default: return '$';
+    }
+  };
+
+  const currency = inferCurrency();
+  const currencySymbol = getCurrencySymbol(currency);
 
   const getRankBadge = () => {
     if (rank === 1) {
@@ -140,7 +190,7 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
               <div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 block mb-0.5">작성시 주가</span>
                 <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
-                  {report.initialPrice.toLocaleString()}원
+                  {currencySymbol}{report.initialPrice.toLocaleString()}
                 </span>
               </div>
               <div>
@@ -150,7 +200,7 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
                   'text-gray-900 dark:text-white'
                 }`}>
-                  {report.currentPrice.toLocaleString()}원
+                  {currencySymbol}{report.currentPrice.toLocaleString()}
                 </span>
               </div>
               <div>
@@ -160,7 +210,7 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
                   'text-gray-600 dark:text-gray-400'
                 }`}>
-                  {report.returnRate >= 0 ? '+' : ''}{(report.currentPrice - report.initialPrice).toLocaleString()}원
+                  {report.returnRate >= 0 ? '+' : ''}{currencySymbol}{Math.abs(report.currentPrice - report.initialPrice).toLocaleString()}
                 </span>
               </div>
             </div>

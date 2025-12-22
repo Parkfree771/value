@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 interface StockPriceData {
   currentPrice: number | null;
+  currency: string | null;
   loading: boolean;
   error: string | null;
   lastUpdated: Date | null;
@@ -21,6 +22,7 @@ export function useStockPrice(
   refreshInterval: number = 60000
 ): StockPriceData & { returnRate: number | null } {
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [currency, setCurrency] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -47,6 +49,7 @@ export function useStockPrice(
 
         if (data.price) {
           setCurrentPrice(data.price);
+          setCurrency(data.currency || 'USD');
           setLastUpdated(new Date());
         } else {
           throw new Error('가격 데이터를 찾을 수 없습니다');
@@ -85,6 +88,7 @@ export function useStockPrice(
 
   return {
     currentPrice,
+    currency,
     loading,
     error,
     lastUpdated,

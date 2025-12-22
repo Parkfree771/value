@@ -35,11 +35,14 @@ export async function GET(request: NextRequest) {
     console.log(`Raw API response for ${ticker}:`, JSON.stringify(data, null, 2));
 
     if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
-      const price = data.chart.result[0].meta.regularMarketPrice;
-      console.log(`Successfully fetched price for ${ticker}: $${price}`);
+      const meta = data.chart.result[0].meta;
+      const price = meta.regularMarketPrice;
+      const currency = meta.currency || 'USD';
+      console.log(`Successfully fetched price for ${ticker}: ${price} ${currency}`);
 
       return NextResponse.json({
         price,
+        currency,
         ticker,
         timestamp: new Date().toISOString(),
       });

@@ -3,8 +3,8 @@ import { GuruPortfolio } from './types';
 export const BUFFETT_PORTFOLIO: GuruPortfolio = {
   guruNameEn: 'Warren Buffett',
   guruNameKr: '워렌 버핏',
-  reportDate: '2024-12-31',
-  filingDate: '2025-02-14',
+  reportDate: '2025-09-30',
+  filingDate: '2025-11-14',
   totalValue: 267200000000, // $267.2B
   holdings: [
     {
@@ -13,12 +13,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 22.69,
       recentActivity: 'Reduce 14.92%',
       shares: 238212764,
-      reportedPrice: 254.63,
       value: 60656116000,
-      currentPrice: 272.19,
-      changeFromReported: 6.90,
       week52Low: 168.63,
-      week52High: 288.62
+      week52High: 288.62,
     },
     {
       ticker: 'AXP',
@@ -26,12 +23,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 18.84,
       recentActivity: '',
       shares: 151610700,
-      reportedPrice: 332.16,
       value: 50359011000,
-      currentPrice: 375.52,
-      changeFromReported: 13.05,
       week52Low: 219.32,
-      week52High: 387.49
+      week52High: 387.49,
     },
     {
       ticker: 'BAC',
@@ -39,12 +33,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 10.96,
       recentActivity: 'Reduce 6.15%',
       shares: 568070012,
-      reportedPrice: 51.59,
       value: 29306732000,
-      currentPrice: 54.26,
-      changeFromReported: 5.18,
       week52Low: 32.52,
-      week52High: 56.07
+      week52High: 56.07,
     },
     {
       ticker: 'KO',
@@ -52,12 +43,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 9.92,
       recentActivity: '',
       shares: 400000000,
-      reportedPrice: 66.32,
       value: 26528000000,
-      currentPrice: 70.36,
-      changeFromReported: 6.09,
       week52Low: 58.88,
-      week52High: 72.91
+      week52High: 72.91,
     },
     {
       ticker: 'CVX',
@@ -65,12 +53,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 7.09,
       recentActivity: '',
       shares: 122064792,
-      reportedPrice: 155.29,
       value: 18955442000,
-      currentPrice: 147.69,
-      changeFromReported: -4.89,
       week52Low: 127.59,
-      week52High: 163.27
+      week52High: 163.27,
     },
     {
       ticker: 'OXY',
@@ -78,12 +63,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 4.68,
       recentActivity: '',
       shares: 264941431,
-      reportedPrice: 47.25,
       value: 12518483000,
-      currentPrice: 39.73,
-      changeFromReported: -15.92,
       week52Low: 34.21,
-      week52High: 52.05
+      week52High: 52.05,
     },
     {
       ticker: 'MCO',
@@ -91,12 +73,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 4.40,
       recentActivity: '',
       shares: 24669778,
-      reportedPrice: 476.48,
       value: 11754655000,
-      currentPrice: 497.69,
-      changeFromReported: 4.45,
       week52Low: 376.55,
-      week52High: 527.90
+      week52High: 527.90,
     },
     {
       ticker: 'CB',
@@ -104,12 +83,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 3.31,
       recentActivity: 'Add 15.90%',
       shares: 31332895,
-      reportedPrice: 282.25,
       value: 8843710000,
-      currentPrice: 310.96,
-      changeFromReported: 10.17,
       week52Low: 248.87,
-      week52High: 313.46
+      week52High: 313.46,
     },
     {
       ticker: 'KHC',
@@ -117,12 +93,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 3.17,
       recentActivity: '',
       shares: 325634818,
-      reportedPrice: 26.04,
       value: 8479531000,
-      currentPrice: 24.75,
-      changeFromReported: -4.95,
       week52Low: 23.33,
-      week52High: 31.87
+      week52High: 31.87,
     },
     {
       ticker: 'GOOGL',
@@ -130,12 +103,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 1.62,
       recentActivity: 'Buy',
       shares: 17846142,
-      reportedPrice: 243.10,
       value: 4338397000,
-      currentPrice: 302.46,
-      changeFromReported: 24.42,
       week52Low: 140.14,
-      week52High: 328.62
+      week52High: 328.62,
     },
     {
       ticker: 'DVA',
@@ -143,12 +113,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 1.60,
       recentActivity: 'Reduce 4.84%',
       shares: 32160579,
-      reportedPrice: 132.87,
       value: 4273177000,
-      currentPrice: 116.15,
-      changeFromReported: -12.58,
       week52Low: 113.97,
-      week52High: 179.60
+      week52High: 179.60,
     },
     {
       ticker: 'KR',
@@ -156,12 +123,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 1.26,
       recentActivity: '',
       shares: 50000000,
-      reportedPrice: 67.41,
       value: 3370500000,
-      currentPrice: 62.79,
-      changeFromReported: -6.85,
       week52Low: 56.96,
-      week52High: 74.13
+      week52High: 74.13,
     },
     {
       ticker: 'SIRI',
@@ -169,12 +133,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 1.09,
       recentActivity: 'Add 4.20%',
       shares: 124807117,
-      reportedPrice: 23.27,
       value: 2904885000,
-      currentPrice: 21.23,
-      changeFromReported: -8.77,
       week52Low: 18.00,
-      week52High: 26.40
+      week52High: 26.40,
     },
     {
       ticker: 'V',
@@ -182,12 +143,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 1.06,
       recentActivity: '',
       shares: 8297460,
-      reportedPrice: 341.38,
       value: 2832587000,
-      currentPrice: 346.01,
-      changeFromReported: 1.36,
       week52Low: 297.39,
-      week52High: 374.11
+      week52High: 374.11,
     },
     {
       ticker: 'VRSN',
@@ -195,12 +153,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.94,
       recentActivity: 'Reduce 32.36%',
       shares: 8989880,
-      reportedPrice: 279.57,
       value: 2513301000,
-      currentPrice: 244.39,
-      changeFromReported: -12.58,
-      week52Low: 189.47,
-      week52High: 308.75
+      week52Low: 192.27,
+      week52High: 308.75,
     },
     {
       ticker: 'MA',
@@ -208,12 +163,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.85,
       recentActivity: '',
       shares: 3986648,
-      reportedPrice: 568.81,
       value: 2267645000,
-      currentPrice: 566.21,
-      changeFromReported: -0.46,
       week52Low: 463.61,
-      week52High: 600.98
+      week52High: 600.98,
     },
     {
       ticker: 'AMZN',
@@ -221,12 +173,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.82,
       recentActivity: '',
       shares: 10000000,
-      reportedPrice: 219.57,
       value: 2195700000,
-      currentPrice: 226.76,
-      changeFromReported: 3.27,
       week52Low: 161.38,
-      week52High: 258.60
+      week52High: 258.60,
     },
     {
       ticker: 'STZ',
@@ -234,12 +183,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.68,
       recentActivity: '',
       shares: 13400000,
-      reportedPrice: 134.67,
       value: 1804578000,
-      currentPrice: 136.81,
-      changeFromReported: 1.59,
       week52Low: 126.45,
-      week52High: 226.12
+      week52High: 223.40,
     },
     {
       ticker: 'UNH',
@@ -247,12 +193,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.65,
       recentActivity: '',
       shares: 5039564,
-      reportedPrice: 345.30,
       value: 1740161000,
-      currentPrice: 328.14,
-      changeFromReported: -4.97,
       week52Low: 231.57,
-      week52High: 594.32
+      week52High: 594.32,
     },
     {
       ticker: 'COF',
@@ -260,12 +203,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.57,
       recentActivity: '',
       shares: 7150000,
-      reportedPrice: 212.58,
       value: 1519947000,
-      currentPrice: 242.80,
-      changeFromReported: 14.22,
       week52Low: 141.84,
-      week52High: 244.82
+      week52High: 244.82,
     },
     {
       ticker: 'AON',
@@ -273,12 +213,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.55,
       recentActivity: '',
       shares: 4100000,
-      reportedPrice: 356.58,
       value: 1461977000,
-      currentPrice: 353.02,
-      changeFromReported: -1.00,
       week52Low: 321.67,
-      week52High: 410.34
+      week52High: 410.34,
     },
     {
       ticker: 'DPZ',
@@ -286,12 +223,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.48,
       recentActivity: 'Add 13.22%',
       shares: 2981945,
-      reportedPrice: 431.71,
       value: 1287335000,
-      currentPrice: 431.37,
-      changeFromReported: -0.08,
       week52Low: 390.88,
-      week52High: 493.24
+      week52High: 493.24,
     },
     {
       ticker: 'ALLY',
@@ -299,12 +233,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.43,
       recentActivity: '',
       shares: 29000000,
-      reportedPrice: 39.20,
       value: 1136799000,
-      currentPrice: 45.44,
-      changeFromReported: 15.92,
       week52Low: 28.79,
-      week52High: 46.24
+      week52High: 46.24,
     },
     {
       ticker: 'LLYVK',
@@ -312,12 +243,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.40,
       recentActivity: '',
       shares: 10917661,
-      reportedPrice: 96.97,
       value: 1058685000,
-      currentPrice: 84.47,
-      changeFromReported: -12.89,
       week52Low: 80.56,
-      week52High: 86.08
+      week52High: 86.08,
     },
     {
       ticker: 'POOL',
@@ -325,12 +253,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.40,
       recentActivity: '',
       shares: 3458885,
-      reportedPrice: 310.07,
       value: 1072496000,
-      currentPrice: 236.36,
-      changeFromReported: -23.77,
       week52Low: 229.63,
-      week52High: 368.69
+      week52High: 368.69,
     },
     {
       ticker: 'LEN',
@@ -338,12 +263,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.33,
       recentActivity: 'Add 0.03%',
       shares: 7050950,
-      reportedPrice: 126.04,
       value: 888702000,
-      currentPrice: 108.33,
-      changeFromReported: -14.05,
       week52Low: 97.13,
-      week52High: 143.62
+      week52High: 143.62,
     },
     {
       ticker: 'NUE',
@@ -351,12 +273,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.32,
       recentActivity: 'Reduce 3.12%',
       shares: 6407749,
-      reportedPrice: 135.43,
       value: 867801000,
-      currentPrice: 157.83,
-      changeFromReported: 16.54,
       week52Low: 96.79,
-      week52High: 168.07
+      week52High: 168.07,
     },
     {
       ticker: 'LPX',
@@ -364,12 +283,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.19,
       recentActivity: '',
       shares: 5664793,
-      reportedPrice: 88.84,
       value: 503260000,
-      currentPrice: 85.21,
-      changeFromReported: -4.09,
       week52Low: 73.42,
-      week52High: 118.45
+      week52High: 118.45,
     },
     {
       ticker: 'LLYVA',
@@ -377,12 +293,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.18,
       recentActivity: '',
       shares: 4986588,
-      reportedPrice: 94.30,
       value: 470235000,
-      currentPrice: 82.14,
-      changeFromReported: -12.90,
       week52Low: 79.37,
-      week52High: 83.60
+      week52High: 83.60,
     },
     {
       ticker: 'FWONK',
@@ -390,12 +303,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.12,
       recentActivity: '',
       shares: 3018555,
-      reportedPrice: 104.45,
       value: 315288000,
-      currentPrice: 96.08,
-      changeFromReported: -8.01,
       week52Low: 75.26,
-      week52High: 109.36
+      week52High: 109.36,
     },
     {
       ticker: 'HEI.A',
@@ -403,12 +313,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.12,
       recentActivity: '',
       shares: 1294612,
-      reportedPrice: 254.09,
       value: 328948000,
-      currentPrice: 240.94,
-      changeFromReported: -5.18,
       week52Low: 174.74,
-      week52High: 264.71
+      week52High: 264.71,
     },
     {
       ticker: 'CHTR',
@@ -416,12 +323,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.11,
       recentActivity: '',
       shares: 1060882,
-      reportedPrice: 275.11,
       value: 291854000,
-      currentPrice: 206.50,
-      changeFromReported: -24.94,
       week52Low: 193.00,
-      week52High: 437.06
+      week52High: 437.06,
     },
     {
       ticker: 'LAMR',
@@ -429,12 +333,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.06,
       recentActivity: 'Add 2.79%',
       shares: 1202110,
-      reportedPrice: 122.42,
       value: 147162000,
-      currentPrice: 128.91,
-      changeFromReported: 5.30,
       week52Low: 97.32,
-      week52High: 134.63
+      week52High: 134.63,
     },
     {
       ticker: 'ALLE',
@@ -442,12 +343,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.05,
       recentActivity: '',
       shares: 780133,
-      reportedPrice: 177.35,
       value: 138357000,
-      currentPrice: 159.92,
-      changeFromReported: -9.83,
       week52Low: 115.44,
-      week52High: 180.11
+      week52High: 180.11,
     },
     {
       ticker: 'NVR',
@@ -455,12 +353,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.03,
       recentActivity: '',
       shares: 11112,
-      reportedPrice: 8034.65,
       value: 89281000,
-      currentPrice: 7561.62,
-      changeFromReported: -5.89,
       week52Low: 6562.85,
-      week52High: 8618.28
+      week52High: 8618.28,
     },
     {
       ticker: 'DEO',
@@ -468,12 +363,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.01,
       recentActivity: '',
       shares: 227750,
-      reportedPrice: 95.43,
       value: 21734000,
-      currentPrice: 88.39,
-      changeFromReported: -7.38,
       week52Low: 85.13,
-      week52High: 122.78
+      week52High: 122.78,
     },
     {
       ticker: 'JEF',
@@ -481,12 +373,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.01,
       recentActivity: '',
       shares: 433558,
-      reportedPrice: 65.42,
       value: 28363000,
-      currentPrice: 61.90,
-      changeFromReported: -5.38,
       week52Low: 38.44,
-      week52High: 80.46
+      week52High: 80.46,
     },
     {
       ticker: 'LEN.B',
@@ -494,12 +383,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.01,
       recentActivity: 'Add 0.03%',
       shares: 180980,
-      reportedPrice: 119.99,
       value: 21716000,
-      currentPrice: 101.20,
-      changeFromReported: -15.66,
       week52Low: 92.79,
-      week52High: 136.77
+      week52High: 136.77,
     },
     {
       ticker: 'LILA',
@@ -507,12 +393,9 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.01,
       recentActivity: '',
       shares: 2630792,
-      reportedPrice: 8.29,
       value: 21809000,
-      currentPrice: 8.10,
-      changeFromReported: -2.29,
       week52Low: 4.25,
-      week52High: 9.04
+      week52High: 9.04,
     },
     {
       ticker: 'BATRK',
@@ -520,26 +403,20 @@ export const BUFFETT_PORTFOLIO: GuruPortfolio = {
       portfolioPercent: 0.00,
       recentActivity: '',
       shares: 223645,
-      reportedPrice: 41.59,
       value: 9302000,
-      currentPrice: 40.07,
-      changeFromReported: -3.65,
       week52Low: 35.46,
-      week52High: 47.18
+      week52High: 47.18,
     },
     {
       ticker: 'LILAK',
       companyName: 'Liberty LiLAC Group C',
       portfolioPercent: 0.00,
       recentActivity: '',
-      shares: 1284020,
-      reportedPrice: 8.44,
-      value: 10837000,
-      currentPrice: 8.16,
-      changeFromReported: -3.32,
-      week52Low: 4.23,
-      week52High: 9.13
-    }
+      shares: 23953,
+      value: 191000,
+      week52Low: 4.25,
+      week52High: 9.04,
+    },
   ]
 };
 

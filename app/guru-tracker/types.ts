@@ -122,12 +122,12 @@ export interface PortfolioHolding {
   portfolioPercent: number;
   recentActivity?: string;
   shares: number;
-  reportedPrice: number;
+  reportedPrice?: number; // 공시 당시 가격 (동적 로드)
   value: number;
-  currentPrice: number;
-  changeFromReported: number;
-  week52Low: number;
-  week52High: number;
+  currentPrice?: number; // 현재 가격 (동적 로드)
+  changeFromReported?: number; // 수익률 (동적 계산)
+  week52Low?: number;
+  week52High?: number;
 }
 
 export interface GuruPortfolio {

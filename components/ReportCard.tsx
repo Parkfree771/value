@@ -21,6 +21,11 @@ interface ReportCardProps {
   likes: number;
   showActions?: boolean; // 수정/삭제 버튼 표시 여부
   onDelete?: () => void; // 삭제 후 콜백
+  category?: string;
+  stockData?: {
+    currency?: string;
+    [key: string]: any;
+  };
 }
 
 export default function ReportCard({
@@ -38,10 +43,57 @@ export default function ReportCard({
   likes,
   showActions = false,
   onDelete,
+  category,
+  stockData,
 }: ReportCardProps) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   // API에서 이미 계산된 returnRate를 사용하므로 별도 계산 불필요
+
+  // 통화 추론 함수
+  const inferCurrency = (): string => {
+    // stockData에 currency가 있으면 사용
+    if (stockData?.currency) {
+      return stockData.currency;
+    }
+
+    // category 기반 추론
+    if (category) {
+      const categoryUpper = category.toUpperCase();
+      if (categoryUpper.includes('KOSPI') || categoryUpper.includes('KOSDAQ')) return 'KRW';
+      if (categoryUpper.includes('NIKKEI')) return 'JPY';
+      if (categoryUpper.includes('NYSE') || categoryUpper.includes('NASDAQ')) return 'USD';
+      if (categoryUpper.includes('HANGSENG')) return 'HKD';
+    }
+
+    // 티커 suffix 기반 추론
+    if (ticker) {
+      if (ticker.endsWith('.T')) return 'JPY';
+      if (ticker.endsWith('.KS') || ticker.endsWith('.KQ')) return 'KRW';
+      if (ticker.endsWith('.L')) return 'GBP';
+      if (ticker.endsWith('.HK')) return 'HKD';
+      if (ticker.endsWith('.SS') || ticker.endsWith('.SZ')) return 'CNY';
+    }
+
+    return 'USD'; // 기본값
+  };
+
+  // 통화 기호 가져오기
+  const getCurrencySymbol = (curr: string): string => {
+    switch (curr.toUpperCase()) {
+      case 'USD': return '$';
+      case 'JPY': return '¥';
+      case 'KRW': return '₩';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'CNY': case 'CNH': return '¥';
+      case 'HKD': return 'HK$';
+      default: return '$';
+    }
+  };
+
+  const currency = inferCurrency();
+  const currencySymbol = getCurrencySymbol(currency);
 
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -128,12 +180,12 @@ export default function ReportCard({
         <div className="grid grid-cols-2 sm:flex sm:gap-6 gap-2 mb-3 sm:mb-4 text-xs sm:text-sm">
           <div>
             <span className="text-gray-500 dark:text-gray-400 block sm:inline">작성시:</span>
-            <span className="ml-0 sm:ml-2 font-semibold text-gray-900 dark:text-white block sm:inline">{initialPrice.toLocaleString()}원</span>
+            <span className="ml-0 sm:ml-2 font-semibold text-gray-900 dark:text-white block sm:inline">{currencySymbol}{initialPrice.toLocaleString()}</span>
           </div>
           <div>
             <span className="text-gray-500 dark:text-gray-400 block sm:inline">현재:</span>
             <span className={`ml-0 sm:ml-2 font-semibold ${getReturnColorClass(returnRate)} block sm:inline`}>
-              {currentPrice.toLocaleString()}원
+              {currencySymbol}{currentPrice.toLocaleString()}
             </span>
           </div>
         </div>
