@@ -2,11 +2,15 @@
 
 import Script from 'next/script';
 
-// Google AdSense 설정
-// 실제 배포 시 환경변수로 관리하세요: process.env.NEXT_PUBLIC_ADSENSE_ID
-const ADSENSE_ID = 'ca-pub-XXXXXXXXXXXXXXXX'; // Google AdSense Publisher ID로 교체
+// Google AdSense 설정 - 환경변수에서 가져오기
+const ADSENSE_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export default function GoogleAdSense() {
+  // AdSense ID가 설정되지 않았으면 컴포넌트를 렌더링하지 않음
+  if (!ADSENSE_ID) {
+    return null;
+  }
+
   return (
     <Script
       async
@@ -26,6 +30,11 @@ interface AdUnitProps {
 }
 
 export function AdUnit({ slot, format = 'auto', responsive = true, style }: AdUnitProps) {
+  // AdSense ID가 설정되지 않았으면 컴포넌트를 렌더링하지 않음
+  if (!ADSENSE_ID) {
+    return null;
+  }
+
   return (
     <div style={style}>
       <ins

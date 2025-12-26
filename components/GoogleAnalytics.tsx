@@ -2,11 +2,15 @@
 
 import Script from 'next/script';
 
-// Google Analytics 설정
-// 실제 배포 시 환경변수로 관리하세요: process.env.NEXT_PUBLIC_GA_ID
-const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // Google Analytics Measurement ID로 교체
+// Google Analytics 설정 - 환경변수에서 가져오기
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export default function GoogleAnalytics() {
+  // GA ID가 설정되지 않았으면 컴포넌트를 렌더링하지 않음
+  if (!GA_MEASUREMENT_ID) {
+    return null;
+  }
+
   return (
     <>
       <Script

@@ -1,16 +1,51 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
 import GuruTrackingCard from '@/components/GuruTrackingCard';
 import { MOCK_GURU_EVENTS } from '@/app/guru-tracker/mockData';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function WordWatchPage() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [selectedGuru, setSelectedGuru] = useState('');
   const [selectedOpinion, setSelectedOpinion] = useState('');
   const [sortBy, setSortBy] = useState('newest');
+  const [firebaseEvents, setFirebaseEvents] = useState<GuruTrackingEvent[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mentionEvents = MOCK_GURU_EVENTS.filter(e => e.data_type === 'MENTION');
+  // Firebase에서 워드워치 데이터 가져오기
+  useEffect(() => {
+    const fetchWordWatch = async () => {
+      try {
+        const wordWatchRef = collection(db, 'word-watch');
+        const q = query(wordWatchRef, orderBy('created_at', 'desc'));
+        const querySnapshot = await getDocs(q);
+
+        const events: GuruTrackingEvent[] = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+          created_at: doc.data().created_at?.toDate()?.toISOString() || new Date().toISOString(),
+        } as GuruTrackingEvent));
+
+        setFirebaseEvents(events);
+      } catch (error) {
+        console.error('Error fetching word watch:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWordWatch();
+  }, []);
+
+  // Mock 데이터와 Firebase 데이터 합치기
+  const allEvents = [...firebaseEvents, ...MOCK_GURU_EVENTS.filter(e => e.data_type === 'MENTION')];
+  const mentionEvents = allEvents;
 
   // Apply filters
   const filteredEvents = mentionEvents
@@ -64,12 +99,27 @@ export default function WordWatchPage() {
       {/* Word Watch Content */}
       <div className="space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 tracking-wide">
-            SNS 발언 추적
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            시장 인플루언서들의 트위터, 인터뷰, 컨퍼런스 발언을 추적하고 그들의 예측이 맞았는지 검증합니다.
-          </p>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-wide">
+                SNS 발언 추적
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400 mt-2">
+                시장 인플루언서들의 트위터, 인터뷰, 컨퍼런스 발언을 추적하고 그들의 예측이 맞았는지 검증합니다.
+              </p>
+            </div>
+            {user && (
+              <button
+                onClick={() => router.push('/word-watch/write')}
+                className="px-6 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                작성하기
+              </button>
+            )}
+          </div>
 
           {/* 필터 */}
           <div className="mb-6 flex flex-wrap gap-3">
@@ -108,7 +158,14 @@ export default function WordWatchPage() {
 
         {/* Event Cards */}
         <div className="space-y-6">
-          {filteredEvents.length > 0 ? (
+          {loading ? (
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
+              <div className="flex justify-center items-center gap-3">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+                <span className="text-lg text-gray-600 dark:text-gray-400">데이터 로딩 중...</span>
+              </div>
+            </div>
+          ) : filteredEvents.length > 0 ? (
             filteredEvents.map(event => (
               <GuruTrackingCard key={event.id} event={event} />
             ))
@@ -125,6 +182,13 @@ export default function WordWatchPage() {
           )}
         </div>
       </div>
+
+      {/* Firebase 데이터 카운트 표시 (개발 확인용) */}
+      {!loading && firebaseEvents.length > 0 && (
+        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+          사용자 작성 글: {firebaseEvents.length}개 | Mock 데이터: {MOCK_GURU_EVENTS.filter(e => e.data_type === 'MENTION').length}개
+        </div>
+      )}
 
       {/* 면책 조항 */}
       <section className="mt-12 p-6 sm:p-8 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-l-4 border-cyan-600 dark:border-cyan-500 rounded-r-lg shadow-lg">

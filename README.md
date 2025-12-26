@@ -30,6 +30,38 @@
 
 ## 시작하기
 
+### 환경 변수 설정
+
+1. `.env.example` 파일을 복사하여 `.env` 파일을 생성합니다:
+
+```bash
+cp .env.example .env
+```
+
+2. `.env` 파일을 열어 실제 값을 입력합니다:
+
+```env
+# Firebase 설정
+NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
+
+# 사이트 URL
+NEXT_PUBLIC_SITE_URL=https://your-domain.com
+
+# Google Analytics (선택사항)
+NEXT_PUBLIC_GA_MEASUREMENT_ID=your-ga-id
+
+# Google AdSense (선택사항)
+# NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-xxxxxxxxxxxxxxxx
+```
+
+**중요**: `.env` 파일은 Git에 커밋되지 않습니다. 민감한 정보가 포함되어 있으므로 절대 공개 저장소에 업로드하지 마세요.
+
 ### 설치
 
 ```bash

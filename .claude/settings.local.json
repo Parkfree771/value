@@ -32,7 +32,10 @@
       "Bash(mkdir:*)",
       "Bash(timeout /t 5 /nobreak)",
       "Bash(npm uninstall:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(test:*)",
+      "Bash(cat:*)",
+      "Bash(npx firebase deploy:*)"
     ],
     "deny": [],
     "ask": []
