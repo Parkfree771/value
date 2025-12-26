@@ -31,11 +31,12 @@ export default function WordWatchWritePage() {
       await addDoc(wordWatchRef, {
         ...data,
         created_at: serverTimestamp(),
-        author_uid: user.uid,
+        author_id: user.uid,
         author_email: user.email,
+        author_nickname: user.displayName || user.email?.split('@')[0] || '익명',
       });
 
-      alert('워드워치가 성공적으로 작성되었습니다!');
+      alert('마켓 콜이 성공적으로 작성되었습니다!');
       router.push('/word-watch');
     } catch (error) {
       console.error('Error writing document: ', error);
@@ -67,10 +68,10 @@ export default function WordWatchWritePage() {
         {/* 헤더 */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            워드워치 작성
+            마켓 콜 작성
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            시장 인플루언서들의 발언을 기록하고 추적하세요
+            투자 전문가들의 시장 예측을 기록하고 검증하세요
           </p>
         </div>
 

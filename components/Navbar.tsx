@@ -112,7 +112,7 @@ export default function Navbar() {
                   : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
-              워드 워치
+              마켓 콜
             </Link>
             <Link
               href="/write"
@@ -318,7 +318,7 @@ export default function Navbar() {
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
-                워드 워치
+                마켓 콜
               </Link>
               <Link
                 href="/write"
