@@ -4,18 +4,18 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import WordWatchForm from '@/components/WordWatchForm';
+import MarketCallForm from '@/components/MarketCallForm';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
 import { useEffect } from 'react';
 
-export default function WordWatchWritePage() {
+export default function MarketCallWritePage() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
       alert('로그인이 필요합니다.');
-      router.push('/login?redirect=/word-watch/write');
+      router.push('/login?redirect=/market-call/write');
     }
   }, [user, loading, router]);
 
@@ -27,8 +27,8 @@ export default function WordWatchWritePage() {
 
     try {
       // Firebase에 저장
-      const wordWatchRef = collection(db, 'word-watch');
-      await addDoc(wordWatchRef, {
+      const marketCallRef = collection(db, 'market-call');
+      await addDoc(marketCallRef, {
         ...data,
         created_at: serverTimestamp(),
         author_id: user.uid,
@@ -37,7 +37,7 @@ export default function WordWatchWritePage() {
       });
 
       alert('마켓 콜이 성공적으로 작성되었습니다!');
-      router.push('/word-watch');
+      router.push('/market-call');
     } catch (error) {
       console.error('Error writing document: ', error);
       throw error;
@@ -45,7 +45,7 @@ export default function WordWatchWritePage() {
   };
 
   const handleCancel = () => {
-    router.push('/word-watch');
+    router.push('/market-call');
   };
 
   if (loading) {
@@ -76,7 +76,7 @@ export default function WordWatchWritePage() {
         </div>
 
         {/* 폼 */}
-        <WordWatchForm onSubmit={handleSubmit} onCancel={handleCancel} />
+        <MarketCallForm onSubmit={handleSubmit} onCancel={handleCancel} />
       </div>
     </div>
   );

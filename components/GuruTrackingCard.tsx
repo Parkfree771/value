@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface GuruTrackingCardProps {
   event: GuruTrackingEvent;
-  collection?: 'posts' | 'word-watch'; // 어느 컬렉션에서 온 데이터인지
+  collection?: 'posts' | 'market-call'; // 어느 컬렉션에서 온 데이터인지
 }
 
 export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTrackingCardProps) {
@@ -19,8 +19,8 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
   const isClosed = event.is_closed || false;
   const isOwner = user && event.author_id === user.uid;
 
-  // 워드워치는 수익 확정 버튼 표시 안 함
-  const showCloseButton = collection !== 'word-watch' && !isClosed && isOwner;
+  // 마켓콜은 수익 확정 버튼 표시 안 함
+  const showCloseButton = collection !== 'market-call' && !isClosed && isOwner;
 
   // 실시간 주식 가격 가져오기 (확정되지 않은 경우에만)
   const { currentPrice, currency, returnRate, loading: priceLoading, lastUpdated } = useStockPrice(

@@ -20,6 +20,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(report.likes || 0);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isClosed, setIsClosed] = useState(false);
 
   // 조회수 증가
   useEffect(() => {
@@ -35,6 +37,11 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
     incrementView();
   }, [report.id]);
+
+  // 수익 확정 상태 확인
+  useEffect(() => {
+    setIsClosed(report.is_closed || false);
+  }, [report.is_closed]);
 
   // 좋아요 상태 확인
   useEffect(() => {
@@ -138,6 +145,47 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     }
   };
 
+  // 수익 확정 처리
+  const handleClosePosition = async () => {
+    if (!user || !report.id || isClosing) return;
+
+    const confirmMessage = `현재 수익률 ${report.returnRate?.toFixed(2)}%로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.`;
+    if (!confirm(confirmMessage)) return;
+
+    setIsClosing(true);
+
+    try {
+      const response = await fetch('/api/close-position', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postId: report.id,
+          collection: 'posts',
+          userId: user.uid,
+          closedPrice: report.currentPrice,
+          closedReturnRate: report.returnRate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('수익이 확정되었습니다!');
+        // 페이지 새로고침하여 업데이트된 데이터 표시
+        window.location.reload();
+      } else {
+        alert(data.error || '수익 확정에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('수익 확정 오류:', error);
+      alert('수익 확정 중 오류가 발생했습니다.');
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
   // 현재 사용자가 작성자인지 확인
   const isAuthor = user && report.authorId === user.uid;
 
@@ -173,6 +221,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   </div>
                   {isAuthor ? (
                     <div className="flex gap-2">
+                      {!isClosed && (
+                        <button
+                          onClick={handleClosePosition}
+                          disabled={isClosing}
+                          className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                        >
+                          {isClosing ? '처리 중...' : '수익 확정하기'}
+                        </button>
+                      )}
                       <Button variant="outline" size="sm" onClick={handleEdit} className="flex-shrink-0">수정</Button>
                       <Button variant="outline" size="sm" onClick={handleDelete} className="flex-shrink-0 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">삭제</Button>
                     </div>
@@ -187,6 +244,17 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             <div className="lg:hidden mb-4 flex items-center justify-center gap-2 pb-4 border-b dark:border-gray-700">
               {isAuthor ? (
                 <>
+                  {!isClosed && (
+                    <button
+                      onClick={handleClosePosition}
+                      disabled={isClosing}
+                      className={`px-4 py-2 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm ${
+                        isClosing ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                    >
+                      {isClosing ? '처리 중...' : '수익 확정하기'}
+                    </button>
+                  )}
                   <button onClick={handleEdit} className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -240,10 +308,26 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   {getOpinionBadge()}
                 </div>
                 <div className="text-left sm:text-right">
-                  <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">리포트 수익률</div>
+                  <div className="text-xs sm:text-sm">
+                    {isClosed ? (
+                      <span className="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        수익 확정 완료
+                      </span>
+                    ) : (
+                      <span className="text-gray-600 dark:text-gray-400">리포트 수익률</span>
+                    )}
+                  </div>
                   <div className={`text-2xl sm:text-3xl font-bold ${getReturnRateColor()}`}>
                     {report.returnRate > 0 ? '+' : ''}{report.returnRate}%
                   </div>
+                  {isClosed && report.closed_at && (
+                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      {new Date(report.closed_at).toLocaleDateString('ko-KR')} 확정
+                    </div>
+                  )}
                 </div>
               </div>
 

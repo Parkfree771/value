@@ -78,10 +78,14 @@ async function getReportData(id: string): Promise<Report | null> {
       files: data.files || [],
       positionType: data.positionType || 'long',
       stockData: data.stockData || {},
+      is_closed: data.is_closed || false,
+      closed_at: data.closed_at,
+      closed_return_rate: data.closed_return_rate,
+      closed_price: data.closed_price,
     };
 
-    // 실시간 주가 및 수익률 업데이트
-    if (report.ticker && report.initialPrice) {
+    // 실시간 주가 및 수익률 업데이트 (확정되지 않은 경우에만)
+    if (!report.is_closed && report.ticker && report.initialPrice) {
       console.log(`[ReportPage] 수익률 업데이트 시도:`, {
         id: docSnap.id,
         ticker: report.ticker,
@@ -105,6 +109,19 @@ async function getReportData(id: string): Promise<Report | null> {
         };
       } else {
         console.error(`[ReportPage] 수익률 업데이트 실패 - updatedData가 null`);
+      }
+    } else if (report.is_closed) {
+      console.log(`[ReportPage] 수익률 업데이트 건너뛰기 - 이미 확정됨:`, {
+        id: docSnap.id,
+        closed_at: report.closed_at,
+        closed_return_rate: report.closed_return_rate
+      });
+      // 확정된 수익률 사용
+      if (report.closed_return_rate !== undefined) {
+        report.returnRate = report.closed_return_rate;
+      }
+      if (report.closed_price !== undefined) {
+        report.currentPrice = report.closed_price;
       }
     } else {
       console.warn(`[ReportPage] 수익률 업데이트 건너뛰기:`, {

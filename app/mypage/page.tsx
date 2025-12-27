@@ -95,6 +95,10 @@ export default function MyPage() {
             files: data.files || [],
             positionType: data.positionType || 'long',
             stockData: data.stockData || {},
+            is_closed: data.is_closed || false,
+            closed_at: data.closed_at,
+            closed_return_rate: data.closed_return_rate,
+            closed_price: data.closed_price,
           };
         });
 
@@ -120,6 +124,12 @@ export default function MyPage() {
       try {
         const updatedReports = await Promise.all(
           myReports.map(async (report) => {
+            // 이미 확정된 경우 건너뛰기
+            if (report.is_closed) {
+              console.log(`[MyPage] ${report.id}: 이미 확정됨, 업데이트 건너뛰기`);
+              return report;
+            }
+
             // ticker와 initialPrice가 없으면 기존 리포트 반환
             if (!report.ticker || !report.initialPrice || report.initialPrice === 0) {
               console.log(`[MyPage] ${report.id}: ticker 또는 initialPrice 없음`);

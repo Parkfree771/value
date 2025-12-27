@@ -32,6 +32,10 @@ export interface Report {
     pbr?: number;
     [key: string]: any;
   };
+  is_closed?: boolean;
+  closed_at?: string;
+  closed_return_rate?: number;
+  closed_price?: number;
 }
 
 export interface UserProfile {

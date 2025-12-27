@@ -9,19 +9,19 @@ import { MOCK_GURU_EVENTS } from '@/app/guru-tracker/mockData';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-export default function WordWatchPage() {
+export default function MarketCallPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [sortBy, setSortBy] = useState('newest');
   const [firebaseEvents, setFirebaseEvents] = useState<GuruTrackingEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Firebase에서 워드워치 데이터 가져오기
+  // Firebase에서 마켓콜 데이터 가져오기
   useEffect(() => {
-    const fetchWordWatch = async () => {
+    const fetchMarketCall = async () => {
       try {
-        const wordWatchRef = collection(db, 'word-watch');
-        const q = query(wordWatchRef, orderBy('created_at', 'desc'));
+        const marketCallRef = collection(db, 'market-call');
+        const q = query(marketCallRef, orderBy('created_at', 'desc'));
         const querySnapshot = await getDocs(q);
 
         const events: GuruTrackingEvent[] = querySnapshot.docs.map(doc => ({
@@ -32,13 +32,13 @@ export default function WordWatchPage() {
 
         setFirebaseEvents(events);
       } catch (error) {
-        console.error('Error fetching word watch:', error);
+        console.error('Error fetching market call:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWordWatch();
+    fetchMarketCall();
   }, []);
 
   // Mock 데이터와 Firebase 데이터 합치기
@@ -135,7 +135,7 @@ export default function WordWatchPage() {
         {/* 오른쪽: 작성하기 버튼 */}
         {user && (
           <button
-            onClick={() => router.push('/word-watch/write')}
+            onClick={() => router.push('/market-call/write')}
             className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -146,7 +146,7 @@ export default function WordWatchPage() {
         )}
       </div>
 
-      {/* Word Watch Content */}
+      {/* Market Call Content */}
       <div className="space-y-6">
 
         {/* Event Cards */}
@@ -160,11 +160,11 @@ export default function WordWatchPage() {
             </div>
           ) : filteredEvents.length > 0 ? (
             filteredEvents.map(event => (
-              <GuruTrackingCard key={event.id} event={event} collection="word-watch" />
+              <GuruTrackingCard key={event.id} event={event} collection="market-call" />
             ))
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
-              <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">WORD WATCH</div>
+              <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">MARKET CALL</div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 필터 조건에 맞는 데이터가 없습니다
               </h3>

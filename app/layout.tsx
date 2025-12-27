@@ -9,9 +9,8 @@ import GoogleAdSense from "@/components/GoogleAdSense";
 
 export const viewport: Viewport = {
   width: 'device-width',
-  initialScale: 0.75,
+  initialScale: 1,
   maximumScale: 5,
-  userScalable: true,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
     { media: '(prefers-color-scheme: dark)', color: '#111827' },

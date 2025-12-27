@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 지원하는 컬렉션 확인
-    if (collection !== 'posts' && collection !== 'word-watch') {
+    // 지원하는 컬렉션 확인 (posts만 수익 확정 가능)
+    if (collection !== 'posts') {
       return NextResponse.json(
         { error: '지원하지 않는 컬렉션입니다.' },
         { status: 400 }

@@ -35,7 +35,8 @@
       "Bash(firebase deploy:*)",
       "Bash(test:*)",
       "Bash(cat:*)",
-      "Bash(npx firebase deploy:*)"
+      "Bash(npx firebase deploy:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": [],
     "ask": []

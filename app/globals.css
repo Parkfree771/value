@@ -14,10 +14,63 @@
   }
 }
 
+html {
+  /* iOS Safari 폰트 크기 자동 조정 방지 */
+  -webkit-text-size-adjust: 100%;
+
+  /* 기본 폰트 크기 (16px - 웹 표준) */
+  font-size: 16px;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+
+  /* 텍스트 렌더링 최적화 (macOS/iOS) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* 최소 폰트 크기 (너무 작게 표시되지 않도록) */
+  min-height: 100vh;
+}
+
+/* 모바일 터치 타겟 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  /* 모바일에서만 터치 타겟 최소 크기 적용 */
+  button:not(.btn-sm):not(.text-xs):not(.text-sm),
+  a:not(.text-xs):not(.text-sm) {
+    min-height: 44px;
+  }
+}
+
+/* 스크롤바 스타일 (Webkit 브라우저) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
 }
 
 @layer utilities {

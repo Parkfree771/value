@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Card from './Card';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ReportCardProps {
   id: string;
   title: string;
   author: string;
+  authorId?: string; // 작성자 ID 추가
   stockName: string;
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
@@ -26,12 +28,17 @@ interface ReportCardProps {
     currency?: string;
     [key: string]: any;
   };
+  is_closed?: boolean; // 수익 확정 여부
+  closed_at?: string; // 확정 일시
+  closed_return_rate?: number; // 확정 수익률
+  closed_price?: number; // 확정 가격
 }
 
 export default function ReportCard({
   id,
   title,
   author,
+  authorId,
   stockName,
   ticker,
   opinion,
@@ -45,9 +52,16 @@ export default function ReportCard({
   onDelete,
   category,
   stockData,
+  is_closed = false,
+  closed_at,
+  closed_return_rate,
+  closed_price,
 }: ReportCardProps) {
   const router = useRouter();
+  const { user } = useAuth();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isClosed, setIsClosed] = useState(is_closed);
   // API에서 이미 계산된 returnRate를 사용하므로 별도 계산 불필요
 
   // 통화 추론 함수
@@ -129,6 +143,51 @@ export default function ReportCard({
       alert('리포트 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // 수익 확정 처리
+  const handleClosePosition = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user || !id || isClosing) return;
+
+    const confirmMessage = `현재 수익률 ${returnRate?.toFixed(2)}%로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.`;
+    if (!confirm(confirmMessage)) return;
+
+    setIsClosing(true);
+
+    try {
+      const response = await fetch('/api/close-position', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postId: id,
+          collection: 'posts',
+          userId: user.uid,
+          closedPrice: currentPrice,
+          closedReturnRate: returnRate,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('수익이 확정되었습니다!');
+        setIsClosed(true);
+        // 페이지 새로고침
+        window.location.reload();
+      } else {
+        alert(data.error || '수익 확정에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('수익 확정 오류:', error);
+      alert('수익 확정 중 오류가 발생했습니다.');
+    } finally {
+      setIsClosing(false);
     }
   };
 
@@ -214,16 +273,30 @@ export default function ReportCard({
             )}
             {showActions && (
               <>
+                {!isClosed && (
+                  <button
+                    onClick={handleClosePosition}
+                    disabled={isClosing || isDeleting}
+                    className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isClosing ? '처리 중...' : '수익 확정하기'}
+                  </button>
+                )}
+                {isClosed && (
+                  <span className="px-3 py-1.5 text-xs font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded-lg border border-green-300 dark:border-green-700">
+                    수익 확정 완료
+                  </span>
+                )}
                 <button
                   onClick={handleEdit}
-                  disabled={isDeleting}
+                  disabled={isDeleting || isClosing}
                   className="px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded transition-colors disabled:opacity-50"
                 >
                   수정
                 </button>
                 <button
                   onClick={handleDelete}
-                  disabled={isDeleting}
+                  disabled={isDeleting || isClosing}
                   className="px-2 py-1 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
                 >
                   {isDeleting ? '삭제 중...' : '삭제'}
