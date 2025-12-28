@@ -47,20 +47,37 @@ export async function getUserPostsTickers(): Promise<string[]> {
 /**
  * 구루 포트폴리오에서 ticker 수집 (JSON 파일에서 읽기)
  * 매일 한 번만 업데이트용 (종가)
+ * @param guruName 특정 구루만 가져오기 (예: 'buffett') - 선택사항
  */
-export async function getGuruTickers(): Promise<string[]> {
+export async function getGuruTickers(guruName?: string): Promise<string[]> {
   const tickersSet = new Set<string>();
 
   // JSON 파일에서 구루 포트폴리오 데이터 읽기
-  Object.values(guruPortfolioData.gurus).forEach((guru) => {
-    guru.holdings.forEach((holding) => {
-      if (holding.ticker) {
-        tickersSet.add(holding.ticker.toUpperCase().trim());
-      }
+  if (guruName) {
+    // 특정 구루만 처리
+    const guru = (guruPortfolioData.gurus as any)[guruName];
+    if (guru) {
+      guru.holdings.forEach((holding: any) => {
+        if (holding.ticker) {
+          tickersSet.add(holding.ticker.toUpperCase().trim());
+        }
+      });
+      console.log(`[Guru Tickers] Found ${tickersSet.size} tickers from ${guruName} portfolio (JSON)`);
+    } else {
+      console.warn(`[Guru Tickers] Guru '${guruName}' not found`);
+    }
+  } else {
+    // 전체 구루 처리
+    Object.values(guruPortfolioData.gurus).forEach((guru) => {
+      guru.holdings.forEach((holding) => {
+        if (holding.ticker) {
+          tickersSet.add(holding.ticker.toUpperCase().trim());
+        }
+      });
     });
-  });
+    console.log(`[Guru Tickers] Found ${tickersSet.size} tickers from ${Object.keys(guruPortfolioData.gurus).length} guru portfolios (JSON)`);
+  }
 
-  console.log(`[Guru Tickers] Found ${tickersSet.size} tickers from ${Object.keys(guruPortfolioData.gurus).length} guru portfolios (JSON)`);
   return Array.from(tickersSet).sort();
 }
 

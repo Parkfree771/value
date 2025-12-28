@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -12,46 +14,34 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    console.log(`Fetching stock price for: ${ticker}`);
+    const tickerUpper = ticker.toUpperCase();
+    console.log(`[Stock Price] Fetching from Firestore: ${tickerUpper}`);
 
-    // Yahoo Finance API를 통해 주식 가격 가져오기
-    const response = await fetch(
-      `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1d`,
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        },
-        cache: 'no-store', // 캐시 사용 안함
-      }
-    );
+    // Firestore stock_data에서 캐시된 가격 가져오기
+    const stockDoc = await getDoc(doc(db, 'stock_data', tickerUpper));
 
-    if (!response.ok) {
-      console.error(`Yahoo Finance API error: ${response.status}`);
-      throw new Error(`Yahoo Finance API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log(`Raw API response for ${ticker}:`, JSON.stringify(data, null, 2));
-
-    if (data.chart?.result?.[0]?.meta?.regularMarketPrice) {
-      const meta = data.chart.result[0].meta;
-      const price = meta.regularMarketPrice;
-      const currency = meta.currency || 'USD';
-      console.log(`Successfully fetched price for ${ticker}: ${price} ${currency}`);
+    if (stockDoc.exists()) {
+      const data = stockDoc.data();
+      console.log(`[Stock Price] Found cached data for ${tickerUpper}: ${data.price} ${data.currency}`);
 
       return NextResponse.json({
-        price,
-        currency,
-        ticker,
-        timestamp: new Date().toISOString(),
+        price: data.price,
+        currency: data.currency || 'USD',
+        ticker: tickerUpper,
+        timestamp: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString(),
       });
     } else {
-      console.error('Price data not found in response');
-      throw new Error('Price data not found in response');
+      console.warn(`[Stock Price] No cached data for ${tickerUpper}`);
+      return NextResponse.json(
+        {
+          error: 'Stock data not found',
+          message: `${tickerUpper} 종목 데이터가 캐시에 없습니다. 잠시 후 다시 시도해주세요.`,
+        },
+        { status: 404 }
+      );
     }
   } catch (error) {
-    console.error('Stock price fetch error:', error);
+    console.error('[Stock Price] Fetch error:', error);
     return NextResponse.json(
       {
         error: 'Failed to fetch stock price',

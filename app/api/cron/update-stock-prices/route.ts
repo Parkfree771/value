@@ -27,9 +27,10 @@ export async function POST(request: NextRequest) {
     // 쿼리 파라미터 확인
     const searchParams = request.nextUrl.searchParams;
     const type = searchParams.get('type') || 'all'; // user | guru | all
+    const guruName = searchParams.get('guru'); // 특정 구루만 처리 (예: buffett)
     const forceRefresh = searchParams.get('forceRefresh') === 'true';
 
-    console.log(`[CRON] ===== Starting stock price update (type: ${type}) =====`);
+    console.log(`[CRON] ===== Starting stock price update (type: ${type}${guruName ? `, guru: ${guruName}` : ''}) =====`);
 
     // 토큰 준비 (강제 갱신 또는 캐시 사용)
     if (forceRefresh) {
@@ -50,8 +51,10 @@ export async function POST(request: NextRequest) {
       console.log(`[CRON] Processing ${tickers.length} user post tickers (real-time)`);
     } else if (type === 'guru') {
       // 매일 06시: 구루 포트폴리오 종목만 (종가)
-      tickers = await getGuruTickers();
-      console.log(`[CRON] Processing ${tickers.length} guru portfolio tickers (daily close)`);
+      // guruName이 있으면 특정 구루만, 없으면 전체 구루
+      tickers = await getGuruTickers(guruName || undefined);
+      const desc = guruName ? `${guruName} portfolio` : 'all guru portfolios';
+      console.log(`[CRON] Processing ${tickers.length} tickers from ${desc} (daily close)`);
     } else {
       // 전체 (기본값, 하위 호환성)
       tickers = await getAllUniqueTickers();
