@@ -1,7 +1,7 @@
 // 동적 종목 리스트 생성 (Posts + 구루 포트폴리오)
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
-import { GURU_PORTFOLIOS } from '@/app/guru-tracker/portfolioData';
+import guruPortfolioData from './guru-portfolio-data.json';
 
 /**
  * 사용자 게시글에서 ticker 수집 (posts + market-call)
@@ -45,21 +45,22 @@ export async function getUserPostsTickers(): Promise<string[]> {
 }
 
 /**
- * 구루 포트폴리오에서 ticker 수집
+ * 구루 포트폴리오에서 ticker 수집 (JSON 파일에서 읽기)
  * 매일 한 번만 업데이트용 (종가)
  */
 export async function getGuruTickers(): Promise<string[]> {
   const tickersSet = new Set<string>();
 
-  Object.values(GURU_PORTFOLIOS).forEach((portfolio) => {
-    portfolio.holdings.forEach((holding) => {
+  // JSON 파일에서 구루 포트폴리오 데이터 읽기
+  Object.values(guruPortfolioData.gurus).forEach((guru) => {
+    guru.holdings.forEach((holding) => {
       if (holding.ticker) {
         tickersSet.add(holding.ticker.toUpperCase().trim());
       }
     });
   });
 
-  console.log(`[Guru Tickers] Found ${tickersSet.size} tickers from ${Object.keys(GURU_PORTFOLIOS).length} guru portfolios`);
+  console.log(`[Guru Tickers] Found ${tickersSet.size} tickers from ${Object.keys(guruPortfolioData.gurus).length} guru portfolios (JSON)`);
   return Array.from(tickersSet).sort();
 }
 
