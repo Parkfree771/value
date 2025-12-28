@@ -36,12 +36,10 @@ export async function POST(request: NextRequest) {
 
     // 토큰 준비 (강제 갱신 또는 캐시 사용)
     if (forceRefresh) {
-      console.log('[CRON] Force refreshing KIS token...');
       await refreshKISToken();
-      console.log('[CRON] New token generated and cached');
+      console.log('[CRON] Token refreshed');
     } else {
       await getKISTokenWithCache();
-      console.log('[CRON] KIS token ready (cached)');
     }
 
     // 종목 리스트 생성 (type에 따라 분기)
@@ -75,7 +73,30 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 4. 각 ticker별 가격 조회 및 Firestore 저장
+    // 4. 구루 포트폴리오인 경우 미리 데이터 맵 생성 (성능 최적화)
+    let exchangeMap: Map<string, string> | null = null;
+    let basePriceMap: Map<string, { basePrice: number; companyName: string }> | null = null;
+
+    if (type === 'guru') {
+      // 거래소 맵 생성 (O(1) 조회)
+      exchangeMap = new Map();
+      basePriceMap = new Map();
+
+      Object.values(guruPortfolioData.gurus).forEach((guru) => {
+        guru.holdings.forEach((holding) => {
+          const tickerUpper = holding.ticker.toUpperCase();
+          if ((holding as any).exchange) {
+            exchangeMap!.set(tickerUpper, (holding as any).exchange);
+          }
+          basePriceMap!.set(tickerUpper, {
+            basePrice: holding.basePrice,
+            companyName: holding.companyName,
+          });
+        });
+      });
+    }
+
+    // 5. 각 ticker별 가격 조회 및 Firestore 저장
     let successCount = 0;
     let failCount = 0;
     const errors: string[] = [];
@@ -85,37 +106,17 @@ export async function POST(request: NextRequest) {
       const ticker = tickers[i];
 
       try {
-        console.log(`[CRON] [${i + 1}/${tickers.length}] Fetching ${ticker}...`);
-
         // 국내 vs 해외 판별 (6자리 숫자 = 한국)
         const isDomestic = /^\d{6}$/.test(ticker);
         let priceData;
 
         if (isDomestic) {
-          // 국내 주식
           priceData = await getKISStockPrice(ticker);
         } else {
-          // 해외 주식 - JSON에서 거래소 정보 찾기
-          let exchange = 'NAS'; // 기본값
-
-          if (type === 'guru') {
-            // 구루 포트폴리오인 경우 JSON에서 거래소 정보 조회
-            for (const guru of Object.values(guruPortfolioData.gurus)) {
-              const holding = guru.holdings.find(h => h.ticker.toUpperCase() === ticker);
-              if (holding && (holding as any).exchange) {
-                exchange = (holding as any).exchange;
-                break;
-              }
-            }
-          } else {
-            // user 종목은 기존 detectExchange 사용
-            exchange = detectExchange(ticker);
-          }
-
+          const exchange = exchangeMap?.get(ticker) || detectExchange(ticker);
           priceData = await getKISOverseaStockPrice(ticker, exchange);
         }
 
-        // currency 결정 (국내 = KRW, 해외 = priceData.currency 또는 USD)
         const currency = isDomestic ? 'KRW' : ((priceData as any).currency || 'USD');
 
         // Firestore에 개별 문서로 저장
@@ -136,14 +137,10 @@ export async function POST(request: NextRequest) {
 
         // 구루 포트폴리오 종목인 경우 stockPricesMap에 추가
         if (type === 'guru') {
-          stockPricesMap.set(ticker, {
-            price: priceData.price,
-            currency,
-          });
+          stockPricesMap.set(ticker, { price: priceData.price, currency });
         }
 
         successCount++;
-        console.log(`[CRON] ✓ ${ticker}: ${priceData.price} ${currency}`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         console.error(`[CRON] ✗ Failed: ${ticker} - ${errorMsg}`);
@@ -170,27 +167,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. 구루 포트폴리오인 경우 Firebase Storage JSON 파일 생성 및 업로드
-    if (type === 'guru' && stockPricesMap.size > 0) {
-      console.log(`[CRON] Generating JSON file for ${stockPricesMap.size} guru stocks...`);
-
-      // 5-1. JSON 파일에서 basePrice 맵 생성
-      const basePriceMap = new Map<string, { basePrice: number; companyName: string }>();
-      Object.values(guruPortfolioData.gurus).forEach((guru) => {
-        guru.holdings.forEach((holding) => {
-          basePriceMap.set(holding.ticker.toUpperCase(), {
-            basePrice: holding.basePrice,
-            companyName: holding.companyName,
-          });
-        });
-      });
-
-      // 5-2. 최종 JSON 구조 생성
+    // 6. 구루 포트폴리오인 경우 Firebase Storage JSON 파일 생성 및 업로드
+    if (type === 'guru' && stockPricesMap.size > 0 && basePriceMap) {
       const stocksData: Record<string, any> = {};
       let calculatedCount = 0;
 
       stockPricesMap.forEach((currentData, ticker) => {
-        const baseData = basePriceMap.get(ticker);
+        const baseData = basePriceMap!.get(ticker);
 
         if (baseData) {
           // 수익률 계산: (현재가 - 기준가) / 기준가 * 100
@@ -213,33 +196,29 @@ export async function POST(request: NextRequest) {
 
       const jsonData = {
         lastUpdated: new Date().toISOString(),
-        reportDate: guruPortfolioData.reportDate, // "2025-09-30"
+        reportDate: guruPortfolioData.reportDate,
         totalStocks: calculatedCount,
         stocks: stocksData,
       };
 
-      // 5-3. Firebase Storage에 업로드 (매일 덮어쓰기)
+      // Firebase Storage에 업로드 (매일 덮어쓰기)
       try {
         const storageRef = ref(storage, 'guru-stock-prices.json');
         await uploadString(storageRef, JSON.stringify(jsonData, null, 2), 'raw', {
           contentType: 'application/json',
         });
-
-        console.log(`[CRON] ✅ JSON file uploaded to Firebase Storage (${calculatedCount} stocks)`);
+        console.log(`[CRON] ✅ JSON uploaded: ${calculatedCount} stocks`);
       } catch (uploadError) {
-        console.error('[CRON] Failed to upload JSON to Firebase Storage:', uploadError);
+        console.error('[CRON] ✗ JSON upload failed:', uploadError);
       }
     }
 
     const duration = Date.now() - startTime;
     const durationSec = (duration / 1000).toFixed(2);
 
-    console.log('[CRON] ===== Update completed =====');
-    console.log(`[CRON] Duration: ${durationSec}s`);
-    console.log(`[CRON] Success: ${successCount} / Failed: ${failCount}`);
-
+    console.log(`[CRON] ✓ Completed: ${successCount} success, ${failCount} failed (${durationSec}s)`);
     if (errors.length > 0) {
-      console.log(`[CRON] Errors: ${errors.slice(0, 5).join(', ')}${errors.length > 5 ? '...' : ''}`);
+      console.log(`[CRON] Errors: ${errors.slice(0, 3).join(', ')}${errors.length > 3 ? ` +${errors.length - 3} more` : ''}`);
     }
 
     return NextResponse.json({
