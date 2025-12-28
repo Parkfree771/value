@@ -95,8 +95,23 @@ export async function POST(request: NextRequest) {
           // 국내 주식
           priceData = await getKISStockPrice(ticker);
         } else {
-          // 해외 주식
-          const exchange = detectExchange(ticker);
+          // 해외 주식 - JSON에서 거래소 정보 찾기
+          let exchange = 'NAS'; // 기본값
+
+          if (type === 'guru') {
+            // 구루 포트폴리오인 경우 JSON에서 거래소 정보 조회
+            for (const guru of Object.values(guruPortfolioData.gurus)) {
+              const holding = guru.holdings.find(h => h.ticker.toUpperCase() === ticker);
+              if (holding && (holding as any).exchange) {
+                exchange = (holding as any).exchange;
+                break;
+              }
+            }
+          } else {
+            // user 종목은 기존 detectExchange 사용
+            exchange = detectExchange(ticker);
+          }
+
           priceData = await getKISOverseaStockPrice(ticker, exchange);
         }
 

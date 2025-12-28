@@ -7,296 +7,2068 @@
       "guruNameEn": "Warren Buffett",
       "guruNameKr": "워렌 버핏",
       "holdings": [
-        { "ticker": "AAPL", "companyName": "Apple Inc.", "basePrice": 254.67, "shares": 238212764, "value": 60656116000 },
-        { "ticker": "AXP", "companyName": "American Express", "basePrice": 332.15, "shares": 151610700, "value": 50359011000 },
-        { "ticker": "BAC", "companyName": "Bank of America Corp.", "basePrice": 51.60, "shares": 568070012, "value": 29306732000 },
-        { "ticker": "KO", "companyName": "Coca Cola Co.", "basePrice": 66.32, "shares": 400000000, "value": 26528000000 },
-        { "ticker": "CVX", "companyName": "Chevron Corp.", "basePrice": 155.27, "shares": 122064792, "value": 18955442000 },
-        { "ticker": "OXY", "companyName": "Occidental Petroleum", "basePrice": 47.25, "shares": 264941431, "value": 12518483000 },
-        { "ticker": "MCO", "companyName": "Moody's Corp.", "basePrice": 476.56, "shares": 24669778, "value": 11754655000 },
-        { "ticker": "CB", "companyName": "Chubb Limited", "basePrice": 282.27, "shares": 31332895, "value": 8843710000 },
-        { "ticker": "KHC", "companyName": "Kraft Heinz Co.", "basePrice": 26.04, "shares": 325634818, "value": 8479531000 },
-        { "ticker": "GOOGL", "companyName": "Alphabet Inc.", "basePrice": 243.14, "shares": 17846142, "value": 4338397000 },
-        { "ticker": "DVA", "companyName": "DaVita HealthCare Partners", "basePrice": 132.88, "shares": 32160579, "value": 4273177000 },
-        { "ticker": "KR", "companyName": "Kroger Co.", "basePrice": 67.41, "shares": 50000000, "value": 3370500000 },
-        { "ticker": "SIRI", "companyName": "SiriusXM Holdings Inc", "basePrice": 23.28, "shares": 124807117, "value": 2904885000 },
-        { "ticker": "V", "companyName": "Visa Inc.", "basePrice": 341.45, "shares": 8297460, "value": 2832587000 },
-        { "ticker": "VRSN", "companyName": "Verisign Inc.", "basePrice": 279.56, "shares": 8989880, "value": 2513301000 },
-        { "ticker": "MA", "companyName": "Mastercard Inc.", "basePrice": 568.81, "shares": 3986648, "value": 2267645000 },
-        { "ticker": "AMZN", "companyName": "Amazon.com Inc.", "basePrice": 219.57, "shares": 10000000, "value": 2195700000 },
-        { "ticker": "STZ", "companyName": "Constellation Brands", "basePrice": 134.67, "shares": 13400000, "value": 1804578000 },
-        { "ticker": "UNH", "companyName": "United Health Group Inc.", "basePrice": 345.30, "shares": 5039564, "value": 1740161000 },
-        { "ticker": "COF", "companyName": "Capital One Financial", "basePrice": 212.58, "shares": 7150000, "value": 1519947000 },
-        { "ticker": "AON", "companyName": "Aon Plc", "basePrice": 356.58, "shares": 4100000, "value": 1461977000 },
-        { "ticker": "DPZ", "companyName": "Dominos Pizza Inc.", "basePrice": 431.69, "shares": 2981945, "value": 1287335000 },
-        { "ticker": "ALLY", "companyName": "Ally Financial Inc.", "basePrice": 39.20, "shares": 29000000, "value": 1136799000 },
-        { "ticker": "LLYVK", "companyName": "Liberty Media Corp. Series C Live", "basePrice": 96.97, "shares": 10917661, "value": 1058685000 },
-        { "ticker": "POOL", "companyName": "Pool Corp.", "basePrice": 310.10, "shares": 3458885, "value": 1072496000 },
-        { "ticker": "LEN", "companyName": "Lennar Corp.", "basePrice": 126.05, "shares": 7050950, "value": 888702000 },
-        { "ticker": "NUE", "companyName": "Nucor Corp.", "basePrice": 135.42, "shares": 6407749, "value": 867801000 },
-        { "ticker": "LPX", "companyName": "Louisiana-Pacific Corp.", "basePrice": 88.84, "shares": 5664793, "value": 503260000 },
-        { "ticker": "LLYVA", "companyName": "Liberty Media Corp. Series A Live", "basePrice": 94.31, "shares": 4986588, "value": 470235000 },
-        { "ticker": "FWONK", "companyName": "Liberty Media Corp Formula One Series C", "basePrice": 104.44, "shares": 3018555, "value": 315288000 },
-        { "ticker": "HEI-A", "companyName": "HEICO Corp. CL A", "basePrice": 254.07, "shares": 1294612, "value": 328948000 },
-        { "ticker": "CHTR", "companyName": "Charter Communications", "basePrice": 275.08, "shares": 1060882, "value": 291854000 },
-        { "ticker": "LAMR", "companyName": "Lamar Advertising Co.", "basePrice": 122.43, "shares": 1202110, "value": 147162000 },
-        { "ticker": "ALLE", "companyName": "Allegion Plc", "basePrice": 177.37, "shares": 780133, "value": 138357000 },
-        { "ticker": "NVR", "companyName": "NVR Inc.", "basePrice": 8035.08, "shares": 11112, "value": 89281000 },
-        { "ticker": "DEO", "companyName": "Diageo ADR", "basePrice": 95.43, "shares": 227750, "value": 21734000 },
-        { "ticker": "JEF", "companyName": "Jefferies Financial Group Inc.", "basePrice": 65.41, "shares": 433558, "value": 28363000 },
-        { "ticker": "LEN-B", "companyName": "Lennar Corp. CL B", "basePrice": 120.00, "shares": 180980, "value": 21716000 },
-        { "ticker": "LILA", "companyName": "Liberty LiLAC Group A", "basePrice": 8.29, "shares": 2630792, "value": 21809000 },
-        { "ticker": "BATRK", "companyName": "Atlanta Braves Holdings Inc. Series C", "basePrice": 41.59, "shares": 223645, "value": 9302000 },
-        { "ticker": "LILAK", "companyName": "Liberty LiLAC Group C", "basePrice": 7.97, "shares": 23953, "value": 191000 }
+        {
+          "ticker": "AAPL",
+          "companyName": "Apple Inc.",
+          "basePrice": 254.67,
+          "shares": 238212764,
+          "value": 60656116000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "AXP",
+          "companyName": "American Express",
+          "basePrice": 332.15,
+          "shares": 151610700,
+          "value": 50359011000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BAC",
+          "companyName": "Bank of America Corp.",
+          "basePrice": 51.6,
+          "shares": 568070012,
+          "value": 29306732000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "KO",
+          "companyName": "Coca Cola Co.",
+          "basePrice": 66.32,
+          "shares": 400000000,
+          "value": 26528000000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CVX",
+          "companyName": "Chevron Corp.",
+          "basePrice": 155.27,
+          "shares": 122064792,
+          "value": 18955442000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "OXY",
+          "companyName": "Occidental Petroleum",
+          "basePrice": 47.25,
+          "shares": 264941431,
+          "value": 12518483000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "MCO",
+          "companyName": "Moody's Corp.",
+          "basePrice": 476.56,
+          "shares": 24669778,
+          "value": 11754655000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CB",
+          "companyName": "Chubb Limited",
+          "basePrice": 282.27,
+          "shares": 31332895,
+          "value": 8843710000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "KHC",
+          "companyName": "Kraft Heinz Co.",
+          "basePrice": 26.04,
+          "shares": 325634818,
+          "value": 8479531000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GOOGL",
+          "companyName": "Alphabet Inc.",
+          "basePrice": 243.14,
+          "shares": 17846142,
+          "value": 4338397000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "DVA",
+          "companyName": "DaVita HealthCare Partners",
+          "basePrice": 132.88,
+          "shares": 32160579,
+          "value": 4273177000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "KR",
+          "companyName": "Kroger Co.",
+          "basePrice": 67.41,
+          "shares": 50000000,
+          "value": 3370500000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SIRI",
+          "companyName": "SiriusXM Holdings Inc",
+          "basePrice": 23.28,
+          "shares": 124807117,
+          "value": 2904885000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "V",
+          "companyName": "Visa Inc.",
+          "basePrice": 341.45,
+          "shares": 8297460,
+          "value": 2832587000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "VRSN",
+          "companyName": "Verisign Inc.",
+          "basePrice": 279.56,
+          "shares": 8989880,
+          "value": 2513301000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "MA",
+          "companyName": "Mastercard Inc.",
+          "basePrice": 568.81,
+          "shares": 3986648,
+          "value": 2267645000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "AMZN",
+          "companyName": "Amazon.com Inc.",
+          "basePrice": 219.57,
+          "shares": 10000000,
+          "value": 2195700000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "STZ",
+          "companyName": "Constellation Brands",
+          "basePrice": 134.67,
+          "shares": 13400000,
+          "value": 1804578000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "UNH",
+          "companyName": "United Health Group Inc.",
+          "basePrice": 345.3,
+          "shares": 5039564,
+          "value": 1740161000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "COF",
+          "companyName": "Capital One Financial",
+          "basePrice": 212.58,
+          "shares": 7150000,
+          "value": 1519947000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "AON",
+          "companyName": "Aon Plc",
+          "basePrice": 356.58,
+          "shares": 4100000,
+          "value": 1461977000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "DPZ",
+          "companyName": "Dominos Pizza Inc.",
+          "basePrice": 431.69,
+          "shares": 2981945,
+          "value": 1287335000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ALLY",
+          "companyName": "Ally Financial Inc.",
+          "basePrice": 39.2,
+          "shares": 29000000,
+          "value": 1136799000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LLYVK",
+          "companyName": "Liberty Media Corp. Series C Live",
+          "basePrice": 96.97,
+          "shares": 10917661,
+          "value": 1058685000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "POOL",
+          "companyName": "Pool Corp.",
+          "basePrice": 310.1,
+          "shares": 3458885,
+          "value": 1072496000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "LEN",
+          "companyName": "Lennar Corp.",
+          "basePrice": 126.05,
+          "shares": 7050950,
+          "value": 888702000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NUE",
+          "companyName": "Nucor Corp.",
+          "basePrice": 135.42,
+          "shares": 6407749,
+          "value": 867801000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LPX",
+          "companyName": "Louisiana-Pacific Corp.",
+          "basePrice": 88.84,
+          "shares": 5664793,
+          "value": 503260000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LLYVA",
+          "companyName": "Liberty Media Corp. Series A Live",
+          "basePrice": 94.31,
+          "shares": 4986588,
+          "value": 470235000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "FWONK",
+          "companyName": "Liberty Media Corp Formula One Series C",
+          "basePrice": 104.44,
+          "shares": 3018555,
+          "value": 315288000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "HEI-A",
+          "companyName": "HEICO Corp. CL A",
+          "basePrice": 254.07,
+          "shares": 1294612,
+          "value": 328948000
+        },
+        {
+          "ticker": "CHTR",
+          "companyName": "Charter Communications",
+          "basePrice": 275.08,
+          "shares": 1060882,
+          "value": 291854000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "LAMR",
+          "companyName": "Lamar Advertising Co.",
+          "basePrice": 122.43,
+          "shares": 1202110,
+          "value": 147162000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ALLE",
+          "companyName": "Allegion Plc",
+          "basePrice": 177.37,
+          "shares": 780133,
+          "value": 138357000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NVR",
+          "companyName": "NVR Inc.",
+          "basePrice": 8035.08,
+          "shares": 11112,
+          "value": 89281000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "DEO",
+          "companyName": "Diageo ADR",
+          "basePrice": 95.43,
+          "shares": 227750,
+          "value": 21734000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "JEF",
+          "companyName": "Jefferies Financial Group Inc.",
+          "basePrice": 65.41,
+          "shares": 433558,
+          "value": 28363000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LEN-B",
+          "companyName": "Lennar Corp. CL B",
+          "basePrice": 120,
+          "shares": 180980,
+          "value": 21716000
+        },
+        {
+          "ticker": "LILA",
+          "companyName": "Liberty LiLAC Group A",
+          "basePrice": 8.29,
+          "shares": 2630792,
+          "value": 21809000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "BATRK",
+          "companyName": "Atlanta Braves Holdings Inc. Series C",
+          "basePrice": 41.59,
+          "shares": 223645,
+          "value": 9302000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "LILAK",
+          "companyName": "Liberty LiLAC Group C",
+          "basePrice": 7.97,
+          "shares": 23953,
+          "value": 191000,
+          "exchange": "NAS"
+        }
       ]
     },
     "li_lu": {
       "guruNameEn": "Li Lu",
       "guruNameKr": "리 루",
       "holdings": [
-        { "ticker": "GOOGL", "companyName": "Alphabet Inc.", "basePrice": 243.14, "shares": 2543300, "value": 618276000 },
-        { "ticker": "PDD", "companyName": "Pinduoduo Inc.", "basePrice": 132.15, "shares": 4608000, "value": 609039000 },
-        { "ticker": "GOOG", "companyName": "Alphabet Inc. CL C", "basePrice": 243.58, "shares": 2451300, "value": 597014000 },
-        { "ticker": "BAC", "companyName": "Bank of America Corp.", "basePrice": 51.60, "shares": 10431387, "value": 538155000 },
-        { "ticker": "BRK-B", "companyName": "Berkshire Hathaway CL B", "basePrice": 502.74, "shares": 897749, "value": 451334000 },
-        { "ticker": "EWBC", "companyName": "East West Bancorp", "basePrice": 106.45, "shares": 2776351, "value": 295543000 },
-        { "ticker": "OXY", "companyName": "Occidental Petroleum", "basePrice": 47.25, "shares": 1466500, "value": 69292000 },
-        { "ticker": "AAPL", "companyName": "Apple Inc.", "basePrice": 254.67, "shares": 110600, "value": 28162000 },
-        { "ticker": "SOC", "companyName": "Sable Offshore Corp", "basePrice": 17.46, "shares": 1343000, "value": 23449000 }
+        {
+          "ticker": "GOOGL",
+          "companyName": "Alphabet Inc.",
+          "basePrice": 243.14,
+          "shares": 2543300,
+          "value": 618276000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "PDD",
+          "companyName": "Pinduoduo Inc.",
+          "basePrice": 132.15,
+          "shares": 4608000,
+          "value": 609039000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GOOG",
+          "companyName": "Alphabet Inc. CL C",
+          "basePrice": 243.58,
+          "shares": 2451300,
+          "value": 597014000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "BAC",
+          "companyName": "Bank of America Corp.",
+          "basePrice": 51.6,
+          "shares": 10431387,
+          "value": 538155000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BRK-B",
+          "companyName": "Berkshire Hathaway CL B",
+          "basePrice": 502.74,
+          "shares": 897749,
+          "value": 451334000
+        },
+        {
+          "ticker": "EWBC",
+          "companyName": "East West Bancorp",
+          "basePrice": 106.45,
+          "shares": 2776351,
+          "value": 295543000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "OXY",
+          "companyName": "Occidental Petroleum",
+          "basePrice": 47.25,
+          "shares": 1466500,
+          "value": 69292000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "AAPL",
+          "companyName": "Apple Inc.",
+          "basePrice": 254.67,
+          "shares": 110600,
+          "value": 28162000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "SOC",
+          "companyName": "Sable Offshore Corp",
+          "basePrice": 17.46,
+          "shares": 1343000,
+          "value": 23449000,
+          "exchange": "NYS"
+        }
       ]
     },
     "bill_ackman": {
       "guruNameEn": "Bill Ackman",
       "guruNameKr": "빌 애크먼",
       "holdings": [
-        { "ticker": "UBER", "companyName": "Uber Technologies Inc.", "basePrice": 97.95, "shares": 30270518, "value": 2965603000 },
-        { "ticker": "BN", "companyName": "Brookfield Corp.", "basePrice": 45.73, "shares": 61530346, "value": 2813167000 },
-        { "ticker": "HHH", "companyName": "Howard Hughes Holdings Inc.", "basePrice": 82.18, "shares": 18852064, "value": 1549074000 },
-        { "ticker": "GOOG", "companyName": "Alphabet Inc. CL C", "basePrice": 243.58, "shares": 6324031, "value": 1540218000 },
-        { "ticker": "QSR", "companyName": "Restaurant Brands International", "basePrice": 64.14, "shares": 22915496, "value": 1469800000 },
-        { "ticker": "AMZN", "companyName": "Amazon.com Inc.", "basePrice": 219.57, "shares": 5823316, "value": 1278625000 },
-        { "ticker": "GOOGL", "companyName": "Alphabet Inc.", "basePrice": 243.14, "shares": 4843973, "value": 1177570000 },
-        { "ticker": "CMG", "companyName": "Chipotle Mexican Grill Inc.", "basePrice": 39.20, "shares": 21541177, "value": 844199000 },
-        { "ticker": "HLT", "companyName": "Hilton Worldwide Holdings", "basePrice": 259.47, "shares": 3030578, "value": 786253000 },
-        { "ticker": "SEG", "companyName": "Seaport Entertainment Group", "basePrice": 22.92, "shares": 5023780, "value": 115145000 },
-        { "ticker": "HTZ", "companyName": "Hertz Global Hldgs Inc.", "basePrice": 6.80, "shares": 15241127, "value": 103640000 }
+        {
+          "ticker": "UBER",
+          "companyName": "Uber Technologies Inc.",
+          "basePrice": 97.95,
+          "shares": 30270518,
+          "value": 2965603000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BN",
+          "companyName": "Brookfield Corp.",
+          "basePrice": 45.73,
+          "shares": 61530346,
+          "value": 2813167000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "HHH",
+          "companyName": "Howard Hughes Holdings Inc.",
+          "basePrice": 82.18,
+          "shares": 18852064,
+          "value": 1549074000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GOOG",
+          "companyName": "Alphabet Inc. CL C",
+          "basePrice": 243.58,
+          "shares": 6324031,
+          "value": 1540218000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "QSR",
+          "companyName": "Restaurant Brands International",
+          "basePrice": 64.14,
+          "shares": 22915496,
+          "value": 1469800000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "AMZN",
+          "companyName": "Amazon.com Inc.",
+          "basePrice": 219.57,
+          "shares": 5823316,
+          "value": 1278625000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GOOGL",
+          "companyName": "Alphabet Inc.",
+          "basePrice": 243.14,
+          "shares": 4843973,
+          "value": 1177570000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CMG",
+          "companyName": "Chipotle Mexican Grill Inc.",
+          "basePrice": 39.2,
+          "shares": 21541177,
+          "value": 844199000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "HLT",
+          "companyName": "Hilton Worldwide Holdings",
+          "basePrice": 259.47,
+          "shares": 3030578,
+          "value": 786253000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SEG",
+          "companyName": "Seaport Entertainment Group",
+          "basePrice": 22.92,
+          "shares": 5023780,
+          "value": 115145000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "HTZ",
+          "companyName": "Hertz Global Hldgs Inc.",
+          "basePrice": 6.8,
+          "shares": 15241127,
+          "value": 103640000,
+          "exchange": "NAS"
+        }
       ]
     },
     "howard_marks": {
       "guruNameEn": "Howard Marks",
       "guruNameKr": "하워드 막스",
       "holdings": [
-        { "ticker": "TRMD", "companyName": "Torm Plc", "basePrice": 20.57, "shares": 40581120, "value": 834581000 },
-        { "ticker": "EXE", "companyName": "Expand Energy Corp.", "basePrice": 106.23, "shares": 5062363, "value": 537825000 },
-        { "ticker": "GTX", "companyName": "Garrett Motion Inc.", "basePrice": 13.62, "shares": 31894816, "value": 434407000 },
-        { "ticker": "AU", "companyName": "AngloGold Ashanti Ltd.", "basePrice": 70.34, "shares": 4185261, "value": 294349000 },
-        { "ticker": "VNOM", "companyName": "Viper Energy Inc.", "basePrice": 38.22, "shares": 6285062, "value": 240215000 },
-        { "ticker": "TDS", "companyName": "Telephone & Data Systems", "basePrice": 39.23, "shares": 3688386, "value": 144732000 },
-        { "ticker": "TLN", "companyName": "Talen Energy Corp", "basePrice": 425.42, "shares": 291117, "value": 123835000 },
-        { "ticker": "STKL", "companyName": "SunOpta Inc.", "basePrice": 5.86, "shares": 20726126, "value": 121426000 },
-        { "ticker": "CORZ", "companyName": "Core Scientific Inc", "basePrice": 17.94, "shares": 6400708, "value": 114829000 },
-        { "ticker": "B", "companyName": "Barrick Mining Corp.", "basePrice": 32.77, "shares": 3302086, "value": 108209000 },
-        { "ticker": "LBTYA", "companyName": "Liberty Global Ltd CL A", "basePrice": 11.46, "shares": 8551191, "value": 97997000 },
-        { "ticker": "FTAI", "companyName": "FTAI Aviation Ltd.", "basePrice": 166.86, "shares": 585175, "value": 97642000 },
-        { "ticker": "CX", "companyName": "Cemex", "basePrice": 8.99, "shares": 10448824, "value": 93935000 },
-        { "ticker": "ITUB", "companyName": "ita Unibanco Holding S.A.", "basePrice": 7.34, "shares": 12665801, "value": 92967000 },
-        { "ticker": "CBL", "companyName": "CBL & Associates Pptys Inc.", "basePrice": 30.59, "shares": 3005126, "value": 91897000 },
-        { "ticker": "NOK", "companyName": "Nokia Corp.", "basePrice": 4.81, "shares": 18752229, "value": 90198000 },
-        { "ticker": "TAC", "companyName": "TransAlta Corp.", "basePrice": 13.66, "shares": 6415253, "value": 87648000 },
-        { "ticker": "RWAY", "companyName": "Runway Growth Finance Corp", "basePrice": 10.16, "shares": 8279667, "value": 84121000 },
-        { "ticker": "KRC", "companyName": "Kilroy Realty Corp.", "basePrice": 42.25, "shares": 1850011, "value": 78163000 },
-        { "ticker": "GRAB", "companyName": "Grab Holdings Ltd Cl A", "basePrice": 6.02, "shares": 12094495, "value": 72809000 },
-        { "ticker": "NU", "companyName": "Nu Holdings Ltd", "basePrice": 16.01, "shares": 4518884, "value": 72347000 },
-        { "ticker": "VIST", "companyName": "Vista Oil & Gas, S.A.B. de C.V.", "basePrice": 34.40, "shares": 1841319, "value": 63341000 },
-        { "ticker": "FCX", "companyName": "Freeport-McMoran Inc.", "basePrice": 39.23, "shares": 1504865, "value": 59021000 },
-        { "ticker": "LILAK", "companyName": "Liberty LiLAC Group C", "basePrice": 8.44, "shares": 6669823, "value": 56293000 },
-        { "ticker": "YMM", "companyName": "Full Truck Alliance Spn ADR", "basePrice": 12.97, "shares": 3797697, "value": 49256000 },
-        { "ticker": "BLCO", "companyName": "Bausch + Lomb Corp", "basePrice": 15.06, "shares": 3245439, "value": 48909000 },
-        { "ticker": "SATS", "companyName": "EchoStar Corp.", "basePrice": 76.36, "shares": 600000, "value": 45816000 },
-        { "ticker": "BZ", "companyName": "Kanzhun Ltd", "basePrice": 23.36, "shares": 1643572, "value": 38394000 },
-        { "ticker": "XP", "companyName": "XP Inc.", "basePrice": 18.79, "shares": 2032877, "value": 38198000 },
-        { "ticker": "CRC", "companyName": "California Resources Corp.", "basePrice": 53.19, "shares": 694502, "value": 36934000 },
-        { "ticker": "SBLK", "companyName": "Star Bulk Carriers Corp.", "basePrice": 18.59, "shares": 1962892, "value": 36490000 },
-        { "ticker": "AD", "companyName": "Array Digital Infrastructure Inc.", "basePrice": 50.02, "shares": 724444, "value": 36229000 },
-        { "ticker": "TX", "companyName": "Ternium S.A.", "basePrice": 34.73, "shares": 897509, "value": 31170000 },
-        { "ticker": "NBR", "companyName": "Nabors Industries Ltd.", "basePrice": 40.87, "shares": 737112, "value": 30126000 },
-        { "ticker": "ECVT", "companyName": "Ecovyst Inc.", "basePrice": 8.76, "shares": 2859022, "value": 25045000 },
-        { "ticker": "SE", "companyName": "Sea Ltd", "basePrice": 178.73, "shares": 141368, "value": 25267000 },
-        { "ticker": "OCSL", "companyName": "Oaktree Specialty Lending Corp", "basePrice": 13.05, "shares": 1852456, "value": 24175000 },
-        { "ticker": "JBS", "companyName": "Jbs Nv A", "basePrice": 14.93, "shares": 1580400, "value": 23595000 },
-        { "ticker": "VALE", "companyName": "Vale SA", "basePrice": 10.86, "shares": 2033706, "value": 22086000 },
-        { "ticker": "TEO", "companyName": "Telecom Argentina S.A.", "basePrice": 7.27, "shares": 2629483, "value": 19116000 },
-        { "ticker": "OPTU", "companyName": "Optimum Communications Inc.", "basePrice": 2.41, "shares": 7500000, "value": 18075000 },
-        { "ticker": "ALVO", "companyName": "Alvotech SA", "basePrice": 8.19, "shares": 1563676, "value": 12807000 },
-        { "ticker": "INDV", "companyName": "Indivior Plc", "basePrice": 41.47, "shares": 257785398, "value": 10692000 },
-        { "ticker": "SMRT", "companyName": "SmartRent Inc.", "basePrice": 1.41, "shares": 7505294, "value": 10582000 },
-        { "ticker": "CHKEL", "companyName": "Chesapeake Energy Corp. WTS", "basePrice": 96.73, "shares": 95294, "value": 9216000 },
-        { "ticker": "MX", "companyName": "MagnaChip Semiconductor Corp.", "basePrice": 3.13, "shares": 2849858, "value": 8920000 },
-        { "ticker": "ACR", "companyName": "ACRES Commercial Realty Corp.", "basePrice": 21.16, "shares": 391380, "value": 8282000 },
-        { "ticker": "BHC", "companyName": "Bausch Health", "basePrice": 6.45, "shares": 1270000, "value": 8192000 },
-        { "ticker": "ALVOW", "companyName": "Alvotech SA 27", "basePrice": 1.52, "shares": 4666667, "value": 7088000 },
-        { "ticker": "LILA", "companyName": "Liberty LiLAC Group A", "basePrice": 8.29, "shares": 846474, "value": 7017000 },
-        { "ticker": "HDB", "companyName": "HDFC Bank Ltd.", "basePrice": 34.16, "shares": 151206, "value": 5165000 },
-        { "ticker": "LGN", "companyName": "Legence Corp Cl A", "basePrice": 30.81, "shares": 175000, "value": 5392000 },
-        { "ticker": "BATL", "companyName": "Battalion Oil Corp.", "basePrice": 1.21, "shares": 3013823, "value": 3647000 },
-        { "ticker": "TGS", "companyName": "Transportadora de Gas Del Sur SA", "basePrice": 21.04, "shares": 56522, "value": 1189000 },
-        { "ticker": "BTAI", "companyName": "Bioxcel Therapeutics Inc", "basePrice": 2.56, "shares": 241188, "value": 617000 },
-        { "ticker": "TPICQ", "companyName": "TPI Composites Inc.", "basePrice": 0.03, "shares": 4610003, "value": 143000 }
+        {
+          "ticker": "TRMD",
+          "companyName": "Torm Plc",
+          "basePrice": 20.57,
+          "shares": 40581120,
+          "value": 834581000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "EXE",
+          "companyName": "Expand Energy Corp.",
+          "basePrice": 106.23,
+          "shares": 5062363,
+          "value": 537825000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GTX",
+          "companyName": "Garrett Motion Inc.",
+          "basePrice": 13.62,
+          "shares": 31894816,
+          "value": 434407000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "AU",
+          "companyName": "AngloGold Ashanti Ltd.",
+          "basePrice": 70.34,
+          "shares": 4185261,
+          "value": 294349000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "VNOM",
+          "companyName": "Viper Energy Inc.",
+          "basePrice": 38.22,
+          "shares": 6285062,
+          "value": 240215000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "TDS",
+          "companyName": "Telephone & Data Systems",
+          "basePrice": 39.23,
+          "shares": 3688386,
+          "value": 144732000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TLN",
+          "companyName": "Talen Energy Corp",
+          "basePrice": 425.42,
+          "shares": 291117,
+          "value": 123835000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "STKL",
+          "companyName": "SunOpta Inc.",
+          "basePrice": 5.86,
+          "shares": 20726126,
+          "value": 121426000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CORZ",
+          "companyName": "Core Scientific Inc",
+          "basePrice": 17.94,
+          "shares": 6400708,
+          "value": 114829000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "B",
+          "companyName": "Barrick Mining Corp.",
+          "basePrice": 32.77,
+          "shares": 3302086,
+          "value": 108209000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LBTYA",
+          "companyName": "Liberty Global Ltd CL A",
+          "basePrice": 11.46,
+          "shares": 8551191,
+          "value": 97997000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "FTAI",
+          "companyName": "FTAI Aviation Ltd.",
+          "basePrice": 166.86,
+          "shares": 585175,
+          "value": 97642000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CX",
+          "companyName": "Cemex",
+          "basePrice": 8.99,
+          "shares": 10448824,
+          "value": 93935000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ITUB",
+          "companyName": "ita Unibanco Holding S.A.",
+          "basePrice": 7.34,
+          "shares": 12665801,
+          "value": 92967000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CBL",
+          "companyName": "CBL & Associates Pptys Inc.",
+          "basePrice": 30.59,
+          "shares": 3005126,
+          "value": 91897000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NOK",
+          "companyName": "Nokia Corp.",
+          "basePrice": 4.81,
+          "shares": 18752229,
+          "value": 90198000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TAC",
+          "companyName": "TransAlta Corp.",
+          "basePrice": 13.66,
+          "shares": 6415253,
+          "value": 87648000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "RWAY",
+          "companyName": "Runway Growth Finance Corp",
+          "basePrice": 10.16,
+          "shares": 8279667,
+          "value": 84121000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "KRC",
+          "companyName": "Kilroy Realty Corp.",
+          "basePrice": 42.25,
+          "shares": 1850011,
+          "value": 78163000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GRAB",
+          "companyName": "Grab Holdings Ltd Cl A",
+          "basePrice": 6.02,
+          "shares": 12094495,
+          "value": 72809000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "NU",
+          "companyName": "Nu Holdings Ltd",
+          "basePrice": 16.01,
+          "shares": 4518884,
+          "value": 72347000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "VIST",
+          "companyName": "Vista Oil & Gas, S.A.B. de C.V.",
+          "basePrice": 34.4,
+          "shares": 1841319,
+          "value": 63341000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "FCX",
+          "companyName": "Freeport-McMoran Inc.",
+          "basePrice": 39.23,
+          "shares": 1504865,
+          "value": 59021000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LILAK",
+          "companyName": "Liberty LiLAC Group C",
+          "basePrice": 8.44,
+          "shares": 6669823,
+          "value": 56293000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "YMM",
+          "companyName": "Full Truck Alliance Spn ADR",
+          "basePrice": 12.97,
+          "shares": 3797697,
+          "value": 49256000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BLCO",
+          "companyName": "Bausch + Lomb Corp",
+          "basePrice": 15.06,
+          "shares": 3245439,
+          "value": 48909000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SATS",
+          "companyName": "EchoStar Corp.",
+          "basePrice": 76.36,
+          "shares": 600000,
+          "value": 45816000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "BZ",
+          "companyName": "Kanzhun Ltd",
+          "basePrice": 23.36,
+          "shares": 1643572,
+          "value": 38394000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "XP",
+          "companyName": "XP Inc.",
+          "basePrice": 18.79,
+          "shares": 2032877,
+          "value": 38198000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CRC",
+          "companyName": "California Resources Corp.",
+          "basePrice": 53.19,
+          "shares": 694502,
+          "value": 36934000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SBLK",
+          "companyName": "Star Bulk Carriers Corp.",
+          "basePrice": 18.59,
+          "shares": 1962892,
+          "value": 36490000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "AD",
+          "companyName": "Array Digital Infrastructure Inc.",
+          "basePrice": 50.02,
+          "shares": 724444,
+          "value": 36229000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TX",
+          "companyName": "Ternium S.A.",
+          "basePrice": 34.73,
+          "shares": 897509,
+          "value": 31170000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NBR",
+          "companyName": "Nabors Industries Ltd.",
+          "basePrice": 40.87,
+          "shares": 737112,
+          "value": 30126000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ECVT",
+          "companyName": "Ecovyst Inc.",
+          "basePrice": 8.76,
+          "shares": 2859022,
+          "value": 25045000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SE",
+          "companyName": "Sea Ltd",
+          "basePrice": 178.73,
+          "shares": 141368,
+          "value": 25267000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "OCSL",
+          "companyName": "Oaktree Specialty Lending Corp",
+          "basePrice": 13.05,
+          "shares": 1852456,
+          "value": 24175000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "JBS",
+          "companyName": "Jbs Nv A",
+          "basePrice": 14.93,
+          "shares": 1580400,
+          "value": 23595000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "VALE",
+          "companyName": "Vale SA",
+          "basePrice": 10.86,
+          "shares": 2033706,
+          "value": 22086000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TEO",
+          "companyName": "Telecom Argentina S.A.",
+          "basePrice": 7.27,
+          "shares": 2629483,
+          "value": 19116000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "OPTU",
+          "companyName": "Optimum Communications Inc.",
+          "basePrice": 2.41,
+          "shares": 7500000,
+          "value": 18075000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ALVO",
+          "companyName": "Alvotech SA",
+          "basePrice": 8.19,
+          "shares": 1563676,
+          "value": 12807000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "INDV",
+          "companyName": "Indivior Plc",
+          "basePrice": 41.47,
+          "shares": 257785398,
+          "value": 10692000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "SMRT",
+          "companyName": "SmartRent Inc.",
+          "basePrice": 1.41,
+          "shares": 7505294,
+          "value": 10582000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CHKEL",
+          "companyName": "Chesapeake Energy Corp. WTS",
+          "basePrice": 96.73,
+          "shares": 95294,
+          "value": 9216000
+        },
+        {
+          "ticker": "MX",
+          "companyName": "MagnaChip Semiconductor Corp.",
+          "basePrice": 3.13,
+          "shares": 2849858,
+          "value": 8920000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ACR",
+          "companyName": "ACRES Commercial Realty Corp.",
+          "basePrice": 21.16,
+          "shares": 391380,
+          "value": 8282000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BHC",
+          "companyName": "Bausch Health",
+          "basePrice": 6.45,
+          "shares": 1270000,
+          "value": 8192000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ALVOW",
+          "companyName": "Alvotech SA 27",
+          "basePrice": 1.52,
+          "shares": 4666667,
+          "value": 7088000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "LILA",
+          "companyName": "Liberty LiLAC Group A",
+          "basePrice": 8.29,
+          "shares": 846474,
+          "value": 7017000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "HDB",
+          "companyName": "HDFC Bank Ltd.",
+          "basePrice": 34.16,
+          "shares": 151206,
+          "value": 5165000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LGN",
+          "companyName": "Legence Corp Cl A",
+          "basePrice": 30.81,
+          "shares": 175000,
+          "value": 5392000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "BATL",
+          "companyName": "Battalion Oil Corp.",
+          "basePrice": 1.21,
+          "shares": 3013823,
+          "value": 3647000,
+          "exchange": "AMS"
+        },
+        {
+          "ticker": "TGS",
+          "companyName": "Transportadora de Gas Del Sur SA",
+          "basePrice": 21.04,
+          "shares": 56522,
+          "value": 1189000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BTAI",
+          "companyName": "Bioxcel Therapeutics Inc",
+          "basePrice": 2.56,
+          "shares": 241188,
+          "value": 617000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "TPICQ",
+          "companyName": "TPI Composites Inc.",
+          "basePrice": 0.03,
+          "shares": 4610003,
+          "value": 143000
+        }
       ]
     },
     "seth_klarman": {
       "guruNameEn": "Seth Klarman",
       "guruNameKr": "세스 클라만",
       "holdings": [
-        { "ticker": "QSR", "companyName": "Restaurant Brands International", "basePrice": 64.14, "shares": 8252862, "value": 529337000 },
-        { "ticker": "GOOG", "companyName": "Alphabet Inc. CL C", "basePrice": 243.58, "shares": 1858138, "value": 452550000 },
-        { "ticker": "ELV", "companyName": "Elevance Health Inc.", "basePrice": 323.14, "shares": 1319000, "value": 426195000 },
-        { "ticker": "CRH", "companyName": "CRH plc", "basePrice": 119.87, "shares": 3383395, "value": 405669000 },
-        { "ticker": "WTW", "companyName": "Willis Towers Watson plc", "basePrice": 345.48, "shares": 1089065, "value": 376218000 },
-        { "ticker": "UNP", "companyName": "Union Pacific", "basePrice": 236.40, "shares": 1496204, "value": 353658000 },
-        { "ticker": "WCC", "companyName": "WESCO International Inc.", "basePrice": 211.49, "shares": 1503180, "value": 317923000 },
-        { "ticker": "DG", "companyName": "Dollar General", "basePrice": 103.35, "shares": 2666876, "value": 275622000 },
-        { "ticker": "FERG", "companyName": "Ferguson Enterprises Inc.", "basePrice": 224.57, "shares": 1155500, "value": 259502000 },
-        { "ticker": "LBTYK", "companyName": "Liberty Global Ltd CL C", "basePrice": 11.75, "shares": 21657803, "value": 254479000 },
-        { "ticker": "FIS", "companyName": "Fidelity National Information Services", "basePrice": 65.94, "shares": 3789711, "value": 249894000 },
-        { "ticker": "EXP", "companyName": "Eagle Materials Inc.", "basePrice": 233.02, "shares": 939660, "value": 218978000 },
-        { "ticker": "GPC", "companyName": "Genuine Parts", "basePrice": 138.64, "shares": 1395000, "value": 193347000 },
-        { "ticker": "GDS", "companyName": "GDS Holdings Ltd", "basePrice": 38.70, "shares": 3249952, "value": 125773000 },
-        { "ticker": "FISV", "companyName": "Fiserv Inc.", "basePrice": 128.96, "shares": 895000, "value": 115392000 },
-        { "ticker": "HLF", "companyName": "Herbalife Nutrition Ltd.", "basePrice": 8.44, "shares": 7759844, "value": 65493000 },
-        { "ticker": "LBTYA", "companyName": "Liberty Global Ltd CL A", "basePrice": 11.46, "shares": 5076762, "value": 58180000 },
-        { "ticker": "COLD", "companyName": "Americold Realty Trust", "basePrice": 12.24, "shares": 3600000, "value": 44064000 },
-        { "ticker": "PAGS", "companyName": "PagSeguro Digital Ltd.", "basePrice": 10.00, "shares": 2500000, "value": 25000000 },
-        { "ticker": "TBN", "companyName": "Tamboran Resources Corp", "basePrice": 27.38, "shares": 570833, "value": 15629000 }
+        {
+          "ticker": "QSR",
+          "companyName": "Restaurant Brands International",
+          "basePrice": 64.14,
+          "shares": 8252862,
+          "value": 529337000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GOOG",
+          "companyName": "Alphabet Inc. CL C",
+          "basePrice": 243.58,
+          "shares": 1858138,
+          "value": 452550000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ELV",
+          "companyName": "Elevance Health Inc.",
+          "basePrice": 323.14,
+          "shares": 1319000,
+          "value": 426195000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CRH",
+          "companyName": "CRH plc",
+          "basePrice": 119.87,
+          "shares": 3383395,
+          "value": 405669000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "WTW",
+          "companyName": "Willis Towers Watson plc",
+          "basePrice": 345.48,
+          "shares": 1089065,
+          "value": 376218000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "UNP",
+          "companyName": "Union Pacific",
+          "basePrice": 236.4,
+          "shares": 1496204,
+          "value": 353658000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "WCC",
+          "companyName": "WESCO International Inc.",
+          "basePrice": 211.49,
+          "shares": 1503180,
+          "value": 317923000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "DG",
+          "companyName": "Dollar General",
+          "basePrice": 103.35,
+          "shares": 2666876,
+          "value": 275622000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "FERG",
+          "companyName": "Ferguson Enterprises Inc.",
+          "basePrice": 224.57,
+          "shares": 1155500,
+          "value": 259502000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LBTYK",
+          "companyName": "Liberty Global Ltd CL C",
+          "basePrice": 11.75,
+          "shares": 21657803,
+          "value": 254479000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "FIS",
+          "companyName": "Fidelity National Information Services",
+          "basePrice": 65.94,
+          "shares": 3789711,
+          "value": 249894000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "EXP",
+          "companyName": "Eagle Materials Inc.",
+          "basePrice": 233.02,
+          "shares": 939660,
+          "value": 218978000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GPC",
+          "companyName": "Genuine Parts",
+          "basePrice": 138.64,
+          "shares": 1395000,
+          "value": 193347000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GDS",
+          "companyName": "GDS Holdings Ltd",
+          "basePrice": 38.7,
+          "shares": 3249952,
+          "value": 125773000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "FISV",
+          "companyName": "Fiserv Inc.",
+          "basePrice": 128.96,
+          "shares": 895000,
+          "value": 115392000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "HLF",
+          "companyName": "Herbalife Nutrition Ltd.",
+          "basePrice": 8.44,
+          "shares": 7759844,
+          "value": 65493000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "LBTYA",
+          "companyName": "Liberty Global Ltd CL A",
+          "basePrice": 11.46,
+          "shares": 5076762,
+          "value": 58180000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "COLD",
+          "companyName": "Americold Realty Trust",
+          "basePrice": 12.24,
+          "shares": 3600000,
+          "value": 44064000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "PAGS",
+          "companyName": "PagSeguro Digital Ltd.",
+          "basePrice": 10,
+          "shares": 2500000,
+          "value": 25000000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TBN",
+          "companyName": "Tamboran Resources Corp",
+          "basePrice": 27.38,
+          "shares": 570833,
+          "value": 15629000,
+          "exchange": "NYS"
+        }
       ]
     },
     "stanley_druckenmiller": {
       "guruNameEn": "Stanley Druckenmiller",
       "guruNameKr": "스탠리 드러켄밀러",
       "holdings": [
-        { "ticker": "NTRA", "companyName": "Natera Inc.", "basePrice": 160.93, "shares": 3214532, "value": 517443000 },
-        { "ticker": "INSM", "companyName": "Insmed Inc.", "basePrice": 144.01, "shares": 2423435, "value": 348999000 },
-        { "ticker": "TEVA", "companyName": "Teva Pharmaceutical Inds Ltd", "basePrice": 20.20, "shares": 16593935, "value": 335197000 },
-        { "ticker": "TSM", "companyName": "Taiwan Semiconductor Mfg Ltd", "basePrice": 279.31, "shares": 765085, "value": 213681000 },
-        { "ticker": "WWD", "companyName": "Woodward Inc.", "basePrice": 252.68, "shares": 633015, "value": 159969000 },
-        { "ticker": "CPNG", "companyName": "Coupang Inc.", "basePrice": 32.20, "shares": 4633124, "value": 149187000 },
-        { "ticker": "MELI", "companyName": "Mercadolibre Inc.", "basePrice": 2337.35, "shares": 58344, "value": 136346000 },
-        { "ticker": "DOCU", "companyName": "Docusign Inc.", "basePrice": 72.11, "shares": 1685950, "value": 121540000 },
-        { "ticker": "VRNA", "companyName": "Verona Pharma Plc", "basePrice": 106.70, "shares": 1002080, "value": 106932000 },
-        { "ticker": "EEM", "companyName": "Ishares Tr MSCI EMG MKT ETF", "basePrice": 53.40, "shares": 1900000, "value": 101460000 },
-        { "ticker": "AMZN", "companyName": "Amazon Com Inc.", "basePrice": 219.57, "shares": 437070, "value": 95967000 },
-        { "ticker": "ROKU", "companyName": "Roku Inc.", "basePrice": 100.13, "shares": 822435, "value": 82350000 },
-        { "ticker": "QSR", "companyName": "Restaurant Brands Intl Inc.", "basePrice": 64.14, "shares": 1131365, "value": 72566000 },
-        { "ticker": "WAB", "companyName": "Wabtec", "basePrice": 200.48, "shares": 302410, "value": 60624000 },
-        { "ticker": "SPY", "companyName": "Spdr S&P 500 Etf Tr", "basePrice": 666.18, "shares": 90000, "value": 59956000 },
-        { "ticker": "IWM", "companyName": "Ishares Tr RUSSELL 2000 ETF", "basePrice": 241.98, "shares": 226000, "value": 54683000 },
-        { "ticker": "NAMS", "companyName": "Newamsterdam Pharma Company", "basePrice": 28.44, "shares": 1923700, "value": 54710000 },
-        { "ticker": "CRS", "companyName": "Carpenter Technology Corp.", "basePrice": 245.54, "shares": 220035, "value": 54027000 },
-        { "ticker": "C", "companyName": "Citigroup Inc.", "basePrice": 101.50, "shares": 514850, "value": 52257000 },
-        { "ticker": "TWLO", "companyName": "Twilio Inc.", "basePrice": 100.09, "shares": 512800, "value": 51326000 },
-        { "ticker": "BAC", "companyName": "Bank America Corp.", "basePrice": 51.60, "shares": 989250, "value": 51035000 },
-        { "ticker": "SE", "companyName": "Sea Ltd", "basePrice": 178.73, "shares": 274200, "value": 49008000 },
-        { "ticker": "EQT", "companyName": "Eqt Corp.", "basePrice": 54.44, "shares": 894950, "value": 48712000 },
-        { "ticker": "GEV", "companyName": "Ge Vernova Inc.", "basePrice": 614.94, "shares": 77320, "value": 47544000 },
-        { "ticker": "CRH", "companyName": "Crh Plc", "basePrice": 119.87, "shares": 393820, "value": 47219000 },
-        { "ticker": "VST", "companyName": "Vistra Corp.", "basePrice": 195.90, "shares": 233985, "value": 45842000 },
-        { "ticker": "DHI", "companyName": "D R Horton Inc.", "basePrice": 169.48, "shares": 205150, "value": 34767000 },
-        { "ticker": "OPCH", "companyName": "Option Care Health Inc.", "basePrice": 27.76, "shares": 977685, "value": 27141000 },
-        { "ticker": "AEVA", "companyName": "Aeva Technologies Inc.", "basePrice": 14.50, "shares": 1839314, "value": 26670000 },
-        { "ticker": "PCG", "companyName": "Pg&E Corp.", "basePrice": 15.08, "shares": 1649300, "value": 24871000 },
-        { "ticker": "GOOGL", "companyName": "Alphabet Inc.", "basePrice": 243.14, "shares": 102200, "value": 24845000 },
-        { "ticker": "ARM", "companyName": "Arm Holdings Plc", "basePrice": 141.49, "shares": 167900, "value": 23756000 },
-        { "ticker": "NU", "companyName": "Nu Hldgs Ltd", "basePrice": 16.01, "shares": 1454180, "value": 23281000 },
-        { "ticker": "SMTC", "companyName": "Semtech Corp.", "basePrice": 71.45, "shares": 301515, "value": 21543000 },
-        { "ticker": "STX", "companyName": "Seagate Technology Hldngs Pl", "basePrice": 236.11, "shares": 85900, "value": 20278000 },
-        { "ticker": "GPC", "companyName": "Genuine Parts Co.", "basePrice": 138.64, "shares": 144185, "value": 19984000 },
-        { "ticker": "ELVN", "companyName": "Enliven Therapeutics Inc.", "basePrice": 20.47, "shares": 947405, "value": 19393000 },
-        { "ticker": "POST", "companyName": "Post Hldgs Inc.", "basePrice": 107.48, "shares": 176400, "value": 18959000 },
-        { "ticker": "SYF", "companyName": "Synchrony Financial", "basePrice": 71.05, "shares": 261825, "value": 18603000 },
-        { "ticker": "ARGT", "companyName": "Global X Fds GB MSCI AR ETF", "basePrice": 69.75, "shares": 254045, "value": 17722000 },
-        { "ticker": "COGT", "companyName": "Cogent Biosciences Inc.", "basePrice": 14.36, "shares": 1059580, "value": 15216000 },
-        { "ticker": "PTGX", "companyName": "Protagonist Therapeutics Inc.", "basePrice": 66.43, "shares": 159700, "value": 10609000 },
-        { "ticker": "CMG", "companyName": "Chipotle Mexican Grill Inc.", "basePrice": 39.20, "shares": 233205, "value": 9139000 },
-        { "ticker": "COF", "companyName": "Capital One Finl Corp.", "basePrice": 212.58, "shares": 43920, "value": 9337000 },
-        { "ticker": "SEI", "companyName": "Solaris Energy Infras Inc.", "basePrice": 39.97, "shares": 145600, "value": 5820000 },
-        { "ticker": "MDB", "companyName": "Mongodb Inc.", "basePrice": 310.39, "shares": 17710, "value": 5497000 },
-        { "ticker": "TXRH", "companyName": "Texas Roadhouse Inc.", "basePrice": 166.14, "shares": 29800, "value": 4951000 },
-        { "ticker": "SATS", "companyName": "Echostar Corp", "basePrice": 76.36, "shares": 60765, "value": 4640000 },
-        { "ticker": "YPF", "companyName": "Ypf Sociedad Anonima", "basePrice": 24.29, "shares": 114695, "value": 2786000 }
+        {
+          "ticker": "NTRA",
+          "companyName": "Natera Inc.",
+          "basePrice": 160.93,
+          "shares": 3214532,
+          "value": 517443000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "INSM",
+          "companyName": "Insmed Inc.",
+          "basePrice": 144.01,
+          "shares": 2423435,
+          "value": 348999000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "TEVA",
+          "companyName": "Teva Pharmaceutical Inds Ltd",
+          "basePrice": 20.2,
+          "shares": 16593935,
+          "value": 335197000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TSM",
+          "companyName": "Taiwan Semiconductor Mfg Ltd",
+          "basePrice": 279.31,
+          "shares": 765085,
+          "value": 213681000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "WWD",
+          "companyName": "Woodward Inc.",
+          "basePrice": 252.68,
+          "shares": 633015,
+          "value": 159969000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CPNG",
+          "companyName": "Coupang Inc.",
+          "basePrice": 32.2,
+          "shares": 4633124,
+          "value": 149187000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "MELI",
+          "companyName": "Mercadolibre Inc.",
+          "basePrice": 2337.35,
+          "shares": 58344,
+          "value": 136346000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "DOCU",
+          "companyName": "Docusign Inc.",
+          "basePrice": 72.11,
+          "shares": 1685950,
+          "value": 121540000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "VRNA",
+          "companyName": "Verona Pharma Plc",
+          "basePrice": 106.7,
+          "shares": 1002080,
+          "value": 106932000
+        },
+        {
+          "ticker": "EEM",
+          "companyName": "Ishares Tr MSCI EMG MKT ETF",
+          "basePrice": 53.4,
+          "shares": 1900000,
+          "value": 101460000,
+          "exchange": "AMS"
+        },
+        {
+          "ticker": "AMZN",
+          "companyName": "Amazon Com Inc.",
+          "basePrice": 219.57,
+          "shares": 437070,
+          "value": 95967000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ROKU",
+          "companyName": "Roku Inc.",
+          "basePrice": 100.13,
+          "shares": 822435,
+          "value": 82350000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "QSR",
+          "companyName": "Restaurant Brands Intl Inc.",
+          "basePrice": 64.14,
+          "shares": 1131365,
+          "value": 72566000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "WAB",
+          "companyName": "Wabtec",
+          "basePrice": 200.48,
+          "shares": 302410,
+          "value": 60624000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SPY",
+          "companyName": "Spdr S&P 500 Etf Tr",
+          "basePrice": 666.18,
+          "shares": 90000,
+          "value": 59956000,
+          "exchange": "AMS"
+        },
+        {
+          "ticker": "IWM",
+          "companyName": "Ishares Tr RUSSELL 2000 ETF",
+          "basePrice": 241.98,
+          "shares": 226000,
+          "value": 54683000,
+          "exchange": "AMS"
+        },
+        {
+          "ticker": "NAMS",
+          "companyName": "Newamsterdam Pharma Company",
+          "basePrice": 28.44,
+          "shares": 1923700,
+          "value": 54710000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CRS",
+          "companyName": "Carpenter Technology Corp.",
+          "basePrice": 245.54,
+          "shares": 220035,
+          "value": 54027000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "C",
+          "companyName": "Citigroup Inc.",
+          "basePrice": 101.5,
+          "shares": 514850,
+          "value": 52257000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TWLO",
+          "companyName": "Twilio Inc.",
+          "basePrice": 100.09,
+          "shares": 512800,
+          "value": 51326000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BAC",
+          "companyName": "Bank America Corp.",
+          "basePrice": 51.6,
+          "shares": 989250,
+          "value": 51035000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SE",
+          "companyName": "Sea Ltd",
+          "basePrice": 178.73,
+          "shares": 274200,
+          "value": 49008000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "EQT",
+          "companyName": "Eqt Corp.",
+          "basePrice": 54.44,
+          "shares": 894950,
+          "value": 48712000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GEV",
+          "companyName": "Ge Vernova Inc.",
+          "basePrice": 614.94,
+          "shares": 77320,
+          "value": 47544000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CRH",
+          "companyName": "Crh Plc",
+          "basePrice": 119.87,
+          "shares": 393820,
+          "value": 47219000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "VST",
+          "companyName": "Vistra Corp.",
+          "basePrice": 195.9,
+          "shares": 233985,
+          "value": 45842000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "DHI",
+          "companyName": "D R Horton Inc.",
+          "basePrice": 169.48,
+          "shares": 205150,
+          "value": 34767000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "OPCH",
+          "companyName": "Option Care Health Inc.",
+          "basePrice": 27.76,
+          "shares": 977685,
+          "value": 27141000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "AEVA",
+          "companyName": "Aeva Technologies Inc.",
+          "basePrice": 14.5,
+          "shares": 1839314,
+          "value": 26670000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "PCG",
+          "companyName": "Pg&E Corp.",
+          "basePrice": 15.08,
+          "shares": 1649300,
+          "value": 24871000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GOOGL",
+          "companyName": "Alphabet Inc.",
+          "basePrice": 243.14,
+          "shares": 102200,
+          "value": 24845000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ARM",
+          "companyName": "Arm Holdings Plc",
+          "basePrice": 141.49,
+          "shares": 167900,
+          "value": 23756000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "NU",
+          "companyName": "Nu Hldgs Ltd",
+          "basePrice": 16.01,
+          "shares": 1454180,
+          "value": 23281000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SMTC",
+          "companyName": "Semtech Corp.",
+          "basePrice": 71.45,
+          "shares": 301515,
+          "value": 21543000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "STX",
+          "companyName": "Seagate Technology Hldngs Pl",
+          "basePrice": 236.11,
+          "shares": 85900,
+          "value": 20278000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GPC",
+          "companyName": "Genuine Parts Co.",
+          "basePrice": 138.64,
+          "shares": 144185,
+          "value": 19984000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ELVN",
+          "companyName": "Enliven Therapeutics Inc.",
+          "basePrice": 20.47,
+          "shares": 947405,
+          "value": 19393000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "POST",
+          "companyName": "Post Hldgs Inc.",
+          "basePrice": 107.48,
+          "shares": 176400,
+          "value": 18959000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SYF",
+          "companyName": "Synchrony Financial",
+          "basePrice": 71.05,
+          "shares": 261825,
+          "value": 18603000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ARGT",
+          "companyName": "Global X Fds GB MSCI AR ETF",
+          "basePrice": 69.75,
+          "shares": 254045,
+          "value": 17722000,
+          "exchange": "AMS"
+        },
+        {
+          "ticker": "COGT",
+          "companyName": "Cogent Biosciences Inc.",
+          "basePrice": 14.36,
+          "shares": 1059580,
+          "value": 15216000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "PTGX",
+          "companyName": "Protagonist Therapeutics Inc.",
+          "basePrice": 66.43,
+          "shares": 159700,
+          "value": 10609000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CMG",
+          "companyName": "Chipotle Mexican Grill Inc.",
+          "basePrice": 39.2,
+          "shares": 233205,
+          "value": 9139000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "COF",
+          "companyName": "Capital One Finl Corp.",
+          "basePrice": 212.58,
+          "shares": 43920,
+          "value": 9337000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SEI",
+          "companyName": "Solaris Energy Infras Inc.",
+          "basePrice": 39.97,
+          "shares": 145600,
+          "value": 5820000,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "MDB",
+          "companyName": "Mongodb Inc.",
+          "basePrice": 310.39,
+          "shares": 17710,
+          "value": 5497000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "TXRH",
+          "companyName": "Texas Roadhouse Inc.",
+          "basePrice": 166.14,
+          "shares": 29800,
+          "value": 4951000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "SATS",
+          "companyName": "Echostar Corp",
+          "basePrice": 76.36,
+          "shares": 60765,
+          "value": 4640000,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "YPF",
+          "companyName": "Ypf Sociedad Anonima",
+          "basePrice": 24.29,
+          "shares": 114695,
+          "value": 2786000,
+          "exchange": "NYS"
+        }
       ]
     },
     "ray_dalio": {
       "guruNameEn": "Ray Dalio",
       "guruNameKr": "레이 달리오",
       "holdings": [
-        { "ticker": "TSM", "companyName": "Taiwan Semiconductor Mfg Ltd", "basePrice": 279.31, "shares": 5160855, "value": 1441496933 },
-        { "ticker": "HDB", "companyName": "HDFC Bank Ltd", "basePrice": 34.16, "shares": 27078614, "value": 925097695 },
-        { "ticker": "SAP", "companyName": "SAP SE", "basePrice": 267.22, "shares": 2300337, "value": 614747609 },
-        { "ticker": "FMX", "companyName": "Fomento Economico Mexicano", "basePrice": 98.62, "shares": 5733207, "value": 565422468 },
-        { "ticker": "MELI", "companyName": "Mercadolibre Inc.", "basePrice": 2337.35, "shares": 213349, "value": 498649240 },
-        { "ticker": "LIN", "companyName": "Linde Plc", "basePrice": 474.85, "shares": 936014, "value": 444593572 },
-        { "ticker": "BHP", "companyName": "BHP Group Ltd", "basePrice": 55.75, "shares": 7817647, "value": 435838431 },
-        { "ticker": "BAP", "companyName": "Credicorp Ltd", "basePrice": 266.28, "shares": 1543847, "value": 411081579 },
-        { "ticker": "ALC", "companyName": "Alcon AG", "basePrice": 74.52, "shares": 5482424, "value": 408507748 },
-        { "ticker": "NTES", "companyName": "Netease Inc.", "basePrice": 151.99, "shares": 2541600, "value": 386304586 },
-        { "ticker": "GOOGL", "companyName": "Alphabet Inc.", "basePrice": 243.14, "shares": 1475171, "value": 358623742 },
-        { "ticker": "MSFT", "companyName": "Microsoft Corp.", "basePrice": 517.94, "shares": 686547, "value": 355600114 },
-        { "ticker": "RYAAY", "companyName": "Ryanair Holdings Plc", "basePrice": 60.23, "shares": 5344152, "value": 321835448 },
-        { "ticker": "NICE", "companyName": "Nice Ltd", "basePrice": 144.79, "shares": 2215335, "value": 320742411 },
-        { "ticker": "AMZN", "companyName": "Amazon Com Inc.", "basePrice": 219.57, "shares": 1354567, "value": 297426184 },
-        { "ticker": "SE", "companyName": "Sea Ltd", "basePrice": 178.73, "shares": 1562614, "value": 279294359 },
-        { "ticker": "NFLX", "companyName": "Netflix Inc.", "basePrice": 1199.00, "shares": 224123, "value": 268720937 },
-        { "ticker": "ASML", "companyName": "ASML Holding N V", "basePrice": 968.77, "shares": 273194, "value": 264605780 },
-        { "ticker": "META", "companyName": "Meta Platforms Inc.", "basePrice": 734.29, "shares": 352919, "value": 259180730 },
-        { "ticker": "SHEL", "companyName": "Shell Plc", "basePrice": 71.55, "shares": 3270497, "value": 233960147 },
-        { "ticker": "SONY", "companyName": "Sony Group Corp.", "basePrice": 28.79, "shares": 7536757, "value": 217001106 },
-        { "ticker": "CNI", "companyName": "Canadian Natl Ry Co", "basePrice": 94.31, "shares": 2297538, "value": 216663108 },
-        { "ticker": "BKNG", "companyName": "Booking Holdings Inc.", "basePrice": 5399.16, "shares": 37946, "value": 204880699 },
-        { "ticker": "CME", "companyName": "CME Group Inc.", "basePrice": 270.18, "shares": 690427, "value": 186547646 },
-        { "ticker": "NVDA", "companyName": "Nvidia Corporation", "basePrice": 186.57, "shares": 977338, "value": 182348828 },
-        { "ticker": "VRTX", "companyName": "Vertex Pharmaceuticals Inc.", "basePrice": 391.62, "shares": 455988, "value": 178598008 },
-        { "ticker": "PGR", "companyName": "Progressive Corp.", "basePrice": 246.94, "shares": 691378, "value": 170724498 },
-        { "ticker": "BBVA", "companyName": "Banco Bilbao Vizcaya Argenta", "basePrice": 19.25, "shares": 8758673, "value": 168617295 },
-        { "ticker": "HLN", "companyName": "Haleon Plc", "basePrice": 8.97, "shares": 17909401, "value": 160686673 },
-        { "ticker": "MFC", "companyName": "Manulife Finl Corp.", "basePrice": 31.16, "shares": 5077216, "value": 158171172 },
-        { "ticker": "APH", "companyName": "Amphenol Corp New", "basePrice": 123.75, "shares": 1251914, "value": 154926125 },
-        { "ticker": "AVGO", "companyName": "Broadcom Inc.", "basePrice": 329.91, "shares": 451298, "value": 148893754 },
-        { "ticker": "DE", "companyName": "Deere & Co", "basePrice": 457.26, "shares": 324719, "value": 148485203 },
-        { "ticker": "TW", "companyName": "Tradeweb Mkts Inc.", "basePrice": 110.97, "shares": 1303676, "value": 144679916 },
-        { "ticker": "RIO", "companyName": "Rio Tinto Plc", "basePrice": 66.02, "shares": 1887696, "value": 124629678 },
-        { "ticker": "SNPS", "companyName": "Synopsys Inc.", "basePrice": 493.39, "shares": 240194, "value": 118506871 },
-        { "ticker": "ACN", "companyName": "Accenture Plc Ireland", "basePrice": 246.58, "shares": 470517, "value": 116032660 },
-        { "ticker": "GMAB", "companyName": "Genmab A/S", "basePrice": 30.66, "shares": 3484487, "value": 106862786 },
-        { "ticker": "ADBE", "companyName": "Adobe Inc.", "basePrice": 352.78, "shares": 301169, "value": 106240794 },
-        { "ticker": "HEI", "companyName": "Heico Corp New", "basePrice": 322.83, "shares": 328553, "value": 106064317 },
-        { "ticker": "ABBV", "companyName": "Abbvie Inc.", "basePrice": 231.51, "shares": 430494, "value": 99678130 },
-        { "ticker": "TLK", "companyName": "P T Telekomunikasi Indonesia", "basePrice": 18.82, "shares": 4925278, "value": 92709178 },
-        { "ticker": "CSGP", "companyName": "Costar Group Inc.", "basePrice": 84.36, "shares": 1083322, "value": 91394331 },
-        { "ticker": "NOW", "companyName": "Servicenow Inc.", "basePrice": 920.24, "shares": 96013, "value": 88367396 },
-        { "ticker": "DHR", "companyName": "Danaher Corporation", "basePrice": 198.27, "shares": 415656, "value": 82416405 },
-        { "ticker": "TMO", "companyName": "Thermo Fisher Scientific Inc.", "basePrice": 485.17, "shares": 168576, "value": 81775375 },
-        { "ticker": "AME", "companyName": "Ametek Inc.", "basePrice": 188.02, "shares": 429956, "value": 80833370 },
-        { "ticker": "NVS", "companyName": "Novartis AG", "basePrice": 128.29, "shares": 629958, "value": 80801389 },
-        { "ticker": "ELV", "companyName": "Elevance Health Inc.", "basePrice": 323.14, "shares": 246365, "value": 79605459 },
-        { "ticker": "JNJ", "companyName": "Johnson & Johnson", "basePrice": 185.43, "shares": 424760, "value": 78762384 },
-        { "ticker": "V", "companyName": "Visa Inc.", "basePrice": 341.45, "shares": 203944, "value": 69625306 },
-        { "ticker": "SLB", "companyName": "Schlumberger Ltd", "basePrice": 34.37, "shares": 1965908, "value": 67566961 },
-        { "ticker": "NOC", "companyName": "Northrop Grumman Corp.", "basePrice": 609.27, "shares": 105511, "value": 64292800 },
-        { "ticker": "TTD", "companyName": "The Trade Desk Inc.", "basePrice": 49.02, "shares": 1289848, "value": 63220880 },
-        { "ticker": "VXUS", "companyName": "Vanguard Intl Equity Index F", "basePrice": 71.36, "shares": 840898, "value": 60016267 },
-        { "ticker": "ATKR", "companyName": "Atkore Inc.", "basePrice": 62.76, "shares": 895998, "value": 56218289 },
-        { "ticker": "HON", "companyName": "Honeywell Intl Inc.", "basePrice": 210.53, "shares": 265293, "value": 55845255 },
-        { "ticker": "GLOB", "companyName": "Globant S A", "basePrice": 57.39, "shares": 597231, "value": 34271120 },
-        { "ticker": "ZTO", "companyName": "ZTO Express Cayman Inc.", "basePrice": 19.20, "shares": 892018, "value": 17124419 },
-        { "ticker": "TS", "companyName": "Tenaris S A", "basePrice": 35.76, "shares": 408147, "value": 14599418 },
-        { "ticker": "KSPI", "companyName": "Kaspi Kz JSC", "basePrice": 81.68, "shares": 154802, "value": 12644227 },
-        { "ticker": "ITUB", "companyName": "Itau Unibanco Hldg S A", "basePrice": 7.34, "shares": 1615455, "value": 11857440 },
-        { "ticker": "ACWI", "companyName": "Ishares Tr MSCI ACWI ETF", "basePrice": 138.25, "shares": 63515, "value": 8780708 },
-        { "ticker": "INDA", "companyName": "Ishares Tr MSCI INDIA ETF", "basePrice": 52.06, "shares": 157699, "value": 8209810 },
-        { "ticker": "EPAM", "companyName": "Epam Sys Inc.", "basePrice": 150.77, "shares": 37181, "value": 5606523 },
-        { "ticker": "IBN", "companyName": "ICICI Bank Limited", "basePrice": 30.23, "shares": 75629, "value": 2286278 },
-        { "ticker": "ACWX", "companyName": "Ishares Tr MSCI ACWI EX US", "basePrice": 65.00, "shares": 19823, "value": 1288693 },
-        { "ticker": "VEA", "companyName": "Vanguard Tax-Managed Fds", "basePrice": 59.93, "shares": 17814, "value": 1067525 }
+        {
+          "ticker": "TSM",
+          "companyName": "Taiwan Semiconductor Mfg Ltd",
+          "basePrice": 279.31,
+          "shares": 5160855,
+          "value": 1441496933,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "HDB",
+          "companyName": "HDFC Bank Ltd",
+          "basePrice": 34.16,
+          "shares": 27078614,
+          "value": 925097695,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SAP",
+          "companyName": "SAP SE",
+          "basePrice": 267.22,
+          "shares": 2300337,
+          "value": 614747609,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "FMX",
+          "companyName": "Fomento Economico Mexicano",
+          "basePrice": 98.62,
+          "shares": 5733207,
+          "value": 565422468,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "MELI",
+          "companyName": "Mercadolibre Inc.",
+          "basePrice": 2337.35,
+          "shares": 213349,
+          "value": 498649240,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "LIN",
+          "companyName": "Linde Plc",
+          "basePrice": 474.85,
+          "shares": 936014,
+          "value": 444593572,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "BHP",
+          "companyName": "BHP Group Ltd",
+          "basePrice": 55.75,
+          "shares": 7817647,
+          "value": 435838431,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BAP",
+          "companyName": "Credicorp Ltd",
+          "basePrice": 266.28,
+          "shares": 1543847,
+          "value": 411081579,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ALC",
+          "companyName": "Alcon AG",
+          "basePrice": 74.52,
+          "shares": 5482424,
+          "value": 408507748,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NTES",
+          "companyName": "Netease Inc.",
+          "basePrice": 151.99,
+          "shares": 2541600,
+          "value": 386304586,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GOOGL",
+          "companyName": "Alphabet Inc.",
+          "basePrice": 243.14,
+          "shares": 1475171,
+          "value": 358623742,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "MSFT",
+          "companyName": "Microsoft Corp.",
+          "basePrice": 517.94,
+          "shares": 686547,
+          "value": 355600114,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "RYAAY",
+          "companyName": "Ryanair Holdings Plc",
+          "basePrice": 60.23,
+          "shares": 5344152,
+          "value": 321835448,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "NICE",
+          "companyName": "Nice Ltd",
+          "basePrice": 144.79,
+          "shares": 2215335,
+          "value": 320742411,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "AMZN",
+          "companyName": "Amazon Com Inc.",
+          "basePrice": 219.57,
+          "shares": 1354567,
+          "value": 297426184,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "SE",
+          "companyName": "Sea Ltd",
+          "basePrice": 178.73,
+          "shares": 1562614,
+          "value": 279294359,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NFLX",
+          "companyName": "Netflix Inc.",
+          "basePrice": 1199,
+          "shares": 224123,
+          "value": 268720937,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ASML",
+          "companyName": "ASML Holding N V",
+          "basePrice": 968.77,
+          "shares": 273194,
+          "value": 264605780,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "META",
+          "companyName": "Meta Platforms Inc.",
+          "basePrice": 734.29,
+          "shares": 352919,
+          "value": 259180730,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "SHEL",
+          "companyName": "Shell Plc",
+          "basePrice": 71.55,
+          "shares": 3270497,
+          "value": 233960147,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SONY",
+          "companyName": "Sony Group Corp.",
+          "basePrice": 28.79,
+          "shares": 7536757,
+          "value": 217001106,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CNI",
+          "companyName": "Canadian Natl Ry Co",
+          "basePrice": 94.31,
+          "shares": 2297538,
+          "value": 216663108,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BKNG",
+          "companyName": "Booking Holdings Inc.",
+          "basePrice": 5399.16,
+          "shares": 37946,
+          "value": 204880699,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "CME",
+          "companyName": "CME Group Inc.",
+          "basePrice": 270.18,
+          "shares": 690427,
+          "value": 186547646,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "NVDA",
+          "companyName": "Nvidia Corporation",
+          "basePrice": 186.57,
+          "shares": 977338,
+          "value": 182348828,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "VRTX",
+          "companyName": "Vertex Pharmaceuticals Inc.",
+          "basePrice": 391.62,
+          "shares": 455988,
+          "value": 178598008,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "PGR",
+          "companyName": "Progressive Corp.",
+          "basePrice": 246.94,
+          "shares": 691378,
+          "value": 170724498,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "BBVA",
+          "companyName": "Banco Bilbao Vizcaya Argenta",
+          "basePrice": 19.25,
+          "shares": 8758673,
+          "value": 168617295,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "HLN",
+          "companyName": "Haleon Plc",
+          "basePrice": 8.97,
+          "shares": 17909401,
+          "value": 160686673,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "MFC",
+          "companyName": "Manulife Finl Corp.",
+          "basePrice": 31.16,
+          "shares": 5077216,
+          "value": 158171172,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "APH",
+          "companyName": "Amphenol Corp New",
+          "basePrice": 123.75,
+          "shares": 1251914,
+          "value": 154926125,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "AVGO",
+          "companyName": "Broadcom Inc.",
+          "basePrice": 329.91,
+          "shares": 451298,
+          "value": 148893754,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "DE",
+          "companyName": "Deere & Co",
+          "basePrice": 457.26,
+          "shares": 324719,
+          "value": 148485203,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TW",
+          "companyName": "Tradeweb Mkts Inc.",
+          "basePrice": 110.97,
+          "shares": 1303676,
+          "value": 144679916,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "RIO",
+          "companyName": "Rio Tinto Plc",
+          "basePrice": 66.02,
+          "shares": 1887696,
+          "value": 124629678,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SNPS",
+          "companyName": "Synopsys Inc.",
+          "basePrice": 493.39,
+          "shares": 240194,
+          "value": 118506871,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ACN",
+          "companyName": "Accenture Plc Ireland",
+          "basePrice": 246.58,
+          "shares": 470517,
+          "value": 116032660,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "GMAB",
+          "companyName": "Genmab A/S",
+          "basePrice": 30.66,
+          "shares": 3484487,
+          "value": 106862786,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ADBE",
+          "companyName": "Adobe Inc.",
+          "basePrice": 352.78,
+          "shares": 301169,
+          "value": 106240794,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "HEI",
+          "companyName": "Heico Corp New",
+          "basePrice": 322.83,
+          "shares": 328553,
+          "value": 106064317,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ABBV",
+          "companyName": "Abbvie Inc.",
+          "basePrice": 231.51,
+          "shares": 430494,
+          "value": 99678130,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TLK",
+          "companyName": "P T Telekomunikasi Indonesia",
+          "basePrice": 18.82,
+          "shares": 4925278,
+          "value": 92709178,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "CSGP",
+          "companyName": "Costar Group Inc.",
+          "basePrice": 84.36,
+          "shares": 1083322,
+          "value": 91394331,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "NOW",
+          "companyName": "Servicenow Inc.",
+          "basePrice": 920.24,
+          "shares": 96013,
+          "value": 88367396,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "DHR",
+          "companyName": "Danaher Corporation",
+          "basePrice": 198.27,
+          "shares": 415656,
+          "value": 82416405,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TMO",
+          "companyName": "Thermo Fisher Scientific Inc.",
+          "basePrice": 485.17,
+          "shares": 168576,
+          "value": 81775375,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "AME",
+          "companyName": "Ametek Inc.",
+          "basePrice": 188.02,
+          "shares": 429956,
+          "value": 80833370,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NVS",
+          "companyName": "Novartis AG",
+          "basePrice": 128.29,
+          "shares": 629958,
+          "value": 80801389,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ELV",
+          "companyName": "Elevance Health Inc.",
+          "basePrice": 323.14,
+          "shares": 246365,
+          "value": 79605459,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "JNJ",
+          "companyName": "Johnson & Johnson",
+          "basePrice": 185.43,
+          "shares": 424760,
+          "value": 78762384,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "V",
+          "companyName": "Visa Inc.",
+          "basePrice": 341.45,
+          "shares": 203944,
+          "value": 69625306,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "SLB",
+          "companyName": "Schlumberger Ltd",
+          "basePrice": 34.37,
+          "shares": 1965908,
+          "value": 67566961,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "NOC",
+          "companyName": "Northrop Grumman Corp.",
+          "basePrice": 609.27,
+          "shares": 105511,
+          "value": 64292800,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TTD",
+          "companyName": "The Trade Desk Inc.",
+          "basePrice": 49.02,
+          "shares": 1289848,
+          "value": 63220880,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "VXUS",
+          "companyName": "Vanguard Intl Equity Index F",
+          "basePrice": 71.36,
+          "shares": 840898,
+          "value": 60016267,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ATKR",
+          "companyName": "Atkore Inc.",
+          "basePrice": 62.76,
+          "shares": 895998,
+          "value": 56218289,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "HON",
+          "companyName": "Honeywell Intl Inc.",
+          "basePrice": 210.53,
+          "shares": 265293,
+          "value": 55845255,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "GLOB",
+          "companyName": "Globant S A",
+          "basePrice": 57.39,
+          "shares": 597231,
+          "value": 34271120,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ZTO",
+          "companyName": "ZTO Express Cayman Inc.",
+          "basePrice": 19.2,
+          "shares": 892018,
+          "value": 17124419,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "TS",
+          "companyName": "Tenaris S A",
+          "basePrice": 35.76,
+          "shares": 408147,
+          "value": 14599418,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "KSPI",
+          "companyName": "Kaspi Kz JSC",
+          "basePrice": 81.68,
+          "shares": 154802,
+          "value": 12644227,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "ITUB",
+          "companyName": "Itau Unibanco Hldg S A",
+          "basePrice": 7.34,
+          "shares": 1615455,
+          "value": 11857440,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ACWI",
+          "companyName": "Ishares Tr MSCI ACWI ETF",
+          "basePrice": 138.25,
+          "shares": 63515,
+          "value": 8780708,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "INDA",
+          "companyName": "Ishares Tr MSCI INDIA ETF",
+          "basePrice": 52.06,
+          "shares": 157699,
+          "value": 8209810,
+          "exchange": "AMS"
+        },
+        {
+          "ticker": "EPAM",
+          "companyName": "Epam Sys Inc.",
+          "basePrice": 150.77,
+          "shares": 37181,
+          "value": 5606523,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "IBN",
+          "companyName": "ICICI Bank Limited",
+          "basePrice": 30.23,
+          "shares": 75629,
+          "value": 2286278,
+          "exchange": "NYS"
+        },
+        {
+          "ticker": "ACWX",
+          "companyName": "Ishares Tr MSCI ACWI EX US",
+          "basePrice": 65,
+          "shares": 19823,
+          "value": 1288693,
+          "exchange": "NAS"
+        },
+        {
+          "ticker": "VEA",
+          "companyName": "Vanguard Tax-Managed Fds",
+          "basePrice": 59.93,
+          "shares": 17814,
+          "value": 1067525,
+          "exchange": "AMS"
+        }
       ]
     }
   }
