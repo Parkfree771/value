@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
-import { getKISTokenWithCache } from '@/lib/kisTokenManager';
+import { getKISStockPrice, getKISOverseaStockPrice, detectExchange, getKISToken } from '@/lib/kis';
+// import { getKISTokenWithCache } from '@/lib/kisTokenManager'; // 임시로 비활성화
 import { getAllUniqueTickers } from '@/lib/dynamicTickers';
 
 const DELAY_BETWEEN_REQUESTS = 100; // ms (초당 10회 = 안전한 rate limit)
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
 
     console.log('[CRON] ===== Starting stock price update =====');
 
-    // 2. 토큰 준비 (Firestore 캐싱)
-    await getKISTokenWithCache();
+    // 2. 토큰 준비 (메모리 캐시 사용 - Firestore 없이)
+    await getKISToken();
     console.log('[CRON] KIS token ready');
 
     // 3. 동적 ticker 리스트 생성 (posts + 구루 포트폴리오)
