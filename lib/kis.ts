@@ -29,25 +29,40 @@ let tokenExpiry: number | null = null;
 export async function getKISToken(): Promise<string> {
   // 캐시된 토큰이 유효한 경우 재사용
   if (cachedToken && tokenExpiry && Date.now() < tokenExpiry) {
+    console.log('[KIS Token] Using cached token');
     return cachedToken;
   }
 
+  console.log('[KIS Token] Generating new token...');
+  console.log('[KIS Token] BASE_URL:', process.env.KIS_BASE_URL);
+  console.log('[KIS Token] APP_KEY exists:', !!process.env.KIS_APP_KEY);
+  console.log('[KIS Token] APP_SECRET exists:', !!process.env.KIS_APP_SECRET);
+
   const url = `${process.env.KIS_BASE_URL}/oauth2/tokenP`;
+
+  const requestBody = {
+    grant_type: 'client_credentials',
+    appkey: process.env.KIS_APP_KEY,
+    appsecret: process.env.KIS_APP_SECRET,
+  };
+
+  console.log('[KIS Token] Request URL:', url);
+  console.log('[KIS Token] Request body:', { ...requestBody, appsecret: '***' });
 
   const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      grant_type: 'client_credentials',
-      appkey: process.env.KIS_APP_KEY,
-      appsecret: process.env.KIS_APP_SECRET,
-    }),
+    body: JSON.stringify(requestBody),
   });
 
+  console.log('[KIS Token] Response status:', response.status);
+
   if (!response.ok) {
-    throw new Error(`토큰 발급 실패: ${response.status}`);
+    const errorText = await response.text();
+    console.error('[KIS Token] Error response:', errorText);
+    throw new Error(`토큰 발급 실패: ${response.status} - ${errorText}`);
   }
 
   const data: KISTokenResponse = await response.json();
