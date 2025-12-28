@@ -38,7 +38,8 @@
       "Bash(npx firebase deploy:*)",
       "Bash(npx tsc:*)",
       "Bash(curl:*)",
-      "Bash(https://warrennvalue.netlify.app/api/cron/update-stock-prices)"
+      "Bash(https://warrennvalue.netlify.app/api/cron/update-stock-prices)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []
