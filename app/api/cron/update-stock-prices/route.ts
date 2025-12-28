@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
 
     console.log('[CRON] ===== Starting stock price update =====');
 
-    // 임시 테스트: 하드코딩된 종목 리스트 (Firestore 없이)
-    const tickers = ['005930', 'AAPL']; // 삼성전자, 애플
-    console.log(`[CRON] [TEST MODE] Processing ${tickers.length} hardcoded tickers`);
+    // 동적 ticker 리스트 생성 (posts + 구루 포트폴리오)
+    const tickers = await getAllUniqueTickers();
+    console.log(`[CRON] Processing ${tickers.length} unique tickers`);
 
     // 토큰 준비 (메모리 캐시 사용)
     await getKISToken();
