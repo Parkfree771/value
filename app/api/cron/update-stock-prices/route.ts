@@ -1,10 +1,12 @@
 // 주식 가격 자동 업데이트 크론 작업
 import { NextRequest, NextResponse } from 'next/server';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { ref, uploadString } from 'firebase/storage';
+import { db, storage } from '@/lib/firebase';
 import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
 import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
 import { getUserPostsTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
+import guruPortfolioData from '@/lib/guru-portfolio-data.json';
 
 const DELAY_BETWEEN_REQUESTS = 100; // ms (초당 10회 = 안전한 rate limit)
 
@@ -77,6 +79,7 @@ export async function POST(request: NextRequest) {
     let successCount = 0;
     let failCount = 0;
     const errors: string[] = [];
+    const stockPricesMap = new Map<string, { price: number; currency: string }>(); // 구루 JSON용
 
     for (let i = 0; i < tickers.length; i++) {
       const ticker = tickers[i];
@@ -116,6 +119,14 @@ export async function POST(request: NextRequest) {
           lastUpdated: Timestamp.now(),
         });
 
+        // 구루 포트폴리오 종목인 경우 stockPricesMap에 추가
+        if (type === 'guru') {
+          stockPricesMap.set(ticker, {
+            price: priceData.price,
+            currency,
+          });
+        }
+
         successCount++;
         console.log(`[CRON] ✓ ${ticker}: ${priceData.price} ${currency}`);
       } catch (error) {
@@ -141,6 +152,67 @@ export async function POST(request: NextRequest) {
       // Rate limiting: 마지막 종목 제외하고 100ms delay
       if (i < tickers.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+      }
+    }
+
+    // 5. 구루 포트폴리오인 경우 Firebase Storage JSON 파일 생성 및 업로드
+    if (type === 'guru' && stockPricesMap.size > 0) {
+      console.log(`[CRON] Generating JSON file for ${stockPricesMap.size} guru stocks...`);
+
+      // 5-1. JSON 파일에서 basePrice 맵 생성
+      const basePriceMap = new Map<string, { basePrice: number; companyName: string }>();
+      Object.values(guruPortfolioData.gurus).forEach((guru) => {
+        guru.holdings.forEach((holding) => {
+          basePriceMap.set(holding.ticker.toUpperCase(), {
+            basePrice: holding.basePrice,
+            companyName: holding.companyName,
+          });
+        });
+      });
+
+      // 5-2. 최종 JSON 구조 생성
+      const stocksData: Record<string, any> = {};
+      let calculatedCount = 0;
+
+      stockPricesMap.forEach((currentData, ticker) => {
+        const baseData = basePriceMap.get(ticker);
+
+        if (baseData) {
+          // 수익률 계산: (현재가 - 기준가) / 기준가 * 100
+          const returnRate = ((currentData.price - baseData.basePrice) / baseData.basePrice) * 100;
+
+          stocksData[ticker] = {
+            ticker,
+            companyName: baseData.companyName,
+            basePrice: baseData.basePrice,
+            currentPrice: currentData.price,
+            currency: currentData.currency,
+            returnRate: parseFloat(returnRate.toFixed(2)),
+          };
+
+          calculatedCount++;
+        } else {
+          console.warn(`[CRON] No base price found for ${ticker}`);
+        }
+      });
+
+      const jsonData = {
+        lastUpdated: new Date().toISOString(),
+        reportDate: guruPortfolioData.reportDate, // "2025-09-30"
+        totalStocks: calculatedCount,
+        stocks: stocksData,
+      };
+
+      // 5-3. Firebase Storage에 업로드 (매일 덮어쓰기)
+      try {
+        const storageRef = ref(storage, 'guru-stock-prices.json');
+        await uploadString(storageRef, JSON.stringify(jsonData, null, 2), 'raw', {
+          contentType: 'application/json',
+        });
+
+        console.log(`[CRON] ✅ JSON file uploaded to Firebase Storage (${calculatedCount} stocks)`);
+      } catch (uploadError) {
+        console.error('[CRON] Failed to upload JSON to Firebase Storage:', uploadError);
       }
     }
 
