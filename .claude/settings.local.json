@@ -39,7 +39,9 @@
       "Bash(npx tsc:*)",
       "Bash(curl:*)",
       "Bash(https://warrennvalue.netlify.app/api/cron/update-stock-prices)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(\"https://warrennvalue.netlify.app/api/cron/update-stock-prices?type=guru\" )",
+      "Bash(\"https://warrennvalue.netlify.app/api/cron/update-stock-prices?type=user\" )"
     ],
     "deny": [],
     "ask": []

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getHistoricalPrice, getCurrentStockPrice } from '@/lib/stockPrice';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import guruPortfolioData from '@/lib/guru-portfolio-data.json';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,37 +14,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`Fetching prices for ${tickers.length} tickers on ${reportDate}`);
+    console.log(`[Portfolio Prices] Fetching prices for ${tickers.length} tickers`);
 
-    // 각 티커별로 과거 가격과 현재 가격 가져오기
+    // JSON 파일에서 basePrice 맵 생성
+    const basePriceMap = new Map<string, number>();
+    Object.values(guruPortfolioData.gurus).forEach((guru) => {
+      guru.holdings.forEach((holding) => {
+        basePriceMap.set(holding.ticker.toUpperCase(), holding.basePrice);
+      });
+    });
+
+    // 각 티커별로 basePrice와 현재가 가져오기
     const pricePromises = tickers.map(async (ticker: string) => {
       try {
-        const [historicalData, currentData] = await Promise.all([
-          getHistoricalPrice(ticker, reportDate),
-          getCurrentStockPrice(ticker),
-        ]);
+        const tickerUpper = ticker.toUpperCase();
 
-        if (!historicalData || !currentData) {
-          console.warn(`Price data not available for ${ticker}`);
+        // 1. JSON에서 9월 30일 기준가 가져오기
+        const reportedPrice = basePriceMap.get(tickerUpper);
+
+        // 2. Firestore에서 현재가 가져오기
+        const stockDoc = await getDoc(doc(db, 'stock_data', tickerUpper));
+        const currentPrice = stockDoc.exists() ? stockDoc.data()?.price : null;
+
+        if (!reportedPrice || !currentPrice) {
+          console.warn(`[Portfolio Prices] Missing price data for ${ticker} - basePrice: ${reportedPrice}, currentPrice: ${currentPrice}`);
           return {
             ticker,
-            reportedPrice: null,
-            currentPrice: null,
+            reportedPrice: reportedPrice || null,
+            currentPrice: currentPrice || null,
             changeFromReported: null,
           };
         }
 
-        const changeFromReported =
-          ((currentData.price - historicalData.close) / historicalData.close) * 100;
+        // 3. 수익률 계산
+        const changeFromReported = ((currentPrice - reportedPrice) / reportedPrice) * 100;
 
         return {
           ticker,
-          reportedPrice: historicalData.close,
-          currentPrice: currentData.price,
+          reportedPrice,
+          currentPrice,
           changeFromReported: parseFloat(changeFromReported.toFixed(2)),
         };
       } catch (error) {
-        console.error(`Error fetching price for ${ticker}:`, error);
+        console.error(`[Portfolio Prices] Error fetching price for ${ticker}:`, error);
         return {
           ticker,
           reportedPrice: null,
@@ -60,7 +74,7 @@ export async function POST(request: NextRequest) {
       reportDate,
     });
   } catch (error) {
-    console.error('Portfolio prices fetch error:', error);
+    console.error('[Portfolio Prices] Fetch error:', error);
     return NextResponse.json(
       {
         error: 'Failed to fetch portfolio prices',
