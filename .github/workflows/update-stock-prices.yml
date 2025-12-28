@@ -1,0 +1,46 @@
+name: Update Stock Prices
+
+on:
+  schedule:
+    # 매 15분마다 실행 (UTC 기준)
+    - cron: '*/15 * * * *'
+
+  # 수동 실행 가능 (Actions 탭에서 "Run workflow" 버튼)
+  workflow_dispatch:
+
+jobs:
+  update-prices:
+    name: Fetch and update stock prices
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # 300종목 × 100ms = 30초 + 여유
+
+    steps:
+      - name: Call stock price update API
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            ${{ secrets.SITE_URL }}/api/cron/update-stock-prices)
+
+          http_code=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+
+          echo "HTTP Status: $http_code"
+          echo "Response Body:"
+          echo "$body" | jq '.' 2>/dev/null || echo "$body"
+
+          # API가 200이 아닌 상태 코드를 반환하면 워크플로우 실패
+          if [ "$http_code" -ne 200 ]; then
+            echo "❌ Error: API returned status $http_code"
+            exit 1
+          fi
+
+          echo "✅ Stock prices updated successfully"
+
+      - name: Log completion
+        if: success()
+        run: |
+          echo "================================================"
+          echo "Stock prices updated successfully"
+          echo "Timestamp: $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+          echo "================================================"
