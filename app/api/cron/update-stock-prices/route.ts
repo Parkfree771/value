@@ -70,6 +70,9 @@ export async function POST(request: NextRequest) {
           priceData = await getKISOverseaStockPrice(ticker, exchange);
         }
 
+        // currency 결정 (국내 = KRW, 해외 = priceData.currency 또는 USD)
+        const currency = isDomestic ? 'KRW' : ((priceData as any).currency || 'USD');
+
         // Firestore에 개별 문서로 저장
         const docRef = doc(db, 'stock_data', ticker);
         await setDoc(docRef, {
@@ -81,13 +84,13 @@ export async function POST(request: NextRequest) {
           high: priceData.high,
           low: priceData.low,
           volume: priceData.volume,
-          currency: priceData.currency || (isDomestic ? 'KRW' : 'USD'),
+          currency,
           isDomestic,
           lastUpdated: Timestamp.now(),
         });
 
         successCount++;
-        console.log(`[CRON] ✓ ${ticker}: ${priceData.price} ${priceData.currency || (isDomestic ? 'KRW' : 'USD')}`);
+        console.log(`[CRON] ✓ ${ticker}: ${priceData.price} ${currency}`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         console.error(`[CRON] ✗ Failed: ${ticker} - ${errorMsg}`);
