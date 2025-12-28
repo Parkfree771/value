@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { getKISStockPrice, getKISOverseaStockPrice, detectExchange, getKISToken } from '@/lib/kis';
-// import { getKISTokenWithCache } from '@/lib/kisTokenManager'; // 임시로 비활성화
+import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
+import { getKISTokenWithCache } from '@/lib/kisTokenManager';
 import { getAllUniqueTickers } from '@/lib/dynamicTickers';
 
 const DELAY_BETWEEN_REQUESTS = 100; // ms (초당 10회 = 안전한 rate limit)
@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
     const tickers = await getAllUniqueTickers();
     console.log(`[CRON] Processing ${tickers.length} unique tickers`);
 
-    // 토큰 준비 (메모리 캐시 사용)
-    await getKISToken();
+    // 토큰 준비 (Firestore 캐시 사용 - serverless에서 중요!)
+    await getKISTokenWithCache();
     console.log('[CRON] KIS token ready');
 
     if (tickers.length === 0) {
