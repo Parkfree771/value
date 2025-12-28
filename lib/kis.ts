@@ -1,4 +1,5 @@
 // 한국투자증권 API 유틸리티
+import { getKISTokenWithCache } from './kisTokenManager';
 
 interface KISTokenResponse {
   access_token: string;
@@ -79,7 +80,7 @@ export async function getKISToken(): Promise<string> {
  * @param stockCode 종목코드 (예: 005930 - 삼성전자)
  */
 export async function getKISStockPrice(stockCode: string) {
-  const token = await getKISToken();
+  const token = await getKISTokenWithCache();
 
   // 쿼리 파라미터 추가
   const params = new URLSearchParams({
@@ -129,7 +130,7 @@ export async function getKISStockPrice(stockCode: string) {
  * @param exchange 거래소 코드 (예: NAS, NYS, HKS)
  */
 export async function getKISOverseaStockPrice(symbol: string, exchange: string = 'NAS') {
-  const token = await getKISToken();
+  const token = await getKISTokenWithCache();
 
   const params = new URLSearchParams({
     AUTH: '',
