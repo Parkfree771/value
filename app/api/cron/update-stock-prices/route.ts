@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { doc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
-import { getKISTokenWithCache } from '@/lib/kisTokenManager';
-import { getAllUniqueTickers } from '@/lib/dynamicTickers';
+import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
+import { getUserPostsTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
 
 const DELAY_BETWEEN_REQUESTS = 100; // ms (초당 10회 = 안전한 rate limit)
 
@@ -24,15 +24,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('[CRON] ===== Starting stock price update =====');
+    // 쿼리 파라미터 확인
+    const searchParams = request.nextUrl.searchParams;
+    const type = searchParams.get('type') || 'all'; // user | guru | all
+    const forceRefresh = searchParams.get('forceRefresh') === 'true';
 
-    // 동적 ticker 리스트 생성 (posts + 구루 포트폴리오)
-    const tickers = await getAllUniqueTickers();
-    console.log(`[CRON] Processing ${tickers.length} unique tickers`);
+    console.log(`[CRON] ===== Starting stock price update (type: ${type}) =====`);
 
-    // 토큰 준비 (Firestore 캐시 사용 - serverless에서 중요!)
-    await getKISTokenWithCache();
-    console.log('[CRON] KIS token ready');
+    // 토큰 준비 (강제 갱신 또는 캐시 사용)
+    if (forceRefresh) {
+      console.log('[CRON] Force refreshing KIS token...');
+      await refreshKISToken();
+      console.log('[CRON] New token generated and cached');
+    } else {
+      await getKISTokenWithCache();
+      console.log('[CRON] KIS token ready (cached)');
+    }
+
+    // 종목 리스트 생성 (type에 따라 분기)
+    let tickers: string[] = [];
+
+    if (type === 'user') {
+      // 15분마다: 사용자 게시글 종목만 (피드, 마켓콜, 마이페이지)
+      tickers = await getUserPostsTickers();
+      console.log(`[CRON] Processing ${tickers.length} user post tickers (real-time)`);
+    } else if (type === 'guru') {
+      // 매일 06시: 구루 포트폴리오 종목만 (종가)
+      tickers = await getGuruTickers();
+      console.log(`[CRON] Processing ${tickers.length} guru portfolio tickers (daily close)`);
+    } else {
+      // 전체 (기본값, 하위 호환성)
+      tickers = await getAllUniqueTickers();
+      console.log(`[CRON] Processing ${tickers.length} total tickers (all)`);
+    }
 
     if (tickers.length === 0) {
       console.warn('[CRON] No tickers found to process');

@@ -4,48 +4,75 @@ import { db } from './firebase';
 import { GURU_PORTFOLIOS } from '@/app/guru-tracker/portfolioData';
 
 /**
- * Firestore posts와 구루 포트폴리오에서 모든 unique ticker 수집
- * @returns 중복 제거된 ticker 배열 (정렬됨)
+ * 사용자 게시글에서 ticker 수집 (posts + market-call)
+ * 15분마다 실시간 업데이트용
  */
-export async function getAllUniqueTickers(): Promise<string[]> {
+export async function getUserPostsTickers(): Promise<string[]> {
   const tickersSet = new Set<string>();
 
-  // 1. Firestore posts 컬렉션에서 ticker 수집
+  // 1. posts 컬렉션
   try {
     const postsSnapshot = await getDocs(collection(db, 'posts'));
-    let postsCount = 0;
-
     postsSnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.ticker && typeof data.ticker === 'string') {
-        // 대문자로 정규화하여 저장
         tickersSet.add(data.ticker.toUpperCase().trim());
-        postsCount++;
       }
     });
-
-    console.log(`[Tickers] Found ${postsCount} tickers from ${postsSnapshot.size} posts`);
+    console.log(`[User Tickers] Found ${tickersSet.size} tickers from ${postsSnapshot.size} posts`);
   } catch (error) {
-    console.error('[Tickers] Failed to fetch posts:', error);
-    // 계속 진행 - 구루 포트폴리오 종목은 가져올 수 있음
+    console.error('[User Tickers] Failed to fetch posts:', error);
   }
 
-  // 2. 구루 포트폴리오에서 ticker 수집
-  let guruTickersCount = 0;
+  // 2. market-call 컬렉션
+  try {
+    const marketCallSnapshot = await getDocs(collection(db, 'market-call'));
+    let marketCallCount = 0;
+    marketCallSnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.ticker && typeof data.ticker === 'string') {
+        tickersSet.add(data.ticker.toUpperCase().trim());
+        marketCallCount++;
+      }
+    });
+    console.log(`[User Tickers] Found ${marketCallCount} tickers from ${marketCallSnapshot.size} market-call posts`);
+  } catch (error) {
+    console.error('[User Tickers] Failed to fetch market-call:', error);
+  }
+
+  console.log(`[User Tickers] Total unique user tickers: ${tickersSet.size}`);
+  return Array.from(tickersSet).sort();
+}
+
+/**
+ * 구루 포트폴리오에서 ticker 수집
+ * 매일 한 번만 업데이트용 (종가)
+ */
+export async function getGuruTickers(): Promise<string[]> {
+  const tickersSet = new Set<string>();
+
   Object.values(GURU_PORTFOLIOS).forEach((portfolio) => {
     portfolio.holdings.forEach((holding) => {
       if (holding.ticker) {
         tickersSet.add(holding.ticker.toUpperCase().trim());
-        guruTickersCount++;
       }
     });
   });
 
-  console.log(`[Tickers] Found ${guruTickersCount} tickers from guru portfolios (${Object.keys(GURU_PORTFOLIOS).length} gurus)`);
-
-  const totalTickers = tickersSet.size;
-  console.log(`[Tickers] Total unique tickers: ${totalTickers}`);
-
-  // 정렬해서 반환 (로그 확인 시 편리)
+  console.log(`[Guru Tickers] Found ${tickersSet.size} tickers from ${Object.keys(GURU_PORTFOLIOS).length} guru portfolios`);
   return Array.from(tickersSet).sort();
+}
+
+/**
+ * 모든 unique ticker 수집 (하위 호환성)
+ * @deprecated 대신 getUserPostsTickers() 또는 getGuruTickers() 사용
+ */
+export async function getAllUniqueTickers(): Promise<string[]> {
+  const userTickers = await getUserPostsTickers();
+  const guruTickers = await getGuruTickers();
+
+  const allTickers = new Set([...userTickers, ...guruTickers]);
+  console.log(`[All Tickers] Total unique tickers: ${allTickers.size}`);
+
+  return Array.from(allTickers).sort();
 }
