@@ -26,13 +26,14 @@ export async function POST(request: NextRequest) {
 
     console.log('[CRON] ===== Starting stock price update =====');
 
-    // 2. 토큰 준비 (메모리 캐시 사용 - Firestore 없이)
-    await getKISToken();
-    console.log('[CRON] KIS token ready');
-
-    // 3. 동적 ticker 리스트 생성 (posts + 구루 포트폴리오)
+    // 2. 동적 ticker 리스트 생성 (posts + 구루 포트폴리오) - 토큰보다 먼저!
     const tickers = await getAllUniqueTickers();
     console.log(`[CRON] Processing ${tickers.length} unique tickers`);
+
+    // 3. 토큰 준비 (메모리 캐시 사용 - Firestore 없이)
+    // 주의: Firestore 조회 이후에 토큰 발급 (serverless function 특성)
+    await getKISToken();
+    console.log('[CRON] KIS token ready');
 
     if (tickers.length === 0) {
       console.warn('[CRON] No tickers found to process');
