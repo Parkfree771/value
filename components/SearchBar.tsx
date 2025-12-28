@@ -1,71 +1,83 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+
+interface StockSuggestion {
+  symbol: string;
+  name: string;
+  nameKr?: string;
+  exchange: string;
+  type: 'EQUITY' | 'ETF';
+}
 
 interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  reports?: Array<{
-    id: string;
-    stockName: string;
-    ticker: string;
-    author: string;
-    title: string;
-  }>;
 }
 
-export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }: SearchBarProps) {
+export default function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [suggestions, setSuggestions] = useState<StockSuggestion[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  // 자동완성 추천 목록 생성 - useMemo로 최적화
-  const suggestions = useMemo(() => {
-    if (!searchQuery.trim() || !reports.length) return [];
+  // 실시간 종목 검색 API 호출
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      const query = searchQuery.trim();
 
-    const query = searchQuery.toLowerCase();
-    const suggestionsMap = new Map<string, { type: string; label: string; value: string }>();
-
-    reports.forEach((report) => {
-      // 종목명 매칭
-      if (report.stockName.toLowerCase().includes(query)) {
-        const key = `stock-${report.stockName}`;
-        if (!suggestionsMap.has(key)) {
-          suggestionsMap.set(key, {
-            type: '종목',
-            label: report.stockName,
-            value: report.stockName,
-          });
-        }
+      if (!query || query.length < 1) {
+        setSuggestions([]);
+        return;
       }
 
-      // 티커 매칭
-      if (report.ticker.toLowerCase().includes(query)) {
-        const key = `ticker-${report.ticker}`;
-        if (!suggestionsMap.has(key)) {
-          suggestionsMap.set(key, {
-            type: '티커',
-            label: `${report.ticker} (${report.stockName})`,
-            value: report.ticker,
-          });
-        }
+      // 이전 요청 취소
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
 
-      // 작성자 매칭
-      if (report.author.toLowerCase().includes(query)) {
-        const key = `author-${report.author}`;
-        if (!suggestionsMap.has(key)) {
-          suggestionsMap.set(key, {
-            type: '작성자',
-            label: report.author,
-            value: report.author,
-          });
-        }
-      }
-    });
+      abortControllerRef.current = new AbortController();
+      setIsLoading(true);
 
-    return Array.from(suggestionsMap.values()).slice(0, 8);
-  }, [searchQuery, reports]);
+      try {
+        const response = await fetch(
+          `/api/stocks/search?q=${encodeURIComponent(query)}&limit=10`,
+          { signal: abortControllerRef.current.signal }
+        );
+
+        if (!response.ok) {
+          throw new Error('Search failed');
+        }
+
+        const data = await response.json();
+
+        if (data.success && Array.isArray(data.stocks)) {
+          setSuggestions(data.stocks);
+        } else {
+          setSuggestions([]);
+        }
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Stock search error:', error);
+          setSuggestions([]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    // 디바운싱
+    const timeoutId = setTimeout(fetchSuggestions, 300);
+
+    return () => {
+      clearTimeout(timeoutId);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [searchQuery]);
 
   // 외부 클릭 감지
   useEffect(() => {
@@ -91,17 +103,19 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
       setFocusedIndex((prev) => (prev > 0 ? prev - 1 : -1));
     } else if (e.key === 'Enter' && focusedIndex >= 0) {
       e.preventDefault();
-      handleSelectSuggestion(suggestions[focusedIndex].value);
+      handleSelectSuggestion(suggestions[focusedIndex]);
     } else if (e.key === 'Escape') {
       setShowSuggestions(false);
       setFocusedIndex(-1);
     }
   };
 
-  const handleSelectSuggestion = useCallback((value: string) => {
-    setSearchQuery(value);
+  const handleSelectSuggestion = useCallback((stock: StockSuggestion) => {
+    // 종목 심볼 또는 이름으로 검색
+    setSearchQuery(stock.symbol);
     setShowSuggestions(false);
     setFocusedIndex(-1);
+    setSuggestions([]);
   }, [setSearchQuery]);
 
   const highlightMatch = useCallback((text: string, query: string) => {
@@ -118,6 +132,19 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
       </>
     );
   }, []);
+
+  const getExchangeBadgeColor = (exchange: string) => {
+    if (exchange === 'KRX') return 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300';
+    if (exchange === 'NAS' || exchange === 'NYS') return 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
+    return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+  };
+
+  const getExchangeLabel = (exchange: string) => {
+    if (exchange === 'KRX') return '한국';
+    if (exchange === 'NAS') return 'NASDAQ';
+    if (exchange === 'NYS') return 'NYSE';
+    return exchange;
+  };
 
   return (
     <div className="mb-4 sm:mb-6" ref={searchRef}>
@@ -168,27 +195,40 @@ export default function SearchBar({ searchQuery, setSearchQuery, reports = [] }:
         )}
 
         {/* 자동완성 드롭다운 */}
-        {showSuggestions && suggestions.length > 0 && (
+        {showSuggestions && (isLoading || suggestions.length > 0) && (
           <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 sm:max-h-80 overflow-y-auto">
-            {suggestions.map((suggestion, index) => (
-              <button
-                key={`${suggestion.type}-${suggestion.value}`}
-                onClick={() => handleSelectSuggestion(suggestion.value)}
-                onMouseEnter={() => setFocusedIndex(index)}
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
-                  focusedIndex === index ? 'bg-gray-50 dark:bg-gray-700' : ''
-                }`}
-              >
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <span className="px-1.5 sm:px-2 py-0.5 text-xs font-semibold rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 flex-shrink-0">
-                    {suggestion.type}
-                  </span>
-                  <span className="text-sm sm:text-base text-gray-900 dark:text-white truncate">
-                    {highlightMatch(suggestion.label, searchQuery)}
-                  </span>
-                </div>
-              </button>
-            ))}
+            {isLoading ? (
+              <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                검색 중...
+              </div>
+            ) : suggestions.length > 0 ? (
+              suggestions.map((stock, index) => (
+                <button
+                  key={`${stock.exchange}-${stock.symbol}`}
+                  onClick={() => handleSelectSuggestion(stock)}
+                  onMouseEnter={() => setFocusedIndex(index)}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
+                    focusedIndex === index ? 'bg-gray-50 dark:bg-gray-700' : ''
+                  }`}
+                >
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-semibold rounded flex-shrink-0 ${getExchangeBadgeColor(stock.exchange)}`}>
+                      {getExchangeLabel(stock.exchange)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-sm text-gray-900 dark:text-white">
+                          {highlightMatch(stock.symbol, searchQuery)}
+                        </span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                          {highlightMatch(stock.nameKr || stock.name, searchQuery)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))
+            ) : null}
           </div>
         )}
       </div>

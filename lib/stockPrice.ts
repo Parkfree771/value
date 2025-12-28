@@ -1,6 +1,10 @@
-import YahooFinance from 'yahoo-finance2';
-
-const yahooFinance = new YahooFinance();
+import {
+  getKISStockPrice,
+  getKISOverseaStockPrice,
+  getKISHistoricalStockPrice,
+  getKISHistoricalOverseaStockPrice,
+  detectExchange
+} from './kis';
 
 export interface StockQuote {
   symbol: string;
@@ -17,76 +21,70 @@ export interface HistoricalPrice {
 }
 
 /**
- * Yahoo Finance API를 사용하여 실시간 주가 정보를 가져옵니다.
- * @param ticker 주식 티커 심볼 (예: 'AAPL', '005930.KS')
+ * 한국투자증권 API를 사용하여 실시간 주가 정보를 가져옵니다.
+ * @param ticker 주식 티커 심볼 (예: '005930', 'AAPL', 'TSLA')
+ * @param exchange 거래소 코드 (선택사항, 예: 'NAS', 'NYS')
  * @returns 주가 정보
  */
-export async function getCurrentStockPrice(ticker: string): Promise<StockQuote | null> {
+export async function getCurrentStockPrice(
+  ticker: string,
+  exchange?: string
+): Promise<StockQuote | null> {
   try {
     console.log(`[StockPrice] 주가 조회 시작: ${ticker}`);
 
-    // 한국 주식의 경우 .KS 또는 .KQ 접미사 추가
-    let formattedTicker = ticker;
-    if (/^\d{6}$/.test(ticker)) {
-      // 6자리 숫자인 경우 한국 주식으로 간주
-      formattedTicker = `${ticker}.KS`; // 코스피
-      console.log(`[StockPrice] 6자리 티커 감지, .KS 추가: ${formattedTicker}`);
+    // 거래소 자동 감지 (접미사 제거 전에 먼저 감지)
+    const detectedExchange = exchange || detectExchange(ticker);
+
+    // 종목코드 정규화 (접미사 제거)
+    let stockCode = ticker;
+    if (ticker.includes('.')) {
+      stockCode = ticker.split('.')[0];
     }
 
-    console.log(`[StockPrice] Yahoo Finance API 호출 중: ${formattedTicker}`);
-    const quote: any = await yahooFinance.quote(formattedTicker);
-    console.log(`[StockPrice] API 응답:`, {
-      symbol: quote?.symbol,
-      price: quote?.regularMarketPrice,
-      currency: quote?.currency,
-      hasData: !!quote
-    });
+    // 한국 주식 (6자리 숫자)
+    if (/^\d{6}$/.test(stockCode)) {
+      console.log(`[StockPrice] 국내 주식 조회: ${stockCode}`);
+      const data = await getKISStockPrice(stockCode);
 
-    if (!quote || typeof quote !== 'object') {
-      console.error(`[StockPrice] 주가 정보를 찾을 수 없습니다: ${ticker} - 티커가 존재하지 않거나 잘못되었습니다.`);
+      if (!data) {
+        console.error(`[StockPrice] 주가 정보를 찾을 수 없습니다: ${ticker}`);
+        return null;
+      }
+
+      const result: StockQuote = {
+        symbol: stockCode,
+        price: data.price,
+        currency: 'KRW',
+        marketCap: undefined,
+        regularMarketChangePercent: data.changePercent,
+      };
+
+      console.log(`[StockPrice] 국내 주가 조회 성공:`, result);
+      return result;
+    }
+
+    // 해외 주식 (AAPL, TSLA 등)
+    console.log(`[StockPrice] 해외 주식 조회: ${stockCode} (거래소: ${detectedExchange})`);
+    const data = await getKISOverseaStockPrice(stockCode, detectedExchange);
+
+    if (!data) {
+      console.error(`[StockPrice] 주가 정보를 찾을 수 없습니다: ${ticker}`);
       return null;
     }
 
-    if (!quote.regularMarketPrice) {
-      console.error(`[StockPrice] 주가 데이터가 없습니다: ${ticker} (symbol: ${quote.symbol})`);
-      return null;
-    }
-
-    const result = {
-      symbol: quote.symbol,
-      price: quote.regularMarketPrice,
-      currency: quote.currency || 'KRW',
-      marketCap: quote.marketCap,
-      regularMarketChangePercent: quote.regularMarketChangePercent,
+    const result: StockQuote = {
+      symbol: stockCode,
+      price: data.price,
+      currency: data.currency,
+      marketCap: undefined,
+      regularMarketChangePercent: data.changePercent,
     };
-    console.log(`[StockPrice] 주가 조회 성공:`, result);
+
+    console.log(`[StockPrice] 해외 주가 조회 성공:`, result);
     return result;
   } catch (error) {
     console.error(`[StockPrice] 주가 조회 실패 (${ticker}):`, error);
-
-    // .KS로 실패한 경우 .KQ 시도 (코스닥)
-    if (ticker.endsWith('.KS')) {
-      try {
-        const kosdaqTicker = ticker.replace('.KS', '.KQ');
-        console.log(`[StockPrice] 코스닥 티커로 재시도: ${kosdaqTicker}`);
-        const quote: any = await yahooFinance.quote(kosdaqTicker);
-
-        if (quote && quote.regularMarketPrice) {
-          const result = {
-            symbol: quote.symbol,
-            price: quote.regularMarketPrice,
-            currency: quote.currency || 'KRW',
-            marketCap: quote.marketCap,
-            regularMarketChangePercent: quote.regularMarketChangePercent,
-          };
-          console.log(`[StockPrice] 코스닥 조회 성공:`, result);
-          return result;
-        }
-      } catch (kosdaqError) {
-        console.error(`[StockPrice] 코스닥 조회도 실패 (${ticker}):`, kosdaqError);
-      }
-    }
-
     return null;
   }
 }
@@ -204,62 +202,68 @@ export function formatReturnRate(returnRate: number): string {
 
 /**
  * 특정 날짜의 주식 종가를 가져옵니다.
- * @param ticker 주식 티커 심볼 (예: 'AAPL')
+ *
+ * @param ticker 주식 티커 심볼 (예: '005930', 'AAPL')
  * @param date 조회할 날짜 (YYYY-MM-DD 형식)
+ * @param exchange (선택) 거래소 코드
  * @returns 해당 날짜의 종가 정보
  */
 export async function getHistoricalPrice(
   ticker: string,
-  date: string
+  date: string,
+  exchange?: string
 ): Promise<HistoricalPrice | null> {
   try {
     console.log(`[HistoricalPrice] 과거 주가 조회 시작: ${ticker} at ${date}`);
 
-    // 날짜를 Date 객체로 변환
-    const targetDate = new Date(date);
-    const startDate = new Date(targetDate);
-    startDate.setDate(startDate.getDate() - 5); // 5일 전부터 조회 (주말/공휴일 대비)
-    const endDate = new Date(targetDate);
-    endDate.setDate(endDate.getDate() + 5); // 5일 후까지 조회
+    // 거래소 자동 감지 (접미사 제거 전에 먼저 감지)
+    const detectedExchange = exchange || detectExchange(ticker);
 
-    console.log(`[HistoricalPrice] Yahoo Finance API 호출: ${ticker} from ${startDate.toISOString()} to ${endDate.toISOString()}`);
+    // 종목코드 정규화 (접미사 제거)
+    let stockCode = ticker;
+    if (ticker.includes('.')) {
+      stockCode = ticker.split('.')[0];
+    }
 
-    const queryOptions = {
-      period1: startDate,
-      period2: endDate,
-      interval: '1d' as const,
-    };
+    // 한국 주식 (6자리 숫자)
+    if (/^\d{6}$/.test(stockCode)) {
+      console.log(`[HistoricalPrice] 국내 주식 과거 조회: ${stockCode} at ${date}`);
+      const data = await getKISHistoricalStockPrice(stockCode, date);
 
-    const result = await yahooFinance.historical(ticker, queryOptions);
+      if (!data) {
+        console.error(`[HistoricalPrice] 과거 주가 정보를 찾을 수 없습니다: ${ticker} at ${date}`);
+        return null;
+      }
 
-    if (!result || result.length === 0) {
-      console.error(`[HistoricalPrice] 데이터 없음: ${ticker} at ${date}`);
+      const result: HistoricalPrice = {
+        date: date,
+        close: data.close,
+        symbol: stockCode,
+      };
+
+      console.log(`[HistoricalPrice] 국내 과거 주가 조회 성공:`, result);
+      return result;
+    }
+
+    // 해외 주식
+    console.log(`[HistoricalPrice] 해외 주식 과거 조회: ${stockCode} at ${date} (거래소: ${detectedExchange})`);
+    const data = await getKISHistoricalOverseaStockPrice(stockCode, detectedExchange, date);
+
+    if (!data) {
+      console.error(`[HistoricalPrice] 과거 주가 정보를 찾을 수 없습니다: ${ticker} at ${date}`);
       return null;
     }
 
-    // 목표 날짜에 가장 가까운 데이터 찾기
-    const targetTime = targetDate.getTime();
-    let closestData = result[0];
-    let minDiff = Math.abs(closestData.date.getTime() - targetTime);
-
-    for (const data of result) {
-      const diff = Math.abs(data.date.getTime() - targetTime);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closestData = data;
-      }
-    }
-
-    const historicalPrice: HistoricalPrice = {
-      date: closestData.date.toISOString().split('T')[0],
-      close: closestData.close,
-      symbol: ticker,
+    const result: HistoricalPrice = {
+      date: date,
+      close: data.close,
+      symbol: stockCode,
     };
 
-    console.log(`[HistoricalPrice] 조회 성공:`, historicalPrice);
-    return historicalPrice;
+    console.log(`[HistoricalPrice] 해외 과거 주가 조회 성공:`, result);
+    return result;
   } catch (error) {
-    console.error(`[HistoricalPrice] 조회 실패 (${ticker} at ${date}):`, error);
+    console.error(`[HistoricalPrice] 과거 주가 조회 실패 (${ticker} at ${date}):`, error);
     return null;
   }
 }

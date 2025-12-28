@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import YahooFinance from 'yahoo-finance2';
-
-const yahooFinance = new YahooFinance();
+import { getCompanyProfile, STOCK_CODES, detectExchange } from '@/lib/kis';
 
 export async function GET(
   request: NextRequest,
@@ -9,69 +7,69 @@ export async function GET(
 ) {
   try {
     const { symbol } = await params;
+    const searchParams = request.nextUrl.searchParams;
+    const exchange = searchParams.get('exchange') || undefined;
 
     console.log(`[API /stocks/${symbol}] 주식 데이터 조회 시작`);
 
-    // Yahoo Finance에서 주식 데이터 조회
-    const quote: any = await yahooFinance.quote(symbol);
+    // 종목코드 정규화
+    let stockCode = symbol;
 
-    if (!quote || typeof quote !== 'object') {
+    // .KS, .KQ 등의 접미사 제거
+    if (symbol.includes('.')) {
+      stockCode = symbol.split('.')[0];
+    }
+
+    // 거래소 자동 감지
+    const detectedExchange = exchange || detectExchange(stockCode);
+
+    // getCompanyProfile 사용하여 상세 정보 조회
+    const profile = await getCompanyProfile(stockCode, detectedExchange);
+
+    if (!profile) {
       console.error(`[API /stocks/${symbol}] 주식을 찾을 수 없습니다.`);
       return NextResponse.json(
-        { error: `주식 티커 '${symbol}'을(를) 찾을 수 없습니다. 올바른 티커인지 확인해주세요.` },
+        { error: `주식 '${stockCode}'을(를) 찾을 수 없습니다.` },
         { status: 404 }
       );
     }
 
-    if (!quote.regularMarketPrice) {
-      console.error(`[API /stocks/${symbol}] 주가 데이터가 없습니다.`);
-      return NextResponse.json(
-        { error: `'${symbol}'의 주가 데이터를 가져올 수 없습니다.` },
-        { status: 404 }
-      );
+    // 종목명 우선순위: API 응답 > STOCK_CODES 매핑 > 심볼
+    let stockName = profile.name;
+    if (!stockName || stockName === stockCode) {
+      for (const [name, code] of Object.entries(STOCK_CODES)) {
+        if (code === stockCode) {
+          stockName = name;
+          break;
+        }
+      }
     }
 
-    const summaryDetail: any = await yahooFinance.quoteSummary(symbol, {
-      modules: ['summaryDetail', 'defaultKeyStatistics', 'financialData']
-    });
-
-    console.log(`[API /stocks/${symbol}] 조회 성공:`, {
-      symbol: quote.symbol,
-      price: quote.regularMarketPrice
-    });
-
-    // 필요한 데이터 추출
     const stockData = {
-      symbol: quote.symbol || symbol,
-      name: quote.shortName || quote.longName || 'Unknown',
-      currentPrice: quote.regularMarketPrice || 0,
-      currency: quote.currency || 'USD',
-      marketCap: quote.marketCap || 0,
-
-      // 재무 지표
-      per: summaryDetail.summaryDetail?.trailingPE ||
-           summaryDetail.defaultKeyStatistics?.trailingPE ||
-           null,
-      pbr: summaryDetail.defaultKeyStatistics?.priceToBook || null,
-      eps: summaryDetail.defaultKeyStatistics?.trailingEps || null,
-
-      // 추가 정보
-      exchange: quote.exchange || 'N/A',
-      industry: quote.industry || null,
-      sector: quote.sector || null,
+      symbol: stockCode,
+      name: stockName,
+      currentPrice: profile.currentPrice,
+      currency: profile.currency,
+      marketCap: profile.marketCap || 0,
+      per: profile.per || null,
+      pbr: profile.pbr || null,
+      eps: profile.eps || null,
+      exchange: profile.exchange,
+      industry: null,
+      sector: null,
+      high52w: profile.high52w || null,
+      low52w: profile.low52w || null,
+      volume: profile.volume || 0,
+      avgVolume: profile.avgVolume || null,
+      dividend: profile.dividend || null,
+      dividendYield: profile.dividendYield || null,
     };
+
+    console.log(`[API /stocks/${symbol}] 조회 성공:`, stockData);
 
     return NextResponse.json(stockData);
   } catch (error: any) {
     console.error(`[API /stocks/${(await params).symbol}] 오류:`, error);
-
-    // 404 에러 (티커를 찾을 수 없음)
-    if (error.message?.includes('Not Found') || error.message?.includes('404')) {
-      return NextResponse.json(
-        { error: `주식 티커를 찾을 수 없습니다. 올바른 티커인지 확인해주세요.` },
-        { status: 404 }
-      );
-    }
 
     return NextResponse.json(
       { error: '주식 데이터를 가져오는 중 오류가 발생했습니다.' },

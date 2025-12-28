@@ -135,6 +135,38 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
     }
   };
 
+  // 통화 심볼 변환 함수
+  const getCurrencySymbol = (currency: string): string => {
+    switch (currency.toUpperCase()) {
+      case 'USD': return '$';
+      case 'JPY': return '¥';
+      case 'KRW': return '₩';
+      case 'EUR': return '€';
+      case 'GBP': return '£';
+      case 'CNY': return '¥';
+      case 'HKD': return 'HK$';
+      default: return currency;
+    }
+  };
+
+  // 숫자 포맷팅 (천 단위 콤마)
+  const formatNumber = (num: number): string => {
+    return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(num);
+  };
+
+  // 시가총액 포맷팅
+  const formatMarketCap = (marketCap: number, currency: string): string => {
+    const symbol = getCurrencySymbol(currency);
+    if (marketCap >= 1e12) {
+      return `${symbol}${(marketCap / 1e12).toFixed(2)}T`;
+    } else if (marketCap >= 1e9) {
+      return `${symbol}${(marketCap / 1e9).toFixed(2)}B`;
+    } else if (marketCap >= 1e6) {
+      return `${symbol}${(marketCap / 1e6).toFixed(2)}M`;
+    }
+    return `${symbol}${formatNumber(marketCap)}`;
+  };
+
   return (
     <div ref={searchRef} className="relative w-full">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -152,11 +184,11 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
               {selectedStock.symbol} · {selectedStock.exchange}
             </div>
             <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 grid grid-cols-2 gap-2">
-              <div>현재가: {selectedStock.currency} {selectedStock.currentPrice?.toFixed(2)}</div>
-              <div>시가총액: {(selectedStock.marketCap / 1e9).toFixed(2)}B</div>
-              {selectedStock.per && <div>PER: {selectedStock.per.toFixed(2)}</div>}
-              {selectedStock.pbr && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}
-              {selectedStock.eps && <div>EPS: {selectedStock.eps.toFixed(2)}</div>}
+              <div>현재가: {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}</div>
+              <div>시가총액: {formatMarketCap(selectedStock.marketCap, selectedStock.currency)}</div>
+              {selectedStock.per && selectedStock.per > 0 && <div>PER: {selectedStock.per.toFixed(2)}</div>}
+              {selectedStock.pbr && selectedStock.pbr > 0 && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}
+              {selectedStock.eps && selectedStock.eps !== 0 && <div>EPS: {getCurrencySymbol(selectedStock.currency)}{selectedStock.eps.toFixed(2)}</div>}
             </div>
           </div>
           <button

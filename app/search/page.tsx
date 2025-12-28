@@ -63,7 +63,7 @@ export default function SearchPage() {
       </div>
 
       {/* Search Bar */}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={reports} />
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
       {/* Filters */}
       <FilterBar />

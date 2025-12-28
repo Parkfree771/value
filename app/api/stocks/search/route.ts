@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import YahooFinance from 'yahoo-finance2';
-
-const yahooFinance = new YahooFinance();
+import { searchAllStocks } from '@/lib/kis';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q');
+    const limit = parseInt(searchParams.get('limit') || '20', 10);
 
     if (!query) {
       return NextResponse.json(
@@ -17,27 +16,24 @@ export async function GET(request: NextRequest) {
 
     console.log(`[API /stocks/search] 검색 시작: ${query}`);
 
-    // Yahoo Finance에서 기업 검색
-    const result: any = await yahooFinance.search(query);
+    // 한국투자증권 API를 통한 실시간 검색
+    const results = await searchAllStocks(query, limit);
 
-    console.log(`[API /stocks/search] 검색 완료: ${result.quotes?.length || 0}개 결과`);
+    console.log(`[API /stocks/search] 검색 완료: ${results.length}개 결과`);
 
-    // 주식 종목만 필터링
-    const stocks = (result.quotes || [])
-      .filter((quote: any) => quote.quoteType === 'EQUITY')
-      .slice(0, 10) // 상위 10개만
-      .map((quote: any) => ({
-        symbol: quote.symbol,
-        name: quote.shortname || quote.longname || quote.symbol,
-        exchange: quote.exchange || 'N/A',
-        type: quote.quoteType
-      }));
-
-    return NextResponse.json({ stocks });
+    return NextResponse.json({
+      success: true,
+      stocks: results,
+      count: results.length,
+    });
   } catch (error) {
     console.error('Stock search error:', error);
     return NextResponse.json(
-      { error: 'Failed to search stocks' },
+      {
+        success: false,
+        error: 'Failed to search stocks',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
       { status: 500 }
     );
   }

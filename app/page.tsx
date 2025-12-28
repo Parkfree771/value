@@ -100,7 +100,7 @@ export default function HomePage() {
 
       {/* 데스크탑: 검색바 + 필터바 */}
       <div className="hidden md:block">
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} reports={reports} />
+        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <FilterBar onFilterChange={setFilters} />
       </div>
 
