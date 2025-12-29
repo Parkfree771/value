@@ -8,7 +8,7 @@ import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
 import { getUserPostsTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
 import guruPortfolioData from '@/lib/guru-portfolio-data.json';
 
-const DELAY_BETWEEN_REQUESTS = 100; // ms (초당 10회 = 안전한 rate limit)
+const DELAY_BETWEEN_REQUESTS = 50; // ms (초당 20회 = KIS API limit)
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
@@ -182,6 +182,7 @@ export async function POST(request: NextRequest) {
           stocksData[ticker] = {
             ticker,
             companyName: baseData.companyName,
+            exchange: exchangeMap?.get(ticker) || null,
             basePrice: baseData.basePrice,
             currentPrice: currentData.price,
             currency: currentData.currency,
