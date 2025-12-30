@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage, Timestamp } from '@/lib/firebase-admin';
 import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
 import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
-import { getUserPostsTickers, getPostTickers, getMarketCallTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
+import { getUserPostsTickers, getPostTickers, getMarketCallTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers-admin';
 import guruPortfolioData from '@/lib/guru-portfolio-data.json';
 
 // Netlify Functions 타임아웃 설정 (무료 플랜 최대: 26초)
