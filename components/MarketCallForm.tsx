@@ -110,7 +110,7 @@ export default function WordWatchForm({ onSubmit, onCancel, initialData, isEditM
   const insertImageToEditor = (url: string) => {
     if (mode === 'text') {
       const imgMarkdown = `![이미지](${url})`;
-      setContent(prev => prev + '\n' + imgMarkdown);
+      setContent((prev: string) => prev + '\n' + imgMarkdown);
     } else if (mode === 'html') {
       const imgTag = `<img src="${url}" alt="이미지" style="max-width: 100%; height: auto;" />`;
       navigator.clipboard.writeText(imgTag);
