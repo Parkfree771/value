@@ -1,8 +1,6 @@
 // 주식 가격 자동 업데이트 크론 작업
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, setDoc, Timestamp } from 'firebase/firestore';
-import { ref, uploadString } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
+import { adminDb, adminStorage, Timestamp } from '@/lib/firebase-admin';
 import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
 import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
 import { getUserPostsTickers, getPostTickers, getMarketCallTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
@@ -158,9 +156,8 @@ async function handleRequest(request: NextRequest) {
           // JSON용 데이터만 수집
           stockPricesMap.set(ticker, { price: priceData.price, currency });
         } else {
-          // Posts/Market-call은 Firestore에 저장
-          const docRef = doc(db, collectionName, ticker);
-          await setDoc(docRef, {
+          // Posts/Market-call은 Firestore에 저장 (Admin SDK 사용)
+          await adminDb.collection(collectionName).doc(ticker).set({
             ticker,
             price: priceData.price,
             change: priceData.change,
@@ -180,11 +177,10 @@ async function handleRequest(request: NextRequest) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         console.error(`[CRON] ✗ Failed: ${ticker} - ${errorMsg}`);
 
-        // 구루가 아닌 경우에만 실패한 종목을 Firestore에 저장
+        // 구루가 아닌 경우에만 실패한 종목을 Firestore에 저장 (Admin SDK 사용)
         if (type !== 'guru') {
           try {
-            const docRef = doc(db, collectionName, ticker);
-            await setDoc(docRef, {
+            await adminDb.collection(collectionName).doc(ticker).set({
               ticker,
               error: errorMsg,
               lastUpdated: Timestamp.now(),
@@ -239,11 +235,15 @@ async function handleRequest(request: NextRequest) {
         stocks: stocksData,
       };
 
-      // Firebase Storage에 업로드 (매일 덮어쓰기)
+      // Firebase Storage에 업로드 (매일 덮어쓰기, Admin SDK 사용)
       try {
-        const storageRef = ref(storage, 'guru-stock-prices.json');
-        await uploadString(storageRef, JSON.stringify(jsonData, null, 2), 'raw', {
+        const bucket = adminStorage.bucket();
+        const file = bucket.file('guru-stock-prices.json');
+        await file.save(JSON.stringify(jsonData, null, 2), {
           contentType: 'application/json',
+          metadata: {
+            cacheControl: 'public, max-age=300', // 5분 캐시
+          },
         });
         console.log(`[CRON] ✅ JSON uploaded: ${calculatedCount} stocks`);
       } catch (uploadError) {
