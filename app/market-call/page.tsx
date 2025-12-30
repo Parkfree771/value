@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
 import GuruTrackingCard from '@/components/GuruTrackingCard';
-import { MOCK_GURU_EVENTS } from '@/app/guru-tracker/mockData';
 
 export default function MarketCallPage() {
   const router = useRouter();
@@ -42,9 +41,8 @@ export default function MarketCallPage() {
     fetchMarketCall();
   }, [sortBy, currentPage]);
 
-  // Mock 데이터와 Firebase 데이터 합치기
-  const allEvents = [...firebaseEvents, ...MOCK_GURU_EVENTS.filter(e => e.data_type === 'MENTION')];
-  const mentionEvents = allEvents;
+  // Firebase 데이터만 사용
+  const mentionEvents = firebaseEvents;
 
   // Apply sorting
   const filteredEvents = mentionEvents.sort((a, b) => {

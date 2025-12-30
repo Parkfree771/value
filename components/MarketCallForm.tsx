@@ -40,11 +40,13 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  // 워드워치 전용 필드
+  // 마켓콜 전용 필드
   const [guruName, setGuruName] = useState('');
   const [guruPosition, setGuruPosition] = useState('');
   const [opinion, setOpinion] = useState<'buy' | 'sell'>('buy');
   const [sourceUrl, setSourceUrl] = useState('');
+  const [baseDate, setBaseDate] = useState(''); // 기준 날짜 (사용자 입력)
+  const [basePrice, setBasePrice] = useState(''); // 기준 가격 (사용자 입력)
 
   // HTML 모드 미리보기
   const previewContent = useMemo(() => {
@@ -120,6 +122,16 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
       return;
     }
 
+    if (!baseDate) {
+      alert('기준 날짜를 입력해주세요.');
+      return;
+    }
+
+    if (!basePrice || parseFloat(basePrice) <= 0) {
+      alert('유효한 기준 가격을 입력해주세요.');
+      return;
+    }
+
     if (isUploading) {
       alert('이미지 업로드 중입니다. 잠시만 기다려주세요.');
       return;
@@ -137,11 +149,11 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
       const actionDirection: ActionDirection = opinion === 'sell' ? 'SHORT' : 'LONG';
       const badgeLabel: BadgeLabel = opinion === 'sell' ? 'SELL' : 'BUY';
 
-      const wordWatchData = {
+      const marketCallData = {
         guru_name: guruName,
         guru_name_kr: guruPosition,
         data_type: 'MENTION',
-        event_date: new Date().toISOString().split('T')[0],
+        event_date: baseDate, // 사용자가 입력한 기준 날짜
         target_ticker: stockData.symbol,
         company_name: stockData.name,
         exchange: stockData.exchange,
@@ -154,11 +166,11 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
         summary,
         content_html: finalContent,
         tracking_data: {
-          base_price_date: new Date().toISOString().split('T')[0],
+          base_price_date: baseDate, // 사용자가 입력한 기준 날짜
           action_direction: actionDirection,
         },
-        base_price: stockData.currentPrice,
-        current_price: stockData.currentPrice,
+        base_price: parseFloat(basePrice), // 사용자가 입력한 기준 가격
+        current_price: parseFloat(basePrice), // 초기값은 기준 가격과 동일
         return_rate: 0,
         views: 0,
         likes: 0,
@@ -179,7 +191,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
         },
       };
 
-      await onSubmit(wordWatchData);
+      await onSubmit(marketCallData);
     } catch (error) {
       console.error('Error submitting form:', error);
       alert('작성 중 오류가 발생했습니다.');
@@ -303,6 +315,57 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             <option value="buy">매수 (상승 예상)</option>
             <option value="sell">매도 (하락 예상)</option>
           </select>
+        </div>
+
+        {/* 기준 날짜 & 기준 가격 */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              기준 날짜 <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="date"
+              value={baseDate}
+              onChange={(e) => setBaseDate(e.target.value)}
+              max={new Date().toISOString().split('T')[0]}
+              required
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              발언/예측 시점의 날짜를 선택하세요
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              기준 가격 {stockData && `(${stockData.currency})`} <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              value={basePrice}
+              onChange={(e) => setBasePrice(e.target.value)}
+              required
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              placeholder="150.00"
+            />
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              기준 날짜 당시의 주가를 입력하세요
+            </p>
+          </div>
+        </div>
+
+        {/* 안내 메시지 */}
+        <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <div className="flex gap-2">
+            <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="text-sm text-yellow-800 dark:text-yellow-200">
+              <strong className="font-semibold">마켓콜 추적 안내:</strong> 기준 날짜와 기준 가격을 기준으로 현재 시점까지의 수익률을 자동 계산합니다.
+              예) 2025년 9월 30일에 "테슬라 매수" 의견을 냈다면, 기준 날짜를 2025-09-30으로, 기준 가격을 당시 테슬라 종가로 입력하세요.
+            </div>
+          </div>
         </div>
       </div>
 
