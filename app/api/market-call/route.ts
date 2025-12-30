@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, Timestamp, where, documentId, getDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, Timestamp, where, documentId, getDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 
 export async function GET(request: NextRequest) {
   try {
@@ -180,6 +180,110 @@ export async function GET(request: NextRequest) {
       {
         success: false,
         error: 'Failed to fetch market-call events',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// PUT: 마켓콜 수정
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, userId, ...updateData } = body;
+
+    if (!id || !userId) {
+      return NextResponse.json(
+        { success: false, error: 'ID and userId are required' },
+        { status: 400 }
+      );
+    }
+
+    // 문서 가져오기
+    const docRef = doc(db, 'market-call', id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return NextResponse.json(
+        { success: false, error: 'Document not found' },
+        { status: 404 }
+      );
+    }
+
+    // 작성자 확인
+    const data = docSnap.data();
+    if (data.author_id !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    // 수정
+    await updateDoc(docRef, {
+      ...updateData,
+      updated_at: Timestamp.now(),
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('[API Market-call PUT] Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to update market-call',
+        message: error instanceof Error ? error.message : 'Unknown error',
+      },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE: 마켓콜 삭제
+export async function DELETE(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const id = searchParams.get('id');
+    const userId = searchParams.get('userId');
+
+    if (!id || !userId) {
+      return NextResponse.json(
+        { success: false, error: 'ID and userId are required' },
+        { status: 400 }
+      );
+    }
+
+    // 문서 가져오기
+    const docRef = doc(db, 'market-call', id);
+    const docSnap = await getDoc(docRef);
+
+    if (!docSnap.exists()) {
+      return NextResponse.json(
+        { success: false, error: 'Document not found' },
+        { status: 404 }
+      );
+    }
+
+    // 작성자 확인
+    const data = docSnap.data();
+    if (data.author_id !== userId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 403 }
+      );
+    }
+
+    // 삭제
+    await deleteDoc(docRef);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('[API Market-call DELETE] Error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: 'Failed to delete market-call',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }

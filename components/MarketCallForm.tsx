@@ -26,27 +26,31 @@ interface StockData {
 interface WordWatchFormProps {
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
+  initialData?: any; // 수정 모드일 때 초기 데이터
+  isEditMode?: boolean; // 수정 모드 여부
 }
 
-export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps) {
+export default function WordWatchForm({ onSubmit, onCancel, initialData, isEditMode = false }: WordWatchFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [mode, setMode] = useState<EditorMode>('text');
-  const [title, setTitle] = useState('');
-  const [stockData, setStockData] = useState<StockData | null>(null);
-  const [content, setContent] = useState('');
-  const [htmlContent, setHtmlContent] = useState('');
+  const [mode, setMode] = useState<EditorMode>(initialData?.mode || 'text');
+  const [title, setTitle] = useState(initialData?.title || '');
+  const [stockData, setStockData] = useState<StockData | null>(initialData?.stockData || null);
+  const [content, setContent] = useState(initialData?.mode === 'text' ? (initialData?.content_html || '') : '');
+  const [htmlContent, setHtmlContent] = useState(initialData?.mode === 'html' ? (initialData?.content_html || '') : '');
   const [images, setImages] = useState<File[]>([]);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>(initialData?.images || []);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   // 마켓콜 전용 필드
-  const [guruName, setGuruName] = useState('');
-  const [guruPosition, setGuruPosition] = useState('');
-  const [opinion, setOpinion] = useState<'buy' | 'sell'>('buy');
-  const [sourceUrl, setSourceUrl] = useState('');
-  const [baseDate, setBaseDate] = useState(''); // 기준 날짜 (사용자 입력)
-  const [basePrice, setBasePrice] = useState(''); // 기준 가격 (사용자 입력)
+  const [guruName, setGuruName] = useState(initialData?.guru_name || '');
+  const [guruPosition, setGuruPosition] = useState(initialData?.guru_name_kr || '');
+  const [opinion, setOpinion] = useState<'buy' | 'sell'>(
+    initialData?.badge_info?.label === 'SELL' ? 'sell' : 'buy'
+  );
+  const [sourceUrl, setSourceUrl] = useState(initialData?.source_url || '');
+  const [baseDate, setBaseDate] = useState(initialData?.event_date || ''); // 기준 날짜 (사용자 입력)
+  const [basePrice, setBasePrice] = useState(initialData?.base_price?.toString() || ''); // 기준 가격 (사용자 입력)
 
   // HTML 모드 미리보기
   const previewContent = useMemo(() => {
@@ -599,7 +603,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               : 'hover:from-cyan-700 hover:to-blue-700'
           }`}
         >
-          {isSubmitting ? '작성 중...' : '작성 완료'}
+          {isSubmitting ? (isEditMode ? '수정 중...' : '작성 중...') : (isEditMode ? '수정 완료' : '작성 완료')}
         </button>
         <button
           type="button"

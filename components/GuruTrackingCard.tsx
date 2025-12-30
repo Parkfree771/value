@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { GuruTrackingEvent, BadgeLabel } from '@/app/guru-tracker/types';
 import { useStockPrice } from '@/hooks/useStockPrice';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,8 +12,10 @@ interface GuruTrackingCardProps {
 }
 
 export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTrackingCardProps) {
+  const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const { user } = useAuth();
 
   // 수익 확정 여부 확인
@@ -21,6 +24,9 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
 
   // 마켓콜은 수익 확정 버튼 표시 안 함
   const showCloseButton = collection !== 'market-call' && !isClosed && isOwner;
+
+  // 마켓콜이고 본인 글이면 수정/삭제 버튼 표시
+  const showEditDeleteButtons = collection === 'market-call' && isOwner;
 
   // 실시간 주식 가격 가져오기 (확정되지 않은 경우에만)
   const { currentPrice, currency, returnRate, loading: priceLoading, lastUpdated } = useStockPrice(
@@ -217,6 +223,42 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
     } finally {
       setIsClosing(false);
     }
+  };
+
+  // 마켓콜 삭제 처리
+  const handleDelete = async () => {
+    if (!user || !event.id || isDeleting) return;
+
+    if (!confirm('정말로 이 마켓 콜을 삭제하시겠습니까?\n\n삭제 후에는 복구할 수 없습니다.')) return;
+
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/market-call?id=${event.id}&userId=${user.uid}`, {
+        method: 'DELETE',
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('마켓 콜이 삭제되었습니다.');
+        // 페이지 새로고침
+        window.location.reload();
+      } else {
+        alert(data.error || '삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('삭제 오류:', error);
+      alert('삭제 중 오류가 발생했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // 마켓콜 수정 페이지로 이동
+  const handleEdit = () => {
+    if (!event.id) return;
+    router.push(`/market-call/edit/${event.id}`);
   };
 
   return (
@@ -422,13 +464,41 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
             {event.likes || 0}
           </span>
         </div>
-        <span className={`px-3 py-1 rounded-full font-bold tracking-wider text-xs ${
-          event.data_type === 'PORTFOLIO'
-            ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-            : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
-        }`}>
-          {event.data_type === 'PORTFOLIO' ? 'WALLET WATCH' : 'MARKET CALL'}
-        </span>
+        <div className="flex items-center gap-3">
+          {/* 수정/삭제 버튼 (마켓콜 작성자인 경우) */}
+          {showEditDeleteButtons && (
+            <>
+              <button
+                onClick={handleEdit}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-xs flex items-center gap-1.5"
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                수정
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className={`px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors text-xs flex items-center gap-1.5 ${
+                  isDeleting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                {isDeleting ? '삭제 중...' : '삭제'}
+              </button>
+            </>
+          )}
+          <span className={`px-3 py-1 rounded-full font-bold tracking-wider text-xs ${
+            event.data_type === 'PORTFOLIO'
+              ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+              : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
+          }`}>
+            {event.data_type === 'PORTFOLIO' ? 'WALLET WATCH' : 'MARKET CALL'}
+          </span>
+        </div>
       </div>
     </div>
   );

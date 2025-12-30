@@ -252,7 +252,7 @@ export function detectExchange(symbol: string): string {
  * @param date 조회 날짜 (YYYYMMDD 형식)
  */
 export async function getKISHistoricalStockPrice(stockCode: string, date: string) {
-  const token = await getKISToken();
+  const token = await getKISTokenWithCache();
 
   // YYYY-MM-DD를 YYYYMMDD로 변환
   const formattedDate = date.replace(/-/g, '');
@@ -316,7 +316,7 @@ export async function getKISHistoricalOverseaStockPrice(
 ) {
   console.log(`[KIS Historical Oversea] 요청: symbol=${symbol}, exchange=${exchange}, date=${date}`);
 
-  const token = await getKISToken();
+  const token = await getKISTokenWithCache();
 
   // YYYY-MM-DD를 YYYYMMDD로 변환
   const formattedDate = date.replace(/-/g, '');
@@ -697,7 +697,7 @@ export interface CompanyProfile {
  */
 export async function getKoreanCompanyProfile(stockCode: string): Promise<CompanyProfile | null> {
   try {
-    const token = await getKISToken();
+    const token = await getKISTokenWithCache();
 
     const params = new URLSearchParams({
       fid_cond_mrkt_div_code: 'J',
@@ -765,7 +765,7 @@ export async function getOverseaCompanyProfile(
   exchange: string = 'NAS'
 ): Promise<CompanyProfile | null> {
   try {
-    const token = await getKISToken();
+    const token = await getKISTokenWithCache();
 
     const params = new URLSearchParams({
       AUTH: '',
