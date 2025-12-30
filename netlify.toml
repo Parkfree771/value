@@ -4,3 +4,24 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Scheduled Functions (Cron Jobs)
+# Posts 컬렉션 업데이트 (15분마다)
+[[scheduled_functions]]
+  path = "/api/cron/update-stock-prices?type=post"
+  schedule = "*/15 * * * *"
+
+# Market-call 컬렉션 업데이트 (15분마다, posts와 5분 차이)
+[[scheduled_functions]]
+  path = "/api/cron/update-stock-prices?type=marketcall"
+  schedule = "5,20,35,50 * * * *"
+
+# Guru 포트폴리오 업데이트 (매일 오전 6시, 배치 1/2)
+[[scheduled_functions]]
+  path = "/api/cron/update-stock-prices?type=guru&batch=1"
+  schedule = "0 6 * * *"
+
+# Guru 포트폴리오 업데이트 (매일 오전 6시 10분, 배치 2/2)
+[[scheduled_functions]]
+  path = "/api/cron/update-stock-prices?type=guru&batch=2"
+  schedule = "10 6 * * *"

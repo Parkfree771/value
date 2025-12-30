@@ -13,15 +13,18 @@ export const maxDuration = 26;
 
 const DELAY_BETWEEN_REQUESTS = 50; // ms (초당 20회 = KIS API limit)
 
-export async function POST(request: NextRequest) {
+async function handleRequest(request: NextRequest) {
   const startTime = Date.now();
 
   try {
-    // 1. 보안: CRON_SECRET 검증
+    // 1. 보안: Netlify Scheduled Function 또는 CRON_SECRET 검증
+    const isNetlifyScheduled = request.headers.get('x-nf-event') === 'scheduled';
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
+    const secretParam = request.nextUrl.searchParams.get('secret');
 
-    if (!token || token !== process.env.CRON_SECRET) {
+    // Netlify scheduled function이거나, Authorization 헤더나 query param으로 secret이 일치하는 경우 허용
+    if (!isNetlifyScheduled && token !== process.env.CRON_SECRET && secretParam !== process.env.CRON_SECRET) {
       console.error('[CRON] Unauthorized request attempt');
       return NextResponse.json(
         { success: false, error: 'Unauthorized' },
@@ -283,4 +286,14 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// GET 메서드 (Netlify Scheduled Functions용)
+export async function GET(request: NextRequest) {
+  return handleRequest(request);
+}
+
+// POST 메서드 (수동 호출용)
+export async function POST(request: NextRequest) {
+  return handleRequest(request);
 }
