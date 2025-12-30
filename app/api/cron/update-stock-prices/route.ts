@@ -34,8 +34,9 @@ export async function POST(request: NextRequest) {
     const type = searchParams.get('type') || 'all'; // user | guru | all
     const guruName = searchParams.get('guru'); // 특정 구루만 처리 (예: buffett)
     const forceRefresh = searchParams.get('forceRefresh') === 'true';
+    const batch = searchParams.get('batch'); // 1 = 앞 절반, 2 = 뒤 절반 (종목 많은 구루용)
 
-    console.log(`[CRON] ===== Starting stock price update (type: ${type}${guruName ? `, guru: ${guruName}` : ''}) =====`);
+    console.log(`[CRON] ===== Starting stock price update (type: ${type}${guruName ? `, guru: ${guruName}` : ''}${batch ? `, batch: ${batch}` : ''}) =====`);
 
     // 토큰 준비 (강제 갱신 또는 캐시 사용)
     if (forceRefresh) {
@@ -74,6 +75,19 @@ export async function POST(request: NextRequest) {
         tickersFailed: 0,
         duration: Date.now() - startTime,
       });
+    }
+
+    // batch 파라미터로 종목 분할 (종목 많은 구루용: buffett, howard_marks, ray_dalio, stanley_druckenmiller)
+    const totalTickers = tickers.length;
+    if (batch) {
+      const half = Math.ceil(tickers.length / 2);
+      if (batch === '1') {
+        tickers = tickers.slice(0, half);
+        console.log(`[CRON] Batch 1/2: Processing first ${tickers.length}/${totalTickers} tickers`);
+      } else if (batch === '2') {
+        tickers = tickers.slice(half);
+        console.log(`[CRON] Batch 2/2: Processing last ${tickers.length}/${totalTickers} tickers`);
+      }
     }
 
     // 4. 구루 포트폴리오인 경우 미리 데이터 맵 생성 (성능 최적화)
