@@ -122,6 +122,21 @@ export interface GuruTrackingEvent {
   current_price?: number;
   base_price?: number;
   return_rate?: number;
+
+  // 주식 상세 정보
+  stockData?: {
+    symbol?: string;
+    name?: string;
+    currentPrice?: number;
+    currency?: string;
+    marketCap?: number;
+    per?: number | null;
+    pbr?: number | null;
+    eps?: number | null;
+    exchange?: string;
+    industry?: string;
+    sector?: string;
+  };
 }
 
 export type TabType = 'wallet' | 'word';

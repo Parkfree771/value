@@ -233,77 +233,96 @@ export default function WordWatchForm({ onSubmit, onCancel, initialData, isEditM
           selectedStock={stockData}
         />
 
-        {/* 종목 프로필 카드 */}
-        <div className="mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            종목 프로필
-          </h3>
-
+        {/* 종목 프로필 카드 - 모던 디자인 */}
+        <div className="mt-4">
           {stockData ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">현재 주가</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {stockData.currency} {stockData.currentPrice.toLocaleString()}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">시가총액</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {(stockData.marketCap / 1e9).toFixed(2)}B
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PER</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PBR</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">거래소</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                  {stockData.exchange}
-                </div>
-              </div>
-              {stockData.sector && (
-                <div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">섹터</div>
-                  <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                    {stockData.sector}
+            <div className="relative bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+              {/* 상단: 기업명, 티커, 현재가 */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+                      {stockData.name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-sm font-mono font-semibold text-cyan-600 dark:text-cyan-400">
+                        {stockData.symbol}
+                      </span>
+                      <span className="text-xs text-gray-400">•</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{stockData.exchange}</span>
+                    </div>
                   </div>
                 </div>
-              )}
+                <div className="text-right">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재가</div>
+                  <div className="text-2xl font-black text-gray-900 dark:text-white tabular-nums">
+                    {stockData.currency} {stockData.currentPrice.toLocaleString()}
+                  </div>
+                </div>
+              </div>
+
+              {/* 하단: 금융지표 (좌: 시총 크게, 우: PER/PBR/EPS 작게) */}
+              <div className="px-5 py-4 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex items-center justify-between gap-6">
+                  {/* 좌측: 시가총액 강조 */}
+                  <div className="flex-shrink-0">
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Market Cap</div>
+                    <div className="text-3xl font-black text-gray-900 dark:text-white tabular-nums">
+                      {stockData.currency}{(stockData.marketCap / 1e9).toFixed(1)}<span className="text-xl text-gray-500 dark:text-gray-400">B</span>
+                    </div>
+                  </div>
+
+                  {/* 우측: PER, PBR, EPS 정렬 */}
+                  <div className="flex-1 grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PER</div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+                        {stockData.per ? stockData.per.toFixed(2) : '-'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PBR</div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+                        {stockData.pbr ? stockData.pbr.toFixed(2) : '-'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">EPS</div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+                        {stockData.eps ? stockData.eps.toFixed(2) : '-'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 간단 안내 */}
+                <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                    <svg className="w-3.5 h-3.5 text-cyan-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    작성 시점 데이터로 저장되어 수익률 계산에 사용됩니다
+                  </p>
+                </div>
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
-                <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">시가총액</div>
-                <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PER</div>
-                <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
-              </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PBR</div>
-                <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
+            <div className="bg-white dark:bg-gray-800 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8">
+              <div className="text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h4 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                  종목 검색
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  종목을 선택하면 프로필이 표시됩니다
+                </p>
               </div>
             </div>
           )}
-
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-blue-200 dark:border-blue-800">
-            종목을 검색하면 현재 주가와 기업 프로필이 자동으로 표시되며, 이 가격을 기준으로 실시간 수익률이 계산됩니다.
-          </div>
         </div>
 
         {/* 투자 의견 */}

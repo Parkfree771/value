@@ -299,84 +299,109 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               )}
             </div>
 
-            {/* 기업 정보 카드 */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl p-4 sm:p-6 border-2 border-blue-200 dark:border-blue-800">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4">
-                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                  <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">{report.stockName}</h3>
-                  <span className="text-sm sm:text-base lg:text-lg text-gray-500 dark:text-gray-400">{report.ticker}</span>
-                  {getOpinionBadge()}
-                </div>
-                <div className="text-left sm:text-right">
-                  <div className="text-xs sm:text-sm">
-                    {isClosed ? (
-                      <span className="inline-flex items-center gap-1 text-green-700 dark:text-green-400 font-semibold">
-                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                        </svg>
-                        수익 확정 완료
+            {/* 기업 정보 카드 - 완전히 새로운 디자인 */}
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+              {/* 상단: 기업명/티커 + 수익률 (한 줄에) */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-800">
+                <div className="flex items-center gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                        {report.stockName}
+                      </h3>
+                      {getOpinionBadge()}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
+                        {report.ticker}
                       </span>
-                    ) : (
-                      <span className="text-gray-600 dark:text-gray-400">리포트 수익률</span>
-                    )}
+                      {report.stockData?.exchange && (
+                        <>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-gray-600 dark:text-gray-400">{report.stockData.exchange}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className={`text-2xl sm:text-3xl font-bold ${getReturnRateColor()}`}>
+                </div>
+
+                {/* 수익률 - 컴팩트 */}
+                <div className={`flex-shrink-0 px-4 py-2.5 rounded-lg ${
+                  isClosed
+                    ? 'bg-green-100 dark:bg-green-900/30'
+                    : 'bg-gray-100 dark:bg-gray-700'
+                }`}>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mb-0.5 text-center">
+                    {isClosed ? '확정' : '수익률'}
+                  </div>
+                  <div className={`text-2xl font-black tabular-nums ${getReturnRateColor()}`}>
                     {report.returnRate > 0 ? '+' : ''}{report.returnRate}%
                   </div>
-                  {isClosed && report.closed_at && (
-                    <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      {new Date(report.closed_at).toLocaleDateString('ko-KR')} 확정
+                </div>
+              </div>
+
+              {/* 중단: 시총 크게 + PER/PBR/EPS 작게 */}
+              <div className="px-5 py-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between gap-6">
+                  {/* 좌: 시총 강조 */}
+                  <div className="flex-shrink-0">
+                    <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5 uppercase tracking-wide">Market Cap</div>
+                    <div className="text-3xl font-black text-gray-900 dark:text-white tabular-nums">
+                      {report.stockData?.marketCap
+                        ? <>{report.stockData.currency || '$'}{(report.stockData.marketCap / 1e9).toFixed(1)}<span className="text-xl text-gray-500">B</span></>
+                        : <span className="text-xl text-gray-400">N/A</span>
+                      }
+                    </div>
+                  </div>
+
+                  {/* 우: PER/PBR/EPS 작게 정렬 */}
+                  <div className="flex-1 grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PER</div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+                        {report.stockData?.per ? report.stockData.per.toFixed(2) : '-'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">PBR</div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+                        {report.stockData?.pbr ? report.stockData.pbr.toFixed(2) : '-'}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">EPS</div>
+                      <div className="text-base font-bold text-gray-900 dark:text-white tabular-nums">
+                        {report.stockData?.eps ? report.stockData.eps.toFixed(2) : '-'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 하단: 주가 정보 */}
+              <div className="px-5 py-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">작성 시점</div>
+                    <div className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">
+                      {report.stockData?.currency || ''} {report.initialPrice?.toLocaleString()}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재가</div>
+                    <div className="text-sm font-bold text-gray-900 dark:text-white tabular-nums">
+                      {report.stockData?.currency || ''} {report.currentPrice?.toLocaleString()}
+                    </div>
+                  </div>
+                  {report.targetPrice && (
+                    <div>
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">목표가</div>
+                      <div className="text-sm font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                        {report.stockData?.currency || ''} {report.targetPrice?.toLocaleString()}
+                      </div>
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* 기업 기본 정보 그리드 */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
-                  <div className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white truncate">
-                    {report.stockData?.currency || ''} {report.currentPrice?.toLocaleString()}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">시가총액</div>
-                  <div className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white truncate">
-                    {report.stockData?.marketCap
-                      ? `${(report.stockData.marketCap / 1e9).toFixed(2)}B`
-                      : 'N/A'}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PER</div>
-                  <div className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white">
-                    {report.stockData?.per ? report.stockData.per.toFixed(2) : 'N/A'}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PBR</div>
-                  <div className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white">
-                    {report.stockData?.pbr ? report.stockData.pbr.toFixed(2) : 'N/A'}
-                  </div>
-                </div>
-              </div>
-
-              {/* 작성 시점 주가 & 목표가 */}
-              <div className="grid grid-cols-2 gap-2 sm:gap-4 mt-3 sm:mt-4">
-                <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">작성 시점 주가</div>
-                  <div className="text-sm sm:text-base lg:text-lg font-bold text-gray-900 dark:text-white truncate">
-                    {report.stockData?.currency || ''} {report.initialPrice?.toLocaleString()}
-                  </div>
-                </div>
-                {report.targetPrice && (
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">목표가</div>
-                    <div className="text-sm sm:text-base lg:text-lg font-bold text-blue-600 dark:text-blue-400 truncate">
-                      {report.stockData?.currency || ''} {report.targetPrice?.toLocaleString()}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           </Card>
