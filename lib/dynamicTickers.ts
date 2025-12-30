@@ -4,13 +4,12 @@ import { db } from './firebase';
 import guruPortfolioData from './guru-portfolio-data.json';
 
 /**
- * 사용자 게시글에서 ticker 수집 (posts + market-call)
- * 15분마다 실시간 업데이트용
+ * Posts 컬렉션에서만 ticker 수집
+ * 15분마다 실시간 업데이트용 (post_prices 컬렉션에 저장)
  */
-export async function getUserPostsTickers(): Promise<string[]> {
+export async function getPostTickers(): Promise<string[]> {
   const tickersSet = new Set<string>();
 
-  // 1. posts 컬렉션
   try {
     const postsSnapshot = await getDocs(collection(db, 'posts'));
     postsSnapshot.forEach((doc) => {
@@ -19,29 +18,50 @@ export async function getUserPostsTickers(): Promise<string[]> {
         tickersSet.add(data.ticker.toUpperCase().trim());
       }
     });
-    console.log(`[User Tickers] Found ${tickersSet.size} tickers from ${postsSnapshot.size} posts`);
+    console.log(`[Post Tickers] Found ${tickersSet.size} tickers from ${postsSnapshot.size} posts`);
   } catch (error) {
-    console.error('[User Tickers] Failed to fetch posts:', error);
+    console.error('[Post Tickers] Failed to fetch posts:', error);
   }
 
-  // 2. market-call 컬렉션
+  return Array.from(tickersSet).sort();
+}
+
+/**
+ * Market-call 컬렉션에서만 ticker 수집
+ * 15분마다 실시간 업데이트용 (marketcall_prices 컬렉션에 저장)
+ */
+export async function getMarketCallTickers(): Promise<string[]> {
+  const tickersSet = new Set<string>();
+
   try {
     const marketCallSnapshot = await getDocs(collection(db, 'market-call'));
-    let marketCallCount = 0;
     marketCallSnapshot.forEach((doc) => {
       const data = doc.data();
       if (data.ticker && typeof data.ticker === 'string') {
         tickersSet.add(data.ticker.toUpperCase().trim());
-        marketCallCount++;
       }
     });
-    console.log(`[User Tickers] Found ${marketCallCount} tickers from ${marketCallSnapshot.size} market-call posts`);
+    console.log(`[MarketCall Tickers] Found ${tickersSet.size} tickers from ${marketCallSnapshot.size} market-call posts`);
   } catch (error) {
-    console.error('[User Tickers] Failed to fetch market-call:', error);
+    console.error('[MarketCall Tickers] Failed to fetch market-call:', error);
   }
 
-  console.log(`[User Tickers] Total unique user tickers: ${tickersSet.size}`);
   return Array.from(tickersSet).sort();
+}
+
+/**
+ * 사용자 게시글에서 ticker 수집 (posts + market-call)
+ * @deprecated 대신 getPostTickers() 또는 getMarketCallTickers() 사용
+ * 하위 호환성을 위해 유지
+ */
+export async function getUserPostsTickers(): Promise<string[]> {
+  const postTickers = await getPostTickers();
+  const marketCallTickers = await getMarketCallTickers();
+
+  const allTickers = new Set([...postTickers, ...marketCallTickers]);
+  console.log(`[User Tickers] Total unique user tickers: ${allTickers.size} (${postTickers.length} posts + ${marketCallTickers.length} market-call)`);
+
+  return Array.from(allTickers).sort();
 }
 
 /**

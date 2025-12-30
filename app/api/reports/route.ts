@@ -56,11 +56,12 @@ export async function GET(request: NextRequest) {
         // ticker와 initialPrice가 있는 경우에만 실시간 수익률 계산
         if (data.ticker && data.initialPrice) {
           try {
-            console.log(`[API Reports] Updating return rate for ${data.ticker}`);
+            console.log(`[API Reports] Updating return rate for ${data.ticker} (from post_prices)`);
             const updated = await updateReportReturnRate(
               data.ticker,
               data.initialPrice,
-              data.opinion === 'sell' ? 'short' : 'long'
+              data.opinion === 'sell' ? 'short' : 'long',
+              'post_prices' // Posts 컬렉션은 post_prices에서 가격 조회
             );
 
             if (updated) {

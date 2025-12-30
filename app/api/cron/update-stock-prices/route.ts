@@ -5,7 +5,7 @@ import { ref, uploadString } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase';
 import { getKISStockPrice, getKISOverseaStockPrice, detectExchange } from '@/lib/kis';
 import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
-import { getUserPostsTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
+import { getUserPostsTickers, getPostTickers, getMarketCallTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
 import guruPortfolioData from '@/lib/guru-portfolio-data.json';
 
 // Netlify Functions 타임아웃 설정 (무료 플랜 최대: 26초)
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     // 쿼리 파라미터 확인
     const searchParams = request.nextUrl.searchParams;
-    const type = searchParams.get('type') || 'all'; // user | guru | all
+    const type = searchParams.get('type') || 'all'; // post | marketcall | guru | user(deprecated) | all
     const guruName = searchParams.get('guru'); // 특정 구루만 처리 (예: buffett)
     const forceRefresh = searchParams.get('forceRefresh') === 'true';
     const batch = searchParams.get('batch'); // 1 = 앞 절반, 2 = 뒤 절반 (종목 많은 구루용)
@@ -48,20 +48,34 @@ export async function POST(request: NextRequest) {
 
     // 종목 리스트 생성 (type에 따라 분기)
     let tickers: string[] = [];
+    let collectionName = 'stock_data'; // 기본 컬렉션 (하위 호환성)
 
-    if (type === 'user') {
-      // 15분마다: 사용자 게시글 종목만 (피드, 마켓콜, 마이페이지)
+    if (type === 'post') {
+      // 15분마다: Posts 게시글 종목만 → post_prices 컬렉션에 저장
+      tickers = await getPostTickers();
+      collectionName = 'post_prices';
+      console.log(`[CRON] Processing ${tickers.length} post tickers → ${collectionName}`);
+    } else if (type === 'marketcall') {
+      // 15분마다: Market-call 게시글 종목만 → marketcall_prices 컬렉션에 저장
+      tickers = await getMarketCallTickers();
+      collectionName = 'marketcall_prices';
+      console.log(`[CRON] Processing ${tickers.length} market-call tickers → ${collectionName}`);
+    } else if (type === 'user') {
+      // @deprecated: 하위 호환성 (posts + market-call 모두)
       tickers = await getUserPostsTickers();
-      console.log(`[CRON] Processing ${tickers.length} user post tickers (real-time)`);
+      collectionName = 'stock_data';
+      console.log(`[CRON] Processing ${tickers.length} user post tickers (deprecated - use type=post or type=marketcall)`);
     } else if (type === 'guru') {
-      // 매일 06시: 구루 포트폴리오 종목만 (종가)
+      // 매일 06시: 구루 포트폴리오 종목만 (종가) → guru-stock-prices.json으로 저장
       // guruName이 있으면 특정 구루만, 없으면 전체 구루
       tickers = await getGuruTickers(guruName || undefined);
+      collectionName = 'stock_data'; // 구루는 JSON 파일로 저장하지만 일단 컬렉션명 유지
       const desc = guruName ? `${guruName} portfolio` : 'all guru portfolios';
       console.log(`[CRON] Processing ${tickers.length} tickers from ${desc} (daily close)`);
     } else {
       // 전체 (기본값, 하위 호환성)
       tickers = await getAllUniqueTickers();
+      collectionName = 'stock_data';
       console.log(`[CRON] Processing ${tickers.length} total tickers (all)`);
     }
 
@@ -136,8 +150,8 @@ export async function POST(request: NextRequest) {
 
         const currency = isDomestic ? 'KRW' : ((priceData as any).currency || 'USD');
 
-        // Firestore에 개별 문서로 저장
-        const docRef = doc(db, 'stock_data', ticker);
+        // Firestore에 개별 문서로 저장 (type에 따라 다른 컬렉션)
+        const docRef = doc(db, collectionName, ticker);
         await setDoc(docRef, {
           ticker,
           price: priceData.price,
@@ -164,7 +178,7 @@ export async function POST(request: NextRequest) {
 
         // 실패한 종목도 에러 정보와 함께 Firestore에 저장
         try {
-          const docRef = doc(db, 'stock_data', ticker);
+          const docRef = doc(db, collectionName, ticker);
           await setDoc(docRef, {
             ticker,
             error: errorMsg,

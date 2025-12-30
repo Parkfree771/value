@@ -5,6 +5,7 @@ import { db } from '@/lib/firebase';
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const ticker = searchParams.get('ticker');
+  const collection = searchParams.get('collection') || 'marketcall_prices'; // 기본값: marketcall_prices (market-call에서 사용)
 
   if (!ticker) {
     return NextResponse.json(
@@ -15,10 +16,10 @@ export async function GET(request: NextRequest) {
 
   try {
     const tickerUpper = ticker.toUpperCase();
-    console.log(`[Stock Price] Fetching from Firestore: ${tickerUpper}`);
+    console.log(`[Stock Price] Fetching from Firestore: ${tickerUpper} (collection: ${collection})`);
 
-    // Firestore stock_data에서 캐시된 가격 가져오기
-    const stockDoc = await getDoc(doc(db, 'stock_data', tickerUpper));
+    // Firestore에서 캐시된 가격 가져오기 (collection 파라미터로 지정)
+    const stockDoc = await getDoc(doc(db, collection, tickerUpper));
 
     if (stockDoc.exists()) {
       const data = stockDoc.data();

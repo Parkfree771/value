@@ -5,6 +5,8 @@ import {
   getKISHistoricalOverseaStockPrice,
   detectExchange
 } from './kis';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from './firebase';
 
 export interface StockQuote {
   symbol: string;
@@ -21,17 +23,74 @@ export interface HistoricalPrice {
 }
 
 /**
+ * Firestore에서 캐시된 주가를 가져옵니다.
+ * @param ticker 주식 티커 심볼
+ * @param collectionName 조회할 컬렉션 ('post_prices', 'marketcall_prices', 'stock_data')
+ * @returns 주가 정보 (없으면 null)
+ */
+async function getPriceFromFirestore(
+  ticker: string,
+  collectionName: string
+): Promise<StockQuote | null> {
+  try {
+    const stockCode = ticker.includes('.') ? ticker.split('.')[0] : ticker;
+    const docRef = doc(db, collectionName, stockCode.toUpperCase());
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+
+      // 에러가 있는 문서는 스킵
+      if (data.error) {
+        console.log(`[Firestore] ${stockCode} has error: ${data.error}`);
+        return null;
+      }
+
+      // 가격이 있으면 반환
+      if (data.price) {
+        console.log(`[Firestore] ✅ Cache hit: ${stockCode} = $${data.price} (${collectionName})`);
+        return {
+          symbol: stockCode,
+          price: data.price,
+          currency: data.currency || 'USD',
+          marketCap: undefined,
+          regularMarketChangePercent: data.changePercent,
+        };
+      }
+    }
+
+    console.log(`[Firestore] ❌ Cache miss: ${stockCode} (${collectionName})`);
+    return null;
+  } catch (error) {
+    console.error(`[Firestore] Error fetching ${ticker} from ${collectionName}:`, error);
+    return null;
+  }
+}
+
+/**
  * 한국투자증권 API를 사용하여 실시간 주가 정보를 가져옵니다.
+ * Firestore 캐시를 먼저 확인하고, 없으면 KIS API를 호출합니다.
  * @param ticker 주식 티커 심볼 (예: '005930', 'AAPL', 'TSLA')
  * @param exchange 거래소 코드 (선택사항, 예: 'NAS', 'NYS')
+ * @param collectionName Firestore 컬렉션 이름 (기본값: 'stock_data')
  * @returns 주가 정보
  */
 export async function getCurrentStockPrice(
   ticker: string,
-  exchange?: string
+  exchange?: string,
+  collectionName: string = 'stock_data'
 ): Promise<StockQuote | null> {
   try {
-    console.log(`[StockPrice] 주가 조회 시작: ${ticker}`);
+    console.log(`[StockPrice] 주가 조회 시작: ${ticker} (collection: ${collectionName})`);
+
+    // 1. Firestore 캐시 먼저 확인
+    const cachedPrice = await getPriceFromFirestore(ticker, collectionName);
+    if (cachedPrice) {
+      return cachedPrice;
+    }
+
+    // 2. 캐시 미스 - KIS API 직접 호출
+    console.log(`[StockPrice] Firestore 캐시 미스, KIS API 호출: ${ticker}`);
 
     // 거래소 자동 감지 (접미사 제거 전에 먼저 감지)
     const detectedExchange = exchange || detectExchange(ticker);
@@ -44,7 +103,7 @@ export async function getCurrentStockPrice(
 
     // 한국 주식 (6자리 숫자)
     if (/^\d{6}$/.test(stockCode)) {
-      console.log(`[StockPrice] 국내 주식 조회: ${stockCode}`);
+      console.log(`[StockPrice] 국내 주식 조회 (KIS API): ${stockCode}`);
       const data = await getKISStockPrice(stockCode);
 
       if (!data) {
@@ -65,7 +124,7 @@ export async function getCurrentStockPrice(
     }
 
     // 해외 주식 (AAPL, TSLA 등)
-    console.log(`[StockPrice] 해외 주식 조회: ${stockCode} (거래소: ${detectedExchange})`);
+    console.log(`[StockPrice] 해외 주식 조회 (KIS API): ${stockCode} (거래소: ${detectedExchange})`);
     const data = await getKISOverseaStockPrice(stockCode, detectedExchange);
 
     if (!data) {
@@ -116,12 +175,14 @@ export function calculateReturnRate(
  * @param ticker 주식 티커
  * @param initialPrice 작성 시점 주가
  * @param positionType 포지션 타입
+ * @param collectionName Firestore 컬렉션 이름 ('post_prices', 'marketcall_prices', 'stock_data')
  * @returns 업데이트된 주가 및 수익률 정보
  */
 export async function updateReportReturnRate(
   ticker: string,
   initialPrice: number,
-  positionType: 'long' | 'short' = 'long'
+  positionType: 'long' | 'short' = 'long',
+  collectionName: string = 'post_prices'
 ): Promise<{
   currentPrice: number;
   returnRate: number;
@@ -131,7 +192,8 @@ export async function updateReportReturnRate(
   console.log(`[UpdateReturnRate] 수익률 업데이트 시작:`, {
     ticker,
     initialPrice,
-    positionType
+    positionType,
+    collectionName
   });
 
   // initialPrice 유효성 검증
@@ -140,7 +202,7 @@ export async function updateReportReturnRate(
     return null;
   }
 
-  const stockQuote = await getCurrentStockPrice(ticker);
+  const stockQuote = await getCurrentStockPrice(ticker, undefined, collectionName);
 
   if (!stockQuote) {
     console.error(`[UpdateReturnRate] 주가 조회 실패 - ticker: ${ticker}`);
