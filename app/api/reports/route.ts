@@ -8,8 +8,10 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const sortBy = searchParams.get('sortBy') || 'createdAt'; // createdAt, returnRate, views
     const limitCount = parseInt(searchParams.get('limit') || '50', 10);
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const pageSize = parseInt(searchParams.get('pageSize') || '5', 10);
 
-    console.log(`[API Reports] Fetching reports - sortBy: ${sortBy}, limit: ${limitCount}`);
+    console.log(`[API Reports] Fetching reports - sortBy: ${sortBy}, limit: ${limitCount}, page: ${page}, pageSize: ${pageSize}`);
 
     // Firestore에서 리포트 가져오기
     const postsRef = collection(db, 'posts');
@@ -84,10 +86,20 @@ export async function GET(request: NextRequest) {
 
     console.log(`[API Reports] Successfully processed ${reports.length} reports`);
 
+    // 페이지네이션 적용
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const paginatedReports = reports.slice(startIndex, endIndex);
+    const totalPages = Math.ceil(reports.length / pageSize);
+
     return NextResponse.json({
       success: true,
-      reports,
-      count: reports.length,
+      reports: paginatedReports,
+      count: paginatedReports.length,
+      total: reports.length,
+      page,
+      pageSize,
+      totalPages,
     });
   } catch (error) {
     console.error('[API Reports] Error:', error);

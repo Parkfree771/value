@@ -6,8 +6,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
 import GuruTrackingCard from '@/components/GuruTrackingCard';
 import { MOCK_GURU_EVENTS } from '@/app/guru-tracker/mockData';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 export default function MarketCallPage() {
   const router = useRouter();
@@ -15,22 +13,25 @@ export default function MarketCallPage() {
   const [sortBy, setSortBy] = useState('newest');
   const [firebaseEvents, setFirebaseEvents] = useState<GuruTrackingEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 5; // 페이지당 5개
 
-  // Firebase에서 마켓콜 데이터 가져오기
+  // API에서 마켓콜 데이터 가져오기 (가격 계산 포함)
   useEffect(() => {
     const fetchMarketCall = async () => {
       try {
-        const marketCallRef = collection(db, 'market-call');
-        const q = query(marketCallRef, orderBy('created_at', 'desc'));
-        const querySnapshot = await getDocs(q);
+        setLoading(true);
+        const sortByField = sortBy === 'newest' ? 'created_at' : sortBy === 'return' ? 'return_rate' : 'views';
+        const response = await fetch(`/api/market-call?sortBy=${sortByField}&limit=100&page=${currentPage}&pageSize=${pageSize}`);
+        const data = await response.json();
 
-        const events: GuruTrackingEvent[] = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-          created_at: doc.data().created_at?.toDate()?.toISOString() || new Date().toISOString(),
-        } as GuruTrackingEvent));
-
-        setFirebaseEvents(events);
+        if (data.success) {
+          setFirebaseEvents(data.events);
+          setTotalPages(data.totalPages);
+        } else {
+          console.error('마켓콜 가져오기 실패:', data.error);
+        }
       } catch (error) {
         console.error('Error fetching market call:', error);
       } finally {
@@ -39,7 +40,7 @@ export default function MarketCallPage() {
     };
 
     fetchMarketCall();
-  }, []);
+  }, [sortBy, currentPage]);
 
   // Mock 데이터와 Firebase 데이터 합치기
   const allEvents = [...firebaseEvents, ...MOCK_GURU_EVENTS.filter(e => e.data_type === 'MENTION')];
@@ -176,10 +177,47 @@ export default function MarketCallPage() {
         </div>
       </div>
 
+      {/* 페이지네이션 */}
+      {!loading && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            이전
+          </button>
+
+          <div className="flex gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  currentPage === page
+                    ? 'bg-cyan-600 text-white'
+                    : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            다음
+          </button>
+        </div>
+      )}
+
       {/* Firebase 데이터 카운트 표시 (개발 확인용) */}
       {!loading && firebaseEvents.length > 0 && (
         <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          사용자 작성 글: {firebaseEvents.length}개 | Mock 데이터: {MOCK_GURU_EVENTS.filter(e => e.data_type === 'MENTION').length}개
+          사용자 작성 글: {firebaseEvents.length}개 | 페이지: {currentPage}/{totalPages}
         </div>
       )}
 

@@ -37,6 +37,8 @@ export default function RankingPage() {
   const [loading, setLoading] = useState(true);
   const [investors, setInvestors] = useState<any[]>([]);
   const [trending, setTrending] = useState<RankedReport[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
   useEffect(() => {
@@ -114,6 +116,11 @@ export default function RankingPage() {
     fetchReports();
   }, []);
 
+  // Reset to page 1 when tab or period changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, selectedPeriod]);
+
   const getPeriodLabel = (period: TimePeriod) => {
     const labels = {
       '1month': '1달',
@@ -181,6 +188,42 @@ export default function RankingPage() {
     if (rank === 3) return '🥉';
     return `${rank}위`;
   };
+
+  // Get paginated reports
+  const getPaginatedReports = () => {
+    const filtered = getFilteredReports();
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filtered.slice(startIndex, endIndex);
+  };
+
+  // Get paginated investors
+  const getPaginatedInvestors = () => {
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return investors.slice(startIndex, endIndex);
+  };
+
+  // Get paginated trending
+  const getPaginatedTrending = () => {
+    const filtered = getFilteredTrending();
+    const startIndex = (currentPage - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filtered.slice(startIndex, endIndex);
+  };
+
+  // Get total pages based on active tab
+  const getTotalPages = () => {
+    if (activeTab === 'reports') {
+      return Math.ceil(getFilteredReports().length / pageSize);
+    } else if (activeTab === 'investors') {
+      return Math.ceil(investors.length / pageSize);
+    } else {
+      return Math.ceil(getFilteredTrending().length / pageSize);
+    }
+  };
+
+  const totalPages = getTotalPages();
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -362,15 +405,53 @@ export default function RankingPage() {
                 ))}
               </div>
             ) : getFilteredReports().length > 0 ? (
-              getFilteredReports().map((report, index) => (
-                <RankingReportCard key={report.id} report={report} rank={index + 1} />
-              ))
+              getPaginatedReports().map((report, index) => {
+                const actualRank = (currentPage - 1) * pageSize + index + 1;
+                return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
+              })
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500 dark:text-gray-400">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
+
+          {/* 페이지네이션 */}
+          {!loading && totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                이전
+              </button>
+
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -508,7 +589,7 @@ export default function RankingPage() {
               전체 투자자 랭킹
             </h2>
             <div className="space-y-2 sm:space-y-3">
-              {investors.map((investor) => (
+              {getPaginatedInvestors().map((investor) => (
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
@@ -541,6 +622,43 @@ export default function RankingPage() {
               ))}
             </div>
           </div>
+
+          {/* 페이지네이션 */}
+          {!loading && totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                이전
+              </button>
+
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </>
       )}
 
@@ -570,15 +688,53 @@ export default function RankingPage() {
 
           <div className="space-y-4 sm:space-y-6">
             {getFilteredTrending().length > 0 ? (
-              getFilteredTrending().map((report, index) => (
-                <RankingReportCard key={report.id} report={report} rank={index + 1} />
-              ))
+              getPaginatedTrending().map((report, index) => {
+                const actualRank = (currentPage - 1) * pageSize + index + 1;
+                return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
+              })
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-500 dark:text-gray-400">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
+
+          {/* 페이지네이션 */}
+          {!loading && totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                이전
+              </button>
+
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                      currentPage === page
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>

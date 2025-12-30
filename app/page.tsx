@@ -36,6 +36,9 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const pageSize = 5;
   const [filters, setFilters] = useState({
     period: 'all',
     market: 'all',
@@ -48,11 +51,20 @@ export default function HomePage() {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/reports?sortBy=createdAt&limit=50');
+        // Map activeTab to sortBy parameter
+        let sortByField = 'createdAt';
+        if (activeTab === 'popular') {
+          sortByField = 'views';
+        } else if (activeTab === 'return') {
+          sortByField = 'returnRate';
+        }
+
+        const response = await fetch(`/api/reports?sortBy=${sortByField}&limit=100&page=${currentPage}&pageSize=${pageSize}`);
         const data = await response.json();
 
         if (data.success) {
           setReports(data.reports);
+          setTotalPages(data.totalPages);
         } else {
           console.error('리포트 가져오기 실패:', data.error);
         }
@@ -64,7 +76,12 @@ export default function HomePage() {
     };
 
     fetchReports();
-  }, []);
+  }, [activeTab, currentPage]);
+
+  // Reset to page 1 when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   // 검색 및 필터링
   const filteredReports = reports.filter((report) => {
@@ -232,12 +249,42 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* Load More Button */}
-      <div className="text-center mt-6 sm:mt-8">
-        <button className="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors">
-          더 보기
-        </button>
-      </div>
+      {/* 페이지네이션 */}
+      {!loading && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-2 mt-8">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            이전
+          </button>
+
+          <div className="flex gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+                  currentPage === page
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   );
 }

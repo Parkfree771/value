@@ -150,25 +150,26 @@ export async function POST(request: NextRequest) {
 
         const currency = isDomestic ? 'KRW' : ((priceData as any).currency || 'USD');
 
-        // Firestore에 개별 문서로 저장 (type에 따라 다른 컬렉션)
-        const docRef = doc(db, collectionName, ticker);
-        await setDoc(docRef, {
-          ticker,
-          price: priceData.price,
-          change: priceData.change,
-          changePercent: priceData.changePercent,
-          open: priceData.open,
-          high: priceData.high,
-          low: priceData.low,
-          volume: priceData.volume,
-          currency,
-          isDomestic,
-          lastUpdated: Timestamp.now(),
-        });
-
-        // 구루 포트폴리오 종목인 경우 stockPricesMap에 추가
+        // 구루 포트폴리오는 JSON 파일만 생성 (DB 저장 안 함)
         if (type === 'guru') {
+          // JSON용 데이터만 수집
           stockPricesMap.set(ticker, { price: priceData.price, currency });
+        } else {
+          // Posts/Market-call은 Firestore에 저장
+          const docRef = doc(db, collectionName, ticker);
+          await setDoc(docRef, {
+            ticker,
+            price: priceData.price,
+            change: priceData.change,
+            changePercent: priceData.changePercent,
+            open: priceData.open,
+            high: priceData.high,
+            low: priceData.low,
+            volume: priceData.volume,
+            currency,
+            isDomestic,
+            lastUpdated: Timestamp.now(),
+          });
         }
 
         successCount++;
@@ -176,16 +177,18 @@ export async function POST(request: NextRequest) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         console.error(`[CRON] ✗ Failed: ${ticker} - ${errorMsg}`);
 
-        // 실패한 종목도 에러 정보와 함께 Firestore에 저장
-        try {
-          const docRef = doc(db, collectionName, ticker);
-          await setDoc(docRef, {
-            ticker,
-            error: errorMsg,
-            lastUpdated: Timestamp.now(),
-          });
-        } catch (saveError) {
-          console.error(`[CRON] Failed to save error for ${ticker}:`, saveError);
+        // 구루가 아닌 경우에만 실패한 종목을 Firestore에 저장
+        if (type !== 'guru') {
+          try {
+            const docRef = doc(db, collectionName, ticker);
+            await setDoc(docRef, {
+              ticker,
+              error: errorMsg,
+              lastUpdated: Timestamp.now(),
+            });
+          } catch (saveError) {
+            console.error(`[CRON] Failed to save error for ${ticker}:`, saveError);
+          }
         }
 
         failCount++;
