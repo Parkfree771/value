@@ -8,6 +8,9 @@ import { getKISTokenWithCache, refreshKISToken } from '@/lib/kisTokenManager';
 import { getUserPostsTickers, getGuruTickers, getAllUniqueTickers } from '@/lib/dynamicTickers';
 import guruPortfolioData from '@/lib/guru-portfolio-data.json';
 
+// Netlify Functions 타임아웃 설정 (무료 플랜 최대: 26초)
+export const maxDuration = 26;
+
 const DELAY_BETWEEN_REQUESTS = 100; // ms (초당 10회 = 안전한 rate limit)
 
 export async function POST(request: NextRequest) {
