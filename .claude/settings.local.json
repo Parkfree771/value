@@ -43,7 +43,8 @@
       "Bash(\"https://warrennvalue.netlify.app/api/cron/update-stock-prices?type=guru\" )",
       "Bash(\"https://warrennvalue.netlify.app/api/cron/update-stock-prices?type=user\" )",
       "Bash(\"https://warrennvalue.netlify.app/api/cron/update-stock-prices?type=guru&guru=buffett\" )",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": [],
     "ask": []

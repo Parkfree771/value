@@ -153,6 +153,11 @@ export default function WordWatchForm({ onSubmit, onCancel, initialData, isEditM
       const actionDirection: ActionDirection = opinion === 'sell' ? 'SHORT' : 'LONG';
       const badgeLabel: BadgeLabel = opinion === 'sell' ? 'SELL' : 'BUY';
 
+      // 수익률 계산: (현재가 - 기준가) / 기준가 * 100
+      const basePriceNum = parseFloat(basePrice);
+      const currentPriceNum = stockData.currentPrice;
+      const returnRate = ((currentPriceNum - basePriceNum) / basePriceNum) * 100;
+
       const marketCallData = {
         guru_name: guruName,
         guru_name_kr: guruPosition,
@@ -173,9 +178,9 @@ export default function WordWatchForm({ onSubmit, onCancel, initialData, isEditM
           base_price_date: baseDate, // 사용자가 입력한 기준 날짜
           action_direction: actionDirection,
         },
-        base_price: parseFloat(basePrice), // 사용자가 입력한 기준 가격
-        current_price: parseFloat(basePrice), // 초기값은 기준 가격과 동일
-        return_rate: 0,
+        base_price: basePriceNum, // 사용자가 입력한 기준 가격
+        current_price: currentPriceNum, // API로 가져온 실시간 현재가
+        return_rate: returnRate,
         views: 0,
         likes: 0,
         images: uploadedImageUrls,

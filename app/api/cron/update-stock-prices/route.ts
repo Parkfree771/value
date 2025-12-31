@@ -202,50 +202,77 @@ async function handleRequest(request: NextRequest) {
 
     // 6. 구루 포트폴리오인 경우 Firebase Storage JSON 파일 생성 및 업로드
     if (type === 'guru' && stockPricesMap.size > 0 && basePriceMap) {
-      const stocksData: Record<string, any> = {};
-      let calculatedCount = 0;
-
-      stockPricesMap.forEach((currentData, ticker) => {
-        const baseData = basePriceMap!.get(ticker);
-
-        if (baseData) {
-          // 수익률 계산: (현재가 - 기준가) / 기준가 * 100
-          const returnRate = ((currentData.price - baseData.basePrice) / baseData.basePrice) * 100;
-
-          stocksData[ticker] = {
-            ticker,
-            companyName: baseData.companyName,
-            exchange: exchangeMap?.get(ticker) || null,
-            basePrice: baseData.basePrice,
-            currentPrice: currentData.price,
-            currency: currentData.currency,
-            returnRate: parseFloat(returnRate.toFixed(2)),
-          };
-
-          calculatedCount++;
-        } else {
-          console.warn(`[CRON] No base price found for ${ticker}`);
-        }
-      });
-
-      const jsonData = {
-        lastUpdated: new Date().toISOString(),
-        reportDate: guruPortfolioData.reportDate,
-        totalStocks: calculatedCount,
-        stocks: stocksData,
-      };
-
-      // Firebase Storage에 업로드 (매일 덮어쓰기, Admin SDK 사용)
       try {
         const bucket = adminStorage.bucket();
         const file = bucket.file('guru-stock-prices.json');
+
+        // 1. 기존 JSON 파일 읽기 (merge를 위해)
+        let existingStocks: Record<string, any> = {};
+        try {
+          const [fileContent] = await file.download();
+          const existingData = JSON.parse(fileContent.toString());
+          existingStocks = existingData.stocks || {};
+          console.log(`[CRON] Loaded existing JSON with ${Object.keys(existingStocks).length} stocks`);
+        } catch (downloadError) {
+          console.warn('[CRON] No existing JSON found, creating new one');
+        }
+
+        // 2. 기존 데이터와 merge (currentPrice만 업데이트, basePrice는 유지)
+        let updatedCount = 0;
+        let newCount = 0;
+
+        stockPricesMap.forEach((currentData, ticker) => {
+          const baseData = basePriceMap!.get(ticker);
+
+          if (baseData) {
+            const existing = existingStocks[ticker];
+
+            // 수익률 계산: (현재가 - 기준가) / 기준가 * 100
+            const returnRate = ((currentData.price - baseData.basePrice) / baseData.basePrice) * 100;
+
+            if (existing) {
+              // 기존 종목: currentPrice와 returnRate만 업데이트
+              existingStocks[ticker] = {
+                ...existing, // 기존 데이터 유지 (basePrice 포함)
+                currentPrice: currentData.price, // 현재가만 업데이트
+                currency: currentData.currency,
+                returnRate: parseFloat(returnRate.toFixed(2)),
+              };
+              updatedCount++;
+            } else {
+              // 새로운 종목: 전체 데이터 추가
+              existingStocks[ticker] = {
+                ticker,
+                companyName: baseData.companyName,
+                exchange: exchangeMap?.get(ticker) || null,
+                basePrice: baseData.basePrice,
+                currentPrice: currentData.price,
+                currency: currentData.currency,
+                returnRate: parseFloat(returnRate.toFixed(2)),
+              };
+              newCount++;
+            }
+          } else {
+            console.warn(`[CRON] No base price found for ${ticker}`);
+          }
+        });
+
+        const jsonData = {
+          lastUpdated: new Date().toISOString(),
+          reportDate: guruPortfolioData.reportDate,
+          totalStocks: Object.keys(existingStocks).length,
+          stocks: existingStocks, // merge된 전체 데이터
+        };
+
+        // 3. Firebase Storage에 업로드 (merge된 데이터)
         await file.save(JSON.stringify(jsonData, null, 2), {
           contentType: 'application/json',
           metadata: {
             cacheControl: 'public, max-age=300', // 5분 캐시
           },
         });
-        console.log(`[CRON] ✅ JSON uploaded: ${calculatedCount} stocks`);
+
+        console.log(`[CRON] ✅ JSON uploaded: ${updatedCount} updated, ${newCount} new, ${jsonData.totalStocks} total stocks`);
       } catch (uploadError) {
         console.error('[CRON] ✗ JSON upload failed:', uploadError);
       }
