@@ -62,28 +62,28 @@ export default function MarketCallPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 소개 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-black dark:via-gray-950 dark:to-black rounded-none sm:rounded-2xl p-6 sm:p-8 shadow-2xl border-t-4 border-b-4 sm:border-4 border-cyan-600 dark:border-cyan-500 relative overflow-hidden">
+      <section className="mb-6 sm:mb-8 bg-white/5 dark:bg-black/40 backdrop-blur-xl rounded-none sm:rounded-2xl p-6 sm:p-8 shadow-glass border border-electric-blue-500/30 relative overflow-hidden">
         {/* 장식 요소 */}
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
-        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-50"></div>
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-electric-blue-500 to-transparent opacity-50"></div>
+        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-electric-blue-500 to-transparent opacity-50"></div>
 
         <div className="relative z-10">
           <div className="text-center mb-6 sm:mb-7">
-            <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 bg-cyan-600/20 border border-cyan-600/50 rounded-full">
-              <span className="text-xs font-semibold tracking-widest text-cyan-400 uppercase">Expert Market Predictions</span>
+            <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 bg-electric-blue-500/20 border border-electric-blue-500/50 rounded-full">
+              <span className="text-xs font-semibold tracking-widest text-electric-blue-400 uppercase font-heading">Expert Market Predictions</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-electric-blue-400 to-neon-orange-500 mb-1.5 sm:mb-2 tracking-tight leading-tight font-heading drop-shadow-sm">
               MARKET CALL
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-cyan-100 tracking-wide font-light">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 tracking-wide font-light">
               전문가들의 예측, 데이터로 검증하다
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
             <blockquote className="relative">
-              <p className="text-sm sm:text-base md:text-lg text-gray-100 leading-relaxed font-serif italic mb-4 sm:mb-5">
-                투자 전문가들이 공개적으로 내놓은 <strong className="text-cyan-300">마켓 콜(Market Call)</strong>을 추적합니다.
+              <p className="text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed italic mb-4 sm:mb-5 font-body">
+                투자 전문가들이 공개적으로 내놓은 <strong className="text-electric-blue-400">마켓 콜(Market Call)</strong>을 추적합니다.
                 <br className="hidden sm:block" />
                 "테슬라 매수", "금 상승 전망", "달러 약세 예상" - 그들의 예측을 따랐다면 어땠을까요?
                 <br className="hidden sm:block" />
@@ -96,14 +96,14 @@ export default function MarketCallPage() {
       </section>
 
       {/* 정렬 버튼 & 작성하기 버튼 */}
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         {/* 왼쪽: 정렬 버튼 */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 overflow-x-auto pb-2 sm:pb-0">
           <button
             onClick={() => setSortBy('newest')}
-            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
               sortBy === 'newest'
-                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md'
+                ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
@@ -111,9 +111,9 @@ export default function MarketCallPage() {
           </button>
           <button
             onClick={() => setSortBy('popular')}
-            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
               sortBy === 'popular'
-                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md'
+                ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
@@ -121,9 +121,9 @@ export default function MarketCallPage() {
           </button>
           <button
             onClick={() => setSortBy('return')}
-            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all whitespace-nowrap ${
               sortBy === 'return'
-                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md'
+                ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
             }`}
           >
@@ -135,7 +135,7 @@ export default function MarketCallPage() {
         {user && (
           <button
             onClick={() => router.push('/market-call/write')}
-            className="px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            className="px-4 py-2 bg-gradient-to-r from-electric-blue-600 to-electric-blue-800 hover:from-electric-blue-700 hover:to-electric-blue-900 text-white text-sm font-semibold rounded-lg transition-all shadow-neon-blue hover:shadow-lg flex items-center gap-2 whitespace-nowrap"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -151,9 +151,9 @@ export default function MarketCallPage() {
         {/* Event Cards */}
         <div className="space-y-6">
           {loading ? (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
+            <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-lg shadow-glass p-12 text-center border border-gray-200 dark:border-white/10">
               <div className="flex justify-center items-center gap-3">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-600"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-electric-blue-600"></div>
                 <span className="text-lg text-gray-600 dark:text-gray-400">데이터 로딩 중...</span>
               </div>
             </div>
@@ -162,8 +162,8 @@ export default function MarketCallPage() {
               <GuruTrackingCard key={event.id} event={event} collection="market-call" />
             ))
           ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
-              <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">MARKET CALL</div>
+            <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-lg shadow-glass p-12 text-center border border-gray-200 dark:border-white/10">
+              <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4 font-heading">MARKET CALL</div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                 필터 조건에 맞는 데이터가 없습니다
               </h3>
@@ -193,7 +193,7 @@ export default function MarketCallPage() {
                 onClick={() => setCurrentPage(page)}
                 className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                   currentPage === page
-                    ? 'bg-cyan-600 text-white'
+                    ? 'bg-electric-blue text-white shadow-neon-blue'
                     : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
@@ -220,8 +220,8 @@ export default function MarketCallPage() {
       )}
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-l-4 border-cyan-600 dark:border-cyan-500 rounded-r-lg shadow-lg">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 tracking-wide uppercase">
+      <section className="mt-12 p-6 sm:p-8 bg-gradient-to-r from-electric-blue-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 border-l-4 border-electric-blue-600 dark:border-electric-blue-500 rounded-r-lg shadow-lg">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 tracking-wide uppercase font-heading">
           마켓 콜 추적의 한계
         </h3>
         <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
@@ -235,10 +235,10 @@ export default function MarketCallPage() {
           </p>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-cyan-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 space-y-2">
-          <div className="flex gap-2"><strong className="font-semibold text-cyan-700 dark:text-cyan-400">TIMING RISK:</strong> <span>공개 발언과 실제 매매 시점은 다를 수 있습니다.</span></div>
-          <div className="flex gap-2"><strong className="font-semibold text-cyan-700 dark:text-cyan-400">TRACKING METHOD:</strong> <span>발언 시점 가격 대비 현재가를 산출한 것으로, 실제 수익률과 무관합니다.</span></div>
-          <div className="flex gap-2"><strong className="font-semibold text-cyan-700 dark:text-cyan-400">FOR REFERENCE ONLY:</strong> <span>이 데이터는 투자 권유가 아니며, 전문가 예측 검증을 위한 참고 자료입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>
+        <div className="mt-6 pt-4 border-t border-electric-blue-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 space-y-2">
+          <div className="flex gap-2"><strong className="font-semibold text-electric-blue-700 dark:text-electric-blue-400">TIMING RISK:</strong> <span>공개 발언과 실제 매매 시점은 다를 수 있습니다.</span></div>
+          <div className="flex gap-2"><strong className="font-semibold text-electric-blue-700 dark:text-electric-blue-400">TRACKING METHOD:</strong> <span>발언 시점 가격 대비 현재가를 산출한 것으로, 실제 수익률과 무관합니다.</span></div>
+          <div className="flex gap-2"><strong className="font-semibold text-electric-blue-700 dark:text-electric-blue-400">FOR REFERENCE ONLY:</strong> <span>이 데이터는 투자 권유가 아니며, 전문가 예측 검증을 위한 참고 자료입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>
         </div>
       </section>
     </div>

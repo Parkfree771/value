@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Oswald, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -76,18 +77,30 @@ export const metadata: Metadata = {
   },
 };
 
+const oswald = Oswald({
+  subsets: ["latin"],
+  variable: "--font-heading",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className={`${oswald.variable} ${inter.variable}`}>
       <head>
         <GoogleAnalytics />
         <GoogleAdSense />
       </head>
-      <body className="antialiased flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
+      <body className="antialiased flex flex-col min-h-screen bg-white dark:bg-deep-black text-gray-900 dark:text-gray-100 transition-colors font-body">
         <ThemeProvider>
           <AuthProvider>
             <Navbar />

@@ -139,9 +139,9 @@ export default function HomePage() {
         <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
           <button
             onClick={() => setActiveTab('all')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'all'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -149,9 +149,9 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActiveTab('following')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'following'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -159,9 +159,9 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActiveTab('popular')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'popular'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -169,9 +169,9 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActiveTab('return')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
+          className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'return'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -183,9 +183,9 @@ export default function HomePage() {
         <div className="hidden md:flex gap-4">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'all'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -193,9 +193,9 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActiveTab('following')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'following'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -203,9 +203,9 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActiveTab('popular')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'popular'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -213,9 +213,9 @@ export default function HomePage() {
           </button>
           <button
             onClick={() => setActiveTab('return')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-colors ${
+          className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'return'
-                ? 'bg-blue-600 dark:bg-blue-500 text-white'
+              ? 'bg-electric-blue text-white shadow-neon-blue'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -267,7 +267,7 @@ export default function HomePage() {
                 onClick={() => setCurrentPage(page)}
                 className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
                   currentPage === page
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-electric-blue text-white shadow-neon-blue'
                     : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
