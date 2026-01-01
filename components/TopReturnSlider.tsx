@@ -62,9 +62,9 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-200 dark:border-gray-700 transition-colors">
+    <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-xl shadow-glass p-4 sm:p-6 mb-8 sm:mb-12 border border-gray-200 dark:border-white/10 transition-colors">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 sm:mb-6">
+      <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div>
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">수익률 TOP 10</h2>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 hidden sm:block">가장 높은 수익률을 기록한 리포트</p>
@@ -83,10 +83,10 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
           {topReturns.map((item, index) => (
             <Link key={item.id} href={`/reports/${item.id}`}>
               <div
-                className={`flex-shrink-0 w-64 sm:w-80 p-3 sm:p-4 rounded-lg transition-all cursor-pointer snap-start ${
+                className={`flex-shrink-0 w-64 sm:w-80 p-4 sm:p-5 rounded-xl transition-all cursor-pointer snap-start border ${
                   currentIndex === index
-                    ? 'bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-500 dark:border-blue-400 shadow-md'
-                    : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-2 border-transparent'
+                    ? 'bg-electric-blue-50 dark:bg-electric-blue-900/20 border-electric-blue-500 dark:border-electric-blue-500 shadow-neon-blue scale-[1.02]'
+                    : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700'
                 }`}
                 onMouseEnter={() => setCurrentIndex(index)}
               >
@@ -103,11 +103,11 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
 
                 {/* Return Rate */}
                 <div className="mb-2">
-                  <div className={`text-2xl sm:text-3xl font-bold ${
+                  <div className={`text-2xl sm:text-3xl font-bold font-heading ${
                     item.returnRate > 0
-                      ? 'text-red-600 dark:text-red-400'
+                      ? 'text-red-600 dark:text-red-500'
                       : item.returnRate < 0
-                      ? 'text-blue-600 dark:text-blue-400'
+                      ? 'text-blue-600 dark:text-blue-500'
                       : 'text-gray-600 dark:text-gray-400'
                   }`}>
                     {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%

@@ -111,20 +111,22 @@ export default function HomePage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider reports={reports} />
 
       {/* 데스크탑: 검색바 + 필터바 */}
-      <div className="hidden md:block">
-        <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-        <FilterBar onFilterChange={setFilters} />
+      <div className="hidden md:block mb-8">
+        <div className="flex flex-col gap-6">
+          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          <FilterBar onFilterChange={setFilters} />
+        </div>
       </div>
 
       {/* 모바일: 검색 버튼 */}
-      <div className="md:hidden mb-4">
+      <div className="md:hidden mb-8">
         <Link href="/search">
-          <button className="w-full px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-left text-gray-500 dark:text-gray-400 flex items-center gap-3 hover:border-blue-500 dark:hover:border-blue-400 transition-colors">
+          <button className="w-full px-4 py-3 bg-white/5 dark:bg-white/5 border border-white/10 rounded-xl text-left text-gray-400 flex items-center gap-3 hover:border-electric-blue-500/50 transition-colors backdrop-blur-sm">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -134,7 +136,7 @@ export default function HomePage() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="mb-4 sm:mb-6">
+      <div className="mb-8">
         {/* 모바일: 4개 탭 한 줄 */}
         <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
           <button

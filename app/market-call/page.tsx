@@ -72,18 +72,18 @@ export default function MarketCallPage() {
             <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 bg-electric-blue-500/20 border border-electric-blue-500/50 rounded-full">
               <span className="text-xs font-semibold tracking-widest text-electric-blue-400 uppercase font-heading">Expert Market Predictions</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-electric-blue-400 to-neon-orange-500 mb-1.5 sm:mb-2 tracking-tight leading-tight font-heading drop-shadow-sm">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-electric-blue-400 to-neon-orange-500 mb-2 sm:mb-4 tracking-tight leading-tight font-heading drop-shadow-sm">
               MARKET CALL
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-300 tracking-wide font-light">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 dark:text-gray-300 tracking-wide font-light">
               전문가들의 예측, 데이터로 검증하다
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
             <blockquote className="relative">
-              <p className="text-sm sm:text-base md:text-lg text-gray-300 leading-relaxed italic mb-4 sm:mb-5 font-body">
-                투자 전문가들이 공개적으로 내놓은 <strong className="text-electric-blue-400">마켓 콜(Market Call)</strong>을 추적합니다.
+              <p className="text-sm sm:text-base md:text-lg text-gray-300 dark:text-gray-300 leading-relaxed font-body mb-6 sm:mb-8">
+                투자 전문가들이 공개적으로 내놓은 <strong className="text-electric-blue-400 font-bold">마켓 콜(Market Call)</strong>을 추적합니다.
                 <br className="hidden sm:block" />
                 "테슬라 매수", "금 상승 전망", "달러 약세 예상" - 그들의 예측을 따랐다면 어땠을까요?
                 <br className="hidden sm:block" />

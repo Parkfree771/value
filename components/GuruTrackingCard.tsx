@@ -332,11 +332,13 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
                 )}
               </div>
               <div className={`text-2xl font-black mb-1 font-heading tracking-tight ${
-                displayReturnRate >= 0
-                  ? 'text-neon-green-600 dark:text-neon-green-400 drop-shadow-sm'
-                  : 'text-neon-orange-600 dark:text-neon-orange-400 drop-shadow-sm'
+                displayReturnRate > 0
+                  ? 'text-red-600 dark:text-red-500 drop-shadow-sm'
+                  : displayReturnRate < 0
+                  ? 'text-blue-600 dark:text-blue-500 drop-shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400'
               }`}>
-                {displayReturnRate >= 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
+                {displayReturnRate > 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
               </div>
               {event.base_price && displayPrice && (
                 <div className="text-xs text-gray-600 dark:text-gray-400 font-mono leading-tight">
