@@ -262,153 +262,146 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
   };
 
   return (
-    <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-xl shadow-glass hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-white/10 overflow-hidden">
+    <div className="group bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-electric-blue-500 dark:hover:border-electric-blue-500 transition-all duration-300 overflow-hidden">
       {/* Main Content Area */}
-      <div className="p-6">
-        {/* Top Section: Horizontal Layout */}
-        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 mb-6">
-          {/* Left: Avatar + Analyst Info + Badge */}
-          <div className="flex items-center gap-4 flex-1">
-            <div className="w-14 h-14 bg-gradient-to-br from-electric-blue-400 to-electric-blue-600 rounded-full flex items-center justify-center text-white font-bold font-heading text-xl shadow-neon-blue flex-shrink-0">
+      <div className="p-6 sm:p-8">
+        {/* Header: Author + Badge + Return Rate */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          {/* Left: Author Info */}
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-electric-blue-500 to-electric-blue-700 rounded-xl flex items-center justify-center text-white font-bold font-heading text-lg flex-shrink-0">
               {event.guru_name.charAt(0)}
             </div>
-            <div className="flex-1 min-w-0">
+            <div>
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white font-heading">
                   {event.guru_name}
                 </h3>
                 <span className={getBadgeStyles(event.badge_info.label, event.badge_info.intensity)}>
                   {event.badge_info.label}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{event.guru_name_kr}</p>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                <span>{event.event_date}</span>
-              </div>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{event.guru_name_kr}</p>
             </div>
           </div>
 
-          {/* Middle: Stock Info */}
-          {event.target_ticker && (
-            <div className="px-4 py-3 bg-gradient-to-r from-electric-blue-500/5 to-blue-500/5 border border-electric-blue-500/20 rounded-lg flex-shrink-0 h-[90px] flex items-center">
-              <div className="flex gap-3 text-xs w-[280px]">
-                <div className="w-[100px]">
-                  <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Company</div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm leading-tight">
-                    Nike, Inc.
-                  </div>
-                </div>
-                <div className="w-[70px]">
-                  <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Ticker</div>
-                  <div className="font-mono font-bold text-electric-blue-700 dark:text-electric-blue-300 text-sm">
-                    {event.target_ticker}
-                  </div>
-                </div>
-                <div className="w-[80px]">
-                  <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Exchange</div>
-                  <div className="font-semibold text-gray-900 dark:text-white text-sm">
-                    {event.exchange || '-'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Right: Return Rate */}
+          {/* Right: Return Rate - Prominent Display */}
           {displayReturnRate !== undefined && (
-            <div className={`bg-gradient-to-br rounded-lg px-4 py-3 text-center border flex-shrink-0 w-[160px] h-[90px] flex flex-col justify-center ${
-              isClosed
-                ? 'from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-green-400 dark:border-green-600'
-                : 'from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 border-gray-200 dark:border-white/10'
+            <div className={`relative px-6 py-4 rounded-xl border-2 ${
+              displayReturnRate > 0
+                ? 'bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/30 dark:to-rose-950/30 border-red-300 dark:border-red-700'
+                : displayReturnRate < 0
+                ? 'bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-300 dark:border-blue-700'
+                : 'bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-800/30 dark:to-slate-800/30 border-gray-300 dark:border-gray-600'
             }`}>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center justify-center gap-1.5 leading-tight whitespace-nowrap">
-                {isClosed ? (
-                  <span className="text-green-600 dark:text-green-400 font-bold">✓ 수익확정</span>
-                ) : (
-                  <>
-                    수익률
-                    {priceLoading && <span className="text-yellow-500 animate-spin">⟳</span>}
-                  </>
-                )}
+              {isClosed && (
+                <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                  확정
+                </div>
+              )}
+              <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1.5">
+                수익률
+                {priceLoading && !isClosed && <span className="text-yellow-500 animate-spin">⟳</span>}
               </div>
-              <div className={`text-2xl font-black mb-1 font-heading tracking-tight ${
+              <div className={`text-3xl font-black font-heading ${
                 displayReturnRate > 0
-                  ? 'text-red-600 dark:text-red-500 drop-shadow-sm'
+                  ? 'text-red-600 dark:text-red-400'
                   : displayReturnRate < 0
-                  ? 'text-blue-600 dark:text-blue-500 drop-shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400'
+                  ? 'text-blue-600 dark:text-blue-400'
+                  : 'text-gray-600 dark:text-gray-400'
               }`}>
                 {displayReturnRate > 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
               </div>
               {event.base_price && displayPrice && (
-                <div className="text-xs text-gray-600 dark:text-gray-400 font-mono leading-tight">
+                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-mono">
                   {currencySymbol}{event.base_price.toFixed(2)} → {currencySymbol}{displayPrice.toFixed(2)}
                 </div>
               )}
             </div>
           )}
-
-          {/* Far Right: Price Update Time or Close Button */}
-          {showCloseButton ? (
-            <button
-              onClick={handleClosePosition}
-              disabled={isClosing}
-              className={`bg-gradient-to-br from-electric-blue-500 to-electric-blue-600 hover:from-electric-blue-600 hover:to-electric-blue-700 rounded-lg px-4 py-3 text-center border-2 border-electric-blue-400 dark:border-electric-blue-500 flex-shrink-0 w-[120px] h-[90px] flex flex-col justify-center transition-all shadow-md hover:shadow-lg ${
-                isClosing ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              <div className="text-xs text-white font-bold mb-1.5 leading-tight">
-                {isClosing ? '처리중...' : '수익 확정'}
-              </div>
-              <div className="text-lg font-black text-white">
-                💰
-              </div>
-              <div className="text-xs text-white/80 mt-1 leading-tight">
-                {displayReturnRate !== undefined ? `${displayReturnRate >= 0 ? '+' : ''}${displayReturnRate.toFixed(1)}%` : '-'}
-              </div>
-            </button>
-          ) : (
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 rounded-lg px-4 py-3 text-center border border-gray-200 dark:border-gray-600 flex-shrink-0 w-[120px] h-[90px] flex flex-col justify-center">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 leading-tight whitespace-nowrap">
-                {isClosed ? '확정일' : '가격갱신'}
-              </div>
-              {isClosed && event.closed_at ? (
-                <>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                    {new Date(event.closed_at).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-tight">
-                    {new Date(event.closed_at).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </>
-              ) : lastUpdated ? (
-                <>
-                  <div className="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                    {lastUpdated.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' })}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 leading-tight">
-                    {lastUpdated.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </>
-              ) : (
-                <div className="text-sm text-gray-500 dark:text-gray-400">-</div>
-              )}
-            </div>
-          )}
         </div>
 
-        {/* Middle Section: Main Statement */}
-        <div className="border-t border-gray-200 dark:border-gray-700 pt-5">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight flex-1">
+        {/* Stock Info Bar */}
+        {event.target_ticker && (
+          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border border-blue-200 dark:border-gray-700 rounded-xl">
+            <div className="flex flex-wrap items-center gap-4 text-sm">
+              {(event.company_name || event.stockData?.name) && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Company</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{event.company_name || event.stockData?.name}</span>
+                  </div>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
+                </>
+              )}
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Ticker</span>
+                <span className="font-mono font-bold text-electric-blue-600 dark:text-electric-blue-400 text-base">{event.target_ticker}</span>
+              </div>
+              {event.exchange && (
+                <>
+                  <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Exchange</span>
+                    <span className="font-semibold text-gray-900 dark:text-white">{event.exchange}</span>
+                  </div>
+                </>
+              )}
+              <div className="w-px h-4 bg-gray-300 dark:bg-gray-600"></div>
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Date</span>
+                <span className="font-semibold text-gray-900 dark:text-white">{event.event_date}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content: Title + Summary + Content */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white leading-tight mb-3">
               {event.title}
             </h2>
+            <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+              {event.summary}
+            </p>
+          </div>
+
+          <div
+            className={`text-sm text-gray-600 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none transition-all duration-300 ${
+              isExpanded ? '' : 'line-clamp-3'
+            }`}
+            dangerouslySetInnerHTML={{ __html: event.content_html }}
+          />
+
+          <div className="flex items-center gap-3 mt-4">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white text-sm font-semibold rounded-lg transition-all"
+            >
+              {isExpanded ? (
+                <>
+                  <span>접기</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                  </svg>
+                </>
+              ) : (
+                <>
+                  <span>더보기</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </button>
+
             {event.source_url && (
               <a
                 href={event.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-electric-blue-600 to-electric-blue-800 hover:from-electric-blue-700 hover:to-electric-blue-900 text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-electric-blue-600 hover:bg-electric-blue-700 text-white text-sm font-semibold rounded-lg transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -416,63 +409,70 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
                 원문 보기
               </a>
             )}
-          </div>
-          <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-            {event.summary}
-          </p>
-          <div
-            className={`text-sm text-gray-600 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none transition-all duration-300 ${
-              isExpanded ? '' : 'line-clamp-3'
-            }`}
-            dangerouslySetInnerHTML={{ __html: event.content_html }}
-          />
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-electric-blue-600 hover:text-electric-blue-700 dark:text-electric-blue-400 dark:hover:text-electric-blue-300 transition-colors"
-          >
-            {isExpanded ? (
-              <>
-                <span>접기</span>
-                <svg className="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                </svg>
-              </>
-            ) : (
-              <>
-                <span>더보기</span>
-                <svg className="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </>
+
+            {/* Close Position Button */}
+            {showCloseButton && (
+              <button
+                onClick={handleClosePosition}
+                disabled={isClosing}
+                className={`inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white text-sm font-semibold rounded-lg transition-all ${
+                  isClosing ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <span className="text-lg">💰</span>
+                <span>{isClosing ? '처리중...' : '수익 확정'}</span>
+              </button>
             )}
-          </button>
+          </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-3 bg-gray-50 dark:bg-gray-700/30 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-4 text-gray-500 dark:text-gray-400">
-          <span className="flex items-center gap-1.5">
+      <div className="px-6 sm:px-8 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <span className="flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            {event.views || 0}
+            <span className="font-semibold">{event.views || 0}</span>
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            {event.likes || 0}
+            <span className="font-semibold">{event.likes || 0}</span>
           </span>
+          {(isClosed && event.closed_at) ? (
+            <>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>확정: {new Date(event.closed_at).toLocaleDateString('ko-KR')}</span>
+              </span>
+            </>
+          ) : lastUpdated ? (
+            <>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
+              <span className="flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>갱신: {lastUpdated.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}</span>
+              </span>
+            </>
+          ) : null}
         </div>
-        <div className="flex items-center gap-3">
-          {/* 수정/삭제 버튼 (마켓콜 작성자인 경우) */}
+
+        <div className="flex items-center gap-2">
+          {/* Edit/Delete buttons for market-call owner */}
           {showEditDeleteButtons && (
             <>
               <button
                 onClick={handleEdit}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors text-xs flex items-center gap-1.5"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all text-xs"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -482,7 +482,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className={`px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors text-xs flex items-center gap-1.5 ${
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all text-xs ${
                   isDeleting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
@@ -493,10 +493,11 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
               </button>
             </>
           )}
-          <span className={`px-3 py-1 rounded-full font-bold tracking-wider text-xs ${
+
+          <span className={`px-3 py-1.5 rounded-lg font-bold tracking-wider text-xs ${
             event.data_type === 'PORTFOLIO'
-              ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-              : 'bg-electric-blue-100 dark:bg-electric-blue-900/30 text-electric-blue-700 dark:text-electric-blue-300'
+              ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
+              : 'bg-electric-blue-100 dark:bg-electric-blue-900/40 text-electric-blue-700 dark:text-electric-blue-300 border border-electric-blue-200 dark:border-electric-blue-800'
           }`}>
             {event.data_type === 'PORTFOLIO' ? 'WALLET WATCH' : 'MARKET CALL'}
           </span>

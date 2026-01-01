@@ -62,7 +62,7 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
   };
 
   return (
-    <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-xl shadow-glass p-4 sm:p-6 mb-8 sm:mb-12 border border-gray-200 dark:border-white/10 transition-colors">
+    <div className="bg-white dark:bg-gray-900 rounded-xl p-4 sm:p-6 mb-8 sm:mb-12 border-2 border-gray-200 dark:border-gray-700 transition-colors">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 sm:mb-8">
         <div>
@@ -78,31 +78,31 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
       </div>
 
       {/* Horizontal Scrollable List of TOP 10 */}
-      <div className="relative">
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-3 sm:pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent -mx-1 px-1">
+      <div className="relative -mx-4 px-4">
+        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-6 pt-1 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent px-2">
           {topReturns.map((item, index) => (
             <Link key={item.id} href={`/reports/${item.id}`}>
               <div
-                className={`flex-shrink-0 w-64 sm:w-80 p-4 sm:p-5 rounded-xl transition-all cursor-pointer snap-start border ${
+                className={`flex-shrink-0 w-64 sm:w-80 p-4 sm:p-5 rounded-xl transition-all cursor-pointer snap-start border-2 ${
                   currentIndex === index
-                    ? 'bg-electric-blue-50 dark:bg-electric-blue-900/20 border-electric-blue-500 dark:border-electric-blue-500 shadow-neon-blue scale-[1.02]'
+                    ? 'bg-electric-blue-50 dark:bg-electric-blue-900/20 border-electric-blue-500 dark:border-electric-blue-500'
                     : 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700'
                 }`}
                 onMouseEnter={() => setCurrentIndex(index)}
               >
                 {/* Rank + Author */}
-                <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3">
+                <div className="flex items-start gap-2 sm:gap-3 mb-2 sm:mb-3 h-[56px]">
                   <div className="text-xl sm:text-2xl font-bold text-gray-400 dark:text-gray-500 flex-shrink-0">
                     {getMedal(item.rank)}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-1 truncate">{item.author}</h3>
-                    <h4 className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2">{item.title}</h4>
+                    <h4 className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mb-2 line-clamp-2 min-h-[2.5rem]">{item.title}</h4>
                   </div>
                 </div>
 
                 {/* Return Rate */}
-                <div className="mb-2">
+                <div className="mb-2 h-[40px] flex items-center">
                   <div className={`text-2xl sm:text-3xl font-bold font-heading ${
                     item.returnRate > 0
                       ? 'text-red-600 dark:text-red-500'

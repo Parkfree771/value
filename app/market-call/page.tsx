@@ -62,7 +62,7 @@ export default function MarketCallPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 소개 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-white/5 dark:bg-black/40 backdrop-blur-xl rounded-none sm:rounded-2xl p-6 sm:p-8 shadow-glass border border-electric-blue-500/30 relative overflow-hidden">
+      <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-black dark:via-gray-950 dark:to-black rounded-none sm:rounded-2xl p-6 sm:p-8 border-t-4 border-b-4 sm:border-4 border-electric-blue-600 dark:border-electric-blue-500 relative overflow-hidden">
         {/* 장식 요소 */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-electric-blue-500 to-transparent opacity-50"></div>
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-electric-blue-500 to-transparent opacity-50"></div>
@@ -75,14 +75,14 @@ export default function MarketCallPage() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-electric-blue-400 to-neon-orange-500 mb-2 sm:mb-4 tracking-tight leading-tight font-heading drop-shadow-sm">
               MARKET CALL
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-300 dark:text-gray-300 tracking-wide font-light">
+            <p className="text-base sm:text-lg md:text-xl text-electric-blue-100 tracking-wide font-light">
               전문가들의 예측, 데이터로 검증하다
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
             <blockquote className="relative">
-              <p className="text-sm sm:text-base md:text-lg text-gray-300 dark:text-gray-300 leading-relaxed font-body mb-6 sm:mb-8">
+              <p className="text-sm sm:text-base md:text-lg text-gray-100 leading-relaxed font-body mb-6 sm:mb-8">
                 투자 전문가들이 공개적으로 내놓은 <strong className="text-electric-blue-400 font-bold">마켓 콜(Market Call)</strong>을 추적합니다.
                 <br className="hidden sm:block" />
                 "테슬라 매수", "금 상승 전망", "달러 약세 예상" - 그들의 예측을 따랐다면 어땠을까요?
