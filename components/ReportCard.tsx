@@ -217,19 +217,19 @@ export default function ReportCard({
 
   return (
     <div onClick={handleCardClick} className="block cursor-pointer">
-      <Card className="p-4 sm:p-6 hover:border-blue-300 dark:hover:border-blue-500 border border-transparent dark:border-transparent transition-colors">
+      <Card className="p-4 sm:p-6 bg-white/80 dark:bg-gray-900/60 backdrop-blur-md shadow-glass border border-gray-200 dark:border-white/10 hover:shadow-neon-blue transition-all duration-300">
         {/* Header */}
         <div className="flex justify-between items-start mb-3 sm:mb-4 gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{stockName}</h3>
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{ticker}</span>
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide">{stockName}</h3>
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono">{ticker}</span>
               {getOpinionBadge()}
             </div>
             <h2 className="text-sm sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2 line-clamp-2">{title}</h2>
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
-            <div className="text-xl sm:text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-black font-heading tracking-tight drop-shadow-sm">
               {formatReturn(returnRate)}
             </div>
           </div>

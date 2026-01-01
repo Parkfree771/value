@@ -262,19 +262,19 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div className="bg-white/80 dark:bg-gray-900/60 backdrop-blur-md rounded-xl shadow-glass hover:shadow-2xl transition-all duration-300 border border-gray-200 dark:border-white/10 overflow-hidden">
       {/* Main Content Area */}
       <div className="p-6">
         {/* Top Section: Horizontal Layout */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 mb-6">
           {/* Left: Avatar + Analyst Info + Badge */}
           <div className="flex items-center gap-4 flex-1">
-            <div className="w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg flex-shrink-0">
+            <div className="w-14 h-14 bg-gradient-to-br from-electric-blue-400 to-electric-blue-600 rounded-full flex items-center justify-center text-white font-bold font-heading text-xl shadow-neon-blue flex-shrink-0">
               {event.guru_name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide">
                   {event.guru_name}
                 </h3>
                 <span className={getBadgeStyles(event.badge_info.label, event.badge_info.intensity)}>
@@ -290,7 +290,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
 
           {/* Middle: Stock Info */}
           {event.target_ticker && (
-            <div className="px-4 py-3 bg-gradient-to-r from-cyan-500/5 to-blue-500/5 border border-cyan-500/20 rounded-lg flex-shrink-0 h-[90px] flex items-center">
+            <div className="px-4 py-3 bg-gradient-to-r from-electric-blue-500/5 to-blue-500/5 border border-electric-blue-500/20 rounded-lg flex-shrink-0 h-[90px] flex items-center">
               <div className="flex gap-3 text-xs w-[280px]">
                 <div className="w-[100px]">
                   <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Company</div>
@@ -300,7 +300,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
                 </div>
                 <div className="w-[70px]">
                   <div className="text-gray-500 dark:text-gray-400 mb-1.5 text-xs leading-tight">Ticker</div>
-                  <div className="font-mono font-bold text-cyan-700 dark:text-cyan-300 text-sm">
+                  <div className="font-mono font-bold text-electric-blue-700 dark:text-electric-blue-300 text-sm">
                     {event.target_ticker}
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
             <div className={`bg-gradient-to-br rounded-lg px-4 py-3 text-center border flex-shrink-0 w-[160px] h-[90px] flex flex-col justify-center ${
               isClosed
                 ? 'from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-green-400 dark:border-green-600'
-                : 'from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 border-gray-200 dark:border-gray-600'
+                : 'from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 border-gray-200 dark:border-white/10'
             }`}>
               <div className="text-xs text-gray-500 dark:text-gray-400 mb-1.5 flex items-center justify-center gap-1.5 leading-tight whitespace-nowrap">
                 {isClosed ? (
@@ -331,12 +331,14 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
                   </>
                 )}
               </div>
-              <div className={`text-2xl font-black mb-1 ${
-                displayReturnRate >= 0
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-blue-600 dark:text-blue-400'
+              <div className={`text-2xl font-black mb-1 font-heading tracking-tight ${
+                displayReturnRate > 0
+                  ? 'text-red-600 dark:text-red-500 drop-shadow-sm'
+                  : displayReturnRate < 0
+                  ? 'text-blue-600 dark:text-blue-500 drop-shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400'
               }`}>
-                {displayReturnRate >= 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
+                {displayReturnRate > 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
               </div>
               {event.base_price && displayPrice && (
                 <div className="text-xs text-gray-600 dark:text-gray-400 font-mono leading-tight">
@@ -351,7 +353,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
             <button
               onClick={handleClosePosition}
               disabled={isClosing}
-              className={`bg-gradient-to-br from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 rounded-lg px-4 py-3 text-center border-2 border-cyan-400 dark:border-cyan-500 flex-shrink-0 w-[120px] h-[90px] flex flex-col justify-center transition-all shadow-md hover:shadow-lg ${
+              className={`bg-gradient-to-br from-electric-blue-500 to-electric-blue-600 hover:from-electric-blue-600 hover:to-electric-blue-700 rounded-lg px-4 py-3 text-center border-2 border-electric-blue-400 dark:border-electric-blue-500 flex-shrink-0 w-[120px] h-[90px] flex flex-col justify-center transition-all shadow-md hover:shadow-lg ${
                 isClosing ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
@@ -406,7 +408,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
                 href={event.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-electric-blue-600 to-electric-blue-800 hover:from-electric-blue-700 hover:to-electric-blue-900 text-white text-sm font-semibold rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -426,7 +428,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
           />
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-cyan-600 hover:text-cyan-700 dark:text-cyan-400 dark:hover:text-cyan-300 transition-colors"
+            className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-electric-blue-600 hover:text-electric-blue-700 dark:text-electric-blue-400 dark:hover:text-electric-blue-300 transition-colors"
           >
             {isExpanded ? (
               <>
@@ -494,7 +496,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
           <span className={`px-3 py-1 rounded-full font-bold tracking-wider text-xs ${
             event.data_type === 'PORTFOLIO'
               ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-              : 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300'
+              : 'bg-electric-blue-100 dark:bg-electric-blue-900/30 text-electric-blue-700 dark:text-electric-blue-300'
           }`}>
             {event.data_type === 'PORTFOLIO' ? 'WALLET WATCH' : 'MARKET CALL'}
           </span>

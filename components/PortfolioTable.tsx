@@ -233,11 +233,13 @@ export default function PortfolioTable({ portfolio }: PortfolioTableProps) {
                         <div className="text-xs text-gray-400 animate-pulse">로딩 중...</div>
                       ) : prices.changeFromReported !== null && prices.changeFromReported !== undefined ? (
                         <div className={`text-sm font-bold ${
-                          prices.changeFromReported >= 0
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-blue-600 dark:text-blue-400'
+                          prices.changeFromReported > 0
+                            ? 'text-red-600 dark:text-red-500'
+                            : prices.changeFromReported < 0
+                            ? 'text-blue-600 dark:text-blue-500'
+                            : 'text-gray-500 dark:text-gray-400'
                         }`}>
-                          {prices.changeFromReported >= 0 ? '+' : ''}{prices.changeFromReported.toFixed(2)}%
+                          {prices.changeFromReported > 0 ? '+' : ''}{prices.changeFromReported.toFixed(2)}%
                         </div>
                       ) : (
                         <div className="text-xs text-gray-400">N/A</div>
@@ -327,11 +329,13 @@ export default function PortfolioTable({ portfolio }: PortfolioTableProps) {
                     <div className="text-xs text-gray-400 animate-pulse">로딩 중...</div>
                   ) : prices.changeFromReported !== null && prices.changeFromReported !== undefined ? (
                     <div className={`text-base font-bold ${
-                      prices.changeFromReported >= 0
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-blue-600 dark:text-blue-400'
+                      prices.changeFromReported > 0
+                        ? 'text-red-600 dark:text-red-500'
+                        : prices.changeFromReported < 0
+                        ? 'text-blue-600 dark:text-blue-500'
+                        : 'text-gray-500 dark:text-gray-400'
                     }`}>
-                      {prices.changeFromReported >= 0 ? '+' : ''}{prices.changeFromReported.toFixed(2)}%
+                      {prices.changeFromReported > 0 ? '+' : ''}{prices.changeFromReported.toFixed(2)}%
                     </div>
                   ) : (
                     <div className="text-xs text-gray-400">N/A</div>
