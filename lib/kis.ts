@@ -215,6 +215,10 @@ export function getCurrencyByExchange(exchange: string): string {
 /**
  * 티커 심볼로 거래소 추정
  */
+/**
+ * 거래소 감지
+ * global-stocks.json에서 동적으로 조회
+ */
 export function detectExchange(symbol: string): string {
   // 6자리 숫자 = 한국 주식
   if (/^\d{6}$/.test(symbol)) {
@@ -229,12 +233,48 @@ export function detectExchange(symbol: string): string {
   if (symbol.endsWith('.HN')) return 'HNX'; // 하노이
   if (symbol.endsWith('.HM')) return 'HSX'; // 호치민
 
-  // 특정 티커의 거래소 매핑 (알파벳 순서)
+  // global-stocks.json에서 조회 시도
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'public', 'data', 'global-stocks.json');
+
+    // 파일이 존재하면 읽기
+    if (fs.existsSync(filePath)) {
+      const data = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+      const upperSymbol = symbol.toUpperCase();
+
+      // 정확한 심볼 매치 찾기
+      const stock = data.stocks?.find((s: any) => s.symbol.toUpperCase() === upperSymbol);
+      if (stock) {
+        return stock.exchange;
+      }
+    }
+  } catch (error) {
+    // 에러 발생 시 폴백 로직으로 계속 진행
+    console.warn(`[detectExchange] Failed to load global-stocks.json:`, error);
+  }
+
+  // 폴백: 특정 티커의 거래소 매핑 (주요 종목만)
   const tickerExchangeMap: Record<string, string> = {
-    'BRK-A': 'NYS',  // Berkshire Hathaway Class A
-    'BRK-B': 'NYS',  // Berkshire Hathaway Class B
-    'NVO': 'NYS',    // Novo Nordisk (NYSE에 상장)
-    // 필요시 추가 매핑
+    // NYSE 주요 종목
+    'JPM': 'NYS', 'BAC': 'NYS', 'WFC': 'NYS', 'GS': 'NYS', 'MS': 'NYS',
+    'V': 'NYS', 'MA': 'NYS', 'AXP': 'NYS', 'BRK-B': 'NYS', 'BA': 'NYS',
+    'CAT': 'NYS', 'MMM': 'NYS', 'GE': 'NYS', 'OXY': 'NYS', 'MCO': 'NYS',
+    'CB': 'NYS', 'KHC': 'NYS', 'DVA': 'NYS', 'COF': 'NYS', 'CHTR': 'NYS',
+    'STZ': 'NYS', 'KO': 'NYS', 'PEP': 'NYS', 'PG': 'NYS', 'NKE': 'NYS',
+    'COST': 'NYS', 'WMT': 'NYS', 'TGT': 'NYS', 'HD': 'NYS', 'JNJ': 'NYS',
+    'PFE': 'NYS', 'UNH': 'NYS', 'LLY': 'NYS', 'MRK': 'NYS', 'ABT': 'NYS',
+    'XOM': 'NYS', 'CVX': 'NYS', 'COP': 'NYS', 'T': 'NYS', 'VZ': 'NYS',
+    'NU': 'NYS', 'SIRI': 'NYS', 'NVO': 'NYS', 'MCD': 'NYS',
+
+    // NASDAQ 주요 종목
+    'AAPL': 'NAS', 'MSFT': 'NAS', 'TSLA': 'NAS', 'AMZN': 'NAS', 'GOOGL': 'NAS',
+    'META': 'NAS', 'NVDA': 'NAS', 'NFLX': 'NAS', 'ADBE': 'NAS', 'INTC': 'NAS',
+    'AMD': 'NAS', 'CRM': 'NAS', 'ORCL': 'NAS', 'CSCO': 'NAS', 'AVGO': 'NAS',
+    'QCOM': 'NAS', 'PYPL': 'NAS', 'UBER': 'NAS', 'ABNB': 'NAS', 'SBUX': 'NAS',
+    'TMUS': 'NAS', 'VRSN': 'NAS', 'LSXMA': 'NAS', 'LSXMK': 'NAS', 'FND': 'NAS',
+    'SNOW': 'NAS', 'MRNA': 'NAS',
   };
 
   const upperSymbol = symbol.toUpperCase();
@@ -242,7 +282,7 @@ export function detectExchange(symbol: string): string {
     return tickerExchangeMap[upperSymbol];
   }
 
-  // 기본적으로 미국 주식 (NASDAQ)
+  // 기본값: 미국 주식 (NASDAQ)
   return 'NAS';
 }
 
@@ -428,6 +468,17 @@ export const STOCK_CODES: Record<string, string> = {
   'HD현대일렉트릭': '267260',
   '포스코퓨처엠': '003670',
 
+  // 증권사
+  '한국투자증권': '030200',
+  '미래에셋증권': '006800',
+  'NH투자증권': '005940',
+  '삼성증권': '016360',
+  'KB증권': '030210',
+  '키움증권': '039490',
+  '메리츠증권': '008560',
+  '하이투자증권': '003690',
+  '신한투자증권': '001720',
+
   // 미국 주요 기술주
   'Apple': 'AAPL',
   'Microsoft': 'MSFT',
@@ -528,7 +579,7 @@ export const STOCK_CODES: Record<string, string> = {
 };
 
 /**
- * 국내 주식 종목 검색 (로컬 STOCK_CODES 기반)
+ * 국내 주식 종목 검색 (로컬 매핑으로 빠른 자동완성)
  * @param query 검색어 (종목명 또는 종목코드)
  * @param limit 결과 개수 제한
  */
@@ -538,7 +589,7 @@ export async function searchKoreanStocks(query: string, limit: number = 20): Pro
   const searchLower = query.toLowerCase().trim();
   const results: StockInfo[] = [];
 
-  // STOCK_CODES에서 국내 주식만 검색
+  // STOCK_CODES에서 국내 주식 검색
   Object.entries(STOCK_CODES).forEach(([name, symbol]) => {
     // 6자리 숫자 = 국내 주식
     if (/^\d{6}$/.test(symbol)) {
@@ -570,7 +621,6 @@ export async function searchKoreanStocks(query: string, limit: number = 20): Pro
     if (aExact && !bExact) return -1;
     if (!aExact && bExact) return 1;
 
-    // 시작하는 것을 우선순위로
     const aStarts = a.name.toLowerCase().startsWith(searchLower) || a.symbol.toLowerCase().startsWith(searchLower);
     const bStarts = b.name.toLowerCase().startsWith(searchLower) || b.symbol.toLowerCase().startsWith(searchLower);
 
@@ -580,11 +630,12 @@ export async function searchKoreanStocks(query: string, limit: number = 20): Pro
     return 0;
   });
 
+  console.log(`[searchKoreanStocks] 검색 결과: ${uniqueResults.length}개`);
   return uniqueResults.slice(0, limit);
 }
 
 /**
- * 해외 주식 종목 검색 (로컬 STOCK_CODES 기반)
+ * 해외 주식 종목 검색 (로컬 매핑 + API로 정확한 거래소 조회)
  * @param query 검색어 (종목명 또는 심볼)
  * @param exchange 거래소 코드 (사용 안 함)
  * @param limit 결과 개수 제한
@@ -597,9 +648,9 @@ export async function searchOverseaStocks(
   if (!query || query.trim().length === 0) return [];
 
   const searchLower = query.toLowerCase().trim();
-  const results: StockInfo[] = [];
+  const candidates: StockInfo[] = [];
 
-  // STOCK_CODES에서 해외 주식만 검색
+  // STOCK_CODES에서 해외 주식 검색
   Object.entries(STOCK_CODES).forEach(([name, symbol]) => {
     // 6자리 숫자가 아니면 해외 주식
     if (!/^\d{6}$/.test(symbol)) {
@@ -607,30 +658,34 @@ export async function searchOverseaStocks(
       const symbolLower = symbol.toLowerCase();
 
       if (nameLower.includes(searchLower) || symbolLower.includes(searchLower)) {
-        results.push({
+        candidates.push({
           symbol: symbol,
           name: name,
-          exchange: detectExchange(symbol),
+          exchange: 'NAS', // 임시값, API로 조회 예정
           type: 'EQUITY' as const,
         });
       }
     }
   });
 
-  // 중복 제거 및 정렬
-  const uniqueResults = Array.from(
-    new Map(results.map(item => [item.symbol, item])).values()
+  if (candidates.length === 0) {
+    console.log(`[searchOverseaStocks] 검색 결과: 0개`);
+    return [];
+  }
+
+  // 중복 제거
+  const uniqueCandidates = Array.from(
+    new Map(candidates.map(item => [item.symbol, item])).values()
   );
 
   // 검색어와 정확히 일치하는 것을 우선순위로
-  uniqueResults.sort((a, b) => {
+  uniqueCandidates.sort((a, b) => {
     const aExact = a.name.toLowerCase() === searchLower || a.symbol.toLowerCase() === searchLower;
     const bExact = b.name.toLowerCase() === searchLower || b.symbol.toLowerCase() === searchLower;
 
     if (aExact && !bExact) return -1;
     if (!aExact && bExact) return 1;
 
-    // 시작하는 것을 우선순위로
     const aStarts = a.name.toLowerCase().startsWith(searchLower) || a.symbol.toLowerCase().startsWith(searchLower);
     const bStarts = b.name.toLowerCase().startsWith(searchLower) || b.symbol.toLowerCase().startsWith(searchLower);
 
@@ -640,7 +695,152 @@ export async function searchOverseaStocks(
     return 0;
   });
 
-  return uniqueResults.slice(0, limit);
+  // detectExchange로 정확한 거래소 코드 설정
+  const resultsWithExchange = uniqueCandidates.slice(0, limit).map(stock => ({
+    ...stock,
+    exchange: detectExchange(stock.symbol),
+  }));
+
+  console.log(`[searchOverseaStocks] 검색 결과: ${resultsWithExchange.length}개`);
+  return resultsWithExchange;
+}
+
+/**
+ * 통합 검색 결과 인터페이스 (재무정보 포함)
+ */
+export interface StockSearchResult {
+  symbol: string;
+  name: string;
+  exchange: string;
+  type: 'EQUITY' | 'ETF';
+  price?: number;
+  currency?: string;
+  marketCap?: number;
+  per?: number;
+  pbr?: number;
+}
+
+/**
+ * 해외주식 통합 검색 (여러 거래소 시도)
+ * 검색어를 심볼로 간주하고 주요 거래소에서 현재가 조회
+ */
+export async function searchStocksWithDetails(query: string, limit: number = 10): Promise<StockSearchResult[]> {
+  if (!query || query.trim().length === 0) return [];
+
+  try {
+    const token = await getKISTokenWithCache();
+    const symbol = query.trim().toUpperCase();
+
+    console.log(`[searchStocksWithDetails] 심볼 "${symbol}" 검색 시작`);
+
+    // 주요 거래소 목록 (우선순위 순)
+    const exchanges = ['NYS', 'NAS', 'AMS', 'TSE', 'HKS'];
+    const results: StockSearchResult[] = [];
+
+    // 각 거래소에서 병렬로 조회
+    const promises = exchanges.map(async (exchange) => {
+      try {
+        console.log(`[searchStocksWithDetails] ${symbol} @ ${exchange} 조회 시도`);
+
+        // 현재가 API로 직접 조회
+        const params = new URLSearchParams({
+          AUTH: '',
+          EXCD: exchange,
+          SYMB: symbol,
+        });
+
+        const url = `${process.env.KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price?${params.toString()}`;
+
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'authorization': `Bearer ${token}`,
+            'appkey': process.env.KIS_APP_KEY!,
+            'appsecret': process.env.KIS_APP_SECRET!,
+            'tr_id': 'HHDFS00000300',  // 해외주식 현재가
+          },
+        });
+
+        if (!response.ok) {
+          return null;
+        }
+
+        const data = await response.json();
+
+        if (!data.output || !data.output.last) {
+          return null;
+        }
+
+        const output = data.output;
+        const price = parseFloat(output.last || output.curr_price || 0);
+
+        // 가격이 0이면 유효하지 않은 종목
+        if (!price || price === 0) {
+          return null;
+        }
+
+        console.log(`[searchStocksWithDetails] ${symbol} @ ${exchange} 발견! 가격: ${price}`);
+
+        // 상세 정보도 조회 시도
+        const detailParams = new URLSearchParams({
+          AUTH: '',
+          EXCD: exchange,
+          SYMB: symbol,
+        });
+
+        const detailUrl = `${process.env.KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price-detail?${detailParams.toString()}`;
+
+        const detailResponse = await fetch(detailUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8',
+            'authorization': `Bearer ${token}`,
+            'appkey': process.env.KIS_APP_KEY!,
+            'appsecret': process.env.KIS_APP_SECRET!,
+            'tr_id': 'HHDFS76200200',
+          },
+        });
+
+        let marketCap, per, pbr;
+        if (detailResponse.ok) {
+          const detailData = await detailResponse.json();
+          if (detailData.output) {
+            marketCap = parseFloat(detailData.output.valx || 0) || undefined;
+            per = parseFloat(detailData.output.per || 0) || undefined;
+            pbr = parseFloat(detailData.output.pbr || 0) || undefined;
+          }
+        }
+
+        return {
+          symbol,
+          name: output.name || symbol,
+          exchange,
+          type: 'EQUITY' as const,
+          price,
+          currency: getCurrencyByExchange(exchange),
+          marketCap,
+          per,
+          pbr,
+        };
+      } catch (error) {
+        console.error(`[searchStocksWithDetails] ${symbol} @ ${exchange} 오류:`, error);
+        return null;
+      }
+    });
+
+    const allResults = await Promise.all(promises);
+
+    // null이 아닌 결과만 필터링
+    const validResults = allResults.filter((r): r is NonNullable<typeof r> => r !== null);
+
+    console.log(`[searchStocksWithDetails] 완료: ${validResults.length}개 거래소에서 발견`);
+
+    return validResults.slice(0, limit);
+  } catch (error) {
+    console.error('[searchStocksWithDetails] 오류:', error);
+    return [];
+  }
 }
 
 /**
@@ -706,6 +906,8 @@ export async function getKoreanCompanyProfile(stockCode: string): Promise<Compan
 
     const url = `${process.env.KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price?${params.toString()}`;
 
+    console.log(`[getKoreanCompanyProfile] API 호출: ${stockCode}`);
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -718,6 +920,7 @@ export async function getKoreanCompanyProfile(stockCode: string): Promise<Compan
     });
 
     if (!response.ok) {
+      console.error(`[getKoreanCompanyProfile] API 오류: ${response.status}`);
       return null;
     }
 
@@ -725,6 +928,7 @@ export async function getKoreanCompanyProfile(stockCode: string): Promise<Compan
     const output = data.output;
 
     if (!output) {
+      console.error(`[getKoreanCompanyProfile] output 없음`);
       return null;
     }
 
@@ -737,85 +941,156 @@ export async function getKoreanCompanyProfile(stockCode: string): Promise<Compan
       }
     }
 
+    // 재무 데이터 파싱
+    const currentPrice = parseFloat(output.stck_prpr || 0);
+
+    // 시가총액: hts_avls는 '억원' 단위이므로 원 단위로 변환
+    const marketCapIn100M = parseFloat(output.hts_avls || 0);
+    const marketCap = marketCapIn100M * 100_000_000; // 억원 -> 원
+
+    // PER, PBR, EPS (0이면 undefined로 처리)
+    const per = parseFloat(output.per || 0) || undefined;
+    const pbr = parseFloat(output.pbr || 0) || undefined;
+    const eps = parseFloat(output.eps || 0) || undefined;
+
+    const high52w = parseFloat(output.w52_hgpr || 0) || undefined;
+    const low52w = parseFloat(output.w52_lwpr || 0) || undefined;
+    const volume = parseInt(output.acml_vol || 0) || 0;
+
+    console.log(`[getKoreanCompanyProfile] 성공: ${stockCode}`);
+    console.log(`  - 현재가: ${currentPrice.toLocaleString()}원`);
+    console.log(`  - 시가총액: ${marketCapIn100M.toLocaleString()}억원 (${marketCap.toLocaleString()}원)`);
+    console.log(`  - PER: ${per}, PBR: ${pbr}, EPS: ${eps}`);
+
     return {
       symbol: stockCode,
       name: stockName,
       exchange: 'KRX',
-      currentPrice: parseFloat(output.stck_prpr),
+      currentPrice,
       currency: 'KRW',
-      marketCap: parseFloat(output.hts_avls || 0),  // 시가총액
-      per: parseFloat(output.per || 0),              // PER
-      pbr: parseFloat(output.pbr || 0),              // PBR
-      eps: parseFloat(output.eps || 0),              // EPS
-      high52w: parseFloat(output.w52_hgpr || 0),     // 52주 최고가
-      low52w: parseFloat(output.w52_lwpr || 0),      // 52주 최저가
-      volume: parseInt(output.acml_vol || 0),        // 거래량
+      marketCap,
+      per,
+      pbr,
+      eps,
+      high52w,
+      low52w,
+      volume,
     };
   } catch (error) {
-    console.error('국내 기업 프로필 조회 오류:', error);
+    console.error('[getKoreanCompanyProfile] 오류:', error);
     return null;
   }
 }
 
 /**
- * 해외 기업 프로필 조회
+ * 해외 기업 프로필 조회 (현재가 + 상세 정보 API 사용)
  */
 export async function getOverseaCompanyProfile(
   symbol: string,
   exchange: string = 'NAS'
 ): Promise<CompanyProfile | null> {
   try {
+    console.log(`[getOverseaCompanyProfile] 조회: ${symbol}, exchange: ${exchange}`);
+
     const token = await getKISTokenWithCache();
 
-    const params = new URLSearchParams({
-      AUTH: '',
-      EXCD: exchange,
-      SYMB: symbol,
-    });
+    // 1. 현재가 API 호출
+    const priceData = await getKISOverseaStockPrice(symbol, exchange);
 
-    const url = `${process.env.KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price-detail?${params.toString()}`;
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'authorization': `Bearer ${token}`,
-        'appkey': process.env.KIS_APP_KEY!,
-        'appsecret': process.env.KIS_APP_SECRET!,
-        'tr_id': 'HHDFS76200200',  // 해외주식 현재가 상세
-      },
-    });
-
-    if (!response.ok) {
+    if (!priceData || !priceData.price || priceData.price === 0) {
+      console.warn(`[getOverseaCompanyProfile] 가격 정보 없음: ${symbol}`);
       return null;
     }
 
-    const data = await response.json();
-    const output = data.output;
-
-    if (!output) {
-      return null;
+    // 종목명 찾기 (STOCK_CODES에서)
+    let stockName = symbol;
+    for (const [name, code] of Object.entries(STOCK_CODES)) {
+      if (code.toUpperCase() === symbol.toUpperCase()) {
+        stockName = name;
+        break;
+      }
     }
+
+    // 2. 상세 정보 API 호출 (재무 데이터 포함)
+    let marketCap = 0;
+    let per: number | undefined = undefined;
+    let pbr: number | undefined = undefined;
+    let eps: number | undefined = undefined;
+    let high52w: number | undefined = priceData.high || undefined;
+    let low52w: number | undefined = priceData.low || undefined;
+
+    try {
+      const detailParams = new URLSearchParams({
+        AUTH: '',
+        EXCD: exchange,
+        SYMB: symbol,
+      });
+
+      const detailUrl = `${process.env.KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price-detail?${detailParams.toString()}`;
+
+      console.log(`[getOverseaCompanyProfile] 상세 정보 API 호출: ${symbol}`);
+
+      const detailResponse = await fetch(detailUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'authorization': `Bearer ${token}`,
+          'appkey': process.env.KIS_APP_KEY!,
+          'appsecret': process.env.KIS_APP_SECRET!,
+          'tr_id': 'HHDFS76200200', // 해외주식 현재가 상세
+        },
+      });
+
+      if (detailResponse.ok) {
+        const detailData = await detailResponse.json();
+        if (detailData.output) {
+          const detail = detailData.output;
+
+          // 시가총액 (mcap: 백만 단위)
+          marketCap = parseFloat(detail.mcap || 0) * 1_000_000 || 0;
+
+          // PER, PBR, EPS (필드명: perx, pbrx, epsx)
+          per = parseFloat(detail.perx || 0) || undefined;
+          pbr = parseFloat(detail.pbrx || 0) || undefined;
+          eps = parseFloat(detail.epsx || 0) || undefined;
+
+          // 52주 최고/최저가
+          high52w = parseFloat(detail.h52p || 0) || high52w;
+          low52w = parseFloat(detail.l52p || 0) || low52w;
+
+          console.log(`[getOverseaCompanyProfile] 상세 정보 로드 성공`);
+          console.log(`  - 시가총액: ${(marketCap / 1_000_000_000).toFixed(2)}B ${priceData.currency}`);
+          console.log(`  - PER: ${per}, PBR: ${pbr}, EPS: ${eps}`);
+          console.log(`  - 52주 최고: ${high52w}, 최저: ${low52w}`);
+        }
+      } else {
+        console.warn(`[getOverseaCompanyProfile] 상세 정보 API 오류: ${detailResponse.status}`);
+      }
+    } catch (detailError) {
+      console.warn(`[getOverseaCompanyProfile] 상세 정보 조회 실패 (가격 정보만 사용):`, detailError);
+    }
+
+    console.log(`[getOverseaCompanyProfile] 성공: ${symbol} = ${priceData.price} ${priceData.currency}`);
 
     return {
       symbol: symbol,
-      name: output.name || symbol,
+      name: stockName,
       exchange: exchange,
-      currentPrice: parseFloat(output.last || output.curr_price || 0),
-      currency: getCurrencyByExchange(exchange),
-      marketCap: parseFloat(output.valx || 0),           // 시가총액
-      per: parseFloat(output.per || 0),                  // PER
-      pbr: parseFloat(output.pbr || 0),                  // PBR
-      eps: parseFloat(output.eps || 0),                  // EPS
-      high52w: parseFloat(output.h52w || output.w52_hgpr || 0),   // 52주 최고가
-      low52w: parseFloat(output.l52w || output.w52_lwpr || 0),    // 52주 최저가
-      volume: parseInt(output.tvol || output.volume || 0),        // 거래량
-      avgVolume: parseInt(output.avol || 0),             // 평균 거래량
-      dividend: parseFloat(output.t_xprc || 0),          // 배당금
-      dividendYield: parseFloat(output.t_rate || 0),     // 배당 수익률
+      currentPrice: priceData.price,
+      currency: priceData.currency || 'USD',
+      marketCap,
+      per,
+      pbr,
+      eps,
+      high52w,
+      low52w,
+      volume: priceData.volume || 0,
+      avgVolume: undefined,
+      dividend: undefined,
+      dividendYield: undefined,
     };
   } catch (error) {
-    console.error('해외 기업 프로필 조회 오류:', error);
+    console.error('[getOverseaCompanyProfile] 오류:', error);
     return null;
   }
 }

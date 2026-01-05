@@ -7,6 +7,12 @@ interface Stock {
   name: string;
   exchange: string;
   type: string;
+  price?: number;
+  currency?: string;
+  marketCap?: number;
+  per?: number;
+  pbr?: number;
+  nameKr?: string;
 }
 
 interface StockData {
@@ -83,7 +89,10 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
     setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/stocks/${stock.symbol}`);
+      // API 호출해서 정확한 정보 가져오기
+      const url = `/api/stocks/${stock.symbol}?exchange=${encodeURIComponent(stock.exchange)}`;
+      console.log(`[StockSearchInput] API 호출: ${url}`);
+      const response = await fetch(url);
       const stockData = await response.json();
 
       // API 응답 에러 체크
@@ -207,7 +216,7 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="기업명 또는 티커 입력 (예: 삼성전자, 005930.KS, AAPL)"
+              placeholder="기업명 또는 티커 입력 (예: 삼성전자, 나이키, AAPL)"
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-white
                        focus:outline-none focus:ring-2 focus:ring-blue-500
@@ -227,7 +236,7 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
                           max-h-96 overflow-y-auto">
               {results.map((stock, index) => (
                 <button
-                  key={stock.symbol}
+                  key={`${stock.symbol}-${stock.exchange}-${index}`}
                   onClick={() => handleStockSelect(stock)}
                   className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700
                             transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0
@@ -236,10 +245,11 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
                       <div className="font-semibold text-gray-900 dark:text-white">
-                        {stock.name}
+                        {stock.exchange === 'KRX' && stock.nameKr ? stock.nameKr : stock.name}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
                         {stock.symbol}
+                        {stock.exchange === 'KRX' && stock.nameKr && <span className="ml-2 text-gray-400">· {stock.name}</span>}
                       </div>
                     </div>
                     <div className="text-xs text-gray-400 dark:text-gray-500">

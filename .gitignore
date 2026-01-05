@@ -35,3 +35,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stock data files
+/public/data/
+
+# claude local settings
+.claude/settings.local.json
