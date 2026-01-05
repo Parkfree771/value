@@ -841,3 +841,48 @@ export async function getCompanyProfile(ticker: string, exchange?: string): Prom
   // 해외 주식
   return getOverseaCompanyProfile(stockCode, detectedExchange);
 }
+
+/**
+ * 해외주식 상품기본정보 조회 (거래소 코드 확인용)
+ * @param symbol 종목 심볼 (예: NKE)
+ */
+export async function searchStockExchangeCode(symbol: string): Promise<string> {
+  try {
+    const token = await getKISTokenWithCache();
+
+    const params = new URLSearchParams({
+      PRDT_TYPE_CD: '512',
+      PDNO: symbol,
+    });
+
+    const url = `${process.env.KIS_BASE_URL}/uapi/overseas-stock/v1/trading/search-stock-info?${params.toString()}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'authorization': `Bearer ${token}`,
+        'appkey': process.env.KIS_APP_KEY!,
+        'appsecret': process.env.KIS_APP_SECRET!,
+        'tr_id': 'CTPF1702R', // 상품기본정보 조회
+        'custtype': 'P',
+      },
+    });
+
+    if (!response.ok) {
+      console.warn(`[searchStockExchangeCode] API Error: ${response.status}`);
+      return 'NAS';
+    }
+
+    const data = await response.json();
+
+    if (data.output && data.output.ovrs_excg_cd) {
+      return data.output.ovrs_excg_cd;
+    }
+
+    return 'NAS';
+  } catch (error) {
+    console.error(`[searchStockExchangeCode] Error for ${symbol}:`, error);
+    return 'NAS';
+  }
+}

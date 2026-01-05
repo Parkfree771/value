@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getCompanyProfile, STOCK_CODES, detectExchange } from '@/lib/kis';
+import { getCompanyProfile, STOCK_CODES, detectExchange, searchStockExchangeCode } from '@/lib/kis';
 
 export async function GET(
   request: NextRequest,
@@ -21,7 +21,20 @@ export async function GET(
     }
 
     // 거래소 자동 감지
-    const detectedExchange = exchange || detectExchange(stockCode);
+    let detectedExchange = exchange;
+
+    if (!detectedExchange) {
+      detectedExchange = detectExchange(stockCode);
+
+      // 만약 감지된 거래소가 'NAS' (기본값) 라면, 실제 API를 통해 정확한 거래소를 확인
+      if (detectedExchange === 'NAS') {
+        const foundExchange = await searchStockExchangeCode(stockCode);
+        if (foundExchange) {
+          console.log(`[API /stocks/${symbol}] 거래소 자동 감지 (API): ${foundExchange}`);
+          detectedExchange = foundExchange;
+        }
+      }
+    }
 
     // getCompanyProfile 사용하여 상세 정보 조회
     const profile = await getCompanyProfile(stockCode, detectedExchange);
