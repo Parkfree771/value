@@ -57,15 +57,25 @@ interface GuruPortfolio {
 // guru-portfolio-data.json에서 종목 추출
 function loadGuruPortfolios(): Map<string, { exchange: string; basePrice: number; companyName: string }> {
   const jsonPath = path.join(process.cwd(), 'lib', 'guru-portfolio-data.json');
+  console.log('[DEBUG] Loading from:', jsonPath);
+
   const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
+  console.log('[DEBUG] Top-level keys:', Object.keys(data));
+  console.log('[DEBUG] Has gurus?:', !!data.gurus);
 
   const stockMap = new Map<string, { exchange: string; basePrice: number; companyName: string }>();
 
   // gurus 객체에서 각 구루의 종목들을 순회
   const gurus = data.gurus || data;
+  console.log('[DEBUG] Guru IDs:', Object.keys(gurus));
+
   for (const guruId of Object.keys(gurus)) {
     const guru = gurus[guruId];
-    if (!guru.holdings) continue;
+    if (!guru.holdings) {
+      console.log('[DEBUG] No holdings for:', guruId);
+      continue;
+    }
+    console.log('[DEBUG]', guruId, 'has', guru.holdings.length, 'holdings');
 
     for (const holding of guru.holdings) {
       // exchange가 없는 종목은 스킵 (채권 등)
