@@ -5,12 +5,21 @@ import { getStorage } from 'firebase-admin/storage';
 
 // Admin SDK가 이미 초기화되었는지 확인
 if (getApps().length === 0) {
-  // 환경 변수에서 서비스 계정 정보 읽기
-  const serviceAccount: ServiceAccount = {
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // 개행 문자 처리
-  };
+  let serviceAccount: ServiceAccount;
+
+  // 방법 1: Base64 인코딩된 서비스 계정 (권장)
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    const json = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf-8');
+    serviceAccount = JSON.parse(json);
+  }
+  // 방법 2: 개별 환경 변수 (레거시)
+  else {
+    serviceAccount = {
+      projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    };
+  }
 
   initializeApp({
     credential: cert(serviceAccount),
