@@ -8,12 +8,16 @@ import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 // ===== Firebase Admin 초기화 =====
+console.log('[DEBUG] Script version: 2025-01-08-v2');
+console.log('[DEBUG] FIREBASE_SERVICE_ACCOUNT_BASE64 exists:', !!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64);
+
 if (getApps().length === 0) {
   // Base64로 인코딩된 서비스 계정 JSON 사용 (GitHub Actions용)
   const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
   if (!serviceAccountBase64) {
     console.error('[ERROR] FIREBASE_SERVICE_ACCOUNT_BASE64 is not set');
+    console.error('[DEBUG] Available env vars:', Object.keys(process.env).filter(k => k.includes('FIREBASE')));
     process.exit(1);
   }
 
