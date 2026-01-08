@@ -1,13 +1,19 @@
-name: Update Stock Prices
+name: Update Stock Prices (Asia)
 
 on:
   schedule:
-    # 15분마다 실행 (UTC 기준)
-    - cron: '*/15 * * * *'
-  workflow_dispatch: # 수동 실행 가능
+    # 아시아 시장 시간: 09:00~17:00 KST = 00:00~08:00 UTC
+    # 15분마다 실행
+    - cron: '*/15 0-8 * * *'
+  workflow_dispatch:
+    inputs:
+      market_type:
+        description: 'Market type to update'
+        required: false
+        default: 'ASIA'
 
 jobs:
-  update-prices:
+  update-prices-asia:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,13 +29,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Update stock prices
+      - name: Update Asia stock prices
         env:
-          # Firebase Admin SDK (Base64 encoded service account JSON)
           FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
-
-          # KIS API
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
           KIS_BASE_URL: https://openapi.koreainvestment.com:9443
+          MARKET_TYPE: ASIA
         run: npx tsx scripts/github-update-prices.ts

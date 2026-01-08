@@ -10,6 +10,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
+import { registerTicker } from '@/lib/tickers';
 import type { MarketCategory } from '@/types/report';
 
 type EditorMode = 'text' | 'html';
@@ -333,6 +334,9 @@ export default function WritePage() {
       } else {
         // 새 글 작성 모드: 새 리포트 생성
         const docRef = await addDoc(collection(db, 'posts'), reportData);
+
+        // tickers 컬렉션에 등록 (가격 업데이트 최적화용)
+        await registerTicker(stockData.symbol, stockData.exchange);
 
         console.log('리포트가 저장되었습니다. ID:', docRef.id);
 

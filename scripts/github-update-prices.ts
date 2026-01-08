@@ -1,13 +1,36 @@
 /**
  * GitHub Actions 크론용 주식 가격 업데이트 스크립트
  *
- * 15분마다 실행되어 posts/market-call 컬렉션의 currentPrice를 업데이트
+ * 15분마다 실행되어 tickers 컬렉션의 종목들 현재가를 조회하고
+ * Firebase Storage에 JSON 파일로 저장 (비용 최적화)
+ *
+ * 환경변수 MARKET_TYPE으로 거래소 필터링:
+ * - ASIA: KRX(한국), TSE(일본), SHS/SZS(중국), HKS(홍콩)
+ * - US: NAS(나스닥), NYS(뉴욕), AMS(아멕스)
+ * - ALL: 모든 거래소 (기본값)
  */
 
 import { initializeApp, cert, getApps } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+import { getStorage } from 'firebase-admin/storage';
+
+// 거래소 그룹 정의
+const ASIA_EXCHANGES = ['KRX', 'TSE', 'SHS', 'SZS', 'HKS'];
+const US_EXCHANGES = ['NAS', 'NYS', 'AMS'];
+
+// 환경변수에서 마켓 타입 확인
+const MARKET_TYPE = process.env.MARKET_TYPE || 'ALL';
+
+function shouldProcessExchange(exchange: string): boolean {
+  if (MARKET_TYPE === 'ALL') return true;
+  if (MARKET_TYPE === 'ASIA') return ASIA_EXCHANGES.includes(exchange);
+  if (MARKET_TYPE === 'US') return US_EXCHANGES.includes(exchange);
+  return true;
+}
 
 // ===== Firebase Admin 초기화 =====
+let projectId: string;
+
 if (getApps().length === 0) {
   const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
@@ -19,9 +42,11 @@ if (getApps().length === 0) {
   try {
     const serviceAccountJson = Buffer.from(serviceAccountBase64, 'base64').toString('utf-8');
     const serviceAccount = JSON.parse(serviceAccountJson);
+    projectId = serviceAccount.project_id;
 
     initializeApp({
       credential: cert(serviceAccount),
+      storageBucket: `${projectId}.firebasestorage.app`,
     });
     console.log('[Firebase] Initialized');
   } catch (error) {
@@ -31,6 +56,7 @@ if (getApps().length === 0) {
 }
 
 const db = getFirestore();
+const bucket = getStorage().bucket();
 
 // ===== KIS API 설정 =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
@@ -175,86 +201,64 @@ async function getStockPrice(token: string, ticker: string, exchange: string): P
 // ===== 메인 함수 =====
 async function main() {
   const startTime = Date.now();
-  console.log('[CRON] ===== Starting stock price update =====');
+  console.log(`[CRON] ===== Starting stock price update (MARKET: ${MARKET_TYPE}) =====`);
 
   try {
     // 1. KIS 토큰 가져오기
     const token = await getKISToken();
 
-    // 2. posts 컬렉션에서 ticker, exchange가 있는 문서 조회
-    const postsSnapshot = await db.collection('posts')
-      .where('ticker', '!=', null)
+    // 2. tickers 컬렉션에서 postCount > 0인 문서 조회
+    const tickersSnapshot = await db.collection('tickers')
+      .where('postCount', '>', 0)
       .get();
 
-    // 3. market-call 컬렉션에서 target_ticker, exchange가 있는 문서 조회
-    const marketCallSnapshot = await db.collection('market-call')
-      .where('target_ticker', '!=', null)
-      .get();
+    console.log(`[CRON] Found ${tickersSnapshot.size} active tickers`);
 
-    console.log(`[CRON] Found ${postsSnapshot.size} posts, ${marketCallSnapshot.size} market-calls`);
+    // 3. 기존 가격 JSON 로드 (있으면)
+    let existingPrices: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = {};
+    try {
+      const file = bucket.file('stock-prices.json');
+      const [exists] = await file.exists();
+      if (exists) {
+        const [content] = await file.download();
+        const data = JSON.parse(content.toString());
+        existingPrices = data.prices || {};
+      }
+    } catch (e) {
+      console.log('[CRON] No existing price file, creating new one');
+    }
 
     let successCount = 0;
     let failCount = 0;
     const errors: string[] = [];
+    const prices: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = { ...existingPrices };
 
-    // 4. ticker별로 그룹화 (같은 종목 중복 조회 방지)
-    const tickerMap = new Map<string, { exchange: string; docRefs: { collection: string; id: string }[] }>();
-
-    // posts 문서 그룹화
-    postsSnapshot.docs.forEach(doc => {
+    // 4. 각 ticker별 가격 조회
+    for (const doc of tickersSnapshot.docs) {
       const data = doc.data();
       const ticker = data.ticker;
-      const exchange = data.exchange || data.stockData?.exchange;
+      const exchange = data.exchange;
 
-      if (ticker && exchange) {
-        const key = `${ticker}:${exchange}`;
-        if (!tickerMap.has(key)) {
-          tickerMap.set(key, { exchange, docRefs: [] });
-        }
-        tickerMap.get(key)!.docRefs.push({ collection: 'posts', id: doc.id });
+      // 마켓 타입 필터링
+      if (!shouldProcessExchange(exchange)) {
+        continue;
       }
-    });
-
-    // market-call 문서 그룹화
-    marketCallSnapshot.docs.forEach(doc => {
-      const data = doc.data();
-      const ticker = data.target_ticker;
-      const exchange = data.exchange || data.stockData?.exchange;
-
-      if (ticker && exchange) {
-        const key = `${ticker}:${exchange}`;
-        if (!tickerMap.has(key)) {
-          tickerMap.set(key, { exchange, docRefs: [] });
-        }
-        tickerMap.get(key)!.docRefs.push({ collection: 'market-call', id: doc.id });
-      }
-    });
-
-    console.log(`[CRON] Grouped into ${tickerMap.size} unique tickers`);
-
-    // 5. 각 ticker별 가격 조회 및 업데이트
-    for (const [key, { exchange, docRefs }] of tickerMap) {
-      const ticker = key.split(':')[0];
 
       try {
         const price = await getStockPrice(token, ticker, exchange);
 
-        // 해당 ticker의 모든 문서 업데이트
-        const updatePromises = docRefs.map(({ collection, id }) =>
-          db.collection(collection).doc(id).update({
-            currentPrice: price,
-            lastPriceUpdate: Timestamp.now(),
-          })
-        );
+        prices[ticker] = {
+          currentPrice: price,
+          exchange,
+          lastUpdated: new Date().toISOString(),
+        };
 
-        await Promise.all(updatePromises);
-
-        console.log(`[CRON] ✓ ${ticker} (${exchange}): $${price} → ${docRefs.length} docs`);
-        successCount += docRefs.length;
+        console.log(`[CRON] ✓ ${ticker} (${exchange}): $${price}`);
+        successCount++;
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
         console.error(`[CRON] ✗ ${ticker}: ${errorMsg}`);
-        failCount += docRefs.length;
+        failCount++;
         errors.push(`${ticker}: ${errorMsg}`);
       }
 
@@ -262,8 +266,25 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
     }
 
+    // 5. Firebase Storage에 JSON 저장
+    const jsonData = {
+      lastUpdated: new Date().toISOString(),
+      marketType: MARKET_TYPE,
+      totalTickers: Object.keys(prices).length,
+      successCount,
+      failCount,
+      prices,
+    };
+
+    const file = bucket.file('stock-prices.json');
+    await file.save(JSON.stringify(jsonData, null, 2), {
+      contentType: 'application/json',
+      metadata: { cacheControl: 'public, max-age=300' }, // 5분 캐시
+    });
+
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`[CRON] ===== Completed: ${successCount} success, ${failCount} failed (${duration}s) =====`);
+    console.log(`[STORAGE] stock-prices.json uploaded!`);
 
     if (errors.length > 0) {
       console.log(`[CRON] Errors: ${errors.slice(0, 5).join(', ')}${errors.length > 5 ? ` +${errors.length - 5} more` : ''}`);

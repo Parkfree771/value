@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { registerTicker } from '@/lib/tickers';
 import MarketCallForm from '@/components/MarketCallForm';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
 import { useEffect } from 'react';
@@ -54,6 +55,11 @@ export default function MarketCallWritePage() {
       };
 
       const docRef = await addDoc(marketCallRef, marketCallData);
+
+      // tickers 컬렉션에 등록 (가격 업데이트 최적화용)
+      if (data.target_ticker && data.exchange) {
+        await registerTicker(data.target_ticker, data.exchange);
+      }
 
       console.log('마켓 콜이 저장되었습니다. ID:', docRef.id);
 
