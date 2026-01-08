@@ -9,30 +9,26 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 // ===== Firebase Admin 초기화 =====
 if (getApps().length === 0) {
-  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+  // Base64로 인코딩된 서비스 계정 JSON 사용 (GitHub Actions용)
+  const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
 
-  if (!privateKey) {
-    console.error('[ERROR] FIREBASE_PRIVATE_KEY is not set');
+  if (!serviceAccountBase64) {
+    console.error('[ERROR] FIREBASE_SERVICE_ACCOUNT_BASE64 is not set');
     process.exit(1);
   }
 
-  // GitHub Actions에서 private key 처리
-  // 1. 이스케이프된 \n을 실제 줄바꿈으로 변환
-  privateKey = privateKey.replace(/\\n/g, '\n');
+  try {
+    const serviceAccountJson = Buffer.from(serviceAccountBase64, 'base64').toString('utf-8');
+    const serviceAccount = JSON.parse(serviceAccountJson);
 
-  // 2. 앞뒤 따옴표 제거 (JSON 문자열로 저장된 경우)
-  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-    privateKey = JSON.parse(privateKey);
+    initializeApp({
+      credential: cert(serviceAccount),
+    });
+    console.log('[Firebase] Initialized');
+  } catch (error) {
+    console.error('[ERROR] Failed to parse service account:', error);
+    process.exit(1);
   }
-
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: privateKey,
-    }),
-  });
-  console.log('[Firebase] Initialized');
 }
 
 const db = getFirestore();
