@@ -61,9 +61,10 @@ function loadGuruPortfolios(): Map<string, { exchange: string; basePrice: number
 
   const stockMap = new Map<string, { exchange: string; basePrice: number; companyName: string }>();
 
-  // 각 구루의 종목들을 순회
-  for (const guruId of Object.keys(data)) {
-    const guru = data[guruId];
+  // gurus 객체에서 각 구루의 종목들을 순회
+  const gurus = data.gurus || data;
+  for (const guruId of Object.keys(gurus)) {
+    const guru = gurus[guruId];
     if (!guru.holdings) continue;
 
     for (const holding of guru.holdings) {
