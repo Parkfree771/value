@@ -56,9 +56,28 @@ interface GuruPortfolio {
 
 // guru-portfolio-data.json에서 종목 추출
 function loadGuruPortfolios(): Map<string, { exchange: string; basePrice: number; companyName: string }> {
-  const jsonPath = path.join(process.cwd(), 'lib', 'guru-portfolio-data.json');
-  console.log('[DEBUG] Loading from:', jsonPath);
+  // 여러 경로 시도
+  const possiblePaths = [
+    path.join(process.cwd(), 'lib', 'guru-portfolio-data.json'),
+    path.resolve(__dirname, '..', 'lib', 'guru-portfolio-data.json'),
+    '/home/runner/work/value/value/lib/guru-portfolio-data.json', // GitHub Actions 절대 경로
+  ];
 
+  let jsonPath = '';
+  for (const p of possiblePaths) {
+    console.log('[DEBUG] Checking:', p, '- exists:', fs.existsSync(p));
+    if (fs.existsSync(p)) {
+      jsonPath = p;
+      break;
+    }
+  }
+
+  if (!jsonPath) {
+    console.error('[ERROR] guru-portfolio-data.json not found in any path');
+    return new Map();
+  }
+
+  console.log('[DEBUG] Using path:', jsonPath);
   const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
   console.log('[DEBUG] Top-level keys:', Object.keys(data));
   console.log('[DEBUG] Has gurus?:', !!data.gurus);
