@@ -56,45 +56,27 @@ interface GuruPortfolio {
 
 // guru-portfolio-data.json에서 종목 추출
 function loadGuruPortfolios(): Map<string, { exchange: string; basePrice: number; companyName: string }> {
-  // 여러 경로 시도
-  const possiblePaths = [
-    path.join(process.cwd(), 'lib', 'guru-portfolio-data.json'),
-    path.resolve(__dirname, '..', 'lib', 'guru-portfolio-data.json'),
-    '/home/runner/work/value/value/lib/guru-portfolio-data.json', // GitHub Actions 절대 경로
-  ];
+  const jsonPath = path.join(process.cwd(), 'lib', 'guru-portfolio-data.json');
+  console.log('[GURU] Loading portfolio from:', jsonPath);
 
-  let jsonPath = '';
-  for (const p of possiblePaths) {
-    console.log('[DEBUG] Checking:', p, '- exists:', fs.existsSync(p));
-    if (fs.existsSync(p)) {
-      jsonPath = p;
-      break;
-    }
-  }
+  const rawData = fs.readFileSync(jsonPath, 'utf-8');
+  const data = JSON.parse(rawData);
 
-  if (!jsonPath) {
-    console.error('[ERROR] guru-portfolio-data.json not found in any path');
-    return new Map();
-  }
+  console.log('[GURU] Data keys:', Object.keys(data).join(', '));
 
-  console.log('[DEBUG] Using path:', jsonPath);
-  const data = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-  console.log('[DEBUG] Top-level keys:', Object.keys(data));
-  console.log('[DEBUG] Has gurus?:', !!data.gurus);
+  // gurus 키가 있으면 그 안의 데이터 사용
+  const gurusData = data.gurus ? data.gurus : data;
+  console.log('[GURU] Gurus found:', Object.keys(gurusData).join(', '));
 
   const stockMap = new Map<string, { exchange: string; basePrice: number; companyName: string }>();
 
-  // gurus 객체에서 각 구루의 종목들을 순회
-  const gurus = data.gurus || data;
-  console.log('[DEBUG] Guru IDs:', Object.keys(gurus));
-
-  for (const guruId of Object.keys(gurus)) {
-    const guru = gurus[guruId];
-    if (!guru.holdings) {
-      console.log('[DEBUG] No holdings for:', guruId);
+  for (const guruId of Object.keys(gurusData)) {
+    const guru = gurusData[guruId];
+    if (!guru || !guru.holdings) {
+      console.log('[GURU] Skipping', guruId, '- no holdings');
       continue;
     }
-    console.log('[DEBUG]', guruId, 'has', guru.holdings.length, 'holdings');
+    console.log('[GURU]', guruId, ':', guru.holdings.length, 'holdings');
 
     for (const holding of guru.holdings) {
       // exchange가 없는 종목은 스킵 (채권 등)
