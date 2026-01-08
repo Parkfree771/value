@@ -9,11 +9,20 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 // ===== Firebase Admin 초기화 =====
 if (getApps().length === 0) {
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!privateKey) {
     console.error('[ERROR] FIREBASE_PRIVATE_KEY is not set');
     process.exit(1);
+  }
+
+  // GitHub Actions에서 private key 처리
+  // 1. 이스케이프된 \n을 실제 줄바꿈으로 변환
+  privateKey = privateKey.replace(/\\n/g, '\n');
+
+  // 2. 앞뒤 따옴표 제거 (JSON 문자열로 저장된 경우)
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = JSON.parse(privateKey);
   }
 
   initializeApp({

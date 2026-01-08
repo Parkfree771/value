@@ -9,11 +9,17 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
 // Firebase Admin 초기화
 if (getApps().length === 0) {
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
   if (!privateKey) {
     console.error('[ERROR] FIREBASE_PRIVATE_KEY is not set');
     process.exit(1);
+  }
+
+  // GitHub Actions에서 private key 처리
+  privateKey = privateKey.replace(/\\n/g, '\n');
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = JSON.parse(privateKey);
   }
 
   initializeApp({
