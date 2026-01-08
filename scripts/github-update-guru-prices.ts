@@ -11,6 +11,9 @@ import { getStorage } from 'firebase-admin/storage';
 import * as fs from 'fs';
 import * as path from 'path';
 
+console.log('[VERSION] guru-prices-v3-2025-01-08');
+console.log('[CWD]', process.cwd());
+
 // Firebase Admin 초기화
 if (getApps().length === 0) {
   const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
