@@ -1,0 +1,1399 @@
+[
+  {
+    "ticker": "AAPL",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 254.3835
+  },
+  {
+    "ticker": "AXP",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 330.5861
+  },
+  {
+    "ticker": "BAC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 51.3233
+  },
+  {
+    "ticker": "KO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 65.8574
+  },
+  {
+    "ticker": "CVX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 153.5748
+  },
+  {
+    "ticker": "OXY",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 46.9771
+  },
+  {
+    "ticker": "MCO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 475.5361
+  },
+  {
+    "ticker": "CB",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 281.3553
+  },
+  {
+    "ticker": "KHC",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 25.6331
+  },
+  {
+    "ticker": "GOOGL",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 242.941
+  },
+  {
+    "ticker": "DVA",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 132.87
+  },
+  {
+    "ticker": "KR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 67.0524
+  },
+  {
+    "ticker": "SIRI",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 22.9871
+  },
+  {
+    "ticker": "V",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 340.7051
+  },
+  {
+    "ticker": "VRSN",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 278.7095
+  },
+  {
+    "ticker": "MA",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 568.0603
+  },
+  {
+    "ticker": "AMZN",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 219.57
+  },
+  {
+    "ticker": "STZ",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 133.6213
+  },
+  {
+    "ticker": "UNH",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 342.9937
+  },
+  {
+    "ticker": "COF",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 211.7745
+  },
+  {
+    "ticker": "AON",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 355.8002
+  },
+  {
+    "ticker": "DPZ",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 431.71
+  },
+  {
+    "ticker": "ALLY",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 38.9
+  },
+  {
+    "ticker": "LLYVK",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 96.97
+  },
+  {
+    "ticker": "POOL",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 308.546
+  },
+  {
+    "ticker": "LEN",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 125.5055
+  },
+  {
+    "ticker": "NUE",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 134.9698
+  },
+  {
+    "ticker": "LPX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 88.5121
+  },
+  {
+    "ticker": "LLYVA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 94.3
+  },
+  {
+    "ticker": "FWONK",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 104.45
+  },
+  {
+    "ticker": "HEI-A",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "CHTR",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 275.105
+  },
+  {
+    "ticker": "LAMR",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 120.6891
+  },
+  {
+    "ticker": "ALLE",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 176.7952
+  },
+  {
+    "ticker": "NVR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 8034.66
+  },
+  {
+    "ticker": "DEO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 92.9935
+  },
+  {
+    "ticker": "JEF",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 64.9484
+  },
+  {
+    "ticker": "LEN-B",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "LILA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 8.29
+  },
+  {
+    "ticker": "BATRK",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 41.59
+  },
+  {
+    "ticker": "LILAK",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 8.44
+  },
+  {
+    "ticker": "PDD",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 132.17
+  },
+  {
+    "ticker": "GOOG",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 243.3912
+  },
+  {
+    "ticker": "BRK-B",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "EWBC",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 105.8213
+  },
+  {
+    "ticker": "SOC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 17.46
+  },
+  {
+    "ticker": "UBER",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 97.97
+  },
+  {
+    "ticker": "BN",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 45.6594
+  },
+  {
+    "ticker": "HHH",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 82.17
+  },
+  {
+    "ticker": "QSR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 63.5745
+  },
+  {
+    "ticker": "CMG",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 39.19
+  },
+  {
+    "ticker": "HLT",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 259.2929
+  },
+  {
+    "ticker": "SEG",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 22.92
+  },
+  {
+    "ticker": "HTZ",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 6.8
+  },
+  {
+    "ticker": "TRMD",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 20.0675
+  },
+  {
+    "ticker": "EXE",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 105.7287
+  },
+  {
+    "ticker": "GTX",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 13.5541
+  },
+  {
+    "ticker": "AU",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 69.6102
+  },
+  {
+    "ticker": "VNOM",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 37.6326
+  },
+  {
+    "ticker": "TDS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 39.1992
+  },
+  {
+    "ticker": "TLN",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 425.38
+  },
+  {
+    "ticker": "STKL",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 5.86
+  },
+  {
+    "ticker": "CORZ",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 17.94
+  },
+  {
+    "ticker": "B",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 32.6301
+  },
+  {
+    "ticker": "LBTYA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 11.46
+  },
+  {
+    "ticker": "FTAI",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 166.5039
+  },
+  {
+    "ticker": "CX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 8.9725
+  },
+  {
+    "ticker": "ITUB",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 6.7167
+  },
+  {
+    "ticker": "CBL",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 30.16
+  },
+  {
+    "ticker": "NOK",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 4.7837
+  },
+  {
+    "ticker": "TAC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 13.6268
+  },
+  {
+    "ticker": "RWAY",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 9.8196
+  },
+  {
+    "ticker": "KRC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 41.6526
+  },
+  {
+    "ticker": "GRAB",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 6.02
+  },
+  {
+    "ticker": "NU",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 16.01
+  },
+  {
+    "ticker": "VIST",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 34.4
+  },
+  {
+    "ticker": "FCX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 39.0798
+  },
+  {
+    "ticker": "YMM",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 12.8729
+  },
+  {
+    "ticker": "BLCO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 15.07
+  },
+  {
+    "ticker": "SATS",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 76.36
+  },
+  {
+    "ticker": "BZ",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 23.1968
+  },
+  {
+    "ticker": "XP",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 18.6027
+  },
+  {
+    "ticker": "CRC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 52.7292
+  },
+  {
+    "ticker": "SBLK",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 18.4902
+  },
+  {
+    "ticker": "AD",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 50.01
+  },
+  {
+    "ticker": "TX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 33.8687
+  },
+  {
+    "ticker": "NBR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 40.87
+  },
+  {
+    "ticker": "ECVT",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 8.76
+  },
+  {
+    "ticker": "SE",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 178.73
+  },
+  {
+    "ticker": "OCSL",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 12.6659
+  },
+  {
+    "ticker": "JBS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 14.93
+  },
+  {
+    "ticker": "VALE",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 10.3117
+  },
+  {
+    "ticker": "TEO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 7.0523
+  },
+  {
+    "ticker": "OPTU",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "ALVO",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 8.19
+  },
+  {
+    "ticker": "INDV",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 24.11
+  },
+  {
+    "ticker": "SMRT",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 1.41
+  },
+  {
+    "ticker": "CHKEL",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "MX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 3.13
+  },
+  {
+    "ticker": "ACR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 21.16
+  },
+  {
+    "ticker": "BHC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 6.45
+  },
+  {
+    "ticker": "ALVOW",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 1.5188
+  },
+  {
+    "ticker": "HDB",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 34.16
+  },
+  {
+    "ticker": "LGN",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 30.81
+  },
+  {
+    "ticker": "BATL",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "TGS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 21.03
+  },
+  {
+    "ticker": "BTAI",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 2.56
+  },
+  {
+    "ticker": "TPICQ",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "ELV",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 321.463
+  },
+  {
+    "ticker": "CRH",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 119.4907
+  },
+  {
+    "ticker": "WTW",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 344.4972
+  },
+  {
+    "ticker": "UNP",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 234.9953
+  },
+  {
+    "ticker": "WCC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 211.1542
+  },
+  {
+    "ticker": "DG",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 102.2924
+  },
+  {
+    "ticker": "FERG",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 223.6821
+  },
+  {
+    "ticker": "LBTYK",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 11.75
+  },
+  {
+    "ticker": "FIS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 65.5396
+  },
+  {
+    "ticker": "EXP",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 232.783
+  },
+  {
+    "ticker": "GPC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 137.5046
+  },
+  {
+    "ticker": "GDS",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 38.7
+  },
+  {
+    "ticker": "FISV",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "HLF",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 8.44
+  },
+  {
+    "ticker": "COLD",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 12.0293
+  },
+  {
+    "ticker": "PAGS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 9.8717
+  },
+  {
+    "ticker": "TBN",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 27.38
+  },
+  {
+    "ticker": "NTRA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 160.97
+  },
+  {
+    "ticker": "INSM",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 144.01
+  },
+  {
+    "ticker": "TEVA",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 20.2
+  },
+  {
+    "ticker": "TSM",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 278.5722
+  },
+  {
+    "ticker": "WWD",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 252.4373
+  },
+  {
+    "ticker": "CPNG",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 32.2
+  },
+  {
+    "ticker": "MELI",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 2336.94
+  },
+  {
+    "ticker": "DOCU",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 72.09
+  },
+  {
+    "ticker": "VRNA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "EEM",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "ROKU",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 100.13
+  },
+  {
+    "ticker": "WAB",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 200.229
+  },
+  {
+    "ticker": "SPY",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "IWM",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "NAMS",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 28.44
+  },
+  {
+    "ticker": "CRS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 245.3369
+  },
+  {
+    "ticker": "C",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 100.8984
+  },
+  {
+    "ticker": "TWLO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 100.09
+  },
+  {
+    "ticker": "EQT",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 54.2692
+  },
+  {
+    "ticker": "GEV",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 614.1912
+  },
+  {
+    "ticker": "VST",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 195.6473
+  },
+  {
+    "ticker": "DHI",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 168.9477
+  },
+  {
+    "ticker": "U",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 40.04
+  },
+  {
+    "ticker": "CLF",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 12.2
+  },
+  {
+    "ticker": "BBB",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 30.816
+  },
+  {
+    "ticker": "PCT",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 13.15
+  },
+  {
+    "ticker": "DAKT",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 20.92
+  },
+  {
+    "ticker": "DKS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 220.9765
+  },
+  {
+    "ticker": "FLUT",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 254
+  },
+  {
+    "ticker": "KBE",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "OPCH",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 27.76
+  },
+  {
+    "ticker": "AEVA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 14.5
+  },
+  {
+    "ticker": "PCG",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 15.0331
+  },
+  {
+    "ticker": "ARM",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 141.49
+  },
+  {
+    "ticker": "SMTC",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 71.45
+  },
+  {
+    "ticker": "STX",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 235.4422
+  },
+  {
+    "ticker": "ELVN",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 20.47
+  },
+  {
+    "ticker": "POST",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 107.48
+  },
+  {
+    "ticker": "SYF",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 70.7592
+  },
+  {
+    "ticker": "ARGT",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "COGT",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 14.36
+  },
+  {
+    "ticker": "PTGX",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 66.43
+  },
+  {
+    "ticker": "SEI",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 39.8833
+  },
+  {
+    "ticker": "MDB",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 310.38
+  },
+  {
+    "ticker": "TXRH",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 165.4889
+  },
+  {
+    "ticker": "YPF",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 24.29
+  },
+  {
+    "ticker": "SAP",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 267.21
+  },
+  {
+    "ticker": "FMX",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 96.511
+  },
+  {
+    "ticker": "LIN",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 473.2572
+  },
+  {
+    "ticker": "BHP",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 55.75
+  },
+  {
+    "ticker": "BAP",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 266.28
+  },
+  {
+    "ticker": "ALC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 74.51
+  },
+  {
+    "ticker": "NTES",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 151.37
+  },
+  {
+    "ticker": "MSFT",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 516.9825
+  },
+  {
+    "ticker": "RYAAY",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 60.22
+  },
+  {
+    "ticker": "NICE",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 144.78
+  },
+  {
+    "ticker": "NFLX",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 119.892
+  },
+  {
+    "ticker": "ASML",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "META",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 733.7815
+  },
+  {
+    "ticker": "SHEL",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 70.8554
+  },
+  {
+    "ticker": "SONY",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 28.79
+  },
+  {
+    "ticker": "CNI",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 93.6899
+  },
+  {
+    "ticker": "BKNG",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 5388.9574
+  },
+  {
+    "ticker": "CME",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 268.9501
+  },
+  {
+    "ticker": "NVDA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 186.5696
+  },
+  {
+    "ticker": "VRTX",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 391.64
+  },
+  {
+    "ticker": "PGR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 232.1074
+  },
+  {
+    "ticker": "BBVA",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 18.8985
+  },
+  {
+    "ticker": "HLN",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 8.97
+  },
+  {
+    "ticker": "MFC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 30.8749
+  },
+  {
+    "ticker": "APH",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 123.5118
+  },
+  {
+    "ticker": "AVGO",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 329.2799
+  },
+  {
+    "ticker": "DE",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 455.6838
+  },
+  {
+    "ticker": "TW",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 110.8577
+  },
+  {
+    "ticker": "RIO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 66.01
+  },
+  {
+    "ticker": "SNPS",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 493.39
+  },
+  {
+    "ticker": "ACN",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 245.0052
+  },
+  {
+    "ticker": "GMAB",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 30.67
+  },
+  {
+    "ticker": "ADBE",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 352.75
+  },
+  {
+    "ticker": "HEI",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 322.7025
+  },
+  {
+    "ticker": "ABBV",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 229.8826
+  },
+  {
+    "ticker": "TLK",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 18.82
+  },
+  {
+    "ticker": "CSGP",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 84.37
+  },
+  {
+    "ticker": "NOW",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 184.056
+  },
+  {
+    "ticker": "DHR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 197.986
+  },
+  {
+    "ticker": "TMO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 484.6557
+  },
+  {
+    "ticker": "AME",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 187.7075
+  },
+  {
+    "ticker": "NVS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 128.24
+  },
+  {
+    "ticker": "JNJ",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 184.2502
+  },
+  {
+    "ticker": "SLB",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 34.1006
+  },
+  {
+    "ticker": "NOC",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 606.8602
+  },
+  {
+    "ticker": "TTD",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 49.01
+  },
+  {
+    "ticker": "VXUS",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 72.1349
+  },
+  {
+    "ticker": "ATKR",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 62.4198
+  },
+  {
+    "ticker": "HON",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 197.1449
+  },
+  {
+    "ticker": "GLOB",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 57.38
+  },
+  {
+    "ticker": "ZTO",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 19.2
+  },
+  {
+    "ticker": "TS",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 35.2456
+  },
+  {
+    "ticker": "KSPI",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 81.68
+  },
+  {
+    "ticker": "ACWI",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 137.0357
+  },
+  {
+    "ticker": "INDA",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": null,
+    "error": "조회 실패"
+  },
+  {
+    "ticker": "EPAM",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 150.79
+  },
+  {
+    "ticker": "IBN",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": 30.23
+  },
+  {
+    "ticker": "ACWX",
+    "exchange": "NAS",
+    "exchangeName": "NASDAQ",
+    "price": 63.9978
+  },
+  {
+    "ticker": "VEA",
+    "exchange": "NYS",
+    "exchangeName": "NYSE",
+    "price": null,
+    "error": "조회 실패"
+  }
+]

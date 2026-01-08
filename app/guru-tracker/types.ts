@@ -145,10 +145,11 @@ export type TabType = 'wallet' | 'word';
 export interface PortfolioHolding {
   ticker: string;
   companyName: string;
+  exchange?: string; // 거래소 (NYSE, NASDAQ 등)
   portfolioPercent: number;
   recentActivity?: string;
   shares: number;
-  reportedPrice?: number; // 공시 당시 가격 (동적 로드)
+  reportedPrice?: number; // 공시일(reportDate) 기준 종가
   value: number;
   currentPrice?: number; // 현재 가격 (동적 로드)
   changeFromReported?: number; // 수익률 (동적 계산)

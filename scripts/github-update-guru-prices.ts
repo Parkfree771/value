@@ -102,7 +102,7 @@ function loadGuruPortfolios(): Map<string, { exchange: string; basePrice: number
   return stockMap;
 }
 
-// KIS 토큰 가져오기
+// KIS 토큰 가져오기 (Firestore에서)
 async function getKISToken(): Promise<string> {
   const tokenDoc = await db.collection('settings').doc('kis_token').get();
 
