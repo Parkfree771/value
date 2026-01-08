@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 사용자 프로필
+    match /users/{userId} {
+      allow read: if true; // 모든 사용자 프로필 읽기 가능
+      allow write: if request.auth != null && request.auth.uid == userId; // 본인만 수정 가능
+    }
+
+    // 리포트 게시글
+    match /posts/{postId} {
+      allow read: if true; // 모든 게시글 읽기 가능
+      allow create: if request.auth != null; // 로그인 사용자만 작성 가능
+      allow update: if (request.auth != null && request.auth.uid == resource.data.authorId) || // 작성자는 전체 수정 가능
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['views', 'likes', 'likedBy', 'currentPrice', 'returnRate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price']); // 조회수, 좋아요, 수익확정은 누구나 업데이트 가능
+      allow delete: if request.auth != null && request.auth.uid == resource.data.authorId; // 작성자만 삭제 가능
+
+      // 게시글별 좋아요 정보 (서브컬렉션)
+      match /likes/{userId} {
+        allow read: if true; // 모든 사용자가 좋아요 상태 확인 가능
+        allow write: if request.auth != null; // 로그인한 사용자만 좋아요 가능
+      }
+    }
+
+    // 좋아요 정보 (최상위 컬렉션 - 하위 호환성)
+    match /likes/{likeId} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // 댓글
+    match /comments/{commentId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId;
+    }
+
+    // 워드워치 (Word Watch)
+    match /word-watch/{wordWatchId} {
+      allow read: if true; // 모든 사용자가 워드워치 읽기 가능
+      allow create: if request.auth != null; // 로그인한 사용자만 작성 가능
+      allow update: if (request.auth != null && request.auth.uid == resource.data.author_uid) || // 작성자는 전체 수정 가능
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['views', 'likes', 'current_price', 'return_rate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price']); // 조회수, 좋아요, 가격/수익률, 수익확정은 누구나 업데이트 가능
+      allow delete: if request.auth != null && request.auth.uid == resource.data.author_uid; // 작성자만 삭제 가능
+    }
+
+    // 마켓 콜 (Market Call)
+    match /market-call/{marketCallId} {
+      allow read: if true; // 모든 사용자가 마켓 콜 읽기 가능
+      allow create: if request.auth != null; // 로그인한 사용자만 작성 가능
+      allow update: if (request.auth != null && request.auth.uid == resource.data.author_id) || // 작성자는 전체 수정 가능
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['views', 'likes', 'current_price', 'return_rate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price']); // 조회수, 좋아요, 가격/수익률, 수익확정은 누구나 업데이트 가능
+      allow delete: if request.auth != null && request.auth.uid == resource.data.author_id; // 작성자만 삭제 가능
+    }
+
+    // 게시글 가격 추적 (Posts - Ticker별 가격 정보)
+    match /post_prices/{ticker} {
+      allow read: if true; // 모든 사용자가 읽기 가능
+      allow create: if request.auth != null; // 로그인한 사용자가 게시글 작성 시 ticker 등록
+      allow update: if true; // 크론이 가격 업데이트 (서버에서 Admin SDK 사용)
+      allow delete: if false; // 삭제 불가 (관리자만)
+    }
+
+    // 마켓 콜 가격 추적 (Market-call - Ticker별 가격 정보)
+    match /marketcall_prices/{ticker} {
+      allow read: if true; // 모든 사용자가 읽기 가능
+      allow create: if request.auth != null; // 로그인한 사용자가 마켓 콜 작성 시 ticker 등록
+      allow update: if true; // 크론이 가격 업데이트 (서버에서 Admin SDK 사용)
+      allow delete: if false; // 삭제 불가 (관리자만)
+    }
+  }
+}

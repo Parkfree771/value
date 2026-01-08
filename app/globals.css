@@ -1,0 +1,238 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   디자인 토큰 (Design Tokens)
+   ============================================
+   전체 사이트의 색상, 간격 등을 정의합니다.
+   여기를 수정하면 전체 사이트에 반영됩니다.
+   ============================================ */
+
+:root {
+  /* 기본 배경/텍스트 색상 */
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* 브랜드 컬러 (Tailwind의 electric-blue 보완) */
+  --brand-primary: #3b82f6; /* blue-500 */
+  --brand-secondary: #8b5cf6; /* violet-500 */
+
+  /* 상태 색상 */
+  --color-success: #10b981; /* green-500 */
+  --color-warning: #f59e0b; /* amber-500 */
+  --color-error: #ef4444; /* red-500 */
+  --color-info: #3b82f6; /* blue-500 */
+
+  /* 투자 의견 색상 */
+  --color-buy: #ef4444; /* red-500 - 매수 */
+  --color-sell: #3b82f6; /* blue-500 - 매도 */
+  --color-hold: #6b7280; /* gray-500 - 보유 */
+
+  /* 그림자 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* 간격 (필요시 여기서 전역 조정) */
+  --spacing-xs: 0.25rem; /* 4px */
+  --spacing-sm: 0.5rem; /* 8px */
+  --spacing-md: 1rem; /* 16px */
+  --spacing-lg: 1.5rem; /* 24px */
+  --spacing-xl: 2rem; /* 32px */
+
+  /* 반응형 breakpoint (참고용) */
+  /* sm: 640px, md: 768px, lg: 1024px, xl: 1280px, 2xl: 1536px */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #050505;
+    --foreground: #ededed;
+
+    /* 다크모드에서는 그림자 약하게 */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  }
+}
+
+/* ============================================
+   기본 HTML/Body 설정
+   ============================================
+   폰트, 배경색 등 전역 스타일을 정의합니다.
+   ============================================ */
+
+html {
+  /* iOS Safari 폰트 크기 자동 조정 방지 */
+  -webkit-text-size-adjust: 100%;
+
+  /* 기본 폰트 크기 (16px - 웹 표준) */
+  font-size: 16px;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+
+  /*
+    폰트 변경하려면 여기 수정:
+    예) font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  */
+  font-family: Arial, Helvetica, sans-serif;
+
+  /* 텍스트 렌더링 최적화 (macOS/iOS) */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* 최소 높이 */
+  min-height: 100vh;
+}
+
+/* ============================================
+   모바일 최적화
+   ============================================
+   터치 타겟, 스크롤바 등 모바일 UX 개선
+   ============================================ */
+
+/* 모바일 터치 타겟 최적화 */
+@media (hover: none) and (pointer: coarse) {
+  /* 모바일에서만 터치 타겟 최소 크기 적용 (애플 가이드라인: 44px) */
+  button:not(.btn-sm):not(.text-xs):not(.text-sm),
+  a:not(.text-xs):not(.text-sm) {
+    min-height: 44px;
+  }
+}
+
+/* 스크롤바 스타일 (Webkit 브라우저) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* ============================================
+   유틸리티 클래스
+   ============================================
+   Tailwind 유틸리티 확장
+   ============================================ */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* ============================================
+   공통 컴포넌트 클래스
+   ============================================
+   여러 곳에서 재사용되는 스타일 패턴
+
+   수정 가이드:
+   - 카드 디자인 변경 → .card-base, .card-interactive
+   - 버튼 디자인 변경 → .btn-primary, .btn-secondary
+   - 배지 디자인 변경 → .badge-* 클래스들
+   - 수익률 색상 변경 → .return-* 클래스들
+   ============================================ */
+@layer components {
+  /* 카드 스타일 */
+  .card-base {
+    @apply bg-white dark:bg-gray-900 rounded-xl transition-all duration-300;
+    @apply border-2 border-gray-200 dark:border-gray-700;
+  }
+
+  .card-interactive {
+    @apply card-base;
+    @apply hover:border-electric-blue-500 dark:hover:border-electric-blue-500;
+    @apply hover:scale-[1.01] hover:ring-2 hover:ring-electric-blue-500/20;
+    @apply cursor-pointer;
+  }
+
+  /* 버튼 스타일 */
+  .btn-primary {
+    @apply px-4 py-2 bg-electric-blue text-white rounded-lg font-semibold;
+    @apply hover:bg-electric-blue-600 transition-colors shadow-sm;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600;
+    @apply text-gray-700 dark:text-gray-300 rounded-lg font-semibold;
+    @apply hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors;
+  }
+
+  /* 배지 스타일 */
+  .badge-base {
+    @apply px-2 py-1 rounded text-xs font-semibold;
+  }
+
+  .badge-buy {
+    @apply badge-base bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400;
+  }
+
+  .badge-sell {
+    @apply badge-base bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400;
+  }
+
+  .badge-hold {
+    @apply badge-base bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300;
+  }
+
+  /* 수익률 색상 */
+  .return-positive {
+    @apply text-red-600 dark:text-red-500;
+  }
+
+  .return-negative {
+    @apply text-blue-600 dark:text-blue-500;
+  }
+
+  .return-neutral {
+    @apply text-gray-600 dark:text-gray-400;
+  }
+
+  /* 텍스트 스타일 */
+  .text-heading {
+    @apply font-bold text-gray-900 dark:text-white font-heading tracking-wide;
+  }
+
+  .text-subheading {
+    @apply font-semibold text-gray-800 dark:text-gray-200;
+  }
+
+  .text-muted {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+
+  /* 컨테이너 스타일 */
+  .section-container {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12;
+  }
+
+  /* 스크롤 컨테이너 */
+  .scroll-container {
+    @apply overflow-x-auto pb-6 pt-1 snap-x snap-mandatory;
+  }
+}
