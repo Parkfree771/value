@@ -1,11 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
+
+// JSON 캐시 (메모리)
+let cachedStockPrices: any = null;
+let cacheTimestamp: number = 0;
+const CACHE_DURATION = 60 * 1000; // 1분 캐시
+
+async function getStockPricesFromJSON() {
+  const now = Date.now();
+
+  // 캐시가 유효하면 재사용
+  if (cachedStockPrices && now - cacheTimestamp < CACHE_DURATION) {
+    return cachedStockPrices;
+  }
+
+  // Firebase Storage에서 JSON 다운로드
+  const storageRef = ref(storage, 'stock-prices.json');
+  const downloadURL = await getDownloadURL(storageRef);
+  const response = await fetch(downloadURL);
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch JSON: ${response.status}`);
+  }
+
+  cachedStockPrices = await response.json();
+  cacheTimestamp = now;
+
+  console.log(`[Stock Price] Loaded JSON with ${cachedStockPrices.totalTickers} tickers (updated: ${cachedStockPrices.lastUpdated})`);
+
+  return cachedStockPrices;
+}
+
+// 거래소에서 통화 추론
+function getCurrencyFromExchange(exchange: string): string {
+  switch (exchange) {
+    case 'KRX': return 'KRW';
+    case 'TSE': return 'JPY';
+    case 'HKS': return 'HKD';
+    case 'SHS':
+    case 'SZS': return 'CNY';
+    default: return 'USD'; // NAS, NYS, AMS
+  }
+}
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const ticker = searchParams.get('ticker');
-  const collection = searchParams.get('collection') || 'marketcall_prices'; // 기본값: marketcall_prices (market-call에서 사용)
 
   if (!ticker) {
     return NextResponse.json(
@@ -16,27 +57,28 @@ export async function GET(request: NextRequest) {
 
   try {
     const tickerUpper = ticker.toUpperCase();
-    console.log(`[Stock Price] Fetching from Firestore: ${tickerUpper} (collection: ${collection})`);
+    console.log(`[Stock Price] Fetching from JSON: ${tickerUpper}`);
 
-    // Firestore에서 캐시된 가격 가져오기 (collection 파라미터로 지정)
-    const stockDoc = await getDoc(doc(db, collection, tickerUpper));
+    // JSON 파일에서 가격 가져오기
+    const stockPricesData = await getStockPricesFromJSON();
+    const stockData = stockPricesData.prices?.[tickerUpper];
 
-    if (stockDoc.exists()) {
-      const data = stockDoc.data();
-      console.log(`[Stock Price] Found cached data for ${tickerUpper}: ${data.price} ${data.currency}`);
+    if (stockData && stockData.currentPrice) {
+      const currency = getCurrencyFromExchange(stockData.exchange);
+      console.log(`[Stock Price] Found data for ${tickerUpper}: ${stockData.currentPrice} ${currency}`);
 
       return NextResponse.json({
-        price: data.price,
-        currency: data.currency || 'USD',
+        price: stockData.currentPrice,
+        currency,
         ticker: tickerUpper,
-        timestamp: data.lastUpdated?.toDate?.()?.toISOString() || new Date().toISOString(),
+        timestamp: stockPricesData.lastUpdated,
       });
     } else {
-      console.warn(`[Stock Price] No cached data for ${tickerUpper}`);
+      console.warn(`[Stock Price] No data for ${tickerUpper} in JSON`);
       return NextResponse.json(
         {
           error: 'Stock data not found',
-          message: `${tickerUpper} 종목 데이터가 캐시에 없습니다. 잠시 후 다시 시도해주세요.`,
+          message: `${tickerUpper} 종목 데이터가 없습니다. 잠시 후 다시 시도해주세요.`,
         },
         { status: 404 }
       );
