@@ -5,8 +5,8 @@ import {
   getKISHistoricalOverseaStockPrice,
   detectExchange
 } from './kis';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from './firebase';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { storage } from './firebase';
 
 export interface StockQuote {
   symbol: string;
@@ -22,75 +22,89 @@ export interface HistoricalPrice {
   symbol: string;
 }
 
+// JSON 캐시
+let cachedPrices: Record<string, { currentPrice: number; exchange: string }> | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 60 * 1000; // 1분
+
+// 거래소에서 통화 추론
+function getCurrencyFromExchange(exchange: string): string {
+  switch (exchange) {
+    case 'KRX': return 'KRW';
+    case 'TSE': return 'JPY';
+    case 'HKS': return 'HKD';
+    case 'SHS':
+    case 'SZS': return 'CNY';
+    default: return 'USD';
+  }
+}
+
 /**
- * Firestore에서 캐시된 주가를 가져옵니다.
- * @param ticker 주식 티커 심볼
- * @param collectionName 조회할 컬렉션 ('post_prices', 'marketcall_prices', 'stock_data')
- * @returns 주가 정보 (없으면 null)
+ * Firebase Storage의 JSON에서 주가를 가져옵니다.
  */
-async function getPriceFromFirestore(
-  ticker: string,
-  collectionName: string
-): Promise<StockQuote | null> {
+async function getPriceFromJSON(ticker: string): Promise<StockQuote | null> {
   try {
-    const stockCode = ticker.includes('.') ? ticker.split('.')[0] : ticker;
-    const docRef = doc(db, collectionName, stockCode.toUpperCase());
-    const docSnap = await getDoc(docRef);
+    const now = Date.now();
 
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-
-      // 에러가 있는 문서는 스킵
-      if (data.error) {
-        console.log(`[Firestore] ${stockCode} has error: ${data.error}`);
-        return null;
-      }
-
-      // 가격이 있으면 반환
-      if (data.price) {
-        console.log(`[Firestore] ✅ Cache hit: ${stockCode} = $${data.price} (${collectionName})`);
-        return {
-          symbol: stockCode,
-          price: data.price,
-          currency: data.currency || 'USD',
-          marketCap: undefined,
-          regularMarketChangePercent: data.changePercent,
-        };
-      }
+    // 캐시가 유효하면 재사용
+    if (!cachedPrices || now - cacheTimestamp >= CACHE_DURATION) {
+      const storageRef = ref(storage, 'stock-prices.json');
+      const downloadURL = await getDownloadURL(storageRef);
+      const response = await fetch(downloadURL);
+      const data = await response.json();
+      cachedPrices = data.prices || {};
+      cacheTimestamp = now;
+      console.log(`[StockPrice] Loaded ${Object.keys(cachedPrices || {}).length} prices from JSON`);
     }
 
-    console.log(`[Firestore] ❌ Cache miss: ${stockCode} (${collectionName})`);
+    const stockCode = ticker.includes('.') ? ticker.split('.')[0] : ticker;
+    const tickerUpper = stockCode.toUpperCase();
+    const priceData = cachedPrices?.[tickerUpper];
+
+    if (priceData && priceData.currentPrice) {
+      const currency = getCurrencyFromExchange(priceData.exchange);
+      console.log(`[StockPrice] ✅ JSON hit: ${tickerUpper} = ${priceData.currentPrice} ${currency}`);
+      return {
+        symbol: tickerUpper,
+        price: priceData.currentPrice,
+        currency,
+        marketCap: undefined,
+        regularMarketChangePercent: undefined,
+      };
+    }
+
+    console.log(`[StockPrice] ❌ JSON miss: ${tickerUpper}`);
     return null;
   } catch (error) {
-    console.error(`[Firestore] Error fetching ${ticker} from ${collectionName}:`, error);
+    console.error(`[StockPrice] Error fetching ${ticker} from JSON:`, error);
     return null;
   }
 }
 
 /**
- * 한국투자증권 API를 사용하여 실시간 주가 정보를 가져옵니다.
- * Firestore 캐시를 먼저 확인하고, 없으면 KIS API를 호출합니다.
+ * 실시간 주가 정보를 가져옵니다.
+ * JSON 캐시를 먼저 확인하고, 없으면 KIS API를 호출합니다.
  * @param ticker 주식 티커 심볼 (예: '005930', 'AAPL', 'TSLA')
  * @param exchange 거래소 코드 (선택사항, 예: 'NAS', 'NYS')
- * @param collectionName Firestore 컬렉션 이름 (기본값: 'stock_data')
+ * @param _collectionName 미사용 (하위 호환성)
  * @returns 주가 정보
  */
 export async function getCurrentStockPrice(
   ticker: string,
   exchange?: string,
-  collectionName: string = 'stock_data'
+  _collectionName: string = 'stock_data'
 ): Promise<StockQuote | null> {
   try {
-    console.log(`[StockPrice] 주가 조회 시작: ${ticker} (collection: ${collectionName})`);
+    console.log(`[StockPrice] 주가 조회 시작: ${ticker}`);
 
-    // 1. Firestore 캐시 먼저 확인
-    const cachedPrice = await getPriceFromFirestore(ticker, collectionName);
+    // 1. JSON 캐시 먼저 확인
+    const cachedPrice = await getPriceFromJSON(ticker);
     if (cachedPrice) {
       return cachedPrice;
     }
 
     // 2. 캐시 미스 - KIS API 직접 호출
-    console.log(`[StockPrice] Firestore 캐시 미스, KIS API 호출: ${ticker}`);
+    console.log(`[StockPrice] JSON 캐시 미스, KIS API 호출: ${ticker}`);
 
     // 거래소 자동 감지 (접미사 제거 전에 먼저 감지)
     const detectedExchange = exchange || detectExchange(ticker);

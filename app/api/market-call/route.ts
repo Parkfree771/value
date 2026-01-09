@@ -1,6 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
+import { db, storage } from '@/lib/firebase';
 import { collection, query, orderBy, limit, getDocs, Timestamp, getDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { ref, getDownloadURL } from 'firebase/storage';
+
+// JSON 캐시
+let cachedPrices: Record<string, { currentPrice: number; exchange: string }> | null = null;
+let cacheTimestamp = 0;
+const CACHE_DURATION = 60 * 1000; // 1분
+
+async function getLatestPrices(): Promise<Record<string, { currentPrice: number; exchange: string }>> {
+  const now = Date.now();
+  if (cachedPrices && now - cacheTimestamp < CACHE_DURATION) {
+    return cachedPrices;
+  }
+
+  try {
+    const storageRef = ref(storage, 'stock-prices.json');
+    const downloadURL = await getDownloadURL(storageRef);
+    const response = await fetch(downloadURL);
+    const data = await response.json();
+    cachedPrices = data.prices || {};
+    cacheTimestamp = now;
+    console.log(`[Market-call API] Loaded ${Object.keys(cachedPrices || {}).length} prices from JSON`);
+    return cachedPrices || {};
+  } catch (error) {
+    console.error('[Market-call API] Failed to load prices JSON:', error);
+    return cachedPrices || {};
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,6 +50,9 @@ export async function GET(request: NextRequest) {
 
     console.log(`[API Market-call] Found ${querySnapshot.docs.length} market-call events`);
 
+    // JSON에서 최신 가격 가져오기
+    const latestPrices = await getLatestPrices();
+
     // 각 market-call 이벤트의 수익률 계산
     const events = querySnapshot.docs.map((doc) => {
       const data = doc.data();
@@ -39,7 +69,12 @@ export async function GET(request: NextRequest) {
 
       // initial_price 또는 base_price 처리 (필드명 통일)
       const basePrice = data.initial_price || data.base_price || 0;
-      const currentPrice = data.currentPrice || data.current_price || 0;
+
+      // JSON에서 최신 가격 가져오기 (없으면 Firestore 값 사용)
+      const ticker = (data.target_ticker || data.ticker || '').toUpperCase();
+      const jsonPrice = latestPrices[ticker]?.currentPrice;
+      const currentPrice = jsonPrice || data.currentPrice || data.current_price || 0;
+
       const actionDirection = data.tracking_data?.action_direction || 'LONG';
 
       // 확정되지 않은 경우에만 수익률 계산
