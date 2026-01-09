@@ -5,8 +5,7 @@ import {
   getKISHistoricalOverseaStockPrice,
   detectExchange
 } from './kis';
-import { ref, getDownloadURL } from 'firebase/storage';
-import { storage } from './firebase';
+import { getLatestPrices, getCurrencyFromExchange } from './priceCache';
 
 export interface StockQuote {
   symbol: string;
@@ -22,44 +21,16 @@ export interface HistoricalPrice {
   symbol: string;
 }
 
-// JSON 캐시
-let cachedPrices: Record<string, { currentPrice: number; exchange: string }> | null = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 60 * 1000; // 1분
-
-// 거래소에서 통화 추론
-function getCurrencyFromExchange(exchange: string): string {
-  switch (exchange) {
-    case 'KRX': return 'KRW';
-    case 'TSE': return 'JPY';
-    case 'HKS': return 'HKD';
-    case 'SHS':
-    case 'SZS': return 'CNY';
-    default: return 'USD';
-  }
-}
-
 /**
  * Firebase Storage의 JSON에서 주가를 가져옵니다.
  */
 async function getPriceFromJSON(ticker: string): Promise<StockQuote | null> {
   try {
-    const now = Date.now();
-
-    // 캐시가 유효하면 재사용
-    if (!cachedPrices || now - cacheTimestamp >= CACHE_DURATION) {
-      const storageRef = ref(storage, 'stock-prices.json');
-      const downloadURL = await getDownloadURL(storageRef);
-      const response = await fetch(downloadURL);
-      const data = await response.json();
-      cachedPrices = data.prices || {};
-      cacheTimestamp = now;
-      console.log(`[StockPrice] Loaded ${Object.keys(cachedPrices || {}).length} prices from JSON`);
-    }
+    const cachedPrices = await getLatestPrices();
 
     const stockCode = ticker.includes('.') ? ticker.split('.')[0] : ticker;
     const tickerUpper = stockCode.toUpperCase();
-    const priceData = cachedPrices?.[tickerUpper];
+    const priceData = cachedPrices[tickerUpper];
 
     if (priceData && priceData.currentPrice) {
       const currency = getCurrencyFromExchange(priceData.exchange);

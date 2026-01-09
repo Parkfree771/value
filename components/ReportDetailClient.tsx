@@ -23,43 +23,41 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [isClosing, setIsClosing] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
 
-  // 조회수 증가
-  useEffect(() => {
-    const incrementView = async () => {
-      try {
-        await fetch(`/api/reports/${report.id}/view`, {
-          method: 'POST',
-        });
-      } catch (error) {
-        console.error('조회수 증가 실패:', error);
-      }
-    };
-
-    incrementView();
-  }, [report.id]);
-
   // 수익 확정 상태 확인
   useEffect(() => {
     setIsClosed(report.is_closed || false);
   }, [report.is_closed]);
 
-  // 좋아요 상태 확인
+  // 조회수 증가 + 좋아요 상태 확인 (병렬 처리)
   useEffect(() => {
-    const checkLikeStatus = async () => {
-      if (!user) return;
+    const initializeData = async () => {
+      const promises: Promise<void>[] = [];
 
-      try {
-        const response = await fetch(`/api/reports/${report.id}/like?userId=${user.uid}`);
-        const data = await response.json();
-        if (data.success) {
-          setIsLiked(data.isLiked);
-        }
-      } catch (error) {
-        console.error('좋아요 상태 확인 실패:', error);
+      // 조회수 증가 (항상 실행)
+      promises.push(
+        fetch(`/api/reports/${report.id}/view`, { method: 'POST' })
+          .catch(error => console.error('조회수 증가 실패:', error))
+          .then(() => {})
+      );
+
+      // 좋아요 상태 확인 (로그인 시에만)
+      if (user) {
+        promises.push(
+          fetch(`/api/reports/${report.id}/like?userId=${user.uid}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) {
+                setIsLiked(data.isLiked);
+              }
+            })
+            .catch(error => console.error('좋아요 상태 확인 실패:', error))
+        );
       }
+
+      await Promise.all(promises);
     };
 
-    checkLikeStatus();
+    initializeData();
   }, [report.id, user]);
 
   // 좋아요 토글
@@ -173,8 +171,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
       if (data.success) {
         alert('수익이 확정되었습니다!');
-        // 페이지 새로고침하여 업데이트된 데이터 표시
-        window.location.reload();
+        // 상태 업데이트로 UI 반영 (새로고침 대신)
+        setIsClosed(true);
       } else {
         alert(data.error || '수익 확정에 실패했습니다.');
       }

@@ -179,8 +179,6 @@ export default function ReportCard({
       if (data.success) {
         alert('수익이 확정되었습니다!');
         setIsClosed(true);
-        // 페이지 새로고침
-        window.location.reload();
       } else {
         alert(data.error || '수익 확정에 실패했습니다.');
       }

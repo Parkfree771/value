@@ -1,7 +1,7 @@
 'use client';
 
 import { GuruPortfolio, PortfolioHolding } from '@/app/guru-tracker/types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 interface PortfolioTableProps {
   portfolio: GuruPortfolio;
@@ -18,11 +18,17 @@ export default function PortfolioTable({ portfolio }: PortfolioTableProps) {
   const [priceData, setPriceData] = useState<Record<string, PriceData>>({});
   const [loading, setLoading] = useState(true);
 
+  // 티커 목록을 문자열로 변환 (의존성 안정화)
+  const tickerString = useMemo(
+    () => portfolio.holdings.map(h => h.ticker).sort().join(','),
+    [portfolio.holdings]
+  );
+
   useEffect(() => {
     const fetchPrices = async () => {
       try {
         setLoading(true);
-        const tickers = portfolio.holdings.map(h => h.ticker);
+        const tickers = tickerString.split(',').filter(Boolean);
 
         const response = await fetch('/api/portfolio-prices', {
           method: 'POST',
@@ -55,8 +61,10 @@ export default function PortfolioTable({ portfolio }: PortfolioTableProps) {
       }
     };
 
-    fetchPrices();
-  }, [portfolio.holdings, portfolio.reportDate]);
+    if (tickerString) {
+      fetchPrices();
+    }
+  }, [tickerString, portfolio.reportDate]);
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(num);

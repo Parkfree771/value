@@ -1,61 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db, storage } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
-import { ref, getDownloadURL } from 'firebase/storage';
-
-// JSON 캐시
-let cachedPrices: Record<string, { currentPrice: number; exchange: string }> | null = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 60 * 1000; // 1분
-
-async function getLatestPrices(): Promise<Record<string, { currentPrice: number; exchange: string }>> {
-  const now = Date.now();
-  if (cachedPrices && now - cacheTimestamp < CACHE_DURATION) {
-    return cachedPrices;
-  }
-
-  try {
-    const storageRef = ref(storage, 'stock-prices.json');
-    const downloadURL = await getDownloadURL(storageRef);
-    const response = await fetch(downloadURL);
-    const data = await response.json();
-    cachedPrices = data.prices || {};
-    cacheTimestamp = now;
-    console.log(`[Reports API] Loaded ${Object.keys(cachedPrices || {}).length} prices from JSON`);
-    return cachedPrices || {};
-  } catch (error) {
-    console.error('[Reports API] Failed to load prices JSON:', error);
-    return cachedPrices || {};
-  }
-}
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, limit, getDocs, Timestamp, startAfter, doc, getDoc, getCountFromServer } from 'firebase/firestore';
+import { getLatestPrices } from '@/lib/priceCache';
 
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const sortBy = searchParams.get('sortBy') || 'createdAt'; // createdAt, returnRate, views
-    const limitCount = parseInt(searchParams.get('limit') || '20', 10); // 50 → 20 최적화
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const pageSize = parseInt(searchParams.get('pageSize') || '5', 10);
+    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '10', 10), 50); // 최대 50개 제한
+    const cursor = searchParams.get('cursor'); // 커서 기반 페이지네이션
 
-    console.log(`[API Reports] Fetching reports - sortBy: ${sortBy}, limit: ${limitCount}, page: ${page}, pageSize: ${pageSize}`);
+    console.log(`[API Reports] Fetching reports - sortBy: ${sortBy}, pageSize: ${pageSize}, cursor: ${cursor}`);
 
-    // Firestore에서 리포트 가져오기
     const postsRef = collection(db, 'posts');
-    const q = query(
-      postsRef,
-      orderBy(sortBy, 'desc'),
-      limit(limitCount)
-    );
-    const querySnapshot = await getDocs(q);
+
+    // 쿼리 구성
+    let q;
+    if (cursor) {
+      // 커서가 있으면 해당 문서 이후부터 가져오기
+      const cursorDoc = await getDoc(doc(db, 'posts', cursor));
+      if (cursorDoc.exists()) {
+        q = query(
+          postsRef,
+          orderBy(sortBy, 'desc'),
+          startAfter(cursorDoc),
+          limit(pageSize)
+        );
+      } else {
+        // 커서 문서가 없으면 처음부터
+        q = query(postsRef, orderBy(sortBy, 'desc'), limit(pageSize));
+      }
+    } else {
+      q = query(postsRef, orderBy(sortBy, 'desc'), limit(pageSize));
+    }
+
+    // 병렬로 데이터와 총 개수 가져오기
+    const [querySnapshot, countSnapshot, latestPrices] = await Promise.all([
+      getDocs(q),
+      getCountFromServer(query(postsRef)),
+      getLatestPrices()
+    ]);
 
     console.log(`[API Reports] Found ${querySnapshot.docs.length} reports`);
 
-    // JSON에서 최신 가격 가져오기
-    const latestPrices = await getLatestPrices();
-
-    // 각 리포트에 가격 적용 (이제 빠름!)
-    const reports = querySnapshot.docs.map((doc) => {
-      const data = doc.data();
+    // 각 리포트에 가격 적용
+    const reports = querySnapshot.docs.map((docSnap) => {
+      const data = docSnap.data();
 
       // createdAt 변환
       let createdAtStr = '';
@@ -67,11 +57,10 @@ export async function GET(request: NextRequest) {
         createdAtStr = new Date().toISOString().split('T')[0];
       }
 
-      // JSON에서 최신 가격 가져오기 (없으면 Firestore 값 사용)
+      // JSON에서 최신 가격 가져오기
       const ticker = (data.ticker || '').toUpperCase();
       const jsonPrice = latestPrices[ticker]?.currentPrice;
 
-      // currentPrice와 initialPrice로 수익률 계산
       const initialPrice = data.initialPrice || 0;
       const currentPrice = jsonPrice || data.currentPrice || 0;
       const positionType = data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
@@ -81,13 +70,12 @@ export async function GET(request: NextRequest) {
         if (positionType === 'long') {
           returnRate = ((currentPrice - initialPrice) / initialPrice) * 100;
         } else {
-          // SHORT
           returnRate = ((initialPrice - currentPrice) / initialPrice) * 100;
         }
       }
 
       return {
-        id: doc.id,
+        id: docSnap.id,
         title: data.title || '',
         author: data.authorName || '익명',
         stockName: data.stockName || '',
@@ -102,23 +90,27 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    // 다음 페이지 커서 (마지막 문서 ID)
+    const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+    const nextCursor = lastDoc ? lastDoc.id : null;
+    const hasMore = querySnapshot.docs.length === pageSize;
+
     console.log(`[API Reports] Successfully processed ${reports.length} reports`);
 
-    // 페이지네이션 적용
-    const startIndex = (page - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    const paginatedReports = reports.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(reports.length / pageSize);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      reports: paginatedReports,
-      count: paginatedReports.length,
-      total: reports.length,
-      page,
+      reports,
+      count: reports.length,
+      total: countSnapshot.data().count,
+      nextCursor,
+      hasMore,
       pageSize,
-      totalPages,
     });
+
+    // 캐시 헤더 추가 (1분간 캐시, stale-while-revalidate)
+    response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
+
+    return response;
   } catch (error) {
     console.error('[API Reports] Error:', error);
     return NextResponse.json(

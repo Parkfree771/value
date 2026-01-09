@@ -2,6 +2,7 @@
 import { initializeApp, getApps, cert, ServiceAccount } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { getAuth } from 'firebase-admin/auth';
 
 // Admin SDK가 이미 초기화되었는지 확인
 if (getApps().length === 0) {
@@ -29,9 +30,34 @@ if (getApps().length === 0) {
   console.log('[Firebase Admin] Initialized successfully');
 }
 
-// Admin SDK Firestore 및 Storage 인스턴스
+// Admin SDK Firestore, Storage, Auth 인스턴스
 export const adminDb = getFirestore();
 export const adminStorage = getStorage();
+export const adminAuth = getAuth();
 
 // Firestore 타임스탬프 유틸리티
 export { FieldValue, Timestamp } from 'firebase-admin/firestore';
+
+/**
+ * Authorization 헤더에서 Firebase ID 토큰을 검증하고 사용자 ID를 반환합니다.
+ * @param authHeader Authorization 헤더 값 (Bearer <token>)
+ * @returns 검증된 사용자 ID 또는 null
+ */
+export async function verifyAuthToken(authHeader: string | null): Promise<string | null> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.split('Bearer ')[1];
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    return decodedToken.uid;
+  } catch (error) {
+    console.error('[Auth] Token verification failed:', error);
+    return null;
+  }
+}

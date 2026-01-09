@@ -12,34 +12,62 @@ export default function MarketCallPage() {
   const [sortBy, setSortBy] = useState('newest');
   const [firebaseEvents, setFirebaseEvents] = useState<GuruTrackingEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 5; // 페이지당 5개
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const pageSize = 10;
 
   // API에서 마켓콜 데이터 가져오기 (가격 계산 포함)
-  useEffect(() => {
-    const fetchMarketCall = async () => {
-      try {
+  const fetchMarketCall = async (cursor?: string, append = false) => {
+    try {
+      if (append) {
+        setLoadingMore(true);
+      } else {
         setLoading(true);
-        const sortByField = sortBy === 'newest' ? 'created_at' : sortBy === 'return' ? 'return_rate' : 'views';
-        const response = await fetch(`/api/market-call?sortBy=${sortByField}&limit=100&page=${currentPage}&pageSize=${pageSize}`);
-        const data = await response.json();
-
-        if (data.success) {
-          setFirebaseEvents(data.events);
-          setTotalPages(data.totalPages);
-        } else {
-          console.error('마켓콜 가져오기 실패:', data.error);
-        }
-      } catch (error) {
-        console.error('Error fetching market call:', error);
-      } finally {
-        setLoading(false);
       }
-    };
 
+      const sortByField = sortBy === 'newest' ? 'created_at' : sortBy === 'return' ? 'return_rate' : 'views';
+      const url = cursor
+        ? `/api/market-call?sortBy=${sortByField}&pageSize=${pageSize}&cursor=${cursor}`
+        : `/api/market-call?sortBy=${sortByField}&pageSize=${pageSize}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        if (append) {
+          setFirebaseEvents(prev => [...prev, ...data.events]);
+        } else {
+          setFirebaseEvents(data.events);
+        }
+        setNextCursor(data.nextCursor);
+        setHasMore(data.hasMore);
+        setTotal(data.total);
+      } else {
+        console.error('마켓콜 가져오기 실패:', data.error);
+      }
+    } catch (error) {
+      console.error('Error fetching market call:', error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  // 초기 로드 및 정렬 변경 시
+  useEffect(() => {
+    setFirebaseEvents([]);
+    setNextCursor(null);
     fetchMarketCall();
-  }, [sortBy, currentPage]);
+  }, [sortBy]);
+
+  // 더 보기 핸들러
+  const handleLoadMore = () => {
+    if (nextCursor && hasMore && !loadingMore) {
+      fetchMarketCall(nextCursor, true);
+    }
+  };
 
   // Firebase 데이터만 사용
   const mentionEvents = firebaseEvents;
@@ -175,47 +203,29 @@ export default function MarketCallPage() {
         </div>
       </div>
 
-      {/* 페이지네이션 */}
-      {!loading && totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-8">
+      {/* 더 보기 버튼 */}
+      {!loading && hasMore && (
+        <div className="flex flex-col items-center gap-2 mt-8">
           <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="px-8 py-3 bg-electric-blue hover:bg-electric-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-neon-blue disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            이전
+            {loadingMore ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                로딩 중...
+              </span>
+            ) : (
+              '더 보기'
+            )}
           </button>
-
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  currentPage === page
-                    ? 'bg-electric-blue text-white shadow-neon-blue'
-                    : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            다음
-          </button>
-        </div>
-      )}
-
-      {/* Firebase 데이터 카운트 표시 (개발 확인용) */}
-      {!loading && firebaseEvents.length > 0 && (
-        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          사용자 작성 글: {firebaseEvents.length}개 | 페이지: {currentPage}/{totalPages}
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {firebaseEvents.length} / {total}개
+          </span>
         </div>
       )}
 

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { GuruTrackingEvent, BadgeLabel } from '@/app/guru-tracker/types';
 import { useStockPrice } from '@/hooks/useStockPrice';
 import { useAuth } from '@/contexts/AuthContext';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 interface GuruTrackingCardProps {
   event: GuruTrackingEvent;
@@ -16,10 +17,9 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { user } = useAuth();
-
-  // 수익 확정 여부 확인
-  const isClosed = event.is_closed || false;
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [isClosed, setIsClosed] = useState(event.is_closed || false);
+  const { user, getIdToken } = useAuth();
   const isOwner = user && event.author_id === user.uid;
 
   // 마켓콜은 수익 확정 버튼 표시 안 함
@@ -212,8 +212,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
 
       if (data.success) {
         alert('수익이 확정되었습니다!');
-        // 페이지 새로고침하여 업데이트된 데이터 표시
-        window.location.reload();
+        setIsClosed(true);
       } else {
         alert(data.error || '수익 확정에 실패했습니다.');
       }
@@ -234,16 +233,24 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
     setIsDeleting(true);
 
     try {
-      const response = await fetch(`/api/market-call?id=${event.id}&userId=${user.uid}`, {
+      const token = await getIdToken();
+      if (!token) {
+        alert('인증이 만료되었습니다. 다시 로그인해주세요.');
+        return;
+      }
+
+      const response = await fetch(`/api/market-call?id=${event.id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
       const data = await response.json();
 
       if (data.success) {
         alert('마켓 콜이 삭제되었습니다.');
-        // 페이지 새로고침
-        window.location.reload();
+        setIsDeleted(true);
       } else {
         alert(data.error || '삭제에 실패했습니다.');
       }
@@ -260,6 +267,9 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
     if (!event.id) return;
     router.push(`/market-call/edit/${event.id}`);
   };
+
+  // 삭제된 경우 렌더링하지 않음
+  if (isDeleted) return null;
 
   return (
     <div className="group bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-electric-blue-500 dark:hover:border-electric-blue-500 transition-all duration-300 overflow-hidden">
@@ -371,7 +381,7 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
             className={`text-sm text-gray-600 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none transition-all duration-300 ${
               isExpanded ? '' : 'line-clamp-3'
             }`}
-            dangerouslySetInnerHTML={{ __html: event.content_html }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.content_html) }}
           />
 
           <div className="flex items-center gap-3 mt-4">

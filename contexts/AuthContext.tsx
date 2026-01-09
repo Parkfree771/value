@@ -9,6 +9,7 @@ interface AuthContextType {
   loading: boolean;
   signInWithGoogle: () => Promise<User | undefined>;
   signOut: () => Promise<void>;
+  getIdToken: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signInWithGoogle: async () => undefined,
   signOut: async () => {},
+  getIdToken: async () => null,
 });
 
 export const useAuth = () => {
@@ -58,11 +60,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const getIdToken = async (): Promise<string | null> => {
+    if (!user) return null;
+    try {
+      return await user.getIdToken();
+    } catch (error) {
+      console.error('토큰 가져오기 실패:', error);
+      return null;
+    }
+  };
+
   const value = {
     user,
     loading,
     signInWithGoogle,
     signOut,
+    getIdToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

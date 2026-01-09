@@ -36,9 +36,11 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const pageSize = 5;
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
+  const pageSize = 10;
   const [filters, setFilters] = useState({
     period: 'all',
     market: 'all',
@@ -47,41 +49,61 @@ export default function HomePage() {
   });
 
   // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
+  const fetchReports = async (cursor?: string, append = false) => {
+    try {
+      if (append) {
+        setLoadingMore(true);
+      } else {
         setLoading(true);
-        // Map activeTab to sortBy parameter
-        let sortByField = 'createdAt';
-        if (activeTab === 'popular') {
-          sortByField = 'views';
-        } else if (activeTab === 'return') {
-          sortByField = 'returnRate';
-        }
-
-        const response = await fetch(`/api/reports?sortBy=${sortByField}&limit=100&page=${currentPage}&pageSize=${pageSize}`);
-        const data = await response.json();
-
-        if (data.success) {
-          setReports(data.reports);
-          setTotalPages(data.totalPages);
-        } else {
-          console.error('리포트 가져오기 실패:', data.error);
-        }
-      } catch (error) {
-        console.error('리포트 가져오기 실패:', error);
-      } finally {
-        setLoading(false);
       }
-    };
 
-    fetchReports();
-  }, [activeTab, currentPage]);
+      let sortByField = 'createdAt';
+      if (activeTab === 'popular') {
+        sortByField = 'views';
+      } else if (activeTab === 'return') {
+        sortByField = 'returnRate';
+      }
 
-  // Reset to page 1 when tab changes
+      const url = cursor
+        ? `/api/reports?sortBy=${sortByField}&pageSize=${pageSize}&cursor=${cursor}`
+        : `/api/reports?sortBy=${sortByField}&pageSize=${pageSize}`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data.success) {
+        if (append) {
+          setReports(prev => [...prev, ...data.reports]);
+        } else {
+          setReports(data.reports);
+        }
+        setNextCursor(data.nextCursor);
+        setHasMore(data.hasMore);
+        setTotal(data.total);
+      } else {
+        console.error('리포트 가져오기 실패:', data.error);
+      }
+    } catch (error) {
+      console.error('리포트 가져오기 실패:', error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  // 초기 로드 및 탭 변경 시
   useEffect(() => {
-    setCurrentPage(1);
+    setReports([]);
+    setNextCursor(null);
+    fetchReports();
   }, [activeTab]);
+
+  // 더 보기 핸들러
+  const handleLoadMore = () => {
+    if (nextCursor && hasMore && !loadingMore) {
+      fetchReports(nextCursor, true);
+    }
+  };
 
   // 검색 및 필터링
   const filteredReports = reports.filter((report) => {
@@ -251,40 +273,29 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* 페이지네이션 */}
-      {!loading && totalPages > 1 && (
-        <div className="flex justify-center items-center gap-2 mt-8">
+      {/* 더 보기 버튼 */}
+      {!loading && hasMore && (
+        <div className="flex flex-col items-center gap-2 mt-8">
           <button
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="px-8 py-3 bg-electric-blue hover:bg-electric-blue-600 text-white rounded-lg text-sm font-semibold transition-all shadow-neon-blue disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            이전
+            {loadingMore ? (
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                로딩 중...
+              </span>
+            ) : (
+              '더 보기'
+            )}
           </button>
-
-          <div className="flex gap-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                  currentPage === page
-                    ? 'bg-electric-blue text-white shadow-neon-blue'
-                    : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            다음
-          </button>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {reports.length} / {total}개
+          </span>
         </div>
       )}
     </div>
