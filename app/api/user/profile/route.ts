@@ -59,6 +59,8 @@ export async function GET(request: NextRequest) {
         authorId: data.authorId || userId,
         stockName: data.stockName || '',
         ticker: data.ticker || '',
+        category: data.category || '',
+        exchange: data.exchange || '',
         opinion: data.opinion || 'hold',
         returnRate: data.returnRate || 0,
         initialPrice: data.initialPrice || 0,

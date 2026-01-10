@@ -10,6 +10,7 @@ export interface Report {
   stockName: string;
   ticker: string;
   category?: MarketCategory;
+  exchange?: string;
   opinion: Opinion;
   targetPrice?: number;
   content: string;

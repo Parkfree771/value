@@ -72,5 +72,13 @@ service cloud.firestore {
       allow update: if true; // 크론이 가격 업데이트 (서버에서 Admin SDK 사용)
       allow delete: if false; // 삭제 불가 (관리자만)
     }
+
+    // Tickers 컬렉션 (게시물 작성 시 ticker 등록, 가격 업데이트 최적화용)
+    match /tickers/{ticker} {
+      allow read: if true; // 모든 사용자가 읽기 가능
+      allow create: if request.auth != null; // 로그인한 사용자만 ticker 등록 가능
+      allow update: if request.auth != null; // 로그인한 사용자가 postCount 증가 가능
+      allow delete: if false; // 삭제 불가 (관리자만)
+    }
   }
 }

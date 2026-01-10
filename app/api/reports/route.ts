@@ -87,6 +87,9 @@ export async function GET(request: NextRequest) {
         createdAt: createdAtStr,
         views: data.views || 0,
         likes: data.likes || 0,
+        exchange: data.exchange || '',
+        category: data.category || '',
+        stockData: data.stockData || null,
       };
     });
 

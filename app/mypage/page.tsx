@@ -80,6 +80,8 @@ export default function MyPage() {
             authorId: data.authorId || '',
             stockName: data.stockName || '',
             ticker: data.ticker || '',
+            category: data.category || '',
+            exchange: data.exchange || '',
             opinion: data.opinion || 'hold',
             returnRate: data.returnRate || 0,
             initialPrice: data.initialPrice || 0,

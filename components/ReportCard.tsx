@@ -25,6 +25,7 @@ interface ReportCardProps {
   showActions?: boolean; // 수정/삭제 버튼 표시 여부
   onDelete?: () => void; // 삭제 후 콜백
   category?: string;
+  exchange?: string; // 거래소 정보 추가
   stockData?: {
     currency?: string;
     [key: string]: any;
@@ -52,6 +53,7 @@ export default function ReportCard({
   showActions = false,
   onDelete,
   category,
+  exchange,
   stockData,
   is_closed = false,
   closed_at,
@@ -70,6 +72,25 @@ export default function ReportCard({
     // stockData에 currency가 있으면 사용
     if (stockData?.currency) {
       return stockData.currency;
+    }
+
+    // exchange 기반 추론 (가장 정확)
+    if (exchange) {
+      const exchangeUpper = exchange.toUpperCase();
+      // 한국
+      if (exchangeUpper === 'KRX' || exchangeUpper === 'KOSPI' || exchangeUpper === 'KOSDAQ' || exchangeUpper === 'KSC') return 'KRW';
+      // 일본
+      if (exchangeUpper === 'TYO' || exchangeUpper === 'JPX' || exchangeUpper === 'TSE') return 'JPY';
+      // 미국
+      if (exchangeUpper === 'NAS' || exchangeUpper === 'NYS' || exchangeUpper === 'NYSE' || exchangeUpper === 'NASDAQ' || exchangeUpper === 'AMEX') return 'USD';
+      // 홍콩
+      if (exchangeUpper === 'HKG' || exchangeUpper === 'HKEX') return 'HKD';
+      // 중국
+      if (exchangeUpper === 'SHH' || exchangeUpper === 'SHZ' || exchangeUpper === 'SSE' || exchangeUpper === 'SZSE') return 'CNY';
+      // 영국
+      if (exchangeUpper === 'LON' || exchangeUpper === 'LSE') return 'GBP';
+      // 유럽
+      if (exchangeUpper === 'FRA' || exchangeUpper === 'PAR' || exchangeUpper === 'AMS') return 'EUR';
     }
 
     // category 기반 추론

@@ -183,10 +183,11 @@ export async function GET(request: NextRequest) {
 
     console.log(`[API /stocks/search] 검색 완료: ${results.length}개 결과`);
 
-    // StockInfo 형식으로 변환
+    // StockInfo 형식으로 변환 (nameKr 포함)
     const formattedResults = results.map(stock => ({
       symbol: stock.symbol,
       name: stock.name,
+      nameKr: stock.nameKr || null,
       exchange: stock.exchange,
       type: 'EQUITY' as const,
     }));

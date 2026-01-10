@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react';
 interface Stock {
   symbol: string;
   name: string;
+  nameKr?: string | null;
   exchange: string;
   type: string;
   price?: number;
@@ -12,7 +13,6 @@ interface Stock {
   marketCap?: number;
   per?: number;
   pbr?: number;
-  nameKr?: string;
 }
 
 interface StockData {
@@ -107,8 +107,14 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
         return;
       }
 
-      console.log('Stock data loaded:', stockData);
-      onStockSelect(stockData);
+      // 자동완성에서 표시된 기업명 그대로 사용 (한글명이 있으면 한글, 없으면 영어)
+      const displayName = (stock.exchange === 'KRX' && stock.nameKr) ? stock.nameKr : stock.name;
+
+      console.log('Stock data loaded:', { ...stockData, name: displayName });
+      onStockSelect({
+        ...stockData,
+        name: displayName,
+      });
     } catch (error) {
       console.error('Failed to fetch stock data:', error);
       alert(`주가 조회 중 오류가 발생했습니다: ${stock.symbol}`);

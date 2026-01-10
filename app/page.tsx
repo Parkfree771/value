@@ -22,6 +22,7 @@ interface Report {
   stockName: string;
   ticker: string;
   category?: string;
+  exchange?: string;
   opinion: 'buy' | 'sell' | 'hold';
   returnRate: number;
   initialPrice: number;
@@ -29,6 +30,10 @@ interface Report {
   createdAt: string;
   views: number;
   likes: number;
+  stockData?: {
+    currency?: string;
+    [key: string]: any;
+  };
 }
 
 export default function HomePage() {
