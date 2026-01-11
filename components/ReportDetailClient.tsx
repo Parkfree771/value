@@ -110,7 +110,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     };
 
     return (
-      <span className={`px-3 py-1 rounded-lg text-sm font-semibold ${styles[report.opinion]}`}>
+      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${styles[report.opinion]}`}>
         {labels[report.opinion]}
       </span>
     );
@@ -300,17 +300,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 기업 정보 카드 - 컴팩트 2줄 디자인 */}
             <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-gray-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 shadow-lg dark:shadow-2xl border border-gray-200 dark:border-transparent">
               {/* 1줄: 기업명 + 매수 | 작성가 | 현재가 | 수익률 */}
-              <div className="relative px-4 sm:px-5 py-3 sm:py-4">
-                <div className="grid grid-cols-4 gap-2 sm:gap-4 items-center">
+              <div className="relative px-6 sm:px-8 py-5 sm:py-6">
+                <div className="grid grid-cols-4 gap-4 sm:gap-6 items-center">
                   {/* 기업 정보 */}
                   <div className="text-center">
-                    <div className="flex items-center justify-center gap-1.5 mb-0.5">
-                      <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate">
-                        {report.stockName}
-                      </h3>
-                      {getOpinionBadge()}
-                    </div>
-                    <div className="flex items-center justify-center gap-1.5 text-xs">
+                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate mb-1">
+                      {report.stockName}
+                    </h3>
+                    <div className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
                       <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
                         {report.ticker}
                       </span>
@@ -320,37 +317,38 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                           <span className="text-gray-500 dark:text-slate-400">{report.stockData.exchange}</span>
                         </>
                       )}
+                      {getOpinionBadge()}
                     </div>
                   </div>
 
                   {/* 작성가 */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 mb-0.5">작성 당시</div>
-                    <div className="text-sm sm:text-base font-bold text-gray-900 dark:text-white tabular-nums">
-                      <span className="text-gray-400 dark:text-slate-400 text-[10px] mr-0.5">{report.stockData?.currency || '$'}</span>
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">작성 당시</div>
+                    <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tabular-nums">
+                      <span className="text-gray-400 dark:text-slate-400 text-xs mr-0.5">{report.stockData?.currency || '$'}</span>
                       {report.initialPrice?.toLocaleString()}
                     </div>
                   </div>
 
                   {/* 현재가 */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 mb-0.5">현재가</div>
-                    <div className={`text-sm sm:text-base font-bold tabular-nums ${
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">현재가</div>
+                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
                       report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
                       report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
                       'text-gray-900 dark:text-white'
                     }`}>
-                      <span className="text-gray-400 dark:text-slate-400 text-[10px] mr-0.5">{report.stockData?.currency || '$'}</span>
+                      <span className="text-gray-400 dark:text-slate-400 text-xs mr-0.5">{report.stockData?.currency || '$'}</span>
                       {report.currentPrice?.toLocaleString()}
                     </div>
                   </div>
 
                   {/* 수익률 */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 mb-0.5">
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
                       {isClosed ? '확정 수익률' : '수익률'}
                     </div>
-                    <div className={`text-sm sm:text-base font-black tabular-nums ${
+                    <div className={`text-base sm:text-lg font-black tabular-nums ${
                       report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
                       report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
                       'text-gray-600 dark:text-slate-300'
@@ -363,12 +361,12 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
 
               {/* 2줄: P/E | P/B | EPS | 목표가 */}
-              <div className="relative px-4 sm:px-5 py-2.5 sm:py-3 bg-gray-100/50 dark:bg-black/20 border-t border-gray-200 dark:border-white/5">
-                <div className="grid grid-cols-4 gap-2 sm:gap-4 items-center">
+              <div className="relative px-6 sm:px-8 py-4 sm:py-5 bg-gray-100/50 dark:bg-black/20 border-t border-gray-200 dark:border-white/5">
+                <div className="grid grid-cols-4 gap-4 sm:gap-6 items-center">
                   {/* P/E */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">P/E</div>
-                    <div className={`text-sm sm:text-base font-bold tabular-nums ${
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">P/E</div>
+                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
                       report.stockData?.per
                         ? report.stockData.per < 15 ? 'text-emerald-600 dark:text-emerald-400'
                           : report.stockData.per > 30 ? 'text-amber-600 dark:text-amber-400'
@@ -381,8 +379,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                   {/* P/B */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">P/B</div>
-                    <div className={`text-sm sm:text-base font-bold tabular-nums ${
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">P/B</div>
+                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
                       report.stockData?.pbr
                         ? report.stockData.pbr < 1 ? 'text-emerald-600 dark:text-emerald-400'
                           : report.stockData.pbr > 3 ? 'text-amber-600 dark:text-amber-400'
@@ -395,8 +393,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                   {/* EPS */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-0.5">EPS</div>
-                    <div className={`text-sm sm:text-base font-bold tabular-nums ${
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">EPS</div>
+                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
                       report.stockData?.eps
                         ? report.stockData.eps > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                         : 'text-gray-400 dark:text-slate-500'
@@ -407,14 +405,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                   {/* 목표가 */}
                   <div className="text-center">
-                    <div className="text-[10px] font-medium text-gray-500 dark:text-slate-400 mb-0.5">목표가</div>
+                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">목표가</div>
                     {report.targetPrice ? (
-                      <div className="text-sm sm:text-base font-bold text-purple-600 dark:text-purple-400 tabular-nums">
-                        <span className="text-gray-400 dark:text-slate-400 text-[10px] mr-0.5">{report.stockData?.currency || '$'}</span>
+                      <div className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400 tabular-nums">
+                        <span className="text-gray-400 dark:text-slate-400 text-xs mr-0.5">{report.stockData?.currency || '$'}</span>
                         {report.targetPrice?.toLocaleString()}
                       </div>
                     ) : (
-                      <div className="text-sm sm:text-base font-bold text-gray-400 dark:text-slate-500">-</div>
+                      <div className="text-base sm:text-lg font-bold text-gray-400 dark:text-slate-500">-</div>
                     )}
                   </div>
                 </div>

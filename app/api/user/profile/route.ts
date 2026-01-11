@@ -138,37 +138,55 @@ export async function PUT(request: NextRequest) {
 
     // 닉네임이 변경된 경우, 해당 사용자가 작성한 모든 게시글의 authorName 업데이트
     if (oldNickname !== nickname.trim()) {
+      // posts 컬렉션 업데이트
       const postsRef = collection(db, 'posts');
-      const q = query(postsRef, where('authorId', '==', userId));
-      const querySnapshot = await getDocs(q);
+      const postsQuery = query(postsRef, where('authorId', '==', userId));
+      const postsSnapshot = await getDocs(postsQuery);
 
-      if (!querySnapshot.empty) {
-        // Firestore의 배치 업데이트 사용 (최대 500개까지 한 번에 처리)
-        const batches = [];
-        let currentBatch = writeBatch(db);
-        let batchCount = 0;
+      // market-call 컬렉션 업데이트
+      const marketCallRef = collection(db, 'market-call');
+      const marketCallQuery = query(marketCallRef, where('author_id', '==', userId));
+      const marketCallSnapshot = await getDocs(marketCallQuery);
 
-        querySnapshot.forEach((docSnapshot) => {
-          if (batchCount === 500) {
-            batches.push(currentBatch);
-            currentBatch = writeBatch(db);
-            batchCount = 0;
-          }
+      // Firestore의 배치 업데이트 사용 (최대 500개까지 한 번에 처리)
+      const batches = [];
+      let currentBatch = writeBatch(db);
+      let batchCount = 0;
 
-          const postRef = doc(db, 'posts', docSnapshot.id);
-          currentBatch.update(postRef, { authorName: nickname.trim() });
-          batchCount++;
-        });
-
-        if (batchCount > 0) {
+      // posts 컬렉션 업데이트
+      postsSnapshot.forEach((docSnapshot) => {
+        if (batchCount === 500) {
           batches.push(currentBatch);
+          currentBatch = writeBatch(db);
+          batchCount = 0;
         }
 
-        // 모든 배치 커밋
-        await Promise.all(batches.map((b) => b.commit()));
+        const postRef = doc(db, 'posts', docSnapshot.id);
+        currentBatch.update(postRef, { authorName: nickname.trim() });
+        batchCount++;
+      });
 
-        console.log(`[Profile Update] ${querySnapshot.size}개의 게시글 작성자 이름 업데이트 완료`);
+      // market-call 컬렉션 업데이트
+      marketCallSnapshot.forEach((docSnapshot) => {
+        if (batchCount === 500) {
+          batches.push(currentBatch);
+          currentBatch = writeBatch(db);
+          batchCount = 0;
+        }
+
+        const marketCallDocRef = doc(db, 'market-call', docSnapshot.id);
+        currentBatch.update(marketCallDocRef, { author_nickname: nickname.trim() });
+        batchCount++;
+      });
+
+      if (batchCount > 0) {
+        batches.push(currentBatch);
       }
+
+      // 모든 배치 커밋
+      await Promise.all(batches.map((b) => b.commit()));
+
+      console.log(`[Profile Update] posts: ${postsSnapshot.size}개, market-call: ${marketCallSnapshot.size}개 작성자 이름 업데이트 완료`);
     }
 
     return NextResponse.json({
