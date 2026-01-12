@@ -4,11 +4,12 @@ import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
+import { OpinionBadge } from '@/components/Badge';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
-import { db } from '@/lib/firebase';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { getReturnColorClass } from '@/utils/calculateReturn';
+import { auth } from '@/lib/firebase';
 
 interface ReportDetailClientProps {
   report: Report;
@@ -96,31 +97,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     return { css: '', html: report.content };
   }, [report.content, report.mode]);
 
-  const getOpinionBadge = () => {
-    const styles = {
-      buy: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-      sell: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-      hold: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
-    };
-
-    const labels = {
-      buy: '매수',
-      sell: '매도',
-      hold: '보유',
-    };
-
-    return (
-      <span className={`px-2 py-0.5 rounded text-xs font-semibold ${styles[report.opinion]}`}>
-        {labels[report.opinion]}
-      </span>
-    );
-  };
-
-  const getReturnRateColor = () => {
-    if (report.returnRate > 0) return 'text-red-600 dark:text-red-400';
-    if (report.returnRate < 0) return 'text-blue-600 dark:text-blue-400';
-    return 'text-gray-600 dark:text-gray-400';
-  };
 
   // 수정 버튼 클릭
   const handleEdit = () => {
@@ -134,9 +110,29 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     }
 
     try {
-      await deleteDoc(doc(db, 'posts', report.id));
-      alert('리포트가 삭제되었습니다.');
-      router.push('/');
+      // Firebase Auth에서 ID 토큰 가져오기
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(`/api/reports/${report.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        alert('리포트가 삭제되었습니다.');
+        router.push('/');
+      } else {
+        alert(data.error || '리포트 삭제 중 오류가 발생했습니다.');
+      }
     } catch (error) {
       console.error('리포트 삭제 실패:', error);
       alert('리포트 삭제 중 오류가 발생했습니다.');
@@ -317,7 +313,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                           <span className="text-gray-500 dark:text-slate-400">{report.stockData.exchange}</span>
                         </>
                       )}
-                      {getOpinionBadge()}
+                      <OpinionBadge opinion={report.opinion} />
                     </div>
                   </div>
 

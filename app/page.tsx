@@ -1,35 +1,15 @@
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, limit, getDocs, Timestamp, getCountFromServer } from 'firebase/firestore';
 import { getLatestPrices } from '@/lib/priceCache';
+import { calculateReturn } from '@/utils/calculateReturn';
+import { ReportSummary } from '@/types/report';
 import HomeClient from '@/components/HomeClient';
 
 // ISR: 1초마다 재생성 (요청 시)
 export const revalidate = 1;
 
-export interface Report {
-  id: string;
-  title: string;
-  author: string;
-  stockName: string;
-  ticker: string;
-  category?: string;
-  exchange?: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  returnRate: number;
-  initialPrice: number;
-  currentPrice: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  positionType?: string;
-  stockData?: {
-    currency?: string;
-    [key: string]: any;
-  };
-}
-
 // 서버에서 데이터 페칭 + 수익률 계산
-async function getReports(): Promise<{ reports: Report[]; total: number }> {
+async function getReports(): Promise<{ reports: ReportSummary[]; total: number }> {
   try {
     const postsRef = collection(db, 'posts');
     const q = query(postsRef, orderBy('createdAt', 'desc'), limit(50));
@@ -63,14 +43,9 @@ async function getReports(): Promise<{ reports: Report[]; total: number }> {
       const positionType = data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
 
       // 수익률 계산 (서버에서 처리)
-      let returnRate = 0;
-      if (initialPrice > 0 && currentPrice > 0) {
-        if (positionType === 'long') {
-          returnRate = ((currentPrice - initialPrice) / initialPrice) * 100;
-        } else {
-          returnRate = ((initialPrice - currentPrice) / initialPrice) * 100;
-        }
-      }
+      const returnRate = (initialPrice > 0 && currentPrice > 0)
+        ? calculateReturn(initialPrice, currentPrice, positionType as 'long' | 'short')
+        : 0;
 
       return {
         id: docSnap.id,

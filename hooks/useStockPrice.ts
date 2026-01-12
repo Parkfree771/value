@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { calculateReturn } from '@/utils/calculateReturn';
 
 interface StockPriceData {
   currentPrice: number | null;
@@ -77,13 +78,9 @@ export function useStockPrice(
   }, [ticker, basePrice, refreshInterval]);
 
   // 수익률 계산
-  // LONG: 가격 상승 시 +수익 (현재가 - 기준가)
-  // SHORT: 가격 하락 시 +수익 (기준가 - 현재가)
   const returnRate =
     currentPrice !== null && basePrice
-      ? actionDirection === 'LONG'
-        ? ((currentPrice - basePrice) / basePrice) * 100
-        : ((basePrice - currentPrice) / basePrice) * 100
+      ? calculateReturn(basePrice, currentPrice, actionDirection === 'LONG' ? 'long' : 'short')
       : null;
 
   return {

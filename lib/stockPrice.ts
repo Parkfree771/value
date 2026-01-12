@@ -6,6 +6,11 @@ import {
   detectExchange
 } from './kis';
 import { getLatestPrices, getCurrencyFromExchange } from './priceCache';
+import {
+  calculateReturn as calculateReturnUtil,
+  getReturnColorClass,
+  formatReturn
+} from '@/utils/calculateReturn';
 
 export interface StockQuote {
   symbol: string;
@@ -135,25 +140,9 @@ export async function getCurrentStockPrice(
 
 /**
  * 수익률을 계산합니다.
- * @param initialPrice 초기 가격 (매수/매도 시점)
- * @param currentPrice 현재 가격
- * @param positionType 포지션 타입 ('long' 또는 'short')
- * @returns 수익률 (%)
+ * @deprecated utils/calculateReturn.ts의 calculateReturn 사용 권장
  */
-export function calculateReturnRate(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: 'long' | 'short' = 'long'
-): number {
-  if (!initialPrice || initialPrice === 0) {
-    return 0;
-  }
-
-  const returnRate = ((currentPrice - initialPrice) / initialPrice) * 100;
-
-  // 숏 포지션의 경우 수익률 반전
-  return positionType === 'short' ? -returnRate : returnRate;
-}
+export const calculateReturnRate = calculateReturnUtil;
 
 /**
  * 리포트의 수익률을 업데이트합니다.
@@ -216,15 +205,9 @@ export async function updateReportReturnRate(
 }
 
 /**
- * 수익률에 따른 색상 클래스를 반환합니다.
- * @param returnRate 수익률 (%)
- * @returns Tailwind CSS 색상 클래스
+ * @deprecated utils/calculateReturn.ts의 getReturnColorClass 사용 권장
  */
-export function getReturnRateColor(returnRate: number): string {
-  if (returnRate > 0) return 'text-red-600 dark:text-red-400'; // 한국에서는 빨간색이 상승
-  if (returnRate < 0) return 'text-blue-600 dark:text-blue-400'; // 파란색이 하락
-  return 'text-gray-600 dark:text-gray-400';
-}
+export const getReturnRateColor = getReturnColorClass;
 
 /**
  * 수익률에 따른 배경색 클래스를 반환합니다.
@@ -238,14 +221,9 @@ export function getReturnRateBackground(returnRate: number): string {
 }
 
 /**
- * 수익률을 포맷팅합니다.
- * @param returnRate 수익률 (%)
- * @returns 포맷팅된 문자열 (예: '+24.5%', '-12.3%')
+ * @deprecated utils/calculateReturn.ts의 formatReturn 사용 권장
  */
-export function formatReturnRate(returnRate: number): string {
-  const sign = returnRate > 0 ? '+' : '';
-  return `${sign}${returnRate.toFixed(2)}%`;
-}
+export const formatReturnRate = formatReturn;
 
 /**
  * 특정 날짜의 주식 종가를 가져옵니다.

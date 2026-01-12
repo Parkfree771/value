@@ -3,21 +3,30 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import type { Report } from '@/app/page';
+import type { ReportSummary } from '@/types/report';
 
+// CLS 방지: 각 컴포넌트의 실제 높이에 맞는 스켈레톤 제공
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
-  loading: () => <div className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  loading: () => <div className="animate-pulse h-[180px] bg-gray-200 dark:bg-gray-700 rounded-xl" />,
+  ssr: false,
 });
-const FilterBar = dynamic(() => import('@/components/FilterBar'));
+const FilterBar = dynamic(() => import('@/components/FilterBar'), {
+  loading: () => <div className="animate-pulse h-[52px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  ssr: false,
+});
 const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
-  loading: () => <div className="animate-pulse h-64 bg-gray-200 dark:bg-gray-700 rounded-lg mb-8" />,
+  loading: () => <div className="animate-pulse h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-8" />,
+  ssr: false,
 });
-const SearchBar = dynamic(() => import('@/components/SearchBar'));
+const SearchBar = dynamic(() => import('@/components/SearchBar'), {
+  loading: () => <div className="animate-pulse h-[48px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  ssr: false,
+});
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
 
 interface HomeClientProps {
-  initialReports: Report[];
+  initialReports: ReportSummary[];
   total: number;
 }
 

@@ -6,7 +6,9 @@ import { useState } from 'react';
 import Card from './Card';
 import Badge, { OpinionBadge } from './Badge';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
+import { inferCurrency, getCurrencySymbol } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
+import { auth } from '@/lib/firebase';
 
 interface ReportCardProps {
   id: string;
@@ -65,70 +67,9 @@ export default function ReportCard({
   const [isDeleting, setIsDeleting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isClosed, setIsClosed] = useState(is_closed);
-  // API에서 이미 계산된 returnRate를 사용하므로 별도 계산 불필요
 
-  // 통화 추론 함수
-  const inferCurrency = (): string => {
-    // stockData에 currency가 있으면 사용
-    if (stockData?.currency) {
-      return stockData.currency;
-    }
-
-    // exchange 기반 추론 (가장 정확)
-    if (exchange) {
-      const exchangeUpper = exchange.toUpperCase();
-      // 한국
-      if (exchangeUpper === 'KRX' || exchangeUpper === 'KOSPI' || exchangeUpper === 'KOSDAQ' || exchangeUpper === 'KSC') return 'KRW';
-      // 일본
-      if (exchangeUpper === 'TYO' || exchangeUpper === 'JPX' || exchangeUpper === 'TSE') return 'JPY';
-      // 미국
-      if (exchangeUpper === 'NAS' || exchangeUpper === 'NYS' || exchangeUpper === 'NYSE' || exchangeUpper === 'NASDAQ' || exchangeUpper === 'AMEX') return 'USD';
-      // 홍콩
-      if (exchangeUpper === 'HKG' || exchangeUpper === 'HKEX') return 'HKD';
-      // 중국
-      if (exchangeUpper === 'SHH' || exchangeUpper === 'SHZ' || exchangeUpper === 'SSE' || exchangeUpper === 'SZSE') return 'CNY';
-      // 영국
-      if (exchangeUpper === 'LON' || exchangeUpper === 'LSE') return 'GBP';
-      // 유럽
-      if (exchangeUpper === 'FRA' || exchangeUpper === 'PAR' || exchangeUpper === 'AMS') return 'EUR';
-    }
-
-    // category 기반 추론
-    if (category) {
-      const categoryUpper = category.toUpperCase();
-      if (categoryUpper.includes('KOSPI') || categoryUpper.includes('KOSDAQ')) return 'KRW';
-      if (categoryUpper.includes('NIKKEI')) return 'JPY';
-      if (categoryUpper.includes('NYSE') || categoryUpper.includes('NASDAQ')) return 'USD';
-      if (categoryUpper.includes('HANGSENG')) return 'HKD';
-    }
-
-    // 티커 suffix 기반 추론
-    if (ticker) {
-      if (ticker.endsWith('.T')) return 'JPY';
-      if (ticker.endsWith('.KS') || ticker.endsWith('.KQ')) return 'KRW';
-      if (ticker.endsWith('.L')) return 'GBP';
-      if (ticker.endsWith('.HK')) return 'HKD';
-      if (ticker.endsWith('.SS') || ticker.endsWith('.SZ')) return 'CNY';
-    }
-
-    return 'USD'; // 기본값
-  };
-
-  // 통화 기호 가져오기
-  const getCurrencySymbol = (curr: string): string => {
-    switch (curr.toUpperCase()) {
-      case 'USD': return '$';
-      case 'JPY': return '¥';
-      case 'KRW': return '₩';
-      case 'EUR': return '€';
-      case 'GBP': return '£';
-      case 'CNY': case 'CNH': return '¥';
-      case 'HKD': return 'HK$';
-      default: return '$';
-    }
-  };
-
-  const currency = inferCurrency();
+  // 통화 추론 및 기호 (utils/currency.ts 사용)
+  const currency = inferCurrency({ exchange, category, ticker, stockData });
   const currencySymbol = getCurrencySymbol(currency);
 
   const handleEdit = (e: React.MouseEvent) => {
@@ -148,21 +89,33 @@ export default function ReportCard({
     setIsDeleting(true);
 
     try {
+      // Firebase Auth에서 ID 토큰 가져오기
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+
       const response = await fetch(`/api/reports/${id}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('삭제 실패');
+        throw new Error(data.error || '삭제 실패');
       }
 
       alert('리포트가 삭제되었습니다.');
       if (onDelete) {
         onDelete();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('삭제 오류:', error);
-      alert('리포트 삭제 중 오류가 발생했습니다.');
+      alert(error.message || '리포트 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
     }
