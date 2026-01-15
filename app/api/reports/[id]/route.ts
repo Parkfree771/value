@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { adminDb, verifyAuthToken } from '@/lib/firebase-admin';
 
 export async function DELETE(
@@ -41,6 +42,9 @@ export async function DELETE(
 
     // 리포트 삭제
     await reportRef.delete();
+
+    // 홈 페이지 캐시 무효화
+    revalidatePath('/');
 
     return NextResponse.json(
       { success: true, message: '리포트가 삭제되었습니다.' },

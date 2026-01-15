@@ -4,8 +4,8 @@ import { getLatestPrices } from '@/lib/priceCache';
 import MarketCallClient from '@/components/MarketCallClient';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
 
-// ISR: 1초마다 재생성 (요청 시)
-export const revalidate = 1;
+// ISR: 5분마다 재생성 (On-Demand Revalidation으로 즉시 갱신 가능)
+export const revalidate = 300;
 
 // 서버에서 데이터 페칭 + 수익률 계산
 async function getMarketCallEvents(): Promise<{ events: GuruTrackingEvent[]; total: number }> {

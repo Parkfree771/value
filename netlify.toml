@@ -4,3 +4,19 @@
 
 [build.environment]
   NODE_VERSION = "20"
+
+# Next.js On-Demand Revalidation 지원
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# API 라우트 캐시 설정
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store, must-revalidate"
+
+# revalidate API는 절대 캐시하면 안됨
+[[headers]]
+  for = "/api/revalidate"
+  [headers.values]
+    Cache-Control = "no-store, no-cache, must-revalidate"

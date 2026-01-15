@@ -17,7 +17,7 @@ const Button = dynamic(() => import('@/components/Button'));
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, authReady } = useAuth();
   const [activeTab, setActiveTab] = useState<'reports' | 'bookmarks' | 'settings'>('reports');
   const [myReports, setMyReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,13 +27,13 @@ export default function MyPage() {
   const [newNickname, setNewNickname] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // 로그인 체크
+  // 로그인 체크 (Auth가 준비된 후에만)
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (authReady && !user) {
       alert('로그인이 필요한 서비스입니다.');
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [user, authReady, router]);
 
   // 사용자 프로필 및 리포트 가져오기
   useEffect(() => {
@@ -291,7 +291,7 @@ export default function MyPage() {
     }
   }
 
-  if (authLoading || !user) {
+  if (!authReady || !user) {
     return null;
   }
 

@@ -55,7 +55,7 @@ interface User {
 
 export default function AdminPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, authReady } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'posts' | 'users'>('dashboard');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -75,9 +75,9 @@ export default function AdminPage() {
     onConfirm: () => {},
   });
 
-  // 관리자 권한 체크
+  // 관리자 권한 체크 (Auth가 준비된 후에만)
   useEffect(() => {
-    if (!authLoading) {
+    if (authReady) {
       if (!user) {
         alert('로그인이 필요합니다.');
         router.push('/login');
@@ -90,7 +90,7 @@ export default function AdminPage() {
         return;
       }
     }
-  }, [user, authLoading, router]);
+  }, [user, authReady, router]);
 
   // 통계 데이터 가져오기
   useEffect(() => {
@@ -242,7 +242,7 @@ export default function AdminPage() {
     }
   }, [activeTab]);
 
-  if (authLoading || !user || !isAdmin(user.email)) {
+  if (!authReady || !user || !isAdmin(user.email)) {
     return null;
   }
 

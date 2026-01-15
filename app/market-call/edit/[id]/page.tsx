@@ -11,7 +11,7 @@ export default function MarketCallEditPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const { user, loading } = useAuth();
+  const { user, authReady } = useAuth();
   const [initialData, setInitialData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,7 +48,8 @@ export default function MarketCallEditPage() {
       }
     };
 
-    if (!loading) {
+    // Auth가 준비된 후에만 체크
+    if (authReady) {
       if (!user) {
         alert('로그인이 필요합니다.');
         router.push('/login?redirect=/market-call');
@@ -56,7 +57,7 @@ export default function MarketCallEditPage() {
       }
       fetchData();
     }
-  }, [id, user, loading, router]);
+  }, [id, user, authReady, router]);
 
   const handleSubmit = async (data: any) => {
     if (!user || !id) {
@@ -95,7 +96,7 @@ export default function MarketCallEditPage() {
     router.push('/market-call');
   };
 
-  if (loading || isLoading) {
+  if (!authReady || isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">

@@ -11,14 +11,15 @@ import { useEffect } from 'react';
 
 export default function MarketCallWritePage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, authReady } = useAuth();
 
   useEffect(() => {
-    if (!loading && !user) {
+    // Auth가 준비된 후에만 체크
+    if (authReady && !user) {
       alert('로그인이 필요합니다.');
       router.push('/login?redirect=/market-call/write');
     }
-  }, [user, loading, router]);
+  }, [user, authReady, router]);
 
   const handleSubmit = async (data: Partial<GuruTrackingEvent>) => {
     if (!user) {
@@ -63,6 +64,20 @@ export default function MarketCallWritePage() {
 
       console.log('마켓 콜이 저장되었습니다. ID:', docRef.id);
 
+      // 마켓콜 페이지와 홈 캐시 즉시 무효화
+      await Promise.all([
+        fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: '/market-call' }),
+        }),
+        fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: '/' }),
+        }),
+      ]);
+
       alert('마켓 콜이 성공적으로 작성되었습니다!');
       router.push('/market-call');
     } catch (error) {
@@ -75,7 +90,7 @@ export default function MarketCallWritePage() {
     router.push('/market-call');
   };
 
-  if (loading) {
+  if (!authReady) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">

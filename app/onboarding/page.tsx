@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth();
+  const { user, authReady } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [nicknameChecking, setNicknameChecking] = useState(false);
@@ -26,12 +26,12 @@ export default function OnboardingPage() {
     marketingAgreed: false,
   });
 
-  // 로그인하지 않았으면 로그인 페이지로
+  // 로그인하지 않았으면 로그인 페이지로 (Auth가 준비된 후에만)
   useEffect(() => {
-    if (!authLoading && !user) {
+    if (authReady && !user) {
       router.push('/login');
     }
-  }, [user, authLoading, router]);
+  }, [user, authReady, router]);
 
   // 이미 온보딩 완료한 사용자는 메인으로
   useEffect(() => {
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
     }
   };
 
-  if (authLoading) {
+  if (!authReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-gray-600 dark:text-gray-400">로딩 중...</div>

@@ -1,23 +1,26 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from 'firebase/auth';
-import { onAuthStateChange, signInWithGoogle as firebaseSignIn, signOut as firebaseSignOut } from '@/lib/auth';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import type { User } from 'firebase/auth';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  authReady: boolean;
   signInWithGoogle: () => Promise<User | undefined>;
   signOut: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
+  checkAuth: () => Promise<User | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  loading: true,
+  loading: false,
+  authReady: false,
   signInWithGoogle: async () => undefined,
   signOut: async () => {},
   getIdToken: async () => null,
+  checkAuth: async () => null,
 });
 
 export const useAuth = () => {
@@ -30,33 +33,83 @@ export const useAuth = () => {
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
+  // Auth 초기화 (백그라운드에서 lazy하게)
+  const initAuth = useCallback(async () => {
+    if (authInitialized) return;
+    setAuthInitialized(true);
+
+    try {
+      const { onAuthStateChangeLazy } = await import('@/lib/firebase-lazy');
+      onAuthStateChangeLazy((firebaseUser) => {
+        setUser(firebaseUser);
+        setAuthReady(true);
+      });
+    } catch (error) {
+      console.error('Auth 초기화 실패:', error);
+      setAuthReady(true);
+    }
+  }, [authInitialized]);
+
+  // 페이지 로드 후 백그라운드에서 Auth 확인 (지연 로드)
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((user) => {
-      setUser(user);
-      setLoading(false);
-    });
+    // 약간의 지연 후 Auth 초기화 (초기 렌더링 차단 방지)
+    const timer = setTimeout(() => {
+      initAuth();
+    }, 100);
 
-    return () => unsubscribe();
-  }, []);
+    return () => clearTimeout(timer);
+  }, [initAuth]);
+
+  // 명시적으로 Auth 체크 (권한 필요한 액션 전에 호출)
+  const checkAuth = useCallback(async (): Promise<User | null> => {
+    if (user) return user;
+
+    setLoading(true);
+    try {
+      const { getCurrentUser } = await import('@/lib/firebase-lazy');
+      const currentUser = await getCurrentUser();
+      if (currentUser) {
+        setUser(currentUser);
+      }
+      return currentUser;
+    } catch (error) {
+      console.error('Auth 체크 실패:', error);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   const signInWithGoogle = async () => {
+    setLoading(true);
     try {
-      const user = await firebaseSignIn();
-      return user;
+      const { signInWithGoogleLazy } = await import('@/lib/firebase-lazy');
+      const firebaseUser = await signInWithGoogleLazy();
+      setUser(firebaseUser);
+      return firebaseUser;
     } catch (error) {
       console.error('로그인 실패:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
+    setLoading(true);
     try {
-      await firebaseSignOut();
+      const { signOutLazy } = await import('@/lib/firebase-lazy');
+      await signOutLazy();
+      setUser(null);
     } catch (error) {
       console.error('로그아웃 실패:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,9 +126,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    authReady,
     signInWithGoogle,
     signOut,
     getIdToken,
+    checkAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

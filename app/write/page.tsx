@@ -329,6 +329,21 @@ export default function WritePage() {
         });
 
         console.log('리포트가 수정되었습니다. ID:', editId);
+
+        // 홈 페이지와 상세 페이지 캐시 즉시 무효화
+        await Promise.all([
+          fetch('/api/revalidate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: '/' }),
+          }),
+          fetch('/api/revalidate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path: `/reports/${editId}` }),
+          }),
+        ]);
+
         alert('리포트가 성공적으로 수정되었습니다!');
         router.push(`/reports/${editId}`);
       } else {
@@ -339,6 +354,13 @@ export default function WritePage() {
         await registerTicker(stockData.symbol, stockData.exchange);
 
         console.log('리포트가 저장되었습니다. ID:', docRef.id);
+
+        // 홈 페이지 캐시 즉시 무효화
+        await fetch('/api/revalidate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: '/' }),
+        });
 
         alert('리포트가 성공적으로 작성되었습니다!');
         router.push('/');
