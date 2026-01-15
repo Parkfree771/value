@@ -53,7 +53,8 @@ export default function HomeClient({ initialReports, total }: HomeClientProps) {
         break;
       case 'all':
       default:
-        // 이미 createdAt 기준 정렬되어 있음
+        // 최신순 정렬 (createdAt desc)
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
         break;
     }
 

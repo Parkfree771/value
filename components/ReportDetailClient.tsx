@@ -10,9 +10,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
+import { getUserProfile } from '@/lib/users';
 
 interface ReportDetailClientProps {
   report: Report;
+}
+
+interface Comment {
+  id: string;
+  content: string;
+  author: string;
+  authorId: string;
+  parentId: string | null;
+  createdAt: string;
+  likes: number;
+  isLiked: boolean;
 }
 
 export default function ReportDetailClient({ report }: ReportDetailClientProps) {
@@ -23,13 +35,57 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [likesCount, setLikesCount] = useState(report.likes || 0);
   const [isClosing, setIsClosing] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [commentCount, setCommentCount] = useState(0);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [userNickname, setUserNickname] = useState<string>('');
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; author: string } | null>(null);
+  const [replyText, setReplyText] = useState('');
 
   // 수익 확정 상태 확인
   useEffect(() => {
     setIsClosed(report.is_closed || false);
   }, [report.is_closed]);
 
-  // 조회수 증가 + 좋아요 상태 확인 (병렬 처리)
+  // 사용자 닉네임 로드
+  useEffect(() => {
+    const loadUserNickname = async () => {
+      if (user) {
+        try {
+          const profile = await getUserProfile(user.uid);
+          if (profile?.nickname) {
+            setUserNickname(profile.nickname);
+          } else {
+            setUserNickname(user.displayName || '익명');
+          }
+        } catch (error) {
+          console.error('닉네임 로드 실패:', error);
+          setUserNickname(user.displayName || '익명');
+        }
+      }
+    };
+    loadUserNickname();
+  }, [user]);
+
+  // 댓글 로드 함수
+  const loadComments = async (userId?: string) => {
+    try {
+      const url = userId
+        ? `/api/reports/${report.id}/comments?userId=${userId}`
+        : `/api/reports/${report.id}/comments`;
+      const response = await fetch(url);
+      const data = await response.json();
+      if (data.success) {
+        setComments(data.comments);
+        setCommentCount(data.count);
+      }
+    } catch (error) {
+      console.error('댓글 로드 실패:', error);
+    }
+  };
+
+  // 조회수 증가 + 좋아요 상태 확인 + 댓글 로드 (병렬 처리)
   useEffect(() => {
     const initializeData = async () => {
       const promises: Promise<void>[] = [];
@@ -40,6 +96,9 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           .catch(error => console.error('조회수 증가 실패:', error))
           .then(() => {})
       );
+
+      // 댓글 로드 (항상 실행)
+      promises.push(loadComments(user?.uid));
 
       // 좋아요 상태 확인 (로그인 시에만)
       if (user) {
@@ -444,7 +503,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           {/* Comments Section */}
           <Card className="p-4 sm:p-6 lg:p-8">
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
-              댓글 0개
+              댓글 {commentCount}개
             </h3>
 
             <div className="mb-4 sm:mb-6">
@@ -453,21 +512,46 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder={user ? "댓글을 작성하세요..." : "댓글을 작성하려면 로그인이 필요합니다."}
                 rows={3}
-                disabled={!user}
+                disabled={!user || isSubmittingComment}
                 className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
               />
               <div className="flex justify-end mt-2">
                 {user ? (
                   <Button
                     size="sm"
-                    onClick={() => {
-                      if (commentText.trim()) {
-                        alert('댓글이 작성되었습니다.');
-                        setCommentText('');
+                    disabled={isSubmittingComment || !commentText.trim()}
+                    onClick={async () => {
+                      if (!commentText.trim() || isSubmittingComment) return;
+
+                      setIsSubmittingComment(true);
+                      try {
+                        const response = await fetch(`/api/reports/${report.id}/comments`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            content: commentText,
+                            userId: user.uid,
+                            authorName: userNickname || '익명',
+                          }),
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                          setComments([data.comment, ...comments]);
+                          setCommentCount(prev => prev + 1);
+                          setCommentText('');
+                        } else {
+                          alert(data.error || '댓글 작성에 실패했습니다.');
+                        }
+                      } catch (error) {
+                        console.error('댓글 작성 실패:', error);
+                        alert('댓글 작성 중 오류가 발생했습니다.');
+                      } finally {
+                        setIsSubmittingComment(false);
                       }
                     }}
                   >
-                    댓글 작성
+                    {isSubmittingComment ? '작성 중...' : '댓글 작성'}
                   </Button>
                 ) : (
                   <Button
@@ -484,18 +568,239 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             </div>
 
             <div className="space-y-3 sm:space-y-4">
-              {[].map((comment: any) => (
-                <div key={comment.id} className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{comment.author}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-shrink-0 ml-2">{comment.createdAt}</div>
-                  </div>
-                  <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-2">{comment.content}</p>
-                  <button className="text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-                    좋아요 {comment.likes}
-                  </button>
+              {comments.length > 0 ? (
+                <>
+                  {/* 부모 댓글만 먼저 렌더링 */}
+                  {comments.filter(c => !c.parentId).map((comment) => (
+                    <div key={comment.id}>
+                      {/* 부모 댓글 */}
+                      <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{comment.author}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                              {new Date(comment.createdAt).toLocaleDateString('ko-KR', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </div>
+                            {user && user.uid === comment.authorId && (
+                              <button
+                                onClick={async () => {
+                                  if (deletingCommentId) return;
+                                  if (!confirm('댓글을 삭제하시겠습니까?')) return;
+
+                                  setDeletingCommentId(comment.id);
+                                  try {
+                                    const response = await fetch(`/api/reports/${report.id}/comments/${comment.id}`, {
+                                      method: 'DELETE',
+                                    });
+                                    const data = await response.json();
+                                    if (data.success) {
+                                      setComments(comments.filter(c => c.id !== comment.id && c.parentId !== comment.id));
+                                      setCommentCount(prev => prev - 1);
+                                    } else {
+                                      alert(data.error || '댓글 삭제에 실패했습니다.');
+                                    }
+                                  } catch (error) {
+                                    console.error('댓글 삭제 실패:', error);
+                                    alert('댓글 삭제 중 오류가 발생했습니다.');
+                                  } finally {
+                                    setDeletingCommentId(null);
+                                  }
+                                }}
+                                disabled={deletingCommentId === comment.id}
+                                className="text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
+                              >
+                                {deletingCommentId === comment.id ? '삭제 중...' : '삭제'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-2 whitespace-pre-wrap">{comment.content}</p>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={async () => {
+                              if (!user) {
+                                alert('로그인이 필요합니다.');
+                                return;
+                              }
+                              try {
+                                const response = await fetch(`/api/reports/${report.id}/comments/${comment.id}`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ userId: user.uid }),
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                  setComments(comments.map(c =>
+                                    c.id === comment.id ? { ...c, likes: data.likes, isLiked: data.isLiked } : c
+                                  ));
+                                }
+                              } catch (error) {
+                                console.error('좋아요 실패:', error);
+                              }
+                            }}
+                            className="flex items-center gap-1 text-xs sm:text-sm transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill={comment.isLiked ? "#ef4444" : "none"} stroke={comment.isLiked ? "#ef4444" : "currentColor"} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span className={comment.isLiked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}>{comment.likes}</span>
+                          </button>
+                          <button
+                            onClick={() => setReplyingTo({ id: comment.id, author: comment.author })}
+                            className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                          >
+                            답글
+                          </button>
+                        </div>
+
+                        {/* 대댓글 입력 폼 */}
+                        {replyingTo?.id === comment.id && (
+                          <div className="mt-3 pl-4 border-l-2 border-blue-500">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                              @{replyingTo.author}에게 답글 작성 중
+                              <button
+                                onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                                className="ml-2 text-red-500 hover:text-red-700"
+                              >
+                                취소
+                              </button>
+                            </div>
+                            <textarea
+                              value={replyText}
+                              onChange={(e) => setReplyText(e.target.value)}
+                              placeholder="답글을 작성하세요..."
+                              rows={2}
+                              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            />
+                            <div className="flex justify-end mt-2">
+                              <Button
+                                size="sm"
+                                disabled={!replyText.trim() || isSubmittingComment}
+                                onClick={async () => {
+                                  if (!replyText.trim() || !user) return;
+                                  setIsSubmittingComment(true);
+                                  try {
+                                    const response = await fetch(`/api/reports/${report.id}/comments`, {
+                                      method: 'POST',
+                                      headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify({
+                                        content: replyText,
+                                        userId: user.uid,
+                                        authorName: userNickname || '익명',
+                                        parentId: comment.id,
+                                      }),
+                                    });
+                                    const data = await response.json();
+                                    if (data.success) {
+                                      setComments([...comments, data.comment]);
+                                      setCommentCount(prev => prev + 1);
+                                      setReplyText('');
+                                      setReplyingTo(null);
+                                    }
+                                  } catch (error) {
+                                    console.error('답글 작성 실패:', error);
+                                  } finally {
+                                    setIsSubmittingComment(false);
+                                  }
+                                }}
+                              >
+                                답글 작성
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* 대댓글 (자식 댓글) */}
+                      {comments.filter(c => c.parentId === comment.id).map((reply) => (
+                        <div key={reply.id} className="ml-6 mt-2 p-3 sm:p-4 bg-gray-100 dark:bg-gray-600 rounded-lg border-l-2 border-blue-500">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{reply.author}</div>
+                            <div className="flex items-center gap-2">
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {new Date(reply.createdAt).toLocaleDateString('ko-KR', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
+                              {user && user.uid === reply.authorId && (
+                                <button
+                                  onClick={async () => {
+                                    if (deletingCommentId) return;
+                                    if (!confirm('답글을 삭제하시겠습니까?')) return;
+                                    setDeletingCommentId(reply.id);
+                                    try {
+                                      const response = await fetch(`/api/reports/${report.id}/comments/${reply.id}`, {
+                                        method: 'DELETE',
+                                      });
+                                      const data = await response.json();
+                                      if (data.success) {
+                                        setComments(comments.filter(c => c.id !== reply.id));
+                                        setCommentCount(prev => prev - 1);
+                                      }
+                                    } catch (error) {
+                                      console.error('답글 삭제 실패:', error);
+                                    } finally {
+                                      setDeletingCommentId(null);
+                                    }
+                                  }}
+                                  disabled={deletingCommentId === reply.id}
+                                  className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
+                                >
+                                  {deletingCommentId === reply.id ? '삭제 중...' : '삭제'}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <p className="text-sm text-gray-700 dark:text-gray-300 mb-2 whitespace-pre-wrap">{reply.content}</p>
+                          <button
+                            onClick={async () => {
+                              if (!user) {
+                                alert('로그인이 필요합니다.');
+                                return;
+                              }
+                              try {
+                                const response = await fetch(`/api/reports/${report.id}/comments/${reply.id}`, {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ userId: user.uid }),
+                                });
+                                const data = await response.json();
+                                if (data.success) {
+                                  setComments(comments.map(c =>
+                                    c.id === reply.id ? { ...c, likes: data.likes, isLiked: data.isLiked } : c
+                                  ));
+                                }
+                              } catch (error) {
+                                console.error('좋아요 실패:', error);
+                              }
+                            }}
+                            className="flex items-center gap-1 text-xs transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill={reply.isLiked ? "#ef4444" : "none"} stroke={reply.isLiked ? "#ef4444" : "currentColor"} viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <span className={reply.isLiked ? 'text-red-500' : 'text-gray-500 dark:text-gray-400'}>{reply.likes}</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                  아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!
                 </div>
-              ))}
+              )}
             </div>
           </Card>
         </div>

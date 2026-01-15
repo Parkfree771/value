@@ -14,13 +14,20 @@ service cloud.firestore {
       allow create: if request.auth != null; // 로그인 사용자만 작성 가능
       allow update: if (request.auth != null && request.auth.uid == resource.data.authorId) || // 작성자는 전체 수정 가능
                        request.resource.data.diff(resource.data).affectedKeys()
-                         .hasOnly(['views', 'likes', 'likedBy', 'currentPrice', 'returnRate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price']); // 조회수, 좋아요, 수익확정은 누구나 업데이트 가능
+                         .hasOnly(['views', 'likes', 'likedBy', 'currentPrice', 'returnRate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price', 'commentCount']); // 조회수, 좋아요, 수익확정, 댓글수는 누구나 업데이트 가능
       allow delete: if request.auth != null && request.auth.uid == resource.data.authorId; // 작성자만 삭제 가능
 
       // 게시글별 좋아요 정보 (서브컬렉션)
       match /likes/{userId} {
         allow read: if true; // 모든 사용자가 좋아요 상태 확인 가능
         allow write: if request.auth != null; // 로그인한 사용자만 좋아요 가능
+      }
+
+      // 게시글별 댓글 (서브컬렉션)
+      match /comments/{commentId} {
+        allow read: if true; // 모든 사용자가 댓글 읽기 가능
+        allow create: if request.auth != null; // 로그인한 사용자만 댓글 작성 가능
+        allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId; // 작성자만 수정/삭제 가능
       }
     }
 
