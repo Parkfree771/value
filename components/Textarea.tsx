@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
 }
 
-export default function Textarea({
+const Textarea = memo(function Textarea({
   label,
   error,
   className = '',
@@ -29,4 +29,6 @@ export default function Textarea({
       )}
     </div>
   );
-}
+});
+
+export default Textarea;

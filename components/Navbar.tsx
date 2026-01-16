@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -8,37 +8,37 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { isAdmin } from '@/lib/admin/adminCheck';
 
-export default function Navbar() {
+const Navbar = memo(function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isActive = (path: string) => {
+  const isActive = useCallback((path: string) => {
     return pathname === path;
-  };
+  }, [pathname]);
 
-  const closeMobileMenu = () => {
+  const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
-  };
+  }, []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = useCallback(async () => {
     try {
       await signOut();
       closeMobileMenu();
     } catch (error) {
       console.error('로그아웃 오류:', error);
     }
-  };
+  }, [signOut, closeMobileMenu]);
 
-  const handleWriteClick = (e: React.MouseEvent) => {
+  const handleWriteClick = useCallback((e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
       alert('로그인이 필요한 서비스입니다.');
       router.push('/login');
     }
-  };
+  }, [user, router]);
 
   return (
     <>
@@ -55,7 +55,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            <Image src="/warren.png" alt="워렌버핏 따라잡기" width={28} height={28} className="sm:w-8 sm:h-8 rounded-full" />
+            <Image src="/warren.png" alt="워렌버핏 따라잡기" width={28} height={28} className="sm:w-8 sm:h-8 rounded-full" priority />
             <span className="text-base sm:text-xl font-bold text-blue-600 dark:text-blue-400">
               <span className="hidden sm:inline">워렌버핏 따라잡기</span>
               <span className="sm:hidden">워렌버핏</span>
@@ -398,4 +398,6 @@ export default function Navbar() {
       </div>
     </>
   );
-}
+});
+
+export default Navbar;

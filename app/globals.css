@@ -2,6 +2,36 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Critical CSS - 첫 렌더링에 필요한 최소 스타일 */
+@layer base {
+  /* GPU 가속 활성화 */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 이미지 최적화 */
+  img {
+    content-visibility: auto;
+  }
+
+  /* 스크롤 성능 최적화 */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
 /* ============================================
    디자인 토큰 (Design Tokens)
    ============================================

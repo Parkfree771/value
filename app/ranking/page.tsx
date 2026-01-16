@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
@@ -121,32 +121,29 @@ export default function RankingPage() {
     setCurrentPage(1);
   }, [activeTab, selectedPeriod]);
 
-  const getPeriodLabel = (period: TimePeriod) => {
-    const labels = {
-      '1month': '1달',
-      '3months': '3달',
-      '6months': '6달',
-      '1year': '1년',
-      'all': '전체',
-    };
-    return labels[period];
-  };
+  const periodLabels = useMemo(() => ({
+    '1month': '1달',
+    '3months': '3달',
+    '6months': '6달',
+    '1year': '1년',
+    'all': '전체',
+  }), []);
 
-  // 기간에 따라 필터링된 리포트 가져오기
-  const getFilteredReports = () => {
-    if (selectedPeriod === 'all') {
-      return reports;
-    }
+  const periodDays = useMemo(() => ({
+    '1month': 30,
+    '3months': 90,
+    '6months': 180,
+    '1year': 365,
+    'all': Infinity,
+  }), []);
+
+  const getPeriodLabel = useCallback((period: TimePeriod) => periodLabels[period], [periodLabels]);
+
+  // 기간에 따라 필터링된 리포트 (memoized)
+  const filteredReports = useMemo(() => {
+    if (selectedPeriod === 'all') return reports;
 
     const today = new Date();
-    const periodDays = {
-      '1month': 30,
-      '3months': 90,
-      '6months': 180,
-      '1year': 365,
-      'all': Infinity,
-    };
-
     const maxDays = periodDays[selectedPeriod];
 
     return reports.filter((report) => {
@@ -155,23 +152,13 @@ export default function RankingPage() {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays <= maxDays;
     });
-  };
+  }, [reports, selectedPeriod, periodDays]);
 
-  // 기간에 따라 필터링된 인기글 가져오기
-  const getFilteredTrending = () => {
-    if (selectedPeriod === 'all') {
-      return trending;
-    }
+  // 기간에 따라 필터링된 인기글 (memoized)
+  const filteredTrending = useMemo(() => {
+    if (selectedPeriod === 'all') return trending;
 
     const today = new Date();
-    const periodDays = {
-      '1month': 30,
-      '3months': 90,
-      '6months': 180,
-      '1year': 365,
-      'all': Infinity,
-    };
-
     const maxDays = periodDays[selectedPeriod];
 
     return trending.filter((report) => {
@@ -180,50 +167,37 @@ export default function RankingPage() {
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       return diffDays <= maxDays;
     });
-  };
+  }, [trending, selectedPeriod, periodDays]);
 
-  const getMedalEmoji = (rank: number) => {
+  const getMedalEmoji = useCallback((rank: number) => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
     if (rank === 3) return '🥉';
     return `${rank}위`;
-  };
+  }, []);
 
-  // Get paginated reports
-  const getPaginatedReports = () => {
-    const filtered = getFilteredReports();
+  // Paginated data (memoized)
+  const paginatedReports = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filtered.slice(startIndex, endIndex);
-  };
+    return filteredReports.slice(startIndex, startIndex + pageSize);
+  }, [filteredReports, currentPage, pageSize]);
 
-  // Get paginated investors
-  const getPaginatedInvestors = () => {
+  const paginatedInvestors = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return investors.slice(startIndex, endIndex);
-  };
+    return investors.slice(startIndex, startIndex + pageSize);
+  }, [investors, currentPage, pageSize]);
 
-  // Get paginated trending
-  const getPaginatedTrending = () => {
-    const filtered = getFilteredTrending();
+  const paginatedTrending = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-    return filtered.slice(startIndex, endIndex);
-  };
+    return filteredTrending.slice(startIndex, startIndex + pageSize);
+  }, [filteredTrending, currentPage, pageSize]);
 
-  // Get total pages based on active tab
-  const getTotalPages = () => {
-    if (activeTab === 'reports') {
-      return Math.ceil(getFilteredReports().length / pageSize);
-    } else if (activeTab === 'investors') {
-      return Math.ceil(investors.length / pageSize);
-    } else {
-      return Math.ceil(getFilteredTrending().length / pageSize);
-    }
-  };
-
-  const totalPages = getTotalPages();
+  // Total pages (memoized)
+  const totalPages = useMemo(() => {
+    if (activeTab === 'reports') return Math.ceil(filteredReports.length / pageSize);
+    if (activeTab === 'investors') return Math.ceil(investors.length / pageSize);
+    return Math.ceil(filteredTrending.length / pageSize);
+  }, [activeTab, filteredReports.length, investors.length, filteredTrending.length, pageSize]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -265,7 +239,7 @@ export default function RankingPage() {
         <>
           {/* Podium for Top 3 - Desktop only */}
           <div className="hidden md:block mb-6">
-            <Podium topThree={getFilteredReports().slice(0, 3).map((report, index) => ({
+            <Podium topThree={filteredReports.slice(0, 3).map((report, index) => ({
               rank: index + 1,
               name: report.stockName,
               avgReturnRate: report.returnRate,
@@ -279,7 +253,7 @@ export default function RankingPage() {
           <div className="md:hidden mb-4 p-4">
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">TOP 3 리포트</h2>
             <div className="flex gap-3 justify-center items-end">
-              {getFilteredReports().slice(0, 3).map((report, index) => (
+              {filteredReports.slice(0, 3).map((report, index) => (
                 <Link
                   key={report.id}
                   href={`/reports/${report.id}`}
@@ -404,8 +378,8 @@ export default function RankingPage() {
                   <div key={i} className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />
                 ))}
               </div>
-            ) : getFilteredReports().length > 0 ? (
-              getPaginatedReports().map((report, index) => {
+            ) : filteredReports.length > 0 ? (
+              paginatedReports.map((report, index) => {
                 const actualRank = (currentPage - 1) * pageSize + index + 1;
                 return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
               })
@@ -589,7 +563,7 @@ export default function RankingPage() {
               전체 투자자 랭킹
             </h2>
             <div className="space-y-2 sm:space-y-3">
-              {getPaginatedInvestors().map((investor) => (
+              {paginatedInvestors.map((investor) => (
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
@@ -687,8 +661,8 @@ export default function RankingPage() {
           </div>
 
           <div className="space-y-4 sm:space-y-6">
-            {getFilteredTrending().length > 0 ? (
-              getPaginatedTrending().map((report, index) => {
+            {filteredTrending.length > 0 ? (
+              paginatedTrending.map((report, index) => {
                 const actualRank = (currentPage - 1) * pageSize + index + 1;
                 return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
               })

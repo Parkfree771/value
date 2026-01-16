@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 
 interface Stock {
   symbol: string;
@@ -34,7 +34,7 @@ interface StockSearchInputProps {
   selectedStock?: StockData | null;
 }
 
-export default function StockSearchInput({ onStockSelect, selectedStock }: StockSearchInputProps) {
+const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selectedStock }: StockSearchInputProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Stock[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -266,4 +266,6 @@ export default function StockSearchInput({ onStockSelect, selectedStock }: Stock
       )}
     </div>
   );
-}
+});
+
+export default StockSearchInput;

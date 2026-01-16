@@ -1,7 +1,7 @@
 'use client';
 
 import { GuruPortfolio, PortfolioHolding } from '@/app/guru-tracker/types';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo, useCallback } from 'react';
 
 interface PortfolioTableProps {
   portfolio: GuruPortfolio;
@@ -14,7 +14,7 @@ interface PriceData {
   changeFromReported: number | null;
 }
 
-export default function PortfolioTable({ portfolio }: PortfolioTableProps) {
+const PortfolioTable = memo(function PortfolioTable({ portfolio }: PortfolioTableProps) {
   const [priceData, setPriceData] = useState<Record<string, PriceData>>({});
   const [loading, setLoading] = useState(true);
 
@@ -356,4 +356,6 @@ export default function PortfolioTable({ portfolio }: PortfolioTableProps) {
       </div>
     </div>
   );
-}
+});
+
+export default PortfolioTable;

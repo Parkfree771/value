@@ -11,23 +11,33 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+// 테마 초기화 스크립트 - FOUC(Flash of Unstyled Content) 방지
+// layout.tsx의 <head>에 인라인으로 삽입될 스크립트
+export const themeInitScript = `
+  (function() {
+    try {
+      var theme = localStorage.getItem('theme');
+      if (!theme) {
+        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {}
+  })();
+`;
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
 
+  // 클라이언트에서만 실행 - 초기 테마 동기화
   useEffect(() => {
-    setMounted(true);
-    // 로컬 스토리지에서 테마 불러오기
     const savedTheme = localStorage.getItem('theme') as Theme;
     if (savedTheme) {
       setTheme(savedTheme);
-      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
     } else {
-      // 시스템 설정 확인
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const initialTheme = prefersDark ? 'dark' : 'light';
-      setTheme(initialTheme);
-      document.documentElement.classList.toggle('dark', initialTheme === 'dark');
+      setTheme(prefersDark ? 'dark' : 'light');
     }
   }, []);
 
@@ -38,10 +48,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  if (!mounted) {
-    return null;
-  }
-
+  // children을 항상 렌더링 - 빈 화면 방지
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}

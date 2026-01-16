@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 
 interface FilterBarProps {
   onFilterChange?: (filters: FilterState) => void;
@@ -13,7 +13,7 @@ interface FilterState {
   sortBy: string;
 }
 
-export default function FilterBar({ onFilterChange }: FilterBarProps) {
+const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
   const [filters, setFilters] = useState<FilterState>({
     period: 'all',
     market: 'all',
@@ -22,11 +22,13 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
   });
   const [showAllFilters, setShowAllFilters] = useState(false);
 
-  const handleFilterChange = (key: keyof FilterState, value: string) => {
-    const newFilters = { ...filters, [key]: value };
-    setFilters(newFilters);
-    onFilterChange?.(newFilters);
-  };
+  const handleFilterChange = useCallback((key: keyof FilterState, value: string) => {
+    setFilters(prev => {
+      const newFilters = { ...prev, [key]: value };
+      onFilterChange?.(newFilters);
+      return newFilters;
+    });
+  }, [onFilterChange]);
 
   // 활성화된 필터 개수 계산
   const activeFilterCount = Object.entries(filters).filter(
@@ -211,4 +213,6 @@ export default function FilterBar({ onFilterChange }: FilterBarProps) {
       </div>
     </div>
   );
-}
+});
+
+export default FilterBar;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
 import Card from './Card';
 
@@ -27,7 +27,7 @@ interface TopReturnSliderProps {
   }>;
 }
 
-export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) {
+const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopReturnSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // 수익률 상위 10개 리포트 추출
@@ -130,4 +130,6 @@ export default function TopReturnSlider({ reports = [] }: TopReturnSliderProps) 
       </div>
     </Card>
   );
-}
+});
+
+export default TopReturnSlider;

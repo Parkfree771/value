@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -6,7 +6,7 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
 }
 
-export default function Select({
+const Select = memo(function Select({
   label,
   options,
   error,
@@ -37,4 +37,6 @@ export default function Select({
       )}
     </div>
   );
-}
+});
+
+export default Select;

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 
 interface Investor {
@@ -13,7 +14,7 @@ interface PodiumProps {
   topThree: Investor[];
 }
 
-export default function Podium({ topThree }: PodiumProps) {
+const Podium = memo(function Podium({ topThree }: PodiumProps) {
   const [first, second, third] = topThree;
 
   const getPodiumHeight = (rank: number) => {
@@ -243,4 +244,6 @@ export default function Podium({ topThree }: PodiumProps) {
       </div>
     </div>
   );
-}
+});
+
+export default Podium;

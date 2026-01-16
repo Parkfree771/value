@@ -2,13 +2,12 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, memo, useCallback } from 'react';
 import Card from './Card';
 import Badge, { OpinionBadge } from './Badge';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { inferCurrency, getCurrencySymbol } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
-import { auth } from '@/lib/firebase';
 
 interface ReportCardProps {
   id: string;
@@ -38,7 +37,7 @@ interface ReportCardProps {
   closed_price?: number; // 확정 가격
 }
 
-export default function ReportCard({
+const ReportCard = memo(function ReportCard({
   id,
   title,
   author,
@@ -48,7 +47,7 @@ export default function ReportCard({
   opinion,
   initialPrice,
   currentPrice,
-  returnRate, // API에서 이미 계산된 수익률 사용
+  returnRate,
   createdAt,
   views,
   likes,
@@ -89,7 +88,8 @@ export default function ReportCard({
     setIsDeleting(true);
 
     try {
-      // Firebase Auth에서 ID 토큰 가져오기
+      // Firebase Auth에서 ID 토큰 가져오기 (lazy import)
+      const { auth } = await import('@/lib/firebase');
       const token = await auth.currentUser?.getIdToken();
       if (!token) {
         alert('로그인이 필요합니다.');
@@ -264,4 +264,6 @@ export default function ReportCard({
       </Card>
     </div>
   );
-}
+});
+
+export default ReportCard;

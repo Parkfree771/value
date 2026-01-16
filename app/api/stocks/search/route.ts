@@ -196,6 +196,10 @@ export async function GET(request: NextRequest) {
       success: true,
       stocks: formattedResults,
       count: formattedResults.length,
+    }, {
+      headers: {
+        'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+      },
     });
   } catch (error) {
     console.error('Stock search error:', error);

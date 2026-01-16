@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
@@ -25,7 +25,7 @@ interface HomeClientProps {
   total: number;
 }
 
-export default function HomeClient({ initialReports, total }: HomeClientProps) {
+const HomeClient = memo(function HomeClient({ initialReports, total }: HomeClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [filters, setFilters] = useState({
@@ -229,4 +229,6 @@ export default function HomeClient({ initialReports, total }: HomeClientProps) {
       )}
     </div>
   );
-}
+});
+
+export default HomeClient;

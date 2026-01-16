@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import Card from './Card';
 
@@ -34,7 +35,7 @@ interface RankingReportCardProps {
   rank: number;
 }
 
-export default function RankingReportCard({ report, rank }: RankingReportCardProps) {
+const RankingReportCard = memo(function RankingReportCard({ report, rank }: RankingReportCardProps) {
 
   // 통화 추론 함수
   const inferCurrency = (): string => {
@@ -249,4 +250,6 @@ export default function RankingReportCard({ report, rank }: RankingReportCardPro
       </div>
     </Card>
   );
-}
+});
+
+export default RankingReportCard;

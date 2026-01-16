@@ -1,24 +1,14 @@
-import React from 'react';
+import React, { memo } from 'react';
 
 interface CardProps {
   children: React.ReactNode;
-  /**
-   * 카드 스타일 variant
-   * - base: 기본 카드 (호버 효과 없음)
-   * - interactive: 클릭 가능한 카드 (호버 효과 있음)
-   * - glass: 유리 효과 카드 (반투명 배경)
-   * - elevated: 그림자가 강한 카드
-   */
   variant?: 'base' | 'interactive' | 'glass' | 'elevated';
-  /**
-   * 패딩 크기
-   */
   padding?: 'none' | 'sm' | 'md' | 'lg';
   className?: string;
   onClick?: () => void;
 }
 
-export default function Card({
+const Card = memo(function Card({
   children,
   variant = 'base',
   padding = 'md',
@@ -58,4 +48,6 @@ export default function Card({
       {children}
     </div>
   );
-}
+});
+
+export default Card;

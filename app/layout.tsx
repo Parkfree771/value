@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
 import { Oswald, Inter } from "next/font/google";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import GoogleAdSense from "@/components/GoogleAdSense";
+
+// Footer는 viewport 밖에 있으므로 lazy load
+const Footer = dynamic(() => import("@/components/Footer"), { ssr: true });
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -96,8 +99,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${oswald.variable} ${inter.variable}`}>
+    <html lang="ko" className={`${oswald.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
+        {/* 테마 초기화 (FOUC 방지) */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+
+        {/* DNS Prefetch & Preconnect */}
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+        <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
         <GoogleAnalytics />
         <GoogleAdSense />
       </head>

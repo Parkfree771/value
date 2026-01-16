@@ -115,71 +115,68 @@ export default function MyPage() {
     fetchUserData();
   }, [user]);
 
-  // 실시간 주가 및 수익률 업데이트
+  // 실시간 주가 및 수익률 업데이트 (stock-prices.json에서 한 번에 가져오기)
   useEffect(() => {
     if (myReports.length === 0) return;
 
     const updatePrices = async () => {
       setUpdatingPrices(true);
-      console.log('[MyPage] 실시간 주가 업데이트 시작');
+      console.log('[MyPage] 가격 업데이트 시작 (JSON 캐시 사용)');
 
       try {
-        const updatedReports = await Promise.all(
-          myReports.map(async (report) => {
-            // 이미 확정된 경우 건너뛰기
-            if (report.is_closed) {
-              console.log(`[MyPage] ${report.id}: 이미 확정됨, 업데이트 건너뛰기`);
-              return report;
-            }
-
-            // ticker와 initialPrice가 없으면 기존 리포트 반환
-            if (!report.ticker || !report.initialPrice || report.initialPrice === 0) {
-              console.log(`[MyPage] ${report.id}: ticker 또는 initialPrice 없음`);
-              return report;
-            }
-
-            try {
-              // API를 통해 실시간 주가 및 수익률 조회
-              const response = await fetch('/api/update-return-rate', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  ticker: report.ticker,
-                  initialPrice: report.initialPrice,
-                  positionType: report.positionType || 'long',
-                }),
-              });
-
-              if (!response.ok) {
-                console.log(`[MyPage] ${report.id}: API 호출 실패 (${response.status})`);
-                return report;
-              }
-
-              const priceData = await response.json();
-
-              if (priceData && !priceData.error) {
-                console.log(`[MyPage] ${report.id} 수익률 업데이트:`, priceData);
-                return {
-                  ...report,
-                  currentPrice: priceData.currentPrice,
-                  returnRate: priceData.returnRate,
-                  stockData: {
-                    ...report.stockData,
-                    ...priceData.stockData,
-                  },
-                };
-              }
-
-              console.log(`[MyPage] ${report.id}: 가격 조회 실패, 기존 데이터 유지`);
-              return report;
-            } catch (error) {
-              console.error(`[MyPage] ${report.id} 가격 업데이트 실패:`, error);
-              return report;
-            }
-          })
+        // stock-prices.json을 한 번만 fetch
+        const response = await fetch(
+          `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebasestorage.app/stock-prices.json`
         );
+
+        if (!response.ok) {
+          console.warn('[MyPage] stock-prices.json 로드 실패, 기존 데이터 유지');
+          setUpdatingPrices(false);
+          return;
+        }
+
+        const priceData = await response.json();
+        const prices = priceData.prices || {};
+
+        console.log(`[MyPage] ${Object.keys(prices).length}개 종목 가격 로드 완료`);
+
+        // 각 리포트에 가격 적용
+        const updatedReports = myReports.map((report) => {
+          // 이미 확정된 경우 건너뛰기
+          if (report.is_closed) {
+            return report;
+          }
+
+          // ticker와 initialPrice가 없으면 기존 리포트 반환
+          if (!report.ticker || !report.initialPrice || report.initialPrice === 0) {
+            return report;
+          }
+
+          const tickerUpper = report.ticker.toUpperCase();
+          const stockPrice = prices[tickerUpper];
+
+          if (stockPrice && stockPrice.currentPrice) {
+            const positionType = report.positionType || 'long';
+            const currentPrice = stockPrice.currentPrice;
+            const initialPrice = report.initialPrice;
+
+            // 수익률 계산
+            let returnRate: number;
+            if (positionType === 'long') {
+              returnRate = ((currentPrice - initialPrice) / initialPrice) * 100;
+            } else {
+              returnRate = ((initialPrice - currentPrice) / initialPrice) * 100;
+            }
+
+            return {
+              ...report,
+              currentPrice,
+              returnRate: parseFloat(returnRate.toFixed(2)),
+            };
+          }
+
+          return report;
+        });
 
         setMyReports(updatedReports);
         console.log('[MyPage] 모든 리포트 수익률 업데이트 완료');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 
 interface StockSuggestion {
   symbol: string;
@@ -15,7 +15,7 @@ interface SearchBarProps {
   setSearchQuery: (query: string) => void;
 }
 
-export default function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
+const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [suggestions, setSuggestions] = useState<StockSuggestion[]>([]);
@@ -240,4 +240,6 @@ export default function SearchBar({ searchQuery, setSearchQuery }: SearchBarProp
       )}
     </div>
   );
-}
+});
+
+export default SearchBar;

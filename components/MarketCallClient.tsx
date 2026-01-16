@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { GuruTrackingEvent } from '@/app/guru-tracker/types';
@@ -11,7 +11,7 @@ interface MarketCallClientProps {
   total: number;
 }
 
-export default function MarketCallClient({ initialEvents, total }: MarketCallClientProps) {
+const MarketCallClient = memo(function MarketCallClient({ initialEvents, total }: MarketCallClientProps) {
   const router = useRouter();
   const { user } = useAuth();
   const [sortBy, setSortBy] = useState('newest');
@@ -181,4 +181,6 @@ export default function MarketCallClient({ initialEvents, total }: MarketCallCli
       </section>
     </div>
   );
-}
+});
+
+export default MarketCallClient;

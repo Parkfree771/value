@@ -1,0 +1,138 @@
+/**
+ * Feed JSON 초기화 API
+ * posts 컬렉션에서 데이터를 읽어 feed.json 생성
+ */
+
+import { NextResponse } from 'next/server';
+import { adminDb, adminStorage } from '@/lib/firebase-admin';
+
+interface FeedPost {
+  id: string;
+  title: string;
+  author: string;
+  stockName: string;
+  ticker: string;
+  exchange: string;
+  opinion: 'buy' | 'sell' | 'hold';
+  positionType: 'long' | 'short';
+  initialPrice: number;
+  currentPrice: number;
+  returnRate: number;
+  createdAt: string;
+  views: number;
+  likes: number;
+  category: string;
+  is_closed?: boolean;
+  closed_return_rate?: number;
+}
+
+function calculateReturn(
+  initialPrice: number,
+  currentPrice: number,
+  positionType: 'long' | 'short'
+): number {
+  if (initialPrice <= 0 || currentPrice <= 0) return 0;
+  if (positionType === 'long') {
+    return ((currentPrice - initialPrice) / initialPrice) * 100;
+  } else {
+    return ((initialPrice - currentPrice) / initialPrice) * 100;
+  }
+}
+
+export async function POST() {
+  try {
+    console.log('[Feed Init] Starting...');
+
+    // posts 컬렉션 읽기
+    const postsSnapshot = await adminDb.collection('posts')
+      .orderBy('createdAt', 'desc')
+      .get();
+
+    console.log(`[Feed Init] Found ${postsSnapshot.size} posts`);
+
+    const feedPosts: FeedPost[] = [];
+    const prices: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = {};
+
+    for (const docSnap of postsSnapshot.docs) {
+      const data = docSnap.data();
+      const ticker = (data.ticker || '').toUpperCase();
+      const exchange = data.exchange || '';
+      const initialPrice = data.initialPrice || 0;
+      const currentPrice = data.currentPrice || initialPrice;
+      const positionType: 'long' | 'short' = data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
+
+      let returnRate: number;
+      if (data.is_closed && data.closed_return_rate != null) {
+        returnRate = data.closed_return_rate;
+      } else {
+        returnRate = calculateReturn(initialPrice, currentPrice, positionType);
+      }
+
+      let createdAtStr = '';
+      if (data.createdAt?.toDate) {
+        createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
+      } else if (typeof data.createdAt === 'string') {
+        createdAtStr = data.createdAt;
+      } else {
+        createdAtStr = new Date().toISOString().split('T')[0];
+      }
+
+      feedPosts.push({
+        id: docSnap.id,
+        title: data.title || '',
+        author: data.authorName || '익명',
+        stockName: data.stockName || '',
+        ticker: data.ticker || '',
+        exchange,
+        opinion: data.opinion || 'hold',
+        positionType,
+        initialPrice,
+        currentPrice,
+        returnRate: parseFloat(returnRate.toFixed(2)),
+        createdAt: createdAtStr,
+        views: data.views || 0,
+        likes: data.likes || 0,
+        category: data.category || '',
+        is_closed: data.is_closed || false,
+        closed_return_rate: data.closed_return_rate,
+      });
+
+      // prices 맵에 추가
+      if (ticker && !prices[ticker]) {
+        prices[ticker] = {
+          currentPrice,
+          exchange,
+          lastUpdated: new Date().toISOString(),
+        };
+      }
+    }
+
+    // feed.json 저장
+    const feedData = {
+      lastUpdated: new Date().toISOString(),
+      totalPosts: feedPosts.length,
+      posts: feedPosts,
+      prices,
+    };
+
+    const bucket = adminStorage.bucket();
+    await bucket.file('feed.json').save(JSON.stringify(feedData, null, 2), {
+      contentType: 'application/json',
+      metadata: { cacheControl: 'public, max-age=60' },
+    });
+
+    console.log(`[Feed Init] Created feed.json with ${feedPosts.length} posts`);
+
+    return NextResponse.json({
+      success: true,
+      message: `feed.json 생성 완료 (${feedPosts.length}개 게시글)`,
+      totalPosts: feedPosts.length,
+    });
+  } catch (error: any) {
+    console.error('[Feed Init] Error:', error);
+    return NextResponse.json(
+      { error: error.message || 'feed.json 생성 실패' },
+      { status: 500 }
+    );
+  }
+}

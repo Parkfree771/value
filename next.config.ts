@@ -26,7 +26,50 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
 
   experimental: {
-    optimizePackageImports: ['react-icons', 'date-fns'],
+    // 패키지 최적화 - tree shaking 강화
+    optimizePackageImports: [
+      'react-icons',
+      'date-fns',
+      'firebase/app',
+      'firebase/auth',
+      'firebase/firestore',
+      'firebase/storage',
+      '@tiptap/react',
+      '@tiptap/starter-kit',
+    ],
+  },
+
+  // 헤더 설정 - 정적 자산 캐싱
+  async headers() {
+    return [
+      {
+        source: '/:all*(svg|jpg|jpeg|png|gif|ico|webp|avif)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/_next/static/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/data/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, stale-while-revalidate=600',
+          },
+        ],
+      },
+    ];
   },
 };
 

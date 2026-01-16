@@ -1,6 +1,66 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { adminDb, verifyAuthToken } from '@/lib/firebase-admin';
+import { adminDb, adminStorage, verifyAuthToken } from '@/lib/firebase-admin';
+
+// feed.json 구조
+interface FeedData {
+  lastUpdated: string;
+  totalPosts: number;
+  posts: Array<{
+    id: string;
+    ticker: string;
+    [key: string]: any;
+  }>;
+  prices: Record<string, any>;
+}
+
+// feed.json에서 게시글 제거
+async function removeFromFeed(postId: string): Promise<void> {
+  try {
+    const bucket = adminStorage.bucket();
+    const file = bucket.file('feed.json');
+    const [exists] = await file.exists();
+
+    if (!exists) return;
+
+    const [content] = await file.download();
+    const feed: FeedData = JSON.parse(content.toString());
+
+    // 해당 게시글 찾기
+    const removedPost = feed.posts.find(p => p.id === postId);
+    if (!removedPost) return;
+
+    // 게시글 제거
+    feed.posts = feed.posts.filter(p => p.id !== postId);
+
+    // 해당 ticker를 사용하는 다른 게시글이 없으면 prices에서도 제거
+    const tickerUpper = (removedPost.ticker || '').toUpperCase();
+    if (tickerUpper) {
+      const otherPostsWithSameTicker = feed.posts.filter(
+        p => (p.ticker || '').toUpperCase() === tickerUpper
+      );
+
+      if (otherPostsWithSameTicker.length === 0) {
+        delete feed.prices[tickerUpper];
+      }
+    }
+
+    // 메타데이터 업데이트
+    feed.totalPosts = feed.posts.length;
+    feed.lastUpdated = new Date().toISOString();
+
+    // 저장
+    await file.save(JSON.stringify(feed, null, 2), {
+      contentType: 'application/json',
+      metadata: { cacheControl: 'public, max-age=60' },
+    });
+
+    console.log(`[Feed] Post ${postId} removed from feed.json`);
+  } catch (error) {
+    console.error('[Feed] Error removing from feed.json:', error);
+    // feed 업데이트 실패해도 삭제는 계속 진행
+  }
+}
 
 export async function DELETE(
   request: NextRequest,
@@ -42,6 +102,9 @@ export async function DELETE(
 
     // 리포트 삭제
     await reportRef.delete();
+
+    // feed.json에서도 제거
+    await removeFromFeed(id);
 
     // 홈 페이지 캐시 무효화
     revalidatePath('/');

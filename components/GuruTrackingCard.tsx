@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { GuruTrackingEvent, BadgeLabel } from '@/app/guru-tracker/types';
 import { useStockPrice } from '@/hooks/useStockPrice';
@@ -12,7 +12,7 @@ interface GuruTrackingCardProps {
   collection?: 'posts' | 'market-call'; // 어느 컬렉션에서 온 데이터인지
 }
 
-export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTrackingCardProps) {
+const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'posts' }: GuruTrackingCardProps) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -515,4 +515,6 @@ export default function GuruTrackingCard({ event, collection = 'posts' }: GuruTr
       </div>
     </div>
   );
-}
+});
+
+export default GuruTrackingCard;

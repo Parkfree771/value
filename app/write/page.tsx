@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
@@ -10,7 +10,6 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
-import { registerTicker } from '@/lib/tickers';
 import type { MarketCategory } from '@/types/report';
 
 type EditorMode = 'text' | 'html';
@@ -31,7 +30,7 @@ interface StockData {
   sector?: string;
 }
 
-export default function WritePage() {
+function WritePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get('id'); // URL에서 수정할 리포트 ID 가져오기
@@ -330,6 +329,30 @@ export default function WritePage() {
 
         console.log('리포트가 수정되었습니다. ID:', editId);
 
+        // feed.json 업데이트 (수정된 내용 반영)
+        try {
+          const { auth } = await import('@/lib/firebase');
+          const token = await auth.currentUser?.getIdToken();
+          if (token) {
+            await fetch('/api/feed', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                postId: editId,
+                postData: {
+                  ...reportData,
+                  authorName: authorName,
+                },
+              }),
+            });
+          }
+        } catch (feedError) {
+          console.error('feed.json 업데이트 실패:', feedError);
+        }
+
         // 홈 페이지와 상세 페이지 캐시 즉시 무효화
         await Promise.all([
           fetch('/api/revalidate', {
@@ -350,8 +373,29 @@ export default function WritePage() {
         // 새 글 작성 모드: 새 리포트 생성
         const docRef = await addDoc(collection(db, 'posts'), reportData);
 
-        // tickers 컬렉션에 등록 (가격 업데이트 최적화용)
-        await registerTicker(stockData.symbol, stockData.exchange);
+        // feed.json에 새 게시글 추가
+        try {
+          const { auth } = await import('@/lib/firebase');
+          const token = await auth.currentUser?.getIdToken();
+          if (token) {
+            await fetch('/api/feed', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                postId: docRef.id,
+                postData: {
+                  ...reportData,
+                  authorName: authorName,
+                },
+              }),
+            });
+          }
+        } catch (feedError) {
+          console.error('feed.json 업데이트 실패:', feedError);
+        }
 
         console.log('리포트가 저장되었습니다. ID:', docRef.id);
 
@@ -823,5 +867,14 @@ export default function WritePage() {
         </form>
       </div>
     </div>
+  );
+}
+
+// Suspense wrapper for useSearchParams
+export default function WritePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">로딩 중...</div>}>
+      <WritePageContent />
+    </Suspense>
   );
 }
