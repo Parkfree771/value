@@ -4,23 +4,18 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
+import ReportCard from '@/components/ReportCard';
 
-// CLS 방지: 각 컴포넌트의 실제 높이에 맞는 스켈레톤 제공
-const ReportCard = dynamic(() => import('@/components/ReportCard'), {
-  loading: () => <div className="animate-pulse h-[180px] bg-gray-200 dark:bg-gray-700 rounded-xl" />,
-  ssr: false,
-});
+// SSR 활성화: ReportCard는 직접 import (가장 중요한 콘텐츠)
+// 덜 중요한 컴포넌트만 dynamic import
 const FilterBar = dynamic(() => import('@/components/FilterBar'), {
   loading: () => <div className="animate-pulse h-[52px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
-  ssr: false,
 });
 const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
   loading: () => <div className="animate-pulse h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-8" />,
-  ssr: false,
 });
 const SearchBar = dynamic(() => import('@/components/SearchBar'), {
   loading: () => <div className="animate-pulse h-[48px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
-  ssr: false,
 });
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';

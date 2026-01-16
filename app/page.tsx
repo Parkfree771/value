@@ -1,6 +1,5 @@
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, Timestamp, getCountFromServer } from 'firebase/firestore';
-import { getLatestPrices } from '@/lib/priceCache';
+import { adminDb } from '@/lib/firebase-admin';
+import { getLatestPricesStatic } from '@/lib/priceCacheStatic';
 import { calculateReturn } from '@/utils/calculateReturn';
 import { ReportSummary } from '@/types/report';
 import HomeClient from '@/components/HomeClient';
@@ -8,17 +7,16 @@ import HomeClient from '@/components/HomeClient';
 // ISR: 5분마다 재생성 (On-Demand Revalidation으로 즉시 갱신 가능)
 export const revalidate = 300;
 
-// 서버에서 데이터 페칭 + 수익률 계산
+// 서버에서 데이터 페칭 + 수익률 계산 (Firebase Admin SDK 사용)
 async function getReports(): Promise<{ reports: ReportSummary[]; total: number }> {
   try {
-    const postsRef = collection(db, 'posts');
-    const q = query(postsRef, orderBy('createdAt', 'desc'), limit(50));
+    const postsRef = adminDb.collection('posts');
 
     // 병렬로 데이터 가져오기
     const [querySnapshot, countSnapshot, latestPrices] = await Promise.all([
-      getDocs(q),
-      getCountFromServer(query(postsRef)),
-      getLatestPrices()
+      postsRef.orderBy('createdAt', 'desc').limit(50).get(),
+      postsRef.count().get(),
+      getLatestPricesStatic()
     ]);
 
     const reports = querySnapshot.docs.map((docSnap) => {
@@ -26,7 +24,7 @@ async function getReports(): Promise<{ reports: ReportSummary[]; total: number }
 
       // createdAt 변환
       let createdAtStr = '';
-      if (data.createdAt instanceof Timestamp) {
+      if (data.createdAt && data.createdAt.toDate) {
         createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
       } else if (typeof data.createdAt === 'string') {
         createdAtStr = data.createdAt;
