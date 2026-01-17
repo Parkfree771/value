@@ -40,27 +40,26 @@ interface FeedData {
 // feed.json + posts 컬렉션(views, likes만)에서 데이터 가져오기
 async function getReportsFromFeed(): Promise<{ reports: ReportSummary[]; total: number }> {
   try {
-    // 1. feed.json 읽기
     const bucket = adminStorage.bucket();
     const file = bucket.file('feed.json');
-    const [exists] = await file.exists();
 
-    if (!exists) {
+    // 병렬 처리: Storage 다운로드 + Firestore 쿼리 동시 실행
+    const [contentResult, postsSnapshot] = await Promise.all([
+      file.download().catch(() => null),
+      adminDb.collection('posts').select('views', 'likes').get()
+    ]);
+
+    if (!contentResult) {
       console.log('[ISR] feed.json not found, returning empty');
       return { reports: [], total: 0 };
     }
 
-    const [content] = await file.download();
+    const [content] = contentResult;
     const feedData: FeedData = JSON.parse(content.toString());
 
     if (feedData.posts.length === 0) {
       return { reports: [], total: 0 };
     }
-
-    // 2. posts 컬렉션에서 views, likes 필드만 조회 (실시간 데이터)
-    const postsSnapshot = await adminDb.collection('posts')
-      .select('views', 'likes')
-      .get();
 
     // id → { views, likes } 맵 생성
     const statsMap = new Map<string, { views: number; likes: number }>();
