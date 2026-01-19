@@ -20,8 +20,8 @@ const SearchBar = dynamic(() => import('@/components/SearchBar'), {
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
 
-// feed.json 공개 URL (Firebase Storage)
-const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
+// feed.json API 엔드포인트 (CORS 우회)
+const FEED_API = '/api/feed/public';
 
 interface FeedPost {
   id: string;
@@ -61,14 +61,11 @@ const HomeClient = memo(function HomeClient() {
     sortBy: 'returnRate',
   });
 
-  // 클라이언트에서 feed.json 직접 fetch (Cold Start 방지)
+  // 클라이언트에서 feed API 호출 (Cold Start 방지)
   useEffect(() => {
     const fetchFeed = async () => {
       try {
-        const res = await fetch(FEED_URL, {
-          cache: 'no-store',
-          headers: { 'Accept': 'application/json' }
-        });
+        const res = await fetch(FEED_API);
 
         if (!res.ok) throw new Error('Feed fetch failed');
 

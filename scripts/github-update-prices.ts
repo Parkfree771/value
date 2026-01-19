@@ -247,41 +247,69 @@ async function getStockPrice(token: string, ticker: string, exchange: string): P
   }
 }
 
+// ===== 기존 feed.json 읽기 =====
+async function getExistingFeed(): Promise<FeedData> {
+  try {
+    const file = bucket.file('feed.json');
+    const [exists] = await file.exists();
+
+    if (!exists) {
+      return {
+        lastUpdated: new Date().toISOString(),
+        totalPosts: 0,
+        posts: [],
+        prices: {},
+      };
+    }
+
+    const [content] = await file.download();
+    return JSON.parse(content.toString()) as FeedData;
+  } catch (error) {
+    console.error('[CRON] Error reading existing feed.json:', error);
+    return {
+      lastUpdated: new Date().toISOString(),
+      totalPosts: 0,
+      posts: [],
+      prices: {},
+    };
+  }
+}
+
 // ===== 메인 함수 =====
 async function main() {
   const startTime = Date.now();
   console.log(`[CRON] ===== Starting feed.json update (MARKET: ${MARKET_TYPE}) =====`);
 
   try {
-    // 1. posts 컬렉션에서 모든 게시글 읽기
+    // 1. 기존 feed.json 읽기 (다른 마켓 데이터 보존용)
+    console.log('[CRON] Reading existing feed.json...');
+    const existingFeed = await getExistingFeed();
+    console.log(`[CRON] Existing feed has ${existingFeed.posts.length} posts`);
+
+    // 2. posts 컬렉션에서 모든 게시글 읽기
     console.log('[CRON] Reading posts collection...');
     const postsSnapshot = await db.collection('posts')
       .orderBy('createdAt', 'desc')
       .get();
 
-    console.log(`[CRON] Found ${postsSnapshot.size} posts`);
+    console.log(`[CRON] Found ${postsSnapshot.size} posts in DB`);
 
     if (postsSnapshot.empty) {
-      console.log('[CRON] No posts found, creating empty feed.json');
-      const emptyFeed: FeedData = {
-        lastUpdated: new Date().toISOString(),
-        totalPosts: 0,
-        posts: [],
-        prices: {},
-      };
-      await bucket.file('feed.json').save(JSON.stringify(emptyFeed, null, 2), {
-        contentType: 'application/json',
-        metadata: { cacheControl: 'public, max-age=60' },
-      });
-      console.log('[CRON] Empty feed.json created');
+      console.log('[CRON] No posts found in DB');
       return;
     }
 
-    // 2. 게시글 데이터 수집 및 고유 ticker 추출
-    const postDataList: Array<{
+    // 3. 게시글 데이터 수집 - 현재 마켓용 & 전체 DB 게시글
+    const currentMarketPosts: Array<{
       id: string;
       data: any;
       tickerKey: string;
+    }> = [];
+
+    const allDbPosts: Array<{
+      id: string;
+      data: any;
+      exchange: string;
     }> = [];
 
     const uniqueTickers: Map<string, { ticker: string; exchange: string }> = new Map();
@@ -293,11 +321,14 @@ async function main() {
 
       if (!ticker || !exchange) continue;
 
-      // 마켓 타입 필터링
+      // 모든 게시글 저장 (나중에 병합용)
+      allDbPosts.push({ id: docSnap.id, data, exchange });
+
+      // 현재 마켓에 해당하는 게시글만 가격 조회 대상
       if (!shouldProcessExchange(exchange)) continue;
 
       const tickerKey = `${ticker}:${exchange}`;
-      postDataList.push({ id: docSnap.id, data, tickerKey });
+      currentMarketPosts.push({ id: docSnap.id, data, tickerKey });
 
       // 고유 ticker 수집 (중복 제거)
       if (!uniqueTickers.has(tickerKey)) {
@@ -305,6 +336,7 @@ async function main() {
       }
     }
 
+    console.log(`[CRON] Posts for current market (${MARKET_TYPE}): ${currentMarketPosts.length}`);
     console.log(`[CRON] Unique tickers to fetch: ${uniqueTickers.size}`);
 
     // 3. KIS 토큰 가져오기
@@ -339,12 +371,17 @@ async function main() {
       await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
     }
 
-    // 5. 각 게시글의 수익률 계산 및 FeedPost 생성
+    // 5. 기존 feed.json의 prices 병합 (다른 마켓 가격 보존)
+    const mergedPrices = { ...existingFeed.prices, ...prices };
+
+    // 6. 모든 DB 게시글에 대해 FeedPost 생성 (가격은 병합된 prices 사용)
     const feedPosts: FeedPost[] = [];
 
-    for (const { id, data, tickerKey } of postDataList) {
+    for (const { id, data, exchange } of allDbPosts) {
       const ticker = (data.ticker || '').toUpperCase();
-      const priceData = prices[ticker];
+      const priceData = mergedPrices[ticker];
+
+      // 현재 마켓이면 새 가격, 아니면 기존 가격 또는 DB 가격 사용
       const currentPrice = priceData?.currentPrice || data.currentPrice || 0;
       const initialPrice = data.initialPrice || 0;
 
@@ -391,12 +428,12 @@ async function main() {
       });
     }
 
-    // 6. feed.json 저장
+    // 7. feed.json 저장 (모든 게시글 포함)
     const feedData: FeedData = {
       lastUpdated: new Date().toISOString(),
       totalPosts: feedPosts.length,
       posts: feedPosts,
-      prices,
+      prices: mergedPrices,
     };
 
     await bucket.file('feed.json').save(JSON.stringify(feedData, null, 2), {
@@ -405,21 +442,21 @@ async function main() {
     });
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`[CRON] ===== Completed: ${successCount} tickers, ${feedPosts.length} posts (${duration}s) =====`);
+    console.log(`[CRON] ===== Completed: ${successCount} tickers updated, ${feedPosts.length} total posts (${duration}s) =====`);
     console.log(`[STORAGE] feed.json uploaded!`);
 
     if (errors.length > 0) {
       console.log(`[CRON] Errors: ${errors.slice(0, 5).join(', ')}${errors.length > 5 ? ` +${errors.length - 5} more` : ''}`);
     }
 
-    // 7. 기존 stock-prices.json도 업데이트 (하위 호환성)
+    // 8. 기존 stock-prices.json도 업데이트 (하위 호환성 - 병합된 가격)
     const stockPricesData = {
       lastUpdated: new Date().toISOString(),
       marketType: MARKET_TYPE,
-      totalTickers: Object.keys(prices).length,
+      totalTickers: Object.keys(mergedPrices).length,
       successCount,
       failCount,
-      prices,
+      prices: mergedPrices,
     };
 
     await bucket.file('stock-prices.json').save(JSON.stringify(stockPricesData, null, 2), {
