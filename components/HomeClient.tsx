@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, memo, useCallback } from 'react';
+import { useState, useMemo, memo, useEffect } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
@@ -20,12 +20,38 @@ const SearchBar = dynamic(() => import('@/components/SearchBar'), {
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
 
-interface HomeClientProps {
-  initialReports: ReportSummary[];
-  total: number;
+// feed.json 공개 URL (Firebase Storage)
+const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
+
+interface FeedPost {
+  id: string;
+  title: string;
+  author: string;
+  stockName: string;
+  ticker: string;
+  exchange: string;
+  opinion: 'buy' | 'sell' | 'hold';
+  positionType: 'long' | 'short';
+  initialPrice: number;
+  currentPrice: number;
+  returnRate: number;
+  createdAt: string;
+  views: number;
+  likes: number;
+  category: string;
+  is_closed?: boolean;
 }
 
-const HomeClient = memo(function HomeClient({ initialReports, total }: HomeClientProps) {
+interface FeedData {
+  lastUpdated: string;
+  totalPosts: number;
+  posts: FeedPost[];
+}
+
+const HomeClient = memo(function HomeClient() {
+  const [reports, setReports] = useState<ReportSummary[]>([]);
+  const [total, setTotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [filters, setFilters] = useState({
@@ -35,9 +61,53 @@ const HomeClient = memo(function HomeClient({ initialReports, total }: HomeClien
     sortBy: 'returnRate',
   });
 
+  // 클라이언트에서 feed.json 직접 fetch (Cold Start 방지)
+  useEffect(() => {
+    const fetchFeed = async () => {
+      try {
+        const res = await fetch(FEED_URL, {
+          cache: 'no-store',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!res.ok) throw new Error('Feed fetch failed');
+
+        const feedData: FeedData = await res.json();
+
+        const mappedReports: ReportSummary[] = feedData.posts.map((post) => ({
+          id: post.id,
+          title: post.title,
+          author: post.author,
+          stockName: post.stockName,
+          ticker: post.ticker,
+          opinion: post.opinion,
+          returnRate: post.returnRate,
+          initialPrice: post.initialPrice,
+          currentPrice: post.currentPrice,
+          createdAt: post.createdAt,
+          views: post.views,
+          likes: post.likes,
+          exchange: post.exchange,
+          category: post.category,
+          positionType: post.positionType,
+          stockData: undefined,
+        }));
+
+        setReports(mappedReports);
+        setTotal(feedData.totalPosts);
+      } catch (error) {
+        console.error('Failed to fetch feed:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchFeed();
+  }, []);
+
   // 클라이언트에서 정렬 처리
   const sortedReports = useMemo(() => {
-    const sorted = [...initialReports];
+    const sorted = [...reports];
 
     switch (activeTab) {
       case 'popular':
@@ -54,7 +124,7 @@ const HomeClient = memo(function HomeClient({ initialReports, total }: HomeClien
     }
 
     return sorted;
-  }, [initialReports, activeTab]);
+  }, [reports, activeTab]);
 
   // 검색 및 필터링
   const filteredReports = useMemo(() => {
@@ -85,10 +155,40 @@ const HomeClient = memo(function HomeClient({ initialReports, total }: HomeClien
     });
   }, [sortedReports, searchQuery, filters]);
 
+  // 로딩 중 스켈레톤 UI
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* TOP 10 스켈레톤 */}
+        <div className="animate-pulse h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-8" />
+
+        {/* 검색바 스켈레톤 */}
+        <div className="hidden md:block mb-8">
+          <div className="animate-pulse h-[48px] bg-gray-200 dark:bg-gray-700 rounded-lg mb-6" />
+          <div className="animate-pulse h-[52px] bg-gray-200 dark:bg-gray-700 rounded-lg" />
+        </div>
+
+        {/* 탭 스켈레톤 */}
+        <div className="flex gap-4 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse h-[40px] w-[100px] bg-gray-200 dark:bg-gray-700 rounded-lg" />
+          ))}
+        </div>
+
+        {/* 카드 스켈레톤 */}
+        <div className="space-y-6">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="animate-pulse h-[180px] bg-gray-200 dark:bg-gray-700 rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* TOP 10 Return Rate Slider */}
-      <TopReturnSlider reports={initialReports} />
+      <TopReturnSlider reports={reports} />
 
       {/* 데스크탑: 검색바 + 필터바 */}
       <div className="hidden md:block mb-8">
