@@ -143,11 +143,6 @@ export async function PUT(request: NextRequest) {
       const postsQuery = query(postsRef, where('authorId', '==', userId));
       const postsSnapshot = await getDocs(postsQuery);
 
-      // market-call 컬렉션 업데이트
-      const marketCallRef = collection(db, 'market-call');
-      const marketCallQuery = query(marketCallRef, where('author_id', '==', userId));
-      const marketCallSnapshot = await getDocs(marketCallQuery);
-
       // Firestore의 배치 업데이트 사용 (최대 500개까지 한 번에 처리)
       const batches = [];
       let currentBatch = writeBatch(db);
@@ -166,19 +161,6 @@ export async function PUT(request: NextRequest) {
         batchCount++;
       });
 
-      // market-call 컬렉션 업데이트
-      marketCallSnapshot.forEach((docSnapshot) => {
-        if (batchCount === 500) {
-          batches.push(currentBatch);
-          currentBatch = writeBatch(db);
-          batchCount = 0;
-        }
-
-        const marketCallDocRef = doc(db, 'market-call', docSnapshot.id);
-        currentBatch.update(marketCallDocRef, { author_nickname: nickname.trim() });
-        batchCount++;
-      });
-
       if (batchCount > 0) {
         batches.push(currentBatch);
       }
@@ -186,7 +168,7 @@ export async function PUT(request: NextRequest) {
       // 모든 배치 커밋
       await Promise.all(batches.map((b) => b.commit()));
 
-      console.log(`[Profile Update] posts: ${postsSnapshot.size}개, market-call: ${marketCallSnapshot.size}개 작성자 이름 업데이트 완료`);
+      console.log(`[Profile Update] posts: ${postsSnapshot.size}개 작성자 이름 업데이트 완료`);
     }
 
     return NextResponse.json({

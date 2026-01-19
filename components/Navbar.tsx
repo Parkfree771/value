@@ -105,16 +105,6 @@ const Navbar = memo(function Navbar() {
               GURU
             </Link>
             <Link
-              href="/market-call"
-              className={`text-sm font-medium transition-colors ${
-                isActive('/market-call')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-              }`}
-            >
-              마켓 콜
-            </Link>
-            <Link
               href="/write"
               onClick={handleWriteClick}
               className={`text-sm font-medium transition-colors ${
@@ -308,17 +298,6 @@ const Navbar = memo(function Navbar() {
                 }`}
               >
                 GURU
-              </Link>
-              <Link
-                href="/market-call"
-                onClick={closeMobileMenu}
-                className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
-                  isActive('/market-call')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                마켓 콜
               </Link>
               <Link
                 href="/write"

@@ -45,7 +45,3 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"path": "/"}' \
             --fail --silent --show-error || echo "Revalidate failed, but continuing..."
-          curl -X POST "${{ secrets.SITE_URL }}/api/revalidate" \
-            -H "Content-Type: application/json" \
-            -d '{"path": "/market-call"}' \
-            --fail --silent --show-error || echo "Revalidate failed, but continuing..."
