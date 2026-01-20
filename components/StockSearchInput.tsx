@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, memo, useCallback } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 
 interface Stock {
   symbol: string;
@@ -13,6 +13,145 @@ interface Stock {
   marketCap?: number;
   per?: number;
   pbr?: number;
+}
+
+interface GlobalStock {
+  symbol: string;
+  name: string;
+  exchange: string;
+  country: string;
+  nameKr?: string;
+}
+
+interface GlobalStocksData {
+  stocks: GlobalStock[];
+}
+
+// 모듈 레벨 캐시 (컴포넌트 재렌더링에도 유지)
+let cachedStocksData: GlobalStock[] | null = null;
+let isLoadingData = false;
+let loadPromise: Promise<GlobalStock[]> | null = null;
+
+async function loadGlobalStocks(): Promise<GlobalStock[]> {
+  if (cachedStocksData) {
+    return cachedStocksData;
+  }
+
+  if (loadPromise) {
+    return loadPromise;
+  }
+
+  isLoadingData = true;
+  loadPromise = fetch('/data/global-stocks.json')
+    .then(res => res.json())
+    .then((data: GlobalStocksData) => {
+      cachedStocksData = data.stocks;
+      isLoadingData = false;
+      return data.stocks;
+    })
+    .catch(err => {
+      isLoadingData = false;
+      loadPromise = null;
+      throw err;
+    });
+
+  return loadPromise;
+}
+
+function searchStocksLocal(stocks: GlobalStock[], query: string, limit: number = 20): Stock[] {
+  if (!query || query.length === 0) {
+    return [];
+  }
+
+  const searchLower = query.toLowerCase().trim();
+  const results: GlobalStock[] = [];
+  const seenKeys = new Set<string>();
+
+  for (const stock of stocks) {
+    const symbolLower = stock.symbol.toLowerCase();
+    const nameLower = stock.name.toLowerCase();
+    const nameKrLower = stock.nameKr?.toLowerCase() || '';
+    const key = `${stock.symbol}:${stock.exchange}`;
+
+    if (seenKeys.has(key)) continue;
+
+    // 심볼 정확 매치
+    if (symbolLower === searchLower) {
+      results.unshift(stock);
+      seenKeys.add(key);
+      continue;
+    }
+
+    // 한글 이름 정확 매치
+    if (nameKrLower && nameKrLower === searchLower) {
+      results.unshift(stock);
+      seenKeys.add(key);
+      continue;
+    }
+
+    // 한글 이름 시작 매치
+    if (nameKrLower && nameKrLower.startsWith(searchLower)) {
+      results.push(stock);
+      seenKeys.add(key);
+      continue;
+    }
+
+    // 심볼 시작 매치
+    if (symbolLower.startsWith(searchLower)) {
+      results.push(stock);
+      seenKeys.add(key);
+      continue;
+    }
+
+    // 한글 이름에 포함
+    if (nameKrLower && nameKrLower.includes(searchLower)) {
+      results.push(stock);
+      seenKeys.add(key);
+      continue;
+    }
+
+    // 영문 이름에 포함
+    if (nameLower.includes(searchLower)) {
+      results.push(stock);
+      seenKeys.add(key);
+      continue;
+    }
+
+    // 심볼에 포함
+    if (symbolLower.includes(searchLower)) {
+      results.push(stock);
+      seenKeys.add(key);
+    }
+
+    if (results.length >= limit * 2) break;
+  }
+
+  // 정렬
+  results.sort((a, b) => {
+    const aSymbol = a.symbol.toLowerCase();
+    const bSymbol = b.symbol.toLowerCase();
+    const aNameKr = a.nameKr?.toLowerCase() || '';
+    const bNameKr = b.nameKr?.toLowerCase() || '';
+
+    if (aSymbol === searchLower && bSymbol !== searchLower) return -1;
+    if (bSymbol === searchLower && aSymbol !== searchLower) return 1;
+    if (aNameKr === searchLower && bNameKr !== searchLower) return -1;
+    if (bNameKr === searchLower && aNameKr !== searchLower) return 1;
+    if (aNameKr.startsWith(searchLower) && !bNameKr.startsWith(searchLower)) return -1;
+    if (bNameKr.startsWith(searchLower) && !aNameKr.startsWith(searchLower)) return 1;
+    if (aSymbol.startsWith(searchLower) && !bSymbol.startsWith(searchLower)) return -1;
+    if (bSymbol.startsWith(searchLower) && !aSymbol.startsWith(searchLower)) return 1;
+
+    return aSymbol.localeCompare(bSymbol);
+  });
+
+  return results.slice(0, limit).map(stock => ({
+    symbol: stock.symbol,
+    name: stock.name,
+    nameKr: stock.nameKr || null,
+    exchange: stock.exchange,
+    type: 'EQUITY' as const,
+  }));
 }
 
 interface StockData {
@@ -54,7 +193,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 검색 API 호출 (디바운스)
+  // 로컬 검색 (디바운스)
   useEffect(() => {
     const searchStocks = async () => {
       if (query.length < 1) {
@@ -65,9 +204,9 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/stocks/search?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        setResults(data.stocks || []);
+        const stocks = await loadGlobalStocks();
+        const searchResults = searchStocksLocal(stocks, query, 20);
+        setResults(searchResults);
         setShowResults(true);
         setSelectedIndex(-1);
       } catch (error) {
@@ -78,7 +217,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
       }
     };
 
-    const debounceTimer = setTimeout(searchStocks, 300);
+    const debounceTimer = setTimeout(searchStocks, 150); // 로컬이라 더 빠르게
     return () => clearTimeout(debounceTimer);
   }, [query]);
 
