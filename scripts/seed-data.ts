@@ -176,7 +176,7 @@ interface FeedPost {
 
 // .env 파일 로드 (로컬 실행용)
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 // Firebase Admin 초기화
 let projectId: string;
