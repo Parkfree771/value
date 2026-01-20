@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, getDocs, doc, getDoc, Timestamp } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 const Card = dynamic(() => import('@/components/Card'));
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
@@ -22,7 +22,6 @@ export default function MyPage() {
   const [myReports, setMyReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [updatingPrices, setUpdatingPrices] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newNickname, setNewNickname] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -35,7 +34,7 @@ export default function MyPage() {
     }
   }, [user, authReady, router]);
 
-  // 사용자 프로필 및 리포트 가져오기
+  // 사용자 리포트 가져오기 (feed.json만 사용, Firestore 읽기 0회)
   useEffect(() => {
     if (!user) return;
 
@@ -43,66 +42,50 @@ export default function MyPage() {
       try {
         setLoading(true);
 
-        // 사용자 프로필 가져오기
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        // feed.json에서 authorId로 내 리포트 필터링
+        const response = await fetch('/api/feed/public');
+        const feedData = await response.json();
+        const allPosts = feedData.posts || [];
 
-        if (userDocSnap.exists()) {
-          setUserProfile(userDocSnap.data());
+        // authorId로 내 글 필터링 후 최신순 정렬
+        const myPosts = allPosts
+          .filter((post: any) => post.authorId === user.uid)
+          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        // 첫 번째 글에서 닉네임 추출 (없으면 Firebase Auth 정보 사용)
+        if (myPosts.length > 0) {
+          setUserProfile({ nickname: myPosts[0].author });
         }
 
-        // 사용자가 작성한 리포트 가져오기
-        const postsRef = collection(db, 'posts');
-        const q = query(
-          postsRef,
-          where('authorId', '==', user.uid),
-          orderBy('createdAt', 'desc')
-        );
-        const querySnapshot = await getDocs(q);
-
-        const fetchedReports: Report[] = querySnapshot.docs.map((doc) => {
-          const data = doc.data();
-
-          // createdAt을 문자열로 변환
-          let createdAtStr = '';
-          if (data.createdAt instanceof Timestamp) {
-            createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-          } else if (typeof data.createdAt === 'string') {
-            createdAtStr = data.createdAt;
-          } else {
-            createdAtStr = new Date().toISOString().split('T')[0];
-          }
-
-          return {
-            id: doc.id,
-            title: data.title || '',
-            author: data.authorName || '익명',
-            authorId: data.authorId || '',
-            stockName: data.stockName || '',
-            ticker: data.ticker || '',
-            category: data.category || '',
-            exchange: data.exchange || '',
-            opinion: data.opinion || 'hold',
-            returnRate: data.returnRate || 0,
-            initialPrice: data.initialPrice || 0,
-            currentPrice: data.currentPrice || 0,
-            targetPrice: data.targetPrice || 0,
-            createdAt: createdAtStr,
-            views: data.views || 0,
-            likes: data.likes || 0,
-            mode: data.mode || 'text',
-            content: data.content || '',
-            cssContent: data.cssContent || '',
-            images: data.images || [],
-            files: data.files || [],
-            positionType: data.positionType || 'long',
-            stockData: data.stockData || {},
-            is_closed: data.is_closed || false,
-            closed_at: data.closed_at,
-            closed_return_rate: data.closed_return_rate,
-            closed_price: data.closed_price,
-          };
-        });
+        const fetchedReports: Report[] = myPosts.map((data: any) => ({
+          id: data.id,
+          title: data.title || '',
+          author: data.author || '익명',
+          authorId: data.authorId || '',
+          stockName: data.stockName || '',
+          ticker: data.ticker || '',
+          category: data.category || '',
+          exchange: data.exchange || '',
+          opinion: data.opinion || 'hold',
+          returnRate: data.returnRate || 0,
+          initialPrice: data.initialPrice || 0,
+          currentPrice: data.currentPrice || 0,
+          targetPrice: data.targetPrice || 0,
+          createdAt: data.createdAt || '',
+          views: data.views || 0,
+          likes: data.likes || 0,
+          mode: 'text',
+          content: '',
+          cssContent: '',
+          images: [],
+          files: [],
+          positionType: data.positionType || 'long',
+          stockData: {},
+          is_closed: data.is_closed || false,
+          closed_at: data.closed_at,
+          closed_return_rate: data.closed_return_rate,
+          closed_price: data.closed_price,
+        }));
 
         setMyReports(fetchedReports);
       } catch (error) {
@@ -115,80 +98,7 @@ export default function MyPage() {
     fetchUserData();
   }, [user]);
 
-  // 실시간 주가 및 수익률 업데이트 (stock-prices.json에서 한 번에 가져오기)
-  useEffect(() => {
-    if (myReports.length === 0) return;
-
-    const updatePrices = async () => {
-      setUpdatingPrices(true);
-      console.log('[MyPage] 가격 업데이트 시작 (JSON 캐시 사용)');
-
-      try {
-        // stock-prices.json을 한 번만 fetch
-        const response = await fetch(
-          `https://storage.googleapis.com/${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebasestorage.app/stock-prices.json`
-        );
-
-        if (!response.ok) {
-          console.warn('[MyPage] stock-prices.json 로드 실패, 기존 데이터 유지');
-          setUpdatingPrices(false);
-          return;
-        }
-
-        const priceData = await response.json();
-        const prices = priceData.prices || {};
-
-        console.log(`[MyPage] ${Object.keys(prices).length}개 종목 가격 로드 완료`);
-
-        // 각 리포트에 가격 적용
-        const updatedReports = myReports.map((report) => {
-          // 이미 확정된 경우 건너뛰기
-          if (report.is_closed) {
-            return report;
-          }
-
-          // ticker와 initialPrice가 없으면 기존 리포트 반환
-          if (!report.ticker || !report.initialPrice || report.initialPrice === 0) {
-            return report;
-          }
-
-          const tickerUpper = report.ticker.toUpperCase();
-          const stockPrice = prices[tickerUpper];
-
-          if (stockPrice && stockPrice.currentPrice) {
-            const positionType = report.positionType || 'long';
-            const currentPrice = stockPrice.currentPrice;
-            const initialPrice = report.initialPrice;
-
-            // 수익률 계산
-            let returnRate: number;
-            if (positionType === 'long') {
-              returnRate = ((currentPrice - initialPrice) / initialPrice) * 100;
-            } else {
-              returnRate = ((initialPrice - currentPrice) / initialPrice) * 100;
-            }
-
-            return {
-              ...report,
-              currentPrice,
-              returnRate: parseFloat(returnRate.toFixed(2)),
-            };
-          }
-
-          return report;
-        });
-
-        setMyReports(updatedReports);
-        console.log('[MyPage] 모든 리포트 수익률 업데이트 완료');
-      } catch (error) {
-        console.error('[MyPage] 가격 업데이트 중 오류:', error);
-      } finally {
-        setUpdatingPrices(false);
-      }
-    };
-
-    updatePrices();
-  }, [myReports.length]); // myReports.length를 의존성으로 사용하여 초기 로드 시에만 실행
+  // feed.json에서 이미 최신 가격과 수익률을 가져오므로 별도 업데이트 불필요
 
   // 통계 계산
   const totalReports = myReports.length;
@@ -207,10 +117,28 @@ export default function MyPage() {
   const totalViews = myReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = myReports.reduce((sum, r) => sum + r.likes, 0);
 
-  // 프로필 수정 모달 열기
-  const handleOpenEditModal = () => {
-    setNewNickname(userProfile?.nickname || user?.displayName || user?.email || '');
+  // 프로필 수정 모달 열기 (이때만 Firestore에서 사용자 정보 읽기)
+  const handleOpenEditModal = async () => {
+    if (!user) return;
+
     setIsEditModalOpen(true);
+
+    try {
+      // Firestore에서 최신 프로필 가져오기
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const profileData = userDocSnap.data();
+        setUserProfile(profileData);
+        setNewNickname(profileData.nickname || user.displayName || '');
+      } else {
+        setNewNickname(userProfile?.nickname || user.displayName || '');
+      }
+    } catch (error) {
+      console.error('프로필 로드 실패:', error);
+      setNewNickname(userProfile?.nickname || user.displayName || '');
+    }
   };
 
   // 프로필 업데이트 핸들러
@@ -278,15 +206,7 @@ export default function MyPage() {
   const userName = userProfile?.nickname || user?.displayName || user?.email || '익명';
   const userEmail = user?.email || '';
 
-  // 가입일 포맷
-  let joinDate = '';
-  if (userProfile?.createdAt) {
-    if (userProfile.createdAt instanceof Timestamp) {
-      joinDate = userProfile.createdAt.toDate().toISOString().split('T')[0];
-    } else if (typeof userProfile.createdAt === 'string') {
-      joinDate = userProfile.createdAt;
-    }
-  }
+  // 가입일은 feed.json에 없으므로 표시하지 않음
 
   if (!authReady || !user) {
     return null;
@@ -305,8 +225,7 @@ export default function MyPage() {
                 {userName[0]}
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-sm font-bold text-gray-900 dark:text-white truncate mb-0.5">{userName}</h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mb-1">{userEmail}</p>
+                <h2 className="text-sm font-bold text-gray-900 dark:text-white truncate mb-1.5">{userName}</h2>
                 <button
                   onClick={handleOpenEditModal}
                   className="text-[11px] py-1 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-medium transition-colors inline-flex items-center justify-center"
@@ -388,7 +307,6 @@ export default function MyPage() {
                 {userName[0]}
               </div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1 truncate px-2">{userName}</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 truncate px-2">{userEmail}</p>
             </div>
 
             {/* Stats */}
@@ -442,11 +360,6 @@ export default function MyPage() {
               <Button variant="outline" className="w-full text-base">설정</Button>
             </div>
 
-            {joinDate && (
-              <div className="mt-6 text-sm text-gray-500 text-center">
-                가입일: {joinDate}
-              </div>
-            )}
           </Card>
         </div>
 
@@ -489,14 +402,6 @@ export default function MyPage() {
         {/* Tab Content */}
         {activeTab === 'reports' && (
             <div>
-              {/* 실시간 업데이트 상태 */}
-              {updatingPrices && (
-                <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                  <span className="text-sm text-blue-900 dark:text-blue-100">실시간 주가 및 수익률 업데이트 중...</span>
-                </div>
-              )}
-
               {/* Performance Summary */}
               <Card className="p-4 sm:p-6 mb-4 sm:mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30">
                 <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">포트폴리오 성과</h3>
@@ -638,14 +543,6 @@ export default function MyPage() {
         {/* 모바일 Tab Content */}
         {activeTab === 'reports' && (
           <div>
-            {/* 실시간 업데이트 상태 */}
-            {updatingPrices && (
-              <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg flex items-center gap-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-600 border-t-transparent"></div>
-                <span className="text-sm text-blue-900 dark:text-blue-100">실시간 주가 및 수익률 업데이트 중...</span>
-              </div>
-            )}
-
             {/* Reports List */}
             <div className="space-y-6">
               {myReports.length > 0 ? (

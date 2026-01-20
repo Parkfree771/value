@@ -159,6 +159,7 @@ interface FeedPost {
   id: string;
   title: string;
   author: string;
+  authorId: string;
   stockName: string;
   ticker: string;
   exchange: string;
@@ -321,6 +322,7 @@ async function main() {
         id: docRef.id,
         title: postData.title,
         author: userData.nickname,
+        authorId: userData.id,
         stockName: postData.stockName,
         ticker: postData.ticker,
         exchange: postData.exchange,

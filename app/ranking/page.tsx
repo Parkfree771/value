@@ -40,17 +40,19 @@ export default function RankingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  // API에서 실시간 수익률이 계산된 리포트 데이터 가져오기
+  // feed.json에서 리포트 데이터 가져오기 (효율적인 캐시 활용)
   useEffect(() => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/reports?sortBy=returnRate&limit=100');
+        const response = await fetch('/api/feed/public');
         const data = await response.json();
 
-        if (data.success) {
-          // daysElapsed 계산 추가
-          const reportsWithDays: RankedReport[] = data.reports.map((report: any) => {
+        const posts = data.posts || [];
+
+        // daysElapsed 계산 및 수익률 기준 정렬
+        const reportsWithDays: RankedReport[] = posts
+          .map((report: any) => {
             const createdDate = new Date(report.createdAt);
             const today = new Date();
             const diffTime = Math.abs(today.getTime() - createdDate.getTime());
@@ -61,51 +63,49 @@ export default function RankingPage() {
               daysElapsed: diffDays,
               priceHistory: report.priceHistory || [],
             };
-          });
+          })
+          .sort((a: RankedReport, b: RankedReport) => b.returnRate - a.returnRate);
 
-          setReports(reportsWithDays);
+        setReports(reportsWithDays);
 
-          // 인기글 데이터 설정 (조회수 + 좋아요 기준으로 정렬)
-          const trendingData = [...reportsWithDays].sort((a, b) => {
-            const scoreA = (a.views || 0) + (a.likes || 0) * 2; // 좋아요에 2배 가중치
-            const scoreB = (b.views || 0) + (b.likes || 0) * 2;
-            return scoreB - scoreA;
-          });
-          setTrending(trendingData);
+        // 인기글 데이터 설정 (조회수 + 좋아요 기준으로 정렬)
+        const trendingData = [...reportsWithDays].sort((a, b) => {
+          const scoreA = (a.views || 0) + (a.likes || 0) * 2; // 좋아요에 2배 가중치
+          const scoreB = (b.views || 0) + (b.likes || 0) * 2;
+          return scoreB - scoreA;
+        });
+        setTrending(trendingData);
 
-          // 투자자 데이터 설정 (작성자별 평균 수익률)
-          const authorMap = new Map<string, { totalReturn: number; count: number; author: string }>();
-          reportsWithDays.forEach(report => {
-            const existing = authorMap.get(report.author);
-            if (existing) {
-              existing.totalReturn += report.returnRate;
-              existing.count += 1;
-            } else {
-              authorMap.set(report.author, {
-                totalReturn: report.returnRate,
-                count: 1,
-                author: report.author,
-              });
-            }
-          });
+        // 투자자 데이터 설정 (작성자별 평균 수익률)
+        const authorMap = new Map<string, { totalReturn: number; count: number; author: string }>();
+        reportsWithDays.forEach((report: RankedReport) => {
+          const existing = authorMap.get(report.author);
+          if (existing) {
+            existing.totalReturn += report.returnRate;
+            existing.count += 1;
+          } else {
+            authorMap.set(report.author, {
+              totalReturn: report.returnRate,
+              count: 1,
+              author: report.author,
+            });
+          }
+        });
 
-          const investorsData = Array.from(authorMap.values())
-            .map(({ author, totalReturn, count }) => ({
-              rank: 0,
-              name: author,
-              avgReturnRate: totalReturn / count,
-              totalReports: count,
-              totalLikes: reportsWithDays
-                .filter(r => r.author === author)
-                .reduce((sum, r) => sum + (r.likes || 0), 0),
-            }))
-            .sort((a, b) => b.avgReturnRate - a.avgReturnRate)
-            .map((investor, index) => ({ ...investor, rank: index + 1 }));
+        const investorsData = Array.from(authorMap.values())
+          .map(({ author, totalReturn, count }) => ({
+            rank: 0,
+            name: author,
+            avgReturnRate: totalReturn / count,
+            totalReports: count,
+            totalLikes: reportsWithDays
+              .filter((r: RankedReport) => r.author === author)
+              .reduce((sum: number, r: RankedReport) => sum + (r.likes || 0), 0),
+          }))
+          .sort((a, b) => b.avgReturnRate - a.avgReturnRate)
+          .map((investor, index) => ({ ...investor, rank: index + 1 }));
 
-          setInvestors(investorsData);
-        } else {
-          console.error('리포트 가져오기 실패:', data.error);
-        }
+        setInvestors(investorsData);
       } catch (error) {
         console.error('리포트 가져오기 실패:', error);
       } finally {

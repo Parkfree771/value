@@ -36,6 +36,7 @@ interface FeedPost {
   id: string;
   title: string;
   author: string;
+  authorId: string;
   stockName: string;
   ticker: string;
   exchange: string;
@@ -411,6 +412,7 @@ async function main() {
         id,
         title: data.title || '',
         author: data.authorName || '익명',
+        authorId: data.authorId || '',
         stockName: data.stockName || '',
         ticker: data.ticker || '',
         exchange: data.exchange || '',
