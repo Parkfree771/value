@@ -1,28 +1,86 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import ReportCard from '@/components/ReportCard';
 import FilterBar from '@/components/FilterBar';
 import SearchBar from '@/components/SearchBar';
 import Container from '@/components/Container';
 
+// 한글명 → 티커 매핑 타입
+interface StockNameMap {
+  nameKrToTicker: Map<string, string[]>;  // 한글명 → 티커들
+  tickerToNameKr: Map<string, string>;    // 티커 → 한글명
+}
+
 export default function SearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stockNameMap, setStockNameMap] = useState<StockNameMap>({
+    nameKrToTicker: new Map(),
+    tickerToNameKr: new Map(),
+  });
 
-  // API에서 리포트 가져오기
+  // global-stocks.json에서 한글명 매핑 로드
+  useEffect(() => {
+    const loadStockNames = async () => {
+      try {
+        const response = await fetch('/data/global-stocks.json');
+        const data = await response.json();
+
+        const nameKrToTicker = new Map<string, string[]>();
+        const tickerToNameKr = new Map<string, string>();
+
+        for (const stock of data.stocks || []) {
+          if (stock.nameKr) {
+            const nameKrLower = stock.nameKr.toLowerCase();
+            // 한글명 → 티커 (여러 티커가 같은 한글명을 가질 수 있음)
+            const existing = nameKrToTicker.get(nameKrLower) || [];
+            existing.push(stock.symbol.toUpperCase());
+            nameKrToTicker.set(nameKrLower, existing);
+            // 티커 → 한글명
+            tickerToNameKr.set(stock.symbol.toUpperCase(), stock.nameKr);
+          }
+        }
+
+        setStockNameMap({ nameKrToTicker, tickerToNameKr });
+        console.log(`[Search] Loaded ${nameKrToTicker.size} Korean stock names`);
+      } catch (error) {
+        console.error('한글명 매핑 로드 실패:', error);
+      }
+    };
+
+    loadStockNames();
+  }, []);
+
+  // feed.json에서 리포트 가져오기 (Firestore 비용 절감)
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await fetch('/api/reports');
+        const response = await fetch('/api/feed/public');
         const data = await response.json();
 
-        if (data.success) {
-          setReports(data.reports);
-        }
+        // feed.json 형식에 맞게 변환
+        const posts = data.posts || [];
+        setReports(posts.map((post: any) => ({
+          id: post.id,
+          title: post.title,
+          author: post.author,
+          stockName: post.stockName,
+          ticker: post.ticker,
+          opinion: post.opinion,
+          returnRate: post.returnRate,
+          initialPrice: post.initialPrice,
+          currentPrice: post.currentPrice,
+          createdAt: post.createdAt,
+          views: post.views,
+          likes: post.likes,
+          exchange: post.exchange,
+          category: post.category,
+          positionType: post.positionType,
+        })));
       } catch (error) {
         console.error('리포트 가져오기 실패:', error);
       } finally {
@@ -33,18 +91,37 @@ export default function SearchPage() {
     fetchReports();
   }, []);
 
-  // 검색 필터링
-  const filteredReports = reports.filter((report) => {
-    if (!searchQuery.trim()) return true;
+  // 검색 필터링 (한글명 매핑 포함)
+  const filteredReports = useMemo(() => {
+    if (!searchQuery.trim()) return reports;
 
     const query = searchQuery.toLowerCase();
-    return (
-      report.stockName.toLowerCase().includes(query) ||
-      report.ticker.toLowerCase().includes(query) ||
-      report.author.toLowerCase().includes(query) ||
-      report.title.toLowerCase().includes(query)
-    );
-  });
+
+    // 한글명으로 검색 시 해당 티커들 찾기
+    const matchedTickers = new Set<string>();
+    for (const [nameKr, tickers] of stockNameMap.nameKrToTicker.entries()) {
+      if (nameKr.includes(query)) {
+        tickers.forEach(t => matchedTickers.add(t));
+      }
+    }
+
+    return reports.filter((report) => {
+      const tickerUpper = report.ticker?.toUpperCase() || '';
+      const stockNameKr = stockNameMap.tickerToNameKr.get(tickerUpper) || '';
+
+      return (
+        // 기존 검색 (영문명, 티커, 작성자, 제목)
+        report.stockName?.toLowerCase().includes(query) ||
+        report.ticker?.toLowerCase().includes(query) ||
+        report.author?.toLowerCase().includes(query) ||
+        report.title?.toLowerCase().includes(query) ||
+        // 한글명 검색 (티커의 한글명이 검색어 포함)
+        stockNameKr.toLowerCase().includes(query) ||
+        // 한글명으로 찾은 티커와 일치
+        matchedTickers.has(tickerUpper)
+      );
+    });
+  }, [reports, searchQuery, stockNameMap]);
 
   return (
     <Container>

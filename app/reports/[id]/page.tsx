@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
+import { cache } from 'react';
 import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Report } from '@/types/report';
-import { updateReportReturnRate } from '@/lib/stockPrice';
 import { generateReportMetadata, generateReportJsonLd } from '@/lib/metadata';
 import ReportDetailClient from '@/components/ReportDetailClient';
 import Card from '@/components/Card';
@@ -10,9 +10,10 @@ import Button from '@/components/Button';
 import Link from 'next/link';
 
 /**
- * 리포트 ID로 Firestore에서 리포트 데이터를 가져옵니다.
+ * 리포트 데이터를 Firestore에서 가져옵니다.
+ * React cache()로 generateMetadata와 페이지 컴포넌트 간 중복 호출 방지
  */
-async function getReportData(id: string): Promise<Report | null> {
+const getReportData = cache(async (id: string): Promise<Report | null> => {
   try {
     const docRef = doc(db, 'posts', id);
     const docSnap = await getDoc(docRef);
@@ -37,7 +38,6 @@ async function getReportData(id: string): Promise<Report | null> {
     let updatedAtArray: string[] = [];
     if (data.updatedAt) {
       if (Array.isArray(data.updatedAt)) {
-        // 이미 배열인 경우
         updatedAtArray = data.updatedAt.map((item: any) => {
           if (item instanceof Timestamp) {
             return item.toDate().toISOString().split('T')[0];
@@ -47,10 +47,8 @@ async function getReportData(id: string): Promise<Report | null> {
           return '';
         }).filter((date: string) => date !== '');
       } else if (data.updatedAt instanceof Timestamp) {
-        // Timestamp인 경우 (기존 데이터 호환)
         updatedAtArray = [data.updatedAt.toDate().toISOString().split('T')[0]];
       } else if (typeof data.updatedAt === 'string') {
-        // 문자열인 경우 (기존 데이터 호환)
         updatedAtArray = [data.updatedAt];
       }
     }
@@ -84,53 +82,14 @@ async function getReportData(id: string): Promise<Report | null> {
       closed_price: data.closed_price,
     };
 
-    // 실시간 주가 및 수익률 업데이트 (확정되지 않은 경우에만)
-    if (!report.is_closed && report.ticker && report.initialPrice) {
-      console.log(`[ReportPage] 수익률 업데이트 시도:`, {
-        id: docSnap.id,
-        ticker: report.ticker,
-        initialPrice: report.initialPrice,
-        positionType: report.positionType
-      });
-
-      const updatedData = await updateReportReturnRate(
-        report.ticker,
-        report.initialPrice,
-        report.positionType
-      );
-
-      if (updatedData) {
-        console.log(`[ReportPage] 수익률 업데이트 성공:`, updatedData);
-        report.currentPrice = updatedData.currentPrice;
-        report.returnRate = updatedData.returnRate;
-        report.stockData = {
-          ...report.stockData,
-          ...updatedData.stockData,
-        };
-      } else {
-        console.error(`[ReportPage] 수익률 업데이트 실패 - updatedData가 null`);
-      }
-    } else if (report.is_closed) {
-      console.log(`[ReportPage] 수익률 업데이트 건너뛰기 - 이미 확정됨:`, {
-        id: docSnap.id,
-        closed_at: report.closed_at,
-        closed_return_rate: report.closed_return_rate
-      });
-      // 확정된 수익률 사용
+    // 확정된 수익률이 있으면 사용
+    if (report.is_closed) {
       if (report.closed_return_rate !== undefined) {
         report.returnRate = report.closed_return_rate;
       }
       if (report.closed_price !== undefined) {
         report.currentPrice = report.closed_price;
       }
-    } else {
-      console.warn(`[ReportPage] 수익률 업데이트 건너뛰기:`, {
-        id: docSnap.id,
-        ticker: report.ticker,
-        initialPrice: report.initialPrice,
-        hasTicker: !!report.ticker,
-        hasInitialPrice: !!report.initialPrice
-      });
     }
 
     return report;
@@ -138,7 +97,7 @@ async function getReportData(id: string): Promise<Report | null> {
     console.error('리포트 가져오기 실패:', error);
     return null;
   }
-}
+});
 
 /**
  * 동적 메타데이터 생성 (SEO)
@@ -205,15 +164,3 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
  * revalidate: 3600 => 1시간마다 페이지 재생성 (ISR)
  */
 export const revalidate = 3600; // 1시간
-
-/**
- * 동적 라우트 파라미터 생성 (옵션)
- * 빌드 시 미리 생성할 페이지 목록
- */
-// export async function generateStaticParams() {
-//   // Firestore에서 모든 리포트 ID 가져오기
-//   const postsSnapshot = await getDocs(collection(db, 'posts'));
-//   return postsSnapshot.docs.map((doc) => ({
-//     id: doc.id,
-//   }));
-// }

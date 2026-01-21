@@ -89,6 +89,19 @@ export async function DELETE(request: NextRequest) {
 
     console.log(`[Admin] 게시글 삭제: ${postId} by ${adminEmail}`);
 
+    // feed.json 갱신 (캐시 무효화)
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+      await fetch(`${baseUrl}/api/revalidate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: '/' }),
+      });
+      console.log(`[Admin] 캐시 무효화 완료`);
+    } catch (revalidateError) {
+      console.error('[Admin] 캐시 무효화 실패:', revalidateError);
+    }
+
     return NextResponse.json({
       success: true,
       message: '게시글이 성공적으로 삭제되었습니다.',
