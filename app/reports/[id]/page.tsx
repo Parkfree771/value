@@ -9,12 +9,66 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Link from 'next/link';
 
+// feed.json URL
+const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
+
+interface FeedPost {
+  id: string;
+  title: string;
+  author: string;
+  returnRate: number;
+  currentPrice: number;
+  initialPrice: number;
+  views: number;
+  likes: number;
+  is_closed?: boolean;
+  closed_return_rate?: number;
+  closed_price?: number;
+}
+
+interface FeedData {
+  posts: FeedPost[];
+}
+
+// feed.json 캐시 (서버 사이드)
+let feedCache: { data: FeedData | null; timestamp: number } = { data: null, timestamp: 0 };
+const FEED_CACHE_TTL = 60 * 1000; // 1분
+
 /**
- * 리포트 데이터를 Firestore에서 가져옵니다.
+ * feed.json에서 최신 수익률 정보 가져오기
+ */
+async function getFeedPost(id: string): Promise<FeedPost | null> {
+  try {
+    const now = Date.now();
+
+    // 캐시 유효하면 사용
+    if (feedCache.data && (now - feedCache.timestamp) < FEED_CACHE_TTL) {
+      return feedCache.data.posts.find(p => p.id === id) || null;
+    }
+
+    // feed.json 가져오기
+    const response = await fetch(FEED_URL, { next: { revalidate: 60 } });
+    if (!response.ok) return null;
+
+    const data: FeedData = await response.json();
+    feedCache = { data, timestamp: now };
+
+    return data.posts.find(p => p.id === id) || null;
+  } catch (error) {
+    console.error('[ReportPage] feed.json 가져오기 실패:', error);
+    return null;
+  }
+}
+
+/**
+ * 리포트 데이터를 가져옵니다.
+ * - feed.json: 최신 수익률, 현재가, 조회수, 좋아요
+ * - Firestore: content, stockData 등 상세 정보
  * React cache()로 generateMetadata와 페이지 컴포넌트 간 중복 호출 방지
  */
 const getReportData = cache(async (id: string): Promise<Report | null> => {
   try {
+    // 1. Firestore에서 상세 정보 가져오기
     const docRef = doc(db, 'posts', id);
     const docSnap = await getDoc(docRef);
 
@@ -23,6 +77,9 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
     }
 
     const data = docSnap.data();
+
+    // 2. feed.json에서 최신 수익률 정보 가져오기
+    const feedPost = await getFeedPost(id);
 
     // createdAt을 문자열로 변환
     let createdAtStr = '';
@@ -53,6 +110,7 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       }
     }
 
+    // 3. 데이터 조합 (feed.json 수익률 우선, Firestore 상세 정보)
     const report: Report = {
       id: docSnap.id,
       title: data.title || '',
@@ -61,14 +119,17 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       stockName: data.stockName || '',
       ticker: data.ticker || '',
       opinion: data.opinion || 'hold',
-      returnRate: data.returnRate || 0,
-      initialPrice: data.initialPrice || 0,
-      currentPrice: data.currentPrice || 0,
+      // feed.json에서 최신 수익률/현재가 사용 (없으면 Firestore 값)
+      returnRate: feedPost?.returnRate ?? data.returnRate ?? 0,
+      initialPrice: feedPost?.initialPrice ?? data.initialPrice ?? 0,
+      currentPrice: feedPost?.currentPrice ?? data.currentPrice ?? 0,
       targetPrice: data.targetPrice || 0,
       createdAt: createdAtStr,
       updatedAt: updatedAtArray.length > 0 ? updatedAtArray : undefined,
-      views: data.views || 0,
-      likes: data.likes || 0,
+      // feed.json에서 최신 조회수/좋아요 사용
+      views: feedPost?.views ?? data.views ?? 0,
+      likes: feedPost?.likes ?? data.likes ?? 0,
+      // Firestore에서만 가져오는 상세 정보
       mode: data.mode || 'text',
       content: data.content || '',
       cssContent: data.cssContent || '',
@@ -76,10 +137,11 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       files: data.files || [],
       positionType: data.positionType || 'long',
       stockData: data.stockData || {},
-      is_closed: data.is_closed || false,
+      // 확정 상태
+      is_closed: feedPost?.is_closed ?? data.is_closed ?? false,
       closed_at: data.closed_at,
-      closed_return_rate: data.closed_return_rate,
-      closed_price: data.closed_price,
+      closed_return_rate: feedPost?.closed_return_rate ?? data.closed_return_rate,
+      closed_price: feedPost?.closed_price ?? data.closed_price,
     };
 
     // 확정된 수익률이 있으면 사용
