@@ -3,6 +3,7 @@ const ADMIN_EMAILS = ['dbfh1498@gmail.com'];
 
 /**
  * 사용자가 관리자인지 확인
+ * 클라이언트 + 서버 모두에서 사용 가능
  */
 export function isAdmin(email: string | null | undefined): boolean {
   if (!email) return false;
@@ -11,6 +12,7 @@ export function isAdmin(email: string | null | undefined): boolean {
 
 /**
  * 관리자 권한 체크 (에러 반환)
+ * 클라이언트 + 서버 모두에서 사용 가능
  */
 export function checkAdminPermission(email: string | null | undefined): void {
   if (!isAdmin(email)) {

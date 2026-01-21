@@ -48,7 +48,7 @@ type SortOrder = 'asc' | 'desc';
 
 export default function AdminPage() {
   const router = useRouter();
-  const { user, authReady } = useAuth();
+  const { user, authReady, getIdToken } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'posts' | 'users'>('dashboard');
   const [loading, setLoading] = useState(true);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -140,11 +140,23 @@ export default function AdminPage() {
 
     try {
       setLoading(true);
-      const response = await fetch(`/api/admin/users?adminEmail=${encodeURIComponent(user.email || '')}`);
+      const token = await getIdToken();
+      if (!token) {
+        alert('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+
+      const response = await fetch('/api/admin/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const data = await response.json();
 
       if (data.success) {
         setUsers(data.users);
+      } else {
+        console.error('사용자 조회 실패:', data.error);
       }
     } catch (error) {
       console.error('사용자 조회 오류:', error);
@@ -256,10 +268,19 @@ export default function AdminPage() {
         setConfirmModal({ ...confirmModal, isOpen: false });
 
         try {
+          const token = await getIdToken();
+          if (!token) {
+            alert('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.');
+            return;
+          }
+
           const response = await fetch('/api/admin/posts', {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ adminEmail: user.email, postId }),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ postId }),
           });
 
           const data = await response.json();
@@ -293,11 +314,19 @@ export default function AdminPage() {
         setConfirmModal({ ...confirmModal, isOpen: false });
 
         try {
+          const token = await getIdToken();
+          if (!token) {
+            alert('인증 토큰을 가져올 수 없습니다. 다시 로그인해주세요.');
+            return;
+          }
+
           const response = await fetch('/api/admin/users', {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
             body: JSON.stringify({
-              adminEmail: user.email,
               userId,
               isSuspended: !isSuspended,
             }),

@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, orderBy, query, limit, startAfter, Timestamp, doc, deleteDoc, getDoc } from 'firebase/firestore';
-import { checkAdminPermission } from '@/lib/admin/adminCheck';
+import { verifyAdminToken } from '@/lib/admin/adminAuth';
 
 // 게시글 목록 조회 (관리자용)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const adminEmail = searchParams.get('adminEmail');
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
     const lastDocId = searchParams.get('lastDocId');
 
-    // 관리자 권한 확인
-    checkAdminPermission(adminEmail);
+    // Authorization 헤더로 관리자 토큰 검증
+    const authHeader = request.headers.get('Authorization');
+    await verifyAdminToken(authHeader);
 
     const postsRef = collection(db, 'posts');
     let q = query(postsRef, orderBy('createdAt', 'desc'), limit(pageSize));
@@ -62,7 +62,11 @@ export async function GET(request: NextRequest) {
 // 게시글 삭제 (관리자용)
 export async function DELETE(request: NextRequest) {
   try {
-    const { adminEmail, postId } = await request.json();
+    // Authorization 헤더로 관리자 토큰 검증
+    const authHeader = request.headers.get('Authorization');
+    const adminEmail = await verifyAdminToken(authHeader);
+
+    const { postId } = await request.json();
 
     if (!postId) {
       return NextResponse.json(
@@ -70,9 +74,6 @@ export async function DELETE(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 관리자 권한 확인
-    checkAdminPermission(adminEmail);
 
     // 게시글 삭제
     const postRef = doc(db, 'posts', postId);

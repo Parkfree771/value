@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, orderBy, query, limit, Timestamp, doc, updateDoc, getDoc, where } from 'firebase/firestore';
-import { checkAdminPermission } from '@/lib/admin/adminCheck';
+import { verifyAdminToken } from '@/lib/admin/adminAuth';
 
 // 사용자 목록 조회 (관리자용)
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const adminEmail = searchParams.get('adminEmail');
-
-    // 관리자 권한 확인
-    checkAdminPermission(adminEmail);
+    // Authorization 헤더로 관리자 토큰 검증
+    const authHeader = request.headers.get('Authorization');
+    await verifyAdminToken(authHeader);
 
     const usersRef = collection(db, 'users');
     const q = query(usersRef, orderBy('createdAt', 'desc'), limit(100));
@@ -51,7 +49,11 @@ export async function GET(request: NextRequest) {
 // 사용자 정지/해제 (관리자용)
 export async function PUT(request: NextRequest) {
   try {
-    const { adminEmail, userId, isSuspended } = await request.json();
+    // Authorization 헤더로 관리자 토큰 검증
+    const authHeader = request.headers.get('Authorization');
+    const adminEmail = await verifyAdminToken(authHeader);
+
+    const { userId, isSuspended } = await request.json();
 
     if (!userId || typeof isSuspended !== 'boolean') {
       return NextResponse.json(
@@ -59,9 +61,6 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // 관리자 권한 확인
-    checkAdminPermission(adminEmail);
 
     // 사용자 정지/해제
     const userRef = doc(db, 'users', userId);
