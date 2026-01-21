@@ -20,7 +20,7 @@ const SearchBar = dynamic(() => import('@/components/SearchBar'), {
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
 
-// feed.json API 엔드포인트 (CORS 우회)
+// feed.json API 엔드포인트 (클라이언트 재검증용)
 const FEED_API = '/api/feed/public';
 
 interface FeedPost {
@@ -48,10 +48,40 @@ interface FeedData {
   posts: FeedPost[];
 }
 
-const HomeClient = memo(function HomeClient() {
-  const [reports, setReports] = useState<ReportSummary[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+interface HomeClientProps {
+  initialData: FeedData | null;
+}
+
+// FeedPost를 ReportSummary로 매핑하는 함수
+function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
+  return posts.map((post) => ({
+    id: post.id,
+    title: post.title,
+    author: post.author,
+    stockName: post.stockName,
+    ticker: post.ticker,
+    opinion: post.opinion,
+    returnRate: post.returnRate,
+    initialPrice: post.initialPrice,
+    currentPrice: post.currentPrice,
+    createdAt: post.createdAt,
+    views: post.views,
+    likes: post.likes,
+    exchange: post.exchange,
+    category: post.category,
+    positionType: post.positionType,
+    stockData: undefined,
+  }));
+}
+
+const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
+  // 서버에서 받은 initialData로 초기 상태 설정
+  const [reports, setReports] = useState<ReportSummary[]>(() =>
+    initialData?.posts ? mapPostsToReports(initialData.posts) : []
+  );
+  const [total, setTotal] = useState(() => initialData?.totalPosts || 0);
+  // initialData가 있으면 로딩 완료 상태로 시작
+  const [isLoading, setIsLoading] = useState(!initialData);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
   const [filters, setFilters] = useState({
@@ -61,8 +91,11 @@ const HomeClient = memo(function HomeClient() {
     sortBy: 'returnRate',
   });
 
-  // 클라이언트에서 feed API 호출 (Cold Start 방지)
+  // 서버에서 데이터를 받지 못했을 경우에만 클라이언트에서 fetch
   useEffect(() => {
+    // 이미 초기 데이터가 있으면 스킵
+    if (initialData) return;
+
     const fetchFeed = async () => {
       try {
         const res = await fetch(FEED_API);
@@ -71,26 +104,7 @@ const HomeClient = memo(function HomeClient() {
 
         const feedData: FeedData = await res.json();
 
-        const mappedReports: ReportSummary[] = feedData.posts.map((post) => ({
-          id: post.id,
-          title: post.title,
-          author: post.author,
-          stockName: post.stockName,
-          ticker: post.ticker,
-          opinion: post.opinion,
-          returnRate: post.returnRate,
-          initialPrice: post.initialPrice,
-          currentPrice: post.currentPrice,
-          createdAt: post.createdAt,
-          views: post.views,
-          likes: post.likes,
-          exchange: post.exchange,
-          category: post.category,
-          positionType: post.positionType,
-          stockData: undefined,
-        }));
-
-        setReports(mappedReports);
+        setReports(mapPostsToReports(feedData.posts));
         setTotal(feedData.totalPosts);
       } catch (error) {
         console.error('Failed to fetch feed:', error);
@@ -100,7 +114,7 @@ const HomeClient = memo(function HomeClient() {
     };
 
     fetchFeed();
-  }, []);
+  }, [initialData]);
 
   // 클라이언트에서 정렬 처리
   const sortedReports = useMemo(() => {

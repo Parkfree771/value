@@ -269,67 +269,44 @@ export default function RankingPage() {
                   }`}>
                     {index === 0 && (
                       <>
-                        {/* Diamond Badge - 3D 입체 */}
-                        {/* 외곽 다중 글로우 - 3D 깊이 */}
-                        <div className="absolute -inset-2 rotate-45 blur-2xl bg-cyan-300/40 animate-pulse"></div>
-                        <div className="absolute -inset-1 rotate-45 blur-xl bg-blue-400/50 animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                        {/* Diamond Badge - 최적화된 3D 입체 */}
+                        {/* 외곽 글로우 - 단순화 */}
+                        <div className="absolute -inset-1 rotate-45 blur-sm bg-cyan-300/30"></div>
 
-                        {/* 다이아몬드 메인 바디 - 3D 그라데이션 */}
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-xl shadow-2xl border-2 border-cyan-200/50"></div>
+                        {/* 다이아몬드 메인 바디 */}
+                        <div className="absolute inset-0 rotate-45 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-xl shadow-lg border-2 border-cyan-200/50"></div>
 
-                        {/* 상단 패싯 (테이블) - 가장 밝은 면 */}
+                        {/* 상단 패싯 */}
                         <div className="absolute inset-2 rotate-45 bg-gradient-to-br from-white via-cyan-50 to-blue-100 rounded-lg shadow-inner"></div>
 
-                        {/* 왼쪽 대각선 패싯 - 어두운 입체면 */}
-                        <div className="absolute top-2 left-0 w-1/2 h-3/4 rotate-45 bg-gradient-to-br from-cyan-500/40 via-cyan-400/30 to-transparent rounded-l-lg"></div>
+                        {/* 반사 효과 - hover시에만 pulse */}
+                        <div className="absolute inset-0 rotate-45 bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-xl group-hover:animate-pulse"></div>
 
-                        {/* 오른쪽 대각선 패싯 - 밝은 반사면 */}
-                        <div className="absolute top-2 right-0 w-1/2 h-3/4 rotate-45 bg-gradient-to-bl from-white/70 via-white/40 to-transparent rounded-r-lg"></div>
-
-                        {/* 하단 패싯 - 깊이감 */}
-                        <div className="absolute bottom-0 left-2 right-2 h-1/2 rotate-45 bg-gradient-to-t from-blue-400/50 via-cyan-300/30 to-transparent rounded-b-lg"></div>
-
-                        {/* 중앙 크리스탈 하이라이트 - 빛나는 코어 */}
-                        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-8 h-8 rotate-45 bg-white/90 rounded-full blur-md animate-pulse"></div>
-
-                        {/* 패싯 라인들 - 크리스탈 구조 */}
-                        <div className="absolute top-0 left-1/2 w-px h-full rotate-45 bg-gradient-to-b from-white/80 via-cyan-200/50 to-transparent"></div>
-                        <div className="absolute top-1/2 left-0 w-full h-px rotate-45 bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
-
-                        {/* 대각선 패싯 구분선 */}
-                        <div className="absolute top-0 left-1/4 w-px h-full rotate-45 bg-gradient-to-b from-white/40 via-transparent to-transparent"></div>
-                        <div className="absolute top-0 right-1/4 w-px h-full rotate-45 bg-gradient-to-b from-white/40 via-transparent to-transparent"></div>
-
-                        {/* 회전하는 반짝임 효과 */}
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-tr from-transparent via-white/40 to-transparent animate-pulse rounded-xl"></div>
-
-                        {/* 순위 숫자 - 3D 효과 */}
+                        {/* 순위 숫자 */}
                         <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <span className="text-xl font-black bg-gradient-to-b from-cyan-600 via-blue-600 to-blue-800 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(6,182,212,0.5)]">1</span>
+                          <span className="text-xl font-black bg-gradient-to-b from-cyan-600 via-blue-600 to-blue-800 bg-clip-text text-transparent">1</span>
                         </div>
                       </>
                     )}
                     {index === 1 && (
                       <>
-                        {/* Gold Badge - 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-lg bg-yellow-400/40 animate-pulse"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-500 rounded-xl rotate-45 shadow-2xl border-2 border-yellow-300"></div>
+                        {/* Gold Badge - 최적화된 3D 입체 */}
+                        <div className="absolute -inset-1 rotate-45 blur-sm bg-yellow-400/30"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-500 rounded-xl rotate-45 shadow-lg border-2 border-yellow-300"></div>
                         <div className="absolute inset-1 bg-gradient-to-b from-white/50 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent rounded-xl rotate-45"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-base font-black text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.3)] z-10">2</span>
+                          <span className="text-base font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] z-10">2</span>
                         </div>
                       </>
                     )}
                     {index === 2 && (
                       <>
-                        {/* Silver Badge - 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-lg bg-slate-300/40 animate-pulse"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-gray-200 to-slate-400 rounded-xl rotate-45 shadow-2xl border-2 border-slate-200"></div>
+                        {/* Silver Badge - 최적화된 3D 입체 */}
+                        <div className="absolute -inset-1 rotate-45 blur-sm bg-slate-300/30"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-gray-200 to-slate-400 rounded-xl rotate-45 shadow-lg border-2 border-slate-200"></div>
                         <div className="absolute inset-1 bg-gradient-to-b from-white/60 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/50 to-transparent rounded-xl rotate-45"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-sm font-black text-gray-700 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] z-10">3</span>
+                          <span className="text-sm font-black text-gray-700 z-10">3</span>
                         </div>
                       </>
                     )}
@@ -456,67 +433,35 @@ export default function RankingPage() {
                   }`}>
                     {investor.rank === 1 && (
                       <>
-                        {/* Diamond Badge - 3D 입체 */}
-                        {/* 외곽 다중 글로우 - 3D 깊이 */}
-                        <div className="absolute -inset-2 rotate-45 blur-2xl bg-cyan-300/40 animate-pulse"></div>
-                        <div className="absolute -inset-1 rotate-45 blur-xl bg-blue-400/50 animate-pulse" style={{animationDelay: '0.5s'}}></div>
-
-                        {/* 다이아몬드 메인 바디 - 3D 그라데이션 */}
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-xl shadow-2xl border-2 border-cyan-200/50"></div>
-
-                        {/* 상단 패싯 (테이블) - 가장 밝은 면 */}
+                        {/* Diamond Badge - 최적화된 3D 입체 */}
+                        <div className="absolute -inset-1 rotate-45 blur-sm bg-cyan-300/30"></div>
+                        <div className="absolute inset-0 rotate-45 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-xl shadow-lg border-2 border-cyan-200/50"></div>
                         <div className="absolute inset-2 rotate-45 bg-gradient-to-br from-white via-cyan-50 to-blue-100 rounded-lg shadow-inner"></div>
-
-                        {/* 왼쪽 대각선 패싯 - 어두운 입체면 */}
-                        <div className="absolute top-2 left-0 w-1/2 h-3/4 rotate-45 bg-gradient-to-br from-cyan-500/40 via-cyan-400/30 to-transparent rounded-l-lg"></div>
-
-                        {/* 오른쪽 대각선 패싯 - 밝은 반사면 */}
-                        <div className="absolute top-2 right-0 w-1/2 h-3/4 rotate-45 bg-gradient-to-bl from-white/70 via-white/40 to-transparent rounded-r-lg"></div>
-
-                        {/* 하단 패싯 - 깊이감 */}
-                        <div className="absolute bottom-0 left-2 right-2 h-1/2 rotate-45 bg-gradient-to-t from-blue-400/50 via-cyan-300/30 to-transparent rounded-b-lg"></div>
-
-                        {/* 중앙 크리스탈 하이라이트 - 빛나는 코어 */}
-                        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-8 h-8 rotate-45 bg-white/90 rounded-full blur-md animate-pulse"></div>
-
-                        {/* 패싯 라인들 - 크리스탈 구조 */}
-                        <div className="absolute top-0 left-1/2 w-px h-full rotate-45 bg-gradient-to-b from-white/80 via-cyan-200/50 to-transparent"></div>
-                        <div className="absolute top-1/2 left-0 w-full h-px rotate-45 bg-gradient-to-r from-transparent via-white/60 to-transparent"></div>
-
-                        {/* 대각선 패싯 구분선 */}
-                        <div className="absolute top-0 left-1/4 w-px h-full rotate-45 bg-gradient-to-b from-white/40 via-transparent to-transparent"></div>
-                        <div className="absolute top-0 right-1/4 w-px h-full rotate-45 bg-gradient-to-b from-white/40 via-transparent to-transparent"></div>
-
-                        {/* 회전하는 반짝임 효과 */}
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-tr from-transparent via-white/40 to-transparent animate-pulse rounded-xl"></div>
-
-                        {/* 순위 숫자 - 3D 효과 */}
+                        <div className="absolute inset-0 rotate-45 bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-xl group-hover:animate-pulse"></div>
                         <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <span className="text-xl font-black bg-gradient-to-b from-cyan-600 via-blue-600 to-blue-800 bg-clip-text text-transparent drop-shadow-[0_2px_4px_rgba(6,182,212,0.5)]">1</span>
+                          <span className="text-xl font-black bg-gradient-to-b from-cyan-600 via-blue-600 to-blue-800 bg-clip-text text-transparent">1</span>
                         </div>
                       </>
                     )}
                     {investor.rank === 2 && (
                       <>
-                        {/* Gold Badge - 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-lg bg-yellow-400/40 animate-pulse"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-500 rounded-xl rotate-45 shadow-2xl border-2 border-yellow-300"></div>
+                        {/* Gold Badge - 최적화된 3D 입체 */}
+                        <div className="absolute -inset-1 rotate-45 blur-sm bg-yellow-400/30"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-500 rounded-xl rotate-45 shadow-lg border-2 border-yellow-300"></div>
                         <div className="absolute inset-1 bg-gradient-to-b from-white/50 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent rounded-xl rotate-45"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-base font-black text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.3)] z-10">2</span>
+                          <span className="text-base font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] z-10">2</span>
                         </div>
                       </>
                     )}
                     {investor.rank === 3 && (
                       <>
-                        {/* Silver Badge - 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-lg bg-slate-300/40 animate-pulse"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-gray-200 to-slate-400 rounded-xl rotate-45 shadow-2xl border-2 border-slate-200"></div>
+                        {/* Silver Badge - 최적화된 3D 입체 */}
+                        <div className="absolute -inset-1 rotate-45 blur-sm bg-slate-300/30"></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-gray-200 to-slate-400 rounded-xl rotate-45 shadow-lg border-2 border-slate-200"></div>
                         <div className="absolute inset-1 bg-gradient-to-b from-white/60 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/50 to-transparent rounded-xl rotate-45"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-sm font-black text-gray-700 drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] z-10">3</span>
+                          <span className="text-sm font-black text-gray-700 z-10">3</span>
                         </div>
                       </>
                     )}

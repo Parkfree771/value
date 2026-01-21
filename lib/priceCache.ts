@@ -1,5 +1,9 @@
-import { ref, getDownloadURL } from 'firebase/storage';
-import { storage } from './firebase';
+/**
+ * 가격 캐시 모듈
+ *
+ * Firebase Storage에서 가격 데이터를 가져와 캐시
+ * Dynamic import로 Firebase 모듈 지연 로드
+ */
 
 // 공통 가격 데이터 타입
 export interface CachedPriceData {
@@ -24,6 +28,11 @@ export async function getLatestPrices(): Promise<Record<string, CachedPriceData>
   }
 
   try {
+    // Dynamic import로 Firebase 모듈 지연 로드
+    const { getStorageLazy } = await import('./firebase-lazy');
+    const { ref, getDownloadURL } = await import('firebase/storage');
+
+    const storage = await getStorageLazy();
     const storageRef = ref(storage, 'stock-prices.json');
     const downloadURL = await getDownloadURL(storageRef);
     const response = await fetch(downloadURL);

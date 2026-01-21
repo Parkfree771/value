@@ -47,7 +47,8 @@ interface FeedData {
 
 // KIS API 설정
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_BETWEEN_REQUESTS = 60; // ms (초당 약 16회)
+const BATCH_SIZE = 5; // 병렬 처리 배치 크기
+const BATCH_DELAY = 100; // 배치 간 딜레이 (ms)
 
 // 수익률 계산
 function calculateReturn(
@@ -182,33 +183,52 @@ export async function POST() {
     // 3. KIS 토큰 가져오기
     const token = await getKISTokenWithCache();
 
-    // 4. 가격 조회
+    // 4. 가격 조회 (배치 병렬 처리)
     const prices: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = {};
     let successCount = 0;
     let failCount = 0;
     const errors: string[] = [];
 
-    for (const [tickerKey, { ticker, exchange }] of uniqueTickers) {
-      try {
-        const price = await getStockPrice(token, ticker, exchange);
+    // 티커 배열로 변환
+    const tickerArray = Array.from(uniqueTickers.entries());
 
-        prices[ticker] = {
-          currentPrice: price,
-          exchange,
-          lastUpdated: new Date().toISOString(),
-        };
+    // 배치 단위로 병렬 처리
+    for (let i = 0; i < tickerArray.length; i += BATCH_SIZE) {
+      const batch = tickerArray.slice(i, i + BATCH_SIZE);
 
-        console.log(`[Update Prices] ✓ ${ticker} (${exchange}): ${price}`);
-        successCount++;
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`[Update Prices] ✗ ${ticker}: ${errorMsg}`);
-        failCount++;
-        errors.push(`${ticker}: ${errorMsg}`);
+      // 배치 내 병렬 실행
+      const results = await Promise.allSettled(
+        batch.map(async ([tickerKey, { ticker, exchange }]) => {
+          const price = await getStockPrice(token, ticker, exchange);
+          return { ticker, exchange, price };
+        })
+      );
+
+      // 결과 처리
+      for (let j = 0; j < results.length; j++) {
+        const result = results[j];
+        const { ticker, exchange } = batch[j][1];
+
+        if (result.status === 'fulfilled') {
+          prices[ticker] = {
+            currentPrice: result.value.price,
+            exchange,
+            lastUpdated: new Date().toISOString(),
+          };
+          console.log(`[Update Prices] ✓ ${ticker} (${exchange}): ${result.value.price}`);
+          successCount++;
+        } else {
+          const errorMsg = result.reason instanceof Error ? result.reason.message : 'Unknown error';
+          console.error(`[Update Prices] ✗ ${ticker}: ${errorMsg}`);
+          failCount++;
+          errors.push(`${ticker}: ${errorMsg}`);
+        }
       }
 
-      // Rate limiting
-      await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+      // 배치 간 Rate limiting (마지막 배치 제외)
+      if (i + BATCH_SIZE < tickerArray.length) {
+        await new Promise(resolve => setTimeout(resolve, BATCH_DELAY));
+      }
     }
 
     // 5. 각 게시글의 수익률 재계산

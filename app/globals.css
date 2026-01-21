@@ -19,15 +19,56 @@
     scroll-behavior: smooth;
   }
 
+  /* GPU containment - 레이아웃 격리로 리플로우 최소화 */
+  .contain-layout {
+    contain: layout;
+  }
+
+  .contain-paint {
+    contain: paint;
+  }
+
+  .contain-strict {
+    contain: strict;
+  }
+
+  /* 배지/카드 등 독립적인 요소에 적용 */
+  .gpu-accelerated {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  /* 애니메이션 성능 최적화 */
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
     }
 
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* blur 효과 완전 제거 */
+    .blur-sm,
+    .blur-md,
+    .blur-lg,
+    .blur-xl,
+    .blur-2xl {
+      filter: none !important;
+    }
+  }
+
+  /* 모바일 배터리 절약 모드 */
+  @media (prefers-reduced-motion: reduce), (update: slow) {
+    .animate-pulse,
+    .animate-spin,
+    .animate-bounce {
+      animation: none !important;
     }
   }
 }
