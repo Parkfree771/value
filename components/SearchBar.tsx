@@ -13,9 +13,10 @@ interface StockSuggestion {
 interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  showStockSuggestions?: boolean; // 종목 자동완성 표시 여부 (기본: true)
 }
 
-const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: SearchBarProps) {
+const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery, showStockSuggestions = true }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [suggestions, setSuggestions] = useState<StockSuggestion[]>([]);
@@ -23,9 +24,15 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: Searc
   const searchRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // 실시간 종목 검색 API 호출
+  // 실시간 종목 검색 API 호출 (showStockSuggestions가 true일 때만)
   useEffect(() => {
     const fetchSuggestions = async () => {
+      // 종목 자동완성이 비활성화된 경우 API 호출 안 함
+      if (!showStockSuggestions) {
+        setSuggestions([]);
+        return;
+      }
+
       const query = searchQuery.trim();
 
       if (!query || query.length < 1) {
@@ -77,7 +84,7 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: Searc
         abortControllerRef.current.abort();
       }
     };
-  }, [searchQuery]);
+  }, [searchQuery, showStockSuggestions]);
 
   // 외부 클릭 감지
   useEffect(() => {
@@ -154,10 +161,12 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: Searc
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
-            setShowSuggestions(true);
+            if (showStockSuggestions) {
+              setShowSuggestions(true);
+            }
             setFocusedIndex(-1);
           }}
-          onFocus={() => setShowSuggestions(true)}
+          onFocus={() => showStockSuggestions && setShowSuggestions(true)}
           onKeyDown={handleKeyDown}
           placeholder="종목명, 티커, 작성자로 검색..."
           className="w-full px-4 sm:px-5 py-2.5 sm:py-3 pl-10 sm:pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -194,8 +203,8 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: Searc
           </button>
         )}
 
-        {/* 자동완성 드롭다운 */}
-        {showSuggestions && (isLoading || suggestions.length > 0) && (
+        {/* 자동완성 드롭다운 - showStockSuggestions가 true일 때만 표시 */}
+        {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
           <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 sm:max-h-80 overflow-y-auto">
             {isLoading ? (
               <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
@@ -233,7 +242,7 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery }: Searc
         )}
       </div>
 
-      {searchQuery && !showSuggestions && (
+      {showStockSuggestions && searchQuery && !showSuggestions && (
         <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
           <span className="font-semibold">&ldquo;{searchQuery}&rdquo;</span> 검색 중...
         </div>

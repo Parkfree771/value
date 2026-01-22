@@ -5,6 +5,7 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
 import ReportCard from '@/components/ReportCard';
+import { useBookmark } from '@/contexts/BookmarkContext';
 
 // SSR 활성화: ReportCard는 직접 import (가장 중요한 콘텐츠)
 // 덜 중요한 컴포넌트만 dynamic import
@@ -91,6 +92,9 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
     sortBy: 'returnRate',
   });
 
+  // 북마크 상태
+  const { bookmarkedIds } = useBookmark();
+
   // 서버에서 데이터를 받지 못했을 경우에만 클라이언트에서 fetch
   useEffect(() => {
     // 이미 초기 데이터가 있으면 스킵
@@ -140,6 +144,11 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   // 검색 및 필터링
   const filteredReports = useMemo(() => {
     return sortedReports.filter((report) => {
+      // 북마크 탭: 북마크한 글만 표시
+      if (activeTab === 'following') {
+        if (!bookmarkedIds.includes(report.id)) return false;
+      }
+
       // 검색어 필터링
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -164,7 +173,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
 
       return true;
     });
-  }, [sortedReports, searchQuery, filters]);
+  }, [sortedReports, searchQuery, filters, activeTab, bookmarkedIds]);
 
   // 로딩 중 스켈레톤 UI
   if (isLoading) {
@@ -243,7 +252,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
-            팔로우
+            북마크
           </button>
           <button
             onClick={() => setActiveTab('popular')}
@@ -287,7 +296,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
-            팔로우 피드
+            북마크
           </button>
           <button
             onClick={() => setActiveTab('popular')}

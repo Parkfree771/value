@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import GoogleAdSense from "@/components/GoogleAdSense";
 
@@ -117,11 +118,13 @@ export default function RootLayout({
       <body className="antialiased flex flex-col min-h-screen bg-white dark:bg-deep-black text-gray-900 dark:text-gray-100 transition-colors font-body">
         <ThemeProvider>
           <AuthProvider>
-            <Navbar />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
+            <BookmarkProvider>
+              <Navbar />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </BookmarkProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

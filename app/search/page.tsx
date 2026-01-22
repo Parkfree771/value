@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ReportCard from '@/components/ReportCard';
 import FilterBar from '@/components/FilterBar';
@@ -13,6 +13,29 @@ interface StockNameMap {
   tickerToNameKr: Map<string, string>;    // 티커 → 한글명
 }
 
+// 필터 상태 타입
+interface FilterState {
+  period: string;
+  market: string;
+  opinion: string;
+  sortBy: string;
+}
+
+// 시장 필터 매핑 (국가별 → 실제 exchange 값)
+const MARKET_MAPPING: Record<string, string[]> = {
+  'KR': ['KRX'],
+  'US': ['NAS', 'NYS'],
+  'JP': ['TSE'],
+  'CN': ['HKS', 'SHS', 'SZS'],
+};
+
+// 의견 필터 매핑 (FilterBar 옵션 → 실제 opinion 값)
+const OPINION_MAPPING: Record<string, string[]> = {
+  'buy': ['buy', 'BUY', '매수', 'long', 'LONG'],
+  'sell': ['sell', 'SELL', '매도', 'short', 'SHORT'],
+  'hold': ['hold', 'HOLD', '보유', '중립'],
+};
+
 export default function SearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
@@ -22,6 +45,17 @@ export default function SearchPage() {
     nameKrToTicker: new Map(),
     tickerToNameKr: new Map(),
   });
+  const [filters, setFilters] = useState<FilterState>({
+    period: 'all',
+    market: 'all',
+    opinion: 'all',
+    sortBy: 'latest',
+  });
+
+  // 필터 변경 핸들러
+  const handleFilterChange = useCallback((newFilters: FilterState) => {
+    setFilters(newFilters);
+  }, []);
 
   // global-stocks.json에서 한글명 매핑 로드
   useEffect(() => {
@@ -91,37 +125,105 @@ export default function SearchPage() {
     fetchReports();
   }, []);
 
-  // 검색 필터링 (한글명 매핑 포함)
+  // 검색 + 필터링 + 정렬 (한글명 매핑 포함)
   const filteredReports = useMemo(() => {
-    if (!searchQuery.trim()) return reports;
+    let result = [...reports];
 
-    const query = searchQuery.toLowerCase();
+    // 1. 검색어 필터링
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
 
-    // 한글명으로 검색 시 해당 티커들 찾기
-    const matchedTickers = new Set<string>();
-    for (const [nameKr, tickers] of stockNameMap.nameKrToTicker.entries()) {
-      if (nameKr.includes(query)) {
-        tickers.forEach(t => matchedTickers.add(t));
+      // 한글명으로 검색 시 해당 티커들 찾기
+      const matchedTickers = new Set<string>();
+      for (const [nameKr, tickers] of stockNameMap.nameKrToTicker.entries()) {
+        if (nameKr.includes(query)) {
+          tickers.forEach(t => matchedTickers.add(t));
+        }
       }
+
+      result = result.filter((report) => {
+        const tickerUpper = report.ticker?.toUpperCase() || '';
+        const stockNameKr = stockNameMap.tickerToNameKr.get(tickerUpper) || '';
+
+        return (
+          // 기존 검색 (영문명, 티커, 작성자, 제목)
+          report.stockName?.toLowerCase().includes(query) ||
+          report.ticker?.toLowerCase().includes(query) ||
+          report.author?.toLowerCase().includes(query) ||
+          report.title?.toLowerCase().includes(query) ||
+          // 한글명 검색 (티커의 한글명이 검색어 포함)
+          stockNameKr.toLowerCase().includes(query) ||
+          // 한글명으로 찾은 티커와 일치
+          matchedTickers.has(tickerUpper)
+        );
+      });
     }
 
-    return reports.filter((report) => {
-      const tickerUpper = report.ticker?.toUpperCase() || '';
-      const stockNameKr = stockNameMap.tickerToNameKr.get(tickerUpper) || '';
+    // 2. 기간 필터링
+    if (filters.period !== 'all') {
+      const now = new Date();
+      let cutoffDate = new Date();
 
-      return (
-        // 기존 검색 (영문명, 티커, 작성자, 제목)
-        report.stockName?.toLowerCase().includes(query) ||
-        report.ticker?.toLowerCase().includes(query) ||
-        report.author?.toLowerCase().includes(query) ||
-        report.title?.toLowerCase().includes(query) ||
-        // 한글명 검색 (티커의 한글명이 검색어 포함)
-        stockNameKr.toLowerCase().includes(query) ||
-        // 한글명으로 찾은 티커와 일치
-        matchedTickers.has(tickerUpper)
-      );
+      switch (filters.period) {
+        case '1m':
+          cutoffDate.setMonth(now.getMonth() - 1);
+          break;
+        case '3m':
+          cutoffDate.setMonth(now.getMonth() - 3);
+          break;
+        case '6m':
+          cutoffDate.setMonth(now.getMonth() - 6);
+          break;
+        case '1y':
+          cutoffDate.setFullYear(now.getFullYear() - 1);
+          break;
+      }
+
+      result = result.filter((report) => {
+        const reportDate = new Date(report.createdAt);
+        return reportDate >= cutoffDate;
+      });
+    }
+
+    // 3. 시장 필터링
+    if (filters.market !== 'all') {
+      const validExchanges = MARKET_MAPPING[filters.market] || [filters.market];
+      result = result.filter((report) => {
+        const exchange = report.exchange?.toUpperCase() || '';
+        return validExchanges.some(e => exchange.includes(e.toUpperCase()));
+      });
+    }
+
+    // 4. 의견 필터링
+    if (filters.opinion !== 'all') {
+      const validOpinions = OPINION_MAPPING[filters.opinion] || [filters.opinion];
+      result = result.filter((report) => {
+        const opinion = report.opinion || '';
+        return validOpinions.some(o =>
+          opinion.toLowerCase() === o.toLowerCase() ||
+          opinion.toUpperCase() === o.toUpperCase()
+        );
+      });
+    }
+
+    // 5. 정렬
+    result.sort((a, b) => {
+      switch (filters.sortBy) {
+        case 'returnRate':
+          return (b.returnRate || 0) - (a.returnRate || 0);
+        case 'latest':
+          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        case 'popular':
+          return (b.likes || 0) - (a.likes || 0);
+        case 'views':
+          return (b.views || 0) - (a.views || 0);
+        default:
+          return 0;
+      }
     });
-  }, [reports, searchQuery, stockNameMap]);
+
+    return result;
+  }, [reports, searchQuery, stockNameMap, filters]);
 
   return (
     <Container>
@@ -140,8 +242,8 @@ export default function SearchPage() {
         </h1>
       </div>
 
-      {/* Search Bar */}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+      {/* Search Bar - 검색 페이지에서는 게시물 검색이 핵심이므로 종목 자동완성 비활성화 */}
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} showStockSuggestions={false} />
 
       {/* Popular Search Keywords (when no search query) */}
       {!searchQuery && (
@@ -165,38 +267,37 @@ export default function SearchPage() {
       )}
 
       {/* Filters */}
-      <FilterBar />
+      <FilterBar onFilterChange={handleFilterChange} />
 
       {/* Search Results Summary */}
-      {searchQuery && (
-        <div className="mb-4 px-2">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            <span className="font-semibold text-gray-900 dark:text-white">&ldquo;{searchQuery}&rdquo;</span>
-            {' '}검색 결과 {filteredReports.length}개
-          </p>
-        </div>
-      )}
+      <div className="mb-4 px-2">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          {searchQuery ? (
+            <>
+              <span className="font-semibold text-gray-900 dark:text-white">&ldquo;{searchQuery}&rdquo;</span>
+              {' '}검색 결과
+            </>
+          ) : (
+            '전체 게시물'
+          )}
+          {' '}<span className="font-semibold text-blue-600 dark:text-blue-400">{filteredReports.length}</span>개
+          {(filters.period !== 'all' || filters.market !== 'all' || filters.opinion !== 'all') && (
+            <span className="ml-2 text-xs text-gray-500">(필터 적용됨)</span>
+          )}
+        </p>
+      </div>
 
       {/* Reports Grid */}
       <div className="space-y-6">
-        {filteredReports.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-16">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-500 dark:text-gray-400">로딩 중...</p>
+          </div>
+        ) : filteredReports.length > 0 ? (
           filteredReports.map((report) => (
             <ReportCard key={report.id} {...report} />
           ))
-        ) : searchQuery ? (
-          <div className="text-center py-16">
-            <div className="mb-4">
-              <svg className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
-              검색 결과가 없습니다
-            </p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm">
-              다른 검색어를 입력해보세요
-            </p>
-          </div>
         ) : (
           <div className="text-center py-16">
             <div className="mb-4">
@@ -205,10 +306,10 @@ export default function SearchPage() {
               </svg>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-lg mb-2">
-              검색어를 입력해주세요
+              {searchQuery ? '검색 결과가 없습니다' : '조건에 맞는 게시물이 없습니다'}
             </p>
             <p className="text-gray-400 dark:text-gray-500 text-sm">
-              종목명, 티커, 작성자로 검색할 수 있습니다
+              {searchQuery ? '다른 검색어를 입력해보세요' : '필터 조건을 변경해보세요'}
             </p>
           </div>
         )}

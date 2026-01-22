@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useCallback } from 'react';
+import { useState, memo, useCallback, useEffect, useRef } from 'react';
 
 interface FilterBarProps {
   onFilterChange?: (filters: FilterState) => void;
@@ -21,14 +21,26 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
     sortBy: 'returnRate',
   });
   const [showAllFilters, setShowAllFilters] = useState(false);
+  const isInitialMount = useRef(true);
+  const onFilterChangeRef = useRef(onFilterChange);
+
+  // onFilterChange ref 업데이트
+  useEffect(() => {
+    onFilterChangeRef.current = onFilterChange;
+  }, [onFilterChange]);
+
+  // filters가 변경되면 부모에게 알림 (초기 마운트 제외)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    onFilterChangeRef.current?.(filters);
+  }, [filters]);
 
   const handleFilterChange = useCallback((key: keyof FilterState, value: string) => {
-    setFilters(prev => {
-      const newFilters = { ...prev, [key]: value };
-      onFilterChange?.(newFilters);
-      return newFilters;
-    });
-  }, [onFilterChange]);
+    setFilters(prev => ({ ...prev, [key]: value }));
+  }, []);
 
   // 활성화된 필터 개수 계산
   const activeFilterCount = Object.entries(filters).filter(
@@ -89,13 +101,11 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               onChange={(e) => handleFilterChange('market', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
-              <option value="all">시장: 전체</option>
-              <option value="KOSPI">코스피</option>
-              <option value="KOSDAQ">코스닥</option>
-              <option value="NASDAQ">나스닥</option>
-              <option value="NYSE">NYSE</option>
-              <option value="NIKKEI">니케이</option>
-              <option value="HANGSENG">항셍</option>
+              <option value="all">국가: 전체</option>
+              <option value="KR">🇰🇷 한국</option>
+              <option value="US">🇺🇸 미국</option>
+              <option value="JP">🇯🇵 일본</option>
+              <option value="CN">🇨🇳 중국</option>
             </select>
 
             <select
@@ -114,12 +124,6 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               <button
                 onClick={() => {
                   setFilters({
-                    period: 'all',
-                    market: 'all',
-                    opinion: 'all',
-                    sortBy: 'returnRate',
-                  });
-                  onFilterChange?.({
                     period: 'all',
                     market: 'all',
                     opinion: 'all',
@@ -159,7 +163,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
           {/* Market Filter */}
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              시장
+              국가
             </label>
             <select
               value={filters.market}
@@ -167,12 +171,10 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
               <option value="all">전체</option>
-              <option value="KOSPI">코스피</option>
-              <option value="KOSDAQ">코스닥</option>
-              <option value="NASDAQ">나스닥</option>
-              <option value="NYSE">NYSE</option>
-              <option value="NIKKEI">니케이</option>
-              <option value="HANGSENG">항셍</option>
+              <option value="KR">🇰🇷 한국</option>
+              <option value="US">🇺🇸 미국</option>
+              <option value="JP">🇯🇵 일본</option>
+              <option value="CN">🇨🇳 중국</option>
             </select>
           </div>
 

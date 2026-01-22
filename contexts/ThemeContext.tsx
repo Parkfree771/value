@@ -7,6 +7,7 @@ type Theme = 'light' | 'dark';
 interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
+  mounted: boolean; // 클라이언트에서 마운트 완료 여부
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -29,6 +30,7 @@ export const themeInitScript = `
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light');
+  const [mounted, setMounted] = useState(false);
 
   // 클라이언트에서만 실행 - 초기 테마 동기화
   useEffect(() => {
@@ -39,6 +41,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setTheme(prefersDark ? 'dark' : 'light');
     }
+    setMounted(true);
   }, []);
 
   const toggleTheme = () => {
@@ -50,7 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   // children을 항상 렌더링 - 빈 화면 방지
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );

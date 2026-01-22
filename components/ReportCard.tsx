@@ -8,6 +8,7 @@ import Badge, { OpinionBadge } from './Badge';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { inferCurrency, getCurrencySymbol } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBookmark } from '@/contexts/BookmarkContext';
 
 interface ReportCardProps {
   id: string;
@@ -63,9 +64,18 @@ const ReportCard = memo(function ReportCard({
 }: ReportCardProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { isBookmarked, toggleBookmark } = useBookmark();
   const [isDeleting, setIsDeleting] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isClosed, setIsClosed] = useState(is_closed);
+
+  const bookmarked = isBookmarked(id);
+
+  const handleBookmarkClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await toggleBookmark(id);
+  };
 
   // 통화 추론 및 기호 (utils/currency.ts 사용)
   const currency = inferCurrency({ exchange, category, ticker, stockData });
@@ -225,6 +235,21 @@ const ReportCard = memo(function ReportCard({
               <>
                 <span>조회 {views}</span>
                 <span>좋아요 {likes}</span>
+                <button
+                  onClick={handleBookmarkClick}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  title={bookmarked ? '북마크 해제' : '북마크'}
+                >
+                  {bookmarked ? (
+                    <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                  ) : (
+                    <svg className="w-5 h-5 text-gray-400 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                  )}
+                </button>
               </>
             )}
             {showActions && (

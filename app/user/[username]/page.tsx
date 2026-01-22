@@ -6,22 +6,55 @@ import ReportCard from '@/components/ReportCard';
 import Link from 'next/link';
 import Card from '@/components/Card';
 
+interface FeedPost {
+  id: string;
+  title: string;
+  author: string;
+  stockName: string;
+  ticker: string;
+  exchange: string;
+  opinion: 'buy' | 'sell' | 'hold';
+  positionType: 'long' | 'short';
+  initialPrice: number;
+  currentPrice: number;
+  returnRate: number;
+  createdAt: string;
+  views: number;
+  likes: number;
+  category: string;
+  is_closed?: boolean;
+}
+
 export default function UserPage() {
   const params = useParams();
   const router = useRouter();
   const username = decodeURIComponent(params.username as string);
-  const [userReports, setUserReports] = useState<any[]>([]);
+  const [userReports, setUserReports] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const fetchUserReports = async () => {
       try {
-        const response = await fetch(`/api/user/profile?username=${encodeURIComponent(username)}`);
+        // feed.json API에서 데이터 가져오기
+        const response = await fetch('/api/feed/public');
         const data = await response.json();
 
-        if (data.success && data.user) {
-          setUserReports(data.user.reports || []);
+        if (data.posts) {
+          // 해당 사용자의 리포트만 필터링
+          const filtered = data.posts.filter(
+            (post: FeedPost) => post.author === username
+          );
+
+          if (filtered.length === 0) {
+            setNotFound(true);
+          } else {
+            // 최신순 정렬
+            filtered.sort((a: FeedPost, b: FeedPost) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+            setUserReports(filtered);
+          }
         } else {
           setNotFound(true);
         }
@@ -72,7 +105,7 @@ export default function UserPage() {
             사용자를 찾을 수 없습니다
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            해당 사용자가 존재하지 않거나 삭제되었습니다.
+            해당 사용자가 존재하지 않거나 작성한 리포트가 없습니다.
           </p>
           <button
             onClick={() => router.back()}
@@ -88,92 +121,68 @@ export default function UserPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Back Button */}
-      <Link
-        href="/ranking"
+      <button
+        onClick={() => router.back()}
         className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-6 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
-        랭킹으로 돌아가기
-      </Link>
+        돌아가기
+      </button>
 
       {/* User Profile Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 sm:p-8 mb-6 sm:mb-8 border border-gray-200 dark:border-gray-700">
-        <div className="flex items-center mb-6">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-3xl font-bold mr-4">
-            {username[0]}
+      <Card variant="glass" padding="lg" className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* 프로필 정보 */}
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
+              {username[0]?.toUpperCase()}
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                {username}
+              </h1>
+              <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
+                <span>{totalReports}개 리포트</span>
+                <span>·</span>
+                <span>승률 {winRate}%</span>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-1">
-              {username}
-            </h1>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-              투자 리포트 전문가
-            </p>
+
+          {/* 핵심 통계 */}
+          <div className="flex items-center gap-6 sm:gap-8">
+            <div className="text-center">
+              <div className={`text-xl sm:text-2xl font-black ${
+                parseFloat(avgReturnRate) > 0 ? 'text-red-500' :
+                parseFloat(avgReturnRate) < 0 ? 'text-blue-500' :
+                'text-gray-500'
+              }`}>
+                {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">평균 수익률</div>
+            </div>
+            <div className="text-center">
+              <div className={`text-xl sm:text-2xl font-black ${
+                parseFloat(maxReturnRate) > 0 ? 'text-red-500' :
+                parseFloat(maxReturnRate) < 0 ? 'text-blue-500' :
+                'text-gray-500'
+              }`}>
+                {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">최고 수익률</div>
+            </div>
           </div>
         </div>
 
-        {/* User Statistics */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center border border-gray-200 dark:border-gray-600">
-            <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-              {totalReports}
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              리포트
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center border border-gray-200 dark:border-gray-600">
-            <div className={`text-lg sm:text-2xl font-bold ${
-              parseFloat(avgReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
-              parseFloat(avgReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
-              'text-gray-600 dark:text-gray-400'
-            }`}>
-              {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              평균
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center border border-gray-200 dark:border-gray-600">
-            <div className={`text-lg sm:text-2xl font-bold ${
-              parseFloat(maxReturnRate) > 0 ? 'text-red-600 dark:text-red-400' :
-              parseFloat(maxReturnRate) < 0 ? 'text-blue-600 dark:text-blue-400' :
-              'text-gray-600 dark:text-gray-400'
-            }`}>
-              {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              최고
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center border border-gray-200 dark:border-gray-600">
-            <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-              {winRate}%
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              승률
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center border border-gray-200 dark:border-gray-600">
-            <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-              {totalViews.toLocaleString()}
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              조회
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 sm:p-4 text-center border border-gray-200 dark:border-gray-600">
-            <div className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
-              {totalLikes.toLocaleString()}
-            </div>
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-1">
-              좋아요
-            </div>
-          </div>
+        {/* 하단 통계 */}
+        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
+          <span>조회 {totalViews.toLocaleString()}</span>
+          <span>·</span>
+          <span>좋아요 {totalLikes.toLocaleString()}</span>
         </div>
-      </div>
+      </Card>
 
       {/* User Reports */}
       <div className="mb-4 sm:mb-6">
@@ -185,23 +194,28 @@ export default function UserPage() {
         </p>
       </div>
 
-      {userReports.length > 0 ? (
-        <div className="space-y-6">
-          {userReports.map((report) => (
-            <ReportCard key={report.id} {...report} showActions={false} />
-          ))}
-        </div>
-      ) : (
-        <Card className="p-8 sm:p-12 text-center">
-          <div className="text-4xl sm:text-6xl mb-4">📝</div>
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2">
-            작성한 리포트가 없습니다
-          </h3>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            아직 이 사용자가 작성한 리포트가 없습니다.
-          </p>
-        </Card>
-      )}
+      <div className="space-y-6">
+        {userReports.map((report) => (
+          <ReportCard
+            key={report.id}
+            id={report.id}
+            title={report.title}
+            author={report.author}
+            stockName={report.stockName}
+            ticker={report.ticker}
+            opinion={report.opinion}
+            initialPrice={report.initialPrice}
+            currentPrice={report.currentPrice}
+            returnRate={report.returnRate}
+            createdAt={report.createdAt}
+            views={report.views}
+            likes={report.likes}
+            category={report.category}
+            exchange={report.exchange}
+            showActions={false}
+          />
+        ))}
+      </div>
     </div>
   );
 }

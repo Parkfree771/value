@@ -11,7 +11,7 @@ import { isAdmin } from '@/lib/admin/adminCheck';
 const Navbar = memo(function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, mounted } = useTheme();
   const { user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -147,7 +147,9 @@ const Navbar = memo(function Navbar() {
               className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'light' ? (
+              {!mounted ? (
+                <div className="w-4 h-4" />
+              ) : theme === 'light' ? (
                 <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
@@ -196,7 +198,9 @@ const Navbar = memo(function Navbar() {
               className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               aria-label="Toggle theme"
             >
-              {theme === 'light' ? (
+              {!mounted ? (
+                <div className="w-4 h-4" />
+              ) : theme === 'light' ? (
                 <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>

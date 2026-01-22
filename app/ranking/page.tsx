@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import styles from './Ranking.module.css';
 
 const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
   loading: () => <div className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
@@ -32,7 +33,7 @@ interface RankedReport {
 
 export default function RankingPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
-  const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('investors');
+  const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('reports');
   const [reports, setReports] = useState<RankedReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [investors, setInvestors] = useState<any[]>([]);
@@ -169,11 +170,8 @@ export default function RankingPage() {
     });
   }, [trending, selectedPeriod, periodDays]);
 
-  const getMedalEmoji = useCallback((rank: number) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
-    return `${rank}위`;
+  const getRankDisplay = useCallback((rank: number) => {
+    return `${rank}`;
   }, []);
 
   // Paginated data (memoized)
@@ -249,84 +247,64 @@ export default function RankingPage() {
             }))} />
           </div>
 
-          {/* Mobile: Top 3 Badges */}
-          <div className="md:hidden mb-4 p-4">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">TOP 3 리포트</h2>
-            <div className="flex gap-3 justify-center items-end">
-              {filteredReports.slice(0, 3).map((report, index) => (
-                <Link
-                  key={report.id}
-                  href={`/reports/${report.id}`}
-                  className={`flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all hover:scale-105 ${
-                    index === 0 ? 'flex-[1.4]' : 'flex-1'
-                  }`}
-                >
-                  {/* Badge */}
-                  <div className={`relative mb-3 ${
-                    index === 0 ? 'w-16 h-16' :
-                    index === 1 ? 'w-14 h-14' :
-                    'w-12 h-12'
-                  }`}>
-                    {index === 0 && (
-                      <>
-                        {/* Diamond Badge - 최적화된 3D 입체 */}
-                        {/* 외곽 글로우 - 단순화 */}
-                        <div className="absolute -inset-1 rotate-45 blur-sm bg-cyan-300/30"></div>
-
-                        {/* 다이아몬드 메인 바디 */}
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-xl shadow-lg border-2 border-cyan-200/50"></div>
-
-                        {/* 상단 패싯 */}
-                        <div className="absolute inset-2 rotate-45 bg-gradient-to-br from-white via-cyan-50 to-blue-100 rounded-lg shadow-inner"></div>
-
-                        {/* 반사 효과 - hover시에만 pulse */}
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-xl group-hover:animate-pulse"></div>
-
-                        {/* 순위 숫자 */}
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <span className="text-xl font-black bg-gradient-to-b from-cyan-600 via-blue-600 to-blue-800 bg-clip-text text-transparent">1</span>
-                        </div>
-                      </>
-                    )}
-                    {index === 1 && (
-                      <>
-                        {/* Gold Badge - 최적화된 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-sm bg-yellow-400/30"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-500 rounded-xl rotate-45 shadow-lg border-2 border-yellow-300"></div>
-                        <div className="absolute inset-1 bg-gradient-to-b from-white/50 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-base font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] z-10">2</span>
-                        </div>
-                      </>
-                    )}
-                    {index === 2 && (
-                      <>
-                        {/* Silver Badge - 최적화된 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-sm bg-slate-300/30"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-gray-200 to-slate-400 rounded-xl rotate-45 shadow-lg border-2 border-slate-200"></div>
-                        <div className="absolute inset-1 bg-gradient-to-b from-white/60 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-sm font-black text-gray-700 z-10">3</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className={`font-bold text-gray-900 dark:text-white text-center truncate w-full ${
-                    index === 0 ? 'text-xs' : 'text-[10px]'
-                  }`}>
-                    {report.stockName}
-                  </div>
-                  <div className={`inline-block px-2 py-0.5 ${
-                    report.returnRate >= 0
-                      ? 'bg-gradient-to-r from-red-500 to-rose-600'
-                      : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                  } text-white font-bold rounded-full mt-1 ${
-                    index === 0 ? 'text-xs' : 'text-[10px]'
-                  }`}>
-                    {report.returnRate >= 0 ? '+' : ''}{report.returnRate.toFixed(2)}%
-                  </div>
-                </Link>
-              ))}
+          {/* Mobile: Top 3 Badges - Dark Gold Theme */}
+          <div className={`md:hidden ${styles.mobileTop3}`}>
+            <div className={styles.mobileTop3Box}>
+              <div className={styles.mobileTopLine}></div>
+              <div className={styles.mobileContent}>
+                <div className={styles.mobileHeader}>
+                  <p className={styles.mobileSubtitle}>Hall of Fame</p>
+                  <h2 className={styles.mobileTitle}>TOP 3</h2>
+                </div>
+                <div className={styles.mobileBadgeLayout}>
+                  {filteredReports.slice(0, 3).map((report, index) => (
+                    <Link
+                      key={report.id}
+                      href={`/reports/${report.id}`}
+                      className={`${styles.mobileBadgeItem} ${index === 0 ? styles.mobileBadgeItemFirst : ''}`}
+                    >
+                      <div className={`${styles.mobileBadge} ${
+                        index === 0 ? styles.mobileBadgeFirst :
+                        index === 1 ? styles.mobileBadgeSecond :
+                        styles.mobileBadgeThird
+                      }`}>
+                        {index === 0 && (
+                          <>
+                            <div className={styles.mobileBadgeFirstGlow}></div>
+                            <div className={styles.mobileBadgeFirstInner}></div>
+                            <div className={styles.mobileBadgeFirstShine}></div>
+                            <div className={styles.mobileBadgeFirstSparkle}></div>
+                            <span className={styles.mobileBadgeFirstNumber}>1</span>
+                          </>
+                        )}
+                        {index === 1 && (
+                          <>
+                            <div className={styles.mobileBadgeSecondInner}></div>
+                            <div className={styles.mobileBadgeSecondShine}></div>
+                            <span className={styles.mobileBadgeSecondNumber}>2</span>
+                          </>
+                        )}
+                        {index === 2 && (
+                          <>
+                            <div className={styles.mobileBadgeThirdInner}></div>
+                            <div className={styles.mobileBadgeThirdShine}></div>
+                            <span className={styles.mobileBadgeThirdNumber}>3</span>
+                          </>
+                        )}
+                      </div>
+                      <div className={`${styles.mobileName} ${index === 0 ? styles.mobileNameFirst : styles.mobileNameOther}`}>
+                        {report.stockName}
+                      </div>
+                      <div className={`${styles.mobileReturn} ${index === 0 ? styles.mobileReturnFirst : styles.mobileReturnOther} ${
+                        report.returnRate >= 0 ? styles.mobileReturnPositive : styles.mobileReturnNegative
+                      }`}>
+                        {report.returnRate >= 0 ? '+' : ''}{report.returnRate.toFixed(2)}%
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.mobileBottomLine}></div>
             </div>
           </div>
 
@@ -413,75 +391,64 @@ export default function RankingPage() {
             <Podium topThree={investors.slice(0, 3)} />
           </div>
 
-          {/* Mobile: Top 3 Badges */}
-          <div className="md:hidden mb-4 p-4">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white mb-4">TOP 3 투자자</h2>
-            <div className="flex gap-3 justify-center items-end">
-              {investors.slice(0, 3).map((investor, index) => (
-                <Link
-                  key={investor.rank}
-                  href={`/user/${encodeURIComponent(investor.name)}`}
-                  className={`flex flex-col items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-all hover:scale-105 ${
-                    investor.rank === 1 ? 'flex-[1.4]' : 'flex-1'
-                  }`}
-                >
-                  {/* Badge */}
-                  <div className={`relative mb-3 ${
-                    investor.rank === 1 ? 'w-16 h-16' :
-                    investor.rank === 2 ? 'w-14 h-14' :
-                    'w-12 h-12'
-                  }`}>
-                    {investor.rank === 1 && (
-                      <>
-                        {/* Diamond Badge - 최적화된 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-sm bg-cyan-300/30"></div>
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-br from-cyan-100 via-blue-50 to-purple-100 rounded-xl shadow-lg border-2 border-cyan-200/50"></div>
-                        <div className="absolute inset-2 rotate-45 bg-gradient-to-br from-white via-cyan-50 to-blue-100 rounded-lg shadow-inner"></div>
-                        <div className="absolute inset-0 rotate-45 bg-gradient-to-tr from-transparent via-white/30 to-transparent rounded-xl group-hover:animate-pulse"></div>
-                        <div className="absolute inset-0 flex items-center justify-center z-10">
-                          <span className="text-xl font-black bg-gradient-to-b from-cyan-600 via-blue-600 to-blue-800 bg-clip-text text-transparent">1</span>
-                        </div>
-                      </>
-                    )}
-                    {investor.rank === 2 && (
-                      <>
-                        {/* Gold Badge - 최적화된 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-sm bg-yellow-400/30"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-200 via-amber-300 to-yellow-500 rounded-xl rotate-45 shadow-lg border-2 border-yellow-300"></div>
-                        <div className="absolute inset-1 bg-gradient-to-b from-white/50 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-base font-black text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.2)] z-10">2</span>
-                        </div>
-                      </>
-                    )}
-                    {investor.rank === 3 && (
-                      <>
-                        {/* Silver Badge - 최적화된 3D 입체 */}
-                        <div className="absolute -inset-1 rotate-45 blur-sm bg-slate-300/30"></div>
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-100 via-gray-200 to-slate-400 rounded-xl rotate-45 shadow-lg border-2 border-slate-200"></div>
-                        <div className="absolute inset-1 bg-gradient-to-b from-white/60 to-transparent rounded-lg rotate-45"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-sm font-black text-gray-700 z-10">3</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                  <div className={`font-bold text-gray-900 dark:text-white text-center truncate w-full ${
-                    investor.rank === 1 ? 'text-xs' : 'text-[10px]'
-                  }`}>
-                    {investor.name}
-                  </div>
-                  <div className={`inline-block px-2 py-0.5 ${
-                    investor.avgReturnRate >= 0
-                      ? 'bg-gradient-to-r from-red-500 to-rose-600'
-                      : 'bg-gradient-to-r from-blue-500 to-blue-600'
-                  } text-white font-bold rounded-full mt-1 ${
-                    investor.rank === 1 ? 'text-xs' : 'text-[10px]'
-                  }`}>
-                    {investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%
-                  </div>
-                </Link>
-              ))}
+          {/* Mobile: Top 3 Badges - Dark Gold Theme */}
+          <div className={`md:hidden ${styles.mobileTop3}`}>
+            <div className={styles.mobileTop3Box}>
+              <div className={styles.mobileTopLine}></div>
+              <div className={styles.mobileContent}>
+                <div className={styles.mobileHeader}>
+                  <p className={styles.mobileSubtitle}>Hall of Fame</p>
+                  <h2 className={styles.mobileTitle}>TOP 3</h2>
+                </div>
+                <div className={styles.mobileBadgeLayout}>
+                  {investors.slice(0, 3).map((investor, index) => (
+                    <Link
+                      key={investor.rank}
+                      href={`/user/${encodeURIComponent(investor.name)}`}
+                      className={`${styles.mobileBadgeItem} ${investor.rank === 1 ? styles.mobileBadgeItemFirst : ''}`}
+                    >
+                      <div className={`${styles.mobileBadge} ${
+                        investor.rank === 1 ? styles.mobileBadgeFirst :
+                        investor.rank === 2 ? styles.mobileBadgeSecond :
+                        styles.mobileBadgeThird
+                      }`}>
+                        {investor.rank === 1 && (
+                          <>
+                            <div className={styles.mobileBadgeFirstGlow}></div>
+                            <div className={styles.mobileBadgeFirstInner}></div>
+                            <div className={styles.mobileBadgeFirstShine}></div>
+                            <div className={styles.mobileBadgeFirstSparkle}></div>
+                            <span className={styles.mobileBadgeFirstNumber}>1</span>
+                          </>
+                        )}
+                        {investor.rank === 2 && (
+                          <>
+                            <div className={styles.mobileBadgeSecondInner}></div>
+                            <div className={styles.mobileBadgeSecondShine}></div>
+                            <span className={styles.mobileBadgeSecondNumber}>2</span>
+                          </>
+                        )}
+                        {investor.rank === 3 && (
+                          <>
+                            <div className={styles.mobileBadgeThirdInner}></div>
+                            <div className={styles.mobileBadgeThirdShine}></div>
+                            <span className={styles.mobileBadgeThirdNumber}>3</span>
+                          </>
+                        )}
+                      </div>
+                      <div className={`${styles.mobileName} ${investor.rank === 1 ? styles.mobileNameFirst : styles.mobileNameOther}`}>
+                        {investor.name}
+                      </div>
+                      <div className={`${styles.mobileReturn} ${investor.rank === 1 ? styles.mobileReturnFirst : styles.mobileReturnOther} ${
+                        investor.avgReturnRate >= 0 ? styles.mobileReturnPositive : styles.mobileReturnNegative
+                      }`}>
+                        {investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.mobileBottomLine}></div>
             </div>
           </div>
 
@@ -515,8 +482,20 @@ export default function RankingPage() {
                   className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-                    <div className="text-xl sm:text-2xl font-bold text-gray-400 dark:text-gray-500 w-6 sm:w-8 text-center flex-shrink-0">
-                      {getMedalEmoji(investor.rank)}
+                    <div className={`${styles.investorRankBadge} ${
+                      investor.rank === 1 ? styles.investorRankFirst :
+                      investor.rank === 2 ? styles.investorRankSecond :
+                      investor.rank === 3 ? styles.investorRankThird :
+                      'bg-gray-200 dark:bg-gray-600'
+                    }`}>
+                      <span className={`${styles.investorRankNumber} ${
+                        investor.rank === 1 ? styles.investorRankNumberFirst :
+                        investor.rank === 2 ? styles.investorRankNumberSecond :
+                        investor.rank === 3 ? styles.investorRankNumberThird :
+                        'text-gray-600 dark:text-gray-300'
+                      }`}>
+                        {getRankDisplay(investor.rank)}
+                      </span>
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="font-bold text-sm sm:text-lg text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate">

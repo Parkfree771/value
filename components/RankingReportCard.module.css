@@ -1,0 +1,171 @@
+/* ============================================
+   RankingReportCard Component
+   순위 배지 스타일
+   1위: 다이아몬드 (반짝이는 크리스탈)
+   2위: 골드
+   3위: 실버
+   ============================================ */
+
+/* 순위 배지 공통 - 다이아몬드 모양 */
+.badge {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: visible;
+  transform: rotate(45deg);
+}
+
+.badge > * {
+  transform: rotate(-45deg);
+}
+
+@media (min-width: 640px) {
+  .badge {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+
+/* 1위 - 다이아몬드 */
+.badgeFirst {
+  background: linear-gradient(135deg, #ecfeff, #cffafe, #a5f3fc, #e0e7ff, #c4b5fd);
+  border: 2px solid rgba(6, 182, 212, 0.5);
+  box-shadow:
+    0 0 15px rgba(6, 182, 212, 0.3),
+    0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  animation: diamondShimmer 3s ease-in-out infinite;
+  background-size: 200% 200%;
+}
+
+.badgeFirst::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.3), rgba(168, 85, 247, 0.2));
+  border-radius: 0.375rem;
+  filter: blur(6px);
+  z-index: -1;
+  animation: diamondPulse 2s ease-in-out infinite;
+}
+
+.badgeFirst::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: white;
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: sparkle 1.5s ease-in-out infinite;
+  transform: rotate(-45deg);
+}
+
+.badgeFirstNumber {
+  font-size: 1.125rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #0891b2, #6366f1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (min-width: 640px) {
+  .badgeFirstNumber {
+    font-size: 1.25rem;
+  }
+}
+
+/* 2위 - 골드 */
+.badgeSecond {
+  background: linear-gradient(135deg, #fef3c7, #fcd34d, #f59e0b, #fbbf24);
+  border: 2px solid rgba(251, 191, 36, 0.5);
+}
+
+.badgeSecondNumber {
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: #78350f;
+}
+
+@media (min-width: 640px) {
+  .badgeSecondNumber {
+    font-size: 1.25rem;
+  }
+}
+
+/* 3위 - 실버 */
+.badgeThird {
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8);
+  border: 2px solid rgba(203, 213, 225, 0.5);
+}
+
+.badgeThirdNumber {
+  font-size: 1.125rem;
+  font-weight: 900;
+  color: #334155;
+}
+
+@media (min-width: 640px) {
+  .badgeThirdNumber {
+    font-size: 1.25rem;
+  }
+}
+
+/* 4위 이상 - 기본 */
+.badgeDefault {
+  background: linear-gradient(135deg, #9ca3af, #6b7280);
+}
+
+.badgeDefaultNumber {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+@media (min-width: 640px) {
+  .badgeDefaultNumber {
+    font-size: 1.125rem;
+  }
+}
+
+/* 애니메이션 */
+@keyframes diamondPulse {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes diamondShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
