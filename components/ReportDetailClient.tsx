@@ -103,14 +103,22 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
       // 좋아요 상태 확인 (로그인 시에만)
       if (user) {
         promises.push(
-          fetch(`/api/reports/${report.id}/like?userId=${user.uid}`)
-            .then(res => res.json())
-            .then(data => {
+          (async () => {
+            try {
+              const token = await auth.currentUser?.getIdToken();
+              const res = await fetch(`/api/reports/${report.id}/like`, {
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+              });
+              const data = await res.json();
               if (data.success) {
                 setIsLiked(data.isLiked);
               }
-            })
-            .catch(error => console.error('좋아요 상태 확인 실패:', error))
+            } catch (error) {
+              console.error('좋아요 상태 확인 실패:', error);
+            }
+          })()
         );
       }
 
@@ -129,18 +137,23 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     }
 
     try {
+      const token = await auth.currentUser?.getIdToken();
       const response = await fetch(`/api/reports/${report.id}/like`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId: user.uid }),
+        body: JSON.stringify({}),
       });
 
       const data = await response.json();
       if (data.success) {
         setIsLiked(data.isLiked);
         setLikesCount(data.likes);
+      } else if (response.status === 401) {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
       }
     } catch (error) {
       console.error('좋아요 처리 실패:', error);
@@ -525,12 +538,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                       setIsSubmittingComment(true);
                       try {
+                        const token = await auth.currentUser?.getIdToken();
                         const response = await fetch(`/api/reports/${report.id}/comments`, {
                           method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                          },
                           body: JSON.stringify({
                             content: commentText,
-                            userId: user.uid,
                             authorName: userNickname || '익명',
                           }),
                         });
@@ -686,12 +702,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                                   if (!replyText.trim() || !user) return;
                                   setIsSubmittingComment(true);
                                   try {
+                                    const token = await auth.currentUser?.getIdToken();
                                     const response = await fetch(`/api/reports/${report.id}/comments`, {
                                       method: 'POST',
-                                      headers: { 'Content-Type': 'application/json' },
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${token}`,
+                                      },
                                       body: JSON.stringify({
                                         content: replyText,
-                                        userId: user.uid,
                                         authorName: userNickname || '익명',
                                         parentId: comment.id,
                                       }),

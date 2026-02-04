@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, orderBy, query, limit, startAfter, Timestamp, doc, deleteDoc, getDoc } from 'firebase/firestore';
-import { verifyAdminToken } from '@/lib/admin/adminAuth';
+import { verifyAdmin } from '@/lib/admin/adminVerify';
 
 // 게시글 목록 조회 (관리자용)
 export async function GET(request: NextRequest) {
   try {
+    // 토큰 기반 관리자 권한 확인
+    const authHeader = request.headers.get('authorization');
+    const admin = await verifyAdmin(authHeader);
+
+    if (!admin) {
+      return NextResponse.json(
+        { error: '관리자 권한이 필요합니다.' },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const pageSize = parseInt(searchParams.get('pageSize') || '20');
     const lastDocId = searchParams.get('lastDocId');
-
-    // Authorization 헤더로 관리자 토큰 검증
-    const authHeader = request.headers.get('Authorization');
-    await verifyAdminToken(authHeader);
 
     const postsRef = collection(db, 'posts');
     let q = query(postsRef, orderBy('createdAt', 'desc'), limit(pageSize));
@@ -50,11 +57,11 @@ export async function GET(request: NextRequest) {
       hasMore: posts.length === pageSize,
       lastDocId: posts.length > 0 ? posts[posts.length - 1].id : null,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('게시글 조회 오류:', error);
     return NextResponse.json(
-      { error: error.message || '게시글 조회 중 오류가 발생했습니다.' },
-      { status: error.message?.includes('관리자 권한') ? 403 : 500 }
+      { error: '게시글 조회 중 오류가 발생했습니다.' },
+      { status: 500 }
     );
   }
 }
@@ -62,9 +69,16 @@ export async function GET(request: NextRequest) {
 // 게시글 삭제 (관리자용)
 export async function DELETE(request: NextRequest) {
   try {
-    // Authorization 헤더로 관리자 토큰 검증
-    const authHeader = request.headers.get('Authorization');
-    const adminEmail = await verifyAdminToken(authHeader);
+    // 토큰 기반 관리자 권한 확인
+    const authHeader = request.headers.get('authorization');
+    const admin = await verifyAdmin(authHeader);
+
+    if (!admin) {
+      return NextResponse.json(
+        { error: '관리자 권한이 필요합니다.' },
+        { status: 403 }
+      );
+    }
 
     const { postId } = await request.json();
 
@@ -88,30 +102,17 @@ export async function DELETE(request: NextRequest) {
 
     await deleteDoc(postRef);
 
-    console.log(`[Admin] 게시글 삭제: ${postId} by ${adminEmail}`);
-
-    // feed.json 갱신 (캐시 무효화)
-    try {
-      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-      await fetch(`${baseUrl}/api/revalidate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ path: '/' }),
-      });
-      console.log(`[Admin] 캐시 무효화 완료`);
-    } catch (revalidateError) {
-      console.error('[Admin] 캐시 무효화 실패:', revalidateError);
-    }
+    console.log(`[Admin] 게시글 삭제: ${postId} by ${admin.email}`);
 
     return NextResponse.json({
       success: true,
       message: '게시글이 성공적으로 삭제되었습니다.',
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('게시글 삭제 오류:', error);
     return NextResponse.json(
-      { error: error.message || '게시글 삭제 중 오류가 발생했습니다.' },
-      { status: error.message?.includes('관리자 권한') ? 403 : 500 }
+      { error: '게시글 삭제 중 오류가 발생했습니다.' },
+      { status: 500 }
     );
   }
 }

@@ -1,16 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
-import { checkAdminPermission } from '@/lib/admin/adminCheck';
+import { verifyAdmin } from '@/lib/admin/adminVerify';
 
 // 통계 조회 (관리자용)
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const adminEmail = searchParams.get('adminEmail');
+    // 토큰 기반 관리자 권한 확인
+    const authHeader = request.headers.get('authorization');
+    const admin = await verifyAdmin(authHeader);
 
-    // 관리자 권한 확인
-    checkAdminPermission(adminEmail);
+    if (!admin) {
+      return NextResponse.json(
+        { error: '관리자 권한이 필요합니다.' },
+        { status: 403 }
+      );
+    }
 
     // 전체 게시글 수
     const postsRef = collection(db, 'posts');
@@ -115,11 +120,11 @@ export async function GET(request: NextRequest) {
         topUsers,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('통계 조회 오류:', error);
     return NextResponse.json(
-      { error: error.message || '통계 조회 중 오류가 발생했습니다.' },
-      { status: error.message?.includes('관리자 권한') ? 403 : 500 }
+      { error: '통계 조회 중 오류가 발생했습니다.' },
+      { status: 500 }
     );
   }
 }

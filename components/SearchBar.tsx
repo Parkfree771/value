@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
 
-interface StockSuggestion {
+export interface StockSuggestion {
   symbol: string;
   name: string;
   nameKr?: string;
@@ -13,10 +13,18 @@ interface StockSuggestion {
 interface SearchBarProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  showStockSuggestions?: boolean; // 종목 자동완성 표시 여부 (기본: true)
+  placeholder?: string;
+  showStockSuggestions?: boolean;
+  onSelectStock?: (stock: StockSuggestion) => void;
 }
 
-const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery, showStockSuggestions = true }: SearchBarProps) {
+const SearchBar = memo(function SearchBar({
+  searchQuery,
+  setSearchQuery,
+  placeholder = '검색어를 입력하세요...',
+  showStockSuggestions = true,
+  onSelectStock
+}: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
   const [suggestions, setSuggestions] = useState<StockSuggestion[]>([]);
@@ -118,12 +126,15 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery, showSto
   };
 
   const handleSelectSuggestion = useCallback((stock: StockSuggestion) => {
-    // 종목 심볼 또는 이름으로 검색
+    // 종목 선택 시 콜백 호출 (검색 타입 변경 등)
+    if (onSelectStock) {
+      onSelectStock(stock);
+    }
     setSearchQuery(stock.symbol);
     setShowSuggestions(false);
     setFocusedIndex(-1);
     setSuggestions([]);
-  }, [setSearchQuery]);
+  }, [setSearchQuery, onSelectStock]);
 
   const highlightMatch = useCallback((text: string, query: string) => {
     const index = text.toLowerCase().indexOf(query.toLowerCase());
@@ -168,7 +179,7 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery, showSto
           }}
           onFocus={() => showStockSuggestions && setShowSuggestions(true)}
           onKeyDown={handleKeyDown}
-          placeholder="종목명, 티커, 작성자로 검색..."
+          placeholder={placeholder}
           className="w-full px-4 sm:px-5 py-2.5 sm:py-3 pl-10 sm:pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
         />
         <svg
@@ -203,7 +214,7 @@ const SearchBar = memo(function SearchBar({ searchQuery, setSearchQuery, showSto
           </button>
         )}
 
-        {/* 자동완성 드롭다운 - showStockSuggestions가 true일 때만 표시 */}
+        {/* 자동완성 드롭다운 */}
         {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
           <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 sm:max-h-80 overflow-y-auto">
             {isLoading ? (

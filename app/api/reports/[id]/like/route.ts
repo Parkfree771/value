@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, updateDoc, increment, getDoc, setDoc, deleteDoc, collection } from 'firebase/firestore';
+import { doc, updateDoc, increment, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { verifyAuthToken } from '@/lib/firebase-admin';
 
 export async function POST(
   request: NextRequest,
@@ -8,13 +9,15 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const body = await request.json();
-    const { userId } = body;
 
-    if (!userId) {
+    // 토큰 기반 인증 검증
+    const authHeader = request.headers.get('authorization');
+    const verifiedUserId = await verifyAuthToken(authHeader);
+
+    if (!verifiedUserId) {
       return NextResponse.json(
-        { success: false, error: '사용자 ID가 필요합니다.' },
-        { status: 400 }
+        { success: false, error: '로그인이 필요합니다.' },
+        { status: 401 }
       );
     }
 
@@ -29,8 +32,8 @@ export async function POST(
       );
     }
 
-    // 사용자의 좋아요 상태 확인
-    const likeRef = doc(db, 'posts', id, 'likes', userId);
+    // 사용자의 좋아요 상태 확인 - 토큰에서 검증된 userId 사용
+    const likeRef = doc(db, 'posts', id, 'likes', verifiedUserId);
     const likeSnap = await getDoc(likeRef);
 
     let isLiked = false;
@@ -45,7 +48,7 @@ export async function POST(
     } else {
       // 좋아요 추가
       await setDoc(likeRef, {
-        userId,
+        userId: verifiedUserId,
         createdAt: new Date().toISOString(),
       });
       await updateDoc(postRef, {
@@ -79,17 +82,19 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
 
-    if (!userId) {
-      return NextResponse.json(
-        { success: false, error: '사용자 ID가 필요합니다.' },
-        { status: 400 }
-      );
+    // 토큰 기반 인증 검증
+    const authHeader = request.headers.get('authorization');
+    const verifiedUserId = await verifyAuthToken(authHeader);
+
+    if (!verifiedUserId) {
+      return NextResponse.json({
+        success: true,
+        isLiked: false
+      });
     }
 
-    const likeRef = doc(db, 'posts', id, 'likes', userId);
+    const likeRef = doc(db, 'posts', id, 'likes', verifiedUserId);
     const likeSnap = await getDoc(likeRef);
 
     return NextResponse.json({

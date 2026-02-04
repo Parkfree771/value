@@ -39,6 +39,14 @@ export const adminAuth = getAuth();
 export { FieldValue, Timestamp } from 'firebase-admin/firestore';
 
 /**
+ * 검증된 사용자 정보
+ */
+export interface VerifiedUser {
+  uid: string;
+  email: string | null;
+}
+
+/**
  * Authorization 헤더에서 Firebase ID 토큰을 검증하고 사용자 ID를 반환합니다.
  * @param authHeader Authorization 헤더 값 (Bearer <token>)
  * @returns 검증된 사용자 ID 또는 null
@@ -56,6 +64,33 @@ export async function verifyAuthToken(authHeader: string | null): Promise<string
   try {
     const decodedToken = await adminAuth.verifyIdToken(token);
     return decodedToken.uid;
+  } catch (error) {
+    console.error('[Auth] Token verification failed:', error);
+    return null;
+  }
+}
+
+/**
+ * Authorization 헤더에서 Firebase ID 토큰을 검증하고 사용자 정보(uid, email)를 반환합니다.
+ * @param authHeader Authorization 헤더 값 (Bearer <token>)
+ * @returns 검증된 사용자 정보 또는 null
+ */
+export async function verifyAuthTokenWithEmail(authHeader: string | null): Promise<VerifiedUser | null> {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return null;
+  }
+
+  const token = authHeader.split('Bearer ')[1];
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    return {
+      uid: decodedToken.uid,
+      email: decodedToken.email || null,
+    };
   } catch (error) {
     console.error('[Auth] Token verification failed:', error);
     return null;

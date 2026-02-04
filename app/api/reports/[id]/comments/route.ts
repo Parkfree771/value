@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb, Timestamp, FieldValue } from '@/lib/firebase-admin';
+import { adminDb, Timestamp, FieldValue, verifyAuthToken } from '@/lib/firebase-admin';
+import DOMPurify from 'isomorphic-dompurify';
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
+import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
+
+// 댓글 최대 길이
+const MAX_COMMENT_LENGTH = 2000;
+
+// Rate Limit 설정 (분당 10회)
+const COMMENT_RATE_LIMIT = 10;
+const COMMENT_RATE_WINDOW = 60 * 1000;
 
 // 댓글 목록 조회
 export async function GET(
@@ -76,8 +86,37 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
+
+    // Rate Limit 체크 (Redis 기반)
+    const clientIP = getClientIP(request);
+    const rateLimitResult = await checkRateLimitRedis(
+      `comment:${clientIP}`,
+      COMMENT_RATE_LIMIT,
+      COMMENT_RATE_WINDOW
+    );
+
+    if (!rateLimitResult.success) {
+      const response = NextResponse.json(
+        { success: false, error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+        { status: 429 }
+      );
+      setRateLimitHeaders(response.headers, rateLimitResult, COMMENT_RATE_LIMIT);
+      return response;
+    }
+
+    // 토큰 기반 인증 검증
+    const authHeader = request.headers.get('authorization');
+    const verifiedUserId = await verifyAuthToken(authHeader);
+
+    if (!verifiedUserId) {
+      return NextResponse.json(
+        { success: false, error: '로그인이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { content, userId, authorName, parentId } = body;
+    const { content, authorName, parentId } = body;
 
     if (!content || !content.trim()) {
       return NextResponse.json(
@@ -86,12 +125,17 @@ export async function POST(
       );
     }
 
-    if (!userId) {
+    // 댓글 길이 제한
+    if (content.length > MAX_COMMENT_LENGTH) {
       return NextResponse.json(
-        { success: false, error: '로그인이 필요합니다.' },
-        { status: 401 }
+        { success: false, error: `댓글은 ${MAX_COMMENT_LENGTH}자 이내로 작성해주세요.` },
+        { status: 400 }
       );
     }
+
+    // XSS 방지 - HTML 태그 제거
+    const sanitizedContent = DOMPurify.sanitize(content.trim(), { ALLOWED_TAGS: [] });
+    const sanitizedAuthorName = DOMPurify.sanitize(authorName || '익명', { ALLOWED_TAGS: [] });
 
     // 리포트 존재 여부 확인
     const postRef = adminDb.collection('posts').doc(id);
@@ -115,11 +159,11 @@ export async function POST(
       }
     }
 
-    // 댓글 추가
+    // 댓글 추가 - 토큰에서 검증된 userId 사용
     const newComment: Record<string, unknown> = {
-      content: content.trim(),
-      authorId: userId,
-      authorName: authorName || '익명',
+      content: sanitizedContent,
+      authorId: verifiedUserId,
+      authorName: sanitizedAuthorName,
       createdAt: Timestamp.now(),
       likes: 0,
     };

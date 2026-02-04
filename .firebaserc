@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "  firebase deploy --only firestore:indexes": "value-91453"
+  },
+  "targets": {},
+  "etags": {}
+}
