@@ -116,12 +116,9 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                 </div>
 
                 {/* Stock Info and Date */}
-                <div className="flex items-center gap-1.5 sm:gap-2 text-xs text-muted flex-wrap">
-                  <span className="font-semibold">{item.stockName}</span>
-                  <span className="hidden sm:inline">{item.ticker}</span>
-                  <span className="hidden sm:inline">·</span>
-                  <span className="sm:hidden">{item.createdAt.slice(5)}</span>
-                  <span className="hidden sm:inline">{item.createdAt}</span>
+                <div className="flex flex-col text-xs text-muted">
+                  <span className="font-semibold truncate max-w-[200px]">{item.stockName} <span className="font-normal">{item.ticker}</span></span>
+                  <span className="mt-0.5">{item.createdAt}</span>
                 </div>
               </div>
             </Link>
