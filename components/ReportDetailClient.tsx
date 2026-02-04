@@ -256,240 +256,154 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const isAuthor = user && report.authorId === user.uid;
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* Main Content - 넓게 */}
-        <div className="lg:col-span-3 space-y-4 sm:space-y-6">
-          {/* Report Header with Stock Info */}
-          <Card className="p-4 sm:p-6">
-            {/* 제목과 작성자 */}
-            <div className="mb-4 sm:mb-6">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4 leading-tight">
-                {report.title}
-              </h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      {/* 제목 + 메타 정보 (전체 너비) */}
+      <div className="mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+          {report.title}
+        </h1>
+        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+          <span className="font-medium text-gray-700 dark:text-gray-300">{report.author}</span>
+          <span>{report.createdAt}</span>
+          <span>조회 {report.views}</span>
+          <span>좋아요 {likesCount}</span>
+        </div>
+      </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 border-b dark:border-gray-700 pb-3 sm:pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg flex-shrink-0">
-                    {report.author[0]}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">{report.author}</div>
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      {report.createdAt} 작성
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
-                  <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    <span>조회 {report.views}</span>
-                    <span>좋아요 {likesCount}</span>
-                  </div>
-                  {isAuthor ? (
-                    <div className="flex gap-2">
-                      {!isClosed && (
-                        <button
-                          onClick={handleClosePosition}
-                          disabled={isClosing}
-                          className="px-3 py-2 text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
-                        >
-                          {isClosing ? '처리 중...' : '수익 확정하기'}
-                        </button>
-                      )}
-                      <Button variant="outline" size="sm" onClick={handleEdit} className="flex-shrink-0">수정</Button>
-                      <Button variant="outline" size="sm" onClick={handleDelete} className="flex-shrink-0 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">삭제</Button>
-                    </div>
-                  ) : (
-                    <Button variant="outline" size="sm" className="flex-shrink-0">팔로우</Button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* 모바일 액션 버튼 (상단) */}
-            <div className="lg:hidden mb-4 flex items-center justify-center gap-2 pb-4 border-b dark:border-gray-700">
-              {isAuthor ? (
-                <>
-                  {!isClosed && (
-                    <button
-                      onClick={handleClosePosition}
-                      disabled={isClosing}
-                      className={`px-4 py-2 bg-gradient-to-br from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm ${
-                        isClosing ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                    >
-                      {isClosing ? '처리 중...' : '수익 확정하기'}
-                    </button>
-                  )}
-                  <button onClick={handleEdit} className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                    </svg>
-                    <span>수정</span>
-                  </button>
-                  <button onClick={handleDelete} className="flex items-center gap-1.5 px-3 py-2 border border-red-300 dark:border-red-600 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg text-sm font-medium transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    <span>삭제</span>
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={handleLike}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      isLiked
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                        : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
-                  >
-                    <svg className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} stroke={isLiked ? "none" : "currentColor"} viewBox="0 0 20 20">
-                      <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
-                    </svg>
-                    <span>{likesCount}</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
-                    <span className="hidden xs:inline">북마크</span>
-                  </button>
-                  <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                    <span className="hidden xs:inline">공유</span>
-                  </button>
-                </>
+      <div className="lg:flex lg:gap-8">
+        {/* 왼쪽: 본문 영역 */}
+        <div className="flex-1 min-w-0 space-y-6">
+          {/* 기업 프로필 */}
+          <Card className="p-5">
+            {/* 헤더: 기업명 */}
+            <div className="flex items-baseline gap-3 mb-6">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">{report.stockName}</span>
+              <span className="font-mono text-sm text-gray-500">{report.ticker}</span>
+              {report.stockData?.exchange && (
+                <span className="text-xs text-gray-400">{report.stockData.exchange}</span>
               )}
             </div>
 
-            {/* 기업 정보 카드 - 컴팩트 2줄 디자인 */}
-            <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-white via-gray-50 to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 shadow-lg dark:shadow-2xl border border-gray-200 dark:border-transparent">
-              {/* 1줄: 기업명 + 매수 | 작성가 | 현재가 | 수익률 */}
-              <div className="relative px-6 sm:px-8 py-5 sm:py-6">
-                <div className="grid grid-cols-4 gap-4 sm:gap-6 items-center">
-                  {/* 기업 정보 */}
-                  <div className="text-center">
-                    <h3 className="text-sm sm:text-base font-bold text-gray-900 dark:text-white truncate mb-1">
-                      {report.stockName}
-                    </h3>
-                    <div className="flex items-center justify-center gap-1.5 text-xs sm:text-sm">
-                      <span className="font-mono font-semibold text-blue-600 dark:text-blue-400">
-                        {report.ticker}
-                      </span>
-                      {report.stockData?.exchange && (
-                        <>
-                          <span className="text-gray-400 dark:text-slate-500">·</span>
-                          <span className="text-gray-500 dark:text-slate-400">{report.stockData.exchange}</span>
-                        </>
-                      )}
-                      <OpinionBadge opinion={report.opinion} />
-                    </div>
-                  </div>
-
-                  {/* 작성가 */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">작성 당시</div>
-                    <div className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tabular-nums">
-                      <span className="text-gray-400 dark:text-slate-400 text-xs mr-0.5">{report.stockData?.currency || '$'}</span>
-                      {report.initialPrice?.toLocaleString()}
-                    </div>
-                  </div>
-
-                  {/* 현재가 */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">현재가</div>
-                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
-                      report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
-                      report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
-                      'text-gray-900 dark:text-white'
-                    }`}>
-                      <span className="text-gray-400 dark:text-slate-400 text-xs mr-0.5">{report.stockData?.currency || '$'}</span>
-                      {report.currentPrice?.toLocaleString()}
-                    </div>
-                  </div>
-
-                  {/* 수익률 */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">
-                      {isClosed ? '확정 수익률' : '수익률'}
-                    </div>
-                    <div className={`text-base sm:text-lg font-black tabular-nums ${
-                      report.returnRate > 0 ? 'text-red-600 dark:text-red-400' :
-                      report.returnRate < 0 ? 'text-blue-600 dark:text-blue-400' :
-                      'text-gray-600 dark:text-slate-300'
-                    }`}>
-                      {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
-                      {isClosed && <span className="ml-1 text-emerald-600 dark:text-emerald-400">✓</span>}
-                    </div>
-                  </div>
+            {/* 가격 정보 */}
+            <div className="grid grid-cols-4 gap-6 mb-3">
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">작성가</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                  {report.initialPrice?.toLocaleString()}
                 </div>
               </div>
-
-              {/* 2줄: P/E | P/B | EPS | 목표가 */}
-              <div className="relative px-6 sm:px-8 py-4 sm:py-5 bg-gray-100/50 dark:bg-black/20 border-t border-gray-200 dark:border-white/5">
-                <div className="grid grid-cols-4 gap-4 sm:gap-6 items-center">
-                  {/* P/E */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">P/E</div>
-                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
-                      report.stockData?.per
-                        ? report.stockData.per < 15 ? 'text-emerald-600 dark:text-emerald-400'
-                          : report.stockData.per > 30 ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-gray-900 dark:text-white'
-                        : 'text-gray-400 dark:text-slate-500'
-                    }`}>
-                      {report.stockData?.per ? report.stockData.per.toFixed(1) : '-'}
-                    </div>
-                  </div>
-
-                  {/* P/B */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">P/B</div>
-                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
-                      report.stockData?.pbr
-                        ? report.stockData.pbr < 1 ? 'text-emerald-600 dark:text-emerald-400'
-                          : report.stockData.pbr > 3 ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-gray-900 dark:text-white'
-                        : 'text-gray-400 dark:text-slate-500'
-                    }`}>
-                      {report.stockData?.pbr ? report.stockData.pbr.toFixed(2) : '-'}
-                    </div>
-                  </div>
-
-                  {/* EPS */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-1">EPS</div>
-                    <div className={`text-base sm:text-lg font-bold tabular-nums ${
-                      report.stockData?.eps
-                        ? report.stockData.eps > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
-                        : 'text-gray-400 dark:text-slate-500'
-                    }`}>
-                      {report.stockData?.eps ? report.stockData.eps.toFixed(2) : '-'}
-                    </div>
-                  </div>
-
-                  {/* 목표가 */}
-                  <div className="text-center">
-                    <div className="text-xs font-medium text-gray-500 dark:text-slate-400 mb-1">목표가</div>
-                    {report.targetPrice ? (
-                      <div className="text-base sm:text-lg font-bold text-purple-600 dark:text-purple-400 tabular-nums">
-                        <span className="text-gray-400 dark:text-slate-400 text-xs mr-0.5">{report.stockData?.currency || '$'}</span>
-                        {report.targetPrice?.toLocaleString()}
-                      </div>
-                    ) : (
-                      <div className="text-base sm:text-lg font-bold text-gray-400 dark:text-slate-500">-</div>
-                    )}
-                  </div>
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">현재가</div>
+                <div className={`text-lg font-semibold tabular-nums ${
+                  report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
+                  report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
+                  'text-gray-900 dark:text-white'
+                }`}>
+                  {report.currentPrice?.toLocaleString()}
                 </div>
               </div>
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">목표가</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                  {report.targetPrice?.toLocaleString() || '-'}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{isClosed ? '확정수익률' : '수익률'}</div>
+                <div className={`text-lg font-bold tabular-nums ${
+                  report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
+                  report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
+                  'text-gray-900 dark:text-white'
+                }`}>
+                  {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
+                </div>
+              </div>
+            </div>
 
-              {/* 하단 그라데이션 라인 */}
-              <div className="h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+            {/* 밸류에이션 지표 */}
+            <div className="grid grid-cols-4 gap-6">
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PER</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                  {report.stockData?.per?.toFixed(1) || '-'}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PBR</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                  {report.stockData?.pbr?.toFixed(2) || '-'}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">EPS</div>
+                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                  {report.stockData?.eps?.toFixed(0) || '-'}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">의견</div>
+                <div className="mt-0.5">
+                  <OpinionBadge opinion={report.opinion} />
+                </div>
+              </div>
             </div>
           </Card>
+
+          {/* 모바일용 액션 버튼 (lg 이하에서만 표시) */}
+          <div className="lg:hidden flex flex-wrap gap-2">
+            {/* 작성자 전용 버튼 */}
+            {isAuthor && (
+              <>
+                {!isClosed && (
+                  <button
+                    onClick={handleClosePosition}
+                    disabled={isClosing}
+                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                  >
+                    {isClosing ? '처리 중...' : '수익확정'}
+                  </button>
+                )}
+                <button
+                  onClick={handleEdit}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors"
+                >
+                  수정
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors"
+                >
+                  삭제
+                </button>
+              </>
+            )}
+            {/* 일반 버튼 */}
+            <button
+              onClick={handleLike}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                isLiked
+                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600'
+                  : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+              }`}
+            >
+              <svg className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 20 20">
+                <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
+              </svg>
+              {likesCount}
+            </button>
+            <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+              </svg>
+              북마크
+            </button>
+            <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              공유
+            </button>
+          </div>
 
           {/* Report Content - 넓고 여유롭게 */}
           <Card className="p-4 sm:p-6 lg:p-8">
@@ -514,76 +428,13 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           </Card>
 
           {/* Comments Section */}
-          <Card className="p-4 sm:p-6 lg:p-8">
-            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
+          <Card className="p-4 sm:p-5">
+            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
               댓글 {commentCount}개
             </h3>
 
-            <div className="mb-4 sm:mb-6">
-              <textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder={user ? "댓글을 작성하세요..." : "댓글을 작성하려면 로그인이 필요합니다."}
-                rows={3}
-                disabled={!user || isSubmittingComment}
-                className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
-              />
-              <div className="flex justify-end mt-2">
-                {user ? (
-                  <Button
-                    size="sm"
-                    disabled={isSubmittingComment || !commentText.trim()}
-                    onClick={async () => {
-                      if (!commentText.trim() || isSubmittingComment) return;
-
-                      setIsSubmittingComment(true);
-                      try {
-                        const token = await auth.currentUser?.getIdToken();
-                        const response = await fetch(`/api/reports/${report.id}/comments`, {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                          },
-                          body: JSON.stringify({
-                            content: commentText,
-                            authorName: userNickname || '익명',
-                          }),
-                        });
-
-                        const data = await response.json();
-                        if (data.success) {
-                          setComments([data.comment, ...comments]);
-                          setCommentCount(prev => prev + 1);
-                          setCommentText('');
-                        } else {
-                          alert(data.error || '댓글 작성에 실패했습니다.');
-                        }
-                      } catch (error) {
-                        console.error('댓글 작성 실패:', error);
-                        alert('댓글 작성 중 오류가 발생했습니다.');
-                      } finally {
-                        setIsSubmittingComment(false);
-                      }
-                    }}
-                  >
-                    {isSubmittingComment ? '작성 중...' : '댓글 작성'}
-                  </Button>
-                ) : (
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      alert('로그인이 필요한 서비스입니다.');
-                      router.push('/login');
-                    }}
-                  >
-                    로그인하고 댓글 작성
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3 sm:space-y-4">
+            {/* 댓글 목록 */}
+            <div className="space-y-3 mb-4">
               {comments.length > 0 ? (
                 <>
                   {/* 부모 댓글만 먼저 렌더링 */}
@@ -816,18 +667,114 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   ))}
                 </>
               ) : (
-                <div className="text-center py-6 text-gray-500 dark:text-gray-400">
-                  아직 댓글이 없습니다. 첫 번째 댓글을 작성해보세요!
+                <div className="text-center py-4 text-sm text-gray-400 dark:text-gray-500">
+                  댓글이 없습니다
                 </div>
               )}
+            </div>
+
+            {/* 댓글 작성 */}
+            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder={user ? "댓글을 작성하세요..." : "로그인 후 댓글 작성이 가능합니다"}
+                rows={2}
+                disabled={!user || isSubmittingComment}
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+              />
+              <div className="flex justify-end mt-2">
+                {user ? (
+                  <Button
+                    size="sm"
+                    disabled={isSubmittingComment || !commentText.trim()}
+                    onClick={async () => {
+                      if (!commentText.trim() || isSubmittingComment) return;
+
+                      setIsSubmittingComment(true);
+                      try {
+                        const token = await auth.currentUser?.getIdToken();
+                        const response = await fetch(`/api/reports/${report.id}/comments`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({
+                            content: commentText,
+                            authorName: userNickname || '익명',
+                          }),
+                        });
+
+                        const data = await response.json();
+                        if (data.success) {
+                          setComments([data.comment, ...comments]);
+                          setCommentCount(prev => prev + 1);
+                          setCommentText('');
+                        } else {
+                          alert(data.error || '댓글 작성에 실패했습니다.');
+                        }
+                      } catch (error) {
+                        console.error('댓글 작성 실패:', error);
+                        alert('댓글 작성 중 오류가 발생했습니다.');
+                      } finally {
+                        setIsSubmittingComment(false);
+                      }
+                    }}
+                  >
+                    {isSubmittingComment ? '작성 중...' : '작성'}
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      alert('로그인이 필요한 서비스입니다.');
+                      router.push('/login');
+                    }}
+                  >
+                    로그인
+                  </Button>
+                )}
+              </div>
             </div>
           </Card>
         </div>
 
-        {/* Sidebar - 간소화 (데스크톱만 표시) */}
-        <div className="hidden lg:block lg:col-span-1">
-          <div className="sticky top-20 space-y-3">
-            {/* Actions */}
+        {/* 오른쪽: 사이드바 (고정 폭) - 데스크톱만 */}
+        <div className="hidden lg:block lg:w-72 lg:flex-shrink-0">
+          <div className="sticky top-20 space-y-4">
+            {/* 작성자 전용 액션 */}
+            {isAuthor && (
+              <Card className="p-4">
+                <div className="space-y-2">
+                  {!isClosed && (
+                    <button
+                      onClick={handleClosePosition}
+                      disabled={isClosing}
+                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                      {isClosing ? '처리 중...' : '수익 확정하기'}
+                    </button>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleEdit}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      수정
+                    </button>
+                    <button
+                      onClick={handleDelete}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* 액션 버튼 */}
             <Card className="p-4">
               <div className="space-y-2">
                 <button
@@ -858,18 +805,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
             </Card>
 
-            {/* Quick Stats */}
+            {/* 날짜 정보 */}
             <Card className="p-4">
               <div className="text-center">
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">작성일</div>
                 <div className="text-base font-semibold text-gray-900 dark:text-white">{report.createdAt}</div>
               </div>
 
-              {/* 수정일 표시 (작성일과 다른 날짜만) */}
               {(() => {
-                // 작성일과 다른 수정일만 필터링
                 const filteredUpdates = report.updatedAt?.filter(date => date !== report.createdAt) || [];
-
                 return filteredUpdates.length > 0 && (
                   <>
                     <div className="border-t dark:border-gray-700 my-3"></div>
