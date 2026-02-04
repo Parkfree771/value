@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, Timestamp, FieldValue, verifyAuthToken } from '@/lib/firebase-admin';
-import DOMPurify from 'isomorphic-dompurify';
+import sanitizeHtml from 'sanitize-html';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
 
@@ -134,8 +134,8 @@ export async function POST(
     }
 
     // XSS 방지 - HTML 태그 제거
-    const sanitizedContent = DOMPurify.sanitize(content.trim(), { ALLOWED_TAGS: [] });
-    const sanitizedAuthorName = DOMPurify.sanitize(authorName || '익명', { ALLOWED_TAGS: [] });
+    const sanitizedContent = sanitizeHtml(content.trim(), { allowedTags: [], allowedAttributes: {} });
+    const sanitizedAuthorName = sanitizeHtml(authorName || '익명', { allowedTags: [], allowedAttributes: {} });
 
     // 리포트 존재 여부 확인
     const postRef = adminDb.collection('posts').doc(id);

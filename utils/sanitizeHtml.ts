@@ -34,7 +34,7 @@ export function sanitizeHtml(html: string): string {
   }
 
   // 클라이언트 사이드에서만 DOMPurify 사용
-  const DOMPurify = require('isomorphic-dompurify');
+  const DOMPurify = require('dompurify');
 
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: [
@@ -102,7 +102,7 @@ export function sanitizeHtmlStrict(html: string): string {
     return html;
   }
 
-  const DOMPurify = require('isomorphic-dompurify');
+  const DOMPurify = require('dompurify');
 
   return DOMPurify.sanitize(html, {
     ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 'a', 'ul', 'ol', 'li'],
