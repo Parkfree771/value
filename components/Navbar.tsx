@@ -6,13 +6,12 @@ import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
-import { isAdmin } from '@/lib/admin/adminCheck';
 
 const Navbar = memo(function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { theme, toggleTheme, mounted } = useTheme();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = useCallback((path: string) => {
@@ -125,7 +124,7 @@ const Navbar = memo(function Navbar() {
             >
               마이페이지
             </Link>
-            {user && isAdmin(user.email) && (
+            {user && isAdmin && (
               <Link
                 href="/admin"
                 className={`text-sm font-medium transition-colors ${
@@ -328,7 +327,7 @@ const Navbar = memo(function Navbar() {
               >
                 마이페이지
               </Link>
-              {user && isAdmin(user.email) && (
+              {user && isAdmin && (
                 <Link
                   href="/admin"
                   onClick={closeMobileMenu}

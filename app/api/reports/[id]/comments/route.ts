@@ -3,9 +3,7 @@ import { adminDb, Timestamp, FieldValue, verifyAuthToken } from '@/lib/firebase-
 import sanitizeHtml from 'sanitize-html';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
-
-// 댓글 최대 길이
-const MAX_COMMENT_LENGTH = 2000;
+import { validateComment, validateNickname } from '@/lib/validation';
 
 // Rate Limit 설정 (분당 10회)
 const COMMENT_RATE_LIMIT = 10;
@@ -118,24 +116,26 @@ export async function POST(
     const body = await request.json();
     const { content, authorName, parentId } = body;
 
-    if (!content || !content.trim()) {
+    // 댓글 내용 검증 (강화된 검증)
+    const contentValidation = validateComment(content);
+    if (!contentValidation.valid) {
       return NextResponse.json(
-        { success: false, error: '댓글 내용을 입력해주세요.' },
-        { status: 400 }
-      );
-    }
-
-    // 댓글 길이 제한
-    if (content.length > MAX_COMMENT_LENGTH) {
-      return NextResponse.json(
-        { success: false, error: `댓글은 ${MAX_COMMENT_LENGTH}자 이내로 작성해주세요.` },
+        { success: false, error: contentValidation.error },
         { status: 400 }
       );
     }
 
     // XSS 방지 - HTML 태그 제거
-    const sanitizedContent = sanitizeHtml(content.trim(), { allowedTags: [], allowedAttributes: {} });
-    const sanitizedAuthorName = sanitizeHtml(authorName || '익명', { allowedTags: [], allowedAttributes: {} });
+    const sanitizedContent = sanitizeHtml(contentValidation.sanitized!, { allowedTags: [], allowedAttributes: {} });
+
+    // 작성자 이름 검증 및 살균
+    let sanitizedAuthorName = '익명';
+    if (authorName) {
+      const authorValidation = validateNickname(authorName);
+      if (authorValidation.valid && authorValidation.sanitized) {
+        sanitizedAuthorName = authorValidation.sanitized;
+      }
+    }
 
     // 리포트 존재 여부 확인
     const postRef = adminDb.collection('posts').doc(id);

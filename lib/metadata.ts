@@ -3,7 +3,7 @@ import { Report } from '@/types/report';
 import { formatReturnRate } from './stockPrice';
 
 const SITE_NAME = '워렌버핏 따라잡기';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://warrennvalue.netlify.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app';
 
 /**
  * 리포트 상세 페이지의 동적 메타데이터를 생성합니다.

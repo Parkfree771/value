@@ -3,11 +3,32 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  collection,
+  addDoc,
   Timestamp,
   serverTimestamp
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { User } from "firebase/auth";
+
+// 동의 기록 인터페이스 (법적 증거 보관용)
+export interface ConsentRecord {
+  uid: string;
+  email: string;
+  consentType: 'onboarding' | 'terms_update' | 'marketing_change';
+  agreements: {
+    termsAgreed: boolean;
+    termsVersion: string;
+    privacyAgreed: boolean;
+    privacyVersion: string;
+    investmentDisclaimerAgreed: boolean;
+    disclaimerVersion: string;
+    marketingAgreed: boolean;
+  };
+  ipAddress?: string;
+  userAgent?: string;
+  consentedAt: Timestamp;
+}
 
 export interface UserProfile {
   uid: string;
@@ -158,6 +179,110 @@ export const getOrCreateUserProfile = async (user: User): Promise<UserProfile> =
     return profile;
   } catch (error) {
     console.error("사용자 프로필 가져오기/생성 오류:", error);
+    throw error;
+  }
+};
+
+// 약관 버전 상수 (약관 변경 시 업데이트)
+export const TERMS_VERSION = "2026.02.01";
+export const PRIVACY_VERSION = "2026.02.01";
+export const DISCLAIMER_VERSION = "2026.02.01";
+
+const CONSENT_RECORDS_COLLECTION = "consent_records";
+
+// 동의 기록 저장 (법적 증거 보관용)
+// 전자상거래법에 따라 계약 관련 기록 5년 보관 의무
+export const saveConsentRecord = async (
+  uid: string,
+  email: string,
+  agreements: {
+    termsAgreed: boolean;
+    privacyAgreed: boolean;
+    investmentDisclaimerAgreed: boolean;
+    marketingAgreed: boolean;
+  },
+  consentType: 'onboarding' | 'terms_update' | 'marketing_change' = 'onboarding'
+): Promise<string> => {
+  try {
+    const consentRecord: ConsentRecord = {
+      uid,
+      email,
+      consentType,
+      agreements: {
+        termsAgreed: agreements.termsAgreed,
+        termsVersion: TERMS_VERSION,
+        privacyAgreed: agreements.privacyAgreed,
+        privacyVersion: PRIVACY_VERSION,
+        investmentDisclaimerAgreed: agreements.investmentDisclaimerAgreed,
+        disclaimerVersion: DISCLAIMER_VERSION,
+        marketingAgreed: agreements.marketingAgreed,
+      },
+      consentedAt: Timestamp.now(),
+    };
+
+    const consentRef = collection(db, CONSENT_RECORDS_COLLECTION);
+    const docRef = await addDoc(consentRef, consentRecord);
+
+    return docRef.id;
+  } catch (error) {
+    console.error("동의 기록 저장 오류:", error);
+    throw error;
+  }
+};
+
+// 회원 탈퇴 시 별도 보관용 데이터 (법적 의무 기간 동안 보관)
+// 전자상거래법: 계약 기록 5년, 분쟁 처리 기록 3년
+export interface WithdrawnUserRecord {
+  uid: string;
+  email: string;
+  nickname: string;
+  withdrawnAt: Timestamp;
+  consentRecordIds: string[]; // 관련 동의 기록 ID들
+  retentionUntil: Timestamp; // 보관 만료일 (탈퇴 후 5년)
+}
+
+const WITHDRAWN_USERS_COLLECTION = "withdrawn_users";
+
+// 회원 탈퇴 처리 (법적 의무 보관)
+export const processUserWithdrawal = async (
+  uid: string,
+  email: string,
+  nickname: string,
+  consentRecordIds: string[] = []
+): Promise<void> => {
+  try {
+    const now = Timestamp.now();
+    // 5년 후 만료
+    const fiveYearsLater = new Date(now.toDate());
+    fiveYearsLater.setFullYear(fiveYearsLater.getFullYear() + 5);
+
+    const withdrawnRecord: WithdrawnUserRecord = {
+      uid,
+      email,
+      nickname,
+      withdrawnAt: now,
+      consentRecordIds,
+      retentionUntil: Timestamp.fromDate(fiveYearsLater),
+    };
+
+    // 탈퇴 기록 저장 (별도 컬렉션)
+    const withdrawnRef = doc(db, WITHDRAWN_USERS_COLLECTION, uid);
+    await setDoc(withdrawnRef, withdrawnRecord);
+
+    // 원본 사용자 데이터 삭제
+    const userRef = doc(db, USERS_COLLECTION, uid);
+    await updateDoc(userRef, {
+      email: "[탈퇴회원]",
+      displayName: "[탈퇴회원]",
+      nickname: "[탈퇴회원]",
+      photoURL: null,
+      bio: null,
+      website: null,
+      isWithdrawn: true,
+      withdrawnAt: now,
+    });
+  } catch (error) {
+    console.error("회원 탈퇴 처리 오류:", error);
     throw error;
   }
 };

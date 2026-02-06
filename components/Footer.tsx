@@ -21,7 +21,7 @@ const Footer = memo(function Footer() {
             onClick={() => setExpanded(!expanded)}
             className="text-sm text-gray-400 hover:text-white transition-colors flex items-center gap-1"
           >
-            {expanded ? '접기' : '더보기'}
+            {expanded ? '접기' : '사업자 정보'}
             <svg
               className={`w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`}
               fill="none"
@@ -33,27 +33,50 @@ const Footer = memo(function Footer() {
           </button>
         </div>
 
-        {/* 확장 영역 */}
+        {/* 확장 영역 - 사업자 정보 */}
         {expanded && (
-          <div className="mt-4 pt-4 border-t border-gray-700 text-center">
-            <p className="text-gray-400 text-sm mb-3">
-              개인 투자자들이 투자 리포트를 작성하고 성과를 추적하는 주식 커뮤니티
-            </p>
-            <div className="flex justify-center gap-4 text-sm mb-3">
-              <Link href="/" className="text-gray-400 hover:text-white transition-colors">피드</Link>
-              <Link href="/ranking" className="text-gray-400 hover:text-white transition-colors">랭킹</Link>
-              <Link href="/write" className="text-gray-400 hover:text-white transition-colors">글쓰기</Link>
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="max-w-md mx-auto text-center">
+              {/* 사업자 정보 */}
+              <div className="text-xs text-gray-400 space-y-1 mb-4">
+                <p>
+                  <span className="text-gray-500">상호명:</span> 부자FARM
+                  <span className="mx-2 text-gray-600">|</span>
+                  <span className="text-gray-500">대표:</span> 박유로
+                </p>
+                <p>
+                  <span className="text-gray-500">사업자등록번호:</span> 326-23-01856
+                </p>
+                <p>
+                  <span className="text-gray-500">주소:</span> 경기도 고양시 일산서구 킨텍스로 240
+                </p>
+                <p>
+                  <span className="text-gray-500">이메일:</span> dbfh1498@gmail.com
+                </p>
+              </div>
+
+              {/* 링크 */}
+              <div className="flex justify-center gap-4 text-sm mb-4">
+                <Link href="/" className="text-gray-400 hover:text-white transition-colors">피드</Link>
+                <Link href="/ranking" className="text-gray-400 hover:text-white transition-colors">랭킹</Link>
+                <Link href="/write" className="text-gray-400 hover:text-white transition-colors">글쓰기</Link>
+              </div>
+
+              {/* 투자 경고 */}
+              <div className="p-3 bg-gray-900 rounded-lg">
+                <p className="text-xs text-yellow-400 font-medium mb-1">[투자 위험 고지]</p>
+                <p className="text-xs text-gray-400">
+                  본 사이트의 투자 리포트는 작성자 개인의 의견이며, 투자 권유가 아닙니다.
+                  투자 손실의 책임은 전적으로 투자자 본인에게 있습니다.
+                </p>
+              </div>
             </div>
-            <p className="text-gray-500 text-xs mb-3">contact@warren-tracker.com</p>
-            <p className="text-xs text-gray-500">
-              <span className="text-yellow-400">⚠️</span> 본 사이트의 투자 리포트는 작성자 개인의 의견이며, 투자 권유가 아닙니다.
-            </p>
           </div>
         )}
 
         {/* 저작권 */}
         <div className="mt-3 pt-3 border-t border-gray-700 text-center text-xs text-gray-500">
-          &copy; 2025 워렌버핏 따라잡기
+          &copy; 2026 워렌버핏 따라잡기. All rights reserved.
         </div>
       </div>
     </footer>

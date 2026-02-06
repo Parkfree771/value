@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   authReady: boolean;
+  isAdmin: boolean;
   signInWithGoogle: () => Promise<User | undefined>;
   signOut: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
@@ -17,6 +18,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: false,
   authReady: false,
+  isAdmin: false,
   signInWithGoogle: async () => undefined,
   signOut: async () => {},
   getIdToken: async () => null,
@@ -36,6 +38,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [authReady, setAuthReady] = useState(false);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // 관리자 상태 확인 (서버 API 호출)
+  const checkAdminStatus = useCallback(async (firebaseUser: User | null) => {
+    if (!firebaseUser) {
+      setIsAdmin(false);
+      return;
+    }
+
+    try {
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/auth/admin-check', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsAdmin(data.isAdmin === true);
+      } else {
+        setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error('관리자 상태 확인 실패:', error);
+      setIsAdmin(false);
+    }
+  }, []);
 
   // Auth 초기화 (백그라운드에서 lazy하게)
   const initAuth = useCallback(async () => {
@@ -47,12 +77,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       onAuthStateChangeLazy((firebaseUser) => {
         setUser(firebaseUser);
         setAuthReady(true);
+        // 관리자 상태도 함께 확인
+        checkAdminStatus(firebaseUser);
       });
     } catch (error) {
       console.error('Auth 초기화 실패:', error);
       setAuthReady(true);
     }
-  }, [authInitialized]);
+  }, [authInitialized, checkAdminStatus]);
 
   // 페이지 로드 후 백그라운드에서 Auth 확인 (지연 로드)
   useEffect(() => {
@@ -74,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const currentUser = await getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
+        await checkAdminStatus(currentUser);
       }
       return currentUser;
     } catch (error) {
@@ -82,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, checkAdminStatus]);
 
   const signInWithGoogle = async () => {
     setLoading(true);
@@ -90,6 +123,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { signInWithGoogleLazy } = await import('@/lib/firebase-lazy');
       const firebaseUser = await signInWithGoogleLazy();
       setUser(firebaseUser);
+      // 로그인 후 관리자 상태 확인
+      await checkAdminStatus(firebaseUser);
       return firebaseUser;
     } catch (error) {
       console.error('로그인 실패:', error);
@@ -105,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { signOutLazy } = await import('@/lib/firebase-lazy');
       await signOutLazy();
       setUser(null);
+      setIsAdmin(false);
     } catch (error) {
       console.error('로그아웃 실패:', error);
       throw error;
@@ -127,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     loading,
     authReady,
+    isAdmin,
     signInWithGoogle,
     signOut,
     getIdToken,

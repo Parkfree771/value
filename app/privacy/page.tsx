@@ -75,6 +75,7 @@ export default function PrivacyPage() {
             <ul className="list-disc list-inside ml-6 space-y-1">
               <li>부정 이용 방지: 1년</li>
               <li>서비스 이용 기록: 회원 탈퇴 시까지</li>
+              <li><strong>약관 동의 기록 (동의 시점, 동의 내용, 동의 버전): 회원 탈퇴 후 5년</strong></li>
             </ul>
 
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 mt-4">나. 관련 법령에 의한 정보 보유</h3>
@@ -85,6 +86,20 @@ export default function PrivacyPage() {
               <li>표시/광고에 관한 기록: 6개월 (전자상거래법)</li>
               <li>웹사이트 방문 기록: 3개월 (통신비밀보호법)</li>
             </ul>
+
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 mt-4">다. 회원 탈퇴 시 정보 처리</h3>
+            <div className="ml-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="mb-2">회원 탈퇴 시 개인정보는 다음과 같이 처리됩니다:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>닉네임, 프로필 사진, 자기소개 등: <strong>즉시 삭제 또는 익명화</strong></li>
+                <li>이메일 주소: 법적 분쟁 대비를 위해 <strong>별도 분리 보관 후 5년 경과 시 파기</strong></li>
+                <li>약관 동의 기록: 동의 입증을 위해 <strong>별도 분리 보관 후 5년 경과 시 파기</strong></li>
+                <li>작성한 리포트/댓글: 회원 요청 시 삭제 또는 익명화 처리</li>
+              </ul>
+              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                * 분리 보관된 정보는 법적 분쟁 대응 목적으로만 사용되며, 다른 목적으로 이용되지 않습니다.
+              </p>
+            </div>
           </section>
 
           <section>
@@ -162,10 +177,12 @@ export default function PrivacyPage() {
             <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mt-3">
               <p><strong>개인정보 보호책임자</strong></p>
               <ul className="mt-2 space-y-1">
-                <li>이름: [담당자명]</li>
-                <li>이메일: privacy@warren-tracker.com</li>
-                <li>전화번호: [연락처]</li>
+                <li>이름: 박유로</li>
+                <li>이메일: dbfh1498@gmail.com</li>
               </ul>
+              <p className="mt-3 text-xs text-gray-500 dark:text-gray-500">
+                * 개인정보 관련 문의사항은 위 이메일로 연락주시기 바랍니다.
+              </p>
             </div>
           </section>
 
@@ -179,7 +196,7 @@ export default function PrivacyPage() {
 
           <section className="pt-6 border-t dark:border-gray-700">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              <strong>시행일:</strong> 2025년 1월 1일
+              <strong>시행일:</strong> 2026년 2월 1일
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               본 개인정보처리방침은 위 시행일부터 적용됩니다.

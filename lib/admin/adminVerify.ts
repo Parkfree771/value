@@ -1,6 +1,6 @@
 // 서버 전용 - 토큰 기반 관리자 검증
 import { verifyAuthTokenWithEmail, VerifiedUser } from '@/lib/firebase-admin';
-import { isAdmin } from './adminCheck';
+import { isAdminEmail } from './adminConfig.server';
 
 export type { VerifiedUser };
 
@@ -17,7 +17,7 @@ export async function verifyAdmin(authHeader: string | null): Promise<VerifiedUs
     return null;
   }
 
-  if (!isAdmin(user.email)) {
+  if (!isAdminEmail(user.email)) {
     return null;
   }
 

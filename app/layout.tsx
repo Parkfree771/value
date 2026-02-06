@@ -38,14 +38,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://warrennvalue.netlify.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://warrennvalue.netlify.app',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app',
     title: '워렌버핏 따라잡기 - 투자 리포트 공유 플랫폼',
     description: '투자 아이디어를 공유하고 수익률을 추적하세요. 개인 투자자들의 투자 리포트 공유 커뮤니티입니다.',
     siteName: '워렌버핏 따라잡기',
@@ -94,6 +94,59 @@ const inter = Inter({
   display: "swap",
 });
 
+// JSON-LD 구조화 데이터 (Organization + WebSite)
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#organization`,
+      name: "워렌버핏 따라잡기",
+      alternateName: "부자FARM",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://value-two-psi.vercel.app",
+      logo: {
+        "@type": "ImageObject",
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/warren.png`,
+        width: 512,
+        height: 512,
+      },
+      contactPoint: {
+        "@type": "ContactPoint",
+        email: "dbfh1498@gmail.com",
+        contactType: "customer service",
+        availableLanguage: "Korean",
+      },
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "킨텍스로 240",
+        addressLocality: "고양시",
+        addressRegion: "경기도",
+        addressCountry: "KR",
+      },
+      sameAs: [],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#website`,
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://value-two-psi.vercel.app",
+      name: "워렌버핏 따라잡기",
+      description: "투자 아이디어를 공유하고 수익률을 추적하세요. 개인 투자자들의 투자 리포트 공유 커뮤니티입니다.",
+      publisher: {
+        "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#organization`,
+      },
+      inLanguage: "ko-KR",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/search?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -104,6 +157,12 @@ export default function RootLayout({
       <head>
         {/* 테마 초기화 (FOUC 방지) */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+
+        {/* JSON-LD 구조화 데이터 */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
 
         {/* DNS Prefetch & Preconnect */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />

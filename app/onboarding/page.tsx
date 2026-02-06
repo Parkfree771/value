@@ -3,10 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { completeOnboarding, getUserProfile, checkNicknameAvailable } from '@/lib/users';
-import Card from '@/components/Card';
-import Input from '@/components/Input';
-import Button from '@/components/Button';
+import { completeOnboarding, getUserProfile, checkNicknameAvailable, saveConsentRecord } from '@/lib/users';
 import Link from 'next/link';
 
 export default function OnboardingPage() {
@@ -17,6 +14,7 @@ export default function OnboardingPage() {
   const [nicknameChecking, setNicknameChecking] = useState(false);
   const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(null);
   const [nicknameError, setNicknameError] = useState('');
+  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     nickname: '',
@@ -26,14 +24,15 @@ export default function OnboardingPage() {
     marketingAgreed: false,
   });
 
-  // 로그인하지 않았으면 로그인 페이지로 (Auth가 준비된 후에만)
+  const allRequiredAgreed = formData.termsAgreed && formData.privacyAgreed && formData.investmentDisclaimerAgreed;
+  const allAgreed = allRequiredAgreed && formData.marketingAgreed;
+
   useEffect(() => {
     if (authReady && !user) {
       router.push('/login');
     }
   }, [user, authReady, router]);
 
-  // 이미 온보딩 완료한 사용자는 메인으로
   useEffect(() => {
     const checkOnboarding = async () => {
       if (user) {
@@ -46,26 +45,22 @@ export default function OnboardingPage() {
     checkOnboarding();
   }, [user, router]);
 
-  // 닉네임 유효성 검사 및 중복 체크 (debounce 적용)
   useEffect(() => {
     const checkNickname = async () => {
       const nickname = formData.nickname.trim();
 
-      // 빈 문자열이거나 너무 짧으면 체크하지 않음
       if (!nickname || nickname.length < 2) {
         setNicknameAvailable(null);
         setNicknameError('');
         return;
       }
 
-      // 닉네임 길이 체크 (2-12자)
       if (nickname.length > 12) {
         setNicknameAvailable(false);
         setNicknameError('닉네임은 12자 이하여야 합니다.');
         return;
       }
 
-      // 한글, 영문, 숫자만 허용 (특수문자 및 공백 제외)
       const nicknameRegex = /^[a-zA-Z0-9가-힣]+$/;
       if (!nicknameRegex.test(nickname)) {
         setNicknameAvailable(false);
@@ -94,20 +89,29 @@ export default function OnboardingPage() {
     return () => clearTimeout(timeoutId);
   }, [formData.nickname, user?.uid]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
+      const checked = e.target.checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
-      // 닉네임 변경 시 상태 초기화
       if (name === 'nickname') {
         setNicknameAvailable(null);
         setNicknameError('');
       }
     }
+  };
+
+  const handleAllAgree = (checked: boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      termsAgreed: checked,
+      privacyAgreed: checked,
+      investmentDisclaimerAgreed: checked,
+      marketingAgreed: checked,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -118,7 +122,6 @@ export default function OnboardingPage() {
       return;
     }
 
-    // 필수 항목 체크
     const nickname = formData.nickname.trim();
     if (!nickname) {
       setError('닉네임을 입력해주세요.');
@@ -135,14 +138,12 @@ export default function OnboardingPage() {
       return;
     }
 
-    // 한글, 영문, 숫자만 허용
     const nicknameRegex = /^[a-zA-Z0-9가-힣]+$/;
     if (!nicknameRegex.test(nickname)) {
       setError('닉네임은 한글, 영문, 숫자만 사용할 수 있습니다.');
       return;
     }
 
-    // 닉네임 사용 가능 여부 확인
     if (nicknameAvailable !== true) {
       setError('사용할 수 없는 닉네임입니다. 다른 닉네임을 입력해주세요.');
       return;
@@ -157,6 +158,18 @@ export default function OnboardingPage() {
       setLoading(true);
       setError('');
 
+      await saveConsentRecord(
+        user.uid,
+        user.email || '',
+        {
+          termsAgreed: formData.termsAgreed,
+          privacyAgreed: formData.privacyAgreed,
+          investmentDisclaimerAgreed: formData.investmentDisclaimerAgreed,
+          marketingAgreed: formData.marketingAgreed,
+        },
+        'onboarding'
+      );
+
       await completeOnboarding(user.uid, {
         nickname: nickname,
         termsAgreed: formData.termsAgreed,
@@ -165,7 +178,6 @@ export default function OnboardingPage() {
         marketingAgreed: formData.marketingAgreed,
       });
 
-      // 온보딩 완료 후 메인 페이지로
       router.push('/');
     } catch (error) {
       console.error('온보딩 오류:', error);
@@ -173,6 +185,10 @@ export default function OnboardingPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
   };
 
   if (!authReady) {
@@ -189,192 +205,300 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-[480px]">
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            환영합니다!
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            회원가입
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            서비스 이용을 위해 몇 가지 정보를 입력해주세요
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            서비스 이용을 위해 정보를 입력해주세요
           </p>
         </div>
 
-        <Card className="p-8">
+        {/* Main Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
           {error && (
-            <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-400 rounded-lg">
+            <div className="mx-6 mt-6 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded-lg text-sm">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 사용자 정보 */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                기본 정보
-              </h2>
-
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Google 계정: <span className="font-medium text-gray-900 dark:text-white">{user.email}</span>
-                </p>
+          <form onSubmit={handleSubmit}>
+            {/* 계정 정보 */}
+            <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">계정 정보</h2>
+              <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{user.email}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Google 계정</p>
+                </div>
               </div>
+            </div>
 
+            {/* 닉네임 */}
+            <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">닉네임</h2>
               <div>
-                <Input
-                  name="nickname"
+                <input
                   type="text"
-                  label="닉네임"
-                  placeholder="한글, 영문, 숫자 2-12자"
+                  name="nickname"
                   value={formData.nickname}
                   onChange={handleChange}
-                  required
+                  placeholder="닉네임을 입력하세요"
+                  className="w-full h-12 px-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  maxLength={12}
                 />
-                {/* 닉네임 체크 상태 표시 */}
-                {formData.nickname.trim().length >= 2 && (
-                  <div className="mt-2">
+                <div className="mt-2 flex items-center justify-between">
+                  <div>
                     {nicknameChecking && (
-                      <p className="text-sm text-blue-600 dark:text-blue-400">닉네임 확인 중...</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">확인 중...</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === true && (
-                      <p className="text-sm text-green-600 dark:text-green-400">사용 가능한 닉네임입니다</p>
+                      <p className="text-xs text-green-600 dark:text-green-400">사용 가능한 닉네임입니다</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === false && nicknameError && (
-                      <p className="text-sm text-red-600 dark:text-red-400">{nicknameError}</p>
+                      <p className="text-xs text-red-600 dark:text-red-400">{nicknameError}</p>
+                    )}
+                    {!nicknameChecking && nicknameAvailable === null && formData.nickname.length === 0 && (
+                      <p className="text-xs text-gray-400">한글, 영문, 숫자 2-12자</p>
                     )}
                   </div>
-                )}
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  2-12자 이내, 한글/영문/숫자만 사용 가능 (특수문자 및 공백 불가)
-                </p>
+                  <span className="text-xs text-gray-400">{formData.nickname.length}/12</span>
+                </div>
               </div>
             </div>
 
             {/* 약관 동의 */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                약관 동의
-              </h2>
+            <div className="p-6">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4">약관 동의</h2>
 
-              <div className="space-y-3">
+              {/* 전체 동의 */}
+              <div
+                className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg mb-3 cursor-pointer"
+                onClick={() => handleAllAgree(!allAgreed)}
+              >
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                  allAgreed
+                    ? 'bg-blue-600 border-blue-600'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}>
+                  {allAgreed && (
+                    <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <span className="font-medium text-gray-900 dark:text-white">전체 동의</span>
+              </div>
+
+              {/* 개별 약관 */}
+              <div className="border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
                 {/* 이용약관 */}
-                <label className="flex items-start gap-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    name="termsAgreed"
-                    checked={formData.termsAgreed}
-                    onChange={handleChange}
-                    className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        이용약관 동의
-                      </span>
-                      <span className="text-xs text-red-500">(필수)</span>
-                    </div>
-                    <Link
-                      href="/terms"
-                      target="_blank"
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
+                <div>
+                  <div className="flex items-center justify-between p-4">
+                    <div
+                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      onClick={() => setFormData(prev => ({ ...prev, termsAgreed: !prev.termsAgreed }))}
                     >
-                      약관 보기
-                    </Link>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                        formData.termsAgreed
+                          ? 'bg-blue-600 border-blue-600'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}>
+                        {formData.termsAgreed && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        이용약관 동의 <span className="text-red-500">(필수)</span>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection('terms')}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                    >
+                      <svg className={`w-5 h-5 transition-transform ${expandedSection === 'terms' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
                   </div>
-                </label>
+                  {expandedSection === 'terms' && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                        <p>- 투자 리포트 작성 및 공유 서비스 이용</p>
+                        <p>- 허위 정보, 명예훼손, 시세조종 목적 게시물 금지</p>
+                        <p>- 작성한 리포트의 저작권은 회원에게 귀속</p>
+                        <Link href="/terms" target="_blank" className="inline-block text-blue-600 dark:text-blue-400 hover:underline mt-2">
+                          전문 보기
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-                {/* 개인정보처리방침 */}
-                <label className="flex items-start gap-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    name="privacyAgreed"
-                    checked={formData.privacyAgreed}
-                    onChange={handleChange}
-                    className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        개인정보처리방침 동의
-                      </span>
-                      <span className="text-xs text-red-500">(필수)</span>
-                    </div>
-                    <Link
-                      href="/privacy"
-                      target="_blank"
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
+                {/* 개인정보 수집 및 이용 */}
+                <div>
+                  <div className="flex items-center justify-between p-4">
+                    <div
+                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      onClick={() => setFormData(prev => ({ ...prev, privacyAgreed: !prev.privacyAgreed }))}
                     >
-                      방침 보기
-                    </Link>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                        formData.privacyAgreed
+                          ? 'bg-blue-600 border-blue-600'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}>
+                        {formData.privacyAgreed && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        개인정보 수집 및 이용 동의 <span className="text-red-500">(필수)</span>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection('privacy')}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                    >
+                      <svg className={`w-5 h-5 transition-transform ${expandedSection === 'privacy' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
                   </div>
-                </label>
+                  {expandedSection === 'privacy' && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs text-gray-600 dark:text-gray-400">
+                        <table className="w-full">
+                          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tr>
+                              <td className="py-1.5 text-gray-500 dark:text-gray-500 w-20">수집 항목</td>
+                              <td className="py-1.5">이메일, 닉네임, 프로필 사진(선택)</td>
+                            </tr>
+                            <tr>
+                              <td className="py-1.5 text-gray-500 dark:text-gray-500">수집 목적</td>
+                              <td className="py-1.5">회원 식별, 서비스 제공</td>
+                            </tr>
+                            <tr>
+                              <td className="py-1.5 text-gray-500 dark:text-gray-500">보유 기간</td>
+                              <td className="py-1.5">탈퇴 시까지 (일부 정보 5년 보관)</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                        <p className="text-[11px] text-gray-400 mt-2">* 동의 거부 시 서비스 이용이 제한됩니다.</p>
+                        <Link href="/privacy" target="_blank" className="inline-block text-blue-600 dark:text-blue-400 hover:underline mt-2">
+                          전문 보기
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* 투자 면책 조항 */}
-                <label className="flex items-start gap-3 p-4 border-2 border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/10 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/20 cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    name="investmentDisclaimerAgreed"
-                    checked={formData.investmentDisclaimerAgreed}
-                    onChange={handleChange}
-                    className="mt-1 w-5 h-5 text-red-600 rounded focus:ring-2 focus:ring-red-500"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        투자 면책 조항 동의
-                      </span>
-                      <span className="text-xs text-red-500">(필수)</span>
-                    </div>
-                    <p className="text-sm text-red-700 dark:text-red-400 mt-1 font-medium">
-                      본 사이트의 투자 정보는 투자 권유가 아니며, 투자 손실에 대한 책임은 투자자에게 있습니다.
-                    </p>
-                    <Link
-                      href="/disclaimer"
-                      target="_blank"
-                      className="text-sm text-red-600 dark:text-red-400 hover:underline font-semibold"
-                      onClick={(e) => e.stopPropagation()}
+                <div>
+                  <div className="flex items-center justify-between p-4">
+                    <div
+                      className="flex items-center gap-3 flex-1 cursor-pointer"
+                      onClick={() => setFormData(prev => ({ ...prev, investmentDisclaimerAgreed: !prev.investmentDisclaimerAgreed }))}
                     >
-                      면책 조항 전문 보기
-                    </Link>
+                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                        formData.investmentDisclaimerAgreed
+                          ? 'bg-red-600 border-red-600'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}>
+                        {formData.investmentDisclaimerAgreed && (
+                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        투자 면책 조항 동의 <span className="text-red-500">(필수)</span>
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSection('disclaimer')}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                    >
+                      <svg className={`w-5 h-5 transition-transform ${expandedSection === 'disclaimer' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
                   </div>
-                </label>
+                  {expandedSection === 'disclaimer' && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs text-red-700 dark:text-red-400 space-y-1">
+                        <p className="font-medium mb-2">[필독] 투자 책임 안내</p>
+                        <p>- 본 사이트의 정보는 투자 권유가 아닙니다</p>
+                        <p>- 투자 손실의 책임은 전적으로 본인에게 있습니다</p>
+                        <p>- 과거 수익률이 미래 수익을 보장하지 않습니다</p>
+                        <p>- 투자 전 전문가 상담을 권장합니다</p>
+                        <Link href="/disclaimer" target="_blank" className="inline-block text-red-600 dark:text-red-400 hover:underline mt-2 font-medium">
+                          전문 보기
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* 마케팅 정보 수신 */}
-                <label className="flex items-start gap-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors">
-                  <input
-                    type="checkbox"
-                    name="marketingAgreed"
-                    checked={formData.marketingAgreed}
-                    onChange={handleChange}
-                    className="mt-1 w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900 dark:text-white">
-                        마케팅 정보 수신 동의
-                      </span>
-                      <span className="text-xs text-gray-500">(선택)</span>
+                <div className="flex items-center justify-between p-4">
+                  <div
+                    className="flex items-center gap-3 flex-1 cursor-pointer"
+                    onClick={() => setFormData(prev => ({ ...prev, marketingAgreed: !prev.marketingAgreed }))}
+                  >
+                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                      formData.marketingAgreed
+                        ? 'bg-blue-600 border-blue-600'
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}>
+                      {formData.marketingAgreed && (
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      새로운 기능, 이벤트 등의 소식을 이메일로 받아보실 수 있습니다
-                    </p>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      마케팅 정보 수신 동의 <span className="text-gray-400">(선택)</span>
+                    </span>
                   </div>
-                </label>
+                </div>
               </div>
             </div>
 
-            <Button
-              type="submit"
-              variant="primary"
-              className="w-full"
-              size="lg"
-              disabled={loading}
-            >
-              {loading ? '처리 중...' : '시작하기'}
-            </Button>
+            {/* 가입 버튼 */}
+            <div className="p-6 pt-0">
+              <button
+                type="submit"
+                disabled={loading || !allRequiredAgreed || nicknameAvailable !== true}
+                className={`w-full h-12 rounded-lg font-medium text-white transition-all ${
+                  loading || !allRequiredAgreed || nicknameAvailable !== true
+                    ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                }`}
+              >
+                {loading ? '처리 중...' : '가입 완료'}
+              </button>
+            </div>
           </form>
-        </Card>
+        </div>
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
+          가입 시 입력한 정보는 안전하게 암호화되어 보관됩니다
+        </p>
       </div>
     </div>
   );

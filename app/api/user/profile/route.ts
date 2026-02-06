@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, collection, query, where, getDocs, writeBatch, orderBy, Timestamp } from 'firebase/firestore';
+import { validateNickname } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
   try {
@@ -102,17 +103,34 @@ export async function PUT(request: NextRequest) {
   try {
     const { userId, nickname } = await request.json();
 
-    if (!userId || !nickname) {
+    if (!userId) {
       return NextResponse.json(
-        { error: '사용자 ID와 닉네임은 필수입니다.' },
+        { error: '사용자 ID가 필요합니다.' },
         { status: 400 }
       );
     }
 
-    // 닉네임 유효성 검사
-    if (nickname.trim().length < 2 || nickname.trim().length > 20) {
+    // 닉네임 유효성 검사 (강화된 검증)
+    const nicknameValidation = validateNickname(nickname);
+    if (!nicknameValidation.valid) {
       return NextResponse.json(
-        { error: '닉네임은 2~20자 사이여야 합니다.' },
+        { error: nicknameValidation.error },
+        { status: 400 }
+      );
+    }
+
+    const validatedNickname = nicknameValidation.sanitized!;
+
+    // 닉네임 중복 체크
+    const usersRef = collection(db, 'users');
+    const duplicateQuery = query(usersRef, where('nickname', '==', validatedNickname));
+    const duplicateSnapshot = await getDocs(duplicateQuery);
+
+    // 자신이 아닌 다른 사용자가 같은 닉네임을 사용 중인지 확인
+    const isDuplicate = duplicateSnapshot.docs.some(doc => doc.id !== userId);
+    if (isDuplicate) {
+      return NextResponse.json(
+        { error: '이미 사용 중인 닉네임입니다.' },
         { status: 400 }
       );
     }
@@ -132,12 +150,12 @@ export async function PUT(request: NextRequest) {
 
     // 사용자 프로필 업데이트
     await updateDoc(userRef, {
-      nickname: nickname.trim(),
+      nickname: validatedNickname,
       updatedAt: new Date().toISOString(),
     });
 
     // 닉네임이 변경된 경우, 해당 사용자가 작성한 모든 게시글의 authorName 업데이트
-    if (oldNickname !== nickname.trim()) {
+    if (oldNickname !== validatedNickname) {
       // posts 컬렉션 업데이트
       const postsRef = collection(db, 'posts');
       const postsQuery = query(postsRef, where('authorId', '==', userId));
@@ -157,7 +175,7 @@ export async function PUT(request: NextRequest) {
         }
 
         const postRef = doc(db, 'posts', docSnapshot.id);
-        currentBatch.update(postRef, { authorName: nickname.trim() });
+        currentBatch.update(postRef, { authorName: validatedNickname });
         batchCount++;
       });
 
@@ -174,7 +192,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: '프로필이 성공적으로 업데이트되었습니다.',
-      nickname: nickname.trim(),
+      nickname: validatedNickname,
     });
   } catch (error) {
     console.error('프로필 업데이트 오류:', error);

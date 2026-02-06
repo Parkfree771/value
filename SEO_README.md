@@ -50,7 +50,7 @@ cp .env.local.example .env.local
 
 # .env.local 파일을 열어서 실제 값 입력
 # 특히 중요한 설정:
-# - NEXT_PUBLIC_SITE_URL: https://warrennvalue.netlify.app
+# - NEXT_PUBLIC_SITE_URL: https://value-two-psi.vercel.app
 # - Firebase 설정값들
 \`\`\`
 
@@ -90,12 +90,12 @@ http://localhost:3000/robots.txt
 #### Google Search Console
 1. https://search.google.com/search-console 접속
 2. 속성 추가 → 도메인 입력
-3. Sitemap 제출: `https://warrennvalue.netlify.app/sitemap.xml`
+3. Sitemap 제출: `https://value-two-psi.vercel.app/sitemap.xml`
 
 #### 네이버 웹마스터 도구
 1. https://searchadvisor.naver.com 접속
 2. 사이트 등록
-3. 사이트맵 제출: `https://warrennvalue.netlify.app/sitemap.xml`
+3. 사이트맵 제출: `https://value-two-psi.vercel.app/sitemap.xml`
 
 ## 파일 구조
 

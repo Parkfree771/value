@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { isAdmin } from '@/lib/admin/adminCheck';
 import { auth } from '@/lib/firebase';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
@@ -56,7 +55,7 @@ interface User {
 
 export default function AdminPage() {
   const router = useRouter();
-  const { user, authReady } = useAuth();
+  const { user, authReady, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState<'dashboard' | 'posts' | 'users'>('dashboard');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats | null>(null);
@@ -85,7 +84,7 @@ export default function AdminPage() {
         return;
       }
 
-      if (!isAdmin(user.email)) {
+      if (!isAdmin) {
         alert('관리자 권한이 필요합니다.');
         router.push('/');
         return;
@@ -95,7 +94,7 @@ export default function AdminPage() {
 
   // 통계 데이터 가져오기
   useEffect(() => {
-    if (!user || !isAdmin(user.email)) return;
+    if (!user || !isAdmin) return;
 
     const fetchStats = async () => {
       try {
@@ -122,7 +121,7 @@ export default function AdminPage() {
 
   // 게시글 목록 가져오기
   const fetchPosts = async () => {
-    if (!user || !isAdmin(user.email)) return;
+    if (!user || !isAdmin) return;
 
     try {
       setLoading(true);
@@ -146,7 +145,7 @@ export default function AdminPage() {
 
   // 사용자 목록 가져오기
   const fetchUsers = async () => {
-    if (!user || !isAdmin(user.email)) return;
+    if (!user || !isAdmin) return;
 
     try {
       setLoading(true);
@@ -170,7 +169,7 @@ export default function AdminPage() {
 
   // 게시글 삭제
   const handleDeletePost = async (postId: string, title: string) => {
-    if (!user || !isAdmin(user.email)) return;
+    if (!user || !isAdmin) return;
 
     setConfirmModal({
       isOpen: true,
@@ -210,7 +209,7 @@ export default function AdminPage() {
 
   // 사용자 정지/해제
   const handleToggleSuspend = async (userId: string, nickname: string, isSuspended: boolean) => {
-    if (!user || !isAdmin(user.email)) return;
+    if (!user || !isAdmin) return;
 
     const action = isSuspended ? '정지 해제' : '정지';
 
@@ -260,7 +259,7 @@ export default function AdminPage() {
     }
   }, [activeTab]);
 
-  if (!authReady || !user || !isAdmin(user.email)) {
+  if (!authReady || !user || !isAdmin) {
     return null;
   }
 

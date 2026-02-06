@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://warrennvalue.netlify.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app';
 
 /**
  * 동적 sitemap.xml 생성

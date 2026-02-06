@@ -1,6 +1,6 @@
 // 서버 사이드 전용 - 클라이언트에서 import하지 마세요
 import { adminAuth } from '@/lib/firebase-admin';
-import { isAdmin } from './adminCheck';
+import { isAdminEmail } from './adminConfig.server';
 
 /**
  * Authorization 헤더에서 토큰을 검증하고 관리자 이메일 반환
@@ -29,8 +29,8 @@ export async function verifyAdminToken(authHeader: string | null): Promise<strin
       throw new Error('이메일 정보가 없습니다.');
     }
 
-    // 관리자 여부 확인
-    if (!isAdmin(email)) {
+    // 관리자 여부 확인 (환경변수 기반)
+    if (!isAdminEmail(email)) {
       throw new Error('관리자 권한이 필요합니다.');
     }
 

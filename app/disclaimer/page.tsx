@@ -18,7 +18,7 @@ export default function DisclaimerPage() {
           {/* 중요 공지 */}
           <div className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
             <h2 className="text-xl font-bold text-red-700 dark:text-red-400 mb-2">
-              ⚠️ 중요 공지
+              [중요 공지]
             </h2>
             <p className="text-red-600 dark:text-red-300 font-medium">
               본 웹사이트에 게시된 모든 투자 정보, 리포트, 의견 및 분석은 투자 권유 또는 매매 추천이 아닙니다.

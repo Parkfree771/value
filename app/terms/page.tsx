@@ -54,7 +54,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제5조 (투자 면책 조항)</h2>
             <div className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded mb-4">
               <p className="font-bold text-red-700 dark:text-red-400 mb-2">
-                ⚠️ 중요: 본 서비스는 투자 자문 또는 투자 권유를 제공하지 않습니다.
+                [중요] 본 서비스는 투자 자문 또는 투자 권유를 제공하지 않습니다.
               </p>
               <p className="text-red-600 dark:text-red-300">
                 자세한 투자 면책 조항은{' '}
@@ -124,10 +124,19 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제8조 (계약 해지)</h2>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제8조 (계약 해지 및 회원 탈퇴)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회원은 언제든지 서비스 이용을 중단하고 회원 탈퇴를 요청할 수 있습니다.</li>
               <li>회사는 회원이 이 약관을 위반한 경우 사전 통지 없이 이용계약을 해지할 수 있습니다.</li>
+              <li>
+                <strong>회원 탈퇴 시 정보 처리:</strong>
+                <ul className="list-disc list-inside ml-6 mt-2">
+                  <li>닉네임, 프로필 등 개인정보는 즉시 삭제 또는 익명화 처리됩니다.</li>
+                  <li>단, 관련 법령 및 개인정보처리방침에 따라 일부 정보(이메일, 약관 동의 기록)는 법적 분쟁 대비를 위해 탈퇴 후 5년간 별도 보관됩니다.</li>
+                  <li>작성한 리포트 및 댓글은 회원 요청 시 삭제하거나, 작성자 정보를 익명화하여 유지할 수 있습니다.</li>
+                </ul>
+              </li>
+              <li>탈퇴 후 재가입 시 이전 계정의 정보 및 활동 내역은 복구되지 않습니다.</li>
             </ol>
           </section>
 
@@ -141,7 +150,7 @@ export default function TermsPage() {
 
           <section className="pt-6 border-t dark:border-gray-700">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              <strong>시행일:</strong> 2025년 1월 1일
+              <strong>시행일:</strong> 2026년 2월 1일
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               본 이용약관은 위 시행일부터 적용됩니다.

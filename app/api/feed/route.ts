@@ -9,6 +9,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage, verifyAuthToken } from '@/lib/firebase-admin';
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
+import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
+
+// Rate Limit 설정: 시간당 10개 게시글 (스팸 방지)
+const POST_RATE_LIMIT = 10;
+const POST_RATE_WINDOW = 60 * 60 * 1000; // 1시간
 
 // feed.json 구조
 interface FeedPost {
@@ -115,6 +121,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Rate Limit 체크 (사용자 ID + IP 기반)
+    const clientIP = getClientIP(request);
+    const rateLimitKey = `post:${userId}:${clientIP}`;
+    const rateLimitResult = await checkRateLimitRedis(
+      rateLimitKey,
+      POST_RATE_LIMIT,
+      POST_RATE_WINDOW
+    );
+
+    if (!rateLimitResult.success) {
+      const response = NextResponse.json(
+        { error: '게시글 작성이 너무 빈번합니다. 잠시 후 다시 시도해주세요.' },
+        { status: 429 }
+      );
+      setRateLimitHeaders(response.headers, rateLimitResult, POST_RATE_LIMIT);
+      return response;
+    }
+
     const body = await request.json();
     const { postId, postData } = body;
 
@@ -211,6 +235,21 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: '로그인이 필요합니다.' },
         { status: 401 }
+      );
+    }
+
+    // Rate Limit 체크 (삭제도 제한 - 분당 30회)
+    const clientIP = getClientIP(request);
+    const rateLimitResult = await checkRateLimitRedis(
+      `delete:${userId}:${clientIP}`,
+      30,
+      60 * 1000 // 1분
+    );
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: '요청이 너무 빈번합니다. 잠시 후 다시 시도해주세요.' },
+        { status: 429 }
       );
     }
 

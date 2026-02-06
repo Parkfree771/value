@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { processUserWithdrawal } from '@/lib/users';
 import styles from './MyPage.module.css';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
@@ -17,7 +18,7 @@ const ReportCard = dynamic(() => import('@/components/ReportCard'), {
 
 export default function MyPage() {
   const router = useRouter();
-  const { user, authReady } = useAuth();
+  const { user, authReady, signOut } = useAuth();
   const { bookmarkedIds, isLoading: bookmarkLoading } = useBookmark();
   const [activeTab, setActiveTab] = useState<'reports' | 'bookmarks' | 'settings'>('reports');
   const [myReports, setMyReports] = useState<Report[]>([]);
@@ -27,6 +28,9 @@ export default function MyPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newNickname, setNewNickname] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawConfirmText, setWithdrawConfirmText] = useState('');
 
   // 로그인 체크 (Auth가 준비된 후에만)
   useEffect(() => {
@@ -210,6 +214,30 @@ export default function MyPage() {
   // 리포트 삭제
   const handleReportDelete = (reportId: string) => {
     setMyReports(prevReports => prevReports.filter(report => report.id !== reportId));
+  };
+
+  // 회원 탈퇴
+  const handleWithdraw = async () => {
+    if (!user || withdrawConfirmText !== '탈퇴합니다') return;
+
+    setIsWithdrawing(true);
+    try {
+      await processUserWithdrawal(
+        user.uid,
+        user.email || '',
+        userProfile?.nickname || user.displayName || '탈퇴회원',
+        []
+      );
+      await signOut();
+      alert('회원 탈퇴가 완료되었습니다. 그동안 이용해주셔서 감사합니다.');
+      router.push('/');
+    } catch (error) {
+      console.error('회원 탈퇴 오류:', error);
+      alert('회원 탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.');
+    } finally {
+      setIsWithdrawing(false);
+      setIsWithdrawModalOpen(false);
+    }
   };
 
   const userName = userProfile?.nickname || user?.displayName || user?.email || '익명';
@@ -426,34 +454,24 @@ export default function MyPage() {
 
             <div className={styles.settingsSection}>
               <h4 className={styles.settingsSectionTitle}>알림 설정</h4>
-              <div className={styles.toggleList}>
-                <label className={styles.toggleItem}>
-                  <span className={styles.toggleLabel}>새 댓글 알림</span>
-                  <input type="checkbox" defaultChecked className={styles.toggleInput} />
-                  <div className={styles.toggle}>
-                    <div className={styles.toggleKnob} />
-                  </div>
-                </label>
-                <label className={styles.toggleItem}>
-                  <span className={styles.toggleLabel}>새 팔로워 알림</span>
-                  <input type="checkbox" defaultChecked className={styles.toggleInput} />
-                  <div className={styles.toggle}>
-                    <div className={styles.toggleKnob} />
-                  </div>
-                </label>
-                <label className={styles.toggleItem}>
-                  <span className={styles.toggleLabel}>마케팅 이메일 수신</span>
-                  <input type="checkbox" className={styles.toggleInput} />
-                  <div className={styles.toggle}>
-                    <div className={styles.toggleKnob} />
-                  </div>
-                </label>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  알림 기능은 준비 중입니다. 곧 제공될 예정입니다.
+                </p>
               </div>
             </div>
 
             <div className={styles.settingsSection}>
               <h4 className={`${styles.settingsSectionTitle} ${styles.settingsSectionTitleDanger}`}>위험 영역</h4>
-              <button className={styles.dangerButton}>회원 탈퇴</button>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+                회원 탈퇴 시 작성한 리포트와 댓글은 익명화되며, 일부 정보는 법적 의무에 따라 5년간 보관됩니다.
+              </p>
+              <button
+                onClick={() => setIsWithdrawModalOpen(true)}
+                className={styles.dangerButton}
+              >
+                회원 탈퇴
+              </button>
             </div>
           </div>
         </div>
@@ -519,6 +537,70 @@ export default function MyPage() {
                 ) : (
                   '저장'
                 )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 회원 탈퇴 확인 모달 */}
+      {isWithdrawModalOpen && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>회원 탈퇴</h3>
+              <button onClick={() => setIsWithdrawModalOpen(false)} className={styles.modalClose}>
+                <svg className={styles.modalCloseIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={styles.modalBody}>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
+                <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-2">
+                  탈퇴 시 다음 사항에 유의해주세요:
+                </p>
+                <ul className="text-sm text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+                  <li>작성한 리포트와 댓글은 익명화 처리됩니다</li>
+                  <li>이메일, 동의 기록은 법적 의무에 따라 5년간 보관됩니다</li>
+                  <li>탈퇴 후 동일 계정으로 재가입해도 이전 데이터는 복구되지 않습니다</li>
+                </ul>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label htmlFor="withdrawConfirm" className={styles.inputLabel}>
+                  탈퇴를 원하시면 아래에 <strong className="text-red-600">"탈퇴합니다"</strong>를 입력해주세요
+                </label>
+                <input
+                  id="withdrawConfirm"
+                  type="text"
+                  value={withdrawConfirmText}
+                  onChange={(e) => setWithdrawConfirmText(e.target.value)}
+                  className={styles.input}
+                  placeholder="탈퇴합니다"
+                  disabled={isWithdrawing}
+                />
+              </div>
+            </div>
+
+            <div className={styles.modalFooter}>
+              <button
+                onClick={() => {
+                  setIsWithdrawModalOpen(false);
+                  setWithdrawConfirmText('');
+                }}
+                disabled={isWithdrawing}
+                className={`${styles.modalButton} ${styles.modalButtonSecondary}`}
+              >
+                취소
+              </button>
+              <button
+                onClick={handleWithdraw}
+                disabled={isWithdrawing || withdrawConfirmText !== '탈퇴합니다'}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isWithdrawing ? '처리 중...' : '탈퇴하기'}
               </button>
             </div>
           </div>
