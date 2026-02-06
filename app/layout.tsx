@@ -156,6 +156,9 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${oswald.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
+        {/* Google Search Console 인증 */}
+        <meta name="google-site-verification" content="AP5eR-Eum2IZ1OjbIlE-vI7mPeI0dmTdV-fxjja6RaU" />
+
         {/* 테마 초기화 (FOUC 방지) */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 
