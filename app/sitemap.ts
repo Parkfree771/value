@@ -9,7 +9,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.verc
  * 검색 엔진이 사이트의 모든 페이지를 찾을 수 있도록 도와줍니다.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 정적 페이지들
+  // 정적 페이지들 (robots.txt에서 차단된 페이지는 제외)
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: SITE_URL,
@@ -30,34 +30,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${SITE_URL}/write`,
+      url: `${SITE_URL}/guru-tracker`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.8,
-    },
-    {
-      url: `${SITE_URL}/reports/new`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${SITE_URL}/mypage`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.7,
-    },
-    {
-      url: `${SITE_URL}/login`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${SITE_URL}/signup`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
     },
     {
       url: `${SITE_URL}/terms`,
@@ -76,6 +52,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/contact`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
     },
   ];
 

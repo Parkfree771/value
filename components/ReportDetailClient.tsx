@@ -409,6 +409,47 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             />
           </Card>
 
+          {/* 첨부 파일 */}
+          {report.files && report.files.length > 0 && (
+            <Card className="p-4 sm:p-5">
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+                첨부 파일 {report.files.length}개
+              </h3>
+              <div className="space-y-2">
+                {report.files.map((file, index) => {
+                  const isNewFormat = typeof file === 'object' && file !== null;
+                  const fileName = isNewFormat ? (file as { name: string; url: string }).name : (file as string);
+                  const fileUrl = isNewFormat ? (file as { name: string; url: string }).url : null;
+                  const ext = fileName.split('.').pop()?.toLowerCase() || '';
+
+                  return (
+                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <svg className="w-6 h-6 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{fileName}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 uppercase">{ext} 파일</p>
+                        </div>
+                      </div>
+                      {fileUrl && (
+                        <a
+                          href={fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="ml-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex-shrink-0"
+                        >
+                          다운로드
+                        </a>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+
           {/* Comments Section */}
           <Card className="p-4 sm:p-5">
             <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">

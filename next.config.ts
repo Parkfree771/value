@@ -34,9 +34,23 @@ const nextConfig: NextConfig = {
       'firebase/auth',
       'firebase/firestore',
       'firebase/storage',
-      '@tiptap/react',
-      '@tiptap/starter-kit',
     ],
+  },
+
+  // 삭제된 페이지 리다이렉트 (Google 봇 404 방지)
+  async redirects() {
+    return [
+      {
+        source: '/market-call',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/market-call/:path*',
+        destination: '/',
+        permanent: true,
+      },
+    ];
   },
 
   // 헤더 설정 - 보안 및 캐싱
@@ -75,12 +89,12 @@ const nextConfig: NextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://*.googleapis.com https://www.googletagmanager.com https://pagead2.googlesyndication.com https://adservice.google.com https://www.google-analytics.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com",
           "img-src 'self' data: blob: https: http:",
-          "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://firebasestorage.googleapis.com https://api.upbit.com https://api.binance.com https://query1.finance.yahoo.com https://query2.finance.yahoo.com",
-          "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com",
+          "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://firebasestorage.googleapis.com https://api.upbit.com https://api.binance.com https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com",
+          "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",

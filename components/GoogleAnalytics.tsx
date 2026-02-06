@@ -1,13 +1,19 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Script from 'next/script';
+import { getCookieConsent } from './CookieConsent';
 
-// Google Analytics 설정 - 환경변수에서 가져오기
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export default function GoogleAnalytics() {
-  // GA ID가 설정되지 않았으면 컴포넌트를 렌더링하지 않음
-  if (!GA_MEASUREMENT_ID) {
+  const [consented, setConsented] = useState(false);
+
+  useEffect(() => {
+    setConsented(getCookieConsent());
+  }, []);
+
+  if (!GA_MEASUREMENT_ID || !consented) {
     return null;
   }
 

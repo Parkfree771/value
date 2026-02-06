@@ -1,4 +1,14 @@
+import type { Metadata } from 'next';
 import Card from '@/components/Card';
+
+export const metadata: Metadata = {
+  title: '개인정보처리방침',
+  description: '워렌버핏 따라잡기 개인정보처리방침입니다. 수집하는 개인정보 항목, 이용 목적, 보유 기간, 이용자 권리 등을 안내합니다.',
+  openGraph: {
+    title: '개인정보처리방침 | 워렌버핏 따라잡기',
+    description: '워렌버핏 따라잡기 개인정보처리방침입니다.',
+  },
+};
 
 export default function PrivacyPage() {
   return (

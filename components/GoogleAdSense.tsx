@@ -1,13 +1,19 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Script from 'next/script';
+import { getCookieConsent } from './CookieConsent';
 
-// Google AdSense 설정 - 환경변수에서 가져오기
 const ADSENSE_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export default function GoogleAdSense() {
-  // AdSense ID가 설정되지 않았으면 컴포넌트를 렌더링하지 않음
-  if (!ADSENSE_ID) {
+  const [consented, setConsented] = useState(false);
+
+  useEffect(() => {
+    setConsented(getCookieConsent());
+  }, []);
+
+  if (!ADSENSE_ID || !consented) {
     return null;
   }
 
@@ -30,7 +36,6 @@ interface AdUnitProps {
 }
 
 export function AdUnit({ slot, format = 'auto', responsive = true, style }: AdUnitProps) {
-  // AdSense ID가 설정되지 않았으면 컴포넌트를 렌더링하지 않음
   if (!ADSENSE_ID) {
     return null;
   }

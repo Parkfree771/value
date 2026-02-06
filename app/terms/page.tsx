@@ -1,4 +1,14 @@
+import type { Metadata } from 'next';
 import Card from '@/components/Card';
+
+export const metadata: Metadata = {
+  title: '이용약관',
+  description: '워렌버핏 따라잡기 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
+  openGraph: {
+    title: '이용약관 | 워렌버핏 따라잡기',
+    description: '워렌버핏 따라잡기 서비스 이용약관입니다.',
+  },
+};
 
 export default function TermsPage() {
   return (

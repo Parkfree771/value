@@ -52,7 +52,7 @@ export interface Report {
   views: number;
   likes: number;
   images?: string[];
-  files?: string[];
+  files?: { name: string; url: string }[] | string[];
   positionType?: 'long' | 'short';
   stockData?: {
     currency?: string;

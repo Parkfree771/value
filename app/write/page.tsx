@@ -6,7 +6,8 @@ import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
 import { uploadMultipleImages } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
-import { db } from '@/lib/firebase';
+import { db, storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
@@ -47,6 +48,7 @@ function WritePageContent() {
   const [images, setImages] = useState<File[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string; url: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -88,6 +90,14 @@ function WritePageContent() {
         // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
           setUploadedImageUrls(reportData.images);
+        }
+
+        // 기존 파일 데이터 설정
+        if (reportData.files && reportData.files.length > 0) {
+          // 새 형식 {name, url} 또는 구 형식 string[]
+          if (typeof reportData.files[0] === 'object') {
+            setUploadedFiles(reportData.files);
+          }
         }
 
       } catch (error) {
@@ -149,17 +159,50 @@ function WritePageContent() {
     e.target.value = ''; // input 초기화
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFiles = Array.from(e.target.files || []);
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
 
-    // 파일 크기 검증 (50MB)
-    const validFiles = uploadedFiles.filter(file => file.size <= 50 * 1024 * 1024);
-
-    if (validFiles.length !== uploadedFiles.length) {
-      alert('일부 파일이 50MB를 초과하여 제외되었습니다.');
+    // PDF만 허용
+    const pdfFiles = selectedFiles.filter(file => file.type === 'application/pdf');
+    if (pdfFiles.length !== selectedFiles.length) {
+      alert('PDF 파일만 업로드 가능합니다.');
     }
 
-    setFiles((prev) => [...prev, ...validFiles]);
+    // 파일 크기 검증 (20MB)
+    const validFiles = pdfFiles.filter(file => file.size <= 20 * 1024 * 1024);
+
+    if (validFiles.length !== pdfFiles.length) {
+      alert('일부 파일이 20MB를 초과하여 제외되었습니다.');
+    }
+
+    if (validFiles.length === 0) return;
+
+    setIsUploading(true);
+    try {
+      const newUploaded: { name: string; url: string }[] = [];
+      for (let i = 0; i < validFiles.length; i++) {
+        const file = validFiles[i];
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${file.name}`;
+        const storageRef = ref(storage, `reports/files/${fileName}`);
+        await uploadBytes(storageRef, file, {
+          contentType: file.type,
+          customMetadata: { originalName: file.name },
+        });
+        const url = await getDownloadURL(storageRef);
+        newUploaded.push({ name: file.name, url });
+        setUploadProgress(((i + 1) / validFiles.length) * 100);
+      }
+      setFiles((prev) => [...prev, ...validFiles]);
+      setUploadedFiles((prev) => [...prev, ...newUploaded]);
+      alert(`${validFiles.length}개 파일 업로드 완료!`);
+    } catch (error) {
+      console.error('파일 업로드 실패:', error);
+      alert('파일 업로드에 실패했습니다.');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+
     e.target.value = ''; // input 초기화
   };
 
@@ -175,6 +218,7 @@ function WritePageContent() {
 
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
+    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -270,7 +314,7 @@ function WritePageContent() {
         content: finalContent,
         mode: 'text',
         images: imageUrls,
-        files: files.map((file) => file.name),
+        files: uploadedFiles,
 
         // 8. 통계 (현재가/수익률은 실시간 조회)
         views: 0,
@@ -653,22 +697,23 @@ function WritePageContent() {
             </div>
           </div>
 
-          {/* 파일 첨부 */}
+          {/* PDF 첨부 */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              파일 첨부
+              PDF 첨부
             </label>
             <div className="space-y-3">
               <label className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors bg-white dark:bg-gray-800">
                 <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <span className="text-sm text-gray-700 dark:text-gray-300">파일 선택</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">(PDF, XLSX, DOCX 등 - 최대 50MB)</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">PDF 첨부</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">(최대 20MB)</span>
                 <input
                   type="file"
                   className="hidden"
                   multiple
+                  accept="application/pdf"
                   onChange={handleFileUpload}
                 />
               </label>

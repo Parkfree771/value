@@ -16,6 +16,7 @@ const Footer = memo(function Footer() {
             <Link href="/terms" className="hover:text-white transition-colors">이용약관</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">개인정보</Link>
             <Link href="/disclaimer" className="text-yellow-400 hover:text-yellow-300 transition-colors">면책조항</Link>
+            <Link href="/contact" className="hover:text-white transition-colors">문의</Link>
           </div>
           <button
             onClick={() => setExpanded(!expanded)}

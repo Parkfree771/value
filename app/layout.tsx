@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import GoogleAdSense from "@/components/GoogleAdSense";
+import CookieConsent from "@/components/CookieConsent";
 
 // Footer는 viewport 밖에 있으므로 lazy load
 const Footer = dynamic(() => import("@/components/Footer"), { ssr: true });
@@ -183,6 +184,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <CookieConsent />
             </BookmarkProvider>
           </AuthProvider>
         </ThemeProvider>
