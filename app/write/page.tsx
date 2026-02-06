@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect, useRef, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
@@ -8,11 +8,12 @@ import { uploadMultipleImages } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
+import dynamic from 'next/dynamic';
 
-type EditorMode = 'text' | 'html';
+const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
+
 type Opinion = 'buy' | 'sell' | 'hold';
 type PositionType = 'long' | 'short';
 
@@ -38,13 +39,11 @@ function WritePageContent() {
 
   const [isEditMode, setIsEditMode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [mode, setMode] = useState<EditorMode>('text');
   const [title, setTitle] = useState('');
   const [stockData, setStockData] = useState<StockData | null>(null);
   const [opinion, setOpinion] = useState<Opinion>('buy');
   const [targetPrice, setTargetPrice] = useState('');
   const [content, setContent] = useState('');
-  const [htmlContent, setHtmlContent] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
@@ -53,14 +52,6 @@ function WritePageContent() {
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
-
-  // HTML 모드 미리보기를 위한 CSS/HTML 추출
-  const previewContent = useMemo(() => {
-    if (mode === 'html' && htmlContent) {
-      return extractStyleTag(htmlContent);
-    }
-    return { css: '', html: '' };
-  }, [mode, htmlContent]);
 
   // 수정 모드: 기존 리포트 데이터 불러오기
   useEffect(() => {
@@ -92,13 +83,7 @@ function WritePageContent() {
         setStockData(reportData.stockData || null);
         setOpinion(reportData.opinion || 'buy');
         setTargetPrice(reportData.targetPrice?.toString() || '');
-        setMode(reportData.mode || 'text');
-
-        if (reportData.mode === 'html') {
-          setHtmlContent(reportData.content || '');
-        } else {
-          setContent(reportData.content || '');
-        }
+        setContent(reportData.content || '');
 
         // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
@@ -184,16 +169,8 @@ function WritePageContent() {
   };
 
   const insertImageToEditor = (url: string) => {
-    if (mode === 'text') {
-      // 텍스트 모드에서는 textarea에 이미지 URL 삽입
-      const imgMarkdown = `![이미지](${url})`;
-      setContent(prev => prev + '\n' + imgMarkdown);
-    } else if (mode === 'html') {
-      // HTML 모드에서는 HTML 코드 복사
-      const imgTag = `<img src="${url}" alt="이미지" style="max-width: 100%; height: auto;" />`;
-      navigator.clipboard.writeText(imgTag);
-      alert('HTML 코드가 복사되었습니다!\n\nHTML 편집기에 붙여넣기(Ctrl+V) 하세요.');
-    }
+    const imgTag = `<img src="${url}" alt="이미지" style="max-width: 100%; height: auto;" />`;
+    setContent(prev => prev + imgTag);
   };
 
   const removeFile = (index: number) => {
@@ -227,7 +204,7 @@ function WritePageContent() {
       const imageUrls = uploadedImageUrls;
 
     // 사용자가 작성한 내용만 저장 (기업 프로필은 상세 페이지 상단에 표시됨)
-    const finalContent = mode === 'html' ? htmlContent : content;
+    const finalContent = content;
 
       // 사용자 프로필에서 닉네임 가져오기
       let authorName = '익명';
@@ -291,8 +268,7 @@ function WritePageContent() {
 
         // 7. 콘텐츠
         content: finalContent,
-        mode,
-        cssContent: '', // HTML 모드에서는 <style> 태그가 HTML에 포함되므로 별도 CSS 필드는 비움
+        mode: 'text',
         images: imageUrls,
         files: files.map((file) => file.name),
 
@@ -577,56 +553,20 @@ function WritePageContent() {
             </div>
           </div>
 
-          {/* 에디터 모드 선택 */}
+          {/* 에디터 */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-              작성 모드
-            </label>
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setMode('text')}
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-                  mode === 'text'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                텍스트 모드
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('html')}
-                className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-                  mode === 'html'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                }`}
-              >
-                HTML/CSS 모드
-              </button>
-            </div>
-          </div>
-
-          {/* 텍스트 모드 에디터 */}
-          {mode === 'text' && (
-            <div>
               <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                 내용
               </label>
-              <textarea
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                required
-                rows={20}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm whitespace-pre-wrap"
-                placeholder="리포트 본문을 입력하세요...&#10;&#10;줄바꿈과 띄어쓰기가 그대로 유지됩니다."
+                onChange={setContent}
+                placeholder="리포트 본문을 입력하세요..."
               />
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                작성한 텍스트가 줄바꿈과 띄어쓰기를 포함하여 그대로 표시됩니다.
+                툴바를 사용하여 굵게, 색상, 정렬 등 서식을 적용할 수 있습니다. 다른 곳에서 복사/붙여넣기하면 서식이 유지됩니다.
               </p>
             </div>
-          )}
 
           {/* 이미지 첨부 */}
           <div>
@@ -679,7 +619,7 @@ function WritePageContent() {
                                   onClick={() => insertImageToEditor(uploadedImageUrls[index])}
                                   className="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                                 >
-                                  {mode === 'text' ? '이미지 URL 복사' : 'HTML 코드 복사'}
+                                  이미지 삽입
                                 </button>
                               </>
                             ) : (
@@ -704,7 +644,7 @@ function WritePageContent() {
                   {uploadedImageUrls.length > 0 && (
                     <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
                       <p className="text-sm text-blue-900 dark:text-blue-100">
-                        <strong>사용법:</strong> {mode === 'text' ? '각 이미지의 "이미지 URL 복사" 버튼을 클릭하면 이미지 URL이 본문에 추가됩니다. ![이미지](URL) 형식으로 표시됩니다.' : '각 이미지의 "HTML 코드 복사" 버튼을 클릭한 후 HTML 편집기에 붙여넣기(Ctrl+V) 하세요.'}
+                        <strong>사용법:</strong> 각 이미지의 &quot;이미지 삽입&quot; 버튼을 클릭하면 본문에 이미지가 추가됩니다.
                       </p>
                     </div>
                   )}
@@ -774,53 +714,6 @@ function WritePageContent() {
               )}
             </div>
           </div>
-
-          {/* HTML/CSS 모드 에디터 */}
-          {mode === 'html' && (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  HTML 코드 (&lt;style&gt; 태그 포함 가능)
-                </label>
-                <textarea
-                  value={htmlContent}
-                  onChange={(e) => setHtmlContent(e.target.value)}
-                  required
-                  rows={15}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
-                  placeholder="<style>
-  .wrap { max-width: 720px; margin: 0 auto; }
-  .title { font-size: 24px; font-weight: bold; }
-</style>
-
-<div class='wrap'>
-  <h1 class='title'>제목</h1>
-  <p>내용...</p>
-</div>"
-                />
-                <div className="mt-2 space-y-1 text-xs text-gray-500 dark:text-gray-400">
-                  <p><strong>&lt;style&gt; 태그:</strong> HTML 코드 안에 &lt;style&gt;...&lt;/style&gt; 형태로 CSS를 포함할 수 있습니다</p>
-                  <p><strong>이미지:</strong> 위의 "HTML 코드 복사" 버튼으로 이미지 태그를 복사하여 붙여넣기 하세요</p>
-                  <p><strong>인라인 스타일:</strong> HTML 태그에 style="..." 속성도 사용 가능합니다</p>
-                </div>
-              </div>
-
-              {/* 미리보기 */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  미리보기
-                </label>
-                <div className="w-full min-h-[200px] px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900">
-                  {/* 추출된 CSS를 별도로 렌더링 */}
-                  {previewContent.css && <style>{previewContent.css}</style>}
-                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewContent.html) }} />
-                </div>
-                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                  보안을 위해 일부 위험한 태그나 스크립트는 자동으로 제거됩니다
-                </p>
-              </div>
-            </div>
-          )}
 
           {/* 업로드 진행 상태 */}
           {isUploading && (

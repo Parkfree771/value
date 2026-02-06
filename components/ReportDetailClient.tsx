@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
-import { sanitizeHtml, extractStyleTag } from '@/utils/sanitizeHtml';
+import { sanitizeHtml } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
@@ -160,15 +160,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
       alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
-
-  // HTML 모드일 때 <style> 태그 추출
-  const { css, html } = useMemo(() => {
-    if (report.mode === 'html') {
-      return extractStyleTag(report.content);
-    }
-    return { css: '', html: report.content };
-  }, [report.content, report.mode]);
-
 
   // 수정 버튼 클릭
   const handleEdit = () => {
@@ -407,24 +398,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
           {/* Report Content - 넓고 여유롭게 */}
           <Card className="p-4 sm:p-6 lg:p-8">
-            {/* HTML/CSS 모드로 작성된 리포트 */}
-            {report.mode === 'html' && (
-              <>
-                {/* 추출된 CSS를 별도로 렌더링 */}
-                {css && <style>{css}</style>}
-                <div
-                  className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(html) }}
-                />
-              </>
-            )}
-
-            {/* 텍스트 모드로 작성된 리포트 */}
-            {(!report.mode || report.mode === 'text') && (
-              <div className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed whitespace-pre-wrap break-words text-gray-900 dark:text-gray-300">
-                {report.content}
-              </div>
-            )}
+            {/* 리포트 본문 */}
+            <div
+              className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed break-words text-gray-900 dark:text-gray-300"
+              dangerouslySetInnerHTML={{
+                __html: /<[a-z][\s\S]*>/i.test(report.content)
+                  ? sanitizeHtml(report.content)
+                  : report.content.replace(/\n/g, '<br />')
+              }}
+            />
           </Card>
 
           {/* Comments Section */}
