@@ -60,15 +60,21 @@ class PrefixIndex {
       const symbol = stock.symbol.toLowerCase();
       this.addToIndex(this.symbolIndex, symbol, i, 4); // 최대 4글자 프리픽스
 
-      // 한글 이름 인덱싱
+      // 한글 이름 인덱싱 (전체 + 개별 단어)
       if (stock.nameKr) {
         const nameKr = stock.nameKr.toLowerCase();
         this.addToIndex(this.nameKrIndex, nameKr, i, 4);
+        for (const word of nameKr.split(/\s+/)) {
+          if (word.length > 0) this.addToIndex(this.nameKrIndex, word, i, 4);
+        }
       }
 
-      // 영문 이름 인덱싱 (첫 단어 위주)
+      // 영문 이름 인덱싱 (전체 + 개별 단어)
       const name = stock.name.toLowerCase();
       this.addToIndex(this.nameEnIndex, name, i, 4);
+      for (const word of name.split(/\s+/)) {
+        if (word.length > 0) this.addToIndex(this.nameEnIndex, word, i, 4);
+      }
     }
 
     this.isBuilt = true;
@@ -130,6 +136,20 @@ class PrefixIndex {
     const nameEnMatches = this.nameEnIndex.get(prefix);
     if (nameEnMatches) {
       nameEnMatches.forEach(i => candidates.add(i));
+    }
+
+    // includes() 폴백: 프리픽스로 찾을 수 없는 복합어 내 부분 문자열 매치
+    // (예: "인버스" in "코스닥150선물인버스", "레버리지" in "코스닥150레버리지")
+    if (searchLower.length >= 2) {
+      for (let i = 0; i < this.stocks.length; i++) {
+        if (candidates.has(i)) continue;
+        const stock = this.stocks[i];
+        const nameKr = stock.nameKr?.toLowerCase() || '';
+        const name = stock.name.toLowerCase();
+        if (nameKr.includes(searchLower) || name.includes(searchLower)) {
+          candidates.add(i);
+        }
+      }
     }
 
     // 후보가 없으면 빈 결과

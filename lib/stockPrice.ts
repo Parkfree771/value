@@ -39,7 +39,7 @@ async function getPriceFromJSON(ticker: string): Promise<StockQuote | null> {
 
     if (priceData && priceData.currentPrice) {
       const currency = getCurrencyFromExchange(priceData.exchange);
-      console.log(`[StockPrice] ✅ JSON hit: ${tickerUpper} = ${priceData.currentPrice} ${currency}`);
+      console.log(`[StockPrice] JSON hit: ${tickerUpper} = ${priceData.currentPrice} ${currency}`);
       return {
         symbol: tickerUpper,
         price: priceData.currentPrice,
@@ -49,7 +49,7 @@ async function getPriceFromJSON(ticker: string): Promise<StockQuote | null> {
       };
     }
 
-    console.log(`[StockPrice] ❌ JSON miss: ${tickerUpper}`);
+    console.log(`[StockPrice] JSON miss: ${tickerUpper}`);
     return null;
   } catch (error) {
     console.error(`[StockPrice] Error fetching ${ticker} from JSON:`, error);

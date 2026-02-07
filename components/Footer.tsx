@@ -11,8 +11,8 @@ const Footer = memo(function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* 기본 정보 (항상 표시) */}
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex items-center gap-4 text-sm text-gray-400">
-            <span className="font-semibold text-white">워렌버핏 따라잡기</span>
+          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400 flex-wrap justify-center">
+            <span className="font-semibold text-white">GuruNote</span>
             <Link href="/terms" className="hover:text-white transition-colors">이용약관</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">개인정보</Link>
             <Link href="/disclaimer" className="text-yellow-400 hover:text-yellow-300 transition-colors">면책조항</Link>
@@ -77,7 +77,7 @@ const Footer = memo(function Footer() {
 
         {/* 저작권 */}
         <div className="mt-3 pt-3 border-t border-gray-700 text-center text-xs text-gray-500">
-          &copy; 2026 워렌버핏 따라잡기. All rights reserved.
+          &copy; 2026 GuruNote. All rights reserved.
         </div>
       </div>
     </footer>

@@ -67,9 +67,9 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
       );
     } else {
       return (
-        <div className={`${styles.badge} ${styles.badgeDefault}`}>
-          <span className={styles.badgeDefaultNumber}>{rank}</span>
-        </div>
+        <span className="w-5 sm:w-7 text-center text-xs sm:text-sm font-bold text-gray-400 dark:text-gray-500">
+          {rank}
+        </span>
       );
     }
   };
@@ -81,62 +81,60 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
   return (
     <div onClick={handleCardClick} className="block cursor-pointer">
       <Card variant="glass" padding="md">
-        <div className="flex gap-3 sm:gap-4">
+        <div className="flex gap-2.5 sm:gap-4">
           {/* Rank Badge */}
-          <div className="flex-shrink-0 flex items-start pt-1">
+          <div className="flex-shrink-0 flex items-start pt-0.5 sm:pt-1">
             {getRankBadge()}
           </div>
 
           {/* Content */}
           <div className="flex-1 min-w-0">
             {/* Header */}
-            <div className="flex justify-between items-start mb-2 sm:mb-3 gap-3">
+            <div className="flex justify-between items-start mb-1.5 sm:mb-3 gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide">{report.stockName}</h3>
-                  <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono">{report.ticker}</span>
-                  <OpinionBadge opinion={report.opinion} />
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1.5 overflow-hidden whitespace-nowrap">
+                  <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{report.stockName}</h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{report.ticker}</span>
+                  <span className="flex-shrink-0"><OpinionBadge opinion={report.opinion} /></span>
                 </div>
-                <h2 className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">{report.title}</h2>
+                <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate">{report.title}</h2>
               </div>
               <div className={`text-right flex-shrink-0 ${getReturnColorClass(report.returnRate)}`}>
-                <div className="text-xl sm:text-2xl font-black font-heading tracking-tight drop-shadow-sm">
+                <div className="text-base sm:text-2xl font-black font-heading tracking-tight">
                   {formatReturn(report.returnRate)}
                 </div>
               </div>
             </div>
 
             {/* Price Info */}
-            <div className="grid grid-cols-2 sm:flex sm:gap-6 gap-2 mb-2 sm:mb-3 text-xs sm:text-sm">
+            <div className="flex gap-4 sm:gap-6 mb-1.5 sm:mb-3 text-xs sm:text-sm">
               <div>
-                <span className="text-gray-500 dark:text-gray-400 block sm:inline">작성시:</span>
-                <span className="ml-0 sm:ml-2 font-semibold text-gray-900 dark:text-white block sm:inline">{currencySymbol}{report.initialPrice.toLocaleString()}</span>
+                <span className="text-gray-500 dark:text-gray-400">작성시: </span>
+                <span className="font-semibold text-gray-900 dark:text-white">{currencySymbol}{report.initialPrice.toLocaleString()}</span>
               </div>
               <div>
-                <span className="text-gray-500 dark:text-gray-400 block sm:inline">현재:</span>
-                <span className={`ml-0 sm:ml-2 font-semibold ${getReturnColorClass(report.returnRate)} block sm:inline`}>
+                <span className="text-gray-500 dark:text-gray-400">현재: </span>
+                <span className={`font-semibold ${getReturnColorClass(report.returnRate)}`}>
                   {currencySymbol}{report.currentPrice.toLocaleString()}
                 </span>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="flex justify-between items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3">
-              <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-                <Link
-                  href={`/user/${encodeURIComponent(report.author)}`}
-                  onClick={(e) => e.stopPropagation()}
-                  className="font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
-                >
-                  {report.author}
-                </Link>
-                <span className="hidden sm:inline">{report.createdAt}</span>
-                <span className="sm:hidden">{report.createdAt.slice(5)}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-                <span>조회 {report.views.toLocaleString()}</span>
-                <span>좋아요 {report.likes.toLocaleString()}</span>
-              </div>
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-1.5 sm:pt-3 gap-1 overflow-hidden whitespace-nowrap">
+              <span
+                className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(report.author)}`; }}
+              >
+                {report.author}
+              </span>
+              <span className="flex-shrink-0">·</span>
+              <span className="flex-shrink-0 hidden sm:inline">{report.createdAt}</span>
+              <span className="flex-shrink-0 sm:hidden">{report.createdAt.slice(5)}</span>
+              <span className="flex-shrink-0">·</span>
+              <span className="flex-shrink-0">조회 {report.views.toLocaleString()}</span>
+              <span className="flex-shrink-0">·</span>
+              <span className="flex-shrink-0">좋아요 {report.likes.toLocaleString()}</span>
             </div>
           </div>
         </div>

@@ -49,7 +49,7 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            워렌버핏 따라잡기
+            GuruNote
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             투자 리포트 공유 플랫폼

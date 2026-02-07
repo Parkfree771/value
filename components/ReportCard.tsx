@@ -185,67 +185,64 @@ const ReportCard = memo(function ReportCard({
     <div onClick={handleCardClick} className="block cursor-pointer">
       <Card variant="glass" padding="md">
         {/* Header */}
-        <div className="flex justify-between items-start mb-3 sm:mb-4 gap-3">
+        <div className="flex justify-between items-start mb-2 sm:mb-4 gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2 flex-wrap">
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide">{stockName}</h3>
-              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-mono">{ticker}</span>
-              <OpinionBadge opinion={opinion} />
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 overflow-hidden whitespace-nowrap">
+              <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{stockName}</h3>
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>
+              <span className="flex-shrink-0"><OpinionBadge opinion={opinion} /></span>
             </div>
-            <h2 className="text-sm sm:text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2 line-clamp-2">{title}</h2>
+            <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 mb-1.5 sm:mb-2 truncate">{title}</h2>
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
-            <div className="text-xl sm:text-2xl font-black font-heading tracking-tight drop-shadow-sm">
+            <div className="text-base sm:text-2xl font-black font-heading tracking-tight">
               {formatReturn(returnRate)}
             </div>
           </div>
         </div>
 
         {/* Price Info */}
-        <div className="grid grid-cols-2 sm:flex sm:gap-6 gap-2 mb-3 sm:mb-4 text-xs sm:text-sm">
+        <div className="flex gap-4 sm:gap-6 mb-2 sm:mb-4 text-xs sm:text-sm">
           <div>
-            <span className="text-gray-500 dark:text-gray-400 block sm:inline">작성시:</span>
-            <span className="ml-0 sm:ml-2 font-semibold text-gray-900 dark:text-white block sm:inline">{currencySymbol}{initialPrice.toLocaleString()}</span>
+            <span className="text-gray-500 dark:text-gray-400">작성시: </span>
+            <span className="font-semibold text-gray-900 dark:text-white">{currencySymbol}{initialPrice.toLocaleString()}</span>
           </div>
           <div>
-            <span className="text-gray-500 dark:text-gray-400 block sm:inline">현재:</span>
-            <span className={`ml-0 sm:ml-2 font-semibold ${getReturnColorClass(returnRate)} block sm:inline`}>
+            <span className="text-gray-500 dark:text-gray-400">현재: </span>
+            <span className={`font-semibold ${getReturnColorClass(returnRate)}`}>
               {currencySymbol}{currentPrice.toLocaleString()}
             </span>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between items-center text-xs sm:text-sm text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3">
-          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-            <Link
-              href={`/user/${encodeURIComponent(author)}`}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              className="font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 truncate transition-colors"
-            >
-              {author}
-            </Link>
-            <span className="hidden sm:inline">{createdAt}</span>
-            <span className="sm:hidden">{createdAt.slice(5)}</span>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3 gap-1 overflow-hidden whitespace-nowrap">
+          <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(author)}`; }}
+          >
+            {author}
+          </span>
+          <span className="flex-shrink-0">·</span>
+          <span className="flex-shrink-0 hidden sm:inline">{createdAt}</span>
+          <span className="flex-shrink-0 sm:hidden">{createdAt.slice(5)}</span>
+          <span className="flex-shrink-0">·</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
             {!showActions && (
               <>
                 <span>조회 {views}</span>
+                <span>·</span>
                 <span>좋아요 {likes}</span>
                 <button
                   onClick={handleBookmarkClick}
-                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="p-0.5 ml-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   title={bookmarked ? '북마크 해제' : '북마크'}
                 >
                   {bookmarked ? (
-                    <svg className="w-5 h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   ) : (
-                    <svg className="w-5 h-5 text-gray-400 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   )}

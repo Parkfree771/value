@@ -17,7 +17,7 @@ import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 
 // ============================================================
-// ⭐ 여기서 데이터를 편집하세요! (간단 버전)
+// 여기서 데이터를 편집하세요! (간단 버전)
 // ============================================================
 //
 // 필수 입력 항목만 작성하면 나머지는 자동으로 채워집니다!
@@ -208,16 +208,16 @@ if (getApps().length === 0) {
       });
     }
     else {
-      console.error('❌ Firebase 인증 정보가 없습니다.');
-      console.log('\n💡 .env 파일에 다음 중 하나를 설정하세요:');
+      console.error('Firebase 인증 정보가 없습니다.');
+      console.log('\n.env 파일에 다음 중 하나를 설정하세요:');
       console.log('   - FIREBASE_SERVICE_ACCOUNT_BASE64 (Base64 인코딩)');
       console.log('   - FIREBASE_CLIENT_EMAIL + FIREBASE_PRIVATE_KEY (개별 키)');
       process.exit(1);
     }
 
-    console.log('✅ Firebase 초기화 완료');
+    console.log('Firebase 초기화 완료');
   } catch (error) {
-    console.error('❌ Firebase 초기화 실패:', error);
+    console.error('Firebase 초기화 실패:', error);
     process.exit(1);
   }
 }
@@ -227,7 +227,7 @@ const bucket = getStorage().bucket();
 
 // 메인 함수
 async function main() {
-  console.log('\n🌱 시드 데이터 생성 시작...\n');
+  console.log('\n시드 데이터 생성 시작...\n');
 
   const feedPosts: FeedPost[] = [];
   const prices: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = {};
@@ -236,7 +236,7 @@ async function main() {
   let totalPosts = 0;
 
   for (const userData of SEED_DATA) {
-    console.log(`👤 사용자 생성: ${userData.nickname}`);
+    console.log(`사용자 생성: ${userData.nickname}`);
 
     // 1. users 컬렉션에 사용자 생성
     const userDoc = {
@@ -314,7 +314,7 @@ async function main() {
       };
 
       const docRef = await db.collection('posts').add(postDoc);
-      console.log(`   📝 게시글 생성: ${postData.title} (ID: ${docRef.id})`);
+      console.log(`   게시글 생성: ${postData.title} (ID: ${docRef.id})`);
       totalPosts++;
 
       // feed.json용 데이터 수집
@@ -350,7 +350,7 @@ async function main() {
   }
 
   // 3. feed.json 생성/업데이트
-  console.log('\n📄 feed.json 업데이트 중...');
+  console.log('\nfeed.json 업데이트 중...');
 
   try {
     // 기존 feed.json 읽기
@@ -386,16 +386,16 @@ async function main() {
       metadata: { cacheControl: 'public, max-age=60' },
     });
 
-    console.log(`   ✅ feed.json 저장 완료 (총 ${mergedPosts.length}개 게시글)`);
+    console.log(`   feed.json 저장 완료 (총 ${mergedPosts.length}개 게시글)`);
   } catch (error) {
-    console.error('   ⚠️ feed.json 업데이트 실패:', error);
+    console.error('   feed.json 업데이트 실패:', error);
   }
 
   // 완료 메시지
   console.log('\n========================================');
-  console.log('🎉 시드 데이터 생성 완료!');
-  console.log(`   👤 사용자: ${totalUsers}명`);
-  console.log(`   📝 게시글: ${totalPosts}개`);
+  console.log('시드 데이터 생성 완료!');
+  console.log(`   사용자: ${totalUsers}명`);
+  console.log(`   게시글: ${totalPosts}개`);
   console.log('========================================\n');
 }
 

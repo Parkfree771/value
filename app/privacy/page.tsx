@@ -3,10 +3,10 @@ import Card from '@/components/Card';
 
 export const metadata: Metadata = {
   title: '개인정보처리방침',
-  description: '워렌버핏 따라잡기 개인정보처리방침입니다. 수집하는 개인정보 항목, 이용 목적, 보유 기간, 이용자 권리 등을 안내합니다.',
+  description: 'GuruNote 개인정보처리방침입니다. 수집하는 개인정보 항목, 이용 목적, 보유 기간, 이용자 권리 등을 안내합니다.',
   openGraph: {
-    title: '개인정보처리방침 | 워렌버핏 따라잡기',
-    description: '워렌버핏 따라잡기 개인정보처리방침입니다.',
+    title: '개인정보처리방침 | GuruNote',
+    description: 'GuruNote 개인정보처리방침입니다.',
   },
 };
 
@@ -19,7 +19,7 @@ export default function PrivacyPage() {
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section>
             <p className="mb-4">
-              워렌버핏 따라잡기(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, &ldquo;개인정보 보호법&rdquo;, &ldquo;정보통신망 이용촉진 및
+              GuruNote(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, &ldquo;개인정보 보호법&rdquo;, &ldquo;정보통신망 이용촉진 및
               정보보호 등에 관한 법률&rdquo; 등 관련 법령을 준수하고 있습니다.
             </p>
             <p>

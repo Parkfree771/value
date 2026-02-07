@@ -54,10 +54,9 @@ const Navbar = memo(function Navbar() {
           <div className="flex justify-between items-center h-14">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            <Image src="/warren.png" alt="워렌버핏 따라잡기" width={28} height={28} className="sm:w-8 sm:h-8 rounded-full" priority />
+            <Image src="/GuruNote.png" alt="GuruNote" width={28} height={28} className="sm:w-8 sm:h-8 rounded-full" priority />
             <span className="text-base sm:text-xl font-bold text-blue-600 dark:text-blue-400">
-              <span className="hidden sm:inline">워렌버핏 따라잡기</span>
-              <span className="sm:hidden">워렌버핏</span>
+              GuruNote
             </span>
           </Link>
 
@@ -133,7 +132,7 @@ const Navbar = memo(function Navbar() {
                     : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
                 }`}
               >
-                ⚙️ 관리자
+                관리자
               </Link>
             )}
           </div>
@@ -232,7 +231,7 @@ const Navbar = memo(function Navbar() {
 
       {/* Mobile Sidebar Menu */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-white dark:bg-gray-800 shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-64 sm:w-72 bg-white dark:bg-gray-800 shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -240,9 +239,9 @@ const Navbar = memo(function Navbar() {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
             <Link href="/" onClick={closeMobileMenu} className="flex items-center space-x-2">
-              <Image src="/warren.png" alt="워렌버핏 따라잡기" width={32} height={32} className="rounded-full" />
+              <Image src="/GuruNote.png" alt="GuruNote" width={32} height={32} className="rounded-full" />
               <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                워렌버핏
+                GuruNote
               </span>
             </Link>
             <button
@@ -337,7 +336,7 @@ const Navbar = memo(function Navbar() {
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
-                  ⚙️ 관리자
+                  관리자
                 </Link>
               )}
             </div>

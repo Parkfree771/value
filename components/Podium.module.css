@@ -128,14 +128,17 @@
 .badge {
   position: relative;
   margin: 0 auto 1rem;
-  border-radius: 0.5rem;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   transform: rotate(45deg);
 }
 
-.badge > * {
+/* 숫자만 역회전 (배경 요소는 부모와 함께 회전) */
+.badgeFirstNumber,
+.badgeSecondNumber,
+.badgeThirdNumber {
   transform: rotate(-45deg);
 }
 
@@ -159,7 +162,7 @@
   position: absolute;
   inset: -6px;
   background: linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.4));
-  border-radius: 0.5rem;
+  border-radius: 0;
   filter: blur(10px);
   animation: diamondPulse 2s ease-in-out infinite;
 }
@@ -169,7 +172,7 @@
   inset: 0;
   background: linear-gradient(135deg, #ecfeff, #cffafe, #a5f3fc, #e0e7ff, #c4b5fd, #a5f3fc, #ecfeff);
   background-size: 200% 200%;
-  border-radius: 0.5rem;
+  border-radius: 0;
   border: 2px solid rgba(6, 182, 212, 0.5);
   box-shadow:
     0 0 20px rgba(6, 182, 212, 0.3),
@@ -181,7 +184,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(255, 255, 255, 0.3) 100%);
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .badgeFirstSparkle {
@@ -234,7 +237,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #fef3c7, #fcd34d, #f59e0b, #fbbf24, #fef3c7);
-  border-radius: 0.5rem;
+  border-radius: 0;
   border: 2px solid rgba(251, 191, 36, 0.5);
   box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
 }
@@ -243,7 +246,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .badgeSecondNumber {
@@ -279,7 +282,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8, #cbd5e1, #e2e8f0, #f8fafc);
-  border-radius: 0.5rem;
+  border-radius: 0;
   border: 2px solid rgba(203, 213, 225, 0.5);
   box-shadow: 0 10px 15px -3px rgba(148, 163, 184, 0.3);
 }
@@ -288,7 +291,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
-  border-radius: 0.5rem;
+  border-radius: 0;
 }
 
 .badgeThirdNumber {
@@ -311,10 +314,11 @@
   font-size: 0.875rem;
   color: #e5e7eb;
   margin-bottom: 0.5rem;
-  padding: 0 0.5rem;
+  padding: 0 0.25rem;
   transition: color 0.3s ease;
   text-align: center;
-  max-width: 100%;
+  width: 100%;
+  max-width: 8rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

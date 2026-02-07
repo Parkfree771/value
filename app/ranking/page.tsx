@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: '랭킹',
   description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요. 최고 수익률 리포트와 인기 투자자를 한눈에 볼 수 있습니다.',
   openGraph: {
-    title: '랭킹 | 워렌버핏 따라잡기',
+    title: '랭킹 | GuruNote',
     description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
   },
 };

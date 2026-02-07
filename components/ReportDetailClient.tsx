@@ -249,11 +249,11 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 제목 + 메타 정보 (전체 너비) */}
-      <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 leading-tight">
           {report.title}
         </h1>
-        <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-wrap">
           <span className="font-medium text-gray-700 dark:text-gray-300">{report.author}</span>
           <span>{report.createdAt}</span>
           <span>조회 {report.views}</span>
@@ -263,97 +263,86 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
       <div className="lg:flex lg:gap-8">
         {/* 왼쪽: 본문 영역 */}
-        <div className="flex-1 min-w-0 space-y-6">
+        <div className="flex-1 min-w-0 space-y-4 sm:space-y-6">
           {/* 기업 프로필 */}
-          <Card className="p-5">
-            {/* 헤더: 기업명 */}
-            <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-xl font-bold text-gray-900 dark:text-white">{report.stockName}</span>
-              <span className="font-mono text-sm text-gray-500">{report.ticker}</span>
-              {report.stockData?.exchange && (
-                <span className={`text-xs ${report.stockData.exchange === 'CRYPTO' ? 'px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-gray-400'}`}>
-                  {report.stockData.exchange === 'CRYPTO' ? '코인' : report.stockData.exchange}
-                </span>
-              )}
+          <Card className="p-0 sm:p-0 overflow-hidden">
+            {/* 헤더: 기업명(왼쪽) + 수익률(오른쪽) */}
+            <div className="flex items-center justify-between px-3 py-3 sm:px-5 sm:py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+                <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white">{report.stockName}</span>
+                <span className="font-mono text-xs sm:text-sm text-gray-500">{report.ticker}</span>
+                {report.stockData?.exchange && (
+                  <span className={`text-xs ${report.stockData.exchange === 'CRYPTO' ? 'px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-gray-400'}`}>
+                    {report.stockData.exchange === 'CRYPTO' ? '코인' : report.stockData.exchange}
+                  </span>
+                )}
+              </div>
+              <div className={`text-right flex-shrink-0 ml-3 text-lg sm:text-2xl font-black tabular-nums ${
+                report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
+                report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
+                'text-gray-900 dark:text-white'
+              }`}>
+                {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
+              </div>
             </div>
 
-            {/* 가격 정보 */}
-            <div className={`grid gap-6 ${report.stockData?.exchange === 'CRYPTO' ? 'grid-cols-5' : 'grid-cols-4'} mb-3`}>
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">작성가</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+            {/* 가격/지표 정보 - 2열 테이블 형태 */}
+            <div className="grid grid-cols-2">
+              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
+                <span className="text-xs text-gray-500 dark:text-gray-400">작성가</span>
+                <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
                   {report.initialPrice?.toLocaleString()}
-                </div>
+                </span>
               </div>
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">현재가</div>
-                <div className={`text-lg font-semibold tabular-nums ${
+              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
+                <span className="text-xs text-gray-500 dark:text-gray-400">현재가</span>
+                <span className={`text-sm sm:text-base font-semibold tabular-nums ${
                   report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
                   'text-gray-900 dark:text-white'
                 }`}>
                   {report.currentPrice?.toLocaleString()}
-                </div>
+                </span>
               </div>
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">목표가</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60">
+                <span className="text-xs text-gray-500 dark:text-gray-400">목표가</span>
+                <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
                   {report.targetPrice?.toLocaleString() || '-'}
-                </div>
+                </span>
               </div>
-              {report.stockData?.exchange === 'CRYPTO' && (
-                <div>
-                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">의견</div>
-                  <div className="mt-0.5">
-                    <OpinionBadge opinion={report.opinion} />
+              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60">
+                <span className="text-xs text-gray-500 dark:text-gray-400">의견</span>
+                <OpinionBadge opinion={report.opinion} />
+              </div>
+              {report.stockData?.exchange !== 'CRYPTO' && (
+                <>
+                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">PER</span>
+                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                      {report.stockData?.per?.toFixed(1) || '-'}
+                    </span>
                   </div>
-                </div>
+                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">PBR</span>
+                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                      {report.stockData?.pbr?.toFixed(2) || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-r border-gray-100 dark:border-gray-700/60">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">EPS</span>
+                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                      {report.stockData?.eps?.toFixed(0) || '-'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3">
+                  </div>
+                </>
               )}
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{isClosed ? '확정수익률' : '수익률'}</div>
-                <div className={`text-lg font-bold tabular-nums ${
-                  report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
-                  report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
-                  'text-gray-900 dark:text-white'
-                }`}>
-                  {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
-                </div>
-              </div>
             </div>
-
-            {/* 밸류에이션 지표 (코인이면 숨김) */}
-            {report.stockData?.exchange !== 'CRYPTO' && (
-              <div className="grid grid-cols-4 gap-6">
-                <div>
-                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PER</div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
-                    {report.stockData?.per?.toFixed(1) || '-'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PBR</div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
-                    {report.stockData?.pbr?.toFixed(2) || '-'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">EPS</div>
-                  <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
-                    {report.stockData?.eps?.toFixed(0) || '-'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">의견</div>
-                  <div className="mt-0.5">
-                    <OpinionBadge opinion={report.opinion} />
-                  </div>
-                </div>
-              </div>
-            )}
           </Card>
 
           {/* 모바일용 액션 버튼 (lg 이하에서만 표시) */}
-          <div className="lg:hidden flex flex-wrap gap-2">
+          <div className="lg:hidden flex flex-wrap gap-1.5 sm:gap-2">
             {/* 작성자 전용 버튼 */}
             {isAuthor && (
               <>
@@ -361,20 +350,20 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   <button
                     onClick={handleClosePosition}
                     disabled={isClosing}
-                    className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50"
                   >
                     {isClosing ? '처리 중...' : '수익확정'}
                   </button>
                 )}
                 <button
                   onClick={handleEdit}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors"
                 >
                   수정
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors"
                 >
                   삭제
                 </button>
@@ -383,25 +372,25 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 일반 버튼 */}
             <button
               onClick={handleLike}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors ${
                 isLiked
                   ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600'
                   : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
               }`}
             >
-              <svg className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 20 20">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 20 20">
                 <path d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
               </svg>
               {likesCount}
             </button>
-            <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
               북마크
             </button>
-            <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-sm transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors">
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
               공유
@@ -409,7 +398,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           </div>
 
           {/* Report Content - 넓고 여유롭게 */}
-          <Card className="p-4 sm:p-6 lg:p-8">
+          <Card className="p-3 sm:p-6 lg:p-8">
             {/* 리포트 본문 */}
             <div
               className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed break-words text-gray-900 dark:text-gray-300"
@@ -423,8 +412,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
           {/* 첨부 파일 */}
           {report.files && report.files.length > 0 && (
-            <Card className="p-4 sm:p-5">
-              <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+            <Card className="p-3 sm:p-5">
+              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
                 첨부 파일 {report.files.length}개
               </h3>
               <div className="space-y-2">
@@ -463,8 +452,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           )}
 
           {/* Comments Section */}
-          <Card className="p-4 sm:p-5">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3">
+          <Card className="p-3 sm:p-5">
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
               댓글 {commentCount}개
             </h3>
 
@@ -624,7 +613,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                       {/* 대댓글 (자식 댓글) */}
                       {comments.filter(c => c.parentId === comment.id).map((reply) => (
-                        <div key={reply.id} className="ml-6 mt-2 p-3 sm:p-4 bg-gray-100 dark:bg-gray-600 rounded-lg border-l-2 border-blue-500">
+                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 bg-gray-100 dark:bg-gray-600 rounded-lg border-l-2 border-blue-500">
                           <div className="flex items-center justify-between mb-2">
                             <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{reply.author}</div>
                             <div className="flex items-center gap-2">

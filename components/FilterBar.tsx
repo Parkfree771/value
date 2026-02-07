@@ -58,10 +58,10 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
             onChange={(e) => handleFilterChange('sortBy', e.target.value)}
             className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
           >
-            <option value="returnRate">📈 수익률순</option>
-            <option value="latest">🆕 최신순</option>
-            <option value="popular">🔥 인기순</option>
-            <option value="views">👁 조회순</option>
+            <option value="returnRate">수익률순</option>
+            <option value="latest">최신순</option>
+            <option value="popular">인기순</option>
+            <option value="views">조회순</option>
           </select>
 
           {/* 필터 버튼 */}
@@ -89,11 +89,11 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               onChange={(e) => handleFilterChange('period', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
-              <option value="all">📅 기간: 전체</option>
-              <option value="1m">📅 1개월</option>
-              <option value="3m">📅 3개월</option>
-              <option value="6m">📅 6개월</option>
-              <option value="1y">📅 1년</option>
+              <option value="all">기간: 전체</option>
+              <option value="1m">1개월</option>
+              <option value="3m">3개월</option>
+              <option value="6m">6개월</option>
+              <option value="1y">1년</option>
             </select>
 
             <select
@@ -102,10 +102,10 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
               <option value="all">국가: 전체</option>
-              <option value="KR">🇰🇷 한국</option>
-              <option value="US">🇺🇸 미국</option>
-              <option value="JP">🇯🇵 일본</option>
-              <option value="CN">🇨🇳 중국</option>
+              <option value="KR">한국</option>
+              <option value="US">미국</option>
+              <option value="JP">일본</option>
+              <option value="CN">중국</option>
             </select>
 
             <select
@@ -113,10 +113,10 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               onChange={(e) => handleFilterChange('opinion', e.target.value)}
               className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
-              <option value="all">💭 의견: 전체</option>
-              <option value="buy">📈 매수</option>
-              <option value="sell">📉 매도</option>
-              <option value="hold">⏸ 보유</option>
+              <option value="all">의견: 전체</option>
+              <option value="buy">매수</option>
+              <option value="sell">매도</option>
+              <option value="hold">보유</option>
             </select>
 
             {/* 초기화 버튼 */}
@@ -132,7 +132,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
                 }}
                 className="w-full px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                🔄 필터 초기화
+                필터 초기화
               </button>
             )}
           </div>
@@ -171,10 +171,10 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
             >
               <option value="all">전체</option>
-              <option value="KR">🇰🇷 한국</option>
-              <option value="US">🇺🇸 미국</option>
-              <option value="JP">🇯🇵 일본</option>
-              <option value="CN">🇨🇳 중국</option>
+              <option value="KR">한국</option>
+              <option value="US">미국</option>
+              <option value="JP">일본</option>
+              <option value="CN">중국</option>
             </select>
           </div>
 

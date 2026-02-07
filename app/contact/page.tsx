@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: '문의하기',
-  description: '워렌버핏 따라잡기 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
+  description: 'GuruNote 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
 };
 
 export default function ContactPage() {

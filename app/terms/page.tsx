@@ -3,10 +3,10 @@ import Card from '@/components/Card';
 
 export const metadata: Metadata = {
   title: '이용약관',
-  description: '워렌버핏 따라잡기 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
+  description: 'GuruNote 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
   openGraph: {
-    title: '이용약관 | 워렌버핏 따라잡기',
-    description: '워렌버핏 따라잡기 서비스 이용약관입니다.',
+    title: '이용약관 | GuruNote',
+    description: 'GuruNote 서비스 이용약관입니다.',
   },
 };
 
@@ -20,7 +20,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제1조 (목적)</h2>
             <p>
-              이 약관은 워렌버핏 따라잡기(이하 &ldquo;회사&rdquo;)가 제공하는 투자 리포트 공유 플랫폼 서비스(이하 &ldquo;서비스&rdquo;)의
+              이 약관은 GuruNote(이하 &ldquo;회사&rdquo;)가 제공하는 투자 리포트 공유 플랫폼 서비스(이하 &ldquo;서비스&rdquo;)의
               이용과 관련하여 회사와 이용자의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
             </p>
           </section>

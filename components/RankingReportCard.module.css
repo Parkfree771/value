@@ -8,9 +8,9 @@
 
 /* 순위 배지 공통 - 다이아몬드 모양 */
 .badge {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.375rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -20,7 +20,10 @@
   transform: rotate(45deg);
 }
 
-.badge > * {
+/* 숫자만 역회전 */
+.badgeFirstNumber,
+.badgeSecondNumber,
+.badgeThirdNumber {
   transform: rotate(-45deg);
 }
 
@@ -68,7 +71,7 @@
 }
 
 .badgeFirstNumber {
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 900;
   background: linear-gradient(135deg, #0891b2, #6366f1);
   -webkit-background-clip: text;
@@ -89,7 +92,7 @@
 }
 
 .badgeSecondNumber {
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 900;
   color: #78350f;
 }
@@ -107,7 +110,7 @@
 }
 
 .badgeThirdNumber {
-  font-size: 1.125rem;
+  font-size: 0.875rem;
   font-weight: 900;
   color: #334155;
 }
@@ -124,7 +127,7 @@
 }
 
 .badgeDefaultNumber {
-  font-size: 1rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: #ffffff;
 }

@@ -13,7 +13,7 @@ const FilterBar = dynamic(() => import('@/components/FilterBar'), {
   loading: () => <div className="animate-pulse h-[52px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
 });
 const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
-  loading: () => <div className="animate-pulse h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-8" />,
+  loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-4 sm:mb-8" />,
 });
 const SearchBar = dynamic(() => import('@/components/SearchBar'), {
   loading: () => <div className="animate-pulse h-[48px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
@@ -178,9 +178,9 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   // 로딩 중 스켈레톤 UI
   if (isLoading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-12">
         {/* TOP 10 스켈레톤 */}
-        <div className="animate-pulse h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-8" />
+        <div className="animate-pulse h-[200px] sm:h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-4 sm:mb-8" />
 
         {/* 검색바 스켈레톤 */}
         <div className="hidden md:block mb-8">
@@ -189,16 +189,16 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         </div>
 
         {/* 탭 스켈레톤 */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="animate-pulse h-[40px] w-[100px] bg-gray-200 dark:bg-gray-700 rounded-lg" />
+            <div key={i} className="animate-pulse h-[36px] sm:h-[40px] w-[70px] sm:w-[100px] bg-gray-200 dark:bg-gray-700 rounded-lg" />
           ))}
         </div>
 
         {/* 카드 스켈레톤 */}
-        <div className="space-y-6">
+        <div className="space-y-3 sm:space-y-6">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="animate-pulse h-[180px] bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div key={i} className="animate-pulse h-[140px] sm:h-[180px] bg-gray-200 dark:bg-gray-700 rounded-xl" />
           ))}
         </div>
       </div>
@@ -206,7 +206,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-12">
       {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider reports={reports} />
 
@@ -219,10 +219,10 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       </div>
 
       {/* 모바일: 검색 버튼 */}
-      <div className="md:hidden mb-8">
+      <div className="md:hidden mb-4">
         <Link href="/search">
-          <button className="w-full px-4 py-3 bg-white/5 dark:bg-white/5 border border-white/10 rounded-xl text-left text-gray-400 flex items-center gap-3 hover:border-electric-blue-500/50 transition-colors backdrop-blur-sm">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-400 flex items-center gap-3 hover:border-blue-500/50 transition-colors text-sm">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <span>종목명, 티커, 작성자로 검색...</span>
@@ -231,7 +231,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       </div>
 
       {/* Tab Navigation */}
-      <div className="mb-8">
+      <div className="mb-4 sm:mb-8">
         {/* 모바일: 4개 탭 한 줄 */}
         <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
           <button
@@ -322,7 +322,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       </div>
 
       {/* Reports Grid */}
-      <div className="space-y-6">
+      <div className="space-y-3 sm:space-y-6">
         {filteredReports.length > 0 ? (
           filteredReports.map((report) => (
             <ReportCard key={report.id} {...report} />

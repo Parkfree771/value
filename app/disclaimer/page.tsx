@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: '투자 면책 조항',
-  description: '워렌버핏 따라잡기 투자 정보 면책 조항',
+  description: 'GuruNote 투자 정보 면책 조항',
 };
 
 export default function DisclaimerPage() {
