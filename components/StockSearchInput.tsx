@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, memo } from 'react';
 import { stockSearchIndex, type GlobalStock, type Stock } from '@/lib/stockSearchIndex';
+import { getCryptoStocksForIndex, getCryptoImageUrl } from '@/lib/cryptoCoins';
 
 interface GlobalStocksData {
   stocks: GlobalStock[];
@@ -24,11 +25,14 @@ async function loadGlobalStocks(): Promise<GlobalStock[]> {
   loadPromise = fetch('/data/global-stocks.json')
     .then(res => res.json())
     .then((data: GlobalStocksData) => {
-      cachedStocksData = data.stocks;
+      // 코인 데이터를 주식 앞에 추가
+      const cryptoStocks = getCryptoStocksForIndex();
+      const allStocks = [...cryptoStocks, ...data.stocks];
+      cachedStocksData = allStocks;
       // 인덱스 빌드
-      stockSearchIndex.build(data.stocks);
+      stockSearchIndex.build(allStocks);
       isIndexBuilt = true;
-      return data.stocks;
+      return allStocks;
     })
     .catch(err => {
       loadPromise = null;
@@ -58,6 +62,10 @@ interface StockData {
   exchange: string;
   industry?: string;
   sector?: string;
+  change24h?: number;
+  changePercent24h?: number;
+  volume24h?: number;
+  tradeValue24h?: number;
 }
 
 interface StockSearchInputProps {
@@ -146,7 +154,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
       }
 
       // 자동완성에서 표시된 기업명 그대로 사용 (한글명이 있으면 한글, 없으면 영어)
-      const displayName = (stock.exchange === 'KRX' && stock.nameKr) ? stock.nameKr : stock.name;
+      const displayName = ((stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr) ? stock.nameKr : stock.name;
 
       console.log('Stock data loaded:', { ...stockData, name: displayName });
       onStockSelect({
@@ -214,20 +222,40 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
       </label>
 
       {selectedStock ? (
-        <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/30
-                      rounded-lg border-2 border-blue-200 dark:border-blue-700">
-          <div className="flex-1">
-            <div className="font-semibold text-gray-900 dark:text-white">
-              {selectedStock.name}
-            </div>
-            <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {selectedStock.symbol} · {selectedStock.exchange}
-            </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 grid grid-cols-2 gap-2">
-              <div>현재가: {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}</div>
-              {selectedStock.per && selectedStock.per > 0 && <div>PER: {selectedStock.per.toFixed(2)}</div>}
-              {selectedStock.pbr && selectedStock.pbr > 0 && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}
-              {selectedStock.eps && selectedStock.eps !== 0 && <div>EPS: {getCurrencySymbol(selectedStock.currency)}{selectedStock.eps.toFixed(2)}</div>}
+        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${
+          selectedStock.exchange === 'CRYPTO'
+            ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
+            : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
+        }`}>
+          <div className="flex items-center gap-3 flex-1">
+            {selectedStock.exchange === 'CRYPTO' && (
+              <img
+                src={getCryptoImageUrl(selectedStock.symbol)}
+                alt={selectedStock.symbol}
+                className="w-10 h-10 rounded-full"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+            )}
+            <div className="flex-1">
+              <div className="font-semibold text-gray-900 dark:text-white">
+                {selectedStock.name}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                {selectedStock.symbol} · {selectedStock.exchange === 'CRYPTO' ? '코인' : selectedStock.exchange}
+              </div>
+              {selectedStock.exchange !== 'CRYPTO' && (
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 grid grid-cols-2 gap-2">
+                  <div>현재가: {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}</div>
+                  {selectedStock.per && selectedStock.per > 0 && <div>PER: {selectedStock.per.toFixed(2)}</div>}
+                  {selectedStock.pbr && selectedStock.pbr > 0 && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}
+                  {selectedStock.eps && selectedStock.eps !== 0 && <div>EPS: {getCurrencySymbol(selectedStock.currency)}{selectedStock.eps.toFixed(2)}</div>}
+                </div>
+              )}
+              {selectedStock.exchange === 'CRYPTO' && (
+                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}
+                </div>
+              )}
             </div>
           </div>
           <button
@@ -272,19 +300,35 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
                             transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0
                             ${index === selectedIndex ? 'bg-gray-50 dark:bg-gray-700' : ''}`}
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900 dark:text-white">
-                        {stock.exchange === 'KRX' && stock.nameKr ? stock.nameKr : stock.name}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        {stock.symbol}
-                        {stock.exchange === 'KRX' && stock.nameKr && <span className="ml-2 text-gray-400">· {stock.name}</span>}
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3 flex-1">
+                      {stock.exchange === 'CRYPTO' && (
+                        <img
+                          src={getCryptoImageUrl(stock.symbol)}
+                          alt={stock.symbol}
+                          className="w-7 h-7 rounded-full flex-shrink-0"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 dark:text-white">
+                          {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr ? stock.nameKr : stock.name}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {stock.symbol}
+                          {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr && <span className="ml-2 text-gray-400">· {stock.name}</span>}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-gray-400 dark:text-gray-500">
-                      {stock.exchange}
-                    </div>
+                    {stock.exchange === 'CRYPTO' ? (
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium">
+                        코인
+                      </span>
+                    ) : (
+                      <div className="text-xs text-gray-400 dark:text-gray-500">
+                        {stock.exchange}
+                      </div>
+                    )}
                   </div>
                 </button>
               ))}

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCompanyProfile, STOCK_CODES, detectExchange, searchStockExchangeCode } from '@/lib/kis';
+import { getUpbitCryptoProfile } from '@/lib/upbit';
+import { CRYPTO_COINS } from '@/lib/cryptoCoins';
 
 export async function GET(
   request: NextRequest,
@@ -34,6 +36,41 @@ export async function GET(
           detectedExchange = foundExchange;
         }
       }
+    }
+
+    // 암호화폐 전용 처리
+    if (detectedExchange === 'CRYPTO') {
+      const cryptoProfile = await getUpbitCryptoProfile(stockCode);
+      if (!cryptoProfile) {
+        return NextResponse.json(
+          { error: `암호화폐 '${stockCode}'의 시세를 조회할 수 없습니다.` },
+          { status: 404 }
+        );
+      }
+
+      const coin = CRYPTO_COINS[stockCode.toUpperCase()];
+      const profileAny = cryptoProfile as any;
+
+      const cryptoData = {
+        symbol: stockCode.toUpperCase(),
+        name: coin?.nameKr || cryptoProfile.name,
+        currentPrice: cryptoProfile.currentPrice,
+        currency: 'KRW',
+        marketCap: 0,
+        per: null,
+        pbr: null,
+        eps: null,
+        exchange: 'CRYPTO',
+        industry: null,
+        sector: null,
+        change24h: profileAny.change24h || null,
+        changePercent24h: profileAny.changePercent24h || null,
+        volume24h: cryptoProfile.volume || null,
+        tradeValue24h: profileAny.tradeValue24h || null,
+      };
+
+      console.log(`[API /stocks/${symbol}] 암호화폐 조회 성공:`, cryptoData);
+      return NextResponse.json(cryptoData);
     }
 
     // getCompanyProfile 사용하여 상세 정보 조회

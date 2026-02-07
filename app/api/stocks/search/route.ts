@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { getCryptoStocksForIndex } from '@/lib/cryptoCoins';
 
 interface GlobalStock {
   symbol: string;
@@ -34,9 +35,15 @@ function loadGlobalStocks(): GlobalStocksData {
   const filePath = path.join(process.cwd(), 'public', 'data', 'global-stocks.json');
   const fileContent = fs.readFileSync(filePath, 'utf-8');
   const data: GlobalStocksData = JSON.parse(fileContent);
+
+  // 코인 데이터를 주식 앞에 추가
+  const cryptoStocks = getCryptoStocksForIndex();
+  data.stocks = [...cryptoStocks, ...data.stocks];
+  data.totalCount = data.stocks.length;
+
   cachedData = data;
 
-  console.log(`[API] 글로벌 주식 데이터 로드 완료: ${data.totalCount.toLocaleString()}개 종목`);
+  console.log(`[API] 글로벌 주식 데이터 로드 완료: ${data.totalCount.toLocaleString()}개 종목 (코인 ${cryptoStocks.length}개 포함)`);
 
   return data;
 }
@@ -189,7 +196,7 @@ export async function GET(request: NextRequest) {
       name: stock.name,
       nameKr: stock.nameKr || null,
       exchange: stock.exchange,
-      type: 'EQUITY' as const,
+      type: (stock.exchange === 'CRYPTO' ? 'CRYPTO' : 'EQUITY') as string,
     }));
 
     return NextResponse.json({

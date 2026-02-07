@@ -271,12 +271,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               <span className="text-xl font-bold text-gray-900 dark:text-white">{report.stockName}</span>
               <span className="font-mono text-sm text-gray-500">{report.ticker}</span>
               {report.stockData?.exchange && (
-                <span className="text-xs text-gray-400">{report.stockData.exchange}</span>
+                <span className={`text-xs ${report.stockData.exchange === 'CRYPTO' ? 'px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-gray-400'}`}>
+                  {report.stockData.exchange === 'CRYPTO' ? '코인' : report.stockData.exchange}
+                </span>
               )}
             </div>
 
             {/* 가격 정보 */}
-            <div className="grid grid-cols-4 gap-6 mb-3">
+            <div className={`grid gap-6 ${report.stockData?.exchange === 'CRYPTO' ? 'grid-cols-5' : 'grid-cols-4'} mb-3`}>
               <div>
                 <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">작성가</div>
                 <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
@@ -299,6 +301,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   {report.targetPrice?.toLocaleString() || '-'}
                 </div>
               </div>
+              {report.stockData?.exchange === 'CRYPTO' && (
+                <div>
+                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">의견</div>
+                  <div className="mt-0.5">
+                    <OpinionBadge opinion={report.opinion} />
+                  </div>
+                </div>
+              )}
               <div>
                 <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">{isClosed ? '확정수익률' : '수익률'}</div>
                 <div className={`text-lg font-bold tabular-nums ${
@@ -311,33 +321,35 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
             </div>
 
-            {/* 밸류에이션 지표 */}
-            <div className="grid grid-cols-4 gap-6">
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PER</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
-                  {report.stockData?.per?.toFixed(1) || '-'}
+            {/* 밸류에이션 지표 (코인이면 숨김) */}
+            {report.stockData?.exchange !== 'CRYPTO' && (
+              <div className="grid grid-cols-4 gap-6">
+                <div>
+                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PER</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                    {report.stockData?.per?.toFixed(1) || '-'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PBR</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                    {report.stockData?.pbr?.toFixed(2) || '-'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">EPS</div>
+                  <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
+                    {report.stockData?.eps?.toFixed(0) || '-'}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">의견</div>
+                  <div className="mt-0.5">
+                    <OpinionBadge opinion={report.opinion} />
+                  </div>
                 </div>
               </div>
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">PBR</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
-                  {report.stockData?.pbr?.toFixed(2) || '-'}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">EPS</div>
-                <div className="text-lg font-semibold text-gray-900 dark:text-white tabular-nums">
-                  {report.stockData?.eps?.toFixed(0) || '-'}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">의견</div>
-                <div className="mt-0.5">
-                  <OpinionBadge opinion={report.opinion} />
-                </div>
-              </div>
-            </div>
+            )}
           </Card>
 
           {/* 모바일용 액션 버튼 (lg 이하에서만 표시) */}

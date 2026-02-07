@@ -164,7 +164,7 @@ class PrefixIndex {
       name: stock.name,
       nameKr: stock.nameKr || null,
       exchange: stock.exchange,
-      type: 'EQUITY',
+      type: stock.exchange === 'CRYPTO' ? 'CRYPTO' : 'EQUITY',
     }));
   }
 

@@ -53,6 +53,7 @@ export async function getLatestPrices(): Promise<Record<string, CachedPriceData>
 export function getCurrencyFromExchange(exchange: string): string {
   switch (exchange) {
     case 'KRX': return 'KRW';
+    case 'CRYPTO': return 'KRW';
     case 'TSE': return 'JPY';
     case 'HKS': return 'HKD';
     case 'SHS':

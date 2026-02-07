@@ -11,6 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
+import { getCryptoImageUrl } from '@/lib/cryptoCoins';
 import dynamic from 'next/dynamic';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
@@ -30,6 +31,10 @@ interface StockData {
   exchange: string;
   industry?: string;
   sector?: string;
+  change24h?: number;
+  changePercent24h?: number;
+  volume24h?: number;
+  tradeValue24h?: number;
 }
 
 function WritePageContent() {
@@ -51,6 +56,7 @@ function WritePageContent() {
   const [uploadedFiles, setUploadedFiles] = useState<{ name: string; url: string }[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [originalInitialPrice, setOriginalInitialPrice] = useState<number | null>(null);
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
@@ -86,6 +92,7 @@ function WritePageContent() {
         setOpinion(reportData.opinion || 'buy');
         setTargetPrice(reportData.targetPrice?.toString() || '');
         setContent(reportData.content || '');
+        setOriginalInitialPrice(reportData.initialPrice || null);
 
         // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
@@ -342,8 +349,11 @@ function WritePageContent() {
           updatedAtArray.push(today);
         }
 
+        // 수정 시 initialPrice, currentPrice, views, likes, createdAt 유지
+        const { initialPrice, currentPrice, lastPriceUpdate, views, likes, likedBy, createdAt, ...editableData } = reportData;
+
         await updateDoc(reportRef, {
-          ...reportData,
+          ...editableData,
           updatedAt: updatedAtArray,
         });
 
@@ -482,62 +492,84 @@ function WritePageContent() {
               selectedStock={stockData}
             />
 
-            {/* 종목 프로필 카드 */}
-            <div className="mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20
-                          border-2 border-blue-200 dark:border-blue-800 rounded-lg">
+            {/* 종목 프로필 카드 (코인이면 숨김) */}
+            <div className={`mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20
+                          border-2 border-blue-200 dark:border-blue-800 rounded-lg ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 종목 프로필
               </h3>
 
               {stockData ? (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">현재 주가</div>
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {stockData.currency} {stockData.currentPrice.toLocaleString()}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PER</div>
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PBR</div>
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">EPS</div>
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">거래소</div>
-                    <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                      {stockData.exchange}
-                    </div>
-                  </div>
-                  {stockData.sector && (
+                stockData.exchange === 'CRYPTO' ? (
+                  <div className="flex items-center gap-5">
+                    <img
+                      src={getCryptoImageUrl(stockData.symbol)}
+                      alt={stockData.symbol}
+                      className="w-16 h-16 rounded-full"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
                     <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">섹터</div>
-                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                        {stockData.sector}
+                      <div className="text-xl font-bold text-gray-900 dark:text-white">
+                        {stockData.name}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        {stockData.symbol}
+                      </div>
+                      <div className="text-2xl font-bold text-orange-500 dark:text-orange-400 mt-2">
+                        {stockData.currency === 'KRW' ? '₩' : stockData.currency} {stockData.currentPrice.toLocaleString()}
                       </div>
                     </div>
-                  )}
-                  {stockData.industry && (
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">산업</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">현재 주가</div>
                       <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                        {stockData.industry}
+                        {stockData.currency} {stockData.currentPrice.toLocaleString()}
                       </div>
                     </div>
-                  )}
-                </div>
+                    <div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PER</div>
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PBR</div>
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">EPS</div>
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">거래소</div>
+                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        {stockData.exchange}
+                      </div>
+                    </div>
+                    {stockData.sector && (
+                      <div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">섹터</div>
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                          {stockData.sector}
+                        </div>
+                      </div>
+                    )}
+                    {stockData.industry && (
+                      <div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">산업</div>
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                          {stockData.industry}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
@@ -555,9 +587,6 @@ function WritePageContent() {
                 </div>
               )}
 
-              <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-blue-200 dark:border-blue-800">
-                이 프로필 데이터는 리포트 상세 페이지 상단에 자동으로 표시됩니다.
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

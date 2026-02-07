@@ -79,8 +79,8 @@ export async function getCurrentStockPrice(
       return cachedPrice;
     }
 
-    // 2. 캐시 미스 - KIS API 직접 호출
-    console.log(`[StockPrice] JSON 캐시 미스, KIS API 호출: ${ticker}`);
+    // 2. 캐시 미스 - API 직접 호출
+    console.log(`[StockPrice] JSON 캐시 미스, API 호출: ${ticker}`);
 
     // 거래소 자동 감지 (접미사 제거 전에 먼저 감지)
     const detectedExchange = exchange || detectExchange(ticker);
@@ -89,6 +89,23 @@ export async function getCurrentStockPrice(
     let stockCode = ticker;
     if (ticker.includes('.')) {
       stockCode = ticker.split('.')[0];
+    }
+
+    // 암호화폐 (업비트 API)
+    if (detectedExchange === 'CRYPTO') {
+      const { getUpbitPrice } = await import('./upbit');
+      const cryptoData = await getUpbitPrice(stockCode);
+      if (!cryptoData) {
+        console.error(`[StockPrice] 암호화폐 가격 조회 실패: ${ticker}`);
+        return null;
+      }
+      return {
+        symbol: stockCode.toUpperCase(),
+        price: cryptoData.price,
+        currency: 'KRW',
+        marketCap: undefined,
+        regularMarketChangePercent: cryptoData.changePercent,
+      };
     }
 
     // 한국 주식 (6자리 숫자)
@@ -248,6 +265,12 @@ export async function getHistoricalPrice(
     let stockCode = ticker;
     if (ticker.includes('.')) {
       stockCode = ticker.split('.')[0];
+    }
+
+    // 암호화폐 (과거가 미지원)
+    if (detectedExchange === 'CRYPTO') {
+      console.log(`[HistoricalPrice] 암호화폐 과거 시세 미지원: ${ticker}`);
+      return null;
     }
 
     // 한국 주식 (6자리 숫자)

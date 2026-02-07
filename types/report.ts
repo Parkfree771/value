@@ -1,6 +1,6 @@
 export type Opinion = 'buy' | 'sell' | 'hold';
 export type EditorMode = 'text' | 'html';
-export type MarketCategory = 'KOSPI' | 'KOSDAQ' | 'NASDAQ' | 'NYSE' | 'NIKKEI' | 'HANGSENG' | 'OTHER';
+export type MarketCategory = 'KOSPI' | 'KOSDAQ' | 'NASDAQ' | 'NYSE' | 'NIKKEI' | 'HANGSENG' | 'CRYPTO' | 'OTHER';
 
 /**
  * 리포트 리스트용 요약 타입 (홈페이지, 검색 결과 등)
