@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Oswald, Inter } from "next/font/google";
+import { Inter } from "next/font/google";
 import dynamic from "next/dynamic";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -20,20 +20,20 @@ export const viewport: Viewport = {
   userScalable: false,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#111827' },
+    { media: '(prefers-color-scheme: dark)', color: '#050505' },
   ],
 };
 
 export const metadata: Metadata = {
   title: {
-    default: 'GuruNote - 투자 리포트 공유 플랫폼',
-    template: '%s | GuruNote',
+    default: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
+    template: '%s | AntStreet',
   },
-  description: '투자 아이디어를 공유하고 수익률을 추적하세요. 개인 투자자들의 투자 리포트 공유 커뮤니티입니다. 실시간 수익률 랭킹, 투자자 랭킹, 투자 분석 리포트를 확인하세요.',
-  keywords: ['투자', '주식', '리포트', '수익률', '투자분석', '주식투자', '증권', '투자커뮤니티', 'GuruNote', '가치투자', '투자전략', '주식분석', '삼성전자', 'TSLA', 'NVDA', 'AAPL', '코스피', '나스닥'],
-  authors: [{ name: 'GuruNote' }],
-  creator: 'GuruNote',
-  publisher: 'GuruNote',
+  description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요. 실시간 수익률 랭킹, 투자자 랭킹, 투자 분석 리포트를 확인하세요.',
+  keywords: ['투자', '주식', '리포트', '수익률', '투자분석', '주식투자', '증권', '투자커뮤니티', 'AntStreet', '앤트스트릿', '개미투자자', '가치투자', '투자전략', '주식분석', '삼성전자', 'TSLA', 'NVDA', 'AAPL', '코스피', '나스닥'],
+  authors: [{ name: 'AntStreet' }],
+  creator: 'AntStreet',
+  publisher: 'AntStreet',
   formatDetection: {
     email: false,
     address: false,
@@ -47,23 +47,23 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
     url: process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app',
-    title: 'GuruNote - 투자 리포트 공유 플랫폼',
-    description: '투자 아이디어를 공유하고 수익률을 추적하세요. 개인 투자자들의 투자 리포트 공유 커뮤니티입니다.',
-    siteName: 'GuruNote',
+    title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
+    description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
+    siteName: 'AntStreet',
     images: [
       {
-        url: '/GuruNote.png',
+        url: '/logo-background.png',
         width: 1200,
         height: 630,
-        alt: 'GuruNote',
+        alt: 'AntStreet',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'GuruNote - 투자 리포트 공유 플랫폼',
-    description: '투자 아이디어를 공유하고 수익률을 추적하세요.',
-    images: ['/GuruNote.png'],
+    title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
+    description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
+    images: ['/logo-background.png'],
   },
   robots: {
     index: true,
@@ -77,17 +77,11 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/GuruNote.png',
-    shortcut: '/GuruNote.png',
-    apple: '/GuruNote.png',
+    icon: '/logo-background.png',
+    shortcut: '/logo-background.png',
+    apple: '/logo-background.png',
   },
 };
-
-const oswald = Oswald({
-  subsets: ["latin"],
-  variable: "--font-heading",
-  display: "swap",
-});
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,12 +96,12 @@ const jsonLd = {
     {
       "@type": "Organization",
       "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#organization`,
-      name: "GuruNote",
+      name: "AntStreet",
       alternateName: "부자FARM",
       url: process.env.NEXT_PUBLIC_SITE_URL || "https://value-two-psi.vercel.app",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/GuruNote.png`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/logo-background.png`,
         width: 512,
         height: 512,
       },
@@ -130,8 +124,8 @@ const jsonLd = {
       "@type": "WebSite",
       "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#website`,
       url: process.env.NEXT_PUBLIC_SITE_URL || "https://value-two-psi.vercel.app",
-      name: "GuruNote",
-      description: "투자 아이디어를 공유하고 수익률을 추적하세요. 개인 투자자들의 투자 리포트 공유 커뮤니티입니다.",
+      name: "AntStreet",
+      description: "개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.",
       publisher: {
         "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#organization`,
       },
@@ -154,7 +148,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${oswald.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html lang="ko" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
         {/* Google Search Console 인증 */}
         <meta name="google-site-verification" content="AP5eR-Eum2IZ1OjbIlE-vI7mPeI0dmTdV-fxjja6RaU" />
@@ -178,7 +172,7 @@ export default function RootLayout({
         <GoogleAnalytics />
         <GoogleAdSense />
       </head>
-      <body className="antialiased flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors font-body">
+      <body className="antialiased flex flex-col min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors font-body">
         <ThemeProvider>
           <AuthProvider>
             <BookmarkProvider>

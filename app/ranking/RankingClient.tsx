@@ -149,7 +149,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           onClick={() => handleTabChange('reports')}
           className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
             activeTab === 'reports'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
@@ -159,7 +159,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           onClick={() => handleTabChange('investors')}
           className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
             activeTab === 'investors'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
@@ -169,7 +169,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           onClick={() => handleTabChange('trending')}
           className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
             activeTab === 'trending'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
@@ -260,7 +260,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 onClick={() => handlePeriodChange(period)}
                 className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all ${
                   selectedPeriod === period
-                    ? 'bg-blue-600 text-white shadow-lg'
+                    ? 'bg-red-600 text-white shadow-lg'
                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
                 }`}
               >
@@ -301,7 +301,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                     onClick={() => setCurrentPage(page)}
                     className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
                       currentPage === page
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-red-600 text-white'
                         : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -398,7 +398,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 onClick={() => handlePeriodChange(period)}
                 className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all ${
                   selectedPeriod === period
-                    ? 'bg-blue-600 text-white shadow-lg'
+                    ? 'bg-red-600 text-white shadow-lg'
                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
                 }`}
               >
@@ -436,7 +436,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                       </span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-sm sm:text-lg text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors truncate">
+                      <div className="font-bold text-sm sm:text-lg text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-400 transition-colors truncate">
                         {investor.name}
                       </div>
                       <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
@@ -477,7 +477,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                     onClick={() => setCurrentPage(page)}
                     className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
                       currentPage === page
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-red-600 text-white'
                         : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >
@@ -513,7 +513,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 onClick={() => handlePeriodChange(period)}
                 className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all ${
                   selectedPeriod === period
-                    ? 'bg-blue-600 text-white shadow-lg'
+                    ? 'bg-red-600 text-white shadow-lg'
                     : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
                 }`}
               >
@@ -553,7 +553,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                     onClick={() => setCurrentPage(page)}
                     className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
                       currentPage === page
-                        ? 'bg-blue-600 text-white'
+                        ? 'bg-red-600 text-white'
                         : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
                   >

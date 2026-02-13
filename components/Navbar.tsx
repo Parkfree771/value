@@ -49,76 +49,78 @@ const Navbar = memo(function Navbar() {
         />
       )}
 
-      <nav className="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors">
+      <nav className="bg-[var(--pixel-bg)] border-b-[3px] border-[var(--pixel-border-muted)] shadow-pixel sticky top-0 z-50 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2" onClick={closeMobileMenu}>
-            <Image src="/GuruNote.png" alt="GuruNote" width={28} height={28} className="sm:w-8 sm:h-8 rounded-full" priority />
-            <span className="text-base sm:text-xl font-bold text-blue-600 dark:text-blue-400">
-              GuruNote
+          <div className="flex justify-between items-center h-16">
+          {/* Logo + Navigation Links */}
+          <div className="flex items-center gap-8">
+          <Link href="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
+            <Image src="/logo.webp" alt="AntStreet" width={48} height={48} className="sm:w-14 sm:h-14" priority />
+            <span className="brand-title text-xl sm:text-2xl leading-none">
+              AntStreet
             </span>
           </Link>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center gap-1">
             <Link
               href="/"
-              className={`text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                 isActive('/')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  ? 'text-white bg-ant-red border-2 border-ant-red-700 shadow-pixel-sm'
+                  : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               피드
             </Link>
             <Link
               href="/search"
-              className={`text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                 isActive('/search')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  ? 'text-white bg-ant-red border-2 border-ant-red-700 shadow-pixel-sm'
+                  : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               검색
             </Link>
             <Link
               href="/ranking"
-              className={`text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                 isActive('/ranking')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  ? 'text-white bg-ant-red border-2 border-ant-red-700 shadow-pixel-sm'
+                  : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               랭킹
             </Link>
             <Link
               href="/guru-tracker"
-              className={`text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                 isActive('/guru-tracker')
-                  ? 'text-orange-600 dark:text-orange-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-orange-600 dark:hover:text-orange-400'
+                  ? 'text-white bg-neon-orange border-2 border-neon-orange-700 shadow-pixel-sm'
+                  : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               GURU
             </Link>
+            <span className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></span>
             <Link
               href="/write"
               onClick={handleWriteClick}
-              className={`text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                 isActive('/write')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  ? 'text-white bg-ant-red border-2 border-ant-red-700 shadow-pixel-sm'
+                  : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               글쓰기
             </Link>
             <Link
               href="/mypage"
-              className={`text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                 isActive('/mypage')
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                  ? 'text-white bg-ant-red border-2 border-ant-red-700 shadow-pixel-sm'
+                  : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
               }`}
             >
               마이페이지
@@ -126,15 +128,16 @@ const Navbar = memo(function Navbar() {
             {user && isAdmin && (
               <Link
                 href="/admin"
-                className={`text-sm font-medium transition-colors ${
+                className={`px-3 py-1.5 text-sm font-semibold transition-all ${
                   isActive('/admin')
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
+                    ? 'text-white bg-ant-red border-2 border-ant-red-700 shadow-pixel-sm'
+                    : 'text-gray-700 dark:text-gray-300 border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 관리자
               </Link>
             )}
+          </div>
           </div>
 
           {/* Auth Buttons + Theme Toggle */}
@@ -165,7 +168,7 @@ const Navbar = memo(function Navbar() {
                 </span>
                 <button
                   onClick={handleSignOut}
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                 >
                   로그아웃
                 </button>
@@ -174,13 +177,13 @@ const Navbar = memo(function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                 >
                   로그인
                 </Link>
                 <Link
                   href="/signup"
-                  className="px-3 py-1.5 text-sm bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+                  className="px-3 py-1.5 text-sm font-bold bg-ant-red text-white border-2 border-ant-red-800 shadow-pixel-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
                 >
                   회원가입
                 </Link>
@@ -211,7 +214,7 @@ const Navbar = memo(function Navbar() {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+              className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
             >
               {mobileMenuOpen ? (
                 <svg className="h-5 w-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -231,17 +234,17 @@ const Navbar = memo(function Navbar() {
 
       {/* Mobile Sidebar Menu */}
       <div
-        className={`fixed top-0 right-0 h-full w-64 sm:w-72 bg-white dark:bg-gray-800 shadow-2xl z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-64 sm:w-72 bg-[var(--pixel-bg)] border-l-[3px] border-[var(--pixel-border)] shadow-pixel-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-            <Link href="/" onClick={closeMobileMenu} className="flex items-center space-x-2">
-              <Image src="/GuruNote.png" alt="GuruNote" width={32} height={32} className="rounded-full" />
-              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                GuruNote
+            <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2">
+              <Image src="/logo.webp" alt="AntStreet" width={40} height={40} />
+              <span className="brand-title text-lg leading-none">
+                AntStreet
               </span>
             </Link>
             <button
@@ -262,7 +265,7 @@ const Navbar = memo(function Navbar() {
                 onClick={closeMobileMenu}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
@@ -273,7 +276,7 @@ const Navbar = memo(function Navbar() {
                 onClick={closeMobileMenu}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/search')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
@@ -284,7 +287,7 @@ const Navbar = memo(function Navbar() {
                 onClick={closeMobileMenu}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/ranking')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
@@ -309,7 +312,7 @@ const Navbar = memo(function Navbar() {
                 }}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/write')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
@@ -320,7 +323,7 @@ const Navbar = memo(function Navbar() {
                 onClick={closeMobileMenu}
                 className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                   isActive('/mypage')
-                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                    ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                 }`}
               >
@@ -332,7 +335,7 @@ const Navbar = memo(function Navbar() {
                   onClick={closeMobileMenu}
                   className={`px-4 py-3 rounded-lg text-base font-medium transition-colors ${
                     isActive('/admin')
-                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      ? 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                 >
@@ -368,7 +371,7 @@ const Navbar = memo(function Navbar() {
                 <Link
                   href="/signup"
                   onClick={closeMobileMenu}
-                  className="px-4 py-2.5 text-base bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors text-center font-medium"
+                  className="px-4 py-2.5 text-base font-bold bg-ant-red text-white border-2 border-ant-red-800 shadow-pixel-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-center"
                 >
                   회원가입
                 </Link>

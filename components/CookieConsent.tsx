@@ -40,7 +40,7 @@ export default function CookieConsent() {
           <p>
             본 사이트는 서비스 개선 및 맞춤형 광고를 위해 쿠키를 사용합니다.
             자세한 내용은{' '}
-            <Link href="/privacy" className="text-blue-600 dark:text-blue-400 underline">
+            <Link href="/privacy" className="text-red-600 dark:text-red-400 underline">
               개인정보처리방침
             </Link>
             을 확인하세요.
@@ -55,7 +55,7 @@ export default function CookieConsent() {
           </button>
           <button
             onClick={handleAccept}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
           >
             동의
           </button>

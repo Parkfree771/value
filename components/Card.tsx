@@ -15,22 +15,16 @@ const Card = memo(function Card({
   className = '',
   onClick,
 }: CardProps) {
-  const baseStyles = 'rounded-xl transition-all duration-300';
+  const baseStyles = 'transition-all duration-200';
 
   const variantStyles = {
-    base: 'bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700',
+    base: 'card-base',
 
-    interactive: `bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700
-      hover:border-electric-blue-500 dark:hover:border-electric-blue-500
-      hover:scale-[1.01] hover:ring-2 hover:ring-electric-blue-500/20
-      cursor-pointer`,
+    interactive: 'card-interactive',
 
-    glass: `bg-white/80 dark:bg-gray-900/60 backdrop-blur-md shadow-glass
-      border border-gray-200 dark:border-white/10
-      hover:shadow-neon-blue`,
+    glass: 'card-base',
 
-    elevated: `bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700
-      shadow-lg hover:shadow-xl`,
+    elevated: 'card-base shadow-pixel-lg',
   };
 
   const paddingStyles = {

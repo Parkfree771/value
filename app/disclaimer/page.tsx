@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: '투자 면책 조항',
-  description: 'GuruNote 투자 정보 면책 조항',
+  description: 'AntStreet 투자 정보 면책 조항',
 };
 
 export default function DisclaimerPage() {
@@ -183,7 +183,7 @@ export default function DisclaimerPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
               9. 면책 동의
             </h2>
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded">
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
               <p className="text-gray-700 dark:text-gray-300 font-medium">
                 본 사이트를 이용함으로써, 사용자는 위의 모든 면책 조항을 이해하고 동의한 것으로 간주됩니다.
                 투자로 인한 모든 결과는 사용자 본인의 책임임을 인지하고 있음을 확인합니다.
@@ -198,7 +198,7 @@ export default function DisclaimerPage() {
             </h2>
             <p>
               본 면책 조항에 대한 질문이나 문의사항이 있으시면{' '}
-              <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+              <Link href="/terms" className="text-red-600 dark:text-red-400 hover:underline">
                 이용약관
               </Link>
               을 참조하거나 고객센터로 연락주시기 바랍니다.
@@ -218,7 +218,7 @@ export default function DisclaimerPage() {
       <div className="mt-8 text-center">
         <Link
           href="/"
-          className="inline-block px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
+          className="inline-block px-6 py-3 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
         >
           홈으로 돌아가기
         </Link>

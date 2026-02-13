@@ -90,7 +90,7 @@ export default function UserPage() {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-ant-red-600 border-t-transparent mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-400">로딩 중...</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ export default function UserPage() {
           </p>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+            className="px-6 py-2 bg-ant-red-600 text-white rounded-lg font-semibold hover:bg-ant-red-700 transition-colors"
           >
             돌아가기
           </button>
@@ -123,7 +123,7 @@ export default function UserPage() {
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-ant-red-600 dark:text-ant-red-400 hover:text-ant-red-700 dark:hover:text-ant-red-300 mb-6 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -136,7 +136,7 @@ export default function UserPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* 프로필 정보 */}
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-ant-red-500 to-ant-red-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
               {username[0]?.toUpperCase()}
             </div>
             <div>

@@ -69,7 +69,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
   };
 
   return (
-    <Card className="p-3 sm:p-6 mb-4 sm:mb-12">
+    <Card className="p-3 sm:p-6 mb-3 sm:mb-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-3 sm:mb-8">
         <div>
@@ -91,7 +91,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
             <Link key={item.id} href={`/reports/${item.id}`}>
               <div className="flex items-center gap-3 h-[44px] active:bg-gray-50 dark:active:bg-gray-800 transition-colors">
                 <span className={`w-5 text-center text-sm font-bold flex-shrink-0 ${
-                  item.rank <= 3 ? 'text-electric-blue' : 'text-gray-400 dark:text-gray-500'
+                  item.rank <= 3 ? 'text-ant-red' : 'text-gray-400 dark:text-gray-500'
                 }`}>
                   {item.rank}
                 </span>
@@ -114,7 +114,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                 <div
                   className={`flex-shrink-0 w-80 p-5 rounded-xl transition-all cursor-pointer snap-start border-2 ${
                     currentIndex === index
-                      ? 'bg-electric-blue-50 dark:bg-electric-blue-900/20 border-electric-blue-500 dark:border-electric-blue-500 scale-[1.02]'
+                      ? 'bg-ant-red-50 dark:bg-ant-red-900/20 border-ant-red-500 dark:border-ant-red-500 scale-[1.02]'
                       : 'card-base hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
                   onMouseEnter={() => setCurrentIndex(index)}
@@ -132,7 +132,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
 
                   {/* Return Rate */}
                   <div className="mb-2 h-[40px] flex items-center">
-                    <div className={`text-3xl font-bold font-heading ${getReturnColorClass(item.returnRate)}`}>
+                    <div className={`text-3xl font-black font-heading ${getReturnColorClass(item.returnRate)}`}>
                       {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
                     </div>
                   </div>

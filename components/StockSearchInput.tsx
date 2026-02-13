@@ -225,7 +225,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
         <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${
           selectedStock.exchange === 'CRYPTO'
             ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
-            : 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700'
+            : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700'
         }`}>
           <div className="flex items-center gap-3 flex-1">
             {selectedStock.exchange === 'CRYPTO' && (
@@ -277,12 +277,12 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
               placeholder="기업명 또는 티커 입력 (예: 삼성전자, 나이키, AAPL)"
               className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-blue-500
+                       focus:outline-none focus:ring-2 focus:ring-red-500
                        placeholder-gray-400 dark:placeholder-gray-500"
             />
             {isLoading && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
               </div>
             )}
           </div>

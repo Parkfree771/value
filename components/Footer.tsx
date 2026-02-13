@@ -7,12 +7,12 @@ const Footer = memo(function Footer() {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <footer className="bg-gray-800 text-white mt-auto">
+    <footer className="bg-[var(--pixel-bg)] text-[var(--foreground)] border-t-[3px] border-[var(--pixel-border-muted)] mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* 기본 정보 (항상 표시) */}
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400 flex-wrap justify-center">
-            <span className="font-semibold text-white">GuruNote</span>
+            <span className="font-semibold text-white">AntStreet</span>
             <Link href="/terms" className="hover:text-white transition-colors">이용약관</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">개인정보</Link>
             <Link href="/disclaimer" className="text-yellow-400 hover:text-yellow-300 transition-colors">면책조항</Link>
@@ -64,7 +64,7 @@ const Footer = memo(function Footer() {
               </div>
 
               {/* 투자 경고 */}
-              <div className="p-3 bg-gray-900 rounded-lg">
+              <div className="p-3 bg-black/30 border-2 border-yellow-500/50">
                 <p className="text-xs text-yellow-400 font-medium mb-1">[투자 위험 고지]</p>
                 <p className="text-xs text-gray-400">
                   본 사이트의 투자 리포트는 작성자 개인의 의견이며, 투자 권유가 아닙니다.
@@ -77,7 +77,7 @@ const Footer = memo(function Footer() {
 
         {/* 저작권 */}
         <div className="mt-3 pt-3 border-t border-gray-700 text-center text-xs text-gray-500">
-          &copy; 2026 GuruNote. All rights reserved.
+          &copy; 2026 AntStreet. All rights reserved.
         </div>
       </div>
     </footer>

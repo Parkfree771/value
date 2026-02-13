@@ -454,7 +454,7 @@ function WritePageContent() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 border border-gray-200 dark:border-gray-700">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
             <p className="text-gray-600 dark:text-gray-400">리포트를 불러오는 중...</p>
           </div>
         </div>
@@ -481,7 +481,7 @@ function WritePageContent() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 placeholder="리포트 제목을 입력하세요"
               />
             </div>
@@ -493,8 +493,8 @@ function WritePageContent() {
             />
 
             {/* 종목 프로필 카드 (코인이면 숨김) */}
-            <div className={`mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20
-                          border-2 border-blue-200 dark:border-blue-800 rounded-lg ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
+            <div className={`mt-4 p-6 bg-gradient-to-r from-red-50 to-indigo-50 dark:from-red-900/20 dark:to-indigo-900/20
+                          border-2 border-red-200 dark:border-red-800 rounded-lg ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
               <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
                 종목 프로필
               </h3>
@@ -524,38 +524,38 @@ function WritePageContent() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">현재 주가</div>
-                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-xl font-bold text-red-600 dark:text-red-400">
                         {stockData.currency} {stockData.currentPrice.toLocaleString()}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PER</div>
-                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-xl font-bold text-red-600 dark:text-red-400">
                         {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PBR</div>
-                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-xl font-bold text-red-600 dark:text-red-400">
                         {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">EPS</div>
-                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-xl font-bold text-red-600 dark:text-red-400">
                         {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
                       <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">거래소</div>
-                      <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                      <div className="text-xl font-bold text-red-600 dark:text-red-400">
                         {stockData.exchange}
                       </div>
                     </div>
                     {stockData.sector && (
                       <div>
                         <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">섹터</div>
-                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        <div className="text-xl font-bold text-red-600 dark:text-red-400">
                           {stockData.sector}
                         </div>
                       </div>
@@ -563,7 +563,7 @@ function WritePageContent() {
                     {stockData.industry && (
                       <div>
                         <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">산업</div>
-                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                        <div className="text-xl font-bold text-red-600 dark:text-red-400">
                           {stockData.industry}
                         </div>
                       </div>
@@ -597,7 +597,7 @@ function WritePageContent() {
                 <select
                   value={opinion}
                   onChange={(e) => setOpinion(e.target.value as Opinion)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   <option value="buy">매수 (롱 포지션 - 상승 예상)</option>
                   <option value="sell">매도 (숏 포지션 - 하락 예상)</option>
@@ -619,7 +619,7 @@ function WritePageContent() {
                   value={targetPrice}
                   onChange={(e) => setTargetPrice(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="예: 85000"
                 />
               </div>
@@ -690,7 +690,7 @@ function WritePageContent() {
                                 <button
                                   type="button"
                                   onClick={() => insertImageToEditor(uploadedImageUrls[index])}
-                                  className="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                  className="mt-2 text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                                 >
                                   이미지 삽입
                                 </button>
@@ -715,8 +715,8 @@ function WritePageContent() {
                     ))}
                   </div>
                   {uploadedImageUrls.length > 0 && (
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                      <p className="text-sm text-blue-900 dark:text-blue-100">
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                      <p className="text-sm text-red-900 dark:text-red-100">
                         <strong>사용법:</strong> 각 이미지의 &quot;이미지 삽입&quot; 버튼을 클릭하면 본문에 이미지가 추가됩니다.
                       </p>
                     </div>
@@ -798,7 +798,7 @@ function WritePageContent() {
               </div>
               <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                 <div
-                  className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+                  className="bg-red-600 dark:bg-red-500 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -810,10 +810,10 @@ function WritePageContent() {
             <button
               type="submit"
               disabled={isUploading}
-              className={`flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold transition-colors ${
+              className={`flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold transition-colors ${
                 isUploading
                   ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-blue-700'
+                  : 'hover:bg-red-700'
               }`}
             >
               {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}

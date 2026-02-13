@@ -439,7 +439,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                           href={fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-3 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors flex-shrink-0"
+                          className="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors flex-shrink-0"
                         >
                           다운로드
                         </a>
@@ -544,7 +544,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                           </button>
                           <button
                             onClick={() => setReplyingTo({ id: comment.id, author: comment.author })}
-                            className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-blue-500 dark:hover:text-blue-400"
+                            className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400"
                           >
                             답글
                           </button>
@@ -552,7 +552,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                         {/* 대댓글 입력 폼 */}
                         {replyingTo?.id === comment.id && (
-                          <div className="mt-3 pl-4 border-l-2 border-blue-500">
+                          <div className="mt-3 pl-4 border-l-2 border-red-500">
                             <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
                               @{replyingTo.author}에게 답글 작성 중
                               <button
@@ -567,7 +567,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                               onChange={(e) => setReplyText(e.target.value)}
                               placeholder="답글을 작성하세요..."
                               rows={2}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                             />
                             <div className="flex justify-end mt-2">
                               <Button
@@ -613,7 +613,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                       {/* 대댓글 (자식 댓글) */}
                       {comments.filter(c => c.parentId === comment.id).map((reply) => (
-                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 bg-gray-100 dark:bg-gray-600 rounded-lg border-l-2 border-blue-500">
+                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 bg-gray-100 dark:bg-gray-600 rounded-lg border-l-2 border-red-500">
                           <div className="flex items-center justify-between mb-2">
                             <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{reply.author}</div>
                             <div className="flex items-center gap-2">
@@ -705,7 +705,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 placeholder={user ? "댓글을 작성하세요..." : "로그인 후 댓글 작성이 가능합니다"}
                 rows={2}
                 disabled={!user || isSubmittingComment}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
               />
               <div className="flex justify-end mt-2">
                 {user ? (
@@ -805,7 +805,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   onClick={handleLike}
                   className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors ${
                     isLiked
-                      ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      ? 'bg-red-600 hover:bg-red-700 text-white'
                       : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
                   }`}
                 >

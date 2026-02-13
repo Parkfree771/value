@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { Report } from '@/types/report';
 import { formatReturnRate } from './stockPrice';
 
-const SITE_NAME = 'GuruNote';
+const SITE_NAME = 'AntStreet';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app';
 
 /**
@@ -129,7 +129,7 @@ export function generateReportJsonLd(
       name: SITE_NAME,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE_URL}/logo.png`,
+        url: `${SITE_URL}/logo.webp`,
       },
     },
     datePublished: report.createdAt,
@@ -191,13 +191,15 @@ export function generateHomeMetadata(): Metadata {
   return {
     title: `${SITE_NAME} - 주식 리포트 & 수익률 인증 플랫폼`,
     description:
-      '실시간 수익률 검증이 가능한 주식 리포트 플랫폼. 투자자들의 매수/매도 리포트와 실제 수익률을 확인하세요. 투자 구루처럼 투자하는 방법을 배우세요.',
+      '실시간 수익률 검증이 가능한 주식 리포트 플랫폼. 투자자들의 매수/매도 리포트와 실제 수익률을 확인하세요. 개미 투자자들의 집단 지혜로 함께 성장하세요.',
     keywords: [
       '주식 투자',
       '주식 리포트',
       '투자 분석',
       '수익률 인증',
-      'GuruNote',
+      'AntStreet',
+      '앤트스트릿',
+      '개미투자자',
       'value investing',
       '가치 투자',
     ],

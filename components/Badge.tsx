@@ -8,13 +8,13 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  buy: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
-  sell: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800',
-  hold: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600',
-  default: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700',
-  success: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800',
-  warning: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800',
-  danger: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800',
+  buy: 'bg-red-500/15 text-red-400 border-2 border-red-500',
+  sell: 'bg-blue-500/15 text-blue-400 border-2 border-blue-500',
+  hold: 'bg-gray-500/15 text-gray-400 border-2 border-gray-500',
+  default: 'bg-gray-500/15 text-gray-400 border-2 border-gray-600',
+  success: 'bg-green-500/15 text-green-400 border-2 border-green-500',
+  warning: 'bg-yellow-500/15 text-yellow-400 border-2 border-yellow-500',
+  danger: 'bg-red-500/15 text-red-400 border-2 border-red-500',
 } as const;
 
 const sizeStyles = {
@@ -30,7 +30,7 @@ const Badge = memo(function Badge({
   className = '',
 }: BadgeProps) {
   return (
-    <span className={`inline-flex items-center justify-center font-semibold rounded transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}>
+    <span className={`inline-flex items-center justify-center font-bold uppercase tracking-wide transition-colors ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}>
       {children}
     </span>
   );

@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: '문의하기',
-  description: 'GuruNote 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
+  description: 'AntStreet 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
 };
 
 export default function ContactPage() {
@@ -48,7 +48,7 @@ export default function ContactPage() {
         </p>
         <a
           href="mailto:dbfh1498@gmail.com"
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -87,9 +87,9 @@ export default function ContactPage() {
 
       {/* 관련 링크 */}
       <div className="text-center text-sm text-gray-500 dark:text-gray-400 space-x-4">
-        <Link href="/terms" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">이용약관</Link>
-        <Link href="/privacy" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">개인정보처리방침</Link>
-        <Link href="/disclaimer" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">면책조항</Link>
+        <Link href="/terms" className="hover:text-ant-red-600 dark:hover:text-ant-red-400 transition-colors">이용약관</Link>
+        <Link href="/privacy" className="hover:text-ant-red-600 dark:hover:text-ant-red-400 transition-colors">개인정보처리방침</Link>
+        <Link href="/disclaimer" className="hover:text-ant-red-600 dark:hover:text-ant-red-400 transition-colors">면책조항</Link>
       </div>
     </div>
   );

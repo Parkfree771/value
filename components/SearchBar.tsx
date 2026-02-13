@@ -143,7 +143,7 @@ const SearchBar = memo(function SearchBar({
     return (
       <>
         {text.substring(0, index)}
-        <span className="font-bold text-blue-600 dark:text-blue-400">
+        <span className="font-bold text-red-600 dark:text-red-400">
           {text.substring(index, index + query.length)}
         </span>
         {text.substring(index + query.length)}
@@ -152,7 +152,7 @@ const SearchBar = memo(function SearchBar({
   }, []);
 
   const getExchangeBadgeColor = (exchange: string) => {
-    if (exchange === 'KRX') return 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300';
+    if (exchange === 'KRX') return 'bg-ant-red-100 dark:bg-ant-red-900 text-ant-red-700 dark:text-ant-red-300';
     if (exchange === 'NAS' || exchange === 'NYS') return 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
     return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
   };
@@ -180,7 +180,7 @@ const SearchBar = memo(function SearchBar({
           onFocus={() => showStockSuggestions && setShowSuggestions(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full px-4 sm:px-5 py-2.5 sm:py-3 pl-10 sm:pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          className="w-full px-4 sm:px-5 py-2.5 sm:py-3 pl-10 sm:pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
         />
         <svg
           className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500"

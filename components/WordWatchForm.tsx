@@ -200,7 +200,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="나이키(NKE): 브랜드 고전 딛고 향후 2년 강력한 성장 전망"
         />
       </div>
@@ -218,7 +218,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
         />
 
         {/* 종목 프로필 카드 */}
-        <div className="mt-4 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg">
+        <div className="mt-4 p-6 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
             종목 프로필
           </h3>
@@ -227,32 +227,32 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">현재 주가</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-xl font-bold text-red-600 dark:text-red-400">
                   {stockData.currency} {stockData.currentPrice.toLocaleString()}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PER</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-xl font-bold text-red-600 dark:text-red-400">
                   {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">PBR</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-xl font-bold text-red-600 dark:text-red-400">
                   {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
                 </div>
               </div>
               <div>
                 <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">거래소</div>
-                <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-xl font-bold text-red-600 dark:text-red-400">
                   {stockData.exchange}
                 </div>
               </div>
               {stockData.sector && (
                 <div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">섹터</div>
-                  <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className="text-xl font-bold text-red-600 dark:text-red-400">
                     {stockData.sector}
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             </div>
           )}
 
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-blue-200 dark:border-blue-800">
+          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-red-200 dark:border-red-800">
             종목을 검색하면 현재 주가와 기업 프로필이 자동으로 표시되며, 이 가격을 기준으로 실시간 수익률이 계산됩니다.
           </div>
         </div>
@@ -288,7 +288,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           <select
             value={opinion}
             onChange={(e) => setOpinion(e.target.value as 'buy' | 'sell')}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           >
             <option value="buy">매수 (상승 예상)</option>
             <option value="sell">매도 (하락 예상)</option>
@@ -311,7 +311,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               value={guruName}
               onChange={(e) => setGuruName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="David Swartz"
             />
           </div>
@@ -324,7 +324,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               value={guruPosition}
               onChange={(e) => setGuruPosition(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="Senior Equity Analyst, Morningstar"
             />
           </div>
@@ -340,7 +340,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           type="url"
           value={sourceUrl}
           onChange={(e) => setSourceUrl(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           placeholder="https://finance.yahoo.com/..."
         />
       </div>
@@ -358,7 +358,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             onClick={() => setMode('text')}
             className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
               mode === 'text'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-red-600 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
@@ -369,7 +369,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             onClick={() => setMode('html')}
             className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
               mode === 'html'
-                ? 'bg-blue-600 text-white'
+                ? 'bg-red-600 text-white'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
           >
@@ -385,7 +385,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               onChange={(e) => setContent(e.target.value)}
               required
               rows={20}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm whitespace-pre-wrap"
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm whitespace-pre-wrap"
               placeholder="발언 내용을 입력하세요..."
             />
           </div>
@@ -400,7 +400,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
                 onChange={(e) => setHtmlContent(e.target.value)}
                 required
                 rows={15}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
                 placeholder="<h3>제목</h3>
 <p>내용...</p>"
               />
@@ -469,7 +469,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
                             <button
                               type="button"
                               onClick={() => insertImageToEditor(uploadedImageUrls[index])}
-                              className="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                              className="mt-2 text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                             >
                               {mode === 'text' ? '본문에 삽입' : 'HTML 코드 복사'}
                             </button>
@@ -508,7 +508,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
-              className="bg-blue-600 dark:bg-blue-500 h-2 rounded-full transition-all duration-300"
+              className="bg-red-600 dark:bg-red-500 h-2 rounded-full transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
@@ -520,10 +520,10 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
         <button
           type="submit"
           disabled={isSubmitting || isUploading}
-          className={`flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-blue-600 text-white rounded-lg font-semibold transition-colors ${
+          className={`flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-red-600 text-white rounded-lg font-semibold transition-colors ${
             isSubmitting || isUploading
               ? 'opacity-50 cursor-not-allowed'
-              : 'hover:from-cyan-700 hover:to-blue-700'
+              : 'hover:from-cyan-700 hover:to-red-700'
           }`}
         >
           {isSubmitting ? '작성 중...' : '작성 완료'}

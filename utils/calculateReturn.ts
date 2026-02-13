@@ -39,9 +39,9 @@ export function formatReturn(returnRate: number, decimalPlaces: number = 2): str
  */
 export function getReturnColorClass(returnRate: number): string {
   if (returnRate > 0) {
-    return 'text-red-600 dark:text-red-500 drop-shadow-sm'; // 수익: Red (Korean Standard)
+    return 'text-red-600 dark:text-red-500'; // 수익: Red (Korean Standard)
   } else if (returnRate < 0) {
-    return 'text-blue-600 dark:text-blue-500 drop-shadow-sm'; // 손실: Blue (Korean Standard)
+    return 'text-blue-600 dark:text-blue-500'; // 손실: Blue (Korean Standard)
   } else {
     return 'text-gray-500 dark:text-gray-400';
   }

@@ -75,7 +75,7 @@ export default function NewReportPage() {
 
         {/* Stock Profile Card - Show only when stock is selected */}
         {selectedStock && (
-          <Card className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30">
+          <Card className="p-6 bg-gradient-to-r from-ant-red-50 to-red-50 dark:from-ant-red-900/30 dark:to-red-900/30">
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">종목 프로필</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               <div>
@@ -133,8 +133,8 @@ export default function NewReportPage() {
             required
           />
 
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <p className="text-sm text-blue-800 dark:text-blue-300">
+          <div className="p-3 bg-ant-red-50 dark:bg-ant-red-900/20 border border-ant-red-200 dark:border-ant-red-800 rounded-lg">
+            <p className="text-sm text-ant-red-800 dark:text-ant-red-300">
               <strong>포지션 타입 안내:</strong><br />
               • <strong>매수 (롱):</strong> 가격이 상승하면 수익률이 플러스(+)로 표시됩니다<br />
               • <strong>매도 (숏):</strong> 가격이 하락하면 수익률이 플러스(+)로 표시됩니다<br />

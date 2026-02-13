@@ -222,14 +222,14 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
   if (isDeleted) return null;
 
   return (
-    <div className="group bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-electric-blue-500 dark:hover:border-electric-blue-500 transition-all duration-300 overflow-hidden">
+    <div className="group bg-white dark:bg-gray-900 rounded-2xl border-2 border-gray-200 dark:border-gray-700 hover:border-ant-red-500 dark:hover:border-ant-red-500 transition-all duration-300 overflow-hidden">
       {/* Main Content Area */}
       <div className="p-6 sm:p-8">
         {/* Header: Author + Badge + Return Rate */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           {/* Left: Author Info */}
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-electric-blue-500 to-electric-blue-700 rounded-xl flex items-center justify-center text-white font-bold font-heading text-lg flex-shrink-0">
+            <div className="w-12 h-12 bg-gradient-to-br from-ant-red-500 to-ant-red-700 rounded-xl flex items-center justify-center text-white font-bold font-heading text-lg flex-shrink-0">
               {event.guru_name.charAt(0)}
             </div>
             <div>
@@ -283,7 +283,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
 
         {/* Stock Info Bar */}
         {event.target_ticker && (
-          <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 border border-blue-200 dark:border-gray-700 rounded-xl">
+          <div className="mb-6 p-4 bg-gradient-to-r from-ant-red-50 to-red-50 dark:from-gray-800 dark:to-gray-800 border border-ant-red-200 dark:border-gray-700 rounded-xl">
             <div className="flex flex-wrap items-center gap-4 text-sm">
               {(event.company_name || event.stockData?.name) && (
                 <>
@@ -296,7 +296,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
               )}
               <div className="flex items-center gap-2">
                 <span className="text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider">Ticker</span>
-                <span className="font-mono font-bold text-electric-blue-600 dark:text-electric-blue-400 text-base">{event.target_ticker}</span>
+                <span className="font-mono font-bold text-ant-red-600 dark:text-ant-red-400 text-base">{event.target_ticker}</span>
               </div>
               {event.exchange && (
                 <>
@@ -361,7 +361,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
                 href={event.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-electric-blue-600 hover:bg-electric-blue-700 text-white text-sm font-semibold rounded-lg transition-all"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-ant-red-600 hover:bg-ant-red-700 text-white text-sm font-semibold rounded-lg transition-all"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -430,7 +430,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
           <span className={`px-3 py-1.5 rounded-lg font-bold tracking-wider text-xs ${
             event.data_type === 'PORTFOLIO'
               ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800'
-              : 'bg-electric-blue-100 dark:bg-electric-blue-900/40 text-electric-blue-700 dark:text-electric-blue-300 border border-electric-blue-200 dark:border-electric-blue-800'
+              : 'bg-ant-red-100 dark:bg-ant-red-900/40 text-ant-red-700 dark:text-ant-red-300 border border-ant-red-200 dark:border-ant-red-800'
           }`}>
             {event.data_type === 'PORTFOLIO' ? 'WALLET WATCH' : 'MARKET CALL'}
           </span>

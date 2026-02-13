@@ -251,13 +251,13 @@ export default function OnboardingPage() {
                   value={formData.nickname}
                   onChange={handleChange}
                   placeholder="닉네임을 입력하세요"
-                  className="w-full h-12 px-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  className="w-full h-12 px-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
                   maxLength={12}
                 />
                 <div className="mt-2 flex items-center justify-between">
                   <div>
                     {nicknameChecking && (
-                      <p className="text-xs text-blue-600 dark:text-blue-400">확인 중...</p>
+                      <p className="text-xs text-red-600 dark:text-red-400">확인 중...</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === true && (
                       <p className="text-xs text-green-600 dark:text-green-400">사용 가능한 닉네임입니다</p>
@@ -285,7 +285,7 @@ export default function OnboardingPage() {
               >
                 <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                   allAgreed
-                    ? 'bg-blue-600 border-blue-600'
+                    ? 'bg-red-600 border-red-600'
                     : 'border-gray-300 dark:border-gray-600'
                 }`}>
                   {allAgreed && (
@@ -308,7 +308,7 @@ export default function OnboardingPage() {
                     >
                       <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                         formData.termsAgreed
-                          ? 'bg-blue-600 border-blue-600'
+                          ? 'bg-red-600 border-red-600'
                           : 'border-gray-300 dark:border-gray-600'
                       }`}>
                         {formData.termsAgreed && (
@@ -337,7 +337,7 @@ export default function OnboardingPage() {
                         <p>- 투자 리포트 작성 및 공유 서비스 이용</p>
                         <p>- 허위 정보, 명예훼손, 시세조종 목적 게시물 금지</p>
                         <p>- 작성한 리포트의 저작권은 회원에게 귀속</p>
-                        <Link href="/terms" target="_blank" className="inline-block text-blue-600 dark:text-blue-400 hover:underline mt-2">
+                        <Link href="/terms" target="_blank" className="inline-block text-red-600 dark:text-red-400 hover:underline mt-2">
                           전문 보기
                         </Link>
                       </div>
@@ -354,7 +354,7 @@ export default function OnboardingPage() {
                     >
                       <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                         formData.privacyAgreed
-                          ? 'bg-blue-600 border-blue-600'
+                          ? 'bg-red-600 border-red-600'
                           : 'border-gray-300 dark:border-gray-600'
                       }`}>
                         {formData.privacyAgreed && (
@@ -397,7 +397,7 @@ export default function OnboardingPage() {
                           </tbody>
                         </table>
                         <p className="text-[11px] text-gray-400 mt-2">* 동의 거부 시 서비스 이용이 제한됩니다.</p>
-                        <Link href="/privacy" target="_blank" className="inline-block text-blue-600 dark:text-blue-400 hover:underline mt-2">
+                        <Link href="/privacy" target="_blank" className="inline-block text-red-600 dark:text-red-400 hover:underline mt-2">
                           전문 보기
                         </Link>
                       </div>
@@ -461,7 +461,7 @@ export default function OnboardingPage() {
                   >
                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
                       formData.marketingAgreed
-                        ? 'bg-blue-600 border-blue-600'
+                        ? 'bg-red-600 border-red-600'
                         : 'border-gray-300 dark:border-gray-600'
                     }`}>
                       {formData.marketingAgreed && (
@@ -486,7 +486,7 @@ export default function OnboardingPage() {
                 className={`w-full h-12 rounded-lg font-medium text-white transition-all ${
                   loading || !allRequiredAgreed || nicknameAvailable !== true
                     ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800'
+                    : 'bg-red-600 hover:bg-red-700 active:bg-red-800'
                 }`}
               >
                 {loading ? '처리 중...' : '가입 완료'}

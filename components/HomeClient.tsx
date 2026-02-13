@@ -211,17 +211,17 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       <TopReturnSlider reports={reports} />
 
       {/* 데스크탑: 검색바 + 필터바 */}
-      <div className="hidden md:block mb-8">
-        <div className="flex flex-col gap-6">
+      <div className="hidden md:block mb-4">
+        <div className="flex flex-col gap-3">
           <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
           <FilterBar onFilterChange={setFilters} />
         </div>
       </div>
 
       {/* 모바일: 검색 버튼 */}
-      <div className="md:hidden mb-4">
+      <div className="md:hidden mb-3">
         <Link href="/search">
-          <button className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-400 flex items-center gap-3 hover:border-blue-500/50 transition-colors text-sm">
+          <button className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-400 flex items-center gap-3 hover:border-red-500/50 transition-colors text-sm">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -231,14 +231,14 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       </div>
 
       {/* Tab Navigation */}
-      <div className="mb-4 sm:mb-8">
+      <div className="mb-3 sm:mb-4">
         {/* 모바일: 4개 탭 한 줄 */}
         <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
           <button
             onClick={() => setActiveTab('all')}
             className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'all'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -248,7 +248,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('following')}
             className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'following'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -258,7 +258,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('popular')}
             className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'popular'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -268,7 +268,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('return')}
             className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
               activeTab === 'return'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
             }`}
           >
@@ -282,7 +282,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('all')}
             className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'all'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -292,7 +292,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('following')}
             className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'following'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -302,7 +302,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('popular')}
             className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'popular'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
@@ -312,7 +312,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             onClick={() => setActiveTab('return')}
             className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
               activeTab === 'return'
-                ? 'bg-electric-blue text-white shadow-neon-blue'
+                ? 'bg-ant-red text-white shadow-neon-red'
                 : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >

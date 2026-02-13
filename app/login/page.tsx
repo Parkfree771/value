@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { getOrCreateUserProfile } from '@/lib/users';
 
@@ -43,22 +44,20 @@ export default function LoginPage() {
       <div className="w-full max-w-[400px]">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="mx-auto w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-5">
-            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-            </svg>
+          <div className="mx-auto w-24 h-24 flex items-center justify-center mb-5">
+            <Image src="/logo.webp" alt="AntStreet" width={96} height={96} />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            GuruNote
+          <h1 className="text-2xl font-bold font-bold text-ant-red-500  mb-2">
+            AntStreet
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            투자 리포트 공유 플랫폼
+            개미 투자자들의 리포트 공유 플랫폼
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-          <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-6 text-center">
+        <div className="card-base p-6">
+          <h2 className="text-lg font-bold text-[var(--foreground)] mb-6 text-center">
             로그인
           </h2>
 
@@ -122,15 +121,15 @@ export default function LoginPage() {
         {/* Terms */}
         <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
           로그인 시{' '}
-          <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <Link href="/terms" className="text-red-600 dark:text-red-400 hover:underline">
             이용약관
           </Link>
           ,{' '}
-          <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <Link href="/privacy" className="text-red-600 dark:text-red-400 hover:underline">
             개인정보처리방침
           </Link>
           ,{' '}
-          <Link href="/disclaimer" className="text-blue-600 dark:text-blue-400 hover:underline">
+          <Link href="/disclaimer" className="text-red-600 dark:text-red-400 hover:underline">
             투자 면책조항
           </Link>
           에 동의하게 됩니다.

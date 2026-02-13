@@ -170,7 +170,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
   if (!report) {
     return {
-      title: '리포트를 찾을 수 없습니다 - GuruNote',
+      title: '리포트를 찾을 수 없습니다 - AntStreet',
       description: '요청하신 리포트가 존재하지 않거나 삭제되었습니다.',
     };
   }

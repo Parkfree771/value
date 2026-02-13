@@ -277,7 +277,7 @@ export default function AdminPage() {
           onClick={() => setActiveTab('dashboard')}
           className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
             activeTab === 'dashboard'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
@@ -287,7 +287,7 @@ export default function AdminPage() {
           onClick={() => setActiveTab('posts')}
           className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
             activeTab === 'posts'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
@@ -297,7 +297,7 @@ export default function AdminPage() {
           onClick={() => setActiveTab('users')}
           className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
             activeTab === 'users'
-              ? 'bg-blue-600 text-white'
+              ? 'bg-red-600 text-white'
               : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
           }`}
         >
@@ -310,15 +310,15 @@ export default function AdminPage() {
         <div className="space-y-6">
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
             </div>
           ) : stats ? (
             <>
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30">
+                <Card className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30">
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">전체 게시글</div>
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.totalPosts.toLocaleString()}</div>
+                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.totalPosts.toLocaleString()}</div>
                 </Card>
 
                 <Card className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30">
@@ -357,7 +357,7 @@ export default function AdminPage() {
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link href={`/report/${post.id}`} className="text-sm font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 truncate block">
+                        <Link href={`/report/${post.id}`} className="text-sm font-semibold text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-400 truncate block">
                           {post.title}
                         </Link>
                         <div className="text-xs text-gray-600 dark:text-gray-400">{post.authorName}</div>
@@ -382,7 +382,7 @@ export default function AdminPage() {
                 <div className="space-y-3">
                   {stats.topUsers.map((user, index) => (
                     <div key={user.userId} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-red-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -390,7 +390,7 @@ export default function AdminPage() {
                         <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email}</div>
                       </div>
                       <div className="flex-shrink-0">
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">게시글 {user.postCount}개</div>
+                        <div className="text-sm font-bold text-red-600 dark:text-red-400">게시글 {user.postCount}개</div>
                       </div>
                     </div>
                   ))}
@@ -409,7 +409,7 @@ export default function AdminPage() {
         <div>
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
             </div>
           ) : (
             <Card className="overflow-hidden">
@@ -430,7 +430,7 @@ export default function AdminPage() {
                     {posts.map((post) => (
                       <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                         <td className="px-4 py-3">
-                          <Link href={`/report/${post.id}`} className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                          <Link href={`/report/${post.id}`} className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium">
                             {post.title}
                           </Link>
                         </td>
@@ -470,7 +470,7 @@ export default function AdminPage() {
         <div>
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
             </div>
           ) : (
             <Card className="overflow-hidden">
