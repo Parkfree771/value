@@ -249,7 +249,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: brandShine 5s ease-in-out infinite;
+    animation: brandShine 5s ease-in-out infinite alternate;
   }
 
   .dark .brand-title {
@@ -265,7 +265,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: brandShine 5s ease-in-out infinite;
+    animation: brandShine 5s ease-in-out infinite alternate;
   }
 
   /* 카드 스타일 - 각진 픽셀 테두리 + 하드 그림자 */
@@ -395,6 +395,6 @@ body {
 
 /* 브랜드 타이틀 샤인 애니메이션 (layer 밖에 선언) */
 @keyframes brandShine {
-  0%, 10% { background-position: 100% 0; }
-  90%, 100% { background-position: -100% 0; }
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }

@@ -2,8 +2,7 @@
  * HTML 살균 유틸리티
  *
  * 보안: 서버/클라이언트 모두에서 XSS 공격을 방지하기 위해 HTML을 살균합니다.
- * - 서버: sanitize-html 패키지 사용
- * - 클라이언트: DOMPurify 사용 (DOM 기반으로 더 정확)
+ * - sanitize-html 패키지 사용 (서버/클라이언트 공용)
  */
 
 import sanitizeHtmlLib from 'sanitize-html';
@@ -186,50 +185,7 @@ export function sanitizeHtml(html: string): string {
     return '';
   }
 
-  // 서버 사이드: sanitize-html 사용
-  if (typeof window === 'undefined') {
-    return sanitizeHtmlLib(html, sanitizeOptions);
-  }
-
-  // 클라이언트 사이드: DOMPurify 사용 (더 정확한 DOM 기반 파싱)
-  try {
-    const DOMPurify = require('dompurify');
-
-    return DOMPurify.sanitize(html, {
-      ALLOWED_TAGS,
-      ALLOWED_ATTR: [
-        // 기본 속성
-        'class', 'id', 'style',
-
-        // 링크 속성
-        'href', 'target', 'rel', 'title',
-
-        // 이미지 속성
-        'src', 'alt', 'width', 'height', 'loading',
-
-        // 테이블 속성
-        'colspan', 'rowspan', 'scope',
-
-        // 시간 속성
-        'datetime',
-
-        // ARIA 접근성 속성
-        'aria-label', 'aria-labelledby', 'aria-describedby',
-        'role',
-      ],
-      ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
-      ALLOW_DATA_ATTR: false,
-      ADD_ATTR: ['target'],
-      FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onmouseout', 'onfocus', 'onblur'],
-      ALLOW_UNKNOWN_PROTOCOLS: false,
-      SANITIZE_DOM: true,
-      KEEP_CONTENT: true,
-    });
-  } catch (error) {
-    // DOMPurify 로드 실패 시 서버 사이드 방식으로 폴백
-    console.warn('DOMPurify 로드 실패, sanitize-html로 폴백:', error);
-    return sanitizeHtmlLib(html, sanitizeOptions);
-  }
+  return sanitizeHtmlLib(html, sanitizeOptions);
 }
 
 /**

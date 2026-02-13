@@ -25,6 +25,8 @@ const US_EXCHANGES = ['NAS', 'NYS', 'AMS'];
 const MARKET_TYPE = process.env.MARKET_TYPE || 'ALL';
 
 function shouldProcessExchange(exchange: string): boolean {
+  // 암호화폐는 24시간 거래이므로 항상 처리
+  if (exchange === 'CRYPTO') return true;
   if (MARKET_TYPE === 'ALL') return true;
   if (MARKET_TYPE === 'ASIA') return ASIA_EXCHANGES.includes(exchange);
   if (MARKET_TYPE === 'US') return US_EXCHANGES.includes(exchange);
@@ -239,9 +241,38 @@ async function getOverseaStockPrice(token: string, ticker: string, exchange: str
   return parseFloat(data.output.last);
 }
 
-// ===== 가격 조회 (국내/해외 자동 판별) =====
+// ===== 암호화폐 가격 조회 (업비트 API) =====
+async function getCryptoPrice(ticker: string): Promise<number> {
+  const market = `KRW-${ticker.toUpperCase()}`;
+  const url = `https://api.upbit.com/v1/ticker?markets=${market}`;
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+  const response = await fetch(url, {
+    signal: controller.signal,
+    headers: { 'Accept': 'application/json' },
+  });
+
+  clearTimeout(timeoutId);
+
+  if (!response.ok) {
+    throw new Error(`Upbit API failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data || data.length === 0) {
+    throw new Error(`No data for ${ticker}`);
+  }
+
+  return data[0].trade_price;
+}
+
+// ===== 가격 조회 (국내/해외/암호화폐 자동 판별) =====
 async function getStockPrice(token: string, ticker: string, exchange: string): Promise<number> {
-  if (exchange === 'KRX') {
+  if (exchange === 'CRYPTO') {
+    return getCryptoPrice(ticker);
+  } else if (exchange === 'KRX') {
     return getKoreanStockPrice(token, ticker);
   } else {
     return getOverseaStockPrice(token, ticker, exchange);
