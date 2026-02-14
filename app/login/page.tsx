@@ -47,22 +47,22 @@ export default function LoginPage() {
           <div className="mx-auto w-24 h-24 flex items-center justify-center mb-5">
             <Image src="/logo.webp" alt="AntStreet" width={96} height={96} />
           </div>
-          <h1 className="text-2xl font-bold font-bold text-ant-red-500  mb-2">
+          <h1 className="font-pixel text-2xl font-bold text-[var(--pixel-accent)] mb-2">
             AntStreet
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
             개미 투자자들의 리포트 공유 플랫폼
           </p>
         </div>
 
         {/* Login Card */}
         <div className="card-base p-6">
-          <h2 className="text-lg font-bold text-[var(--foreground)] mb-6 text-center">
+          <h2 className="font-pixel text-base font-bold text-[var(--foreground)] mb-6 text-center">
             로그인
           </h2>
 
           {error && (
-            <div className="mb-5 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 rounded text-sm">
+            <div className="mb-5 p-3 border-2 border-[var(--pixel-accent)] bg-red-500/10 font-pixel text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -71,7 +71,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border border-gray-300 rounded shadow-sm hover:shadow-md hover:bg-gray-50 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:shadow-sm"
+            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border-2 border-[var(--pixel-border-muted)] shadow-pixel-sm hover:border-[var(--pixel-accent)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ fontFamily: "'Roboto', 'Noto Sans KR', sans-serif" }}
           >
             {/* Google G Logo */}
@@ -87,8 +87,8 @@ export default function LoginPage() {
           </button>
 
           {/* Coming Soon Section */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-4">
+          <div className="mt-6 pt-6 border-t-[3px] border-[var(--pixel-border-muted)]">
+            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 text-center mb-4">
               추가 로그인 옵션 (준비 중)
             </p>
 
@@ -119,24 +119,24 @@ export default function LoginPage() {
         </div>
 
         {/* Terms */}
-        <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p className="mt-6 text-center font-pixel text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
           로그인 시{' '}
-          <Link href="/terms" className="text-red-600 dark:text-red-400 hover:underline">
+          <Link href="/terms" className="text-[var(--pixel-accent)] hover:underline">
             이용약관
           </Link>
           ,{' '}
-          <Link href="/privacy" className="text-red-600 dark:text-red-400 hover:underline">
+          <Link href="/privacy" className="text-[var(--pixel-accent)] hover:underline">
             개인정보처리방침
           </Link>
           ,{' '}
-          <Link href="/disclaimer" className="text-red-600 dark:text-red-400 hover:underline">
+          <Link href="/disclaimer" className="text-[var(--pixel-accent)] hover:underline">
             투자 면책조항
           </Link>
           에 동의하게 됩니다.
         </p>
 
         {/* Security Notice */}
-        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-4 flex items-center justify-center gap-1.5 font-pixel text-xs text-gray-400 dark:text-gray-500">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>

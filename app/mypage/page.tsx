@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,7 +14,7 @@ import { processUserWithdrawal } from '@/lib/users';
 import styles from './MyPage.module.css';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
-  loading: () => <div className="animate-pulse h-48 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  loading: () => <div className="animate-pulse h-48 bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
 });
 
 export default function MyPage() {
@@ -250,11 +251,23 @@ export default function MyPage() {
       {/* 프로필 헤더 */}
       <div className={styles.profileHeader}>
         <div className={styles.profileCard}>
+          {/* 배경 로고 */}
+          <div className={styles.bgLogo}>
+            <Image src="/logo.webp" alt="" width={200} height={200} priority />
+          </div>
+          {/* 스캔라인 오버레이 */}
+          <div className={styles.scanlines} />
+
           <div className={styles.profileContent}>
             <div className={styles.profileInfo}>
-              <div className={styles.avatar}>{userName[0]}</div>
+              <div className={styles.avatar}>
+                <Image src="/logo.webp" alt="프로필" width={80} height={80} className={styles.avatarImg} />
+              </div>
               <div className={styles.userDetails}>
-                <h1 className={styles.userName}>{userName}</h1>
+                <div className={styles.userNameRow}>
+                  <h1 className={styles.userName}>{userName}</h1>
+                  <span className={styles.userBadge}>INVESTOR</span>
+                </div>
                 <p className={styles.userEmail}>{userEmail}</p>
                 <button onClick={handleOpenEditModal} className={styles.editButton}>
                   <svg className={styles.editButtonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,88 +299,88 @@ export default function MyPage() {
       </div>
 
       {/* 상세 통계 */}
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statCardInner}>
-            <div className={`${styles.statIcon} ${styles.statIconGreen}`}>
-              <svg className={`${styles.statIconSvg} ${styles.statIconSvgGreen}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="pixel-stat-card">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconGreen}`}>
+              <svg className={`w-5 h-5 ${styles.statIconSvgGreen}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
             <div>
-              <div className={styles.statLabel}>최고 수익</div>
-              <div className={`${styles.statValue} ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
+              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">최고 수익</div>
+              <div className={`font-pixel text-lg font-black ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
                 {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
               </div>
             </div>
           </div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={styles.statCardInner}>
-            <div className={`${styles.statIcon} ${styles.statIconRed}`}>
-              <svg className={`${styles.statIconSvg} ${styles.statIconSvgRed}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="pixel-stat-card">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconRed}`}>
+              <svg className={`w-5 h-5 ${styles.statIconSvgRed}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
             </div>
             <div>
-              <div className={styles.statLabel}>최저 수익</div>
-              <div className={`${styles.statValue} ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
+              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">최저 수익</div>
+              <div className={`font-pixel text-lg font-black ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
                 {parseFloat(minReturnRate) >= 0 ? '+' : ''}{minReturnRate}%
               </div>
             </div>
           </div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={styles.statCardInner}>
-            <div className={`${styles.statIcon} ${styles.statIconBlue}`}>
-              <svg className={`${styles.statIconSvg} ${styles.statIconSvgBlue}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="pixel-stat-card">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconBlue}`}>
+              <svg className={`w-5 h-5 ${styles.statIconSvgBlue}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </div>
             <div>
-              <div className={styles.statLabel}>총 조회수</div>
-              <div className={styles.statValue}>
+              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">총 조회수</div>
+              <div className="font-pixel text-lg font-black">
                 {totalViews > 999 ? (totalViews / 1000).toFixed(1) + 'K' : totalViews}
               </div>
             </div>
           </div>
         </div>
 
-        <div className={styles.statCard}>
-          <div className={styles.statCardInner}>
-            <div className={`${styles.statIcon} ${styles.statIconPink}`}>
-              <svg className={`${styles.statIconSvg} ${styles.statIconSvgPink}`} fill="currentColor" viewBox="0 0 24 24">
+        <div className="pixel-stat-card">
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconPink}`}>
+              <svg className={`w-5 h-5 ${styles.statIconSvgPink}`} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </div>
             <div>
-              <div className={styles.statLabel}>총 좋아요</div>
-              <div className={styles.statValue}>{totalLikes}</div>
+              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">총 좋아요</div>
+              <div className="font-pixel text-lg font-black">{totalLikes}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className={styles.tabNav}>
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
         <button
           onClick={() => setActiveTab('reports')}
-          className={`${styles.tabButton} ${activeTab === 'reports' ? styles.tabButtonActive : ''}`}
+          className={`pixel-tab ${activeTab === 'reports' ? 'pixel-tab-active' : ''}`}
         >
           내 리포트 ({totalReports})
         </button>
         <button
           onClick={() => setActiveTab('bookmarks')}
-          className={`${styles.tabButton} ${activeTab === 'bookmarks' ? styles.tabButtonActive : ''}`}
+          className={`pixel-tab ${activeTab === 'bookmarks' ? 'pixel-tab-active' : ''}`}
         >
           북마크 ({bookmarkedIds.length})
         </button>
         <button
           onClick={() => setActiveTab('settings')}
-          className={`${styles.tabButton} ${activeTab === 'settings' ? styles.tabButtonActive : ''}`}
+          className={`pixel-tab ${activeTab === 'settings' ? 'pixel-tab-active' : ''}`}
         >
           설정
         </button>
@@ -377,9 +390,9 @@ export default function MyPage() {
       {activeTab === 'reports' && (
         <div className="space-y-4">
           {loading ? (
-            <div className={styles.loading}>
-              <div className={styles.loadingSpinner} />
-              <p className={styles.loadingText}>로딩 중...</p>
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-[3px] border-[var(--pixel-accent)] border-t-transparent animate-spin mx-auto mb-4" />
+              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
             </div>
           ) : myReports.length > 0 ? (
             myReports.map((report) => (
@@ -391,16 +404,16 @@ export default function MyPage() {
               />
             ))
           ) : (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>
-                <svg className={styles.emptyIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="pixel-empty-state">
+              <div className="w-16 h-16 border-2 border-[var(--pixel-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className={styles.emptyTitle}>아직 작성한 리포트가 없습니다</h3>
-              <p className={styles.emptyDescription}>첫 번째 투자 리포트를 작성해보세요!</p>
-              <Link href="/write" className={styles.emptyButton}>
-                <svg className={styles.emptyButtonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 className="font-pixel text-base font-bold mb-2">아직 작성한 리포트가 없습니다</h3>
+              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-6">첫 번째 투자 리포트를 작성해보세요!</p>
+              <Link href="/write" className="btn-primary inline-flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 첫 리포트 작성하기
@@ -413,25 +426,25 @@ export default function MyPage() {
       {activeTab === 'bookmarks' && (
         <div className="space-y-4">
           {loading || bookmarkLoading ? (
-            <div className={styles.loading}>
-              <div className={styles.loadingSpinner} />
-              <p className={styles.loadingText}>로딩 중...</p>
+            <div className="text-center py-12">
+              <div className="w-8 h-8 border-[3px] border-[var(--pixel-accent)] border-t-transparent animate-spin mx-auto mb-4" />
+              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
             </div>
           ) : bookmarkedReports.length > 0 ? (
             bookmarkedReports.map((report) => (
               <ReportCard key={report.id} {...report} />
             ))
           ) : (
-            <div className={styles.emptyState}>
-              <div className={styles.emptyIcon}>
-                <svg className={styles.emptyIconSvg} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="pixel-empty-state">
+              <div className="w-16 h-16 border-2 border-[var(--pixel-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
               </div>
-              <h3 className={styles.emptyTitle}>북마크한 리포트가 없습니다</h3>
-              <p className={styles.emptyDescription}>관심있는 리포트를 북마크해보세요!</p>
-              <Link href="/" className={styles.emptyButton}>
-                <svg className={styles.emptyButtonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <h3 className="font-pixel text-base font-bold mb-2">북마크한 리포트가 없습니다</h3>
+              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-6">관심있는 리포트를 북마크해보세요!</p>
+              <Link href="/" className="btn-primary inline-flex items-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 리포트 둘러보기
@@ -442,33 +455,33 @@ export default function MyPage() {
       )}
 
       {activeTab === 'settings' && (
-        <div className={styles.settingsCard}>
-          <div className={styles.settingsHeader}>
-            <h3 className={styles.settingsTitle}>계정 설정</h3>
+        <div className="card-base overflow-hidden">
+          <div className="px-5 py-4 border-b-[3px] border-[var(--pixel-border-muted)]">
+            <h3 className="font-pixel text-base font-bold uppercase tracking-wider">계정 설정</h3>
           </div>
-          <div className={styles.settingsContent}>
-            <div className={styles.settingsSection}>
-              <h4 className={styles.settingsSectionTitle}>이메일</h4>
-              <p className={styles.settingsSectionValue}>{userEmail}</p>
+          <div className="p-6">
+            <div className="py-4 border-b-2 border-[var(--pixel-border-muted)]">
+              <h4 className="font-pixel text-sm font-bold mb-1">이메일</h4>
+              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">{userEmail}</p>
             </div>
 
-            <div className={styles.settingsSection}>
-              <h4 className={styles.settingsSectionTitle}>알림 설정</h4>
-              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+            <div className="py-4 border-b-2 border-[var(--pixel-border-muted)]">
+              <h4 className="font-pixel text-sm font-bold mb-1">알림 설정</h4>
+              <div className="card-base p-4">
+                <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
                   알림 기능은 준비 중입니다. 곧 제공될 예정입니다.
                 </p>
               </div>
             </div>
 
-            <div className={styles.settingsSection}>
-              <h4 className={`${styles.settingsSectionTitle} ${styles.settingsSectionTitleDanger}`}>위험 영역</h4>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">
+            <div className="py-4">
+              <h4 className="font-pixel text-sm font-bold text-red-600 dark:text-red-400 mb-4">위험 영역</h4>
+              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-3">
                 회원 탈퇴 시 작성한 리포트와 댓글은 익명화되며, 일부 정보는 법적 의무에 따라 5년간 보관됩니다.
               </p>
               <button
                 onClick={() => setIsWithdrawModalOpen(true)}
-                className={styles.dangerButton}
+                className="btn-danger"
               >
                 회원 탈퇴
               </button>
@@ -479,31 +492,31 @@ export default function MyPage() {
 
       {/* 프로필 수정 모달 */}
       {isEditModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>프로필 수정</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className={styles.modalClose}>
-                <svg className={styles.modalCloseIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="pixel-modal-overlay">
+          <div className="pixel-modal">
+            <div className="pixel-modal-header">
+              <h3 className="pixel-modal-title">프로필 수정</h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="pixel-modal-close">
+                <svg className="w-4.5 h-4.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <div className={styles.modalBody}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="nickname" className={styles.inputLabel}>닉네임</label>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="nickname" className="pixel-label">닉네임</label>
                 <input
                   id="nickname"
                   type="text"
                   value={newNickname}
                   onChange={(e) => setNewNickname(e.target.value)}
-                  className={styles.input}
+                  className="pixel-input"
                   placeholder="닉네임을 입력하세요 (2-20자)"
                   maxLength={20}
                   disabled={isUpdating}
                 />
-                <p className={styles.inputHint}>{newNickname.length}/20자</p>
+                <p className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400">{newNickname.length}/20자</p>
               </div>
 
               <div className={styles.warningBox}>
@@ -516,22 +529,22 @@ export default function MyPage() {
               </div>
             </div>
 
-            <div className={styles.modalFooter}>
+            <div className="flex gap-3 mt-6">
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 disabled={isUpdating}
-                className={`${styles.modalButton} ${styles.modalButtonSecondary}`}
+                className="btn-secondary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 취소
               </button>
               <button
                 onClick={handleUpdateProfile}
                 disabled={isUpdating || !newNickname.trim() || newNickname.trim().length < 2}
-                className={`${styles.modalButton} ${styles.modalButtonPrimary}`}
+                className="btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isUpdating ? (
                   <>
-                    <div className={styles.spinner} />
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
                     <span>저장 중...</span>
                   </>
                 ) : (
@@ -545,60 +558,60 @@ export default function MyPage() {
 
       {/* 회원 탈퇴 확인 모달 */}
       {isWithdrawModalOpen && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <h3 className={styles.modalTitle}>회원 탈퇴</h3>
-              <button onClick={() => setIsWithdrawModalOpen(false)} className={styles.modalClose}>
-                <svg className={styles.modalCloseIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="pixel-modal-overlay">
+          <div className="pixel-modal">
+            <div className="pixel-modal-header">
+              <h3 className="pixel-modal-title">회원 탈퇴</h3>
+              <button onClick={() => setIsWithdrawModalOpen(false)} className="pixel-modal-close">
+                <svg className="w-4.5 h-4.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            <div className={styles.modalBody}>
-              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg mb-4">
-                <p className="text-sm text-red-700 dark:text-red-400 font-medium mb-2">
+            <div className="flex flex-col gap-4">
+              <div className="p-4 bg-red-500/10 border-2 border-red-500 mb-2">
+                <p className="font-pixel text-xs text-red-600 dark:text-red-400 font-bold mb-2">
                   탈퇴 시 다음 사항에 유의해주세요:
                 </p>
-                <ul className="text-sm text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+                <ul className="font-pixel text-xs text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
                   <li>작성한 리포트와 댓글은 익명화 처리됩니다</li>
                   <li>이메일, 동의 기록은 법적 의무에 따라 5년간 보관됩니다</li>
                   <li>탈퇴 후 동일 계정으로 재가입해도 이전 데이터는 복구되지 않습니다</li>
                 </ul>
               </div>
 
-              <div className={styles.inputGroup}>
-                <label htmlFor="withdrawConfirm" className={styles.inputLabel}>
-                  탈퇴를 원하시면 아래에 <strong className="text-red-600">"탈퇴합니다"</strong>를 입력해주세요
+              <div className="flex flex-col gap-2">
+                <label htmlFor="withdrawConfirm" className="pixel-label">
+                  탈퇴를 원하시면 아래에 <strong className="text-red-600">&quot;탈퇴합니다&quot;</strong>를 입력해주세요
                 </label>
                 <input
                   id="withdrawConfirm"
                   type="text"
                   value={withdrawConfirmText}
                   onChange={(e) => setWithdrawConfirmText(e.target.value)}
-                  className={styles.input}
+                  className="pixel-input"
                   placeholder="탈퇴합니다"
                   disabled={isWithdrawing}
                 />
               </div>
             </div>
 
-            <div className={styles.modalFooter}>
+            <div className="flex gap-3 mt-6">
               <button
                 onClick={() => {
                   setIsWithdrawModalOpen(false);
                   setWithdrawConfirmText('');
                 }}
                 disabled={isWithdrawing}
-                className={`${styles.modalButton} ${styles.modalButtonSecondary}`}
+                className="btn-secondary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 취소
               </button>
               <button
                 onClick={handleWithdraw}
                 disabled={isWithdrawing || withdrawConfirmText !== '탈퇴합니다'}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="btn-danger flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isWithdrawing ? '처리 중...' : '탈퇴하기'}
               </button>

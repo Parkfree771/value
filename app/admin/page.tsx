@@ -267,39 +267,27 @@ export default function AdminPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">관리자 대시보드</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400">시스템 관리 및 모니터링</p>
+        <h1 className="font-pixel text-2xl sm:text-3xl font-bold mb-2">관리자 대시보드</h1>
+        <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">시스템 관리 및 모니터링</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 sm:gap-4 mb-6 overflow-x-auto pb-2">
+      <div className="flex gap-2 sm:gap-3 mb-6 overflow-x-auto pb-2">
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
-            activeTab === 'dashboard'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
+          className={`pixel-tab ${activeTab === 'dashboard' ? 'pixel-tab-active' : ''}`}
         >
           대시보드
         </button>
         <button
           onClick={() => setActiveTab('posts')}
-          className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
-            activeTab === 'posts'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
+          className={`pixel-tab ${activeTab === 'posts' ? 'pixel-tab-active' : ''}`}
         >
           게시글 관리
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`px-4 sm:px-6 py-2 rounded-lg font-semibold text-sm sm:text-base whitespace-nowrap ${
-            activeTab === 'users'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
+          className={`pixel-tab ${activeTab === 'users' ? 'pixel-tab-active' : ''}`}
         >
           사용자 관리
         </button>
@@ -310,64 +298,64 @@ export default function AdminPage() {
         <div className="space-y-6">
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+              <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]"></div>
             </div>
           ) : stats ? (
             <>
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">전체 게시글</div>
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.totalPosts.toLocaleString()}</div>
-                </Card>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="pixel-stat-card">
+                  <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">전체 게시글</div>
+                  <div className="font-pixel text-2xl font-bold text-[var(--pixel-accent)]">{stats.totalPosts.toLocaleString()}</div>
+                </div>
 
-                <Card className="p-4 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">전체 사용자</div>
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.totalUsers.toLocaleString()}</div>
-                </Card>
+                <div className="pixel-stat-card">
+                  <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">전체 사용자</div>
+                  <div className="font-pixel text-2xl font-bold text-green-600 dark:text-green-400">{stats.totalUsers.toLocaleString()}</div>
+                </div>
 
-                <Card className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">오늘 게시글</div>
-                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.todayPosts.toLocaleString()}</div>
-                </Card>
+                <div className="pixel-stat-card">
+                  <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">오늘 게시글</div>
+                  <div className="font-pixel text-2xl font-bold text-purple-600 dark:text-purple-400">{stats.todayPosts.toLocaleString()}</div>
+                </div>
 
-                <Card className="p-4 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">주간 게시글</div>
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.weekPosts.toLocaleString()}</div>
-                </Card>
+                <div className="pixel-stat-card">
+                  <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">주간 게시글</div>
+                  <div className="font-pixel text-2xl font-bold text-orange-600 dark:text-orange-400">{stats.weekPosts.toLocaleString()}</div>
+                </div>
 
-                <Card className="p-4 bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/30 dark:to-pink-800/30">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">총 조회수</div>
-                  <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">{stats.totalViews.toLocaleString()}</div>
-                </Card>
+                <div className="pixel-stat-card">
+                  <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">총 조회수</div>
+                  <div className="font-pixel text-2xl font-bold text-pink-600 dark:text-pink-400">{stats.totalViews.toLocaleString()}</div>
+                </div>
 
-                <Card className="p-4 bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">총 좋아요</div>
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">{stats.totalLikes.toLocaleString()}</div>
-                </Card>
+                <div className="pixel-stat-card">
+                  <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">총 좋아요</div>
+                  <div className="font-pixel text-2xl font-bold text-[var(--pixel-accent)]">{stats.totalLikes.toLocaleString()}</div>
+                </div>
               </div>
 
               {/* Top Posts */}
-              <Card className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">인기 게시글 TOP 5</h3>
-                <div className="space-y-3">
+              <Card className="p-6" padding="none">
+                <h3 className="font-pixel text-base font-bold mb-4">인기 게시글 TOP 5</h3>
+                <div className="space-y-2">
                   {stats.topPosts.map((post, index) => (
-                    <div key={post.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div key={post.id} className="flex items-center gap-3 p-3 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
+                      <div className="flex-shrink-0 w-8 h-8 bg-[var(--pixel-accent)] border-2 border-pixel-accent-dark flex items-center justify-center text-white font-pixel font-bold text-sm">
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <Link href={`/report/${post.id}`} className="text-sm font-semibold text-gray-900 dark:text-white hover:text-red-600 dark:hover:text-red-400 truncate block">
+                        <Link href={`/report/${post.id}`} className="font-pixel text-sm font-bold hover:text-[var(--pixel-accent)] truncate block transition-colors">
                           {post.title}
                         </Link>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">{post.authorName}</div>
+                        <div className="font-pixel text-xs text-gray-500 dark:text-gray-400">{post.authorName}</div>
                       </div>
                       <div className="flex-shrink-0 text-right">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white">조회 {post.views.toLocaleString()}</div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400">좋아요 {post.likes.toLocaleString()}</div>
+                        <div className="font-pixel text-xs font-bold">조회 {post.views.toLocaleString()}</div>
+                        <div className="font-pixel text-xs text-gray-500 dark:text-gray-400">좋아요 {post.likes.toLocaleString()}</div>
                       </div>
                       <div className="flex-shrink-0">
-                        <div className={`text-sm font-bold ${post.returnRate >= 0 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                        <div className={`font-pixel text-sm font-bold ${post.returnRate >= 0 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                           {post.returnRate >= 0 ? '+' : ''}{post.returnRate.toFixed(2)}%
                         </div>
                       </div>
@@ -377,20 +365,20 @@ export default function AdminPage() {
               </Card>
 
               {/* Top Users */}
-              <Card className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">활동적인 사용자 TOP 5</h3>
-                <div className="space-y-3">
+              <Card className="p-6" padding="none">
+                <h3 className="font-pixel text-base font-bold mb-4">활동적인 사용자 TOP 5</h3>
+                <div className="space-y-2">
                   {stats.topUsers.map((user, index) => (
-                    <div key={user.userId} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-red-400 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <div key={user.userId} className="flex items-center gap-3 p-3 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
+                      <div className="flex-shrink-0 w-8 h-8 bg-purple-600 border-2 border-purple-900 flex items-center justify-center text-white font-pixel font-bold text-sm">
                         {index + 1}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">{user.nickname}</div>
-                        <div className="text-xs text-gray-600 dark:text-gray-400 truncate">{user.email}</div>
+                        <div className="font-pixel text-sm font-bold truncate">{user.nickname}</div>
+                        <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 truncate">{user.email}</div>
                       </div>
                       <div className="flex-shrink-0">
-                        <div className="text-sm font-bold text-red-600 dark:text-red-400">게시글 {user.postCount}개</div>
+                        <div className="font-pixel text-sm font-bold text-[var(--pixel-accent)]">게시글 {user.postCount}개</div>
                       </div>
                     </div>
                   ))}
@@ -398,9 +386,9 @@ export default function AdminPage() {
               </Card>
             </>
           ) : (
-            <Card className="p-8 text-center">
-              <p className="text-gray-600 dark:text-gray-400">통계 데이터를 불러올 수 없습니다.</p>
-            </Card>
+            <div className="pixel-empty-state">
+              <p className="font-pixel text-sm text-gray-500 dark:text-gray-400">통계 데이터를 불러올 수 없습니다.</p>
+            </div>
           )}
         </div>
       )}
@@ -409,46 +397,46 @@ export default function AdminPage() {
         <div>
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+              <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]"></div>
             </div>
           ) : (
             <Card className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                  <thead className="bg-[var(--pixel-bg)]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">제목</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">작성자</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">종목</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">수익률</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">조회수</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">작성일</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">관리</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">제목</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">작성자</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">종목</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">수익률</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">조회수</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">작성일</th>
+                      <th className="px-4 py-3 text-center font-pixel text-xs font-bold uppercase tracking-wider">관리</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y-[2px] divide-[var(--pixel-border-muted)]">
                     {posts.map((post) => (
-                      <tr key={post.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <tr key={post.id} className="hover:bg-red-50 dark:hover:bg-red-900/10">
                         <td className="px-4 py-3">
-                          <Link href={`/report/${post.id}`} className="text-sm text-red-600 dark:text-red-400 hover:underline font-medium">
+                          <Link href={`/report/${post.id}`} className="font-pixel text-xs text-[var(--pixel-accent)] hover:underline font-bold">
                             {post.title}
                           </Link>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{post.authorName}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{post.stockName || post.ticker}</td>
+                        <td className="px-4 py-3 font-pixel text-xs">{post.authorName}</td>
+                        <td className="px-4 py-3 font-pixel text-xs">{post.stockName || post.ticker}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-sm font-semibold ${post.returnRate >= 0 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                          <span className={`font-pixel text-xs font-bold ${post.returnRate >= 0 ? 'text-red-600 dark:text-red-400' : 'text-blue-600 dark:text-blue-400'}`}>
                             {post.returnRate >= 0 ? '+' : ''}{post.returnRate.toFixed(2)}%
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{post.views.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                        <td className="px-4 py-3 font-pixel text-xs">{post.views.toLocaleString()}</td>
+                        <td className="px-4 py-3 font-pixel text-xs text-gray-500 dark:text-gray-400">
                           {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                         </td>
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleDeletePost(post.id, post.title)}
-                            className="px-3 py-1 bg-red-600 text-white text-xs font-semibold rounded hover:bg-red-700 transition-colors"
+                            className="btn-danger !py-1 !px-3 !text-xs"
                           >
                             삭제
                           </button>
@@ -459,7 +447,7 @@ export default function AdminPage() {
                 </table>
               </div>
               {posts.length === 0 && (
-                <div className="p-8 text-center text-gray-600 dark:text-gray-400">게시글이 없습니다.</div>
+                <div className="p-8 text-center font-pixel text-sm text-gray-500 dark:text-gray-400">게시글이 없습니다.</div>
               )}
             </Card>
           )}
@@ -470,38 +458,38 @@ export default function AdminPage() {
         <div>
           {loading ? (
             <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-red-600 border-t-transparent"></div>
+              <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]"></div>
             </div>
           ) : (
             <Card className="overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50 dark:bg-gray-700">
+                  <thead className="bg-[var(--pixel-bg)]">
                     <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">이메일</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">닉네임</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">게시글 수</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">가입일</th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">상태</th>
-                      <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">관리</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">이메일</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">닉네임</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">게시글 수</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">가입일</th>
+                      <th className="px-4 py-3 text-left font-pixel text-xs font-bold uppercase tracking-wider">상태</th>
+                      <th className="px-4 py-3 text-center font-pixel text-xs font-bold uppercase tracking-wider">관리</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="divide-y-[2px] divide-[var(--pixel-border-muted)]">
                     {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{user.email}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{user.nickname}</td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">{user.postCount}개</td>
-                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+                      <tr key={user.id} className="hover:bg-red-50 dark:hover:bg-red-900/10">
+                        <td className="px-4 py-3 font-pixel text-xs">{user.email}</td>
+                        <td className="px-4 py-3 font-pixel text-xs">{user.nickname}</td>
+                        <td className="px-4 py-3 font-pixel text-xs">{user.postCount}개</td>
+                        <td className="px-4 py-3 font-pixel text-xs text-gray-500 dark:text-gray-400">
                           {new Date(user.createdAt).toLocaleDateString('ko-KR')}
                         </td>
                         <td className="px-4 py-3">
                           {user.isSuspended ? (
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-red-700 dark:text-red-400 bg-red-100 dark:bg-red-900/30 rounded">
+                            <span className="inline-flex items-center px-2 py-1 font-pixel text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/10 border-2 border-red-500">
                               정지됨
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-1 text-xs font-semibold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30 rounded">
+                            <span className="inline-flex items-center px-2 py-1 font-pixel text-xs font-bold text-green-600 dark:text-green-400 bg-green-500/10 border-2 border-green-500">
                               활성
                             </span>
                           )}
@@ -509,10 +497,10 @@ export default function AdminPage() {
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleToggleSuspend(user.id, user.nickname, user.isSuspended)}
-                            className={`px-3 py-1 text-xs font-semibold rounded transition-colors ${
+                            className={`font-pixel px-3 py-1 text-xs font-bold border-2 transition-all ${
                               user.isSuspended
-                                ? 'bg-green-600 text-white hover:bg-green-700'
-                                : 'bg-orange-600 text-white hover:bg-orange-700'
+                                ? 'bg-green-600 text-white border-green-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)]'
+                                : 'bg-orange-600 text-white border-orange-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)]'
                             }`}
                           >
                             {user.isSuspended ? '정지 해제' : '정지'}
@@ -524,7 +512,7 @@ export default function AdminPage() {
                 </table>
               </div>
               {users.length === 0 && (
-                <div className="p-8 text-center text-gray-600 dark:text-gray-400">사용자가 없습니다.</div>
+                <div className="p-8 text-center font-pixel text-sm text-gray-500 dark:text-gray-400">사용자가 없습니다.</div>
               )}
             </Card>
           )}
@@ -533,24 +521,26 @@ export default function AdminPage() {
 
       {/* 확인 모달 */}
       {confirmModal.isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-              {confirmModal.title}
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <div className="pixel-modal-overlay">
+          <div className="pixel-modal">
+            <div className="pixel-modal-header">
+              <h3 className="pixel-modal-title">
+                {confirmModal.title}
+              </h3>
+            </div>
+            <p className="font-pixel text-sm text-gray-600 dark:text-gray-400 mb-6">
               {confirmModal.message}
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-                className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                className="btn-secondary font-pixel !text-sm"
               >
                 취소
               </button>
               <button
                 onClick={confirmModal.onConfirm}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                className="btn-danger"
               >
                 확인
               </button>

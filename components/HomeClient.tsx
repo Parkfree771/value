@@ -10,13 +10,13 @@ import { useBookmark } from '@/contexts/BookmarkContext';
 // SSR 활성화: ReportCard는 직접 import (가장 중요한 콘텐츠)
 // 덜 중요한 컴포넌트만 dynamic import
 const FilterBar = dynamic(() => import('@/components/FilterBar'), {
-  loading: () => <div className="animate-pulse h-[52px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  loading: () => <div className="animate-pulse h-[52px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
 });
 const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
-  loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-4 sm:mb-8" />,
+  loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-4 sm:mb-8" />,
 });
 const SearchBar = dynamic(() => import('@/components/SearchBar'), {
-  loading: () => <div className="animate-pulse h-[48px] bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  loading: () => <div className="animate-pulse h-[48px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
 });
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
@@ -180,25 +180,25 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-12">
         {/* TOP 10 스켈레톤 */}
-        <div className="animate-pulse h-[200px] sm:h-[280px] bg-gray-200 dark:bg-gray-700 rounded-xl mb-4 sm:mb-8" />
+        <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-4 sm:mb-8" />
 
         {/* 검색바 스켈레톤 */}
         <div className="hidden md:block mb-8">
-          <div className="animate-pulse h-[48px] bg-gray-200 dark:bg-gray-700 rounded-lg mb-6" />
-          <div className="animate-pulse h-[52px] bg-gray-200 dark:bg-gray-700 rounded-lg" />
+          <div className="animate-pulse h-[48px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-6" />
+          <div className="animate-pulse h-[52px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />
         </div>
 
         {/* 탭 스켈레톤 */}
         <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="animate-pulse h-[36px] sm:h-[40px] w-[70px] sm:w-[100px] bg-gray-200 dark:bg-gray-700 rounded-lg" />
+            <div key={i} className="animate-pulse h-[36px] sm:h-[40px] w-[70px] sm:w-[100px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />
           ))}
         </div>
 
         {/* 카드 스켈레톤 */}
         <div className="space-y-3 sm:space-y-6">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="animate-pulse h-[140px] sm:h-[180px] bg-gray-200 dark:bg-gray-700 rounded-xl" />
+            <div key={i} className="animate-pulse h-[140px] sm:h-[180px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />
           ))}
         </div>
       </div>
@@ -221,7 +221,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* 모바일: 검색 버튼 */}
       <div className="md:hidden mb-3">
         <Link href="/search">
-          <button className="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-left text-gray-400 flex items-center gap-3 hover:border-red-500/50 transition-colors text-sm">
+          <button className="w-full px-4 py-2.5 bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border-muted)] text-left text-gray-400 flex items-center gap-3 hover:border-[var(--pixel-accent)] transition-all font-pixel text-xs">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -234,90 +234,28 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       <div className="mb-3 sm:mb-4">
         {/* 모바일: 4개 탭 한 줄 */}
         <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-              activeTab === 'all'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }`}
-          >
-            전체
-          </button>
-          <button
-            onClick={() => setActiveTab('following')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-              activeTab === 'following'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }`}
-          >
-            북마크
-          </button>
-          <button
-            onClick={() => setActiveTab('popular')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-              activeTab === 'popular'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }`}
-          >
-            인기
-          </button>
-          <button
-            onClick={() => setActiveTab('return')}
-            className={`flex-shrink-0 px-3 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm ${
-              activeTab === 'return'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }`}
-          >
-            수익률
-          </button>
+          {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={activeTab === tab ? 'pixel-tab-active flex-shrink-0 !text-xs !px-3 !py-2' : 'pixel-tab flex-shrink-0 !text-xs !px-3 !py-2'}
+            >
+              {{ all: '전체', following: '북마크', popular: '인기', return: '수익률' }[tab]}
+            </button>
+          ))}
         </div>
 
         {/* 데스크탑: 4개 탭 */}
         <div className="hidden md:flex gap-4">
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
-              activeTab === 'all'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            전체 피드
-          </button>
-          <button
-            onClick={() => setActiveTab('following')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
-              activeTab === 'following'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            북마크
-          </button>
-          <button
-            onClick={() => setActiveTab('popular')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
-              activeTab === 'popular'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            인기순
-          </button>
-          <button
-            onClick={() => setActiveTab('return')}
-            className={`px-6 py-2 rounded-lg text-base font-semibold transition-all shadow-sm ${
-              activeTab === 'return'
-                ? 'bg-ant-red text-white shadow-neon-red'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
-            }`}
-          >
-            수익률순
-          </button>
+          {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={activeTab === tab ? 'pixel-tab-active' : 'pixel-tab'}
+            >
+              {{ all: '전체 피드', following: '북마크', popular: '인기순', return: '수익률순' }[tab]}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -328,11 +266,11 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             <ReportCard key={report.id} {...report} />
           ))
         ) : (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400 text-lg">
+          <div className="pixel-empty-state">
+            <p className="font-pixel text-sm mb-2">
               {searchQuery ? '검색 결과가 없습니다.' : '아직 작성된 리포트가 없습니다.'}
             </p>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
+            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
               {searchQuery ? '다른 검색어를 입력해보세요.' : '첫 번째 리포트를 작성해보세요!'}
             </p>
           </div>
@@ -342,7 +280,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* 게시물 수 표시 */}
       {filteredReports.length > 0 && (
         <div className="flex justify-center mt-8">
-          <span className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="font-pixel text-xs text-gray-500 dark:text-gray-400">
             총 {total}개의 리포트
           </span>
         </div>

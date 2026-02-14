@@ -26,7 +26,7 @@ export default function PortfolioPage() {
   if (!guruInfo) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
+        <div className="card-base p-12 text-center">
           <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">404</div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             구루를 찾을 수 없습니다
@@ -36,7 +36,7 @@ export default function PortfolioPage() {
           </p>
           <Link
             href="/guru-tracker"
-            className="inline-block px-6 py-3 bg-amber-600 text-white rounded-lg font-semibold hover:bg-amber-700 transition-colors"
+            className="inline-block px-6 py-3 bg-amber-600 text-white border-2 border-amber-800 font-pixel font-bold hover:bg-amber-700 transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.3)]"
           >
             구루 목록으로 돌아가기
           </Link>
@@ -61,7 +61,7 @@ export default function PortfolioPage() {
       </div>
 
       {/* 구루 헤더 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-black dark:via-gray-950 dark:to-black rounded-none sm:rounded-2xl p-6 sm:p-8 shadow-2xl border-t-4 border-b-4 sm:border-4 border-amber-600 dark:border-amber-500 relative overflow-hidden">
+      <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-black dark:via-gray-950 dark:to-black p-6 sm:p-8 shadow-pixel border-4 border-amber-600 dark:border-amber-500 relative overflow-hidden">
         {/* 장식 요소 */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
@@ -69,7 +69,7 @@ export default function PortfolioPage() {
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             {/* 프로필 이미지 */}
-            <div className="relative w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden border-4 border-amber-600 dark:border-amber-500 shadow-2xl flex-shrink-0">
+            <div className="relative w-32 h-32 sm:w-40 sm:h-40 overflow-hidden border-4 border-amber-600 dark:border-amber-500 shadow-pixel flex-shrink-0">
               <Image
                 src={`/${guruInfo.image_filename}`}
                 alt={guruInfo.name_kr}
@@ -80,7 +80,7 @@ export default function PortfolioPage() {
 
             {/* 구루 정보 */}
             <div className="flex-1 text-center sm:text-left">
-              <div className="inline-block mb-3 px-4 py-1.5 bg-amber-600/20 border border-amber-600/50 rounded-full">
+              <div className="inline-block mb-3 px-4 py-1.5 bg-amber-600/20 border-2 border-amber-600/50">
                 <span className="text-xs font-semibold tracking-widest text-amber-400 uppercase">
                   {guruInfo.style}
                 </span>
@@ -98,7 +98,7 @@ export default function PortfolioPage() {
                 {guruInfo.catchphrase}
               </p>
 
-              <div className="inline-block px-4 py-2 bg-gray-800/50 border border-gray-700 rounded-lg">
+              <div className="inline-block px-4 py-2 bg-gray-800/50 border-2 border-gray-700">
                 <p className="text-xs text-gray-400 mb-1">운용사</p>
                 <p className="text-sm font-semibold text-white">{guruInfo.filing_name}</p>
               </div>
@@ -113,21 +113,21 @@ export default function PortfolioPage() {
           <>
             {/* 포트폴리오 요약 정보 */}
             <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="card-base p-4 sm:p-6">
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">총 포트폴리오 가치</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   ${(portfolio.totalValue / 1000000000).toFixed(1)}B
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="card-base p-4 sm:p-6">
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">보유 종목 수</p>
                 <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {portfolio.holdings.length}
                 </p>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
+              <div className="card-base p-4 sm:p-6">
                 <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">13F 공시일</p>
                 <p className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                   {new Date(portfolio.filingDate).toLocaleDateString('ko-KR')}
@@ -139,7 +139,7 @@ export default function PortfolioPage() {
             <PortfolioTable portfolio={portfolio} />
           </>
         ) : (
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-gray-700">
+          <div className="card-base p-12 text-center">
             <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
               포트폴리오 데이터 준비중
@@ -152,7 +152,7 @@ export default function PortfolioPage() {
       </section>
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 border-l-4 border-amber-600 dark:border-amber-500 rounded-r-lg shadow-lg">
+      <section className="mt-12 p-6 sm:p-8 bg-amber-500/10 border-l-[4px] border-amber-600 dark:border-amber-500 shadow-pixel">
         <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>

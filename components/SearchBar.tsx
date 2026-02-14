@@ -152,9 +152,9 @@ const SearchBar = memo(function SearchBar({
   }, []);
 
   const getExchangeBadgeColor = (exchange: string) => {
-    if (exchange === 'KRX') return 'bg-ant-red-100 dark:bg-ant-red-900 text-ant-red-700 dark:text-ant-red-300';
-    if (exchange === 'NAS' || exchange === 'NYS') return 'bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300';
-    return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300';
+    if (exchange === 'KRX') return 'bg-red-500/15 text-red-500 border-red-500';
+    if (exchange === 'NAS' || exchange === 'NYS') return 'bg-green-500/15 text-green-500 border-green-500';
+    return 'bg-gray-500/15 text-gray-500 border-gray-500';
   };
 
   const getExchangeLabel = (exchange: string) => {
@@ -180,7 +180,7 @@ const SearchBar = memo(function SearchBar({
           onFocus={() => showStockSuggestions && setShowSuggestions(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full px-4 sm:px-5 py-2.5 sm:py-3 pl-10 sm:pl-12 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+          className="pixel-input !py-2.5 sm:!py-3 !pl-10 sm:!pl-12 !text-sm sm:!text-base focus:shadow-neon-red"
         />
         <svg
           className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500"
@@ -216,7 +216,7 @@ const SearchBar = memo(function SearchBar({
 
         {/* 자동완성 드롭다운 */}
         {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
-          <div className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 sm:max-h-80 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-2 bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border)] shadow-pixel max-h-60 sm:max-h-80 overflow-y-auto">
             {isLoading ? (
               <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                 검색 중...
@@ -227,12 +227,12 @@ const SearchBar = memo(function SearchBar({
                   key={`${stock.exchange}-${stock.symbol}`}
                   onClick={() => handleSelectSuggestion(stock)}
                   onMouseEnter={() => setFocusedIndex(index)}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0 ${
-                    focusedIndex === index ? 'bg-gray-50 dark:bg-gray-700' : ''
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-all border-b-[2px] border-[var(--pixel-border-muted)] last:border-b-0 ${
+                    focusedIndex === index ? 'bg-red-50 dark:bg-red-900/20 border-l-[3px] border-l-[var(--pixel-accent)]' : ''
                   }`}
                 >
                   <div className="flex items-center gap-2 sm:gap-3">
-                    <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-semibold rounded flex-shrink-0 ${getExchangeBadgeColor(stock.exchange)}`}>
+                    <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-bold border-2 flex-shrink-0 font-pixel ${getExchangeBadgeColor(stock.exchange)}`}>
                       {getExchangeLabel(stock.exchange)}
                     </span>
                     <div className="flex-1 min-w-0">

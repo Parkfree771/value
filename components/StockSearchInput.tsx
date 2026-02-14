@@ -217,12 +217,12 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
   return (
     <div ref={searchRef} className="relative w-full">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label className="pixel-label mb-2">
         종목 검색 *
       </label>
 
       {selectedStock ? (
-        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${
+        <div className={`flex items-center justify-between p-4 border-2 ${
           selectedStock.exchange === 'CRYPTO'
             ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
             : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700'
@@ -275,10 +275,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="기업명 또는 티커 입력 (예: 삼성전자, 나이키, AAPL)"
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                       bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-                       focus:outline-none focus:ring-2 focus:ring-red-500
-                       placeholder-gray-400 dark:placeholder-gray-500"
+              className="pixel-input !py-3"
             />
             {isLoading && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -289,16 +286,16 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
           {/* 검색 결과 드롭다운 */}
           {showResults && results.length > 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800
-                          border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg
+            <div className="absolute z-50 w-full mt-2 bg-[var(--pixel-bg-card)]
+                          border-[3px] border-[var(--pixel-border-muted)] shadow-pixel
                           max-h-96 overflow-y-auto">
               {results.map((stock, index) => (
                 <button
                   key={`${stock.symbol}-${stock.exchange}-${index}`}
                   onClick={() => handleStockSelect(stock)}
-                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700
-                            transition-colors border-b border-gray-100 dark:border-gray-700 last:border-b-0
-                            ${index === selectedIndex ? 'bg-gray-50 dark:bg-gray-700' : ''}`}
+                  className={`w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/10
+                            transition-colors border-b-[2px] border-[var(--pixel-border-muted)] last:border-b-0
+                            ${index === selectedIndex ? 'bg-red-50 dark:bg-red-900/10' : ''}`}
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-3 flex-1">
@@ -337,8 +334,8 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
           {/* 검색 결과 없음 */}
           {showResults && !isLoading && query.length > 0 && results.length === 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800
-                          border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4">
+            <div className="absolute z-50 w-full mt-2 bg-[var(--pixel-bg-card)]
+                          border-[3px] border-[var(--pixel-border-muted)] shadow-pixel p-4">
               <p className="text-gray-500 dark:text-gray-400 text-center">
                 검색 결과가 없습니다
               </p>

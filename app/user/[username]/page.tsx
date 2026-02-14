@@ -109,7 +109,7 @@ export default function UserPage() {
           </p>
           <button
             onClick={() => router.back()}
-            className="px-6 py-2 bg-ant-red-600 text-white rounded-lg font-semibold hover:bg-ant-red-700 transition-colors"
+            className="btn-primary font-pixel"
           >
             돌아가기
           </button>
@@ -136,11 +136,11 @@ export default function UserPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* 프로필 정보 */}
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-ant-red-500 to-ant-red-700 rounded-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold shadow-lg">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[var(--pixel-accent)] border-[3px] border-pixel-accent-dark flex items-center justify-center text-white font-pixel text-xl sm:text-2xl font-bold shadow-pixel">
               {username[0]?.toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <h1 className="font-pixel text-lg sm:text-xl font-bold">
                 {username}
               </h1>
               <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">

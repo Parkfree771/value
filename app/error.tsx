@@ -24,7 +24,7 @@ export default function Error({
         <h2 className="text-2xl font-bold text-[var(--foreground)]">
           오류가 발생했습니다
         </h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <p className="mt-2 font-pixel text-xs text-gray-500 dark:text-gray-400">
           일시적인 문제가 발생했습니다. 잠시 후 다시 시도해주세요.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">

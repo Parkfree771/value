@@ -192,7 +192,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* 제목 */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="pixel-label mb-2">
           제목
         </label>
         <input
@@ -200,14 +200,14 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="pixel-input"
           placeholder="나이키(NKE): 브랜드 고전 딛고 향후 2년 강력한 성장 전망"
         />
       </div>
 
       {/* 종목 및 의견 정보 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="font-pixel text-sm font-bold">
           종목 정보
         </h3>
 
@@ -218,8 +218,8 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
         />
 
         {/* 종목 프로필 카드 */}
-        <div className="mt-4 p-6 bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+        <div className="mt-4 p-6 card-base border-[var(--pixel-accent)]/30">
+          <h3 className="font-pixel text-sm font-bold mb-4">
             종목 프로필
           </h3>
 
@@ -260,35 +260,35 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <div className="bg-[var(--pixel-bg)] p-4 border-2 border-dashed border-[var(--pixel-border-muted)]">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
                 <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <div className="bg-[var(--pixel-bg)] p-4 border-2 border-dashed border-[var(--pixel-border-muted)]">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PER</div>
                 <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-4 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
+              <div className="bg-[var(--pixel-bg)] p-4 border-2 border-dashed border-[var(--pixel-border-muted)]">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PBR</div>
                 <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
               </div>
             </div>
           )}
 
-          <div className="mt-4 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-800/50 p-3 rounded border border-red-200 dark:border-red-800">
+          <div className="mt-4 font-pixel text-xs text-gray-600 dark:text-gray-400 bg-[var(--pixel-bg-card)] p-3 border-2 border-[var(--pixel-accent)]/30">
             종목을 검색하면 현재 주가와 기업 프로필이 자동으로 표시되며, 이 가격을 기준으로 실시간 수익률이 계산됩니다.
           </div>
         </div>
 
         {/* 투자 의견 */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          <label className="pixel-label mb-2">
             투자 의견
           </label>
           <select
             value={opinion}
             onChange={(e) => setOpinion(e.target.value as 'buy' | 'sell')}
-            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            className="pixel-input"
           >
             <option value="buy">매수 (상승 예상)</option>
             <option value="sell">매도 (하락 예상)</option>
@@ -298,12 +298,12 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
 
       {/* 발언 인물 정보 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="font-pixel text-sm font-bold">
           발언 인물 정보
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="pixel-label mb-2">
               이름 (영문)
             </label>
             <input
@@ -311,12 +311,12 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               value={guruName}
               onChange={(e) => setGuruName(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="pixel-input"
               placeholder="David Swartz"
             />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+            <label className="pixel-label mb-2">
               소속 / 직함 (영문)
             </label>
             <input
@@ -324,7 +324,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               value={guruPosition}
               onChange={(e) => setGuruPosition(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="pixel-input"
               placeholder="Senior Equity Analyst, Morningstar"
             />
           </div>
@@ -333,21 +333,21 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
 
       {/* 원문 링크 */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="pixel-label mb-2">
           원문 링크 (선택사항)
         </label>
         <input
           type="url"
           value={sourceUrl}
           onChange={(e) => setSourceUrl(e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          className="pixel-input"
           placeholder="https://finance.yahoo.com/..."
         />
       </div>
 
       {/* 내용 작성 */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="font-pixel text-sm font-bold">
           내용 작성
         </h3>
 
@@ -356,22 +356,14 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           <button
             type="button"
             onClick={() => setMode('text')}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              mode === 'text'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
+            className={mode === 'text' ? 'pixel-tab-active' : 'pixel-tab'}
           >
             텍스트
           </button>
           <button
             type="button"
             onClick={() => setMode('html')}
-            className={`px-6 py-2 rounded-lg font-semibold transition-colors ${
-              mode === 'html'
-                ? 'bg-red-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
+            className={mode === 'html' ? 'pixel-tab-active' : 'pixel-tab'}
           >
             HTML/CSS
           </button>
@@ -385,7 +377,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
               onChange={(e) => setContent(e.target.value)}
               required
               rows={20}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm whitespace-pre-wrap"
+              className="pixel-input !text-sm font-mono whitespace-pre-wrap"
               placeholder="발언 내용을 입력하세요..."
             />
           </div>
@@ -400,7 +392,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
                 onChange={(e) => setHtmlContent(e.target.value)}
                 required
                 rows={15}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                className="pixel-input !text-sm font-mono"
                 placeholder="<h3>제목</h3>
 <p>내용...</p>"
               />
@@ -408,10 +400,10 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
 
             {/* 미리보기 */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+              <label className="pixel-label mb-2">
                 미리보기
               </label>
-              <div className="w-full min-h-[200px] px-4 py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900">
+              <div className="w-full min-h-[200px] px-4 py-2 border-2 border-dashed border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
                 {previewContent.css && <style>{previewContent.css}</style>}
                 <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewContent.html) }} />
               </div>
@@ -422,11 +414,11 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
 
       {/* 이미지 첨부 */}
       <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        <label className="pixel-label mb-2">
           이미지 첨부 (선택사항)
         </label>
         <div className="space-y-3">
-          <label className="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors bg-white dark:bg-gray-800">
+          <label className="inline-flex items-center gap-2 px-4 py-2 border-[3px] border-[var(--pixel-border-muted)] cursor-pointer hover:border-[var(--pixel-accent)] transition-all bg-[var(--pixel-bg-card)] shadow-pixel-sm font-pixel text-xs">
             <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
@@ -446,9 +438,9 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             <div className="space-y-3">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {images.map((image, index) => (
-                  <div key={index} className="relative group border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-white dark:bg-gray-800">
+                  <div key={index} className="relative group border-2 border-[var(--pixel-border-muted)] p-3 bg-[var(--pixel-bg-card)]">
                     <div className="flex gap-3">
-                      <div className="w-20 h-20 relative rounded border border-gray-200 dark:border-gray-700 overflow-hidden flex-shrink-0">
+                      <div className="w-20 h-20 relative border-2 border-[var(--pixel-border-muted)] overflow-hidden flex-shrink-0">
                         <Image
                           src={uploadedImageUrls[index] || URL.createObjectURL(image)}
                           alt={`preview-${index}`}
@@ -506,9 +498,9 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
             <span>이미지 업로드 중...</span>
             <span>{Math.round(uploadProgress)}%</span>
           </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+          <div className="w-full bg-[var(--pixel-border-muted)] h-2 border border-[var(--pixel-border)]">
             <div
-              className="bg-red-600 dark:bg-red-500 h-2 rounded-full transition-all duration-300"
+              className="bg-[var(--pixel-accent)] h-full transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}
             />
           </div>
@@ -520,11 +512,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
         <button
           type="submit"
           disabled={isSubmitting || isUploading}
-          className={`flex-1 px-6 py-3 bg-gradient-to-r from-cyan-600 to-red-600 text-white rounded-lg font-semibold transition-colors ${
-            isSubmitting || isUploading
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:from-cyan-700 hover:to-red-700'
-          }`}
+          className="flex-1 btn-primary font-pixel !py-3 !text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? '작성 중...' : '작성 완료'}
         </button>
@@ -532,11 +520,7 @@ export default function WordWatchForm({ onSubmit, onCancel }: WordWatchFormProps
           type="button"
           onClick={onCancel}
           disabled={isSubmitting || isUploading}
-          className={`px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold transition-colors ${
-            isSubmitting || isUploading
-              ? 'opacity-50 cursor-not-allowed'
-              : 'hover:bg-gray-300 dark:hover:bg-gray-600'
-          }`}
+          className="btn-secondary font-pixel !py-3 !text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
           취소
         </button>

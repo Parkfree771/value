@@ -290,7 +290,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             <div className="grid grid-cols-2">
               <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
                 <span className="text-xs text-gray-500 dark:text-gray-400">작성가</span>
-                <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                <span className="font-pixel text-sm font-bold tabular-nums">
                   {report.initialPrice?.toLocaleString()}
                 </span>
               </div>
@@ -306,7 +306,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
               <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60">
                 <span className="text-xs text-gray-500 dark:text-gray-400">목표가</span>
-                <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                <span className="font-pixel text-sm font-bold tabular-nums">
                   {report.targetPrice?.toLocaleString() || '-'}
                 </span>
               </div>
@@ -318,19 +318,19 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 <>
                   <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
                     <span className="text-xs text-gray-500 dark:text-gray-400">PER</span>
-                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                    <span className="font-pixel text-sm font-bold tabular-nums">
                       {report.stockData?.per?.toFixed(1) || '-'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
                     <span className="text-xs text-gray-500 dark:text-gray-400">PBR</span>
-                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                    <span className="font-pixel text-sm font-bold tabular-nums">
                       {report.stockData?.pbr?.toFixed(2) || '-'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-r border-gray-100 dark:border-gray-700/60">
                     <span className="text-xs text-gray-500 dark:text-gray-400">EPS</span>
-                    <span className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white tabular-nums">
+                    <span className="font-pixel text-sm font-bold tabular-nums">
                       {report.stockData?.eps?.toFixed(0) || '-'}
                     </span>
                   </div>
@@ -350,20 +350,20 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   <button
                     onClick={handleClosePosition}
                     disabled={isClosing}
-                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors disabled:opacity-50"
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
                   >
                     {isClosing ? '처리 중...' : '수익확정'}
                   </button>
                 )}
                 <button
                   onClick={handleEdit}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all"
                 >
                   수정
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all"
                 >
                   삭제
                 </button>
@@ -372,10 +372,10 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 일반 버튼 */}
             <button
               onClick={handleLike}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm transition-colors ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 font-pixel text-xs sm:text-sm transition-all ${
                 isLiked
-                  ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600'
-                  : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
+                  ? 'bg-red-500/10 text-[var(--pixel-accent)] border-2 border-[var(--pixel-accent)]'
+                  : 'border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] text-gray-600 dark:text-gray-400'
               }`}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 20 20">
@@ -383,13 +383,13 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </svg>
               {likesCount}
             </button>
-            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors">
+            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all">
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
               북마크
             </button>
-            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg text-xs sm:text-sm transition-colors">
+            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all">
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
@@ -413,7 +413,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           {/* 첨부 파일 */}
           {report.files && report.files.length > 0 && (
             <Card className="p-3 sm:p-5">
-              <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
+              <h3 className="font-pixel text-sm font-bold mb-2 sm:mb-3">
                 첨부 파일 {report.files.length}개
               </h3>
               <div className="space-y-2">
@@ -424,7 +424,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   const ext = fileName.split('.').pop()?.toLowerCase() || '';
 
                   return (
-                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                    <div key={index} className="flex items-center justify-between p-3 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <svg className="w-6 h-6 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -439,7 +439,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                           href={fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-3 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors flex-shrink-0"
+                          className="ml-3 btn-primary !py-1.5 !px-3 font-pixel !text-xs flex-shrink-0"
                         >
                           다운로드
                         </a>
@@ -453,7 +453,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
           {/* Comments Section */}
           <Card className="p-3 sm:p-5">
-            <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white mb-2 sm:mb-3">
+            <h3 className="font-pixel text-sm font-bold mb-2 sm:mb-3">
               댓글 {commentCount}개
             </h3>
 
@@ -465,7 +465,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   {comments.filter(c => !c.parentId).map((comment) => (
                     <div key={comment.id}>
                       {/* 부모 댓글 */}
-                      <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="p-3 sm:p-4 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
                         <div className="flex items-center justify-between mb-2">
                           <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{comment.author}</div>
                           <div className="flex items-center gap-2">
@@ -567,7 +567,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                               onChange={(e) => setReplyText(e.target.value)}
                               placeholder="답글을 작성하세요..."
                               rows={2}
-                              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                              className="pixel-input !text-sm"
                             />
                             <div className="flex justify-end mt-2">
                               <Button
@@ -613,9 +613,9 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                       {/* 대댓글 (자식 댓글) */}
                       {comments.filter(c => c.parentId === comment.id).map((reply) => (
-                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 bg-gray-100 dark:bg-gray-600 rounded-lg border-l-2 border-red-500">
+                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)] border-l-[3px] border-l-[var(--pixel-accent)]">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{reply.author}</div>
+                            <div className="font-pixel text-xs font-bold truncate">{reply.author}</div>
                             <div className="flex items-center gap-2">
                               <div className="text-xs text-gray-500 dark:text-gray-400">
                                 {new Date(reply.createdAt).toLocaleDateString('ko-KR', {
@@ -698,14 +698,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             </div>
 
             {/* 댓글 작성 */}
-            <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-3 border-t-[3px] border-[var(--pixel-border-muted)]">
               <textarea
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder={user ? "댓글을 작성하세요..." : "로그인 후 댓글 작성이 가능합니다"}
                 rows={2}
                 disabled={!user || isSubmittingComment}
-                className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 disabled:bg-gray-100 dark:disabled:bg-gray-800 disabled:cursor-not-allowed"
+                className="pixel-input !text-sm resize-none"
               />
               <div className="flex justify-end mt-2">
                 {user ? (
@@ -775,7 +775,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                     <button
                       onClick={handleClosePosition}
                       disabled={isClosing}
-                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                      className="w-full font-pixel px-4 py-2.5 bg-emerald-600 text-white border-2 border-emerald-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
                     >
                       {isClosing ? '처리 중...' : '수익 확정하기'}
                     </button>
@@ -783,13 +783,13 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   <div className="flex gap-2">
                     <button
                       onClick={handleEdit}
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium transition-colors"
+                      className="flex-1 btn-secondary font-pixel !py-2 !text-sm"
                     >
                       수정
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 rounded-lg text-sm font-medium transition-colors"
+                      className="flex-1 btn-danger font-pixel !py-2 !text-sm"
                     >
                       삭제
                     </button>
@@ -803,10 +803,10 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               <div className="space-y-2">
                 <button
                   onClick={handleLike}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors ${
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 font-pixel text-sm font-bold transition-all ${
                     isLiked
-                      ? 'bg-red-600 hover:bg-red-700 text-white'
-                      : 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      ? 'border-2 pixel-chip-active'
+                      : 'border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)]'
                   }`}
                 >
                   <svg className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} stroke={isLiked ? "none" : "currentColor"} viewBox="0 0 20 20">
@@ -814,13 +814,13 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   </svg>
                   <span>좋아요 {likesCount}</span>
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors">
+                <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] font-pixel text-sm font-bold transition-all">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                   </svg>
                   <span>북마크</span>
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium transition-colors">
+                <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] font-pixel text-sm font-bold transition-all">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>
@@ -832,20 +832,20 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 날짜 정보 */}
             <Card className="p-4">
               <div className="text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">작성일</div>
-                <div className="text-base font-semibold text-gray-900 dark:text-white">{report.createdAt}</div>
+                <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">작성일</div>
+                <div className="font-pixel text-sm font-bold">{report.createdAt}</div>
               </div>
 
               {(() => {
                 const filteredUpdates = report.updatedAt?.filter(date => date !== report.createdAt) || [];
                 return filteredUpdates.length > 0 && (
                   <>
-                    <div className="border-t dark:border-gray-700 my-3"></div>
+                    <div className="border-t-[3px] border-[var(--pixel-border-muted)] my-3"></div>
                     <div className="text-center">
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">수정일</div>
+                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-2">수정일</div>
                       <div className="space-y-1">
                         {filteredUpdates.map((date, index) => (
-                          <div key={index} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          <div key={index} className="font-pixel text-xs font-bold">
                             {date}
                           </div>
                         ))}
@@ -855,10 +855,10 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 );
               })()}
 
-              <div className="border-t dark:border-gray-700 my-3"></div>
+              <div className="border-t-[3px] border-[var(--pixel-border-muted)] my-3"></div>
               <div className="text-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">조회수</div>
-                <div className="text-base font-semibold text-gray-900 dark:text-white">{report.views}</div>
+                <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">조회수</div>
+                <div className="font-pixel text-sm font-bold">{report.views}</div>
               </div>
             </Card>
           </div>

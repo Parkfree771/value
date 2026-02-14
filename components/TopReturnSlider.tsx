@@ -112,7 +112,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
             {topReturns.map((item, index) => (
               <Link key={item.id} href={`/reports/${item.id}`}>
                 <div
-                  className={`flex-shrink-0 w-80 p-5 rounded-xl transition-all cursor-pointer snap-start border-2 ${
+                  className={`flex-shrink-0 w-80 p-5 transition-all cursor-pointer snap-start border-2 ${
                     currentIndex === index
                       ? 'bg-ant-red-50 dark:bg-ant-red-900/20 border-ant-red-500 dark:border-ant-red-500 scale-[1.02]'
                       : 'card-base hover:bg-gray-50 dark:hover:bg-gray-700'

@@ -111,10 +111,10 @@ const PortfolioTable = memo(function PortfolioTable({ portfolio }: PortfolioTabl
   return (
     <div className="space-y-4">
       {/* Portfolio Header */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 border border-gray-200 dark:border-gray-700">
+      <div className="card-base p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
           <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            <h2 className="font-pixel text-lg sm:text-xl font-bold">
               {portfolio.guruNameKr}의 포트폴리오
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
@@ -128,7 +128,7 @@ const PortfolioTable = memo(function PortfolioTable({ portfolio }: PortfolioTabl
             </div>
           </div>
         </div>
-        <div className="flex flex-wrap gap-3 text-xs text-gray-600 dark:text-gray-400 mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex flex-wrap gap-3 font-pixel text-xs text-gray-600 dark:text-gray-400 mt-3 pt-3 border-t-[3px] border-[var(--pixel-border-muted)]">
           <div>
             <span className="font-semibold">보고 기준일:</span> {portfolio.reportDate}
           </div>
@@ -147,44 +147,44 @@ const PortfolioTable = memo(function PortfolioTable({ portfolio }: PortfolioTabl
       </div>
 
       {/* Desktop Table */}
-      <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="hidden lg:block card-base overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-[var(--pixel-bg)] border-b-[3px] border-[var(--pixel-border-muted)]">
               <tr>
-                <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-left font-pixel text-xs font-bold uppercase tracking-wider">
                   종목
                 </th>
-                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right font-pixel text-xs font-bold uppercase tracking-wider">
                   비중
                 </th>
-                <th className="px-3 py-2 text-center text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-center font-pixel text-xs font-bold uppercase tracking-wider">
                   최근 활동
                 </th>
-                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right font-pixel text-xs font-bold uppercase tracking-wider">
                   보유 주식
                 </th>
-                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right font-pixel text-xs font-bold uppercase tracking-wider">
                   평가액
                 </th>
-                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right font-pixel text-xs font-bold uppercase tracking-wider">
                   공시일 종가
                 </th>
-                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right font-pixel text-xs font-bold uppercase tracking-wider">
                   현재가
                 </th>
-                <th className="px-3 py-2 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                <th className="px-3 py-2 text-right font-pixel text-xs font-bold uppercase tracking-wider">
                   수익률
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody className="divide-y-[2px] divide-[var(--pixel-border-muted)]">
               {portfolio.holdings.map((holding) => {
                 const prices = getHoldingPrice(holding);
                 return (
                   <tr
                     key={holding.ticker}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                    className="hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                   >
                     <td className="px-3 py-2">
                       <div>
@@ -268,7 +268,7 @@ const PortfolioTable = memo(function PortfolioTable({ portfolio }: PortfolioTabl
           return (
             <div
               key={holding.ticker}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700"
+              className="card-base p-4"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">

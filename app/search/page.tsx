@@ -81,13 +81,13 @@ export default function SearchPage() {
       <div className="mb-3 sm:mb-6 flex items-center gap-2 sm:gap-3">
         <button
           onClick={() => router.back()}
-          className="md:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+          className="md:hidden p-1.5 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
         >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h1 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+        <h1 className="font-pixel text-xl sm:text-2xl font-bold">
           검색
         </h1>
       </div>
@@ -104,15 +104,15 @@ export default function SearchPage() {
       {/* 검색 방식 선택 */}
       <div className="mb-3 sm:mb-6">
         <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mr-0.5 sm:mr-1">검색 방식:</span>
+          <span className="font-pixel text-xs text-gray-500 dark:text-gray-400 mr-0.5 sm:mr-1">검색 방식:</span>
           {(Object.keys(searchTypeLabels) as SearchType[]).map((type) => (
             <button
               key={type}
               onClick={() => setSearchType(type)}
-              className={`px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm rounded-lg transition-all ${
+              className={`font-pixel px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 transition-all ${
                 searchType === type
-                  ? 'bg-red-600 text-white font-semibold'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                  ? 'border-2 pixel-chip-active font-bold'
+                  : 'bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
               }`}
             >
               {searchTypeLabels[type]}
@@ -123,8 +123,8 @@ export default function SearchPage() {
 
       {/* Popular Search Keywords (when no search query) */}
       {!searchQuery && (
-        <div className="mt-3 mb-4 sm:mt-4 sm:mb-6 p-3 sm:p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
-          <h2 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white mb-2.5 sm:mb-4">
+        <div className="mt-3 mb-4 sm:mt-4 sm:mb-6 p-3 sm:p-6 card-base">
+          <h2 className="font-pixel text-sm font-bold mb-2.5 sm:mb-4">
             인기 검색어
           </h2>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -132,7 +132,7 @@ export default function SearchPage() {
               <button
                 key={keyword}
                 onClick={() => setSearchQuery(keyword)}
-                className="px-2.5 py-1 sm:px-3 sm:py-1.5 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-xs sm:text-sm text-gray-700 dark:text-gray-300 hover:border-red-500 dark:hover:border-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                className="font-pixel px-2.5 py-1 sm:px-3 sm:py-1.5 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] transition-all"
               >
                 <span className="text-xs text-gray-400 mr-1">{index + 1}</span>
                 {keyword}
@@ -148,9 +148,9 @@ export default function SearchPage() {
       {/* Search Results Summary */}
       {searchQuery && (
         <div className="mb-4 px-2">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            <span className="text-red-600 dark:text-red-400 font-medium">{searchTypeLabels[searchType]}</span>
-            {' '}검색: <span className="font-semibold text-gray-900 dark:text-white">&ldquo;{searchQuery}&rdquo;</span>
+          <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+            <span className="text-[var(--pixel-accent)] font-bold">{searchTypeLabels[searchType]}</span>
+            {' '}검색: <span className="font-bold">&ldquo;{searchQuery}&rdquo;</span>
             {' '}결과 {filteredReports.length}개
           </p>
         </div>
@@ -163,30 +163,26 @@ export default function SearchPage() {
             <ReportCard key={report.id} {...report} />
           ))
         ) : searchQuery ? (
-          <div className="text-center py-10 sm:py-16">
-            <div className="mb-3 sm:mb-4">
-              <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-lg mb-1 sm:mb-2">
+          <div className="pixel-empty-state">
+            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--pixel-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p className="font-pixel text-sm mb-1 sm:mb-2">
               검색 결과가 없습니다
             </p>
-            <p className="text-gray-400 dark:text-gray-500 text-xs sm:text-sm">
+            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
               다른 검색어를 입력해보세요
             </p>
           </div>
         ) : (
-          <div className="text-center py-10 sm:py-16">
-            <div className="mb-3 sm:mb-4">
-              <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-lg mb-1 sm:mb-2">
+          <div className="pixel-empty-state">
+            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--pixel-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <p className="font-pixel text-sm mb-1 sm:mb-2">
               검색어를 입력해주세요
             </p>
-            <p className="text-gray-400 dark:text-gray-500 text-xs sm:text-sm">
+            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
               위에서 검색 방식을 선택하고 검색할 수 있습니다
             </p>
           </div>
@@ -196,7 +192,7 @@ export default function SearchPage() {
       {/* Load More Button */}
       {filteredReports.length > 0 && (
         <div className="text-center mt-6 sm:mt-8">
-          <button className="w-full sm:w-auto px-6 py-3 bg-red-600 text-white rounded-lg text-sm sm:text-base font-semibold hover:bg-red-700 transition-colors">
+          <button className="w-full sm:w-auto btn-primary font-pixel">
             더 보기
           </button>
         </div>

@@ -48,7 +48,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
   ).length;
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md mb-6 border border-gray-200 dark:border-gray-700 transition-colors">
+    <div className="bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border-muted)] shadow-pixel mb-6 transition-colors">
       {/* 모바일: 한 줄 축약 버전 */}
       <div className="block md:hidden">
         <div className="p-3 flex items-center gap-2">
@@ -56,7 +56,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
           <select
             value={filters.sortBy}
             onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-            className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+            className="pixel-select flex-1"
           >
             <option value="returnRate">수익률순</option>
             <option value="latest">최신순</option>
@@ -67,14 +67,14 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
           {/* 필터 버튼 */}
           <button
             onClick={() => setShowAllFilters(!showAllFilters)}
-            className="relative px-4 py-2 text-sm font-semibold bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center gap-1"
+            className="btn-primary relative px-4 py-2 text-sm flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
             필터
             {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[var(--pixel-accent)] text-white text-xs font-pixel border-2 border-red-800 flex items-center justify-center">
                 {activeFilterCount}
               </span>
             )}
@@ -83,11 +83,11 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
 
         {/* 확장된 필터 옵션 (모바일) */}
         {showAllFilters && (
-          <div className="px-3 pb-3 space-y-2 border-t border-gray-200 dark:border-gray-700 pt-3">
+          <div className="px-3 pb-3 space-y-2 border-t-[3px] border-[var(--pixel-border-muted)] pt-3">
             <select
               value={filters.period}
               onChange={(e) => handleFilterChange('period', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="pixel-select"
             >
               <option value="all">기간: 전체</option>
               <option value="1m">1개월</option>
@@ -99,7 +99,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
             <select
               value={filters.market}
               onChange={(e) => handleFilterChange('market', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="pixel-select"
             >
               <option value="all">국가: 전체</option>
               <option value="KR">한국</option>
@@ -111,7 +111,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
             <select
               value={filters.opinion}
               onChange={(e) => handleFilterChange('opinion', e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="pixel-select"
             >
               <option value="all">의견: 전체</option>
               <option value="buy">매수</option>
@@ -130,7 +130,7 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
                     sortBy: 'returnRate',
                   });
                 }}
-                className="w-full px-3 py-2 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                className="btn-secondary w-full px-3 py-2 text-sm"
               >
                 필터 초기화
               </button>
@@ -144,13 +144,13 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
         <div className="grid grid-cols-4 gap-4">
           {/* Period Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="pixel-label">
               기간
             </label>
             <select
               value={filters.period}
               onChange={(e) => handleFilterChange('period', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="w-full px-3 py-2 font-pixel border-[3px] border-[var(--pixel-border-muted)] shadow-pixel-sm focus:outline-none focus:border-[var(--pixel-accent)] bg-[var(--pixel-bg-card)] text-gray-900 dark:text-white transition-all"
             >
               <option value="all">전체</option>
               <option value="1m">1개월</option>
@@ -162,13 +162,13 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
 
           {/* Market Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="pixel-label">
               국가
             </label>
             <select
               value={filters.market}
               onChange={(e) => handleFilterChange('market', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="w-full px-3 py-2 font-pixel border-[3px] border-[var(--pixel-border-muted)] shadow-pixel-sm focus:outline-none focus:border-[var(--pixel-accent)] bg-[var(--pixel-bg-card)] text-gray-900 dark:text-white transition-all"
             >
               <option value="all">전체</option>
               <option value="KR">한국</option>
@@ -180,13 +180,13 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
 
           {/* Opinion Filter */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="pixel-label">
               의견
             </label>
             <select
               value={filters.opinion}
               onChange={(e) => handleFilterChange('opinion', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="w-full px-3 py-2 font-pixel border-[3px] border-[var(--pixel-border-muted)] shadow-pixel-sm focus:outline-none focus:border-[var(--pixel-accent)] bg-[var(--pixel-bg-card)] text-gray-900 dark:text-white transition-all"
             >
               <option value="all">전체</option>
               <option value="buy">매수</option>
@@ -197,13 +197,13 @@ const FilterBar = memo(function FilterBar({ onFilterChange }: FilterBarProps) {
 
           {/* Sort By */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="pixel-label">
               정렬
             </label>
             <select
               value={filters.sortBy}
               onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+              className="w-full px-3 py-2 font-pixel border-[3px] border-[var(--pixel-border-muted)] shadow-pixel-sm focus:outline-none focus:border-[var(--pixel-accent)] bg-[var(--pixel-bg-card)] text-gray-900 dark:text-white transition-all"
             >
               <option value="returnRate">수익률순</option>
               <option value="latest">최신순</option>

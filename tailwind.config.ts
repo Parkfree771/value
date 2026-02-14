@@ -56,6 +56,7 @@ const config: Config = {
           border: 'var(--pixel-border)',
           'border-muted': 'var(--pixel-border-muted)',
           accent: 'var(--pixel-accent)',
+          'accent-dark': 'var(--pixel-accent-dark)',
           gold: '#F5A623',
         },
       },

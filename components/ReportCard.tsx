@@ -234,7 +234,7 @@ const ReportCard = memo(function ReportCard({
                 <span>좋아요 {likes}</span>
                 <button
                   onClick={handleBookmarkClick}
-                  className="group/bm p-0.5 ml-0.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                  className="group/bm p-0.5 ml-0.5 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
                   title={bookmarked ? '북마크 해제' : '북마크'}
                 >
                   {bookmarked ? (
@@ -255,7 +255,7 @@ const ReportCard = memo(function ReportCard({
                   <button
                     onClick={handleClosePosition}
                     disabled={isClosing || isDeleting}
-                    className="px-3 py-1.5 text-xs font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-3 py-1.5 font-pixel text-xs font-bold text-white bg-emerald-600 border-2 border-emerald-800 hover:bg-emerald-700 transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isClosing ? '처리 중...' : '수익 확정하기'}
                   </button>

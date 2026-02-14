@@ -133,7 +133,7 @@ export default function NewReportPage() {
             required
           />
 
-          <div className="p-3 bg-ant-red-50 dark:bg-ant-red-900/20 border border-ant-red-200 dark:border-ant-red-800 rounded-lg">
+          <div className="p-3 bg-red-500/10 border-2 border-[var(--pixel-accent)]/30">
             <p className="text-sm text-ant-red-800 dark:text-ant-red-300">
               <strong>포지션 타입 안내:</strong><br />
               • <strong>매수 (롱):</strong> 가격이 상승하면 수익률이 플러스(+)로 표시됩니다<br />

@@ -9,14 +9,14 @@ export default function GuruTrackerPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 소개 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-black dark:via-gray-950 dark:to-black rounded-none sm:rounded-2xl p-6 sm:p-8 shadow-2xl border-t-4 border-b-4 sm:border-4 border-amber-600 dark:border-amber-500 relative overflow-hidden">
+      <section className="mb-6 sm:mb-8 bg-gradient-to-br from-slate-900 via-gray-900 to-slate-800 dark:from-black dark:via-gray-950 dark:to-black p-6 sm:p-8 shadow-pixel border-4 border-amber-600 dark:border-amber-500 relative overflow-hidden">
         {/* 장식 요소 */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
 
         <div className="relative z-10">
           <div className="text-center mb-6 sm:mb-7">
-            <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 bg-amber-600/20 border border-amber-600/50 rounded-full">
+            <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 bg-amber-600/20 border-2 border-amber-600/50">
               <span className="text-xs font-semibold tracking-widest text-amber-400 uppercase">Investment Masters Observatory</span>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight">
@@ -65,7 +65,7 @@ export default function GuruTrackerPage() {
 
       {/* 구루 목록 */}
       <section className="mb-8">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+        <h2 className="font-pixel text-lg sm:text-xl font-bold mb-4 sm:mb-6">
           투자 거장 목록
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -73,11 +73,11 @@ export default function GuruTrackerPage() {
             <Link
               key={guru.name_en}
               href={`/portfolio/${guru.name_en.toLowerCase().replace(/\s+/g, '-')}`}
-              className="text-left p-5 sm:p-6 rounded-xl border-2 transition-all hover:shadow-lg border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-amber-400 dark:hover:border-amber-600"
+              className="text-left p-5 sm:p-6 border-[3px] transition-all border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-amber-500 hover:shadow-pixel"
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3 flex-1">
-                  <div className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-600 flex-shrink-0">
+                  <div className="relative w-14 h-14 overflow-hidden border-[3px] border-[var(--pixel-border-muted)] flex-shrink-0">
                     <Image
                       src={`/${guru.image_filename}`}
                       alt={guru.name_kr}
@@ -86,7 +86,7 @@ export default function GuruTrackerPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-1">
+                    <h3 className="font-pixel text-sm sm:text-base font-bold mb-1">
                       {guru.name_kr}
                     </h3>
                     <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
@@ -96,7 +96,7 @@ export default function GuruTrackerPage() {
                 </div>
               </div>
 
-              <div className="mb-3 pb-3 border-b border-gray-200 dark:border-gray-600">
+              <div className="mb-3 pb-3 border-b-[3px] border-[var(--pixel-border-muted)]">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">운용사</p>
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
                   {guru.filing_name}
@@ -104,7 +104,7 @@ export default function GuruTrackerPage() {
               </div>
 
               <div className="mb-3">
-                <span className="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full text-xs font-semibold">
+                <span className="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-2 border-amber-300 dark:border-amber-700 font-pixel text-xs font-bold">
                   {guru.style}
                 </span>
               </div>
@@ -118,8 +118,8 @@ export default function GuruTrackerPage() {
       </section>
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-gray-900 dark:to-gray-800 border-l-4 border-amber-600 dark:border-amber-500 rounded-r-lg shadow-lg">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-4 tracking-wide uppercase">
+      <section className="mt-12 p-6 sm:p-8 bg-amber-500/10 border-l-[4px] border-amber-600 dark:border-amber-500 shadow-pixel">
+        <h3 className="font-pixel text-sm font-bold mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>
         <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">

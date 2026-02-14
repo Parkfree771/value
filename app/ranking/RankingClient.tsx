@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic';
 import styles from './Ranking.module.css';
 
 const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
-  loading: () => <div className="animate-pulse h-32 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  loading: () => <div className="animate-pulse h-32 bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
 });
 const Podium = dynamic(() => import('@/components/Podium'), {
-  loading: () => <div className="animate-pulse h-96 bg-gray-200 dark:bg-gray-700 rounded-lg" />,
+  loading: () => <div className="animate-pulse h-96 bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
 });
 
 type TimePeriod = '1month' | '3months' | '6months' | '1year' | 'all';
@@ -145,36 +145,15 @@ export default function RankingClient({ initialReports, initialInvestors, initia
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Tab Navigation */}
       <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8">
-        <button
-          onClick={() => handleTabChange('reports')}
-          className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
-            activeTab === 'reports'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-        >
-          리포트
-        </button>
-        <button
-          onClick={() => handleTabChange('investors')}
-          className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
-            activeTab === 'investors'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-        >
-          투자자
-        </button>
-        <button
-          onClick={() => handleTabChange('trending')}
-          className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-colors ${
-            activeTab === 'trending'
-              ? 'bg-red-600 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-          }`}
-        >
-          인기글
-        </button>
+        {(['reports', 'investors', 'trending'] as const).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => handleTabChange(tab)}
+            className={`flex-1 sm:flex-none ${activeTab === tab ? 'pixel-tab-active' : 'pixel-tab'}`}
+          >
+            {{ reports: '리포트', investors: '투자자', trending: '인기글' }[tab]}
+          </button>
+        ))}
       </div>
 
       {activeTab === 'reports' && (
@@ -258,10 +237,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 key={period}
                 onClick={() => handlePeriodChange(period)}
-                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all ${
+                className={`font-pixel px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold transition-all ${
                   selectedPeriod === period
-                    ? 'bg-red-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                    ? 'border-2 pixel-chip-active'
+                    : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
                 }`}
               >
                 {getPeriodLabel(period)}
@@ -277,8 +256,8 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
               })
             ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">선택한 기간에 작성된 리포트가 없습니다.</p>
+              <div className="pixel-empty-state">
+                <p className="font-pixel text-sm">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
@@ -289,7 +268,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
@@ -299,10 +278,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
+                    className={`font-pixel px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
                       currentPage === page
-                        ? 'bg-red-600 text-white'
-                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'border-2 pixel-chip-active'
+                        : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
                     }`}
                   >
                     {page}
@@ -313,7 +292,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
@@ -396,10 +375,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 key={period}
                 onClick={() => handlePeriodChange(period)}
-                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all ${
+                className={`font-pixel px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold transition-all ${
                   selectedPeriod === period
-                    ? 'bg-red-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                    ? 'border-2 pixel-chip-active'
+                    : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
                 }`}
               >
                 {getPeriodLabel(period)}
@@ -408,8 +387,8 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           </div>
 
           {/* All Rankings */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-6 border border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+          <div className="card-base p-3 sm:p-6">
+            <h2 className="font-pixel text-base sm:text-lg font-bold mb-4 sm:mb-6">
               전체 투자자 랭킹
             </h2>
             <div className="space-y-2 sm:space-y-3">
@@ -417,7 +396,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
-                  className="flex items-center justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                  className="flex items-center justify-between p-3 sm:p-4 bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all cursor-pointer"
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <div className={`${styles.investorRankBadge} ${
@@ -465,7 +444,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
@@ -475,10 +454,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
+                    className={`font-pixel px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
                       currentPage === page
-                        ? 'bg-red-600 text-white'
-                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'border-2 pixel-chip-active'
+                        : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
                     }`}
                   >
                     {page}
@@ -489,7 +468,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
@@ -501,8 +480,8 @@ export default function RankingClient({ initialReports, initialInvestors, initia
       {activeTab === 'trending' && (
         <>
           <div className="mb-4 sm:mb-6">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-2 text-center">인기글</h2>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 text-center">조회수와 좋아요가 많은 인기 리포트</p>
+            <h2 className="font-pixel text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-center">인기글</h2>
+            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 text-center">조회수와 좋아요가 많은 인기 리포트</p>
           </div>
 
           {/* Time Period Filter */}
@@ -511,10 +490,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 key={period}
                 onClick={() => handlePeriodChange(period)}
-                className={`px-3 sm:px-6 py-1.5 sm:py-2.5 rounded-lg text-sm sm:text-base font-semibold transition-all ${
+                className={`font-pixel px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold transition-all ${
                   selectedPeriod === period
-                    ? 'bg-red-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600'
+                    ? 'border-2 pixel-chip-active'
+                    : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
                 }`}
               >
                 {getPeriodLabel(period)}
@@ -529,8 +508,8 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
               })
             ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-500 dark:text-gray-400">선택한 기간에 작성된 리포트가 없습니다.</p>
+              <div className="pixel-empty-state">
+                <p className="font-pixel text-sm">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
@@ -541,7 +520,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
@@ -551,10 +530,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold transition-colors ${
+                    className={`font-pixel px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
                       currentPage === page
-                        ? 'bg-red-600 text-white'
-                        : 'bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        ? 'border-2 pixel-chip-active'
+                        : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
                     }`}
                   >
                     {page}
@@ -565,7 +544,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 sm:px-4 sm:py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
