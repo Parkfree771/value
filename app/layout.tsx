@@ -165,6 +165,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
+        {/* RSS Feed */}
+        <link rel="alternate" type="application/rss+xml" title="AntStreet RSS" href="/feed.xml" />
+
         {/* DNS Prefetch & Preconnect */}
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
