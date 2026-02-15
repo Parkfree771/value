@@ -153,6 +153,9 @@ export default function RootLayout({
         {/* Google Search Console 인증 */}
         <meta name="google-site-verification" content="thbsZW7iVjN1ZXSUejzzm9S_b-3uTv-Qv0S-tGiqGII" />
 
+        {/* Naver Search Advisor 인증 */}
+        <meta name="naver-site-verification" content="5a34f98d930b030eafe37723bc938f7e0c2909a4" />
+
         {/* 테마 초기화 (FOUC 방지) */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
 
