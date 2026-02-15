@@ -1,7 +1,7 @@
 # 사이트 효율성 및 보안 분석 보고서
 
 **분석 일자:** 2026-01-21
-**프로젝트:** 워렌버핏 따라잡기 (warren-buffet-tracker)
+**프로젝트:** AntStreet (antstreet)
 **기술 스택:** Next.js 16 + Firebase + Tailwind CSS
 
 ---

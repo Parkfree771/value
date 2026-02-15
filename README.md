@@ -1,6 +1,6 @@
-# 워렌버핏 따라잡기 - 투자 리포트 플랫폼
+# AntStreet - 개미 투자자들의 리포트 공유 플랫폼
 
-개인 투자자들이 직접 매수·매도 리포트를 작성하고, 시간이 지나면서 해당 리포트의 성과(수익률)를 자동으로 추적해 주는 주식 커뮤니티 & 리포트 플랫폼.
+개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하는 리포트 플랫폼.
 
 ## 주요 기능
 
@@ -26,7 +26,7 @@
 - **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
-- **Deployment**: Netlify
+- **Deployment**: Vercel
 
 ## 시작하기
 
@@ -113,11 +113,11 @@ value/
 
 ```
 
-## 네트리파이 배포
+## Vercel 배포
 
 1. GitHub에 코드 푸시
-2. Netlify에서 저장소 연결
-3. 빌드 설정은 `netlify.toml`에 자동 구성됨
+2. Vercel에서 저장소 연결
+3. 환경 변수 설정
 4. 배포 완료!
 
 ## 다음 단계
