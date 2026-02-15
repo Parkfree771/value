@@ -16,7 +16,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'Berkshire Hathaway',
     style: '정통 가치투자',
     catchphrase: '살아있는 자본주의의 역사. 시간이 증명한 가치 투자의 영원한 아이콘.',
-    image_filename: 'buffett.webp'
+    image_filename: 'GURU/Buffett.webp'
   },
   {
     name_kr: '스탠리 드러켄밀러',
@@ -24,7 +24,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'Duquesne Family Office',
     style: '공격적 성장/매크로',
     catchphrase: '30년 무패의 신화. 거시 경제의 흐름을 읽고 주도주를 선점하는 승부사.',
-    image_filename: 'Druckenmiller.webp'
+    image_filename: 'GURU/Druckenmiller.webp'
   },
   {
     name_kr: '빌 애크먼',
@@ -32,7 +32,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'Pershing Square Capital',
     style: '집중 투자',
     catchphrase: '확신이 없다면 배팅하지 않는다. 소수 정예 종목에 집중하는 행동주의 거물.',
-    image_filename: 'ackman.webp'
+    image_filename: 'GURU/Ackman.webp'
   },
   {
     name_kr: '리 루',
@@ -40,7 +40,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'Himalaya Capital',
     style: '글로벌 가치투자',
     catchphrase: '찰리 멍거가 인정한 유일한 파트너. 동서양을 잇는 현대적 가치 투자의 정석.',
-    image_filename: 'riru.png'
+    image_filename: 'GURU/riru.webp'
   },
   {
     name_kr: '세스 클라만',
@@ -48,7 +48,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'The Baupost Group',
     style: '절대 안전마진',
     catchphrase: '잃지 않는 투자의 미학. 남들이 외면한 저평가 자산을 찾는 안전마진의 대가.',
-    image_filename: 'ses.jpg'
+    image_filename: 'GURU/ses.webp'
   },
   {
     name_kr: '하워드 막스',
@@ -56,7 +56,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'Oaktree Capital',
     style: '심층 가치/부실채권',
     catchphrase: '시장의 사이클을 지배하는 현자. 2차적 사고(Second-level thinking)로 리스크를 제어한다.',
-    image_filename: 'max.jpg'
+    image_filename: 'GURU/max.webp'
   },
   {
     name_kr: '레이 달리오',
@@ -64,7 +64,7 @@ export const GURU_LIST: GuruInfo[] = [
     filing_name: 'Bridgewater Associates',
     style: '자산 배분',
     catchphrase: '경제라는 기계를 해부하다. 어떤 위기에도 무너지지 않는 \'올웨더\' 원칙주의자.',
-    image_filename: 'rai.webp'
+    image_filename: 'GURU/rai.webp'
   },
 ];
 

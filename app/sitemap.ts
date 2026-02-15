@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { getDocs, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { GURU_LIST } from './guru-tracker/types';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app';
 
@@ -36,24 +37,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${SITE_URL}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
-      url: `${SITE_URL}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
-      url: `${SITE_URL}/disclaimer`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.3,
-    },
-    {
       url: `${SITE_URL}/contact`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
@@ -87,5 +70,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     console.error('Sitemap 생성 중 리포트 가져오기 실패:', error);
   }
 
-  return [...staticPages, ...reportPages];
+  // 구루 포트폴리오 페이지
+  const guruPages: MetadataRoute.Sitemap = GURU_LIST.map((guru) => ({
+    url: `${SITE_URL}/portfolio/${guru.name_en.toLowerCase().replace(/\s+/g, '-')}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...guruPages, ...reportPages];
 }
