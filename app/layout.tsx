@@ -39,14 +39,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app',
+    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr',
     title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
     description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
     siteName: 'AntStreet',
@@ -95,13 +95,13 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#organization`,
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/#organization`,
       name: "AntStreet",
       alternateName: "부자FARM",
-      url: process.env.NEXT_PUBLIC_SITE_URL || "https://value-two-psi.vercel.app",
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://antstreet.kr",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/logo-background.png`,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/logo-background.png`,
         width: 512,
         height: 512,
       },
@@ -122,19 +122,19 @@ const jsonLd = {
     },
     {
       "@type": "WebSite",
-      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#website`,
-      url: process.env.NEXT_PUBLIC_SITE_URL || "https://value-two-psi.vercel.app",
+      "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/#website`,
+      url: process.env.NEXT_PUBLIC_SITE_URL || "https://antstreet.kr",
       name: "AntStreet",
       description: "개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.",
       publisher: {
-        "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/#organization`,
+        "@id": `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/#organization`,
       },
       inLanguage: "ko-KR",
       potentialAction: {
         "@type": "SearchAction",
         target: {
           "@type": "EntryPoint",
-          urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app'}/search?q={search_term_string}`,
+          urlTemplate: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/search?q={search_term_string}`,
         },
         "query-input": "required name=search_term_string",
       },

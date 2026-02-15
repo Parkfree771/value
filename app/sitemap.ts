@@ -3,7 +3,7 @@ import { getDocs, collection } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { GURU_LIST } from './guru-tracker/types';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://value-two-psi.vercel.app';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
 /**
  * 동적 sitemap.xml 생성
