@@ -151,7 +151,7 @@ export default function RootLayout({
     <html lang="ko" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
         {/* Google Search Console 인증 */}
-        <meta name="google-site-verification" content="AP5eR-Eum2IZ1OjbIlE-vI7mPeI0dmTdV-fxjja6RaU" />
+        <meta name="google-site-verification" content="thbsZW7iVjN1ZXSUejzzm9S_b-3uTv-Qv0S-tGiqGII" />
 
         {/* 테마 초기화 (FOUC 방지) */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
