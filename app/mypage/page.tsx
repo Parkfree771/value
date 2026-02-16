@@ -308,8 +308,8 @@ export default function MyPage() {
               </svg>
             </div>
             <div>
-              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">최고 수익</div>
-              <div className={`font-pixel text-lg font-black ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
+              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">최고 수익</div>
+              <div className={`text-xl font-bold tabular-nums ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
                 {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
               </div>
             </div>
@@ -324,8 +324,8 @@ export default function MyPage() {
               </svg>
             </div>
             <div>
-              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">최저 수익</div>
-              <div className={`font-pixel text-lg font-black ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
+              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">최저 수익</div>
+              <div className={`text-xl font-bold tabular-nums ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
                 {parseFloat(minReturnRate) >= 0 ? '+' : ''}{minReturnRate}%
               </div>
             </div>
@@ -341,8 +341,8 @@ export default function MyPage() {
               </svg>
             </div>
             <div>
-              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">총 조회수</div>
-              <div className="font-pixel text-lg font-black">
+              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">총 조회수</div>
+              <div className="text-xl font-bold tabular-nums">
                 {totalViews > 999 ? (totalViews / 1000).toFixed(1) + 'K' : totalViews}
               </div>
             </div>
@@ -357,8 +357,8 @@ export default function MyPage() {
               </svg>
             </div>
             <div>
-              <div className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400 uppercase tracking-wider">총 좋아요</div>
-              <div className="font-pixel text-lg font-black">{totalLikes}</div>
+              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">총 좋아요</div>
+              <div className="text-xl font-bold tabular-nums">{totalLikes}</div>
             </div>
           </div>
         </div>

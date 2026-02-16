@@ -163,9 +163,20 @@ const Navbar = memo(function Navbar() {
 
             {user ? (
               <>
-                <span className="font-pixel text-xs text-gray-700 dark:text-gray-300">
-                  {user.displayName || user.email}
-                </span>
+                <Link href="/mypage" className="flex-shrink-0">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt="프로필"
+                      className="w-8 h-8 rounded-full border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] bg-[var(--pixel-accent)] flex items-center justify-center text-white font-pixel text-xs font-bold transition-all">
+                      {(user.displayName || user.email || '?')[0]}
+                    </div>
+                  )}
+                </Link>
                 <button
                   onClick={handleSignOut}
                   className="font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--pixel-accent)] transition-colors"
@@ -349,9 +360,23 @@ const Navbar = memo(function Navbar() {
           <div className="border-t-[3px] border-[var(--pixel-border-muted)] p-3">
             {user ? (
               <div className="flex flex-col space-y-2">
-                <div className="px-4 py-2.5 font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 text-center">
-                  {user.displayName || user.email}
-                </div>
+                <Link href="/mypage" onClick={closeMobileMenu} className="flex items-center gap-3 px-4 py-2.5">
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt="프로필"
+                      className="w-9 h-9 rounded-full border-2 border-[var(--pixel-border-muted)]"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-accent)] flex items-center justify-center text-white font-pixel text-sm font-bold">
+                      {(user.displayName || user.email || '?')[0]}
+                    </div>
+                  )}
+                  <span className="font-pixel text-sm font-bold text-gray-700 dark:text-gray-300">
+                    {user.displayName || user.email}
+                  </span>
+                </Link>
                 <button
                   onClick={handleSignOut}
                   className="px-4 py-2.5 font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--pixel-accent)] transition-colors text-center w-full"

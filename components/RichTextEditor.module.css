@@ -1,0 +1,339 @@
+/* ===== Wrapper ===== */
+.wrapper {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #fff;
+}
+
+:global(.dark) .wrapper {
+  border-color: #4b5563;
+  background: #1f2937;
+}
+
+/* ===== 툴바 ===== */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+:global(.dark) .toolbar {
+  background: #1f2937;
+  border-bottom-color: #4b5563;
+}
+
+/* 툴바 버튼 공통 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  color: #374151;
+  font-size: 14px;
+  transition: all 0.15s;
+}
+
+.btn:hover {
+  background: #e5e7eb;
+}
+
+.btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.btnActive {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+:global(.dark) .btn {
+  color: #d1d5db;
+}
+
+:global(.dark) .btn:hover {
+  background: #374151;
+}
+
+:global(.dark) .btnActive {
+  background: #1e3a5f;
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+/* 구분선 */
+.separator {
+  width: 1px;
+  height: 20px;
+  background: #d1d5db;
+  margin: 0 4px;
+}
+
+:global(.dark) .separator {
+  background: #4b5563;
+}
+
+/* 폰트 크기 입력 */
+.fontSizeInput {
+  width: 42px;
+  height: 30px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0 4px;
+  font-size: 13px;
+  text-align: center;
+  background: transparent;
+  color: #374151;
+  -moz-appearance: textfield;
+}
+
+.fontSizeInput::-webkit-outer-spin-button,
+.fontSizeInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.fontSizeInput:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+:global(.dark) .fontSizeInput {
+  border-color: #4b5563;
+  color: #d1d5db;
+  background: #374151;
+}
+
+.fontSizeLabel {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-right: 2px;
+}
+
+/* 색상 팔레트 */
+.colorPickerWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.colorTextHighlight {
+  font-size: 14px;
+  font-weight: 700;
+  background-color: #ffff00;
+  color: #000;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.colorPalette {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 160px;
+}
+
+:global(.dark) .colorPalette {
+  background: #1f2937;
+  border-color: #4b5563;
+}
+
+.colorGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.colorSwatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.colorSwatch:hover {
+  transform: scale(1.2);
+}
+
+.colorCustomRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 6px;
+  border-top: 1px solid #e5e7eb;
+}
+
+:global(.dark) .colorCustomRow {
+  border-top-color: #4b5563;
+}
+
+.colorCustomLabel {
+  font-size: 11px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+:global(.dark) .colorCustomLabel {
+  color: #9ca3af;
+}
+
+.colorInput {
+  width: 24px;
+  height: 24px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+}
+
+/* ===== 에디터 본문 ===== */
+.editorContent {
+  min-height: 400px;
+}
+
+.prosemirror {
+  min-height: 400px;
+  padding: 16px 20px;
+  font-size: 15px;
+  line-height: 1.8;
+  outline: none;
+  color: #111827;
+}
+
+:global(.dark) .prosemirror {
+  background: #374151;
+  color: #f3f4f6;
+}
+
+/* 플레이스홀더 */
+.editorContent :global(.tiptap p.is-editor-empty:first-child::before) {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+:global(.dark) .editorContent :global(.tiptap p.is-editor-empty:first-child::before) {
+  color: #6b7280;
+}
+
+/* 본문 타이포그래피 */
+.editorContent :global(.tiptap) h1 {
+  font-size: 1.75em;
+  font-weight: 700;
+  margin: 1em 0 0.5em;
+  line-height: 1.3;
+}
+
+.editorContent :global(.tiptap) h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin: 0.8em 0 0.4em;
+  line-height: 1.35;
+}
+
+.editorContent :global(.tiptap) h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 0.7em 0 0.35em;
+  line-height: 1.4;
+}
+
+.editorContent :global(.tiptap) p {
+  margin: 0.4em 0;
+}
+
+.editorContent :global(.tiptap) ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.editorContent :global(.tiptap) ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.editorContent :global(.tiptap) li {
+  margin: 0.25em 0;
+}
+
+.editorContent :global(.tiptap) li p {
+  margin: 0;
+}
+
+.editorContent :global(.tiptap) blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: #6b7280;
+}
+
+:global(.dark) .editorContent :global(.tiptap) blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+.editorContent :global(.tiptap) a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+:global(.dark) .editorContent :global(.tiptap) a {
+  color: #60a5fa;
+}
+
+.editorContent :global(.tiptap) img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 0.5em 0;
+}
+
+.editorContent :global(.tiptap) hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}
+
+:global(.dark) .editorContent :global(.tiptap) hr {
+  border-top-color: #4b5563;
+}
+
+.editorContent :global(.tiptap) mark {
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+.editorContent :global(.tiptap) code {
+  background: #f3f4f6;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 0.9em;
+  font-family: monospace;
+}
+
+:global(.dark) .editorContent :global(.tiptap) code {
+  background: #4b5563;
+}

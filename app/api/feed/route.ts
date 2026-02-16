@@ -33,6 +33,7 @@ interface FeedPost {
   views: number;
   likes: number;
   category: string;
+  targetPrice?: number;
   is_closed?: boolean;
   closed_return_rate?: number;
 }
@@ -179,6 +180,7 @@ export async function POST(request: NextRequest) {
       views: 0,
       likes: 0,
       category: postData.category || '',
+      targetPrice: postData.targetPrice || 0,
       is_closed: false,
     };
 

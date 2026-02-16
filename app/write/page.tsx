@@ -13,6 +13,7 @@ import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
 import { getCryptoImageUrl } from '@/lib/cryptoCoins';
 import dynamic from 'next/dynamic';
+import type { Editor } from '@tiptap/react';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
 
@@ -57,6 +58,7 @@ function WritePageContent() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [originalInitialPrice, setOriginalInitialPrice] = useState<number | null>(null);
+  const [tiptapEditor, setTiptapEditor] = useState<Editor | null>(null);
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
@@ -90,7 +92,7 @@ function WritePageContent() {
         setTitle(reportData.title || '');
         setStockData(reportData.stockData || null);
         setOpinion(reportData.opinion || 'buy');
-        setTargetPrice(reportData.targetPrice?.toString() || '');
+        setTargetPrice(reportData.targetPrice ? Number(reportData.targetPrice).toLocaleString() : '');
         setContent(reportData.content || '');
         setOriginalInitialPrice(reportData.initialPrice || null);
 
@@ -219,8 +221,9 @@ function WritePageContent() {
   };
 
   const insertImageToEditor = (url: string) => {
-    const imgTag = `<img src="${url}" alt="이미지" style="max-width: 100%; height: auto;" />`;
-    setContent(prev => prev + imgTag);
+    if (tiptapEditor) {
+      tiptapEditor.chain().focus().setImage({ src: url, alt: '이미지' }).run();
+    }
   };
 
   const removeFile = (index: number) => {
@@ -315,7 +318,7 @@ function WritePageContent() {
         // 6. 투자 의견
         opinion,
         positionType,
-        targetPrice: parseFloat(targetPrice),
+        targetPrice: parseFloat(targetPrice.replace(/,/g, '')) || 0,
 
         // 7. 콘텐츠
         content: finalContent,
@@ -451,11 +454,11 @@ function WritePageContent() {
   // 로딩 중일 때
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="write-page max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="card-base p-8">
           <div className="text-center">
             <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)] mx-auto mb-4"></div>
-            <p className="font-pixel text-sm text-gray-600 dark:text-gray-400">리포트를 불러오는 중...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400">리포트를 불러오는 중...</p>
           </div>
         </div>
       </div>
@@ -463,9 +466,9 @@ function WritePageContent() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="write-page max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="card-base p-6 sm:p-8">
-        <h1 className="font-pixel text-2xl sm:text-3xl font-bold mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-8">
           {isEditMode ? '투자 리포트 수정' : '투자 리포트 작성'}
         </h1>
 
@@ -494,7 +497,7 @@ function WritePageContent() {
 
             {/* 종목 프로필 카드 (코인이면 숨김) */}
             <div className={`mt-4 p-6 card-base border-[var(--pixel-accent)]/30 ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
-              <h3 className="font-pixel text-base font-bold mb-4">
+              <h3 className="text-base font-bold mb-4">
                 종목 프로필
               </h3>
 
@@ -522,47 +525,47 @@ function WritePageContent() {
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
-                      <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
+                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
                         {stockData.currency} {stockData.currentPrice.toLocaleString()}
                       </div>
                     </div>
                     <div>
-                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">PER</div>
-                      <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PER</div>
+                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
                         {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
-                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">PBR</div>
-                      <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PBR</div>
+                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
                         {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
-                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">EPS</div>
-                      <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">EPS</div>
+                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
                         {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
-                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">거래소</div>
-                      <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">거래소</div>
+                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
                         {stockData.exchange}
                       </div>
                     </div>
                     {stockData.sector && (
                       <div>
-                        <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">섹터</div>
-                        <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">섹터</div>
+                        <div className="text-lg font-bold text-[var(--pixel-accent)]">
                           {stockData.sector}
                         </div>
                       </div>
                     )}
                     {stockData.industry && (
                       <div>
-                        <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">산업</div>
-                        <div className="font-pixel text-lg font-bold text-[var(--pixel-accent)]">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">산업</div>
+                        <div className="text-lg font-bold text-[var(--pixel-accent)]">
                           {stockData.industry}
                         </div>
                       </div>
@@ -602,7 +605,7 @@ function WritePageContent() {
                   <option value="sell">매도 (숏 포지션 - 하락 예상)</option>
                   <option value="hold">보유</option>
                 </select>
-                <p className="mt-1 font-pixel text-xs text-gray-500 dark:text-gray-400">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {opinion === 'buy' && '매수: 가격 상승 시 수익률 증가'}
                   {opinion === 'sell' && '매도: 가격 하락 시 수익률 증가'}
                   {opinion === 'hold' && '보유: 현재 포지션 유지'}
@@ -614,12 +617,20 @@ function WritePageContent() {
                   목표 가격
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={targetPrice}
-                  onChange={(e) => setTargetPrice(e.target.value)}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    if (raw === '') {
+                      setTargetPrice('');
+                    } else {
+                      setTargetPrice(Number(raw).toLocaleString());
+                    }
+                  }}
                   required
                   className="pixel-input"
-                  placeholder="예: 85000"
+                  placeholder="예: 85,000"
                 />
               </div>
             </div>
@@ -634,8 +645,9 @@ function WritePageContent() {
                 value={content}
                 onChange={setContent}
                 placeholder="리포트 본문을 입력하세요..."
+                onEditorReady={setTiptapEditor}
               />
-              <p className="mt-2 font-pixel text-xs text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 툴바를 사용하여 굵게, 색상, 정렬 등 서식을 적용할 수 있습니다. 다른 곳에서 복사/붙여넣기하면 서식이 유지됩니다.
               </p>
             </div>
@@ -650,8 +662,8 @@ function WritePageContent() {
                 <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <span className="font-pixel text-sm">이미지 선택</span>
-                <span className="font-pixel text-xs text-gray-500 dark:text-gray-400">(PNG, JPG, GIF - 최대 10MB)</span>
+                <span className="text-sm">이미지 선택</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">(PNG, JPG, GIF - 최대 10MB)</span>
                 <input
                   type="file"
                   className="hidden"
@@ -678,18 +690,18 @@ function WritePageContent() {
                             />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="font-pixel text-sm font-bold truncate">
+                            <div className="text-sm font-bold truncate">
                               {image.name}
                             </div>
                             {uploadedImageUrls[index] ? (
                               <>
-                                <div className="font-pixel text-xs text-green-600 dark:text-green-400 mt-1">
+                                <div className="text-xs text-green-600 dark:text-green-400 mt-1">
                                   업로드 완료
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => insertImageToEditor(uploadedImageUrls[index])}
-                                  className="mt-2 font-pixel text-xs px-3 py-1 btn-primary !py-1 !px-3 !text-xs"
+                                  className="mt-2 text-xs px-3 py-1 btn-primary !py-1 !px-3 !text-xs"
                                 >
                                   이미지 삽입
                                 </button>
@@ -715,7 +727,7 @@ function WritePageContent() {
                   </div>
                   {uploadedImageUrls.length > 0 && (
                     <div className="border-2 border-[var(--pixel-accent)] bg-red-500/10 p-3">
-                      <p className="font-pixel text-xs text-red-900 dark:text-red-100">
+                      <p className="text-xs text-red-900 dark:text-red-100">
                         <strong>사용법:</strong> 각 이미지의 &quot;이미지 삽입&quot; 버튼을 클릭하면 본문에 이미지가 추가됩니다.
                       </p>
                     </div>
@@ -735,8 +747,8 @@ function WritePageContent() {
                 <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
-                <span className="font-pixel text-sm">PDF 첨부</span>
-                <span className="font-pixel text-xs text-gray-500 dark:text-gray-400">(최대 20MB)</span>
+                <span className="text-sm">PDF 첨부</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">(최대 20MB)</span>
                 <input
                   type="file"
                   className="hidden"
@@ -764,10 +776,10 @@ function WritePageContent() {
                           />
                         </svg>
                         <div className="flex-1 min-w-0">
-                          <p className="font-pixel text-sm font-bold truncate">
+                          <p className="text-sm font-bold truncate">
                             {file.name}
                           </p>
-                          <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
@@ -791,7 +803,7 @@ function WritePageContent() {
           {/* 업로드 진행 상태 */}
           {isUploading && (
             <div className="space-y-2">
-              <div className="flex justify-between font-pixel text-xs text-gray-600 dark:text-gray-400">
+              <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
                 <span>이미지 업로드 중...</span>
                 <span>{Math.round(uploadProgress)}%</span>
               </div>
@@ -809,7 +821,7 @@ function WritePageContent() {
             <button
               type="submit"
               disabled={isUploading}
-              className={`flex-1 btn-primary font-pixel !py-3 !text-sm ${
+              className={`flex-1 btn-primary !py-3 !text-sm ${
                 isUploading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
@@ -819,7 +831,7 @@ function WritePageContent() {
               type="button"
               onClick={() => router.push('/')}
               disabled={isUploading}
-              className={`btn-secondary font-pixel !py-3 !text-sm ${
+              className={`btn-secondary !py-3 !text-sm ${
                 isUploading ? 'opacity-50 cursor-not-allowed' : ''
               }`}
             >
@@ -835,7 +847,7 @@ function WritePageContent() {
 // Suspense wrapper for useSearchParams
 export default function WritePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center font-pixel text-sm">로딩 중...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm">로딩 중...</div>}>
       <WritePageContent />
     </Suspense>
   );

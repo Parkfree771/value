@@ -238,12 +238,12 @@ const ReportCard = memo(function ReportCard({
                   title={bookmarked ? '북마크 해제' : '북마크'}
                 >
                   {bookmarked ? (
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-neon-green-500" viewBox="0 0 12 13" shapeRendering="crispEdges">
-                      <path d="M1 0H11V10H9V11H7V12H5V11H3V10H1Z" fill="currentColor" />
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neon-green-500" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 dark:text-gray-500 group-hover/bm:text-neon-green-400 transition-colors" viewBox="0 0 12 13" shapeRendering="crispEdges">
-                      <path d="M1 0H11V10H9V11H7V12H5V11H3V10H1Z" fill="currentColor" />
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-300 dark:text-gray-500 group-hover/bm:text-neon-green-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   )}
                 </button>

@@ -426,10 +426,16 @@ body {
     margin-bottom: 0.25rem;
   }
 
+  /* 글쓰기 페이지: 픽셀 폰트 제거 */
+  .write-page .pixel-input,
+  .write-page .pixel-label {
+    font-family: inherit;
+  }
+
   /* 픽셀 탭 버튼 */
   .pixel-tab {
     font-family: 'Galmuri11', monospace;
-    @apply px-5 py-2 font-bold text-sm whitespace-nowrap;
+    @apply px-6 py-2.5 font-bold text-sm whitespace-nowrap;
     background: var(--pixel-bg-card);
     color: var(--foreground);
     border: 3px solid var(--pixel-border-muted);
@@ -443,6 +449,7 @@ body {
     box-shadow: var(--shadow-sm);
   }
   .pixel-tab-active {
+    @apply px-7 py-3;
     background: var(--pixel-accent);
     color: white;
     border-color: var(--pixel-accent-dark);

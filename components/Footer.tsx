@@ -12,7 +12,7 @@ const Footer = memo(function Footer() {
         {/* 기본 정보 (항상 표시) */}
         <div className="flex flex-col items-center gap-3 text-center">
           <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-400 flex-wrap justify-center">
-            <span className="font-semibold text-white">AntStreet</span>
+            <span className="brand-title text-sm">AntStreet</span>
             <Link href="/terms" className="hover:text-white transition-colors">이용약관</Link>
             <Link href="/privacy" className="hover:text-white transition-colors">개인정보</Link>
             <Link href="/disclaimer" className="text-yellow-400 hover:text-yellow-300 transition-colors">면책조항</Link>

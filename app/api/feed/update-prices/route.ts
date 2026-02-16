@@ -10,7 +10,7 @@
  */
 
 import { NextResponse } from 'next/server';
-import { adminStorage } from '@/lib/firebase-admin';
+import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { getKISTokenWithCache } from '@/lib/kisTokenManager';
 
 // feed.json 구조
@@ -30,6 +30,7 @@ interface FeedPost {
   views: number;
   likes: number;
   category: string;
+  targetPrice?: number;
   is_closed?: boolean;
   closed_return_rate?: number;
 }
@@ -260,7 +261,9 @@ export async function POST() {
       }
     }
 
-    // 5. 각 게시글의 수익률 재계산
+    // 5. 각 게시글의 수익률 재계산 + 목표가 도달 시 자동 수익 확정
+    const autoClosedPosts: string[] = [];
+
     for (const post of feedData.posts) {
       // 이미 확정된 포지션은 스킵
       if (post.is_closed && post.closed_return_rate != null) {
@@ -275,6 +278,35 @@ export async function POST() {
         post.returnRate = parseFloat(
           calculateReturn(post.initialPrice, priceData.currentPrice, post.positionType).toFixed(2)
         );
+
+        // 목표가 도달 시 자동 수익 확정
+        if (!post.is_closed && post.targetPrice && post.targetPrice > 0) {
+          const targetReached =
+            (post.positionType === 'long' && priceData.currentPrice >= post.targetPrice) ||
+            (post.positionType === 'short' && priceData.currentPrice <= post.targetPrice);
+
+          if (targetReached) {
+            const closedReturnRate = parseFloat(
+              calculateReturn(post.initialPrice, priceData.currentPrice, post.positionType).toFixed(2)
+            );
+            post.is_closed = true;
+            post.closed_return_rate = closedReturnRate;
+            autoClosedPosts.push(post.id);
+
+            // Firestore 문서도 함께 업데이트
+            try {
+              await adminDb.collection('posts').doc(post.id).update({
+                is_closed: true,
+                closed_at: new Date().toISOString(),
+                closed_return_rate: closedReturnRate,
+                closed_price: priceData.currentPrice,
+              });
+              console.log(`[Update Prices] Auto-closed post ${post.id} (target: ${post.targetPrice}, current: ${priceData.currentPrice})`);
+            } catch (firestoreErr) {
+              console.error(`[Update Prices] Failed to update Firestore for post ${post.id}:`, firestoreErr);
+            }
+          }
+        }
       }
     }
 
@@ -302,6 +334,7 @@ export async function POST() {
         totalPosts: feedData.posts.length,
         tickersUpdated: successCount,
         tickersFailed: failCount,
+        autoClosed: autoClosedPosts.length,
         duration: `${duration}s`,
       },
       errors: errors.length > 0 ? errors.slice(0, 10) : undefined,

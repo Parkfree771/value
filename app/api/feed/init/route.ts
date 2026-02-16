@@ -22,6 +22,7 @@ interface FeedPost {
   views: number;
   likes: number;
   category: string;
+  targetPrice?: number;
   is_closed?: boolean;
   closed_return_rate?: number;
 }
@@ -93,6 +94,7 @@ export async function POST() {
         views: data.views || 0,
         likes: data.likes || 0,
         category: data.category || '',
+        targetPrice: data.targetPrice || 0,
         is_closed: data.is_closed || false,
         closed_return_rate: data.closed_return_rate,
       });

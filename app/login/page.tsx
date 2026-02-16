@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -12,6 +12,17 @@ export default function LoginPage() {
   const { signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 걷는 애니메이션: 4프레임 스프라이트 순환
+  const spriteFrames = ['/sprite/logo.webp', '/sprite/1.webp', '/sprite/2.webp', '/sprite/3.webp', '/sprite/4.webp'];
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFrame((prev) => (prev + 1) % spriteFrames.length);
+    }, 200);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleGoogleLogin = async () => {
     try {
@@ -42,27 +53,60 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-[400px]">
-        {/* Header */}
+        {/* Header — 대표 로고 + 브랜드 타이틀 */}
         <div className="text-center mb-10">
-          <div className="mx-auto w-24 h-24 flex items-center justify-center mb-5">
-            <Image src="/logo.webp" alt="AntStreet" width={96} height={96} />
+          <div className="mx-auto w-full mb-5 overflow-hidden relative" style={{ height: '192px' }}>
+            {[0, 1, 2].map((antIndex) => (
+              <div
+                key={antIndex}
+                className="ant-walk absolute h-full"
+                style={{
+                  width: '192px',
+                  animationDelay: `${antIndex * -2}s`,
+                }}
+              >
+                {spriteFrames.map((src, i) => (
+                  <Image
+                    key={src}
+                    src={src}
+                    alt="AntStreet"
+                    width={192}
+                    height={192}
+                    priority={antIndex === 0 && i === 0}
+                    style={{ visibility: i === frame ? 'visible' : 'hidden' }}
+                    className="absolute top-1/2 left-0 -translate-y-1/2"
+                  />
+                ))}
+              </div>
+            ))}
+            <style>{`
+              @keyframes antWalk {
+                0% { left: -192px; }
+                100% { left: calc(100% + 192px); }
+              }
+              .ant-walk {
+                animation: antWalk 6s linear infinite;
+              }
+            `}</style>
           </div>
-          <h1 className="font-pixel text-2xl font-bold text-[var(--pixel-accent)] mb-2">
-            AntStreet
-          </h1>
-          <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <span className="brand-title text-3xl leading-none">
+              AntStreet
+            </span>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             개미 투자자들의 리포트 공유 플랫폼
           </p>
         </div>
 
         {/* Login Card */}
         <div className="card-base p-6">
-          <h2 className="font-pixel text-base font-bold text-[var(--foreground)] mb-6 text-center">
+          <h2 className="text-base font-bold text-[var(--foreground)] mb-6 text-center">
             로그인
           </h2>
 
           {error && (
-            <div className="mb-5 p-3 border-2 border-[var(--pixel-accent)] bg-red-500/10 font-pixel text-xs text-red-600 dark:text-red-400">
+            <div className="mb-5 p-3 border-2 border-[var(--pixel-accent)] bg-red-500/10 text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -88,7 +132,7 @@ export default function LoginPage() {
 
           {/* Coming Soon Section */}
           <div className="mt-6 pt-6 border-t-[3px] border-[var(--pixel-border-muted)]">
-            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 text-center mb-4">
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-4">
               추가 로그인 옵션 (준비 중)
             </p>
 
@@ -119,7 +163,7 @@ export default function LoginPage() {
         </div>
 
         {/* Terms */}
-        <p className="mt-6 text-center font-pixel text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
           로그인 시{' '}
           <Link href="/terms" className="text-[var(--pixel-accent)] hover:underline">
             이용약관
@@ -136,7 +180,7 @@ export default function LoginPage() {
         </p>
 
         {/* Security Notice */}
-        <div className="mt-4 flex items-center justify-center gap-1.5 font-pixel text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
