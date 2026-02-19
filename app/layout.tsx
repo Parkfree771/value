@@ -40,9 +40,6 @@ export const metadata: Metadata = {
     telephone: false,
   },
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'),
-  alternates: {
-    canonical: '/',
-  },
   openGraph: {
     type: 'website',
     locale: 'ko_KR',

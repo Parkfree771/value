@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     title: 'GURU 트래커 | AntStreet',
     description: '세계적인 투자 구루들의 포트폴리오를 추적하세요. SEC 13F 공시 기반 실시간 포트폴리오 분석.',
   },
+  alternates: {
+    canonical: '/guru-tracker',
+  },
 };
 
 export default function GuruTrackerLayout({

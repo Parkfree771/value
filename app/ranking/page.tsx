@@ -9,6 +9,9 @@ export const metadata: Metadata = {
     title: '랭킹 | AntStreet',
     description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
   },
+  alternates: {
+    canonical: '/ranking',
+  },
 };
 
 // 1분마다 재검증
