@@ -16,7 +16,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
   padding: 6px 8px;
   border-bottom: 1px solid #e5e7eb;
   background: #f9fafb;
@@ -84,41 +84,55 @@
   background: #4b5563;
 }
 
-/* 폰트 크기 입력 */
-.fontSizeInput {
-  width: 42px;
+/* 폰트 셀렉트 공통 */
+.fontFamilySelect,
+.fontSizeSelect {
   height: 30px;
-  border: 1px solid #d1d5db;
+  border: 1px solid transparent;
   border-radius: 4px;
-  padding: 0 4px;
+  padding: 0 6px;
   font-size: 13px;
-  text-align: center;
   background: transparent;
   color: #374151;
-  -moz-appearance: textfield;
+  cursor: pointer;
+  transition: all 0.15s;
 }
 
-.fontSizeInput::-webkit-outer-spin-button,
-.fontSizeInput::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+.fontFamilySelect {
+  max-width: 110px;
+  margin-right: 4px;
 }
 
-.fontSizeInput:focus {
+.fontSizeSelect {
+  min-width: 54px;
+}
+
+.fontFamilySelect:hover,
+.fontSizeSelect:hover {
+  background: #e5e7eb;
+}
+
+.fontFamilySelect:focus,
+.fontSizeSelect:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #93c5fd;
+  background: #dbeafe;
 }
 
-:global(.dark) .fontSizeInput {
-  border-color: #4b5563;
+:global(.dark) .fontFamilySelect,
+:global(.dark) .fontSizeSelect {
   color: #d1d5db;
+}
+
+:global(.dark) .fontFamilySelect:hover,
+:global(.dark) .fontSizeSelect:hover {
   background: #374151;
 }
 
-.fontSizeLabel {
-  font-size: 11px;
-  color: #9ca3af;
-  margin-right: 2px;
+:global(.dark) .fontFamilySelect:focus,
+:global(.dark) .fontSizeSelect:focus {
+  border-color: #3b82f6;
+  background: #1e3a5f;
 }
 
 /* 색상 팔레트 */

@@ -172,6 +172,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
 
+        {/* 에디터용 Google Fonts (Noto Sans KR, Nanum Gothic, Nanum Myeongjo) */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap"
+          rel="stylesheet"
+        />
+
         <GoogleAnalytics />
         <GoogleAdSense />
       </head>

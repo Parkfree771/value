@@ -222,7 +222,7 @@ function WritePageContent() {
 
   const insertImageToEditor = (url: string) => {
     if (tiptapEditor) {
-      tiptapEditor.chain().focus().setImage({ src: url, alt: '이미지' }).run();
+      (tiptapEditor.chain().focus() as any).setImage({ src: url, alt: '이미지' }).run();
     }
   };
 

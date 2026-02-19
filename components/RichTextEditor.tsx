@@ -7,11 +7,12 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import { TextStyle } from '@tiptap/extension-text-style';
+import FontFamily from '@tiptap/extension-font-family';
 import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
-import TiptapImage from '@tiptap/extension-image';
+import ImageResize from 'tiptap-extension-resize-image';
 import styles from './RichTextEditor.module.css';
 
 // 커스텀 FontSize 확장 — TextStyle을 확장하여 font-size 스타일 속성 + 커맨드 추가
@@ -55,6 +56,32 @@ const FontSizeExtension = TextStyle.extend({
     };
   },
 });
+
+// 폰트 패밀리 목록 (Google Fonts로 로드됨)
+const FONT_FAMILIES = [
+  { label: '기본', value: '' },
+  { label: 'Noto Sans KR', value: 'Noto Sans KR, sans-serif' },
+  { label: '나눔고딕', value: 'Nanum Gothic, sans-serif' },
+  { label: '나눔명조', value: 'Nanum Myeongjo, serif' },
+  { label: 'Arial', value: 'Arial, sans-serif' },
+  { label: 'Georgia', value: 'Georgia, serif' },
+  { label: 'Courier New', value: 'Courier New, monospace' },
+];
+
+// 프리셋 폰트 크기
+const FONT_SIZES = [
+  { label: '10', value: '10px' },
+  { label: '12', value: '12px' },
+  { label: '14', value: '14px' },
+  { label: '16', value: '16px' },
+  { label: '18', value: '18px' },
+  { label: '20', value: '20px' },
+  { label: '24', value: '24px' },
+  { label: '28', value: '28px' },
+  { label: '32', value: '32px' },
+  { label: '36', value: '36px' },
+  { label: '48', value: '48px' },
+];
 
 // 프리셋 글자 색상
 const TEXT_COLORS = [
@@ -112,6 +139,7 @@ function TiptapEditor({ value, onChange, placeholder, onEditorReady }: RichTextE
         types: ['paragraph'],
       }),
       FontSizeExtension,
+      FontFamily,
       Color,
       Highlight.configure({
         multicolor: true,
@@ -126,11 +154,7 @@ function TiptapEditor({ value, onChange, placeholder, onEditorReady }: RichTextE
       Placeholder.configure({
         placeholder: placeholder || '내용을 입력하세요...',
       }),
-      TiptapImage.configure({
-        HTMLAttributes: {
-          style: 'max-width: 100%; height: auto;',
-        },
-      }),
+      ImageResize,
     ],
     content: value || '',
     onUpdate: ({ editor: ed }) => {
@@ -187,25 +211,46 @@ function TiptapEditor({ value, onChange, placeholder, onEditorReady }: RichTextE
     <div className={styles.wrapper}>
       {/* 툴바 */}
       <div className={styles.toolbar}>
-        {/* 폰트 크기 */}
-        <input
-          type="number"
-          className={styles.fontSizeInput}
-          title="폰트 크기 (px)"
-          placeholder="16"
-          min={8}
-          max={72}
-          value={parseInt(editor.getAttributes('textStyle').fontSize) || ''}
+        {/* 폰트 패밀리 */}
+        <select
+          className={styles.fontFamilySelect}
+          title="폰트"
+          value={editor.getAttributes('textStyle').fontFamily || ''}
           onChange={(e) => {
-            const num = parseInt(e.target.value);
-            if (num >= 8 && num <= 72) {
-              editor.chain().focus().setFontSize(`${num}px`).run();
-            } else if (!e.target.value) {
+            if (e.target.value) {
+              editor.chain().focus().setFontFamily(e.target.value).run();
+            } else {
+              editor.chain().focus().unsetFontFamily().run();
+            }
+          }}
+        >
+          {FONT_FAMILIES.map((font) => (
+            <option key={font.label} value={font.value} style={font.value ? { fontFamily: font.value } : undefined}>
+              {font.label}
+            </option>
+          ))}
+        </select>
+
+        {/* 폰트 크기 */}
+        <select
+          className={styles.fontSizeSelect}
+          title="폰트 크기"
+          value={editor.getAttributes('textStyle').fontSize || ''}
+          onChange={(e) => {
+            if (e.target.value) {
+              editor.chain().focus().setFontSize(e.target.value).run();
+            } else {
               editor.chain().focus().unsetFontSize().run();
             }
           }}
-        />
-        <span className={styles.fontSizeLabel}>px</span>
+        >
+          <option value="">크기</option>
+          {FONT_SIZES.map((size) => (
+            <option key={size.value} value={size.value}>
+              {size.label}
+            </option>
+          ))}
+        </select>
 
         <div className={styles.separator} />
 
