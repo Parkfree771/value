@@ -1,19 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Script from 'next/script';
-import { getCookieConsent } from './CookieConsent';
 
 const ADSENSE_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export default function GoogleAdSense() {
-  const [consented, setConsented] = useState(false);
-
-  useEffect(() => {
-    setConsented(getCookieConsent());
-  }, []);
-
-  if (!ADSENSE_ID || !consented) {
+  if (!ADSENSE_ID) {
     return null;
   }
 
