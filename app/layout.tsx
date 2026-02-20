@@ -7,7 +7,6 @@ import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import GoogleAdSense from "@/components/GoogleAdSense";
 import CookieConsent from "@/components/CookieConsent";
 
 // Footer는 viewport 밖에 있으므로 lazy load
@@ -178,8 +177,14 @@ export default function RootLayout({
           rel="stylesheet"
         />
 
+        {/* Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6944494802169618"
+          crossOrigin="anonymous"
+        />
+
         <GoogleAnalytics />
-        <GoogleAdSense />
       </head>
       <body className="antialiased flex flex-col min-h-screen bg-[var(--background)] text-[var(--foreground)] transition-colors font-body">
         <ThemeProvider>
