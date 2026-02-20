@@ -4,8 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GURU_LIST } from '@/app/guru-tracker/types';
-import { GURU_PORTFOLIOS } from '@/app/guru-tracker/portfolioData';
-import PortfolioTable from '@/components/PortfolioTable';
 
 export default function PortfolioPage() {
   const params = useParams();
@@ -20,14 +18,13 @@ export default function PortfolioPage() {
 
   // 구루 정보 찾기
   const guruInfo = GURU_LIST.find(g => g.name_en === guruNameEn);
-  const portfolio = guruInfo ? GURU_PORTFOLIOS[guruInfo.name_en] : null;
 
   // 구루를 찾지 못한 경우
   if (!guruInfo) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="card-base p-12 text-center">
-          <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4 font-pixel">404</div>
+          <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">404</div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
             구루를 찾을 수 없습니다
           </h3>
@@ -77,16 +74,16 @@ export default function PortfolioPage() {
             {/* 구루 정보 */}
             <div className="flex-1 text-center sm:text-left">
               <div className="inline-block mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
-                <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase font-pixel">
+                <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">
                   {guruInfo.style}
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-2 tracking-tight font-pixel text-shadow-pixel">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-2 tracking-tight text-shadow-pixel">
                 {guruInfo.name_kr}
               </h1>
 
-              <p className="text-lg sm:text-xl text-ant-red-600 dark:text-ant-red-400 mb-3 font-bold font-pixel">
+              <p className="text-lg sm:text-xl text-ant-red-600 dark:text-ant-red-400 mb-3 font-bold">
                 {guruInfo.name_en}
               </p>
 
@@ -105,51 +102,20 @@ export default function PortfolioPage() {
 
       {/* 포트폴리오 섹션 */}
       <section>
-        {portfolio ? (
-          <>
-            {/* 포트폴리오 요약 정보 */}
-            <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="card-base p-4 sm:p-6">
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">총 포트폴리오 가치</p>
-                <p className="text-xl sm:text-2xl font-bold text-foreground font-pixel">
-                  ${(portfolio.totalValue / 1000000000).toFixed(1)}B
-                </p>
-              </div>
-
-              <div className="card-base p-4 sm:p-6">
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">보유 종목 수</p>
-                <p className="text-xl sm:text-2xl font-bold text-foreground font-pixel">
-                  {portfolio.holdings.length}
-                </p>
-              </div>
-
-              <div className="card-base p-4 sm:p-6">
-                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-2">13F 공시일</p>
-                <p className="text-lg sm:text-xl font-bold text-foreground font-pixel">
-                  {new Date(portfolio.filingDate).toLocaleDateString('ko-KR')}
-                </p>
-              </div>
-            </div>
-
-            {/* 포트폴리오 테이블 */}
-            <PortfolioTable portfolio={portfolio} />
-          </>
-        ) : (
-          <div className="card-base p-12 text-center">
-            <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4 font-pixel">13F</div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              포트폴리오 데이터 준비중
-            </h3>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">
-              {guruInfo.name_kr}의 13F 공시 데이터를 곧 추가할 예정입니다.
-            </p>
-          </div>
-        )}
+        <div className="card-base p-12 text-center">
+          <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
+          <h3 className="text-lg font-semibold text-foreground mb-2">
+            포트폴리오 데이터 준비중
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            {guruInfo.name_kr}의 13F 공시 데이터를 곧 추가할 예정입니다.
+          </p>
+        </div>
       </section>
 
       {/* 면책 조항 */}
       <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-3 border-pixel-border-muted border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
-        <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase font-pixel">
+        <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>
         <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
@@ -165,9 +131,9 @@ export default function PortfolioPage() {
         </div>
 
         <div className="mt-6 pt-4 border-t-2 border-pixel-border-muted text-xs text-gray-600 dark:text-gray-400 space-y-2">
-          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400 font-pixel">TIME LAG:</strong> <span>13F 공시는 매수 시점으로부터 최대 135일 지연된 데이터일 수 있습니다.</span></div>
-          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400 font-pixel">TRACKING METHOD:</strong> <span>표기된 수익률은 공시된 보고서 가격 대비 현재가를 산출한 것으로, 해당 투자자의 실제 평단가와는 무관합니다.</span></div>
-          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400 font-pixel">FOR ENTERTAINMENT:</strong> <span>이 데이터는 투자 권유가 아니며, 유명 투자자들의 포트폴리오를 기반으로 한 후행적 분석 시뮬레이션입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>
+          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TIME LAG:</strong> <span>13F 공시는 매수 시점으로부터 최대 135일 지연된 데이터일 수 있습니다.</span></div>
+          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TRACKING METHOD:</strong> <span>표기된 수익률은 공시된 보고서 가격 대비 현재가를 산출한 것으로, 해당 투자자의 실제 평단가와는 무관합니다.</span></div>
+          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">FOR ENTERTAINMENT:</strong> <span>이 데이터는 투자 권유가 아니며, 유명 투자자들의 포트폴리오를 기반으로 한 후행적 분석 시뮬레이션입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>
         </div>
       </section>
     </div>

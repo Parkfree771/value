@@ -13,18 +13,18 @@ export default function GuruTrackerPage() {
         <div className="relative z-10">
           <div className="text-center mb-6 sm:mb-7">
             <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
-              <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase font-pixel">Investment Masters Observatory</span>
+              <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">Investment Masters Observatory</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight font-pixel text-shadow-pixel">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-pixel">
               GURU TRACKER
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-ant-red-300 tracking-wide font-bold font-pixel">
+            <p className="text-base sm:text-lg md:text-xl text-ant-red-300 tracking-wide font-bold">
               투자의 거인을 추적하다
             </p>
           </div>
 
           <div className="max-w-3xl mx-auto text-center px-4 sm:px-6">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-ant-red-400 mb-4 sm:mb-5 tracking-widest font-pixel text-glow-red">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-ant-red-400 mb-4 sm:mb-5 tracking-widest text-glow-red">
               GURU
             </h2>
 
@@ -40,7 +40,7 @@ export default function GuruTrackerPage() {
                 <br className="hidden sm:block" />
                 시장의 소음에 흔들리지 않는 철학, 그리고 압도적인 성과로 투자의 본질을 증명해 낸
                 <br className="hidden sm:block" />
-                워렌 버핏, 피터 린치, 레이 달리오 같은 전설적인 거장들.
+                워렌 버핏, 피터 린치 같은 전설적인 거장들.
                 <br className="hidden sm:block" />
                 우리는 그들을 <strong className="text-ant-red-400 font-bold">투자의 구루</strong>라 부릅니다.
               </p>
@@ -61,7 +61,7 @@ export default function GuruTrackerPage() {
 
       {/* 구루 목록 */}
       <section className="mb-8">
-        <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-4 sm:mb-6 font-pixel tracking-wider uppercase">
+        <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-4 sm:mb-6 tracking-wider uppercase">
           GURU 목록
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -85,7 +85,7 @@ export default function GuruTrackerPage() {
                     <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
                       {guru.name_kr}
                     </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-pixel">
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                       {guru.name_en}
                     </p>
                   </div>
@@ -115,7 +115,7 @@ export default function GuruTrackerPage() {
 
       {/* 면책 조항 */}
       <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-3 border-pixel-border-muted border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
-        <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase font-pixel">
+        <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>
         <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
@@ -131,9 +131,9 @@ export default function GuruTrackerPage() {
         </div>
 
         <div className="mt-6 pt-4 border-t-2 border-pixel-border-muted text-xs text-gray-600 dark:text-gray-400 space-y-2">
-          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400 font-pixel">TIME LAG:</strong> <span>13F 공시는 매수 시점으로부터 최대 135일 지연된 데이터일 수 있습니다.</span></div>
-          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400 font-pixel">TRACKING METHOD:</strong> <span>표기된 수익률은 공시된 보고서 가격 대비 현재가를 산출한 것으로, 해당 투자자의 실제 평단가와는 무관합니다.</span></div>
-          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400 font-pixel">FOR ENTERTAINMENT:</strong> <span>이 데이터는 투자 권유가 아니며, 유명 투자자들의 포트폴리오를 기반으로 한 후행적 분석 시뮬레이션입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>
+          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TIME LAG:</strong> <span>13F 공시는 매수 시점으로부터 최대 135일 지연된 데이터일 수 있습니다.</span></div>
+          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TRACKING METHOD:</strong> <span>표기된 수익률은 공시된 보고서 가격 대비 현재가를 산출한 것으로, 해당 투자자의 실제 평단가와는 무관합니다.</span></div>
+          <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">FOR ENTERTAINMENT:</strong> <span>이 데이터는 투자 권유가 아니며, 유명 투자자들의 포트폴리오를 기반으로 한 후행적 분석 시뮬레이션입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>
         </div>
       </section>
     </div>

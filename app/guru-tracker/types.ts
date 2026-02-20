@@ -58,14 +58,6 @@ export const GURU_LIST: GuruInfo[] = [
     catchphrase: '시장의 사이클을 지배하는 현자. 2차적 사고(Second-level thinking)로 리스크를 제어한다.',
     image_filename: 'GURU/max.webp'
   },
-  {
-    name_kr: '레이 달리오',
-    name_en: 'Ray Dalio',
-    filing_name: 'Bridgewater Associates',
-    style: '자산 배분',
-    catchphrase: '경제라는 기계를 해부하다. 어떤 위기에도 무너지지 않는 \'올웨더\' 원칙주의자.',
-    image_filename: 'GURU/rai.webp'
-  },
 ];
 
 export type DataType = 'PORTFOLIO' | 'MENTION';
@@ -140,28 +132,3 @@ export interface GuruTrackingEvent {
 }
 
 export type TabType = 'wallet' | 'word';
-
-// Portfolio Holdings Types
-export interface PortfolioHolding {
-  ticker: string;
-  companyName: string;
-  exchange?: string; // 거래소 (NYSE, NASDAQ 등)
-  portfolioPercent: number;
-  recentActivity?: string;
-  shares: number;
-  reportedPrice?: number; // 공시일(reportDate) 기준 종가
-  value: number;
-  currentPrice?: number; // 현재 가격 (동적 로드)
-  changeFromReported?: number; // 수익률 (동적 계산)
-  week52Low?: number;
-  week52High?: number;
-}
-
-export interface GuruPortfolio {
-  guruNameEn: string;
-  guruNameKr: string;
-  reportDate: string;
-  filingDate: string;
-  totalValue: number;
-  holdings: PortfolioHolding[];
-}
