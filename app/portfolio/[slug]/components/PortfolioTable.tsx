@@ -1,0 +1,198 @@
+'use client';
+
+import { useState } from 'react';
+import { PortfolioHolding } from '@/lib/sec13f/types';
+import StatusBadge from './StatusBadge';
+
+type FilterStatus = 'ALL' | 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM';
+
+function formatValue(value: number): string {
+  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
+  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
+  if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
+  return `$${value.toLocaleString()}`;
+}
+
+function formatShares(shares: number): string {
+  if (shares >= 1e6) return `${(shares / 1e6).toFixed(2)}M`;
+  if (shares >= 1e3) return `${(shares / 1e3).toFixed(0)}K`;
+  return shares.toLocaleString();
+}
+
+const thClass = 'px-3 py-3 text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap';
+
+interface PortfolioTableProps {
+  holdings: PortfolioHolding[];
+  filingDate?: string; // "2026-02-17" 형식
+}
+
+export default function PortfolioTable({ holdings, filingDate }: PortfolioTableProps) {
+  const [filter, setFilter] = useState<FilterStatus>('ALL');
+
+  const filters: { key: FilterStatus; label: string; count: number }[] = [
+    { key: 'ALL', label: '전체', count: holdings.length },
+    { key: 'NEW BUY', label: '신규매수', count: holdings.filter(h => h.status === 'NEW BUY').length },
+    { key: 'SOLD OUT', label: '전량매도', count: holdings.filter(h => h.status === 'SOLD OUT').length },
+    { key: 'ADD', label: '비중확대', count: holdings.filter(h => h.status === 'ADD').length },
+    { key: 'TRIM', label: '비중축소', count: holdings.filter(h => h.status === 'TRIM').length },
+  ];
+
+  const filtered = filter === 'ALL'
+    ? holdings
+    : holdings.filter(h => h.status === filter);
+
+  return (
+    <div>
+      {/* 필터 탭 */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {filters.map(f => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-3 py-1.5 text-xs font-bold border-2 transition-colors ${
+              filter === f.key
+                ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
+                : 'bg-pixel-card text-foreground border-pixel-border hover:bg-pixel-bg'
+            }`}
+            style={{ boxShadow: filter === f.key ? 'var(--shadow-sm)' : 'none' }}
+          >
+            {f.label} ({f.count})
+          </button>
+        ))}
+      </div>
+
+      {/* 테이블 */}
+      <div className="card-base overflow-hidden" style={{ boxShadow: 'var(--shadow-md)' }}>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-pixel-bg border-b-3 border-pixel-border">
+                <th className={`${thClass} text-left w-8`}>#</th>
+                <th className={`${thClass} text-left`}>티커</th>
+                <th className={`${thClass} text-left hidden sm:table-cell`}>종목명</th>
+                <th className={`${thClass} text-center`}>상태</th>
+                <th className={`${thClass} text-right`}>변동</th>
+                <th className={`${thClass} text-right hidden md:table-cell`}>주식수</th>
+                <th className={`${thClass} text-right`}>평가액</th>
+                <th className={`${thClass} text-right`}>비중</th>
+                <th className={`${thClass} text-right hidden sm:table-cell`}>공시일 가격</th>
+                <th className={`${thClass} text-right hidden sm:table-cell`}>현재가</th>
+                <th className={`${thClass} text-right hidden sm:table-cell`}>수익률</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y-[2px] divide-pixel-border-muted">
+              {filtered.map((h, i) => (
+                <tr
+                  key={h.cusip}
+                  className={`hover:bg-ant-red-50/50 dark:hover:bg-ant-red-950/20 transition-colors ${
+                    h.status === 'SOLD OUT' ? 'opacity-50' : ''
+                  }`}
+                >
+                  {/* 순위 */}
+                  <td className="px-3 py-3 text-sm text-gray-400 font-bold">
+                    {i + 1}
+                  </td>
+
+                  {/* 티커 */}
+                  <td className="px-3 py-3">
+                    <span className="text-sm font-bold text-foreground">
+                      {h.ticker || '—'}
+                    </span>
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:hidden">
+                      {h.name_of_issuer}
+                    </p>
+                  </td>
+
+                  {/* 종목명 */}
+                  <td className="px-3 py-3 hidden sm:table-cell">
+                    <span className="text-sm text-foreground">
+                      {h.name_of_issuer}
+                    </span>
+                  </td>
+
+                  {/* 상태 배지 */}
+                  <td className="px-3 py-3 text-center">
+                    <StatusBadge status={h.status} />
+                  </td>
+
+                  {/* 변동률 */}
+                  <td className="px-3 py-3 text-right">
+                    {h.status === 'NEW BUY' ? (
+                      <span className="text-sm font-bold text-red-500">NEW</span>
+                    ) : h.status === 'SOLD OUT' ? (
+                      <span className="text-sm font-bold text-blue-500">-100%</span>
+                    ) : h.shares_change_pct !== null && h.shares_change_pct !== 0 ? (
+                      <span className={`text-sm font-bold ${
+                        h.shares_change_pct > 0 ? 'text-red-500' : 'text-blue-500'
+                      }`}>
+                        {h.shares_change_pct > 0 ? '+' : ''}{h.shares_change_pct.toFixed(1)}%
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400">0%</span>
+                    )}
+                  </td>
+
+                  {/* 주식수 */}
+                  <td className="px-3 py-3 text-right hidden md:table-cell">
+                    <span className="text-sm text-foreground">
+                      {h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}
+                    </span>
+                  </td>
+
+                  {/* 평가액 */}
+                  <td className="px-3 py-3 text-right">
+                    <span className="text-sm text-foreground font-bold">
+                      {h.value_curr > 0 ? formatValue(h.value_curr) : '—'}
+                    </span>
+                  </td>
+
+                  {/* 비중 */}
+                  <td className="px-3 py-3 text-right">
+                    <span className="text-sm text-foreground font-bold">
+                      {h.weight_curr > 0 ? `${h.weight_curr.toFixed(2)}%` : '—'}
+                    </span>
+                  </td>
+
+                  {/* 공시일 가격 */}
+                  <td className="px-3 py-3 text-right hidden sm:table-cell">
+                    <span className="text-sm text-foreground">
+                      {h.price_at_filing ? `$${h.price_at_filing.toFixed(2)}` : '—'}
+                    </span>
+                  </td>
+
+                  {/* 현재가 */}
+                  <td className="px-3 py-3 text-right hidden sm:table-cell">
+                    <span className="text-sm text-foreground font-bold">
+                      {h.price_current ? `$${h.price_current.toFixed(2)}` : '—'}
+                    </span>
+                  </td>
+
+                  {/* 수익률 */}
+                  <td className="px-3 py-3 text-right hidden sm:table-cell">
+                    {h.price_change_pct !== null && h.price_change_pct !== undefined ? (
+                      <span className={`text-sm font-bold ${
+                        h.price_change_pct > 0 ? 'text-red-500' : h.price_change_pct < 0 ? 'text-blue-500' : 'text-gray-400'
+                      }`}>
+                        {h.price_change_pct > 0 ? '+' : ''}{h.price_change_pct.toFixed(1)}%
+                      </span>
+                    ) : (
+                      <span className="text-sm text-gray-400">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {filtered.length === 0 && (
+          <div className="p-8 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              해당 상태의 종목이 없습니다.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

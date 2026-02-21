@@ -1,14 +1,22 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { GURU_LIST } from '@/app/guru-tracker/types';
+import { GuruPortfolioDoc } from '@/lib/sec13f/types';
+import PortfolioSummary from './components/PortfolioSummary';
+import PortfolioTable from './components/PortfolioTable';
 
 export default function PortfolioPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
+
+  const [portfolio, setPortfolio] = useState<GuruPortfolioDoc | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   // slug를 guru name으로 변환 (예: "warren-buffett" -> "Warren Buffett")
   const guruNameEn = slug
@@ -18,6 +26,33 @@ export default function PortfolioPage() {
 
   // 구루 정보 찾기
   const guruInfo = GURU_LIST.find(g => g.name_en === guruNameEn);
+
+  // 포트폴리오 데이터 로드
+  useEffect(() => {
+    if (!slug) return;
+
+    async function fetchPortfolio() {
+      try {
+        const res = await fetch(`/api/guru-portfolio/${slug}`);
+        if (!res.ok) {
+          setError(true);
+          return;
+        }
+        const data = await res.json();
+        if (data.success && data.portfolio) {
+          setPortfolio(data.portfolio as GuruPortfolioDoc);
+        } else {
+          setError(true);
+        }
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchPortfolio();
+  }, [slug]);
 
   // 구루를 찾지 못한 경우
   if (!guruInfo) {
@@ -102,15 +137,33 @@ export default function PortfolioPage() {
 
       {/* 포트폴리오 섹션 */}
       <section>
-        <div className="card-base p-12 text-center">
-          <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
-          <h3 className="text-lg font-semibold text-foreground mb-2">
-            포트폴리오 데이터 준비중
-          </h3>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">
-            {guruInfo.name_kr}의 13F 공시 데이터를 곧 추가할 예정입니다.
-          </p>
-        </div>
+        <h2 className="text-xl sm:text-2xl font-black text-foreground mb-4 tracking-wider uppercase">
+          13F PORTFOLIO
+        </h2>
+
+        {loading ? (
+          <div className="card-base p-12 text-center">
+            <div className="inline-block w-8 h-8 border-3 border-ant-red-600 border-t-transparent animate-spin mb-4" />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              포트폴리오 데이터를 불러오는 중...
+            </p>
+          </div>
+        ) : error || !portfolio ? (
+          <div className="card-base p-12 text-center">
+            <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              포트폴리오 데이터 준비중
+            </h3>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">
+              {guruInfo.name_kr}의 13F 공시 데이터를 곧 추가할 예정입니다.
+            </p>
+          </div>
+        ) : (
+          <>
+            <PortfolioSummary portfolio={portfolio} />
+            <PortfolioTable holdings={portfolio.holdings} filingDate={portfolio.filing_date_curr} />
+          </>
+        )}
       </section>
 
       {/* 면책 조항 */}

@@ -4,6 +4,7 @@ export interface GuruInfo {
   name_kr: string;
   name_en: string;
   filing_name: string; // 13F 공시 법인명
+  cik: string; // SEC CIK 번호 (10자리, 앞에 0 패딩)
   style: string; // 투자 스타일
   catchphrase: string; // 캐치프레이즈
   image_filename: string; // 프로필 이미지 파일명
@@ -14,6 +15,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '워렌 버핏',
     name_en: 'Warren Buffett',
     filing_name: 'Berkshire Hathaway',
+    cik: '0001067983',
     style: '정통 가치투자',
     catchphrase: '살아있는 자본주의의 역사. 시간이 증명한 가치 투자의 영원한 아이콘.',
     image_filename: 'GURU/Buffett.webp'
@@ -22,6 +24,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '스탠리 드러켄밀러',
     name_en: 'Stanley Druckenmiller',
     filing_name: 'Duquesne Family Office',
+    cik: '0001536411',
     style: '공격적 성장/매크로',
     catchphrase: '30년 무패의 신화. 거시 경제의 흐름을 읽고 주도주를 선점하는 승부사.',
     image_filename: 'GURU/Druckenmiller.webp'
@@ -30,6 +33,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '빌 애크먼',
     name_en: 'Bill Ackman',
     filing_name: 'Pershing Square Capital',
+    cik: '0001336528',
     style: '집중 투자',
     catchphrase: '확신이 없다면 배팅하지 않는다. 소수 정예 종목에 집중하는 행동주의 거물.',
     image_filename: 'GURU/Ackman.webp'
@@ -38,6 +42,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '리 루',
     name_en: 'Li Lu',
     filing_name: 'Himalaya Capital',
+    cik: '0001709323',
     style: '글로벌 가치투자',
     catchphrase: '찰리 멍거가 인정한 유일한 파트너. 동서양을 잇는 현대적 가치 투자의 정석.',
     image_filename: 'GURU/riru.webp'
@@ -46,6 +51,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '세스 클라만',
     name_en: 'Seth Klarman',
     filing_name: 'The Baupost Group',
+    cik: '0001061768',
     style: '절대 안전마진',
     catchphrase: '잃지 않는 투자의 미학. 남들이 외면한 저평가 자산을 찾는 안전마진의 대가.',
     image_filename: 'GURU/ses.webp'
@@ -54,6 +60,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '하워드 막스',
     name_en: 'Howard Marks',
     filing_name: 'Oaktree Capital',
+    cik: '0000949509',
     style: '심층 가치/부실채권',
     catchphrase: '시장의 사이클을 지배하는 현자. 2차적 사고(Second-level thinking)로 리스크를 제어한다.',
     image_filename: 'GURU/max.webp'
