@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             <h3 className="text-xs font-bold mb-2 mt-4">가. 수집하는 개인정보 항목</h3>
             <p className="mb-2">회사는 회원가입, 서비스 이용 등을 위해 아래와 같은 개인정보를 수집하고 있습니다:</p>
             <ul className="list-disc list-inside ml-6 space-y-1">
-              <li><strong>필수항목:</strong> 이메일 주소, 비밀번호, 닉네임</li>
+              <li><strong>필수항목:</strong> 이메일 주소, 닉네임</li>
               <li><strong>선택항목:</strong> 프로필 사진, 자기소개</li>
               <li><strong>자동수집항목:</strong> IP 주소, 쿠키, 서비스 이용 기록, 접속 로그</li>
             </ul>
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
             <h3 className="text-xs font-bold mb-2 mt-4">나. 개인정보 수집 방법</h3>
             <ul className="list-disc list-inside ml-6 space-y-1">
               <li>회원가입 및 서비스 이용 과정에서 이용자가 직접 입력</li>
-              <li>소셜 로그인 (Google, 카카오, 네이버) 연동</li>
+              <li>소셜 로그인 (Google) 연동</li>
               <li>자동 수집 도구를 통한 생성정보 수집</li>
             </ul>
           </section>

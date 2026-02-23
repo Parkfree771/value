@@ -155,7 +155,7 @@ export default function DisclaimerPage() {
           {/* 최종 업데이트 */}
           <div className="pt-6 border-t-[3px] border-[var(--pixel-border-muted)]">
             <p className="text-[0.625rem] text-gray-500 dark:text-gray-400">
-              최종 업데이트: {new Date().toLocaleDateString('ko-KR')}
+              최종 업데이트: 2026년 2월 1일
             </p>
           </div>
         </div>

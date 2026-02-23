@@ -109,6 +109,24 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // 동의 기록 (법적 증거 보관 - 전자상거래법 5년 보관)
+    match /consent_records/{recordId} {
+      // 본인의 동의 기록만 읽기 가능
+      allow read: if request.auth != null && request.auth.uid == resource.data.uid;
+      // 로그인한 사용자가 본인의 동의 기록 생성 가능
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.uid;
+      // 동의 기록은 수정/삭제 불가 (법적 증거 보존)
+      allow update, delete: if false;
+    }
+
+    // 탈퇴 회원 기록 (법적 보관 의무)
+    match /withdrawn_users/{userId} {
+      // 본인의 탈퇴 기록만 생성 가능
+      allow create: if request.auth != null && request.auth.uid == userId;
+      // 탈퇴 기록은 읽기/수정/삭제 불가 (Admin SDK로만 접근)
+      allow read, update, delete: if false;
+    }
+
     // Tickers 컬렉션 (게시물 작성 시 ticker 등록, 가격 업데이트 최적화용)
     match /tickers/{ticker} {
       allow read: if true;
