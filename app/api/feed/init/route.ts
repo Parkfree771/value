@@ -5,40 +5,8 @@
 
 import { NextResponse } from 'next/server';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
-
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  stockName: string;
-  ticker: string;
-  exchange: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  positionType: 'long' | 'short';
-  initialPrice: number;
-  currentPrice: number;
-  returnRate: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  category: string;
-  targetPrice?: number;
-  is_closed?: boolean;
-  closed_return_rate?: number;
-}
-
-function calculateReturn(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: 'long' | 'short'
-): number {
-  if (initialPrice <= 0 || currentPrice <= 0) return 0;
-  if (positionType === 'long') {
-    return ((currentPrice - initialPrice) / initialPrice) * 100;
-  } else {
-    return ((initialPrice - currentPrice) / initialPrice) * 100;
-  }
-}
+import { calculateReturn } from '@/utils/calculateReturn';
+import type { FeedPost } from '@/types/feed';
 
 export async function POST() {
   try {

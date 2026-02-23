@@ -12,59 +12,13 @@
 import { NextResponse } from 'next/server';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { getKISTokenWithCache } from '@/lib/kisTokenManager';
-
-// feed.json 구조
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  stockName: string;
-  ticker: string;
-  exchange: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  positionType: 'long' | 'short';
-  initialPrice: number;
-  currentPrice: number;
-  returnRate: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  category: string;
-  targetPrice?: number;
-  is_closed?: boolean;
-  closed_return_rate?: number;
-}
-
-interface FeedData {
-  lastUpdated: string;
-  totalPosts: number;
-  posts: FeedPost[];
-  prices: Record<string, {
-    currentPrice: number;
-    exchange: string;
-    lastUpdated: string;
-  }>;
-}
+import { calculateReturn } from '@/utils/calculateReturn';
+import type { FeedPost, FeedData } from '@/types/feed';
 
 // KIS API 설정
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
 const BATCH_SIZE = 5; // 병렬 처리 배치 크기
 const BATCH_DELAY = 100; // 배치 간 딜레이 (ms)
-
-// 수익률 계산
-function calculateReturn(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: 'long' | 'short'
-): number {
-  if (initialPrice <= 0 || currentPrice <= 0) return 0;
-
-  if (positionType === 'long') {
-    return ((currentPrice - initialPrice) / initialPrice) * 100;
-  } else {
-    return ((initialPrice - currentPrice) / initialPrice) * 100;
-  }
-}
 
 // 국내 주식 가격 조회
 async function getKoreanStockPrice(token: string, ticker: string): Promise<number> {

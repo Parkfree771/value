@@ -10,15 +10,27 @@ export function calculateReturn(
   currentPrice: number,
   positionType: 'long' | 'short' = 'long'
 ): number {
-  if (initialPrice === 0) return 0;
+  if (initialPrice <= 0 || currentPrice <= 0) return 0;
 
   if (positionType === 'long') {
-    // 롱 포지션: 가격 상승 시 수익
     return ((currentPrice - initialPrice) / initialPrice) * 100;
   } else {
-    // 숏 포지션: 가격 하락 시 수익
     return ((initialPrice - currentPrice) / initialPrice) * 100;
   }
+}
+
+/**
+ * Firestore 데이터에서 수익률을 계산하는 함수 (수익 확정 상태 포함)
+ * 수익 확정된 게시글은 closed_return_rate를 반환
+ */
+export function calcReturnRate(data: Record<string, unknown>): number {
+  if (data.is_closed && data.closed_return_rate != null) {
+    return Number(data.closed_return_rate);
+  }
+  const initial = Number(data.initialPrice) || 0;
+  const current = Number(data.currentPrice) || 0;
+  const pos = (data.positionType as string) || 'long';
+  return calculateReturn(initial, current, pos as 'long' | 'short');
 }
 
 /**

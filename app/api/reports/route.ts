@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, query, orderBy, limit, getDocs, Timestamp, startAfter, doc, getDoc, getCountFromServer } from 'firebase/firestore';
 import { getLatestPrices } from '@/lib/priceCache';
+import { calculateReturn } from '@/utils/calculateReturn';
 
 export async function GET(request: NextRequest) {
   try {
@@ -65,14 +66,7 @@ export async function GET(request: NextRequest) {
       const currentPrice = jsonPrice || data.currentPrice || 0;
       const positionType = data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
 
-      let returnRate = 0;
-      if (initialPrice > 0 && currentPrice > 0) {
-        if (positionType === 'long') {
-          returnRate = ((currentPrice - initialPrice) / initialPrice) * 100;
-        } else {
-          returnRate = ((initialPrice - currentPrice) / initialPrice) * 100;
-        }
-      }
+      const returnRate = calculateReturn(initialPrice, currentPrice, positionType);
 
       return {
         id: docSnap.id,

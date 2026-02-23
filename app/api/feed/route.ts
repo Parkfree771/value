@@ -11,43 +11,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage, verifyAuthToken } from '@/lib/firebase-admin';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
+import { calculateReturn } from '@/utils/calculateReturn';
+import type { FeedPost, FeedData } from '@/types/feed';
 
 // Rate Limit 설정: 시간당 10개 게시글 (스팸 방지)
 const POST_RATE_LIMIT = 10;
 const POST_RATE_WINDOW = 60 * 60 * 1000; // 1시간
-
-// feed.json 구조
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  stockName: string;
-  ticker: string;
-  exchange: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  positionType: 'long' | 'short';
-  initialPrice: number;
-  currentPrice: number;
-  returnRate: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  category: string;
-  targetPrice?: number;
-  is_closed?: boolean;
-  closed_return_rate?: number;
-}
-
-interface FeedData {
-  lastUpdated: string;
-  totalPosts: number;
-  posts: FeedPost[];
-  prices: Record<string, {
-    currentPrice: number;
-    exchange: string;
-    lastUpdated: string;
-  }>;
-}
 
 // Firebase Storage에서 feed.json 읽기
 async function getFeed(): Promise<FeedData> {
@@ -89,21 +58,6 @@ async function saveFeed(feedData: FeedData): Promise<void> {
       cacheControl: 'public, max-age=60',
     },
   });
-}
-
-// 수익률 계산
-function calculateReturn(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: 'long' | 'short'
-): number {
-  if (initialPrice <= 0 || currentPrice <= 0) return 0;
-
-  if (positionType === 'long') {
-    return ((currentPrice - initialPrice) / initialPrice) * 100;
-  } else {
-    return ((initialPrice - currentPrice) / initialPrice) * 100;
-  }
 }
 
 /**

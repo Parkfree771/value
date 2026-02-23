@@ -2,19 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
-
-function calcReturnRate(data: Record<string, unknown>): number {
-  if (data.is_closed && data.closed_return_rate != null) {
-    return Number(data.closed_return_rate);
-  }
-  const initial = Number(data.initialPrice) || 0;
-  const current = Number(data.currentPrice) || 0;
-  const pos = (data.positionType as string) || 'long';
-  if (initial <= 0 || current <= 0) return 0;
-  return pos === 'long'
-    ? ((current - initial) / initial) * 100
-    : ((initial - current) / initial) * 100;
-}
+import { calcReturnRate } from '@/utils/calculateReturn';
 
 // 통계 조회 (관리자용)
 export async function GET(request: NextRequest) {
