@@ -11,6 +11,7 @@ import { sanitizeHtml } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
+import { useBookmark } from '@/contexts/BookmarkContext';
 
 interface ReportDetailClientProps {
   report: Report;
@@ -30,6 +31,7 @@ interface Comment {
 export default function ReportDetailClient({ report }: ReportDetailClientProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { isBookmarked, toggleBookmark } = useBookmark();
   const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(report.likes || 0);
@@ -383,13 +385,33 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </svg>
               {likesCount}
             </button>
-            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all">
-              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button
+              onClick={() => {
+                if (!user) { alert('로그인이 필요합니다.'); router.push('/login'); return; }
+                toggleBookmark(report.id);
+              }}
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 font-pixel text-xs sm:text-sm transition-all ${
+                isBookmarked(report.id)
+                  ? 'bg-yellow-500/10 text-yellow-600 border-2 border-yellow-500'
+                  : 'border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)]'
+              }`}
+            >
+              <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isBookmarked(report.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
               북마크
             </button>
-            <button className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all">
+            <button
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: report.title, url: window.location.href });
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('링크가 복사되었습니다.');
+                }
+              }}
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all"
+            >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
               </svg>
@@ -814,13 +836,33 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   </svg>
                   <span>좋아요 {likesCount}</span>
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] font-pixel text-sm font-bold transition-all">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button
+                  onClick={() => {
+                    if (!user) { alert('로그인이 필요합니다.'); router.push('/login'); return; }
+                    toggleBookmark(report.id);
+                  }}
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 font-pixel text-sm font-bold transition-all ${
+                    isBookmarked(report.id)
+                      ? 'border-2 border-yellow-500 bg-yellow-500/10 text-yellow-600'
+                      : 'border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)]'
+                  }`}
+                >
+                  <svg className="w-5 h-5" fill={isBookmarked(report.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                   </svg>
-                  <span>북마크</span>
+                  <span>{isBookmarked(report.id) ? '북마크 해제' : '북마크'}</span>
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] font-pixel text-sm font-bold transition-all">
+                <button
+                  onClick={() => {
+                    if (navigator.share) {
+                      navigator.share({ title: report.title, url: window.location.href });
+                    } else {
+                      navigator.clipboard.writeText(window.location.href);
+                      alert('링크가 복사되었습니다.');
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] font-pixel text-sm font-bold transition-all"
+                >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                   </svg>

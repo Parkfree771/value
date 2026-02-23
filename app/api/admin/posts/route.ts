@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, orderBy, query, limit, startAfter, Timestamp, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
+import { adminStorage } from '@/lib/firebase-admin';
 
 function calcReturnRate(data: Record<string, unknown>): number {
   if (data.is_closed && data.closed_return_rate != null) {
@@ -114,6 +115,28 @@ export async function DELETE(request: NextRequest) {
     }
 
     await deleteDoc(postRef);
+
+    // feed.json에서도 제거
+    try {
+      const bucket = adminStorage.bucket();
+      const file = bucket.file('feed.json');
+      const [exists] = await file.exists();
+      if (exists) {
+        const [content] = await file.download();
+        const feed = JSON.parse(content.toString());
+        if (feed.posts) {
+          feed.posts = feed.posts.filter((p: { id: string }) => p.id !== postId);
+          feed.totalPosts = feed.posts.length;
+          feed.lastUpdated = new Date().toISOString();
+          await file.save(JSON.stringify(feed, null, 2), {
+            contentType: 'application/json',
+            metadata: { cacheControl: 'public, max-age=60' },
+          });
+        }
+      }
+    } catch (feedError) {
+      console.error('[Admin] feed.json 동기화 실패:', feedError);
+    }
 
     console.log(`[Admin] 게시글 삭제: ${postId} by ${admin.email}`);
 

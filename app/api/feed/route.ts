@@ -181,12 +181,24 @@ export async function POST(request: NextRequest) {
       likes: 0,
       category: postData.category || '',
       targetPrice: postData.targetPrice || 0,
-      is_closed: false,
+      is_closed: postData.is_closed || false,
+      closed_return_rate: postData.closed_return_rate,
     };
 
-    // 중복 체크 후 추가
+    // 중복 체크 후 추가 (기존 포스트의 is_closed 상태 보존)
     const existingIndex = feed.posts.findIndex(p => p.id === postId);
     if (existingIndex >= 0) {
+      const existing = feed.posts[existingIndex];
+      // is_closed 관련 필드가 전달되지 않았으면 기존 값 유지
+      if (!newPost.is_closed && existing.is_closed) {
+        newPost.is_closed = existing.is_closed;
+        newPost.closed_return_rate = existing.closed_return_rate;
+        newPost.currentPrice = existing.currentPrice;
+        newPost.returnRate = existing.returnRate;
+      }
+      // 기존 views/likes 보존
+      newPost.views = existing.views || 0;
+      newPost.likes = existing.likes || 0;
       feed.posts[existingIndex] = newPost;
     } else {
       feed.posts.unshift(newPost);

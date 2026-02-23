@@ -362,11 +362,15 @@ function WritePageContent() {
 
         console.log('리포트가 수정되었습니다. ID:', editId);
 
-        // feed.json 업데이트 (수정된 내용 반영)
+        // feed.json 업데이트 (수정된 내용 반영 + is_closed 상태 보존)
         try {
           const { auth } = await import('@/lib/firebase');
           const token = await auth.currentUser?.getIdToken();
           if (token) {
+            // 기존 문서에서 is_closed 관련 필드 보존
+            const preservedSnap = await getDoc(doc(db, 'posts', editId));
+            const preservedData = preservedSnap.exists() ? preservedSnap.data() : {};
+
             await fetch('/api/feed', {
               method: 'POST',
               headers: {
@@ -378,6 +382,9 @@ function WritePageContent() {
                 postData: {
                   ...reportData,
                   authorName: authorName,
+                  is_closed: preservedData.is_closed || false,
+                  closed_return_rate: preservedData.closed_return_rate,
+                  closed_price: preservedData.closed_price,
                 },
               }),
             });
@@ -450,6 +457,25 @@ function WritePageContent() {
       setUploadProgress(0);
     }
   };
+
+  // 비로그인 유저 차단
+  if (!user) {
+    return (
+      <div className="write-page max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="card-base p-8">
+          <div className="text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">로그인이 필요한 서비스입니다.</p>
+            <button
+              onClick={() => router.push('/login')}
+              className="btn-primary !py-2 !px-6 !text-sm"
+            >
+              로그인하기
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // 로딩 중일 때
   if (isLoading) {
