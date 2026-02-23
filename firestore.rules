@@ -60,28 +60,15 @@ service cloud.firestore {
       allow update, delete: if request.auth != null && request.auth.uid == resource.data.authorId;
     }
 
-    // 워드워치 (Word Watch)
-    match /word-watch/{wordWatchId} {
-      allow read: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && (
-        request.auth.uid == resource.data.author_uid ||
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['views', 'likes', 'current_price', 'return_rate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price'])
-      );
-      allow delete: if request.auth != null && request.auth.uid == resource.data.author_uid;
+    // 시스템 설정 (KIS API 토큰 캐시 등)
+    match /settings/{settingId} {
+      allow read, write: if request.auth != null;
     }
 
-    // 마켓 콜 (Market Call)
-    match /market-call/{marketCallId} {
+    // SEC 13F 구루 포트폴리오 (Admin SDK로 쓰기, 공개 읽기)
+    match /guru_portfolios/{slug} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && (
-        request.auth.uid == resource.data.author_id ||
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['views', 'likes', 'current_price', 'return_rate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price'])
-      );
-      allow delete: if request.auth != null && request.auth.uid == resource.data.author_id;
+      allow write: if false;
     }
 
     // 게시글 가격 추적 (Posts - Ticker별 가격 정보)
@@ -89,14 +76,6 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null;
       // 서버에서 Admin SDK로 업데이트하므로 클라이언트에서는 불가
-      allow update: if false;
-      allow delete: if false;
-    }
-
-    // 마켓 콜 가격 추적 (Market-call - Ticker별 가격 정보)
-    match /marketcall_prices/{ticker} {
-      allow read: if true;
-      allow create: if request.auth != null;
       allow update: if false;
       allow delete: if false;
     }
