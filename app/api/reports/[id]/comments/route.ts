@@ -36,32 +36,35 @@ export async function GET(
       .orderBy('createdAt', 'asc')
       .get();
 
-    // 사용자의 좋아요 상태 확인 (병렬 처리)
-    const comments = await Promise.all(
-      commentsSnap.docs.map(async (docSnap) => {
-        const data = docSnap.data();
-
-        // 사용자 좋아요 상태 확인
-        let isLiked = false;
-        if (userId) {
-          const likeSnap = await docSnap.ref.collection('likes').doc(userId).get();
-          isLiked = likeSnap.exists;
+    // 사용자의 좋아요 상태를 단일 배치로 조회 (N+1 쿼리 방지)
+    const likedCommentIds = new Set<string>();
+    if (userId && commentsSnap.docs.length > 0) {
+      const likeRefs = commentsSnap.docs.map((docSnap) =>
+        docSnap.ref.collection('likes').doc(userId)
+      );
+      const likeDocs = await adminDb.getAll(...likeRefs);
+      likeDocs.forEach((likeDoc) => {
+        if (likeDoc.exists) {
+          likedCommentIds.add(likeDoc.ref.parent.parent!.id);
         }
+      });
+    }
 
-        return {
-          id: docSnap.id,
-          content: data.content,
-          author: data.authorName || '익명',
-          authorId: data.authorId,
-          parentId: data.parentId || null,
-          createdAt: data.createdAt instanceof Timestamp
-            ? data.createdAt.toDate().toISOString()
-            : data.createdAt,
-          likes: data.likes || 0,
-          isLiked,
-        };
-      })
-    );
+    const comments = commentsSnap.docs.map((docSnap) => {
+      const data = docSnap.data();
+      return {
+        id: docSnap.id,
+        content: data.content,
+        author: data.authorName || '익명',
+        authorId: data.authorId,
+        parentId: data.parentId || null,
+        createdAt: data.createdAt instanceof Timestamp
+          ? data.createdAt.toDate().toISOString()
+          : data.createdAt,
+        likes: data.likes || 0,
+        isLiked: likedCommentIds.has(docSnap.id),
+      };
+    });
 
     return NextResponse.json({
       success: true,

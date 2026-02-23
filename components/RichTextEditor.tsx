@@ -15,6 +15,15 @@ import Placeholder from '@tiptap/extension-placeholder';
 import ImageResize from 'tiptap-extension-resize-image';
 import styles from './RichTextEditor.module.css';
 
+// 에디터용 한국어 폰트 동적 로드 (글쓰기 페이지에서만 로드됨)
+const EDITOR_FONTS_URL = 'https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Nanum+Gothic:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap';
+if (typeof window !== 'undefined' && !document.querySelector(`link[href="${EDITOR_FONTS_URL}"]`)) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = EDITOR_FONTS_URL;
+  document.head.appendChild(link);
+}
+
 // 커스텀 FontSize 확장 — TextStyle을 확장하여 font-size 스타일 속성 + 커맨드 추가
 // 출력: <span style="font-size: 18px">텍스트</span>
 declare module '@tiptap/core' {

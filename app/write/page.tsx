@@ -11,6 +11,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
+import type { StockData } from '@/types/stock';
 import { getCryptoImageUrl } from '@/lib/cryptoCoins';
 import dynamic from 'next/dynamic';
 import type { Editor } from '@tiptap/react';
@@ -19,24 +20,6 @@ const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ss
 
 type Opinion = 'buy' | 'sell' | 'hold';
 type PositionType = 'long' | 'short';
-
-interface StockData {
-  symbol: string;
-  name: string;
-  currentPrice: number;
-  currency: string;
-  marketCap: number;
-  per: number | null;
-  pbr: number | null;
-  eps: number | null;
-  exchange: string;
-  industry?: string;
-  sector?: string;
-  change24h?: number;
-  changePercent24h?: number;
-  volume24h?: number;
-  tradeValue24h?: number;
-}
 
 function WritePageContent() {
   const router = useRouter();

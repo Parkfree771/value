@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, memo } from 'react';
 import { stockSearchIndex, type GlobalStock, type Stock } from '@/lib/stockSearchIndex';
 import { getCryptoStocksForIndex, getCryptoImageUrl } from '@/lib/cryptoCoins';
+import type { StockData } from '@/types/stock';
 
 interface GlobalStocksData {
   stocks: GlobalStock[];
@@ -48,24 +49,6 @@ function searchStocksLocal(query: string, limit: number = 20): Stock[] {
     return [];
   }
   return stockSearchIndex.search(query, limit);
-}
-
-interface StockData {
-  symbol: string;
-  name: string;
-  currentPrice: number;
-  currency: string;
-  marketCap: number;
-  per: number | null;
-  pbr: number | null;
-  eps: number | null;
-  exchange: string;
-  industry?: string;
-  sector?: string;
-  change24h?: number;
-  changePercent24h?: number;
-  volume24h?: number;
-  tradeValue24h?: number;
 }
 
 interface StockSearchInputProps {
