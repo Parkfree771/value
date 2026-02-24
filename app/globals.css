@@ -622,3 +622,126 @@ body {
     transform: translateY(0);
   }
 }
+
+/* ============================================
+   에디터 ↔ 뷰어 공통 콘텐츠 스타일 (WYSIWYG)
+   @layer 밖에 선언하여 prose 기본값보다 우선
+   ============================================ */
+.article-content {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #374151;
+  word-break: break-word;
+}
+.dark .article-content {
+  color: #d1d5db;
+}
+
+/* 문단 */
+.article-content p {
+  margin: 0.4em 0;
+}
+
+/* 제목 */
+.article-content h1 {
+  font-size: 1.75em;
+  font-weight: 700;
+  margin: 1em 0 0.5em;
+  line-height: 1.3;
+  color: #111827;
+}
+.article-content h2 {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin: 0.8em 0 0.4em;
+  line-height: 1.35;
+  color: #111827;
+}
+.article-content h3 {
+  font-size: 1.15em;
+  font-weight: 600;
+  margin: 0.7em 0 0.35em;
+  line-height: 1.4;
+  color: #111827;
+}
+.dark .article-content h1,
+.dark .article-content h2,
+.dark .article-content h3 {
+  color: #f3f4f6;
+}
+
+/* 목록 */
+.article-content ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+.article-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+.article-content li {
+  margin: 0.25em 0;
+}
+.article-content li p {
+  margin: 0;
+}
+
+/* 인용 */
+.article-content blockquote {
+  border-left: 3px solid #d1d5db;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: #6b7280;
+}
+.dark .article-content blockquote {
+  border-left-color: #4b5563;
+  color: #9ca3af;
+}
+
+/* 링크 */
+.article-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.dark .article-content a {
+  color: #60a5fa;
+}
+
+/* 이미지 */
+.article-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin: 0.5em 0;
+}
+
+/* 구분선 */
+.article-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1em 0;
+}
+.dark .article-content hr {
+  border-top-color: #4b5563;
+}
+
+/* 인라인 코드 */
+.article-content code {
+  background: #f3f4f6;
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 0.9em;
+  font-family: monospace;
+}
+.dark .article-content code {
+  background: #4b5563;
+}
+
+/* 하이라이트 */
+.article-content mark {
+  border-radius: 2px;
+  padding: 0 2px;
+}

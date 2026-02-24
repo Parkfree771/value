@@ -328,7 +328,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
           </div>
 
           <div
-            className={`text-sm text-gray-600 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none transition-all duration-300 ${
+            className={`article-content max-w-none transition-all duration-300 ${
               isExpanded ? '' : 'line-clamp-3'
             }`}
             dangerouslySetInnerHTML={{

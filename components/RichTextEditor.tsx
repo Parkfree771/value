@@ -172,7 +172,7 @@ function TiptapEditor({ value, onChange, placeholder, onEditorReady }: RichTextE
     },
     editorProps: {
       attributes: {
-        class: styles.prosemirror,
+        class: `${styles.prosemirror} article-content`,
       },
     },
   });

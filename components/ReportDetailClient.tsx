@@ -406,7 +406,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           <Card className="p-3 sm:p-6 lg:p-8">
             {/* 리포트 본문 */}
             <div
-              className="prose prose-sm sm:prose-base lg:prose-lg max-w-none dark:prose-invert prose-headings:text-gray-900 dark:prose-headings:text-white prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-p:leading-relaxed break-words text-gray-900 dark:text-gray-300"
+              className="article-content max-w-none"
               dangerouslySetInnerHTML={{
                 __html: /<[a-z][\s\S]*>/i.test(report.content)
                   ? sanitizeHtml(report.content)
