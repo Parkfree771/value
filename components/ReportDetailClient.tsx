@@ -410,6 +410,8 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               dangerouslySetInnerHTML={{
                 __html: /<[a-z][\s\S]*>/i.test(report.content)
                   ? sanitizeHtml(report.content)
+                    // Tiptap 빈 줄 보존: <p></p> → <p><br></p> (속성 있는 경우도 처리)
+                    .replace(/<p([^>]*)><\/p>/g, '<p$1><br></p>')
                   : report.content.replace(/\n/g, '<br />')
               }}
             />

@@ -109,6 +109,7 @@ const sanitizeOptions: sanitizeHtmlLib.IOptions = {
       'color': [/.*/],
       'background-color': [/.*/],
       'background': [/^(?!.*url\s*\(\s*["']?\s*javascript:).*/],
+      'font-family': [/.*/],
       'font-size': [/.*/],
       'font-weight': [/.*/],
       'font-style': [/.*/],

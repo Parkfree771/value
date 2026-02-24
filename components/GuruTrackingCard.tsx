@@ -331,7 +331,11 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
             className={`text-sm text-gray-600 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none transition-all duration-300 ${
               isExpanded ? '' : 'line-clamp-3'
             }`}
-            dangerouslySetInnerHTML={{ __html: sanitizeHtml(event.content_html) }}
+            dangerouslySetInnerHTML={{
+              __html: sanitizeHtml(event.content_html)
+                // Tiptap 빈 줄 보존: <p></p> → <p><br></p> (속성 있는 경우도 처리)
+                .replace(/<p([^>]*)><\/p>/g, '<p$1><br></p>')
+            }}
           />
 
           <div className="flex items-center gap-3 mt-4">
