@@ -19,12 +19,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
+  const title = `${guru.name_kr}(${guru.name_en}) 포트폴리오 - ${guru.filing_name} SEC 13F 공시`;
+  const description = `${guru.name_kr}(${guru.name_en})의 SEC 13F 공시 기반 최신 포트폴리오. ${guru.filing_name} 보유 종목, 신규매수, 전량매도, 비중 변화를 확인하세요. ${guru.style}. ${guru.catchphrase}`;
+
   return {
-    title: `${guru.name_kr} 포트폴리오`,
-    description: `${guru.name_kr}(${guru.name_en})의 13F 공시 기반 포트폴리오. ${guru.filing_name} | ${guru.style}. ${guru.catchphrase}`,
+    title,
+    description,
+    keywords: [
+      guru.name_kr, guru.name_en, guru.filing_name,
+      '13F', 'SEC 13F 공시', '포트폴리오', guru.style,
+      '투자 대가', 'guru portfolio', '헤지펀드',
+    ],
     openGraph: {
-      title: `${guru.name_kr} 포트폴리오 | AntStreet`,
-      description: `${guru.name_kr}(${guru.name_en})의 13F 공시 기반 포트폴리오 분석.`,
+      title: `${title} | AntStreet`,
+      description,
     },
     alternates: {
       canonical: `/portfolio/${slug}`,

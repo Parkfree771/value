@@ -267,80 +267,63 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
         {/* 왼쪽: 본문 영역 */}
         <div className="flex-1 min-w-0 space-y-4 sm:space-y-6">
           {/* 기업 프로필 */}
-          <Card className="p-0 sm:p-0 overflow-hidden">
-            {/* 헤더: 기업명(왼쪽) + 수익률(오른쪽) */}
-            <div className="flex items-center justify-between px-3 py-3 sm:px-5 sm:py-4 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-                <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white">{report.stockName}</span>
-                <span className="font-mono text-xs sm:text-sm text-gray-500">{report.ticker}</span>
+          <Card padding="none" className="overflow-hidden">
+            {/* 1행: 종목명 · 티커 · 거래소 · 의견배지 | 수익률 */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px' }}>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate">{report.stockName}</span>
+                <span className="font-mono text-xs text-gray-400">{report.ticker}</span>
                 {report.stockData?.exchange && (
-                  <span className={`text-xs ${report.stockData.exchange === 'CRYPTO' ? 'px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-gray-400'}`}>
+                  <span className={report.stockData.exchange === 'CRYPTO' ? 'text-xs px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-xs text-gray-400'}>
                     {report.stockData.exchange === 'CRYPTO' ? '코인' : report.stockData.exchange}
                   </span>
                 )}
+                <OpinionBadge opinion={report.opinion} />
               </div>
-              <div className={`text-right flex-shrink-0 ml-3 text-lg sm:text-2xl font-black tabular-nums ${
+              <span className={`flex-shrink-0 ml-4 text-xl sm:text-2xl font-black tabular-nums ${
                 report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
                 report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
                 'text-gray-900 dark:text-white'
               }`}>
                 {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
-              </div>
+              </span>
             </div>
-
-            {/* 가격/지표 정보 - 2열 테이블 형태 */}
-            <div className="grid grid-cols-2">
-              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
-                <span className="text-xs text-gray-500 dark:text-gray-400">작성가</span>
-                <span className="font-pixel text-sm font-bold tabular-nums">
-                  {report.initialPrice?.toLocaleString()}
-                </span>
+            {/* 2행: 작성가 · 현재가 · 목표가 */}
+            <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }}>
+              <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
+                <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가</div>
+                <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
               </div>
-              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
-                <span className="text-xs text-gray-500 dark:text-gray-400">현재가</span>
-                <span className={`text-sm sm:text-base font-semibold tabular-nums ${
+              <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
+                <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">현재가</div>
+                <div className={`text-sm sm:text-base font-bold tabular-nums mt-0.5 ${
                   report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
-                  'text-gray-900 dark:text-white'
-                }`}>
-                  {report.currentPrice?.toLocaleString()}
-                </span>
+                  'text-gray-800 dark:text-gray-100'
+                }`}>{report.currentPrice?.toLocaleString()}</div>
               </div>
-              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60">
-                <span className="text-xs text-gray-500 dark:text-gray-400">목표가</span>
-                <span className="font-pixel text-sm font-bold tabular-nums">
-                  {report.targetPrice?.toLocaleString() || '-'}
-                </span>
+              <div style={{ flex: 1, padding: '10px 16px' }}>
+                <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">목표가</div>
+                <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.targetPrice?.toLocaleString() || '-'}</div>
               </div>
-              <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60">
-                <span className="text-xs text-gray-500 dark:text-gray-400">의견</span>
-                <OpinionBadge opinion={report.opinion} />
-              </div>
-              {report.stockData?.exchange !== 'CRYPTO' && (
-                <>
-                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-r border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">PER</span>
-                    <span className="font-pixel text-sm font-bold tabular-nums">
-                      {report.stockData?.per?.toFixed(1) || '-'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-b border-gray-100 dark:border-gray-700/60 bg-gray-50/50 dark:bg-gray-800/30">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">PBR</span>
-                    <span className="font-pixel text-sm font-bold tabular-nums">
-                      {report.stockData?.pbr?.toFixed(2) || '-'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3 border-r border-gray-100 dark:border-gray-700/60">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">EPS</span>
-                    <span className="font-pixel text-sm font-bold tabular-nums">
-                      {report.stockData?.eps?.toFixed(0) || '-'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center px-3 py-2.5 sm:px-5 sm:py-3">
-                  </div>
-                </>
-              )}
             </div>
+            {/* 3행: PER · PBR · EPS (코인이면 숨김) */}
+            {report.stockData?.exchange !== 'CRYPTO' && (
+              <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }} className="bg-gray-50/50 dark:bg-gray-800/30">
+                <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
+                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">PER</div>
+                  <div className="text-sm font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.per?.toFixed(1) || '-'}</div>
+                </div>
+                <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
+                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">PBR</div>
+                  <div className="text-sm font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.pbr?.toFixed(2) || '-'}</div>
+                </div>
+                <div style={{ flex: 1, padding: '10px 16px' }}>
+                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">EPS</div>
+                  <div className="text-sm font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.eps?.toFixed(0) || '-'}</div>
+                </div>
+              </div>
+            )}
           </Card>
 
           {/* 모바일용 액션 버튼 (lg 이하에서만 표시) */}

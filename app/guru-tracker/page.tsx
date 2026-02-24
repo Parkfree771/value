@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { GURU_LIST } from './types';
 
@@ -71,25 +70,13 @@ export default function GuruTrackerPage() {
               href={`/portfolio/${guru.name_en.toLowerCase().replace(/\s+/g, '-')}`}
               className="card-interactive text-left p-5 sm:p-6 block"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="relative w-14 h-14 border-3 border-ant-red-600 dark:border-ant-red-400 overflow-hidden flex-shrink-0" style={{ boxShadow: 'var(--shadow-sm)' }}>
-                    <Image
-                      src={`/${guru.image_filename}`}
-                      alt={guru.name_kr}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-                      {guru.name_kr}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      {guru.name_en}
-                    </p>
-                  </div>
-                </div>
+              <div className="mb-3">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
+                  {guru.name_kr}
+                </h3>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  {guru.name_en}
+                </p>
               </div>
 
               <div className="mb-3 pb-3 border-b-2 border-pixel-border-muted">

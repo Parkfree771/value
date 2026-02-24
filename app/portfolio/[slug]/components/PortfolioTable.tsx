@@ -21,12 +21,20 @@ function formatShares(shares: number): string {
 
 const thClass = 'px-3 py-3 text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap';
 
+interface PriceData {
+  [ticker: string]: {
+    currentPrice: number;
+    returnRate: number;
+  };
+}
+
 interface PortfolioTableProps {
   holdings: PortfolioHolding[];
   filingDate?: string; // "2026-02-17" 형식
+  prices?: PriceData; // Storage JSON에서 가져온 가격 데이터
 }
 
-export default function PortfolioTable({ holdings, filingDate }: PortfolioTableProps) {
+export default function PortfolioTable({ holdings, filingDate, prices = {} }: PortfolioTableProps) {
   const [filter, setFilter] = useState<FilterStatus>('ALL');
 
   const filters: { key: FilterStatus; label: string; count: number }[] = [
@@ -153,27 +161,29 @@ export default function PortfolioTable({ holdings, filingDate }: PortfolioTableP
                     </span>
                   </td>
 
-                  {/* 공시일 가격 */}
+                  {/* 공시일 가격 (포트폴리오 데이터에서 계산: value / shares) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
                     <span className="text-sm text-foreground">
-                      {h.price_at_filing ? `$${h.price_at_filing.toFixed(2)}` : '—'}
+                      {h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
                     </span>
                   </td>
 
-                  {/* 현재가 */}
+                  {/* 현재가 (Storage JSON) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
                     <span className="text-sm text-foreground font-bold">
-                      {h.price_current ? `$${h.price_current.toFixed(2)}` : '—'}
+                      {h.ticker && prices[h.ticker]?.currentPrice
+                        ? `$${prices[h.ticker].currentPrice.toFixed(2)}`
+                        : '—'}
                     </span>
                   </td>
 
-                  {/* 수익률 */}
+                  {/* 수익률 (Storage JSON) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    {h.price_change_pct !== null && h.price_change_pct !== undefined ? (
+                    {h.ticker && prices[h.ticker]?.returnRate !== undefined ? (
                       <span className={`text-sm font-bold ${
-                        h.price_change_pct > 0 ? 'text-red-500' : h.price_change_pct < 0 ? 'text-blue-500' : 'text-gray-400'
+                        prices[h.ticker].returnRate > 0 ? 'text-red-500' : prices[h.ticker].returnRate < 0 ? 'text-blue-500' : 'text-gray-400'
                       }`}>
-                        {h.price_change_pct > 0 ? '+' : ''}{h.price_change_pct.toFixed(1)}%
+                        {prices[h.ticker].returnRate > 0 ? '+' : ''}{prices[h.ticker].returnRate.toFixed(1)}%
                       </span>
                     ) : (
                       <span className="text-sm text-gray-400">—</span>

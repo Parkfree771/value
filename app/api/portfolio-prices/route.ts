@@ -1,108 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { ref, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { NextResponse } from 'next/server';
+import { adminStorage } from '@/lib/firebase-admin';
 
-export async function POST(request: NextRequest) {
+export async function GET() {
   try {
-    const { tickers, reportDate } = await request.json();
+    const bucket = adminStorage.bucket();
+    const file = bucket.file('guru-stock-prices.json');
 
-    if (!tickers || !Array.isArray(tickers) || !reportDate) {
+    const [exists] = await file.exists();
+    if (!exists) {
       return NextResponse.json(
-        { error: 'Invalid request parameters' },
-        { status: 400 }
-      );
-    }
-
-    console.log(`[Portfolio Prices] Fetching prices for ${tickers.length} tickers from JSON`);
-
-    // Firebase Storage에서 guru-stock-prices.json 다운로드
-    let stockPricesData: any = null;
-
-    try {
-      const storageRef = ref(storage, 'guru-stock-prices.json');
-      const downloadURL = await getDownloadURL(storageRef);
-      const response = await fetch(downloadURL);
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch JSON: ${response.status}`);
-      }
-
-      stockPricesData = await response.json();
-      console.log(`[Portfolio Prices] Loaded JSON with ${stockPricesData.totalStocks} stocks (updated: ${stockPricesData.lastUpdated})`);
-    } catch (error) {
-      console.error('[Portfolio Prices] Failed to load guru-stock-prices.json:', error);
-      return NextResponse.json(
-        {
-          error: 'Guru price data not available',
-          message: 'JSON 파일을 불러올 수 없습니다. Cron job이 실행되었는지 확인해주세요.'
-        },
+        { error: 'Price data not available', message: 'Cron job이 아직 실행되지 않았습니다.' },
         { status: 503 }
       );
     }
 
-    // 각 티커별로 basePrice와 현재가 가져오기
-    const pricePromises = tickers.map(async (ticker: string) => {
-      try {
-        const tickerUpper = ticker.toUpperCase();
+    const [contents] = await file.download();
+    const priceData = JSON.parse(contents.toString('utf-8'));
 
-        // JSON에서 해당 티커 데이터 가져오기
-        const stockData = stockPricesData.stocks[tickerUpper];
-
-        if (!stockData) {
-          console.warn(`[Portfolio Prices] No data for ${ticker} in JSON`);
-          return {
-            ticker,
-            reportedPrice: null,
-            currentPrice: null,
-            changeFromReported: null,
-          };
-        }
-
-        const reportedPrice = stockData.basePrice;
-        const currentPrice = stockData.currentPrice;
-
-        if (!reportedPrice || !currentPrice) {
-          console.warn(`[Portfolio Prices] Missing price data for ${ticker} - basePrice: ${reportedPrice}, currentPrice: ${currentPrice}`);
-          return {
-            ticker,
-            reportedPrice: reportedPrice || null,
-            currentPrice: currentPrice || null,
-            changeFromReported: null,
-          };
-        }
-
-        // JSON에 이미 계산된 수익률이 있으므로 그대로 사용
-        return {
-          ticker,
-          reportedPrice,
-          currentPrice,
-          changeFromReported: stockData.returnRate,
-        };
-      } catch (error) {
-        console.error(`[Portfolio Prices] Error fetching price for ${ticker}:`, error);
-        return {
-          ticker,
-          reportedPrice: null,
-          currentPrice: null,
-          changeFromReported: null,
-        };
-      }
-    });
-
-    const prices = await Promise.all(pricePromises);
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
-      prices,
-      reportDate,
+      lastUpdated: priceData.lastUpdated,
+      totalTickers: priceData.totalTickers,
+      prices: priceData.prices,
     });
+
+    // 캐시키(?ck=)로 URL 자체가 변경되므로 s-maxage는 넉넉하게
+    // 06:00-07:00 KST: 10분마다 캐시키 변경 → 자동 갱신
+    // 나머지 시간: 날짜 단위 캐시키 → 하루 캐시
+    response.headers.set('Cache-Control', 'public, s-maxage=43200, stale-while-revalidate=86400');
+
+    return response;
   } catch (error) {
-    console.error('[Portfolio Prices] Fetch error:', error);
+    console.error('[Portfolio Prices] Error:', error);
     return NextResponse.json(
-      {
-        error: 'Failed to fetch portfolio prices',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      },
+      { error: 'Failed to fetch prices' },
       { status: 500 }
     );
   }

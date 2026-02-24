@@ -1,5 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb } from '@/lib/firebase-admin';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const PORTFOLIOS_PATH = path.join(process.cwd(), 'data', 'guru-portfolios.json');
+
+// 서버 프로세스 내 메모리 캐시
+let cachedData: any = null;
+let cacheTime = 0;
+const CACHE_TTL = 60 * 60 * 1000; // 1시간
+
+function getPortfoliosData() {
+  const now = Date.now();
+  if (cachedData && (now - cacheTime) < CACHE_TTL) {
+    return cachedData;
+  }
+
+  if (!fs.existsSync(PORTFOLIOS_PATH)) {
+    return null;
+  }
+
+  cachedData = JSON.parse(fs.readFileSync(PORTFOLIOS_PATH, 'utf-8'));
+  cacheTime = now;
+  return cachedData;
+}
 
 export async function GET(
   request: NextRequest,
@@ -7,10 +30,9 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const data = getPortfoliosData();
 
-    const doc = await adminDb.collection('guru_portfolios').doc(slug).get();
-
-    if (!doc.exists) {
+    if (!data || !data.gurus[slug]) {
       return NextResponse.json(
         { error: 'Portfolio not found' },
         { status: 404 }
@@ -19,9 +41,12 @@ export async function GET(
 
     const response = NextResponse.json({
       success: true,
-      portfolio: doc.data(),
+      portfolio: data.gurus[slug],
     });
-    response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=7200');
+
+    // 로컬 JSON은 분기 1회 변경 → 긴 캐시
+    response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=172800');
+
     return response;
   } catch (error) {
     console.error('Guru portfolio API error:', error);

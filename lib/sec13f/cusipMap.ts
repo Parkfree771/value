@@ -11,8 +11,8 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   // 메가캡 기술주
   '037833100': { ticker: 'AAPL', exchange: 'NAS' },
   '594918104': { ticker: 'MSFT', exchange: 'NAS' },
-  '02079K305': { ticker: 'GOOG', exchange: 'NAS' },
-  '02079K107': { ticker: 'GOOGL', exchange: 'NAS' },
+  '02079K305': { ticker: 'GOOGL', exchange: 'NAS' },  // Class A (의결권)
+  '02079K107': { ticker: 'GOOG', exchange: 'NAS' },   // Class C (무의결권)
   '023135106': { ticker: 'AMZN', exchange: 'NAS' },
   '30303M102': { ticker: 'META', exchange: 'NAS' },
   '67066G104': { ticker: 'NVDA', exchange: 'NAS' },
@@ -105,6 +105,10 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   // Liberty Media 구 트래킹 주식 (Q3→Q4 스핀오프로 SOLD OUT 처리됨)
   '531229722': { ticker: 'LLYVK', exchange: 'NAS' },  // 구 Liberty Live tracking C → LLYVK로 전환
   '531229748': { ticker: 'LLYVA', exchange: 'NAS' },  // 구 Liberty Live tracking A → LLYVA로 전환
+
+  // Liberty Global
+  'G61188101': { ticker: 'LBTYA', exchange: 'NAS' },   // Liberty Global Class A
+  'G61188127': { ticker: 'LBTYK', exchange: 'NAS' },   // Liberty Global Class C
 
   // Liberty Latin America
   'G9001E102': { ticker: 'LILA', exchange: 'NAS' },    // Liberty Latin America Class A

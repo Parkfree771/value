@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/seed-data.ts",
-    "fetch-13f": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/fetch-13f.ts",
-    "fetch-guru-prices": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/fetch-guru-prices.ts"
+    "fetch-13f": "npx ts-node --compiler-options '{\"module\":\"CommonJS\"}' scripts/fetch-13f.ts"
   },
   "dependencies": {
     "@tiptap/extension-color": "^3.19.0",

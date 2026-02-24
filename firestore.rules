@@ -65,12 +65,6 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
-    // SEC 13F 구루 포트폴리오 (Admin SDK로 쓰기, 공개 읽기)
-    match /guru_portfolios/{slug} {
-      allow read: if true;
-      allow write: if false;
-    }
-
     // 게시글 가격 추적 (Posts - Ticker별 가격 정보)
     match /post_prices/{ticker} {
       allow read: if true;

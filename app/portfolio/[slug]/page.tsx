@@ -9,12 +9,29 @@ import { GuruPortfolioDoc } from '@/lib/sec13f/types';
 import PortfolioSummary from './components/PortfolioSummary';
 import PortfolioTable from './components/PortfolioTable';
 
+/**
+ * 가격 캐시키: 06:00-07:00 KST(장 마감 후)는 10분 단위, 나머지는 날짜 단위
+ * → URL이 바뀌면서 Vercel Edge 캐시가 자동 갱신됨
+ */
+function getPriceCacheKey(): string {
+  const now = new Date();
+  const kstHour = (now.getUTCHours() + 9) % 24;
+  const dateKey = now.toISOString().slice(0, 10);
+
+  if (kstHour >= 6 && kstHour < 7) {
+    const bucket = Math.floor(now.getUTCMinutes() / 10);
+    return `${dateKey}-${bucket}`;
+  }
+  return dateKey;
+}
+
 export default function PortfolioPage() {
   const params = useParams();
   const router = useRouter();
   const slug = params.slug as string;
 
   const [portfolio, setPortfolio] = useState<GuruPortfolioDoc | null>(null);
+  const [prices, setPrices] = useState<Record<string, { currentPrice: number; returnRate: number }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -27,22 +44,33 @@ export default function PortfolioPage() {
   // 구루 정보 찾기
   const guruInfo = GURU_LIST.find(g => g.name_en === guruNameEn);
 
-  // 포트폴리오 데이터 로드
+  // 포트폴리오 + 가격 데이터 동시 로드
   useEffect(() => {
     if (!slug) return;
 
-    async function fetchPortfolio() {
+    async function fetchData() {
       try {
-        const res = await fetch(`/api/guru-portfolio/${slug}`);
-        if (!res.ok) {
-          setError(true);
-          return;
-        }
-        const data = await res.json();
-        if (data.success && data.portfolio) {
-          setPortfolio(data.portfolio as GuruPortfolioDoc);
+        const [portfolioRes, pricesRes] = await Promise.all([
+          fetch(`/api/guru-portfolio/${slug}`),
+          fetch(`/api/portfolio-prices?ck=${getPriceCacheKey()}`),
+        ]);
+
+        if (portfolioRes.ok) {
+          const data = await portfolioRes.json();
+          if (data.success && data.portfolio) {
+            setPortfolio(data.portfolio as GuruPortfolioDoc);
+          } else {
+            setError(true);
+          }
         } else {
           setError(true);
+        }
+
+        if (pricesRes.ok) {
+          const priceData = await pricesRes.json();
+          if (priceData.success && priceData.prices) {
+            setPrices(priceData.prices);
+          }
         }
       } catch {
         setError(true);
@@ -51,7 +79,7 @@ export default function PortfolioPage() {
       }
     }
 
-    fetchPortfolio();
+    fetchData();
   }, [slug]);
 
   // 구루를 찾지 못한 경우
@@ -161,7 +189,7 @@ export default function PortfolioPage() {
         ) : (
           <>
             <PortfolioSummary portfolio={portfolio} />
-            <PortfolioTable holdings={portfolio.holdings} filingDate={portfolio.filing_date_curr} />
+            <PortfolioTable holdings={portfolio.holdings} filingDate={portfolio.filing_date_curr} prices={prices} />
           </>
         )}
       </section>

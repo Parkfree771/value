@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { doc, updateDoc, increment, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { adminDb, FieldValue } from '@/lib/firebase-admin';
 
 // 조회 기록 유효 시간 (24시간)
 const VIEW_EXPIRY_HOURS = 24;
@@ -21,19 +20,19 @@ export async function POST(
     }
 
     // 리포트 존재 여부 확인
-    const docRef = doc(db, 'posts', id);
-    const docSnap = await getDoc(docRef);
+    const docRef = adminDb.collection('posts').doc(id);
+    const docSnap = await docRef.get();
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
       return NextResponse.json(
         { success: false, error: '리포트를 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
 
-    // 조회수 증가
-    await updateDoc(docRef, {
-      views: increment(1),
+    // 조회수 증가 (Admin SDK - 보안 규칙 우회)
+    await docRef.update({
+      views: FieldValue.increment(1),
     });
 
     // 응답에 쿠키 설정

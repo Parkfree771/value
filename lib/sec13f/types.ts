@@ -43,7 +43,7 @@ export interface PortfolioHolding {
   price_change_pct?: number | null; // 공시일 대비 변동률 (%)
 }
 
-// Firestore guru_portfolios/{slug} 문서 구조
+// data/guru-portfolios.json 구루별 포트폴리오 구조
 export interface GuruPortfolioDoc {
   guru_name_en: string;
   guru_name_kr: string;

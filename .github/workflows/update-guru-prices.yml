@@ -1,0 +1,39 @@
+name: Update Guru Portfolio Prices
+
+on:
+  schedule:
+    # 미국 장 마감 후 종가 확정 시간
+    # ET 16:00 마감 → 종가 확정 ~16:15 ET
+    # 동절기(EST): 06:15 KST = 21:15 UTC
+    # 하절기(EDT): 05:15 KST = 20:15 UTC
+    # → 21:30 UTC로 설정 (동절기 기준 06:30 KST, 넉넉하게)
+    - cron: '30 21 * * 1-5'  # 평일만 (월~금)
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  update-guru-prices:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Update guru portfolio prices
+        env:
+          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+          KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+          KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+          KIS_BASE_URL: https://openapi.koreainvestment.com:9443
+        run: npx tsx scripts/github-update-guru-prices.ts
+
+      # 캐시 갱신: revalidate 대신 캐시키 전략 사용
+      # 06:00-07:00 KST 사이 프론트엔드가 10분 단위 캐시키로 자동 갱신
