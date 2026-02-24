@@ -58,7 +58,26 @@ const bucket = getStorage().bucket();
 
 // ===== KIS API =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_MS = 80; // KIS 초당 20회 제한
+const DELAY_MS = 100; // KIS 초당 20회 제한 (여유 확보)
+const MAX_RETRIES = 2; // 실패 시 재시도
+
+// KIS API에서 조회 불가능한 티커 (워런트, OTC 등)
+const SKIP_TICKERS = new Set([
+  'EXE/WS', 'KRSP/WS',  // 워런트
+  'ALVOW',               // 워런트 (Alvotech Warrant)
+  'JBSAY',               // OTC ADR (장외 거래)
+]);
+
+// KIS API 티커 변환 (SEC 티커 → KIS 티커)
+const TICKER_REMAP: Record<string, string> = {
+  'FI': 'FISV',  // Fiserv: SEC는 FI, KIS는 아직 FISV
+};
+
+function toKISTicker(ticker: string): string {
+  if (TICKER_REMAP[ticker]) return TICKER_REMAP[ticker];
+  // BRK-B → BRK/B (KIS는 슬래시 사용)
+  return ticker.replace(/-/g, '/');
+}
 
 async function getKISToken(): Promise<string> {
   const tokenDoc = await db.collection('settings').doc('kis_token').get();
@@ -99,9 +118,11 @@ async function getKISToken(): Promise<string> {
 }
 
 async function getStockPrice(token: string, ticker: string, exchange: string): Promise<number> {
+  const kisTicker = toKISTicker(ticker);
+
   if (exchange === 'KRX') {
     const res = await fetch(
-      `${KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price?FID_COND_MRKT_DIV_CODE=J&FID_INPUT_ISCD=${ticker}`,
+      `${KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price?FID_COND_MRKT_DIV_CODE=J&FID_INPUT_ISCD=${kisTicker}`,
       {
         headers: {
           'Content-Type': 'application/json',
@@ -114,12 +135,14 @@ async function getStockPrice(token: string, ticker: string, exchange: string): P
     );
     const data = await res.json();
     if (data.rt_cd !== '0') throw new Error(data.msg1);
-    return parseFloat(data.output.stck_prpr);
+    const price = parseFloat(data.output.stck_prpr);
+    if (isNaN(price) || price <= 0) throw new Error(`Invalid price: ${data.output.stck_prpr}`);
+    return price;
   }
 
   // 해외 주식
   const res = await fetch(
-    `${KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price?AUTH=&EXCD=${exchange}&SYMB=${ticker}`,
+    `${KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price?AUTH=&EXCD=${exchange}&SYMB=${kisTicker}`,
     {
       headers: {
         'Content-Type': 'application/json',
@@ -131,8 +154,28 @@ async function getStockPrice(token: string, ticker: string, exchange: string): P
     }
   );
   const data = await res.json();
-  if (data.rt_cd !== '0') throw new Error(data.msg1);
-  return parseFloat(data.output.last);
+  if (data.rt_cd !== '0') throw new Error(`${data.msg1} (EXCD=${exchange}, SYMB=${kisTicker})`);
+  const price = parseFloat(data.output.last);
+  if (isNaN(price) || price <= 0) throw new Error(`Invalid price: "${data.output.last}" (EXCD=${exchange}, SYMB=${kisTicker})`);
+  return price;
+}
+
+// 재시도 포함 가격 조회
+async function getStockPriceWithRetry(token: string, ticker: string, exchange: string): Promise<number> {
+  let lastError: Error | null = null;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await getStockPrice(token, ticker, exchange);
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+      if (attempt < MAX_RETRIES) {
+        const wait = 500 * (attempt + 1); // 500ms, 1000ms 대기
+        console.log(`    ↻ ${ticker}: 재시도 ${attempt + 1}/${MAX_RETRIES} (${wait}ms 후)`);
+        await new Promise(r => setTimeout(r, wait));
+      }
+    }
+  }
+  throw lastError;
 }
 
 // ===== 메인 =====
@@ -158,12 +201,24 @@ async function main() {
   const priceMap: Record<string, { currentPrice: number; returnRate: number }> = {};
   let success = 0;
   let fail = 0;
+  let skipped = 0;
+  const failedTickers: string[] = [];
 
-  console.log(`\n[GURU-CRON] Fetching ${portfoliosData.tickers.length} prices...`);
+  // 조회 불가능한 티커 필터링
+  const fetchable = portfoliosData.tickers.filter(t => {
+    if (SKIP_TICKERS.has(t.ticker)) {
+      console.log(`  ⊘ ${t.ticker}: 조회 불가 (워런트/OTC) → 스킵`);
+      skipped++;
+      return false;
+    }
+    return true;
+  });
 
-  for (const { ticker, exchange, filingPrice } of portfoliosData.tickers) {
+  console.log(`\n[GURU-CRON] Fetching ${fetchable.length} prices (${skipped} skipped)...`);
+
+  for (const { ticker, exchange, filingPrice } of fetchable) {
     try {
-      const currentPrice = await getStockPrice(token, ticker, exchange);
+      const currentPrice = await getStockPriceWithRetry(token, ticker, exchange);
       const returnRate = filingPrice > 0
         ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
         : 0;
@@ -173,13 +228,17 @@ async function main() {
       success++;
     } catch (error) {
       const msg = error instanceof Error ? error.message : 'Unknown';
-      console.error(`  ✗ ${ticker}: ${msg}`);
+      console.error(`  ✗ ${ticker} (${exchange}): ${msg}`);
+      failedTickers.push(ticker);
       fail++;
     }
     await new Promise(r => setTimeout(r, DELAY_MS));
   }
 
-  console.log(`\n[GURU-CRON] Prices fetched: ${success} ok, ${fail} failed`);
+  console.log(`\n[GURU-CRON] Prices fetched: ${success} ok, ${fail} failed, ${skipped} skipped`);
+  if (failedTickers.length > 0) {
+    console.log(`[GURU-CRON] Failed tickers: ${failedTickers.join(', ')}`);
+  }
 
   // 4. Firebase Storage에 guru-stock-prices.json 저장
   const storageData = {

@@ -171,7 +171,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                   {/* 현재가 (Storage JSON) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
                     <span className="text-sm text-foreground font-bold">
-                      {h.ticker && prices[h.ticker]?.currentPrice
+                      {h.ticker && prices[h.ticker]?.currentPrice != null
                         ? `$${prices[h.ticker].currentPrice.toFixed(2)}`
                         : '—'}
                     </span>
@@ -179,15 +179,17 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
 
                   {/* 수익률 (Storage JSON) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    {h.ticker && prices[h.ticker]?.returnRate !== undefined ? (
-                      <span className={`text-sm font-bold ${
-                        prices[h.ticker].returnRate > 0 ? 'text-red-500' : prices[h.ticker].returnRate < 0 ? 'text-blue-500' : 'text-gray-400'
-                      }`}>
-                        {prices[h.ticker].returnRate > 0 ? '+' : ''}{prices[h.ticker].returnRate.toFixed(1)}%
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400">—</span>
-                    )}
+                    {(() => {
+                      const rate = h.ticker ? prices[h.ticker]?.returnRate : undefined;
+                      if (rate == null) return <span className="text-sm text-gray-400">—</span>;
+                      return (
+                        <span className={`text-sm font-bold ${
+                          rate > 0 ? 'text-red-500' : rate < 0 ? 'text-blue-500' : 'text-gray-400'
+                        }`}>
+                          {rate > 0 ? '+' : ''}{rate.toFixed(1)}%
+                        </span>
+                      );
+                    })()}
                   </td>
                 </tr>
               ))}

@@ -1,7 +1,7 @@
 {
   "meta": {
     "updated_at": "2026-02-24",
-    "total_unique_tickers": 176
+    "total_unique_tickers": 173
   },
   "gurus": {
     "warren-buffett": {
@@ -3981,11 +3981,6 @@
       "filingPrice": 3.79
     },
     {
-      "ticker": "ALVOW",
-      "exchange": "NAS",
-      "filingPrice": 0.65
-    },
-    {
       "ticker": "AMZN",
       "exchange": "NAS",
       "filingPrice": 230.82
@@ -4216,11 +4211,6 @@
       "filingPrice": 110.36
     },
     {
-      "ticker": "EXE/WS",
-      "exchange": "NYS",
-      "filingPrice": 99.65
-    },
-    {
       "ticker": "EXP",
       "exchange": "NYS",
       "filingPrice": 206.68
@@ -4379,11 +4369,6 @@
       "ticker": "KRSP",
       "exchange": "NYS",
       "filingPrice": 10.28
-    },
-    {
-      "ticker": "KRSP/WS",
-      "exchange": "NYS",
-      "filingPrice": 0.8
     },
     {
       "ticker": "LAMR",

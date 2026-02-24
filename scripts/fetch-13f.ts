@@ -41,6 +41,9 @@ function parseArgs() {
   return parsed;
 }
 
+// KIS API로 가격 조회 불가능한 티커 (워런트, OTC ADR 등)
+const UNFETCHABLE_TICKERS = new Set(['EXE/WS', 'KRSP/WS', 'ALVOW', 'JBSAY']);
+
 // === 티커 목록 + 공시일가 추출 ===
 function extractTickers(gurus: Record<string, GuruPortfolioDoc>): Array<{ ticker: string; exchange: string; filingPrice: number }> {
   const allUnique = new Map<string, { ticker: string; exchange: string; filingPrice: number }>();
@@ -48,6 +51,9 @@ function extractTickers(gurus: Record<string, GuruPortfolioDoc>): Array<{ ticker
   for (const doc of Object.values(gurus)) {
     for (const h of doc.holdings) {
       if (h.ticker && h.status !== 'SOLD OUT' && h.shares_curr > 0) {
+        // 워런트/OTC 등 가격 조회 불가 티커 제외
+        if (UNFETCHABLE_TICKERS.has(h.ticker)) continue;
+
         const key = `${h.ticker}:${h.exchange}`;
         if (!allUnique.has(key)) {
           allUnique.set(key, {
