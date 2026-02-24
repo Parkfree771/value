@@ -28,15 +28,15 @@ export function inferCurrency(options: {
     // 일본
     if (['TYO', 'JPX', 'TSE'].includes(exchangeUpper)) return 'JPY';
     // 미국
-    if (['NAS', 'NYS', 'NYSE', 'NASDAQ', 'AMEX'].includes(exchangeUpper)) return 'USD';
+    if (['NAS', 'NYS', 'NYSE', 'NASDAQ', 'AMEX', 'AMS'].includes(exchangeUpper)) return 'USD';
     // 홍콩
-    if (['HKG', 'HKEX'].includes(exchangeUpper)) return 'HKD';
+    if (['HKG', 'HKEX', 'HKS'].includes(exchangeUpper)) return 'HKD';
     // 중국
-    if (['SHH', 'SHZ', 'SSE', 'SZSE'].includes(exchangeUpper)) return 'CNY';
+    if (['SHH', 'SHZ', 'SSE', 'SZSE', 'SHS', 'SZS'].includes(exchangeUpper)) return 'CNY';
     // 영국
     if (['LON', 'LSE'].includes(exchangeUpper)) return 'GBP';
     // 유럽
-    if (['FRA', 'PAR', 'AMS'].includes(exchangeUpper)) return 'EUR';
+    if (['FRA', 'PAR'].includes(exchangeUpper)) return 'EUR';
   }
 
   // category 기반 추론
