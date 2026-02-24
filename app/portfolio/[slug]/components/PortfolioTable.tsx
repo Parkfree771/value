@@ -161,10 +161,12 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                     </span>
                   </td>
 
-                  {/* 공시일 가격 (포트폴리오 데이터에서 계산: value / shares) */}
+                  {/* 공시일 가격 (KIS API 과거 종가) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
                     <span className="text-sm text-foreground">
-                      {h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
+                      {h.price_at_filing != null
+                        ? `$${h.price_at_filing.toFixed(2)}`
+                        : h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
                     </span>
                   </td>
 
@@ -177,11 +179,15 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                     </span>
                   </td>
 
-                  {/* 수익률 (Storage JSON) */}
+                  {/* 수익률 (공시일 가격 대비 현재가) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
                     {(() => {
-                      const rate = h.ticker ? prices[h.ticker]?.returnRate : undefined;
-                      if (rate == null) return <span className="text-sm text-gray-400">—</span>;
+                      const filingPrice = h.price_at_filing;
+                      const currentPrice = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
+                      if (filingPrice == null || currentPrice == null || filingPrice <= 0) {
+                        return <span className="text-sm text-gray-400">—</span>;
+                      }
+                      const rate = Math.round(((currentPrice - filingPrice) / filingPrice) * 1000) / 10;
                       return (
                         <span className={`text-sm font-bold ${
                           rate > 0 ? 'text-red-500' : rate < 0 ? 'text-blue-500' : 'text-gray-400'

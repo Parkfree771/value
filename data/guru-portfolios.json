@@ -31,7 +31,8 @@
           "weight_prev": 22.69,
           "status": "TRIM",
           "shares_change_pct": -4.32,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 263.88
         },
         {
           "cusip": "025816109",
@@ -47,7 +48,8 @@
           "weight_prev": 18.84,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 344.53
         },
         {
           "cusip": "060505104",
@@ -63,7 +65,8 @@
           "weight_prev": 10.96,
           "status": "TRIM",
           "shares_change_pct": -8.94,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 52.74
         },
         {
           "cusip": "191216100",
@@ -79,7 +82,8 @@
           "weight_prev": 9.92,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 79.56
         },
         {
           "cusip": "166764100",
@@ -95,7 +99,8 @@
           "weight_prev": 7.09,
           "status": "ADD",
           "shares_change_pct": 6.63,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 180.55
         },
         {
           "cusip": "615369105",
@@ -111,7 +116,8 @@
           "weight_prev": 4.4,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 423.22
         },
         {
           "cusip": "674599105",
@@ -127,7 +133,8 @@
           "weight_prev": 4.68,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 45.94
         },
         {
           "cusip": "H1467J104",
@@ -143,7 +150,8 @@
           "weight_prev": 3.31,
           "status": "ADD",
           "shares_change_pct": 9.31,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 331.89
         },
         {
           "cusip": "500754106",
@@ -159,7 +167,8 @@
           "weight_prev": 3.17,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 23.78
         },
         {
           "cusip": "02079K305",
@@ -175,7 +184,8 @@
           "weight_prev": 1.62,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 302.02
         },
         {
           "cusip": "23918K108",
@@ -191,7 +201,8 @@
           "weight_prev": 1.6,
           "status": "TRIM",
           "shares_change_pct": -1.25,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 150.41
         },
         {
           "cusip": "501044101",
@@ -207,7 +218,8 @@
           "weight_prev": 1.26,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 69.66
         },
         {
           "cusip": "92826C839",
@@ -223,7 +235,8 @@
           "weight_prev": 1.06,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 319.5
         },
         {
           "cusip": "829933100",
@@ -239,7 +252,8 @@
           "weight_prev": 1.09,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 21.02
         },
         {
           "cusip": "57636Q104",
@@ -255,7 +269,8 @@
           "weight_prev": 0.85,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 521.93
         },
         {
           "cusip": "92343E102",
@@ -271,7 +286,8 @@
           "weight_prev": 0.94,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 215.4486
         },
         {
           "cusip": "21036P108",
@@ -287,7 +303,8 @@
           "weight_prev": 0.68,
           "status": "TRIM",
           "shares_change_pct": -2.99,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 152.7
         },
         {
           "cusip": "14040H105",
@@ -303,7 +320,8 @@
           "weight_prev": 0.57,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 205.9519
         },
         {
           "cusip": "91324P102",
@@ -319,7 +337,8 @@
           "weight_prev": 0.65,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 289.09
         },
         {
           "cusip": "25754A201",
@@ -335,7 +354,8 @@
           "weight_prev": 0.48,
           "status": "ADD",
           "shares_change_pct": 12.34,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 373.5
         },
         {
           "cusip": "02005N100",
@@ -351,7 +371,8 @@
           "weight_prev": 0.43,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 41.29
         },
         {
           "cusip": "G0403H108",
@@ -367,7 +388,8 @@
           "weight_prev": 0.55,
           "status": "TRIM",
           "shares_change_pct": -12.12,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 325.96
         },
         {
           "cusip": "670346105",
@@ -383,7 +405,8 @@
           "weight_prev": 0.32,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 183.64
         },
         {
           "cusip": "530909308",
@@ -399,7 +422,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 94.21
         },
         {
           "cusip": "73278L105",
@@ -415,7 +439,8 @@
           "weight_prev": 0.4,
           "status": "TRIM",
           "shares_change_pct": -11.28,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 255.46
         },
         {
           "cusip": "526057104",
@@ -431,7 +456,8 @@
           "weight_prev": 0.33,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 121.44
         },
         {
           "cusip": "023135106",
@@ -447,7 +473,8 @@
           "weight_prev": 0.82,
           "status": "TRIM",
           "shares_change_pct": -77.24,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 201.15
         },
         {
           "cusip": "546347105",
@@ -463,7 +490,8 @@
           "weight_prev": 0.19,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 88.86
         },
         {
           "cusip": "530909100",
@@ -479,7 +507,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 91.79
         },
         {
           "cusip": "650111107",
@@ -495,7 +524,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 74.03
         },
         {
           "cusip": "422806208",
@@ -511,7 +541,8 @@
           "weight_prev": 0.12,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 337.21
         },
         {
           "cusip": "531229755",
@@ -527,7 +558,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 86.74
         },
         {
           "cusip": "16119P108",
@@ -543,7 +575,8 @@
           "weight_prev": 0.11,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 237.01
         },
         {
           "cusip": "512816109",
@@ -559,7 +592,8 @@
           "weight_prev": 0.06,
           "status": "HOLD",
           "shares_change_pct": 0.02,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 132.57
         },
         {
           "cusip": "G0176J109",
@@ -575,7 +609,8 @@
           "weight_prev": 0.05,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 162.67
         },
         {
           "cusip": "62944T105",
@@ -591,7 +626,8 @@
           "weight_prev": 0.03,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 7421
         },
         {
           "cusip": "25243Q205",
@@ -607,7 +643,8 @@
           "weight_prev": 0.01,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 96.45
         },
         {
           "cusip": "47233W109",
@@ -623,7 +660,8 @@
           "weight_prev": 0.01,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 51.98
         },
         {
           "cusip": "526057302",
@@ -639,7 +677,8 @@
           "weight_prev": 0.01,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 121.44
         },
         {
           "cusip": "G9001E102",
@@ -655,7 +694,8 @@
           "weight_prev": 0.01,
           "status": "TRIM",
           "shares_change_pct": -8.9,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 7.84
         },
         {
           "cusip": "531229722",
@@ -719,7 +759,8 @@
           "weight_prev": 0,
           "status": "TRIM",
           "shares_change_pct": -48.39,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 47.86
         },
         {
           "cusip": "G9001E128",
@@ -735,7 +776,8 @@
           "weight_prev": 0,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 7.93
         }
       ]
     },
@@ -766,7 +808,8 @@
           "weight_prev": 13.16,
           "status": "TRIM",
           "shares_change_pct": -21.87,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 211.25
         },
         {
           "cusip": "81369Y605",
@@ -782,7 +825,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 52.2
         },
         {
           "cusip": "457669307",
@@ -798,7 +842,8 @@
           "weight_prev": 8.88,
           "status": "TRIM",
           "shares_change_pct": -38.86,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 150.52
         },
         {
           "cusip": "46137V357",
@@ -814,7 +859,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 202.52
         },
         {
           "cusip": "881624209",
@@ -830,7 +876,8 @@
           "weight_prev": 8.53,
           "status": "TRIM",
           "shares_change_pct": -64.6,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 34.41
         },
         {
           "cusip": "980745103",
@@ -846,7 +893,8 @@
           "weight_prev": 4.07,
           "status": "TRIM",
           "shares_change_pct": -6.65,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 386.8041
         },
         {
           "cusip": "023135106",
@@ -862,7 +910,8 @@
           "weight_prev": 2.44,
           "status": "ADD",
           "shares_change_pct": 68.84,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 201.15
         },
         {
           "cusip": "874039100",
@@ -878,7 +927,8 @@
           "weight_prev": 5.44,
           "status": "TRIM",
           "shares_change_pct": -29.02,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 364.2
         },
         {
           "cusip": "22266T109",
@@ -894,7 +944,8 @@
           "weight_prev": 3.79,
           "status": "ADD",
           "shares_change_pct": 46.18,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 17.43
         },
         {
           "cusip": "02079K305",
@@ -910,7 +961,8 @@
           "weight_prev": 0.63,
           "status": "ADD",
           "shares_change_pct": 276.71,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 302.02
         },
         {
           "cusip": "81141R100",
@@ -926,7 +978,8 @@
           "weight_prev": 1.25,
           "status": "ADD",
           "shares_change_pct": 244.32,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 108.51
         },
         {
           "cusip": "464286400",
@@ -942,7 +995,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 37.74
         },
         {
           "cusip": "N62509109",
@@ -958,7 +1012,8 @@
           "weight_prev": 1.39,
           "status": "ADD",
           "shares_change_pct": 59.6,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 35.24
         },
         {
           "cusip": "58733R102",
@@ -974,7 +1029,8 @@
           "weight_prev": 3.47,
           "status": "TRIM",
           "shares_change_pct": -19.19,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 1975.51
         },
         {
           "cusip": "G0896C103",
@@ -990,7 +1046,8 @@
           "weight_prev": 0.81,
           "status": "ADD",
           "shares_change_pct": 126.11,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 38.69
         },
         {
           "cusip": "76131D103",
@@ -1006,7 +1063,8 @@
           "weight_prev": 1.85,
           "status": "ADD",
           "shares_change_pct": 6.86,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 68.13
         },
         {
           "cusip": "19240Q201",
@@ -1022,7 +1080,8 @@
           "weight_prev": 0.39,
           "status": "ADD",
           "shares_change_pct": 109,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 37.62
         },
         {
           "cusip": "013872106",
@@ -1038,7 +1097,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 57.47
         },
         {
           "cusip": "29362U104",
@@ -1054,7 +1114,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 129.56
         },
         {
           "cusip": "256163106",
@@ -1070,7 +1131,8 @@
           "weight_prev": 3.09,
           "status": "TRIM",
           "shares_change_pct": -39.55,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 45.21
         },
         {
           "cusip": "518415104",
@@ -1086,7 +1148,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 97.5
         },
         {
           "cusip": "929740108",
@@ -1102,7 +1165,8 @@
           "weight_prev": 1.54,
           "status": "HOLD",
           "shares_change_pct": -0.76,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 259.69
         },
         {
           "cusip": "093712107",
@@ -1118,7 +1182,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 145.32
         },
         {
           "cusip": "77543R102",
@@ -1134,7 +1199,8 @@
           "weight_prev": 2.09,
           "status": "TRIM",
           "shares_change_pct": -29.12,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 88.58
         },
         {
           "cusip": "349381103",
@@ -1150,7 +1216,8 @@
           "weight_prev": 1.96,
           "status": "TRIM",
           "shares_change_pct": -27.26,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 36.91
         },
         {
           "cusip": "G25508105",
@@ -1166,7 +1233,8 @@
           "weight_prev": 1.2,
           "status": "ADD",
           "shares_change_pct": 20.6,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 122.02
         },
         {
           "cusip": "68404L201",
@@ -1182,7 +1250,8 @@
           "weight_prev": 0.69,
           "status": "ADD",
           "shares_change_pct": 78.58,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 35.24
         },
         {
           "cusip": "464287234",
@@ -1198,7 +1267,8 @@
           "weight_prev": 2.58,
           "status": "TRIM",
           "shares_change_pct": -52.5,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 60.87
         },
         {
           "cusip": "247361702",
@@ -1214,7 +1284,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 70.85
         },
         {
           "cusip": "910047109",
@@ -1230,7 +1301,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 114.02
         },
         {
           "cusip": "86384P109",
@@ -1246,7 +1318,8 @@
           "weight_prev": 1.82,
           "status": "TRIM",
           "shares_change_pct": -45.87,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 8.92
         },
         {
           "cusip": "682189105",
@@ -1262,7 +1335,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 71.96
         },
         {
           "cusip": "74623V103",
@@ -1278,7 +1352,8 @@
           "weight_prev": 0.77,
           "status": "ADD",
           "shares_change_pct": 24.98,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 8.58
         },
         {
           "cusip": "G3643J108",
@@ -1294,7 +1369,8 @@
           "weight_prev": 0.74,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 123.91
         },
         {
           "cusip": "00835Q202",
@@ -1310,7 +1386,8 @@
           "weight_prev": 0.68,
           "status": "HOLD",
           "shares_change_pct": -0.79,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 12.9
         },
         {
           "cusip": "38141G104",
@@ -1326,7 +1403,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 916.04
         },
         {
           "cusip": "185899101",
@@ -1342,7 +1420,8 @@
           "weight_prev": 0.84,
           "status": "TRIM",
           "shares_change_pct": -35.7,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 10.52
         },
         {
           "cusip": "984245100",
@@ -1358,7 +1437,8 @@
           "weight_prev": 0.07,
           "status": "ADD",
           "shares_change_pct": 429.22,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 37.01
         },
         {
           "cusip": "861012102",
@@ -1374,7 +1454,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 33.2
         },
         {
           "cusip": "91332U101",
@@ -1390,7 +1471,8 @@
           "weight_prev": 0.9,
           "status": "TRIM",
           "shares_change_pct": -53.54,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 18.36
         },
         {
           "cusip": "84265V105",
@@ -1406,7 +1488,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 188
         },
         {
           "cusip": "234264109",
@@ -1422,7 +1505,8 @@
           "weight_prev": 0.76,
           "status": "TRIM",
           "shares_change_pct": -40.64,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 27.51
         },
         {
           "cusip": "74967X103",
@@ -1438,7 +1522,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 208.72
         },
         {
           "cusip": "169656105",
@@ -1454,7 +1539,8 @@
           "weight_prev": 0.23,
           "status": "ADD",
           "shares_change_pct": 68.06,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 37.88
         },
         {
           "cusip": "74366E102",
@@ -1470,7 +1556,8 @@
           "weight_prev": 0.27,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 82.46
         },
         {
           "cusip": "98954M200",
@@ -1486,7 +1573,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 43.97
         },
         {
           "cusip": "171757206",
@@ -1518,7 +1606,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 183.65
         },
         {
           "cusip": "02376R102",
@@ -1534,7 +1623,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 14.4
         },
         {
           "cusip": "04010E109",
@@ -1550,7 +1640,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 406.88
         },
         {
           "cusip": "25809K105",
@@ -1566,7 +1657,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 162.34
         },
         {
           "cusip": "74340E103",
@@ -1582,7 +1674,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 20.35
         },
         {
           "cusip": "278768106",
@@ -1598,7 +1691,8 @@
           "weight_prev": 0.12,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 113
         },
         {
           "cusip": "000899104",
@@ -1614,7 +1708,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 15.95
         },
         {
           "cusip": "020398707",
@@ -1630,7 +1725,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 18.25
         },
         {
           "cusip": "97785W106",
@@ -1646,7 +1742,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 19.12
         },
         {
           "cusip": "Y95308105",
@@ -1662,7 +1759,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 12.59
         },
         {
           "cusip": "64073B103",
@@ -1678,7 +1776,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 19.39
         },
         {
           "cusip": "925050106",
@@ -2189,7 +2288,8 @@
           "weight_prev": 19.21,
           "status": "ADD",
           "shares_change_pct": 49.69,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 47.78
         },
         {
           "cusip": "90353T100",
@@ -2205,7 +2305,8 @@
           "weight_prev": 20.25,
           "status": "HOLD",
           "shares_change_pct": -0.21,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 70.53
         },
         {
           "cusip": "023135106",
@@ -2221,7 +2322,8 @@
           "weight_prev": 8.73,
           "status": "ADD",
           "shares_change_pct": 64.99,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 201.15
         },
         {
           "cusip": "02079K107",
@@ -2237,7 +2339,8 @@
           "weight_prev": 10.52,
           "status": "TRIM",
           "shares_change_pct": -2.53,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 302.82
         },
         {
           "cusip": "30303M102",
@@ -2253,7 +2356,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 639.29
         },
         {
           "cusip": "76131D103",
@@ -2269,7 +2373,8 @@
           "weight_prev": 10.04,
           "status": "HOLD",
           "shares_change_pct": -0.21,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 68.13
         },
         {
           "cusip": "44267T102",
@@ -2285,7 +2390,8 @@
           "weight_prev": 10.58,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 82.76
         },
         {
           "cusip": "43300A203",
@@ -2301,7 +2407,8 @@
           "weight_prev": 5.37,
           "status": "HOLD",
           "shares_change_pct": -0.06,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 317.82
         },
         {
           "cusip": "02079K305",
@@ -2317,7 +2424,8 @@
           "weight_prev": 8.04,
           "status": "TRIM",
           "shares_change_pct": -86,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 302.02
         },
         {
           "cusip": "812215200",
@@ -2333,7 +2441,8 @@
           "weight_prev": 0.79,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 20.27
         },
         {
           "cusip": "42806J700",
@@ -2349,7 +2458,8 @@
           "weight_prev": 0.71,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 4.92
         },
         {
           "cusip": "169656105",
@@ -2396,7 +2506,8 @@
           "weight_prev": 19.14,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 302.85
         },
         {
           "cusip": "02079K107",
@@ -2412,7 +2523,8 @@
           "weight_prev": 18.48,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 303.56
         },
         {
           "cusip": "060505104",
@@ -2428,7 +2540,8 @@
           "weight_prev": 16.66,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 52.77
         },
         {
           "cusip": "722304102",
@@ -2444,7 +2557,8 @@
           "weight_prev": 18.85,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 101.95
         },
         {
           "cusip": "084670702",
@@ -2460,7 +2574,8 @@
           "weight_prev": 13.97,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 496.94
         },
         {
           "cusip": "27579R104",
@@ -2476,7 +2591,8 @@
           "weight_prev": 9.15,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 119.86
         },
         {
           "cusip": "674599105",
@@ -2492,7 +2608,8 @@
           "weight_prev": 2.15,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 51.53
         },
         {
           "cusip": "227046109",
@@ -2508,7 +2625,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 96.48
         },
         {
           "cusip": "037833100",
@@ -2524,7 +2642,8 @@
           "weight_prev": 0.87,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 260.58
         },
         {
           "cusip": "78574H104",
@@ -2571,7 +2690,8 @@
           "weight_prev": 11.11,
           "status": "TRIM",
           "shares_change_pct": -2.09,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 66.14
         },
         {
           "cusip": "023135106",
@@ -2587,7 +2707,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 198.79
         },
         {
           "cusip": "G96629103",
@@ -2603,7 +2724,8 @@
           "weight_prev": 7.9,
           "status": "ADD",
           "shares_change_pct": 24.66,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 287.74
         },
         {
           "cusip": "036752103",
@@ -2619,7 +2741,8 @@
           "weight_prev": 8.95,
           "status": "TRIM",
           "shares_change_pct": -3.77,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 346.8
         },
         {
           "cusip": "907818108",
@@ -2635,7 +2758,8 @@
           "weight_prev": 7.43,
           "status": "ADD",
           "shares_change_pct": 8.76,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 260.68
         },
         {
           "cusip": "95082P105",
@@ -2651,7 +2775,8 @@
           "weight_prev": 6.67,
           "status": "TRIM",
           "shares_change_pct": -5.61,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 307.1
         },
         {
           "cusip": "02079K107",
@@ -2667,7 +2792,8 @@
           "weight_prev": 9.5,
           "status": "TRIM",
           "shares_change_pct": -41.49,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 306.02
         },
         {
           "cusip": "31620M106",
@@ -2683,7 +2809,8 @@
           "weight_prev": 5.25,
           "status": "ADD",
           "shares_change_pct": 18.84,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 46.8
         },
         {
           "cusip": "256677105",
@@ -2699,7 +2826,8 @@
           "weight_prev": 5.79,
           "status": "TRIM",
           "shares_change_pct": -22.65,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 153.84
         },
         {
           "cusip": "31488V107",
@@ -2715,7 +2843,8 @@
           "weight_prev": 5.45,
           "status": "TRIM",
           "shares_change_pct": -1.6,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 261.36
         },
         {
           "cusip": "26969P108",
@@ -2731,7 +2860,8 @@
           "weight_prev": 4.6,
           "status": "ADD",
           "shares_change_pct": 26.14,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 235.11
         },
         {
           "cusip": "G61188127",
@@ -2747,7 +2877,8 @@
           "weight_prev": 5.34,
           "status": "TRIM",
           "shares_change_pct": -3.57,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 10.75
         },
         {
           "cusip": "372460105",
@@ -2763,7 +2894,8 @@
           "weight_prev": 4.06,
           "status": "ADD",
           "shares_change_pct": 6.53,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 147.16
         },
         {
           "cusip": "337738108",
@@ -2779,7 +2911,8 @@
           "weight_prev": 2.42,
           "status": "ADD",
           "shares_change_pct": 145.81,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 59.36
         },
         {
           "cusip": "G25508105",
@@ -2795,7 +2928,8 @@
           "weight_prev": 8.52,
           "status": "TRIM",
           "shares_change_pct": -68.29,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 125.97
         },
         {
           "cusip": "G4412G101",
@@ -2811,7 +2945,8 @@
           "weight_prev": 1.38,
           "status": "ADD",
           "shares_change_pct": 19.33,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 15.9
         },
         {
           "cusip": "60855R100",
@@ -2827,7 +2962,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 135.35
         },
         {
           "cusip": "40054J109",
@@ -2843,7 +2979,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 18
         },
         {
           "cusip": "36165L108",
@@ -2859,7 +2996,8 @@
           "weight_prev": 2.64,
           "status": "TRIM",
           "shares_change_pct": -6.31,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 46.12
         },
         {
           "cusip": "03064D108",
@@ -2875,7 +3013,8 @@
           "weight_prev": 0.93,
           "status": "TRIM",
           "shares_change_pct": -3.45,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 12.36
         },
         {
           "cusip": "G61188101",
@@ -2891,7 +3030,8 @@
           "weight_prev": 1.22,
           "status": "TRIM",
           "shares_change_pct": -59.02,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 10.89
         },
         {
           "cusip": "87507T101",
@@ -2907,7 +3047,8 @@
           "weight_prev": 0.33,
           "status": "TRIM",
           "shares_change_pct": -54.94,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 28.1
         },
         {
           "cusip": "G68707101",
@@ -2954,7 +3095,8 @@
           "weight_prev": 11.35,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 102.75
         },
         {
           "cusip": "G89479102",
@@ -2970,7 +3112,8 @@
           "weight_prev": 17.6,
           "status": "TRIM",
           "shares_change_pct": -34.88,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 25.82
         },
         {
           "cusip": "G0378L100",
@@ -2986,7 +3129,8 @@
           "weight_prev": 6.21,
           "status": "TRIM",
           "shares_change_pct": -8.06,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 106.17
         },
         {
           "cusip": "366505105",
@@ -3002,7 +3146,8 @@
           "weight_prev": 9.16,
           "status": "TRIM",
           "shares_change_pct": -46.4,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 20.62
         },
         {
           "cusip": "G4766E116",
@@ -3018,7 +3163,8 @@
           "weight_prev": 0.23,
           "status": "TRIM",
           "shares_change_pct": -97.24,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 34.75
         },
         {
           "cusip": "64361Q101",
@@ -3034,7 +3180,8 @@
           "weight_prev": 5.07,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 44
         },
         {
           "cusip": "879433829",
@@ -3050,7 +3197,8 @@
           "weight_prev": 3.05,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 46.54
         },
         {
           "cusip": "06849F108",
@@ -3066,7 +3214,8 @@
           "weight_prev": 2.28,
           "status": "TRIM",
           "shares_change_pct": -9.9,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 46.65
         },
         {
           "cusip": "87422Q109",
@@ -3082,7 +3231,8 @@
           "weight_prev": 2.61,
           "status": "ADD",
           "shares_change_pct": 13.74,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 388.28
         },
         {
           "cusip": "21874A106",
@@ -3098,7 +3248,8 @@
           "weight_prev": 2.42,
           "status": "ADD",
           "shares_change_pct": 30.47,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 17.23
         },
         {
           "cusip": "654902204",
@@ -3114,7 +3265,8 @@
           "weight_prev": 1.9,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 7.3
         },
         {
           "cusip": "G3730V105",
@@ -3130,7 +3282,8 @@
           "weight_prev": 2.06,
           "status": "TRIM",
           "shares_change_pct": -11.59,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 285.75
         },
         {
           "cusip": "465562106",
@@ -3146,7 +3299,8 @@
           "weight_prev": 1.96,
           "status": "ADD",
           "shares_change_pct": 9.13,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 9.17
         },
         {
           "cusip": "G61188101",
@@ -3162,7 +3316,8 @@
           "weight_prev": 2.07,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 11.16
         },
         {
           "cusip": "124830878",
@@ -3178,7 +3333,8 @@
           "weight_prev": 1.94,
           "status": "TRIM",
           "shares_change_pct": -16.22,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 36.9
         },
         {
           "cusip": "40054J109",
@@ -3194,7 +3350,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 19.62
         },
         {
           "cusip": "89346D107",
@@ -3210,7 +3367,8 @@
           "weight_prev": 1.85,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 13.43
         },
         {
           "cusip": "8676EP108",
@@ -3226,7 +3384,8 @@
           "weight_prev": 2.56,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 6.41
         },
         {
           "cusip": "G6683N103",
@@ -3242,7 +3401,8 @@
           "weight_prev": 1.53,
           "status": "HOLD",
           "shares_change_pct": -0.88,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 16.82
         },
         {
           "cusip": "35671D857",
@@ -3258,7 +3418,8 @@
           "weight_prev": 1.25,
           "status": "TRIM",
           "shares_change_pct": -7.63,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 61.09
         },
         {
           "cusip": "49427F108",
@@ -3274,7 +3435,8 @@
           "weight_prev": 1.65,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 31.81
         },
         {
           "cusip": "151290889",
@@ -3290,7 +3452,8 @@
           "weight_prev": 1.98,
           "status": "TRIM",
           "shares_change_pct": -44.98,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 12.5
         },
         {
           "cusip": "78163D100",
@@ -3306,7 +3469,8 @@
           "weight_prev": 1.77,
           "status": "TRIM",
           "shares_change_pct": -15.1,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 8.46
         },
         {
           "cusip": "071705107",
@@ -3322,7 +3486,8 @@
           "weight_prev": 1.03,
           "status": "ADD",
           "shares_change_pct": 4.23,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 17.73
         },
         {
           "cusip": "G4124C109",
@@ -3338,7 +3503,8 @@
           "weight_prev": 1.54,
           "status": "TRIM",
           "shares_change_pct": -7.33,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 4.27
         },
         {
           "cusip": "G98239109",
@@ -3354,7 +3520,8 @@
           "weight_prev": 0.81,
           "status": "ADD",
           "shares_change_pct": 63.32,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 19.69
         },
         {
           "cusip": "G9001E128",
@@ -3370,7 +3537,8 @@
           "weight_prev": 1.19,
           "status": "TRIM",
           "shares_change_pct": -13.81,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 7.93
         },
         {
           "cusip": "27923Q109",
@@ -3386,7 +3554,8 @@
           "weight_prev": 0.53,
           "status": "ADD",
           "shares_change_pct": 48.81,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 11.64
         },
         {
           "cusip": "911684108",
@@ -3402,7 +3571,8 @@
           "weight_prev": 0.76,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 51.24
         },
         {
           "cusip": "92837L109",
@@ -3418,7 +3588,8 @@
           "weight_prev": 1.34,
           "status": "TRIM",
           "shares_change_pct": -57.52,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 53.95
         },
         {
           "cusip": "35969L108",
@@ -3434,7 +3605,8 @@
           "weight_prev": 1.04,
           "status": "TRIM",
           "shares_change_pct": -7.32,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 9.55
         },
         {
           "cusip": "Y8162K204",
@@ -3450,7 +3622,8 @@
           "weight_prev": 0.77,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 24.53
         },
         {
           "cusip": "48553T106",
@@ -3466,7 +3639,8 @@
           "weight_prev": 0.81,
           "status": "TRIM",
           "shares_change_pct": -7.32,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 17.3
         },
         {
           "cusip": "13057Q305",
@@ -3482,7 +3656,8 @@
           "weight_prev": 0.78,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 56.62
         },
         {
           "cusip": "879273209",
@@ -3498,7 +3673,8 @@
           "weight_prev": 0.4,
           "status": "TRIM",
           "shares_change_pct": -10.72,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 11.36
         },
         {
           "cusip": "91912E105",
@@ -3514,7 +3690,8 @@
           "weight_prev": 0.47,
           "status": "HOLD",
           "shares_change_pct": -0.49,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 15.9
         },
         {
           "cusip": "880890108",
@@ -3530,7 +3707,8 @@
           "weight_prev": 0.66,
           "status": "TRIM",
           "shares_change_pct": -26.62,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 43.25
         },
         {
           "cusip": "G7553X106",
@@ -3546,7 +3724,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 10.34
         },
         {
           "cusip": "67401P405",
@@ -3562,7 +3741,8 @@
           "weight_prev": 0.51,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 12.01
         },
         {
           "cusip": "456788108",
@@ -3578,7 +3758,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 14.75
         },
         {
           "cusip": "675746606",
@@ -3594,7 +3775,8 @@
           "weight_prev": null,
           "status": "NEW BUY",
           "shares_change_pct": null,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 45.8
         },
         {
           "cusip": "83193G107",
@@ -3610,7 +3792,8 @@
           "weight_prev": 0.22,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 1.61
         },
         {
           "cusip": "02156K103",
@@ -3626,7 +3809,8 @@
           "weight_prev": 0.38,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 1.62
         },
         {
           "cusip": "165167180",
@@ -3658,7 +3842,8 @@
           "weight_prev": 0.17,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 5.99
         },
         {
           "cusip": "55933J203",
@@ -3674,7 +3859,8 @@
           "weight_prev": 0.19,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 2.86
         },
         {
           "cusip": "G9001E102",
@@ -3690,7 +3876,8 @@
           "weight_prev": 0.15,
           "status": "HOLD",
           "shares_change_pct": -0.88,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 7.84
         },
         {
           "cusip": "40415F101",
@@ -3706,7 +3893,8 @@
           "weight_prev": 0.11,
           "status": "TRIM",
           "shares_change_pct": -13.73,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 32.81
         },
         {
           "cusip": "L01800116",
@@ -3738,7 +3926,8 @@
           "weight_prev": 0.08,
           "status": "HOLD",
           "shares_change_pct": -0.13,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 2.68
         },
         {
           "cusip": "L01800108",
@@ -3754,7 +3943,8 @@
           "weight_prev": 0.27,
           "status": "TRIM",
           "shares_change_pct": -65.87,
-          "ticker_source": "manual"
+          "ticker_source": "manual",
+          "price_at_filing": 4.64
         },
         {
           "cusip": "09075P204",
@@ -3770,7 +3960,8 @@
           "weight_prev": 0.01,
           "status": "HOLD",
           "shares_change_pct": 0,
-          "ticker_source": "auto"
+          "ticker_source": "auto",
+          "price_at_filing": 1.58
         },
         {
           "cusip": "G7553X114",
@@ -3923,147 +4114,147 @@
     {
       "ticker": "AA",
       "exchange": "NYS",
-      "filingPrice": 53.14
+      "filingPrice": 57.47
     },
     {
       "ticker": "AAL",
       "exchange": "NAS",
-      "filingPrice": 15.33
+      "filingPrice": 14.4
     },
     {
       "ticker": "AAPL",
       "exchange": "NAS",
-      "filingPrice": 271.86
+      "filingPrice": 260.58
     },
     {
       "ticker": "AD",
       "exchange": "NYS",
-      "filingPrice": 53.62
+      "filingPrice": 51.24
     },
     {
       "ticker": "ADMA",
       "exchange": "NAS",
-      "filingPrice": 18.24
+      "filingPrice": 15.95
     },
     {
       "ticker": "AERO",
       "exchange": "NYS",
-      "filingPrice": 21.96
+      "filingPrice": 19.62
     },
     {
       "ticker": "AEVA",
       "exchange": "NAS",
-      "filingPrice": 13.28
+      "filingPrice": 12.9
     },
     {
       "ticker": "AGX",
       "exchange": "NYS",
-      "filingPrice": 313.33
+      "filingPrice": 406.88
     },
     {
       "ticker": "AII",
       "exchange": "NYS",
-      "filingPrice": 8.81
+      "filingPrice": 18.25
     },
     {
       "ticker": "ALLE",
       "exchange": "NYS",
-      "filingPrice": 159.22
+      "filingPrice": 162.67
     },
     {
       "ticker": "ALLY",
       "exchange": "NYS",
-      "filingPrice": 45.29
+      "filingPrice": 41.29
     },
     {
       "ticker": "ALVO",
       "exchange": "NAS",
-      "filingPrice": 3.79
+      "filingPrice": 4.64
     },
     {
       "ticker": "AMZN",
       "exchange": "NAS",
-      "filingPrice": 230.82
+      "filingPrice": 201.15
     },
     {
       "ticker": "AON",
       "exchange": "NYS",
-      "filingPrice": 352.88
+      "filingPrice": 325.96
     },
     {
       "ticker": "AU",
       "exchange": "NYS",
-      "filingPrice": 85.28
+      "filingPrice": 106.17
     },
     {
       "ticker": "AXP",
       "exchange": "NYS",
-      "filingPrice": 369.95
+      "filingPrice": 344.53
     },
     {
       "ticker": "B",
       "exchange": "NYS",
-      "filingPrice": 43.55
+      "filingPrice": 46.65
     },
     {
       "ticker": "BAC",
       "exchange": "NYS",
-      "filingPrice": 55
+      "filingPrice": 52.77
     },
     {
       "ticker": "BATL",
       "exchange": "AMS",
-      "filingPrice": 1.13
+      "filingPrice": 2.68
     },
     {
       "ticker": "BATRA",
       "exchange": "NAS",
-      "filingPrice": 39.44
+      "filingPrice": 47.86
     },
     {
       "ticker": "BE",
       "exchange": "NYS",
-      "filingPrice": 86.89
+      "filingPrice": 145.32
     },
     {
       "ticker": "BHC",
       "exchange": "NYS",
-      "filingPrice": 6.95
+      "filingPrice": 5.99
     },
     {
       "ticker": "BLCO",
       "exchange": "NYS",
-      "filingPrice": 17.08
+      "filingPrice": 17.73
     },
     {
       "ticker": "BN",
       "exchange": "NYS",
-      "filingPrice": 45.89
+      "filingPrice": 47.78
     },
     {
       "ticker": "BRK-B",
       "exchange": "NYS",
-      "filingPrice": 502.65
+      "filingPrice": 496.94
     },
     {
       "ticker": "BTAI",
       "exchange": "NAS",
-      "filingPrice": 1.6
+      "filingPrice": 1.58
     },
     {
       "ticker": "BZ",
       "exchange": "NAS",
-      "filingPrice": 20.38
+      "filingPrice": 17.3
     },
     {
       "ticker": "CB",
       "exchange": "NYS",
-      "filingPrice": 312.12
+      "filingPrice": 331.89
     },
     {
       "ticker": "CBL",
       "exchange": "NYS",
-      "filingPrice": 37
+      "filingPrice": 36.9
     },
     {
       "ticker": "CDTX",
@@ -4073,717 +4264,717 @@
     {
       "ticker": "CHTR",
       "exchange": "NAS",
-      "filingPrice": 208.75
+      "filingPrice": 237.01
     },
     {
       "ticker": "CLF",
       "exchange": "NYS",
-      "filingPrice": 13.28
+      "filingPrice": 10.52
     },
     {
       "ticker": "CMG",
       "exchange": "NYS",
-      "filingPrice": 37
+      "filingPrice": 37.88
     },
     {
       "ticker": "COF",
       "exchange": "NYS",
-      "filingPrice": 242.36
+      "filingPrice": 205.9519
     },
     {
       "ticker": "COGT",
       "exchange": "NAS",
-      "filingPrice": 35.52
+      "filingPrice": 37.62
     },
     {
       "ticker": "COLD",
       "exchange": "NYS",
-      "filingPrice": 12.86
+      "filingPrice": 12.36
     },
     {
       "ticker": "CORZ",
       "exchange": "NAS",
-      "filingPrice": 14.56
+      "filingPrice": 17.23
     },
     {
       "ticker": "CPNG",
       "exchange": "NYS",
-      "filingPrice": 23.59
+      "filingPrice": 17.43
     },
     {
       "ticker": "CRC",
       "exchange": "NYS",
-      "filingPrice": 44.71
+      "filingPrice": 56.62
     },
     {
       "ticker": "CRH",
       "exchange": "NYS",
-      "filingPrice": 124.8
+      "filingPrice": 122.02
     },
     {
       "ticker": "CROX",
       "exchange": "NAS",
-      "filingPrice": 85.52
+      "filingPrice": 96.48
     },
     {
       "ticker": "CVX",
       "exchange": "NYS",
-      "filingPrice": 152.41
+      "filingPrice": 180.55
     },
     {
       "ticker": "CX",
       "exchange": "NYS",
-      "filingPrice": 11.49
+      "filingPrice": 12.5
     },
     {
       "ticker": "DAKT",
       "exchange": "NAS",
-      "filingPrice": 19.77
+      "filingPrice": 27.51
     },
     {
       "ticker": "DAL",
       "exchange": "NYS",
-      "filingPrice": 69.4
+      "filingPrice": 70.85
     },
     {
       "ticker": "DASH",
       "exchange": "NAS",
-      "filingPrice": 226.49
+      "filingPrice": 162.34
     },
     {
       "ticker": "DEO",
       "exchange": "NYS",
-      "filingPrice": 86.27
+      "filingPrice": 96.45
     },
     {
       "ticker": "DG",
       "exchange": "NYS",
-      "filingPrice": 132.77
+      "filingPrice": 153.84
     },
     {
       "ticker": "DOCU",
       "exchange": "NAS",
-      "filingPrice": 68.4
+      "filingPrice": 45.21
     },
     {
       "ticker": "DPZ",
       "exchange": "NAS",
-      "filingPrice": 416.82
+      "filingPrice": 373.5
     },
     {
       "ticker": "DVA",
       "exchange": "NYS",
-      "filingPrice": 113.61
+      "filingPrice": 150.41
     },
     {
       "ticker": "ECVT",
       "exchange": "NYS",
-      "filingPrice": 9.73
+      "filingPrice": 11.64
     },
     {
       "ticker": "EEM",
       "exchange": "AMS",
-      "filingPrice": 54.71
+      "filingPrice": 60.87
     },
     {
       "ticker": "ELV",
       "exchange": "NYS",
-      "filingPrice": 350.55
+      "filingPrice": 346.8
     },
     {
       "ticker": "ENTG",
       "exchange": "NAS",
-      "filingPrice": 84.25
+      "filingPrice": 129.56
     },
     {
       "ticker": "EWBC",
       "exchange": "NAS",
-      "filingPrice": 112.39
+      "filingPrice": 119.86
     },
     {
       "ticker": "EWZ",
       "exchange": "AMS",
-      "filingPrice": 31.77
+      "filingPrice": 37.74
     },
     {
       "ticker": "EXE",
       "exchange": "NAS",
-      "filingPrice": 110.36
+      "filingPrice": 102.75
     },
     {
       "ticker": "EXP",
       "exchange": "NYS",
-      "filingPrice": 206.68
+      "filingPrice": 235.11
     },
     {
       "ticker": "FCX",
       "exchange": "NYS",
-      "filingPrice": 50.79
+      "filingPrice": 61.09
     },
     {
       "ticker": "FERG",
       "exchange": "NYS",
-      "filingPrice": 222.63
+      "filingPrice": 261.36
     },
     {
       "ticker": "FI",
       "exchange": "NYS",
-      "filingPrice": 67.17
+      "filingPrice": 59.36
     },
     {
       "ticker": "FIGR",
       "exchange": "NAS",
-      "filingPrice": 40.84
+      "filingPrice": 36.91
     },
     {
       "ticker": "FIS",
       "exchange": "NYS",
-      "filingPrice": 66.46
+      "filingPrice": 46.8
     },
     {
       "ticker": "FLUT",
       "exchange": "NYS",
-      "filingPrice": 215.04
+      "filingPrice": 123.91
     },
     {
       "ticker": "FTAI",
       "exchange": "NAS",
-      "filingPrice": 196.85
+      "filingPrice": 285.75
     },
     {
       "ticker": "FWONK",
       "exchange": "NAS",
-      "filingPrice": 98.51
+      "filingPrice": 86.74
     },
     {
       "ticker": "GDS",
       "exchange": "NAS",
-      "filingPrice": 34.9
+      "filingPrice": 46.12
     },
     {
       "ticker": "GOOG",
       "exchange": "NAS",
-      "filingPrice": 313.8
+      "filingPrice": 303.56
     },
     {
       "ticker": "GOOGL",
       "exchange": "NAS",
-      "filingPrice": 313
+      "filingPrice": 302.85
     },
     {
       "ticker": "GPC",
       "exchange": "NYS",
-      "filingPrice": 122.96
+      "filingPrice": 147.16
     },
     {
       "ticker": "GRAB",
       "exchange": "NAS",
-      "filingPrice": 4.99
+      "filingPrice": 4.27
     },
     {
       "ticker": "GS",
       "exchange": "NYS",
-      "filingPrice": 879.02
+      "filingPrice": 916.04
     },
     {
       "ticker": "GTX",
       "exchange": "NAS",
-      "filingPrice": 17.43
+      "filingPrice": 20.62
     },
     {
       "ticker": "HDB",
       "exchange": "NYS",
-      "filingPrice": 36.54
+      "filingPrice": 32.81
     },
     {
       "ticker": "HEI",
       "exchange": "NYS",
-      "filingPrice": 252.43
+      "filingPrice": 337.21
     },
     {
       "ticker": "HHH",
       "exchange": "NYS",
-      "filingPrice": 79.77
+      "filingPrice": 82.76
     },
     {
       "ticker": "HLF",
       "exchange": "NYS",
-      "filingPrice": 12.89
+      "filingPrice": 15.9
     },
     {
       "ticker": "HLT",
       "exchange": "NYS",
-      "filingPrice": 287.25
+      "filingPrice": 317.82
     },
     {
       "ticker": "HTZ",
       "exchange": "NAS",
-      "filingPrice": 5.14
+      "filingPrice": 4.92
     },
     {
       "ticker": "INDV",
       "exchange": "NAS",
-      "filingPrice": 35.88
+      "filingPrice": 34.75
     },
     {
       "ticker": "INFY",
       "exchange": "NYS",
-      "filingPrice": 17.82
+      "filingPrice": 14.75
     },
     {
       "ticker": "INSM",
       "exchange": "NAS",
-      "filingPrice": 174.04
+      "filingPrice": 150.52
     },
     {
       "ticker": "ITUB",
       "exchange": "NYS",
-      "filingPrice": 7.16
+      "filingPrice": 9.17
     },
     {
       "ticker": "JEF",
       "exchange": "NYS",
-      "filingPrice": 61.97
+      "filingPrice": 51.98
     },
     {
       "ticker": "KHC",
       "exchange": "NAS",
-      "filingPrice": 24.25
+      "filingPrice": 23.78
     },
     {
       "ticker": "KO",
       "exchange": "NYS",
-      "filingPrice": 69.91
+      "filingPrice": 79.56
     },
     {
       "ticker": "KR",
       "exchange": "NYS",
-      "filingPrice": 62.48
+      "filingPrice": 69.66
     },
     {
       "ticker": "KRC",
       "exchange": "NYS",
-      "filingPrice": 37.37
+      "filingPrice": 31.81
     },
     {
       "ticker": "KRSP",
       "exchange": "NYS",
-      "filingPrice": 10.28
+      "filingPrice": 10.34
     },
     {
       "ticker": "LAMR",
       "exchange": "NAS",
-      "filingPrice": 126.58
+      "filingPrice": 132.57
     },
     {
       "ticker": "LBTYA",
       "exchange": "NAS",
-      "filingPrice": 11.14
+      "filingPrice": 11.16
     },
     {
       "ticker": "LBTYK",
       "exchange": "NAS",
-      "filingPrice": 11.04
+      "filingPrice": 10.75
     },
     {
       "ticker": "LEN",
       "exchange": "NYS",
-      "filingPrice": 102.8
+      "filingPrice": 121.44
     },
     {
       "ticker": "LILA",
       "exchange": "NAS",
-      "filingPrice": 7.39
+      "filingPrice": 7.84
     },
     {
       "ticker": "LILAK",
       "exchange": "NAS",
-      "filingPrice": 7.46
+      "filingPrice": 7.93
     },
     {
       "ticker": "LLYVA",
       "exchange": "NAS",
-      "filingPrice": 81.5
+      "filingPrice": 91.79
     },
     {
       "ticker": "LLYVK",
       "exchange": "NAS",
-      "filingPrice": 83.16
+      "filingPrice": 94.21
     },
     {
       "ticker": "LPX",
       "exchange": "NYS",
-      "filingPrice": 80.76
+      "filingPrice": 88.86
     },
     {
       "ticker": "LSCC",
       "exchange": "NAS",
-      "filingPrice": 73.58
+      "filingPrice": 97.5
     },
     {
       "ticker": "MA",
       "exchange": "NYS",
-      "filingPrice": 570.88
+      "filingPrice": 521.93
     },
     {
       "ticker": "MCO",
       "exchange": "NYS",
-      "filingPrice": 510.85
+      "filingPrice": 423.22
     },
     {
       "ticker": "MELI",
       "exchange": "NAS",
-      "filingPrice": 2014.25
+      "filingPrice": 1975.51
     },
     {
       "ticker": "META",
       "exchange": "NAS",
-      "filingPrice": 660.09
+      "filingPrice": 639.29
     },
     {
       "ticker": "MOH",
       "exchange": "NYS",
-      "filingPrice": 173.54
+      "filingPrice": 135.35
     },
     {
       "ticker": "MX",
       "exchange": "NYS",
-      "filingPrice": 2.55
+      "filingPrice": 2.86
     },
     {
       "ticker": "NAMS",
       "exchange": "NAS",
-      "filingPrice": 35.08
+      "filingPrice": 35.24
     },
     {
       "ticker": "NOK",
       "exchange": "NYS",
-      "filingPrice": 6.47
+      "filingPrice": 7.3
     },
     {
       "ticker": "NP",
       "exchange": "NYS",
-      "filingPrice": 29.15
+      "filingPrice": 19.39
     },
     {
       "ticker": "NTRA",
       "exchange": "NAS",
-      "filingPrice": 229.09
+      "filingPrice": 211.25
     },
     {
       "ticker": "NU",
       "exchange": "NYS",
-      "filingPrice": 16.74
+      "filingPrice": 16.82
     },
     {
       "ticker": "NUE",
       "exchange": "NYS",
-      "filingPrice": 163.11
+      "filingPrice": 183.64
     },
     {
       "ticker": "NVR",
       "exchange": "NYS",
-      "filingPrice": 7292.75
+      "filingPrice": 7421
     },
     {
       "ticker": "NYT",
       "exchange": "NYS",
-      "filingPrice": 69.42
+      "filingPrice": 74.03
     },
     {
       "ticker": "OCSL",
       "exchange": "NAS",
-      "filingPrice": 12.74
+      "filingPrice": 12.01
     },
     {
       "ticker": "ON",
       "exchange": "NAS",
-      "filingPrice": 54.15
+      "filingPrice": 71.96
     },
     {
       "ticker": "ONIT",
       "exchange": "NYS",
-      "filingPrice": 45.79
+      "filingPrice": 45.8
     },
     {
       "ticker": "OPCH",
       "exchange": "NAS",
-      "filingPrice": 31.86
+      "filingPrice": 35.24
     },
     {
       "ticker": "OPTU",
       "exchange": "NYS",
-      "filingPrice": 1.65
+      "filingPrice": 1.62
     },
     {
       "ticker": "OXY",
       "exchange": "NYS",
-      "filingPrice": 41.12
+      "filingPrice": 51.53
     },
     {
       "ticker": "PCT",
       "exchange": "NAS",
-      "filingPrice": 8.59
+      "filingPrice": 8.58
     },
     {
       "ticker": "PDD",
       "exchange": "NAS",
-      "filingPrice": 113.39
+      "filingPrice": 101.95
     },
     {
       "ticker": "PGNY",
       "exchange": "NAS",
-      "filingPrice": 25.68
+      "filingPrice": 20.35
     },
     {
       "ticker": "PM",
       "exchange": "NYS",
-      "filingPrice": 160.4
+      "filingPrice": 183.65
     },
     {
       "ticker": "POOL",
       "exchange": "NAS",
-      "filingPrice": 228.75
+      "filingPrice": 255.46
     },
     {
       "ticker": "PTGX",
       "exchange": "NAS",
-      "filingPrice": 87.34
+      "filingPrice": 82.46
     },
     {
       "ticker": "QSR",
       "exchange": "NYS",
-      "filingPrice": 68.23
+      "filingPrice": 68.13
     },
     {
       "ticker": "RH",
       "exchange": "NYS",
-      "filingPrice": 179.15
+      "filingPrice": 208.72
     },
     {
       "ticker": "ROKU",
       "exchange": "NAS",
-      "filingPrice": 108.49
+      "filingPrice": 88.58
     },
     {
       "ticker": "RSP",
       "exchange": "AMS",
-      "filingPrice": 191.56
+      "filingPrice": 202.52
     },
     {
       "ticker": "RWAY",
       "exchange": "NAS",
-      "filingPrice": 8.93
+      "filingPrice": 8.46
     },
     {
       "ticker": "SATS",
       "exchange": "NAS",
-      "filingPrice": 108.7
+      "filingPrice": 113
     },
     {
       "ticker": "SBLK",
       "exchange": "NAS",
-      "filingPrice": 19.22
+      "filingPrice": 24.53
     },
     {
       "ticker": "SCCO",
       "exchange": "NYS",
-      "filingPrice": 143.47
+      "filingPrice": 188
     },
     {
       "ticker": "SE",
       "exchange": "NYS",
-      "filingPrice": 127.57
+      "filingPrice": 108.51
     },
     {
       "ticker": "SEG",
       "exchange": "NYS",
-      "filingPrice": 19.77
+      "filingPrice": 20.27
     },
     {
       "ticker": "SIRI",
       "exchange": "NAS",
-      "filingPrice": 19.99
+      "filingPrice": 21.02
     },
     {
       "ticker": "SMRT",
       "exchange": "NYS",
-      "filingPrice": 2.02
+      "filingPrice": 1.61
     },
     {
       "ticker": "STKL",
       "exchange": "NAS",
-      "filingPrice": 3.81
+      "filingPrice": 6.41
     },
     {
       "ticker": "STM",
       "exchange": "NYS",
-      "filingPrice": 25.94
+      "filingPrice": 33.2
     },
     {
       "ticker": "STUB",
       "exchange": "NYS",
-      "filingPrice": 13.53
+      "filingPrice": 8.92
     },
     {
       "ticker": "STZ",
       "exchange": "NYS",
-      "filingPrice": 137.96
+      "filingPrice": 152.7
     },
     {
       "ticker": "TAC",
       "exchange": "NYS",
-      "filingPrice": 12.66
+      "filingPrice": 13.43
     },
     {
       "ticker": "TBBB",
       "exchange": "NYS",
-      "filingPrice": 33.39
+      "filingPrice": 38.69
     },
     {
       "ticker": "TBN",
       "exchange": "NYS",
-      "filingPrice": 27.23
+      "filingPrice": 28.1
     },
     {
       "ticker": "TDS",
       "exchange": "NYS",
-      "filingPrice": 41
+      "filingPrice": 46.54
     },
     {
       "ticker": "TEO",
       "exchange": "NYS",
-      "filingPrice": 11.61
+      "filingPrice": 11.36
     },
     {
       "ticker": "TEVA",
       "exchange": "NYS",
-      "filingPrice": 31.21
+      "filingPrice": 34.41
     },
     {
       "ticker": "TLN",
       "exchange": "NAS",
-      "filingPrice": 374.84
+      "filingPrice": 388.28
     },
     {
       "ticker": "TRMD",
       "exchange": "NAS",
-      "filingPrice": 19.95
+      "filingPrice": 25.82
     },
     {
       "ticker": "TSM",
       "exchange": "NYS",
-      "filingPrice": 303.89
+      "filingPrice": 364.2
     },
     {
       "ticker": "TX",
       "exchange": "NYS",
-      "filingPrice": 38.19
+      "filingPrice": 43.25
     },
     {
       "ticker": "U",
       "exchange": "NYS",
-      "filingPrice": 44.17
+      "filingPrice": 18.36
     },
     {
       "ticker": "UAL",
       "exchange": "NAS",
-      "filingPrice": 111.82
+      "filingPrice": 114.02
     },
     {
       "ticker": "UBER",
       "exchange": "NYS",
-      "filingPrice": 81.71
+      "filingPrice": 70.53
     },
     {
       "ticker": "UNH",
       "exchange": "NYS",
-      "filingPrice": 330.11
+      "filingPrice": 289.09
     },
     {
       "ticker": "UNP",
       "exchange": "NYS",
-      "filingPrice": 231.32
+      "filingPrice": 260.68
     },
     {
       "ticker": "V",
       "exchange": "NYS",
-      "filingPrice": 350.71
+      "filingPrice": 319.5
     },
     {
       "ticker": "VALE",
       "exchange": "NYS",
-      "filingPrice": 13.03
+      "filingPrice": 15.9
     },
     {
       "ticker": "VIST",
       "exchange": "NYS",
-      "filingPrice": 48.66
+      "filingPrice": 53.95
     },
     {
       "ticker": "VNOM",
       "exchange": "NAS",
-      "filingPrice": 38.63
+      "filingPrice": 44
     },
     {
       "ticker": "VRSN",
       "exchange": "NAS",
-      "filingPrice": 242.95
+      "filingPrice": 215.4486
     },
     {
       "ticker": "WAB",
       "exchange": "NYS",
-      "filingPrice": 213.45
+      "filingPrice": 259.69
     },
     {
       "ticker": "WCC",
       "exchange": "NYS",
-      "filingPrice": 244.64
+      "filingPrice": 307.1
     },
     {
       "ticker": "WOLF",
       "exchange": "NYS",
-      "filingPrice": 17.41
+      "filingPrice": 19.12
     },
     {
       "ticker": "WTW",
       "exchange": "NAS",
-      "filingPrice": 328.6
+      "filingPrice": 287.74
     },
     {
       "ticker": "WVE",
       "exchange": "NAS",
-      "filingPrice": 17
+      "filingPrice": 12.59
     },
     {
       "ticker": "WWD",
       "exchange": "NAS",
-      "filingPrice": 302.32
+      "filingPrice": 386.8041
     },
     {
       "ticker": "XLF",
       "exchange": "AMS",
-      "filingPrice": 54.77
+      "filingPrice": 52.2
     },
     {
       "ticker": "XP",
       "exchange": "NAS",
-      "filingPrice": 16.37
+      "filingPrice": 19.69
     },
     {
       "ticker": "YMM",
       "exchange": "NYS",
-      "filingPrice": 10.73
+      "filingPrice": 9.55
     },
     {
       "ticker": "YPF",
       "exchange": "NYS",
-      "filingPrice": 36.16
+      "filingPrice": 37.01
     },
     {
       "ticker": "Z",
       "exchange": "NAS",
-      "filingPrice": 68.22
+      "filingPrice": 43.97
     }
   ]
 }

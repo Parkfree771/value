@@ -73,10 +73,19 @@ const TICKER_REMAP: Record<string, string> = {
   'FI': 'FISV',  // Fiserv: SEC는 FI, KIS는 아직 FISV
 };
 
+// KIS API 거래소 변환 (SEC 거래소 → KIS 거래소)
+const EXCHANGE_REMAP: Record<string, string> = {
+  'FI': 'NAS',  // Fiserv: SEC는 NYS, KIS FISV는 NAS
+};
+
 function toKISTicker(ticker: string): string {
   if (TICKER_REMAP[ticker]) return TICKER_REMAP[ticker];
   // BRK-B → BRK/B (KIS는 슬래시 사용)
   return ticker.replace(/-/g, '/');
+}
+
+function toKISExchange(ticker: string, exchange: string): string {
+  return EXCHANGE_REMAP[ticker] || exchange;
 }
 
 async function getKISToken(): Promise<string> {
@@ -218,7 +227,8 @@ async function main() {
 
   for (const { ticker, exchange, filingPrice } of fetchable) {
     try {
-      const currentPrice = await getStockPriceWithRetry(token, ticker, exchange);
+      const kisExchange = toKISExchange(ticker, exchange);
+      const currentPrice = await getStockPriceWithRetry(token, ticker, kisExchange);
       const returnRate = filingPrice > 0
         ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
         : 0;
