@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { adminStorage } from '@/lib/firebase-admin';
+import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
 
-// feed.json 읽기/쓰기 헬퍼
+const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
+
+// feed.json 읽기 (공개 URL) / 쓰기 (Admin SDK)
 async function getFeed() {
   try {
-    const bucket = adminStorage.bucket();
-    const file = bucket.file('feed.json');
-    const [exists] = await file.exists();
-    if (!exists) return null;
-    const [content] = await file.download();
-    return JSON.parse(content.toString());
+    const res = await fetch(FEED_URL, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return await res.json();
   } catch {
     return null;
   }
@@ -48,18 +45,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 문서 참조
-    const docRef = doc(db, collectionName, postId);
-    const docSnap = await getDoc(docRef);
+    // 문서 참조 (Admin SDK)
+    const docRef = adminDb.collection(collectionName).doc(postId);
+    const docSnap = await docRef.get();
 
-    if (!docSnap.exists()) {
+    if (!docSnap.exists) {
       return NextResponse.json(
         { error: '게시글을 찾을 수 없습니다.' },
         { status: 404 }
       );
     }
 
-    const data = docSnap.data();
+    const data = docSnap.data()!;
 
     // 작성자 확인 (camelCase 필드명 사용)
     if (data.authorId !== userId) {
@@ -77,20 +74,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const finalReturnRate = closedReturnRate ?? data.returnRate ?? 0;
-    const finalPrice = closedPrice ?? data.currentPrice ?? data.initialPrice ?? 0;
+    // feed.json의 prices 맵에서 크론이 갱신한 현재가 가져오기
+    const ticker = (data.ticker || '').toUpperCase();
+    let feedCurrentPrice = data.currentPrice;
+    const feed = await getFeed();
+    if (feed?.prices?.[ticker]?.currentPrice) {
+      feedCurrentPrice = feed.prices[ticker].currentPrice;
+    }
 
-    // Firestore 수익 확정 업데이트
-    await updateDoc(docRef, {
+    const basePrice = data.avgPrice || data.initialPrice;
+    const finalReturnRate = closedReturnRate ?? data.returnRate ?? 0;
+    const finalPrice = closedPrice ?? feedCurrentPrice ?? basePrice ?? 0;
+
+    // Firestore 수익 확정 업데이트 (Admin SDK)
+    await docRef.update({
       is_closed: true,
       closed_at: new Date().toISOString(),
       closed_return_rate: finalReturnRate,
       closed_price: finalPrice,
     });
 
-    // feed.json도 동기화
+    // feed.json도 동기화 (위에서 이미 읽은 feed 재사용)
     try {
-      const feed = await getFeed();
       if (feed?.posts) {
         const postIndex = feed.posts.findIndex((p: { id: string }) => p.id === postId);
         if (postIndex >= 0) {

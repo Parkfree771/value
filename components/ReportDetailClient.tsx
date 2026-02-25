@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
-import { Report } from '@/types/report';
+import { Report, AveragingEntry } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
@@ -44,6 +44,9 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ id: string; author: string } | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [isAveragingDown, setIsAveragingDown] = useState(false);
+  const [entries, setEntries] = useState<AveragingEntry[]>(report.entries || []);
+  const [avgPrice, setAvgPrice] = useState<number | undefined>(report.avgPrice);
 
   // 수익 확정 상태 확인
   useEffect(() => {
@@ -245,6 +248,45 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     }
   };
 
+  // 물타기 처리
+  const handleAveragingDown = async () => {
+    if (!user || !report.id || isAveragingDown) return;
+
+    const remaining = 3 - entries.length;
+    const confirmMessage = `현재 시장가로 물타기하시겠습니까?\n\n물타기 후 평균단가 기준으로 수익률이 재계산됩니다.\n(${entries.length}/3회 사용, ${remaining}회 남음)`;
+    if (!confirm(confirmMessage)) return;
+
+    setIsAveragingDown(true);
+
+    try {
+      const response = await fetch('/api/averaging-down', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: report.id,
+          userId: user.uid,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setEntries(data.data.entries);
+        setAvgPrice(data.data.avgPrice);
+        const lastEntry = data.data.entries[data.data.entries.length - 1];
+        alert(`물타기가 기록되었습니다!\n\n물타기 가격: ${lastEntry.price.toLocaleString()}\n평균단가: ${Math.round(data.data.avgPrice).toLocaleString()}`);
+        window.location.reload();
+      } else {
+        alert(data.error || '물타기에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('물타기 오류:', error);
+      alert('물타기 중 오류가 발생했습니다.');
+    } finally {
+      setIsAveragingDown(false);
+    }
+  };
+
   // 현재 사용자가 작성자인지 확인
   const isAuthor = user && report.authorId === user.uid;
 
@@ -288,11 +330,24 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
               </span>
             </div>
-            {/* 2행: 작성가 · 현재가 · 목표가 */}
+            {/* 2행: 작성가(→평균단가) · 현재가 · 목표가 */}
             <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }}>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
-                <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가</div>
-                <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
+                {avgPrice && entries.length > 0 ? (
+                  <>
+                    <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가 → 평균단가</div>
+                    <div className="text-sm sm:text-base font-bold tabular-nums mt-0.5">
+                      <span className="text-gray-400 dark:text-gray-500">{report.initialPrice?.toLocaleString()}</span>
+                      <span className="text-gray-400 dark:text-gray-500 mx-1">→</span>
+                      <span className="text-blue-600 dark:text-blue-400">{Number.isInteger(avgPrice) ? avgPrice.toLocaleString() : parseFloat(avgPrice.toFixed(2)).toLocaleString()}</span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가</div>
+                    <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
+                  </>
+                )}
               </div>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">현재가</div>
@@ -338,6 +393,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                     className="px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
                   >
                     {isClosing ? '처리 중...' : '수익확정'}
+                  </button>
+                )}
+                {!isClosed && entries.length < 3 && (
+                  <button
+                    onClick={handleAveragingDown}
+                    disabled={isAveragingDown}
+                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-blue-600 text-white border-2 border-blue-800 font-pixel text-xs sm:text-sm font-bold transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
+                  >
+                    {isAveragingDown ? '처리 중...' : `물타기 (${entries.length}/3)`}
                   </button>
                 )}
                 <button
@@ -778,6 +842,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {isAuthor && (
               <Card className="p-4">
                 <div className="space-y-2">
+                  {!isClosed && entries.length < 3 && (
+                    <button
+                      onClick={handleAveragingDown}
+                      disabled={isAveragingDown}
+                      className="w-full font-pixel px-4 py-2.5 bg-blue-600 text-white border-2 border-blue-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
+                    >
+                      {isAveragingDown ? '처리 중...' : `물타기 (${entries.length}/3)`}
+                    </button>
+                  )}
                   {!isClosed && (
                     <button
                       onClick={handleClosePosition}
@@ -856,37 +929,57 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
             </Card>
 
-            {/* 날짜 정보 */}
-            <Card className="p-4">
-              <div className="text-center">
-                <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">작성일</div>
-                <div className="font-pixel text-sm font-bold">{report.createdAt}</div>
+            {/* 날짜 · 물타기 · 조회수 */}
+            <Card className="p-4 space-y-3 text-sm">
+              {/* 작성일 · 수정일 · 조회수 - 그리드 */}
+              <div className="grid grid-cols-2 gap-2 text-center">
+                <div>
+                  <div className="text-[11px] text-gray-400 dark:text-gray-500">작성일</div>
+                  <div className="font-bold text-xs mt-0.5">{report.createdAt}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] text-gray-400 dark:text-gray-500">조회수</div>
+                  <div className="font-bold text-xs mt-0.5">{report.views}</div>
+                </div>
               </div>
 
               {(() => {
                 const filteredUpdates = report.updatedAt?.filter(date => date !== report.createdAt) || [];
                 return filteredUpdates.length > 0 && (
-                  <>
-                    <div className="border-t-[3px] border-[var(--pixel-border-muted)] my-3"></div>
-                    <div className="text-center">
-                      <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-2">수정일</div>
-                      <div className="space-y-1">
-                        {filteredUpdates.map((date, index) => (
-                          <div key={index} className="font-pixel text-xs font-bold">
-                            {date}
-                          </div>
-                        ))}
-                      </div>
+                  <div className="text-center">
+                    <div className="text-[11px] text-gray-400 dark:text-gray-500">수정일</div>
+                    <div className="font-bold text-xs mt-0.5">
+                      {filteredUpdates.join(', ')}
                     </div>
-                  </>
+                  </div>
                 );
               })()}
 
-              <div className="border-t-[3px] border-[var(--pixel-border-muted)] my-3"></div>
-              <div className="text-center">
-                <div className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-1">조회수</div>
-                <div className="font-pixel text-sm font-bold">{report.views}</div>
-              </div>
+              {/* 물타기 기록 */}
+              {entries.length > 0 && (
+                <>
+                  <div className="border-t-[3px] border-[var(--pixel-border-muted)]"></div>
+                  <div>
+                    <div className="text-[11px] text-gray-400 dark:text-gray-500 mb-2">물타기 기록</div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-500 dark:text-gray-400">매수 · {report.createdAt}</span>
+                        <span className="font-bold tabular-nums">{report.initialPrice?.toLocaleString()}</span>
+                      </div>
+                      {entries.map((entry, index) => (
+                        <div key={index} className="flex justify-between text-xs">
+                          <span className="text-blue-600 dark:text-blue-400">#{index + 1} · {entry.date}</span>
+                          <span className="font-bold tabular-nums text-blue-600 dark:text-blue-400">{entry.price?.toLocaleString()}</span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between text-xs font-bold pt-1.5 mt-1 border-t border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
+                        <span>평균단가</span>
+                        <span className="tabular-nums">{avgPrice ? (Number.isInteger(avgPrice) ? avgPrice.toLocaleString() : parseFloat(avgPrice.toFixed(2)).toLocaleString()) : '-'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
             </Card>
           </div>
         </div>

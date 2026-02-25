@@ -2,6 +2,12 @@ export type Opinion = 'buy' | 'sell' | 'hold';
 export type EditorMode = 'text' | 'html';
 export type MarketCategory = 'KOSPI' | 'KOSDAQ' | 'NASDAQ' | 'NYSE' | 'NIKKEI' | 'HANGSENG' | 'CRYPTO' | 'OTHER';
 
+export interface AveragingEntry {
+  price: number;
+  date: string;
+  timestamp: string;
+}
+
 /**
  * 리포트 리스트용 요약 타입 (홈페이지, 검색 결과 등)
  */
@@ -28,6 +34,8 @@ export interface ReportSummary {
   };
   is_closed?: boolean;
   closed_return_rate?: number;
+  entries?: AveragingEntry[];
+  avgPrice?: number;
 }
 
 export interface Report {
@@ -65,6 +73,8 @@ export interface Report {
   closed_at?: string;
   closed_return_rate?: number;
   closed_price?: number;
+  entries?: AveragingEntry[];
+  avgPrice?: number;
 }
 
 export interface UserProfile {

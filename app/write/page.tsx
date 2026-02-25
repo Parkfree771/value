@@ -10,7 +10,7 @@ import { db, storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
-import type { MarketCategory } from '@/types/report';
+import type { MarketCategory, AveragingEntry } from '@/types/report';
 import type { StockData } from '@/types/stock';
 import { getCryptoImageUrl } from '@/lib/cryptoCoins';
 import dynamic from 'next/dynamic';
@@ -42,6 +42,8 @@ function WritePageContent() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [originalInitialPrice, setOriginalInitialPrice] = useState<number | null>(null);
   const [tiptapEditor, setTiptapEditor] = useState<Editor | null>(null);
+  const [existingEntries, setExistingEntries] = useState<AveragingEntry[]>([]);
+  const [isClosed, setIsClosed] = useState(false);
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
@@ -78,6 +80,8 @@ function WritePageContent() {
         setTargetPrice(reportData.targetPrice ? Number(reportData.targetPrice).toLocaleString() : '');
         setContent(reportData.content || '');
         setOriginalInitialPrice(reportData.initialPrice || null);
+        setExistingEntries(reportData.entries || []);
+        setIsClosed(reportData.is_closed || false);
 
         // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
@@ -212,6 +216,91 @@ function WritePageContent() {
   const removeFile = (index: number) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // 리포트 삭제
+  const handleDelete = async () => {
+    if (!editId || !user) return;
+    if (!confirm('정말로 이 리포트를 삭제하시겠습니까?\n\n삭제된 리포트는 복구할 수 없습니다.')) return;
+
+    try {
+      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/reports/${editId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert('리포트가 삭제되었습니다.');
+        router.push('/');
+      } else {
+        alert(data.error || '삭제 중 오류가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('삭제 실패:', error);
+      alert('삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  // 수익 확정
+  const [isClosing, setIsClosing] = useState(false);
+  const handleClosePosition = async () => {
+    if (!editId || !user || isClosing) return;
+    if (!confirm('현재 수익률로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.')) return;
+
+    setIsClosing(true);
+    try {
+      const response = await fetch('/api/close-position', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          postId: editId,
+          collection: 'posts',
+          userId: user.uid,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('수익이 확정되었습니다!');
+        setIsClosed(true);
+      } else {
+        alert(data.error || '수익 확정에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('수익 확정 오류:', error);
+      alert('수익 확정 중 오류가 발생했습니다.');
+    } finally {
+      setIsClosing(false);
+    }
+  };
+
+  // 물타기 (사이드바 빠른 물타기)
+  const [isQuickAveraging, setIsQuickAveraging] = useState(false);
+  const handleQuickAveragingDown = async () => {
+    if (!editId || !user || isQuickAveraging) return;
+    const remaining = 3 - existingEntries.length;
+    if (!confirm(`현재 시장가로 물타기하시겠습니까?\n(${existingEntries.length}/3회 사용, ${remaining}회 남음)`)) return;
+
+    setIsQuickAveraging(true);
+    try {
+      const response = await fetch('/api/averaging-down', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ postId: editId, userId: user.uid }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setExistingEntries(data.data.entries);
+        alert(`물타기 완료!\n평균단가: ${Math.round(data.data.avgPrice).toLocaleString()}`);
+      } else {
+        alert(data.error || '물타기에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('물타기 오류:', error);
+      alert('물타기 중 오류가 발생했습니다.');
+    } finally {
+      setIsQuickAveraging(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -368,6 +457,8 @@ function WritePageContent() {
                   is_closed: preservedData.is_closed || false,
                   closed_return_rate: preservedData.closed_return_rate,
                   closed_price: preservedData.closed_price,
+                  entries: preservedData.entries,
+                  avgPrice: preservedData.avgPrice,
                 },
               }),
             });
@@ -475,13 +566,64 @@ function WritePageContent() {
   }
 
   return (
-    <div className="write-page max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="card-base p-6 sm:p-8">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-8">
-          {isEditMode ? '투자 리포트 수정' : '투자 리포트 작성'}
-        </h1>
+    <div className="write-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
+        {isEditMode ? '투자 리포트 수정' : '투자 리포트 작성'}
+      </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="lg:flex lg:gap-8">
+        {/* 왼쪽: 폼 영역 */}
+        <div className="flex-1 min-w-0">
+          {/* 모바일용 액션 버튼 (lg 이하) */}
+          {isEditMode && (
+            <div className="lg:hidden flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+              <button
+                type="submit"
+                form="write-form"
+                disabled={isUploading}
+                className="px-3 py-1.5 bg-[var(--pixel-accent)] text-white border-2 border-[var(--pixel-accent-dark)] font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
+              >
+                {isUploading ? '업로드 중...' : '수정 완료'}
+              </button>
+              {!isClosed && existingEntries.length < 3 && (
+                <button
+                  type="button"
+                  onClick={handleQuickAveragingDown}
+                  disabled={isQuickAveraging}
+                  className="px-3 py-1.5 bg-blue-600 text-white border-2 border-blue-800 font-pixel text-xs sm:text-sm font-bold transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
+                >
+                  {isQuickAveraging ? '처리 중...' : `물타기 (${existingEntries.length}/3)`}
+                </button>
+              )}
+              {!isClosed && (
+                <button
+                  type="button"
+                  onClick={handleClosePosition}
+                  disabled={isClosing}
+                  className="px-3 py-1.5 border-2 border-emerald-600 bg-emerald-600 text-white font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
+                >
+                  {isClosing ? '처리 중...' : '수익확정'}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-3 py-1.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-red-500 hover:text-red-500 font-pixel text-xs sm:text-sm transition-all"
+              >
+                삭제
+              </button>
+              <button
+                type="button"
+                onClick={() => router.push(`/reports/${editId}`)}
+                className="px-3 py-1.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] font-pixel text-xs sm:text-sm transition-all"
+              >
+                글 보기
+              </button>
+            </div>
+          )}
+
+        <form id="write-form" onSubmit={handleSubmit} className="space-y-6">
+          <div className="card-base p-5 sm:p-8 space-y-6">
           {/* 기본 정보 */}
           <div className="space-y-4">
             <div>
@@ -825,30 +967,166 @@ function WritePageContent() {
             </div>
           )}
 
-          {/* 제출 버튼 */}
-          <div className="flex gap-4 pt-4">
+          </div>
+        </form>
+        </div>
+
+        {/* 오른쪽: 사이드바 (데스크톱) */}
+        <div className="hidden lg:block lg:w-72 lg:flex-shrink-0">
+          <div className="sticky top-20 space-y-4">
+            {/* 제출 + 취소 */}
+            <div className="card-base p-4 space-y-2">
+              <button
+                type="submit"
+                form="write-form"
+                disabled={isUploading}
+                className="w-full btn-primary !py-2.5 !text-sm disabled:opacity-50"
+              >
+                {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}
+              </button>
+              <button
+                type="button"
+                onClick={() => isEditMode && editId ? router.push(`/reports/${editId}`) : router.push('/')}
+                disabled={isUploading}
+                className="w-full btn-secondary !py-2.5 !text-sm disabled:opacity-50"
+              >
+                취소
+              </button>
+            </div>
+
+            {/* 수정 모드 전용 액션 */}
+            {isEditMode && editId && (
+              <>
+                {/* 물타기 */}
+                {!isClosed && existingEntries.length < 3 && stockData && (
+                  <div className="card-base p-4 space-y-2">
+                    <button
+                      type="button"
+                      onClick={handleQuickAveragingDown}
+                      disabled={isQuickAveraging}
+                      className="w-full font-pixel px-4 py-2.5 text-sm font-bold transition-all disabled:opacity-50 bg-blue-600 text-white border-2 border-blue-800 shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
+                    >
+                      {isQuickAveraging ? '처리 중...' : `물타기 (${existingEntries.length}/3)`}
+                    </button>
+                    {existingEntries.length > 0 && (
+                      <div className="pt-2 space-y-1">
+                        <div className="flex justify-between text-xs">
+                          <span className="text-blue-600 dark:text-blue-400">작성가</span>
+                          <span className="font-bold tabular-nums">{originalInitialPrice?.toLocaleString()}</span>
+                        </div>
+                        {existingEntries.map((entry, i) => (
+                          <div key={i} className="flex justify-between text-xs">
+                            <span className="text-blue-600 dark:text-blue-400">물타기 #{i + 1}</span>
+                            <span className="font-bold tabular-nums">{entry.price.toLocaleString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 수익확정 + 삭제 */}
+                <div className="card-base p-4 space-y-2">
+                  {!isClosed && (
+                    <button
+                      type="button"
+                      onClick={handleClosePosition}
+                      disabled={isClosing}
+                      className="w-full font-pixel px-4 py-2.5 bg-emerald-600 text-white border-2 border-emerald-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
+                    >
+                      {isClosing ? '처리 중...' : '수익 확정하기'}
+                    </button>
+                  )}
+                  {isClosed && (
+                    <div className="text-center py-2 text-sm font-pixel text-emerald-600 dark:text-emerald-400 font-bold">
+                      수익 확정 완료
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleDelete}
+                    className="w-full btn-danger font-pixel !py-2 !text-sm"
+                  >
+                    삭제
+                  </button>
+                </div>
+
+                {/* 종목 정보 요약 */}
+                {stockData && (
+                  <div className="card-base p-4">
+                    <h3 className="font-pixel text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">종목</span>
+                        <span className="font-bold">{stockData.name}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">현재가</span>
+                        <span className="font-bold tabular-nums">{stockData.currentPrice.toLocaleString()}</span>
+                      </div>
+                      {originalInitialPrice && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 dark:text-gray-400">작성가</span>
+                          <span className="font-bold tabular-nums">{originalInitialPrice.toLocaleString()}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">거래소</span>
+                        <span className="font-bold">{stockData.exchange}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* 새 글 작성 모드 + 종목 선택됨 */}
+            {!isEditMode && stockData && (
+              <div className="card-base p-4">
+                <h3 className="font-pixel text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">종목</span>
+                    <span className="font-bold">{stockData.name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">현재가</span>
+                    <span className="font-bold tabular-nums">{stockData.currentPrice.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500 dark:text-gray-400">거래소</span>
+                    <span className="font-bold">{stockData.exchange}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 모바일: 하단 고정 제출 버튼 (새 글 작성 시) */}
+      {!isEditMode && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[var(--pixel-bg)] border-t-[3px] border-[var(--pixel-border-muted)] z-40">
+          <div className="flex gap-3 max-w-5xl mx-auto">
             <button
               type="submit"
+              form="write-form"
               disabled={isUploading}
-              className={`flex-1 btn-primary !py-3 !text-sm ${
-                isUploading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`flex-1 btn-primary !py-3 !text-sm ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}
+              {isUploading ? '업로드 중...' : '작성 완료'}
             </button>
             <button
               type="button"
               onClick={() => router.push('/')}
               disabled={isUploading}
-              className={`btn-secondary !py-3 !text-sm ${
-                isUploading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className="btn-secondary !py-3 !text-sm"
             >
               취소
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

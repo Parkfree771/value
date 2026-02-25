@@ -142,6 +142,9 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       closed_at: data.closed_at,
       closed_return_rate: feedPost?.closed_return_rate ?? data.closed_return_rate,
       closed_price: feedPost?.closed_price ?? data.closed_price,
+      // 물타기 데이터
+      entries: data.entries || undefined,
+      avgPrice: data.avgPrice || undefined,
     };
 
     // 확정된 수익률이 있으면 사용

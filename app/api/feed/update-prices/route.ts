@@ -229,8 +229,9 @@ export async function POST() {
 
       if (priceData) {
         post.currentPrice = priceData.currentPrice;
+        const basePrice = post.avgPrice || post.initialPrice;
         post.returnRate = parseFloat(
-          calculateReturn(post.initialPrice, priceData.currentPrice, post.positionType).toFixed(2)
+          calculateReturn(basePrice, priceData.currentPrice, post.positionType).toFixed(2)
         );
 
         // 목표가 도달 시 자동 수익 확정
@@ -241,7 +242,7 @@ export async function POST() {
 
           if (targetReached) {
             const closedReturnRate = parseFloat(
-              calculateReturn(post.initialPrice, priceData.currentPrice, post.positionType).toFixed(2)
+              calculateReturn(basePrice, priceData.currentPrice, post.positionType).toFixed(2)
             );
             post.is_closed = true;
             post.closed_return_rate = closedReturnRate;

@@ -20,17 +20,33 @@ export function calculateReturn(
 }
 
 /**
+ * 물타기 평균단가 계산 (균등 가중)
+ * @param initialPrice - 최초 매수가
+ * @param entries - 물타기 엔트리 배열
+ * @returns 평균단가
+ */
+export function calculateAvgPrice(
+  initialPrice: number,
+  entries: { price: number }[]
+): number {
+  if (!entries || entries.length === 0) return initialPrice;
+  const total = initialPrice + entries.reduce((sum, e) => sum + e.price, 0);
+  return total / (1 + entries.length);
+}
+
+/**
  * Firestore 데이터에서 수익률을 계산하는 함수 (수익 확정 상태 포함)
  * 수익 확정된 게시글은 closed_return_rate를 반환
+ * 물타기가 있으면 avgPrice 기준으로 수익률 계산
  */
 export function calcReturnRate(data: Record<string, unknown>): number {
   if (data.is_closed && data.closed_return_rate != null) {
     return Number(data.closed_return_rate);
   }
-  const initial = Number(data.initialPrice) || 0;
+  const basePrice = data.avgPrice ? Number(data.avgPrice) : (Number(data.initialPrice) || 0);
   const current = Number(data.currentPrice) || 0;
   const pos = (data.positionType as string) || 'long';
-  return calculateReturn(initial, current, pos as 'long' | 'short');
+  return calculateReturn(basePrice, current, pos as 'long' | 'short');
 }
 
 /**

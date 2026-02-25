@@ -41,6 +41,8 @@ interface FeedPost {
   likes: number;
   category: string;
   is_closed?: boolean;
+  avgPrice?: number;
+  entries?: { price: number; date: string; timestamp: string }[];
 }
 
 interface FeedData {
@@ -71,6 +73,8 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     exchange: post.exchange,
     category: post.category,
     positionType: post.positionType,
+    avgPrice: post.avgPrice,
+    entries: post.entries,
     stockData: undefined,
   }));
 }

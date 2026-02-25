@@ -36,6 +36,8 @@ interface ReportCardProps {
   closed_at?: string; // 확정 일시
   closed_return_rate?: number; // 확정 수익률
   closed_price?: number; // 확정 가격
+  avgPrice?: number; // 물타기 평균단가
+  entries?: { price: number; date: string }[]; // 물타기 기록
 }
 
 const ReportCard = memo(function ReportCard({
@@ -61,6 +63,8 @@ const ReportCard = memo(function ReportCard({
   closed_at,
   closed_return_rate,
   closed_price,
+  avgPrice,
+  entries,
 }: ReportCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -204,8 +208,17 @@ const ReportCard = memo(function ReportCard({
         {/* Price Info */}
         <div className="flex gap-4 sm:gap-6 mb-2 sm:mb-4 text-xs sm:text-sm">
           <div>
-            <span className="text-gray-500 dark:text-gray-400">작성시: </span>
-            <span className="font-semibold text-gray-900 dark:text-white">{currencySymbol}{initialPrice.toLocaleString()}</span>
+            {avgPrice && entries && entries.length > 0 ? (
+              <>
+                <span className="text-gray-500 dark:text-gray-400">{currencySymbol}{initialPrice.toLocaleString()} → </span>
+                <span className="font-semibold text-blue-600 dark:text-blue-400">{currencySymbol}{Number.isInteger(avgPrice) ? avgPrice.toLocaleString() : parseFloat(avgPrice.toFixed(2)).toLocaleString()}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-gray-500 dark:text-gray-400">작성시: </span>
+                <span className="font-semibold text-gray-900 dark:text-white">{currencySymbol}{initialPrice.toLocaleString()}</span>
+              </>
+            )}
           </div>
           <div>
             <span className="text-gray-500 dark:text-gray-400">현재: </span>

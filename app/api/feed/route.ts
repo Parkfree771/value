@@ -137,18 +137,26 @@ export async function POST(request: NextRequest) {
       targetPrice: postData.targetPrice || 0,
       is_closed: postData.is_closed || false,
       closed_return_rate: postData.closed_return_rate,
+      entries: postData.entries || undefined,
+      avgPrice: postData.avgPrice || undefined,
     };
 
-    // 중복 체크 후 추가 (기존 포스트의 is_closed 상태 보존)
+    // 중복 체크 후 추가 (기존 포스트의 크론 관리 데이터 보존)
     const existingIndex = feed.posts.findIndex(p => p.id === postId);
     if (existingIndex >= 0) {
       const existing = feed.posts[existingIndex];
-      // is_closed 관련 필드가 전달되지 않았으면 기존 값 유지
+      // 크론이 관리하는 현재가/수익률 보존 (수정 페이지의 stale 값으로 덮어쓰기 방지)
+      newPost.currentPrice = existing.currentPrice;
+      newPost.returnRate = existing.returnRate;
+      // is_closed 관련 필드 보존
       if (!newPost.is_closed && existing.is_closed) {
         newPost.is_closed = existing.is_closed;
         newPost.closed_return_rate = existing.closed_return_rate;
-        newPost.currentPrice = existing.currentPrice;
-        newPost.returnRate = existing.returnRate;
+      }
+      // 물타기 데이터 보존
+      if (!newPost.entries && existing.entries) {
+        newPost.entries = existing.entries;
+        newPost.avgPrice = existing.avgPrice;
       }
       // 기존 views/likes 보존
       newPost.views = existing.views || 0;
