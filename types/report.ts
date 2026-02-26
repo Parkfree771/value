@@ -27,7 +27,7 @@ export interface ReportSummary {
   createdAt: string;
   views: number;
   likes: number;
-  positionType?: string;
+  positionType?: 'long' | 'short';
   stockData?: {
     currency?: string;
     [key: string]: any;

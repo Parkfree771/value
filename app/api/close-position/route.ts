@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
 import { revalidatePath } from 'next/cache';
+import { jsonCache, CACHE_KEYS } from '@/lib/jsonCache';
 
-const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
-
-// feed.json 읽기 (공개 URL) / 쓰기 (Admin SDK)
 async function getFeed() {
   try {
-    const res = await fetch(FEED_URL, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return await res.json();
+    const bucket = adminStorage.bucket();
+    const file = bucket.file('feed.json');
+    const [exists] = await file.exists();
+    if (!exists) return null;
+    const [content] = await file.download();
+    return JSON.parse(content.toString());
   } catch {
     return null;
   }
@@ -111,10 +112,11 @@ export async function POST(request: NextRequest) {
       console.error('[Close Position] feed.json 동기화 실패:', feedError);
     }
 
-    // 캐시 무효화
+    // 캐시 무효화 (글 생성과 동일)
     try {
       revalidatePath('/');
       revalidatePath(`/reports/${postId}`);
+      jsonCache.invalidate(CACHE_KEYS.FEED);
     } catch {
       // revalidate 실패는 무시
     }

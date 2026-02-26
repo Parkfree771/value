@@ -18,6 +18,10 @@ interface FeedPost {
   likes: number;
   category: string;
   is_closed?: boolean;
+  closed_return_rate?: number;
+  closed_price?: number;
+  avgPrice?: number;
+  entries?: { price: number; date: string; timestamp: string }[];
 }
 
 interface FeedData {

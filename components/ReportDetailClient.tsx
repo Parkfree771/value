@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
-import { Report, AveragingEntry } from '@/types/report';
+import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
@@ -35,7 +35,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(report.likes || 0);
-  const [isClosing, setIsClosing] = useState(false);
   const [isClosed, setIsClosed] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentCount, setCommentCount] = useState(0);
@@ -44,9 +43,10 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ id: string; author: string } | null>(null);
   const [replyText, setReplyText] = useState('');
-  const [isAveragingDown, setIsAveragingDown] = useState(false);
-  const [entries, setEntries] = useState<AveragingEntry[]>(report.entries || []);
-  const [avgPrice, setAvgPrice] = useState<number | undefined>(report.avgPrice);
+
+  // 물타기 데이터 (report에서 직접 읽기, 표시용)
+  const entries = report.entries || [];
+  const avgPrice = report.avgPrice;
 
   // 수익 확정 상태 확인
   useEffect(() => {
@@ -207,86 +207,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
     }
   };
 
-  // 수익 확정 처리
-  const handleClosePosition = async () => {
-    if (!user || !report.id || isClosing) return;
-
-    const confirmMessage = `현재 수익률 ${report.returnRate?.toFixed(2)}%로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.`;
-    if (!confirm(confirmMessage)) return;
-
-    setIsClosing(true);
-
-    try {
-      const response = await fetch('/api/close-position', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          postId: report.id,
-          collection: 'posts',
-          userId: user.uid,
-          closedPrice: report.currentPrice,
-          closedReturnRate: report.returnRate,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert('수익이 확정되었습니다!');
-        // 상태 업데이트로 UI 반영 (새로고침 대신)
-        setIsClosed(true);
-      } else {
-        alert(data.error || '수익 확정에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('수익 확정 오류:', error);
-      alert('수익 확정 중 오류가 발생했습니다.');
-    } finally {
-      setIsClosing(false);
-    }
-  };
-
-  // 물타기 처리
-  const handleAveragingDown = async () => {
-    if (!user || !report.id || isAveragingDown) return;
-
-    const remaining = 3 - entries.length;
-    const confirmMessage = `현재 시장가로 물타기하시겠습니까?\n\n물타기 후 평균단가 기준으로 수익률이 재계산됩니다.\n(${entries.length}/3회 사용, ${remaining}회 남음)`;
-    if (!confirm(confirmMessage)) return;
-
-    setIsAveragingDown(true);
-
-    try {
-      const response = await fetch('/api/averaging-down', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          postId: report.id,
-          userId: user.uid,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setEntries(data.data.entries);
-        setAvgPrice(data.data.avgPrice);
-        const lastEntry = data.data.entries[data.data.entries.length - 1];
-        alert(`물타기가 기록되었습니다!\n\n물타기 가격: ${lastEntry.price.toLocaleString()}\n평균단가: ${Math.round(data.data.avgPrice).toLocaleString()}`);
-        window.location.reload();
-      } else {
-        alert(data.error || '물타기에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('물타기 오류:', error);
-      alert('물타기 중 오류가 발생했습니다.');
-    } finally {
-      setIsAveragingDown(false);
-    }
-  };
-
   // 현재 사용자가 작성자인지 확인
   const isAuthor = user && report.authorId === user.uid;
 
@@ -386,24 +306,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 작성자 전용 버튼 */}
             {isAuthor && (
               <>
-                {!isClosed && (
-                  <button
-                    onClick={handleClosePosition}
-                    disabled={isClosing}
-                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
-                  >
-                    {isClosing ? '처리 중...' : '수익확정'}
-                  </button>
-                )}
-                {!isClosed && entries.length < 3 && (
-                  <button
-                    onClick={handleAveragingDown}
-                    disabled={isAveragingDown}
-                    className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-blue-600 text-white border-2 border-blue-800 font-pixel text-xs sm:text-sm font-bold transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
-                  >
-                    {isAveragingDown ? '처리 중...' : `물타기 (${entries.length}/3)`}
-                  </button>
-                )}
                 <button
                   onClick={handleEdit}
                   className="px-2.5 py-1.5 sm:px-3 sm:py-2 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] font-pixel text-xs sm:text-sm transition-all"
@@ -841,39 +743,19 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 작성자 전용 액션 */}
             {isAuthor && (
               <Card className="p-4">
-                <div className="space-y-2">
-                  {!isClosed && entries.length < 3 && (
-                    <button
-                      onClick={handleAveragingDown}
-                      disabled={isAveragingDown}
-                      className="w-full font-pixel px-4 py-2.5 bg-blue-600 text-white border-2 border-blue-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
-                    >
-                      {isAveragingDown ? '처리 중...' : `물타기 (${entries.length}/3)`}
-                    </button>
-                  )}
-                  {!isClosed && (
-                    <button
-                      onClick={handleClosePosition}
-                      disabled={isClosing}
-                      className="w-full font-pixel px-4 py-2.5 bg-emerald-600 text-white border-2 border-emerald-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
-                    >
-                      {isClosing ? '처리 중...' : '수익 확정하기'}
-                    </button>
-                  )}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleEdit}
-                      className="flex-1 btn-secondary font-pixel !py-2 !text-sm"
-                    >
-                      수정
-                    </button>
-                    <button
-                      onClick={handleDelete}
-                      className="flex-1 btn-danger font-pixel !py-2 !text-sm"
-                    >
-                      삭제
-                    </button>
-                  </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleEdit}
+                    className="flex-1 btn-secondary font-pixel !py-2 !text-sm"
+                  >
+                    수정
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex-1 btn-danger font-pixel !py-2 !text-sm"
+                  >
+                    삭제
+                  </button>
                 </div>
               </Card>
             )}

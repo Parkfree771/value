@@ -70,7 +70,6 @@ const ReportCard = memo(function ReportCard({
   const { user } = useAuth();
   const { isBookmarked, toggleBookmark } = useBookmark();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [isClosed, setIsClosed] = useState(is_closed);
 
   const bookmarked = isBookmarked(id);
@@ -132,49 +131,6 @@ const ReportCard = memo(function ReportCard({
       alert(error.message || '리포트 삭제 중 오류가 발생했습니다.');
     } finally {
       setIsDeleting(false);
-    }
-  };
-
-  // 수익 확정 처리
-  const handleClosePosition = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user || !id || isClosing) return;
-
-    const confirmMessage = `현재 수익률 ${returnRate?.toFixed(2)}%로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.`;
-    if (!confirm(confirmMessage)) return;
-
-    setIsClosing(true);
-
-    try {
-      const response = await fetch('/api/close-position', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          postId: id,
-          collection: 'posts',
-          userId: user.uid,
-          closedPrice: currentPrice,
-          closedReturnRate: returnRate,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert('수익이 확정되었습니다!');
-        setIsClosed(true);
-      } else {
-        alert(data.error || '수익 확정에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('수익 확정 오류:', error);
-      alert('수익 확정 중 오류가 발생했습니다.');
-    } finally {
-      setIsClosing(false);
     }
   };
 
@@ -264,15 +220,6 @@ const ReportCard = memo(function ReportCard({
             )}
             {showActions && (
               <>
-                {!isClosed && (
-                  <button
-                    onClick={handleClosePosition}
-                    disabled={isClosing || isDeleting}
-                    className="px-3 py-2 font-pixel text-xs font-bold text-white bg-emerald-600 border-2 border-emerald-800 hover:bg-emerald-700 transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isClosing ? '처리 중...' : '수익 확정하기'}
-                  </button>
-                )}
                 {isClosed && (
                   <Badge variant="success" size="lg">
                     수익 확정 완료
@@ -280,14 +227,14 @@ const ReportCard = memo(function ReportCard({
                 )}
                 <button
                   onClick={handleEdit}
-                  disabled={isDeleting || isClosing}
+                  disabled={isDeleting}
                   className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
                 >
                   수정
                 </button>
                 <button
                   onClick={handleDelete}
-                  disabled={isDeleting || isClosing}
+                  disabled={isDeleting}
                   className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
                 >
                   {isDeleting ? '삭제 중...' : '삭제'}

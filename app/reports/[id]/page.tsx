@@ -24,6 +24,8 @@ interface FeedPost {
   is_closed?: boolean;
   closed_return_rate?: number;
   closed_price?: number;
+  avgPrice?: number;
+  entries?: { price: number; date: string; timestamp: string }[];
 }
 
 interface FeedData {
@@ -142,9 +144,9 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       closed_at: data.closed_at,
       closed_return_rate: feedPost?.closed_return_rate ?? data.closed_return_rate,
       closed_price: feedPost?.closed_price ?? data.closed_price,
-      // 물타기 데이터
-      entries: data.entries || undefined,
-      avgPrice: data.avgPrice || undefined,
+      // 물타기 데이터 (feed.json 우선, Firestore fallback)
+      entries: feedPost?.entries ?? data.entries ?? undefined,
+      avgPrice: feedPost?.avgPrice ?? data.avgPrice ?? undefined,
     };
 
     // 확정된 수익률이 있으면 사용
