@@ -121,10 +121,10 @@ export default function SearchPage() {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase();
       return (
-        report.title.toLowerCase().includes(query) ||
-        report.stockName.toLowerCase().includes(query) ||
-        report.ticker.toLowerCase().includes(query) ||
-        report.author.toLowerCase().includes(query)
+        (report.title || '').toLowerCase().includes(query) ||
+        (report.stockName || '').toLowerCase().includes(query) ||
+        (report.ticker || '').toLowerCase().includes(query) ||
+        (report.author || '').toLowerCase().includes(query)
       );
     });
 

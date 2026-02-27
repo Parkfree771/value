@@ -225,10 +225,10 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
         const matchesSearch = (
-          report.stockName.toLowerCase().includes(query) ||
-          report.ticker.toLowerCase().includes(query) ||
-          report.author.toLowerCase().includes(query) ||
-          report.title.toLowerCase().includes(query)
+          (report.stockName || '').toLowerCase().includes(query) ||
+          (report.ticker || '').toLowerCase().includes(query) ||
+          (report.author || '').toLowerCase().includes(query) ||
+          (report.title || '').toLowerCase().includes(query)
         );
         if (!matchesSearch) return false;
       }
