@@ -13,6 +13,25 @@ const Podium = dynamic(() => import('@/components/Podium'), {
 });
 
 type TimePeriod = '1month' | '3months' | '6months' | '1year' | 'all';
+type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK';
+
+const marketLabels: Record<MarketFilter, string> = {
+  all: '전체', KR: '한국', US: '미국', JP: '일본', CN: '중국', HK: '홍콩',
+};
+const MARKET_EXCHANGES: Record<string, string[]> = {
+  KR: ['KRX'], US: ['NAS', 'NYS', 'AMS'], JP: ['TSE'], CN: ['SHS', 'SZS'], HK: ['HKS'],
+};
+const marketKeys = Object.keys(marketLabels) as MarketFilter[];
+
+// 탭 (카테고리 스타일 - 검색 페이지와 동일)
+const TAB_CHIP = 'flex-shrink-0 font-heading tracking-wide px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm transition-all';
+const TAB_ACTIVE = `${TAB_CHIP} font-bold text-[var(--pixel-accent)] border border-[var(--pixel-accent)]`;
+const TAB_INACTIVE = `${TAB_CHIP} font-medium text-gray-600 dark:text-gray-300 hover:text-[var(--foreground)] hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`;
+
+// 날짜 필터 (텍스트 스타일 - 검색 페이지 정렬과 동일)
+const PERIOD_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
+const PERIOD_ACTIVE = `${PERIOD_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
+const PERIOD_INACTIVE = `${PERIOD_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
 
 interface RankedReport {
   id: string;
@@ -28,6 +47,7 @@ interface RankedReport {
   views: number;
   likes: number;
   daysElapsed: number;
+  exchange?: string;
   priceHistory: Array<{ date: string; price: number; returnRate: number }>;
 }
 
@@ -47,6 +67,7 @@ interface RankingClientProps {
 
 export default function RankingClient({ initialReports, initialInvestors, initialTrending }: RankingClientProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
+  const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
   const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('reports');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
@@ -63,6 +84,11 @@ export default function RankingClient({ initialReports, initialInvestors, initia
 
   const handlePeriodChange = useCallback((period: TimePeriod) => {
     setSelectedPeriod(period);
+    setCurrentPage(1);
+  }, []);
+
+  const handleMarketChange = useCallback((market: MarketFilter) => {
+    setMarketFilter(market);
     setCurrentPage(1);
   }, []);
 
@@ -84,35 +110,61 @@ export default function RankingClient({ initialReports, initialInvestors, initia
 
   const getPeriodLabel = useCallback((period: TimePeriod) => periodLabels[period], [periodLabels]);
 
-  // 기간에 따라 필터링된 리포트 (memoized)
+  // 기간 + 시장에 따라 필터링된 리포트 (memoized)
   const filteredReports = useMemo(() => {
-    if (selectedPeriod === 'all') return reports;
+    let filtered = reports;
 
-    const today = new Date();
-    const maxDays = periodDays[selectedPeriod];
+    // 시장 필터
+    if (marketFilter !== 'all') {
+      const exchanges = MARKET_EXCHANGES[marketFilter];
+      filtered = filtered.filter((report) => {
+        if (!report.exchange) return false;
+        return exchanges.includes(report.exchange.toUpperCase());
+      });
+    }
 
-    return reports.filter((report) => {
-      const createdDate = new Date(report.createdAt);
-      const diffTime = today.getTime() - createdDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays <= maxDays;
-    });
-  }, [reports, selectedPeriod, periodDays]);
+    // 기간 필터
+    if (selectedPeriod !== 'all') {
+      const today = new Date();
+      const maxDays = periodDays[selectedPeriod];
+      filtered = filtered.filter((report) => {
+        const createdDate = new Date(report.createdAt);
+        const diffTime = today.getTime() - createdDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= maxDays;
+      });
+    }
 
-  // 기간에 따라 필터링된 인기글 (memoized)
+    return filtered;
+  }, [reports, selectedPeriod, marketFilter, periodDays]);
+
+  // 기간 + 시장에 따라 필터링된 인기글 (memoized)
   const filteredTrending = useMemo(() => {
-    if (selectedPeriod === 'all') return trending;
+    let filtered = trending;
 
-    const today = new Date();
-    const maxDays = periodDays[selectedPeriod];
+    // 시장 필터
+    if (marketFilter !== 'all') {
+      const exchanges = MARKET_EXCHANGES[marketFilter];
+      filtered = filtered.filter((report) => {
+        if (!report.exchange) return false;
+        return exchanges.includes(report.exchange.toUpperCase());
+      });
+    }
 
-    return trending.filter((report) => {
-      const createdDate = new Date(report.createdAt);
-      const diffTime = today.getTime() - createdDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays <= maxDays;
-    });
-  }, [trending, selectedPeriod, periodDays]);
+    // 기간 필터
+    if (selectedPeriod !== 'all') {
+      const today = new Date();
+      const maxDays = periodDays[selectedPeriod];
+      filtered = filtered.filter((report) => {
+        const createdDate = new Date(report.createdAt);
+        const diffTime = today.getTime() - createdDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays <= maxDays;
+      });
+    }
+
+    return filtered;
+  }, [trending, selectedPeriod, marketFilter, periodDays]);
 
   const getRankDisplay = useCallback((rank: number) => {
     return `${rank}`;
@@ -143,13 +195,16 @@ export default function RankingClient({ initialReports, initialInvestors, initia
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      {/* Tab Navigation */}
-      <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8">
+      {/* Header */}
+      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-wide mb-2 sm:mb-3 text-center">랭킹</h1>
+
+      {/* Tab Navigation (카테고리 스타일) */}
+      <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 justify-center">
         {(['reports', 'investors', 'trending'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => handleTabChange(tab)}
-            className={`flex-1 sm:flex-none ${activeTab === tab ? 'pixel-tab-active' : 'pixel-tab'}`}
+            className={activeTab === tab ? TAB_ACTIVE : TAB_INACTIVE}
           >
             {{ reports: '리포트', investors: '투자자', trending: '인기글' }[tab]}
           </button>
@@ -158,94 +213,40 @@ export default function RankingClient({ initialReports, initialInvestors, initia
 
       {activeTab === 'reports' && (
         <>
-          {/* Podium for Top 3 - Desktop only */}
-          <div className="hidden md:block mb-6">
-            <Podium topThree={filteredReports.slice(0, 3).map((report, index) => ({
-              rank: index + 1,
-              name: report.stockName,
-              avgReturnRate: report.returnRate,
-              totalReports: 0,
-              totalLikes: report.likes,
-              linkPath: `/reports/${report.id}`,
-            }))} />
-          </div>
+          {/* TOP 3 Podium (픽셀 카드 스타일) */}
+          <Podium topThree={filteredReports.slice(0, 3).map((report, index) => ({
+            rank: index + 1,
+            name: report.stockName,
+            avgReturnRate: report.returnRate,
+            totalReports: 0,
+            totalLikes: report.likes,
+            linkPath: `/reports/${report.id}`,
+          }))} />
 
-          {/* Mobile: Top 3 Badges - Dark Gold Theme */}
-          <div className={`md:hidden ${styles.mobileTop3}`}>
-            <div className={styles.mobileTop3Box}>
-              <div className={styles.mobileTopLine}></div>
-              <div className={styles.mobileContent}>
-                <div className={styles.mobileHeader}>
-                  <p className={styles.mobileSubtitle}>Hall of Fame</p>
-                  <h2 className={styles.mobileTitle}>TOP 3</h2>
-                </div>
-                <div className={styles.mobileBadgeLayout}>
-                  {filteredReports.slice(0, 3).map((report, index) => (
-                    <Link
-                      key={report.id}
-                      href={`/reports/${report.id}`}
-                      className={`${styles.mobileBadgeItem} ${index === 0 ? styles.mobileBadgeItemFirst : ''}`}
-                    >
-                      <div className={`${styles.mobileBadge} ${
-                        index === 0 ? styles.mobileBadgeFirst :
-                        index === 1 ? styles.mobileBadgeSecond :
-                        styles.mobileBadgeThird
-                      }`}>
-                        {index === 0 && (
-                          <>
-                            <div className={styles.mobileBadgeFirstGlow}></div>
-                            <div className={styles.mobileBadgeFirstInner}></div>
-                            <div className={styles.mobileBadgeFirstShine}></div>
-                            <div className={styles.mobileBadgeFirstSparkle}></div>
-                            <span className={styles.mobileBadgeFirstNumber}>1</span>
-                          </>
-                        )}
-                        {index === 1 && (
-                          <>
-                            <div className={styles.mobileBadgeSecondInner}></div>
-                            <div className={styles.mobileBadgeSecondShine}></div>
-                            <span className={styles.mobileBadgeSecondNumber}>2</span>
-                          </>
-                        )}
-                        {index === 2 && (
-                          <>
-                            <div className={styles.mobileBadgeThirdInner}></div>
-                            <div className={styles.mobileBadgeThirdShine}></div>
-                            <span className={styles.mobileBadgeThirdNumber}>3</span>
-                          </>
-                        )}
-                      </div>
-                      <div className={`${styles.mobileName} ${index === 0 ? styles.mobileNameFirst : styles.mobileNameOther}`}>
-                        {report.stockName}
-                      </div>
-                      <div className={`${styles.mobileReturn} ${index === 0 ? styles.mobileReturnFirst : styles.mobileReturnOther} ${
-                        report.returnRate >= 0 ? styles.mobileReturnPositive : styles.mobileReturnNegative
-                      }`}>
-                        {report.returnRate >= 0 ? '+' : ''}{report.returnRate.toFixed(2)}%
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <div className={styles.mobileBottomLine}></div>
+          {/* Market + Period Filter */}
+          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex justify-between items-center">
+            <div className="flex gap-0.5 sm:gap-1 items-center">
+              {marketKeys.map((market) => (
+                <button
+                  key={market}
+                  onClick={() => handleMarketChange(market)}
+                  className={marketFilter === market ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {marketLabels[market]}
+                </button>
+              ))}
             </div>
-          </div>
-
-          {/* Time Period Filter */}
-          <div className="mb-4 sm:mb-6 flex gap-2 flex-wrap justify-center">
-            {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => handlePeriodChange(period)}
-                className={`font-pixel px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold transition-all ${
-                  selectedPeriod === period
-                    ? 'border-2 pixel-chip-active'
-                    : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
-                }`}
-              >
-                {getPeriodLabel(period)}
-              </button>
-            ))}
+            <div className="flex gap-0.5 sm:gap-1 items-center">
+              {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => handlePeriodChange(period)}
+                  className={selectedPeriod === period ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {getPeriodLabel(period)}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* All Rankings */}
@@ -303,100 +304,42 @@ export default function RankingClient({ initialReports, initialInvestors, initia
 
       {activeTab === 'investors' && (
         <>
-          {/* Podium for Top 3 - Desktop only */}
-          <div className="hidden md:block">
-            <Podium topThree={investors.slice(0, 3)} />
-          </div>
+          {/* TOP 3 Podium (픽셀 카드 스타일) */}
+          <Podium topThree={investors.slice(0, 3)} />
 
-          {/* Mobile: Top 3 Badges - Dark Gold Theme */}
-          <div className={`md:hidden ${styles.mobileTop3}`}>
-            <div className={styles.mobileTop3Box}>
-              <div className={styles.mobileTopLine}></div>
-              <div className={styles.mobileContent}>
-                <div className={styles.mobileHeader}>
-                  <p className={styles.mobileSubtitle}>Hall of Fame</p>
-                  <h2 className={styles.mobileTitle}>TOP 3</h2>
-                </div>
-                <div className={styles.mobileBadgeLayout}>
-                  {investors.slice(0, 3).map((investor, index) => (
-                    <Link
-                      key={investor.rank}
-                      href={`/user/${encodeURIComponent(investor.name)}`}
-                      className={`${styles.mobileBadgeItem} ${investor.rank === 1 ? styles.mobileBadgeItemFirst : ''}`}
-                    >
-                      <div className={`${styles.mobileBadge} ${
-                        investor.rank === 1 ? styles.mobileBadgeFirst :
-                        investor.rank === 2 ? styles.mobileBadgeSecond :
-                        styles.mobileBadgeThird
-                      }`}>
-                        {investor.rank === 1 && (
-                          <>
-                            <div className={styles.mobileBadgeFirstGlow}></div>
-                            <div className={styles.mobileBadgeFirstInner}></div>
-                            <div className={styles.mobileBadgeFirstShine}></div>
-                            <div className={styles.mobileBadgeFirstSparkle}></div>
-                            <span className={styles.mobileBadgeFirstNumber}>1</span>
-                          </>
-                        )}
-                        {investor.rank === 2 && (
-                          <>
-                            <div className={styles.mobileBadgeSecondInner}></div>
-                            <div className={styles.mobileBadgeSecondShine}></div>
-                            <span className={styles.mobileBadgeSecondNumber}>2</span>
-                          </>
-                        )}
-                        {investor.rank === 3 && (
-                          <>
-                            <div className={styles.mobileBadgeThirdInner}></div>
-                            <div className={styles.mobileBadgeThirdShine}></div>
-                            <span className={styles.mobileBadgeThirdNumber}>3</span>
-                          </>
-                        )}
-                      </div>
-                      <div className={`${styles.mobileName} ${investor.rank === 1 ? styles.mobileNameFirst : styles.mobileNameOther}`}>
-                        {investor.name}
-                      </div>
-                      <div className={`${styles.mobileReturn} ${investor.rank === 1 ? styles.mobileReturnFirst : styles.mobileReturnOther} ${
-                        investor.avgReturnRate >= 0 ? styles.mobileReturnPositive : styles.mobileReturnNegative
-                      }`}>
-                        {investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-              <div className={styles.mobileBottomLine}></div>
+          {/* Market + Period Filter */}
+          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex justify-between items-center">
+            <div className="flex gap-0.5 sm:gap-1 items-center">
+              {marketKeys.map((market) => (
+                <button
+                  key={market}
+                  onClick={() => handleMarketChange(market)}
+                  className={marketFilter === market ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {marketLabels[market]}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-0.5 sm:gap-1 items-center">
+              {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => handlePeriodChange(period)}
+                  className={selectedPeriod === period ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {getPeriodLabel(period)}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Time Period Filter */}
-          <div className="mb-4 sm:mb-6 flex gap-2 flex-wrap justify-center">
-            {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => handlePeriodChange(period)}
-                className={`font-pixel px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold transition-all ${
-                  selectedPeriod === period
-                    ? 'border-2 pixel-chip-active'
-                    : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
-                }`}
-              >
-                {getPeriodLabel(period)}
-              </button>
-            ))}
-          </div>
-
           {/* All Rankings */}
-          <div className="card-base p-3 sm:p-6">
-            <h2 className="font-pixel text-base sm:text-lg font-bold mb-4 sm:mb-6">
-              전체 투자자 랭킹
-            </h2>
-            <div className="space-y-2 sm:space-y-3">
+          <div className="space-y-3 sm:space-y-4">
               {paginatedInvestors.map((investor) => (
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
-                  className="flex items-center justify-between p-3 sm:p-4 bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all cursor-pointer"
+                  className="flex items-center justify-between p-3 sm:p-4 card-base hover:border-[var(--pixel-accent)] cursor-pointer"
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <div className={`${styles.investorRankBadge} ${
@@ -435,7 +378,6 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   </div>
                 </Link>
               ))}
-            </div>
           </div>
 
           {/* 페이지네이션 */}
@@ -484,21 +426,30 @@ export default function RankingClient({ initialReports, initialInvestors, initia
             <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 text-center">조회수와 좋아요가 많은 인기 리포트</p>
           </div>
 
-          {/* Time Period Filter */}
-          <div className="mb-6 sm:mb-8 flex gap-2 flex-wrap justify-center">
-            {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
-              <button
-                key={period}
-                onClick={() => handlePeriodChange(period)}
-                className={`font-pixel px-3 sm:px-6 py-1.5 sm:py-2.5 text-xs sm:text-sm font-bold transition-all ${
-                  selectedPeriod === period
-                    ? 'border-2 pixel-chip-active'
-                    : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
-                }`}
-              >
-                {getPeriodLabel(period)}
-              </button>
-            ))}
+          {/* Market + Period Filter */}
+          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex justify-between items-center">
+            <div className="flex gap-0.5 sm:gap-1 items-center">
+              {marketKeys.map((market) => (
+                <button
+                  key={market}
+                  onClick={() => handleMarketChange(market)}
+                  className={marketFilter === market ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {marketLabels[market]}
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-0.5 sm:gap-1 items-center">
+              {(['1month', '3months', '6months', '1year', 'all'] as TimePeriod[]).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => handlePeriodChange(period)}
+                  className={selectedPeriod === period ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {getPeriodLabel(period)}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="space-y-3 sm:space-y-6">

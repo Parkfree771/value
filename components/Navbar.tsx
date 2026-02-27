@@ -65,7 +65,7 @@ const Navbar = memo(function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             <Link
               href="/"
-              className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/')
                   ? 'pixel-nav-active'
                   : 'pixel-nav-inactive'
@@ -75,7 +75,7 @@ const Navbar = memo(function Navbar() {
             </Link>
             <Link
               href="/search"
-              className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/search')
                   ? 'pixel-nav-active'
                   : 'pixel-nav-inactive'
@@ -85,7 +85,7 @@ const Navbar = memo(function Navbar() {
             </Link>
             <Link
               href="/ranking"
-              className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/ranking')
                   ? 'pixel-nav-active'
                   : 'pixel-nav-inactive'
@@ -95,7 +95,7 @@ const Navbar = memo(function Navbar() {
             </Link>
             <Link
               href="/guru-tracker"
-              className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/guru-tracker')
                   ? 'text-white bg-neon-orange border-2 border-neon-orange-700 shadow-pixel-sm'
                   : 'pixel-nav-inactive'
@@ -107,7 +107,7 @@ const Navbar = memo(function Navbar() {
             <Link
               href="/write"
               onClick={handleWriteClick}
-              className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/write')
                   ? 'pixel-nav-active'
                   : 'pixel-nav-inactive'
@@ -117,7 +117,7 @@ const Navbar = memo(function Navbar() {
             </Link>
             <Link
               href="/mypage"
-              className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/mypage')
                   ? 'pixel-nav-active'
                   : 'pixel-nav-inactive'
@@ -128,7 +128,7 @@ const Navbar = memo(function Navbar() {
             {user && isAdmin && (
               <Link
                 href="/admin"
-                className={`font-pixel px-3 py-1.5 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                   isActive('/admin')
                     ? 'pixel-nav-active'
                     : 'pixel-nav-inactive'
@@ -274,7 +274,7 @@ const Navbar = memo(function Navbar() {
               <Link
                 href="/"
                 onClick={closeMobileMenu}
-                className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/')
                     ? 'pixel-nav-mobile-active'
                     : 'pixel-nav-mobile-inactive'
@@ -285,7 +285,7 @@ const Navbar = memo(function Navbar() {
               <Link
                 href="/search"
                 onClick={closeMobileMenu}
-                className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/search')
                     ? 'pixel-nav-mobile-active'
                     : 'pixel-nav-mobile-inactive'
@@ -296,7 +296,7 @@ const Navbar = memo(function Navbar() {
               <Link
                 href="/ranking"
                 onClick={closeMobileMenu}
-                className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/ranking')
                     ? 'pixel-nav-mobile-active'
                     : 'pixel-nav-mobile-inactive'
@@ -307,7 +307,7 @@ const Navbar = memo(function Navbar() {
               <Link
                 href="/guru-tracker"
                 onClick={closeMobileMenu}
-                className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/guru-tracker')
                     ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-l-[3px] border-orange-500'
                     : 'pixel-nav-mobile-inactive'
@@ -321,7 +321,7 @@ const Navbar = memo(function Navbar() {
                   handleWriteClick(e);
                   if (user) closeMobileMenu();
                 }}
-                className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/write')
                     ? 'pixel-nav-mobile-active'
                     : 'pixel-nav-mobile-inactive'
@@ -332,7 +332,7 @@ const Navbar = memo(function Navbar() {
               <Link
                 href="/mypage"
                 onClick={closeMobileMenu}
-                className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/mypage')
                     ? 'pixel-nav-mobile-active'
                     : 'pixel-nav-mobile-inactive'
@@ -344,7 +344,7 @@ const Navbar = memo(function Navbar() {
                 <Link
                   href="/admin"
                   onClick={closeMobileMenu}
-                  className={`font-pixel px-4 py-3 text-sm font-bold transition-all ${
+                  className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                     isActive('/admin')
                       ? 'pixel-nav-mobile-active'
                       : 'pixel-nav-mobile-inactive'

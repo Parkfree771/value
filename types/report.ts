@@ -36,6 +36,7 @@ export interface ReportSummary {
   closed_return_rate?: number;
   entries?: AveragingEntry[];
   avgPrice?: number;
+  themes?: string[];
 }
 
 export interface Report {
@@ -75,6 +76,7 @@ export interface Report {
   closed_price?: number;
   entries?: AveragingEntry[];
   avgPrice?: number;
+  themes?: string[];
 }
 
 export interface UserProfile {

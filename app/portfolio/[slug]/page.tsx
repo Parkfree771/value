@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { GURU_LIST } from '@/app/guru-tracker/types';
 import { GuruPortfolioDoc } from '@/lib/sec13f/types';
@@ -123,19 +122,8 @@ export default function PortfolioPage() {
       {/* 구루 헤더 섹션 */}
       <section className="mb-6 sm:mb-8 bg-pixel-card border-3 border-pixel-border p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
         <div className="relative z-10">
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            {/* 프로필 이미지 */}
-            <div className="relative w-28 h-28 sm:w-36 sm:h-36 border-3 border-ant-red-600 dark:border-ant-red-400 overflow-hidden flex-shrink-0" style={{ boxShadow: 'var(--shadow-lg)' }}>
-              <Image
-                src={`/${guruInfo.image_filename}`}
-                alt={guruInfo.name_kr}
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            {/* 구루 정보 */}
-            <div className="flex-1 text-center sm:text-left">
+          <div>
+            <div className="text-center sm:text-left">
               <div className="inline-block mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
                 <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">
                   {guruInfo.style}

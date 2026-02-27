@@ -53,6 +53,9 @@ interface FeedPost {
   category: string;
   is_closed?: boolean;
   closed_return_rate?: number;
+  entries?: { price: number; date: string; timestamp: string }[];
+  avgPrice?: number;
+  themes?: string[];
 }
 
 interface FeedData {
@@ -416,17 +419,20 @@ async function main() {
       // 현재 마켓이면 새 가격, 아니면 기존 가격 또는 DB 가격 사용
       const currentPrice = priceData?.currentPrice || data.currentPrice || 0;
       const initialPrice = data.initialPrice || 0;
+      const avgPrice = data.avgPrice || undefined;
+      const entries = data.entries || undefined;
 
       // positionType 결정 (opinion 기반)
       const positionType: 'long' | 'short' =
         data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
 
-      // 수익률 계산 (확정된 포지션은 확정 수익률 사용)
+      // 수익률 계산 (물타기 평균단가 우선, 확정된 포지션은 확정 수익률 사용)
+      const basePrice = avgPrice || initialPrice;
       let returnRate: number;
       if (data.is_closed && data.closed_return_rate != null) {
         returnRate = data.closed_return_rate;
       } else {
-        returnRate = calculateReturn(initialPrice, currentPrice, positionType);
+        returnRate = calculateReturn(basePrice, currentPrice, positionType);
       }
 
       // createdAt 변환
@@ -458,6 +464,9 @@ async function main() {
         category: data.category || '',
         is_closed: data.is_closed || false,
         closed_return_rate: data.closed_return_rate,
+        entries,
+        avgPrice,
+        themes: data.themes || undefined,
       });
     }
 

@@ -13,6 +13,8 @@ import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory, AveragingEntry } from '@/types/report';
 import type { StockData } from '@/types/stock';
 import { getCryptoImageUrl } from '@/lib/cryptoCoins';
+import { loadThemes, getThemesForSymbol } from '@/lib/themeStocks';
+import type { Theme } from '@/types/theme';
 import dynamic from 'next/dynamic';
 import type { Editor } from '@tiptap/react';
 
@@ -44,9 +46,25 @@ function WritePageContent() {
   const [tiptapEditor, setTiptapEditor] = useState<Editor | null>(null);
   const [existingEntries, setExistingEntries] = useState<AveragingEntry[]>([]);
   const [isClosed, setIsClosed] = useState(false);
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
+  const [allThemes, setAllThemes] = useState<Theme[]>([]);
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
+
+  // 테마 데이터 로드
+  useEffect(() => {
+    loadThemes().then(setAllThemes).catch(console.error);
+  }, []);
+
+  // 종목 선택 시 관련 테마 자동 추천
+  useEffect(() => {
+    if (!stockData || allThemes.length === 0 || isEditMode) return;
+    const autoThemes = getThemesForSymbol(allThemes, stockData.symbol);
+    if (autoThemes.length > 0) {
+      setSelectedThemes(autoThemes.map(t => t.id));
+    }
+  }, [stockData, allThemes, isEditMode]);
 
   // 수정 모드: 기존 리포트 데이터 불러오기
   useEffect(() => {
@@ -82,6 +100,7 @@ function WritePageContent() {
         setOriginalInitialPrice(reportData.initialPrice || null);
         setExistingEntries(reportData.entries || []);
         setIsClosed(reportData.is_closed || false);
+        setSelectedThemes(reportData.themes || []);
 
         // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
@@ -391,6 +410,7 @@ function WritePageContent() {
         opinion,
         positionType,
         targetPrice: parseFloat(targetPrice.replace(/,/g, '')) || 0,
+        themes: selectedThemes.length > 0 ? selectedThemes : [],
 
         // 7. 콘텐츠
         content: finalContent,
@@ -459,6 +479,7 @@ function WritePageContent() {
                   closed_price: preservedData.closed_price,
                   entries: preservedData.entries,
                   avgPrice: preservedData.avgPrice,
+                  themes: selectedThemes.length > 0 ? selectedThemes : (preservedData.themes || []),
                 },
               }),
             });
@@ -786,6 +807,46 @@ function WritePageContent() {
               </div>
             </div>
           </div>
+
+          {/* 테마 태그 */}
+          {allThemes.length > 0 && (
+            <div>
+              <label className="pixel-label mb-2">
+                테마 태그
+              </label>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                관련 투자 테마를 선택하세요 (선택사항)
+              </p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {allThemes.map((theme) => (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() =>
+                      setSelectedThemes(prev =>
+                        prev.includes(theme.id)
+                          ? prev.filter(id => id !== theme.id)
+                          : [...prev, theme.id]
+                      )
+                    }
+                    className={`font-pixel px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 transition-all ${
+                      selectedThemes.includes(theme.id)
+                        ? 'pixel-chip-active font-bold'
+                        : 'bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
+                    }`}
+                    title={theme.description}
+                  >
+                    {theme.name}
+                  </button>
+                ))}
+              </div>
+              {selectedThemes.length > 0 && (
+                <p className="mt-2 text-xs text-[var(--pixel-accent)]">
+                  {selectedThemes.length}개 테마 선택됨
+                </p>
+              )}
+            </div>
+          )}
 
           {/* 에디터 */}
           <div>

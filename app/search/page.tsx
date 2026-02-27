@@ -1,177 +1,266 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ReportCard from '@/components/ReportCard';
-import FilterBar from '@/components/FilterBar';
 import SearchBar, { StockSuggestion } from '@/components/SearchBar';
 import Container from '@/components/Container';
+import { loadThemes, getSymbolsForThemes } from '@/lib/themeStocks';
+import type { Theme } from '@/types/theme';
 
-type SearchType = 'title' | 'stockName' | 'ticker' | 'author';
+type SortType = 'latest' | 'returnDesc' | 'returnAsc' | 'popular';
+type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK';
 
-const searchTypeLabels: Record<SearchType, string> = {
-  title: '제목',
-  stockName: '종목명',
-  ticker: '티커',
-  author: '작성자',
+const sortLabels: Record<SortType, string> = {
+  latest: '최신순',
+  returnDesc: '수익률↑',
+  returnAsc: '수익률↓',
+  popular: '인기순',
 };
 
-const searchTypePlaceholders: Record<SearchType, string> = {
-  title: '리포트 제목으로 검색...',
-  stockName: '종목명으로 검색...',
-  ticker: '티커(종목코드)로 검색...',
-  author: '작성자 이름으로 검색...',
+const marketLabels: Record<MarketFilter, string> = {
+  all: '전체',
+  KR: '한국',
+  US: '미국',
+  JP: '일본',
+  CN: '중국',
+  HK: '홍콩',
 };
+
+const MARKET_EXCHANGES: Record<string, string[]> = {
+  KR: ['KRX'],
+  US: ['NAS', 'NYS', 'AMS'],
+  JP: ['TSE'],
+  CN: ['SHS', 'SZS'],
+  HK: ['HKS'],
+};
+
+// 테마 칩 (구루 포트 스타일)
+const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border-2 transition-colors';
+const THEME_ACTIVE = `${THEME_CHIP} bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400`;
+const THEME_INACTIVE = `${THEME_CHIP} bg-pixel-card text-foreground border-pixel-border hover:bg-pixel-bg`;
+const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--pixel-accent)] border-[var(--pixel-accent)]`;
+
+// 필터 (텍스트 스타일 - 상장사 & 정렬 공통)
+const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
+const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
+const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
+
+/** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
+function measureFirstRow(container: HTMLElement | null): number {
+  if (!container) return Infinity;
+  const children = Array.from(container.children) as HTMLElement[];
+  if (children.length <= 1) return Infinity;
+  const firstTop = children[0].offsetTop;
+  let count = 0;
+  for (const child of children) {
+    if (child.offsetTop !== firstTop) break;
+    count++;
+  }
+  return count >= children.length ? Infinity : Math.max(count - 1, 1);
+}
 
 export default function SearchPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<SearchType>('title');
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [allThemes, setAllThemes] = useState<Theme[]>([]);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [sortType, setSortType] = useState<SortType>('latest');
+  const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
 
-  // API에서 리포트 가져오기
+  // 테마 칩 더보기
+  const [themeExpanded, setThemeExpanded] = useState(false);
+  const [themeVisible, setThemeVisible] = useState(Infinity);
+  const themeMeasureRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const measure = () => {
+      if (!themeExpanded) setThemeVisible(measureFirstRow(themeMeasureRef.current));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [allThemes, themeExpanded]);
+
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await fetch('/api/reports');
+        const response = await fetch('/api/feed/public');
         const data = await response.json();
-
-        if (data.success) {
-          setReports(data.reports);
-        }
+        if (data.posts) setReports(data.posts);
       } catch (error) {
         console.error('리포트 가져오기 실패:', error);
       } finally {
         setLoading(false);
       }
     };
-
     fetchReports();
+    loadThemes().then(setAllThemes).catch(console.error);
   }, []);
 
-  // 자동완성에서 종목 선택 시 티커 검색으로 전환
-  const handleSelectStock = (stock: StockSuggestion) => {
-    setSearchType('ticker');
-  };
+  const handleSelectStock = (stock: StockSuggestion) => {};
 
-  // 검색 필터링 - 선택된 검색 타입에 따라 필터링
-  const filteredReports = reports.filter((report) => {
-    if (!searchQuery.trim()) return true;
+  const themeSymbols = useMemo(() => {
+    if (!selectedTheme || allThemes.length === 0) return null;
+    return getSymbolsForThemes(allThemes, [selectedTheme]);
+  }, [selectedTheme, allThemes]);
 
-    const query = searchQuery.toLowerCase();
+  const filteredReports = useMemo(() => {
+    const filtered = reports.filter((report) => {
+      if (themeSymbols) {
+        const hasTagMatch = report.themes?.some((t: string) => t === selectedTheme);
+        const hasSymbolMatch = themeSymbols.has(report.ticker.toUpperCase());
+        if (!hasTagMatch && !hasSymbolMatch) return false;
+      }
+      if (marketFilter !== 'all') {
+        const exchanges = MARKET_EXCHANGES[marketFilter];
+        if (!exchanges || !exchanges.includes(report.exchange?.toUpperCase())) return false;
+      }
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        report.title.toLowerCase().includes(query) ||
+        report.stockName.toLowerCase().includes(query) ||
+        report.ticker.toLowerCase().includes(query) ||
+        report.author.toLowerCase().includes(query)
+      );
+    });
 
-    switch (searchType) {
-      case 'title':
-        return report.title.toLowerCase().includes(query);
-      case 'stockName':
-        return report.stockName.toLowerCase().includes(query);
-      case 'ticker':
-        return report.ticker.toLowerCase().includes(query);
-      case 'author':
-        return report.author.toLowerCase().includes(query);
-      default:
-        return true;
-    }
-  });
+    return filtered.sort((a, b) => {
+      switch (sortType) {
+        case 'returnDesc': return (b.returnRate ?? 0) - (a.returnRate ?? 0);
+        case 'returnAsc': return (a.returnRate ?? 0) - (b.returnRate ?? 0);
+        case 'popular': return (b.likes ?? 0) - (a.likes ?? 0);
+        default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+  }, [reports, themeSymbols, selectedTheme, marketFilter, searchQuery, sortType]);
+
+  const selectedThemeName = selectedTheme
+    ? allThemes.find(t => t.id === selectedTheme)?.name
+    : null;
+
+  const themeItems = useMemo(() => [
+    { id: null, name: '전체' },
+    ...allThemes.map(t => ({ id: t.id as string | null, name: t.name })),
+  ], [allThemes]);
+
+  const sortKeys = Object.keys(sortLabels) as SortType[];
+  const marketKeys = Object.keys(marketLabels) as MarketFilter[];
+  const totalThemes = themeItems.length;
 
   return (
     <Container>
-      {/* Header */}
-      <div className="mb-3 sm:mb-6 flex items-center gap-2 sm:gap-3">
-        <button
-          onClick={() => router.back()}
-          className="md:hidden p-1.5 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1 className="font-pixel text-xl sm:text-2xl font-bold">
-          검색
-        </h1>
-      </div>
-
-      {/* Search Bar */}
+      {/* 1. Header + Search Bar */}
+      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-wide mb-2">검색</h1>
       <SearchBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        placeholder={searchTypePlaceholders[searchType]}
-        showStockSuggestions={searchType === 'stockName' || searchType === 'ticker'}
+        placeholder=""
+        showStockSuggestions={false}
         onSelectStock={handleSelectStock}
       />
 
-      {/* 검색 방식 선택 */}
-      <div className="mb-3 sm:mb-6">
-        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          <span className="font-pixel text-xs text-gray-500 dark:text-gray-400 mr-0.5 sm:mr-1">검색 방식:</span>
-          {(Object.keys(searchTypeLabels) as SearchType[]).map((type) => (
+      {/* 2. 테마 칩 (더보기 방식) */}
+      {allThemes.length > 0 && (
+        <div className="mb-3 sm:mb-4 relative">
+          {/* 숨겨진 측정용 */}
+          <div
+            ref={themeMeasureRef}
+            className="flex flex-wrap gap-1.5 sm:gap-2 invisible absolute inset-x-0 top-0 pointer-events-none"
+            aria-hidden="true"
+          >
+            {themeItems.map((t, i) => (
+              <span key={i} className={THEME_INACTIVE}>{t.name}</span>
+            ))}
+          </div>
+
+          <div className={`flex gap-1.5 sm:gap-2 ${themeExpanded ? 'flex-wrap' : 'flex-nowrap'}`}>
+            {(themeExpanded ? themeItems : themeItems.slice(0, themeVisible)).map((t) => (
+              <button
+                key={t.id ?? 'all'}
+                onClick={() => setSelectedTheme(t.id === selectedTheme ? null : t.id)}
+                className={selectedTheme === t.id || (t.id === null && selectedTheme === null) ? THEME_ACTIVE : THEME_INACTIVE}
+                style={{ boxShadow: (selectedTheme === t.id || (t.id === null && selectedTheme === null)) ? 'var(--shadow-sm)' : 'none' }}
+              >
+                {t.name}
+              </button>
+            ))}
+            {!themeExpanded && themeVisible < totalThemes && (
+              <button onClick={() => setThemeExpanded(true)} className={THEME_MORE}>
+                +{totalThemes - themeVisible}
+              </button>
+            )}
+            {themeExpanded && themeVisible < totalThemes && (
+              <button onClick={() => setThemeExpanded(false)} className={THEME_MORE}>
+                접기
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 3. 필터: 왼쪽 상장사 | 오른쪽 정렬 */}
+      <div className="mb-3 sm:mb-4 flex justify-between items-center overflow-x-auto scrollbar-hide">
+        <div className="flex gap-0.5 sm:gap-1 flex-nowrap items-center">
+          {marketKeys.map((m) => (
+            <button
+              key={m}
+              onClick={() => setMarketFilter(m)}
+              className={marketFilter === m ? FILTER_ACTIVE : FILTER_INACTIVE}
+            >
+              {marketLabels[m]}
+            </button>
+          ))}
+        </div>
+        <div className="flex gap-0.5 sm:gap-1 flex-nowrap ml-2 items-center">
+          {sortKeys.map((type) => (
             <button
               key={type}
-              onClick={() => setSearchType(type)}
-              className={`font-pixel px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 transition-all ${
-                searchType === type
-                  ? 'border-2 pixel-chip-active font-bold'
-                  : 'bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
-              }`}
+              onClick={() => setSortType(type)}
+              className={sortType === type ? FILTER_ACTIVE : FILTER_INACTIVE}
             >
-              {searchTypeLabels[type]}
+              {sortLabels[type]}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Popular Search Keywords (when no search query) */}
-      {!searchQuery && (
-        <div className="mt-3 mb-4 sm:mt-4 sm:mb-6 p-3 sm:p-6 card-base">
-          <h2 className="font-pixel text-sm font-bold mb-2.5 sm:mb-4">
-            인기 검색어
-          </h2>
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
-            {['삼성전자', 'NVIDIA', 'Apple', '현대차', 'Tesla', '네이버', 'SK하이닉스', 'Microsoft'].map((keyword, index) => (
-              <button
-                key={keyword}
-                onClick={() => setSearchQuery(keyword)}
-                className="font-pixel px-2.5 py-1 sm:px-3 sm:py-1.5 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)] transition-all"
-              >
-                <span className="text-xs text-gray-400 mr-1">{index + 1}</span>
-                {keyword}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Filters */}
-      <FilterBar />
-
-      {/* Search Results Summary */}
-      {searchQuery && (
+      {/* Results Summary */}
+      {(searchQuery || selectedTheme) && (
         <div className="mb-4 px-2">
           <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
-            <span className="text-[var(--pixel-accent)] font-bold">{searchTypeLabels[searchType]}</span>
-            {' '}검색: <span className="font-bold">&ldquo;{searchQuery}&rdquo;</span>
+            {selectedThemeName && (
+              <span className="text-[var(--pixel-accent)] font-bold">[{selectedThemeName}] </span>
+            )}
+            {searchQuery && (
+              <>검색: <span className="font-bold">&ldquo;{searchQuery}&rdquo;</span></>
+            )}
             {' '}결과 {filteredReports.length}개
           </p>
         </div>
       )}
 
-      {/* Reports Grid */}
+      {/* Reports */}
       <div className="space-y-3 sm:space-y-6">
-        {filteredReports.length > 0 ? (
+        {loading ? (
+          <div className="pixel-empty-state">
+            <p className="font-pixel text-sm">로딩 중...</p>
+          </div>
+        ) : filteredReports.length > 0 ? (
           filteredReports.map((report) => (
             <ReportCard key={report.id} {...report} />
           ))
-        ) : searchQuery ? (
+        ) : (searchQuery || selectedTheme || marketFilter !== 'all') ? (
           <div className="pixel-empty-state">
             <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--pixel-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="font-pixel text-sm mb-1 sm:mb-2">
-              검색 결과가 없습니다
-            </p>
+            <p className="font-pixel text-sm mb-1 sm:mb-2">검색 결과가 없습니다</p>
             <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
-              다른 검색어를 입력해보세요
+              다른 검색어를 입력하거나 필터를 변경해보세요
             </p>
           </div>
         ) : (
@@ -179,22 +268,17 @@ export default function SearchPage() {
             <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--pixel-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="font-pixel text-sm mb-1 sm:mb-2">
-              검색어를 입력해주세요
-            </p>
+            <p className="font-pixel text-sm mb-1 sm:mb-2">검색어를 입력해주세요</p>
             <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
-              위에서 검색 방식을 선택하고 검색할 수 있습니다
+              테마를 선택하거나 검색어를 입력하세요
             </p>
           </div>
         )}
       </div>
 
-      {/* Load More Button */}
       {filteredReports.length > 0 && (
         <div className="text-center mt-6 sm:mt-8">
-          <button className="w-full sm:w-auto btn-primary font-pixel">
-            더 보기
-          </button>
+          <button className="w-full sm:w-auto btn-primary font-pixel">더 보기</button>
         </div>
       )}
     </Container>

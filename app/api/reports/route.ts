@@ -84,6 +84,7 @@ export async function GET(request: NextRequest) {
         exchange: data.exchange || '',
         category: data.category || '',
         stockData: data.stockData || null,
+        themes: data.themes || [],
       };
     });
 

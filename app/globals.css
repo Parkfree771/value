@@ -133,20 +133,20 @@
 }
 
 .dark {
-  --background: #1a1a2e;
-  --foreground: #e0e0e0;
+  --background: #1c1714;
+  --foreground: #e0dcd8;
 
-  --pixel-bg: #1e1e2e;
-  --pixel-bg-card: #2a2a3e;
+  --pixel-bg: #211c18;
+  --pixel-bg-card: #2e2722;
   --pixel-border: #e94560;
-  --pixel-border-muted: #3a3a4e;
+  --pixel-border-muted: #3e3530;
   --pixel-accent: #e94560;
   --pixel-accent-dark: #a32d42;
 
-  --shadow-sm: 2px 2px 0px #000000;
-  --shadow-md: 3px 3px 0px #000000;
-  --shadow-lg: 4px 4px 0px #000000;
-  --shadow-xl: 6px 6px 0px #000000;
+  --shadow-sm: 2px 2px 0px #0d0a08;
+  --shadow-md: 3px 3px 0px #0d0a08;
+  --shadow-lg: 4px 4px 0px #0d0a08;
+  --shadow-xl: 6px 6px 0px #0d0a08;
 }
 
 /* ============================================
@@ -333,22 +333,22 @@ body {
 
   .badge-buy {
     @apply badge-base;
-    background: rgba(239, 68, 68, 0.15);
-    color: #ff6b6b;
+    background: transparent;
+    color: #ef4444;
     border-color: #ef4444;
   }
 
   .badge-sell {
     @apply badge-base;
-    background: rgba(59, 130, 246, 0.15);
-    color: #6baaff;
+    background: transparent;
+    color: #3b82f6;
     border-color: #3b82f6;
   }
 
   .badge-hold {
     @apply badge-base;
-    background: rgba(107, 114, 128, 0.15);
-    color: #9ca3af;
+    background: transparent;
+    color: #6b7280;
     border-color: #6b7280;
   }
 
@@ -561,6 +561,15 @@ body {
     .pixel-empty-state {
       @apply p-12;
     }
+  }
+
+  /* 스크롤바 숨김 */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 
   /* 수익률 색상 - 픽셀 폰트 + 굵게 */

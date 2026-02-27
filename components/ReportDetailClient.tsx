@@ -13,6 +13,20 @@ import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
 import { useBookmark } from '@/contexts/BookmarkContext';
 
+// 테마 ID → 이름 정적 맵
+const THEME_NAMES: Record<string, string> = {
+  'physical-ai': '피지컬AI',
+  'quantum-computing': '양자컴퓨터',
+  'secondary-battery': '2차전지',
+  'ai-semiconductor': 'AI반도체',
+  'robotics': '로봇',
+  'autonomous-driving': '자율주행',
+  'bio-healthcare': '바이오/헬스케어',
+  'space-aerospace': '우주항공',
+  'nuclear-energy': '원자력',
+  'defense': '방산',
+};
+
 interface ReportDetailClientProps {
   report: Report;
 }
@@ -250,6 +264,19 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
               </span>
             </div>
+            {/* 테마 태그 */}
+            {report.themes && report.themes.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+                {report.themes.map(themeId => (
+                  <span
+                    key={themeId}
+                    className="font-pixel text-[10px] sm:text-xs px-2 py-0.5 border border-[var(--pixel-border-muted)] text-gray-500 dark:text-gray-400"
+                  >
+                    #{THEME_NAMES[themeId] || themeId}
+                  </span>
+                ))}
+              </div>
+            )}
             {/* 2행: 작성가(→평균단가) · 현재가 · 목표가 */}
             <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }}>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>

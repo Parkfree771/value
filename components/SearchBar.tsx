@@ -166,91 +166,95 @@ const SearchBar = memo(function SearchBar({
 
   return (
     <div className="mb-4 sm:mb-6" ref={searchRef}>
-      <div className="relative">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            if (showStockSuggestions) {
-              setShowSuggestions(true);
-            }
-            setFocusedIndex(-1);
+      <div className="flex gap-2 max-w-md">
+        {/* 검색 버튼 (왼쪽) */}
+        <button
+          type="button"
+          className="flex-shrink-0 font-heading font-bold tracking-wide text-white text-xs sm:text-sm px-3 sm:px-5 py-1.5 sm:py-2 border-[3px] border-[var(--pixel-accent-dark)] transition-all duration-300 hover:brightness-110 active:translate-y-[1px]"
+          style={{
+            backgroundColor: 'var(--pixel-accent)',
+            boxShadow: '0 2px 8px rgba(153,27,27,0.2)',
           }}
-          onFocus={() => showStockSuggestions && setShowSuggestions(true)}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          className="pixel-input !py-2.5 sm:!py-3 !pl-10 sm:!pl-12 !text-sm sm:!text-base focus:shadow-neon-red"
-        />
-        <svg
-          className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400 dark:text-gray-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-        {searchQuery && (
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setShowSuggestions(false);
-            }}
-            className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        )}
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
 
-        {/* 자동완성 드롭다운 */}
-        {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
-          <div className="absolute z-10 w-full mt-2 bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border)] shadow-pixel max-h-60 sm:max-h-80 overflow-y-auto">
-            {isLoading ? (
-              <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
-                검색 중...
-              </div>
-            ) : suggestions.length > 0 ? (
-              suggestions.map((stock, index) => (
-                <button
-                  key={`${stock.exchange}-${stock.symbol}`}
-                  onClick={() => handleSelectSuggestion(stock)}
-                  onMouseEnter={() => setFocusedIndex(index)}
-                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-all border-b-[2px] border-[var(--pixel-border-muted)] last:border-b-0 ${
-                    focusedIndex === index ? 'bg-red-50 dark:bg-red-900/20 border-l-[3px] border-l-[var(--pixel-accent)]' : ''
-                  }`}
-                >
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-bold border-2 flex-shrink-0 font-pixel ${getExchangeBadgeColor(stock.exchange)}`}>
-                      {getExchangeLabel(stock.exchange)}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-bold text-sm text-gray-900 dark:text-white">
-                          {highlightMatch(stock.symbol, searchQuery)}
-                        </span>
-                        <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                          {highlightMatch(stock.nameKr || stock.name, searchQuery)}
-                        </span>
+        <div className="relative flex-1">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              if (showStockSuggestions) {
+                setShowSuggestions(true);
+              }
+              setFocusedIndex(-1);
+            }}
+            onFocus={() => showStockSuggestions && setShowSuggestions(true)}
+            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
+            className="w-full font-heading font-medium tracking-wide bg-[var(--pixel-bg-card)] text-[var(--foreground)] border-[3px] border-[var(--pixel-border-muted)] pl-3 pr-8 sm:pl-4 sm:pr-10 py-1.5 sm:py-2 text-xs sm:text-sm outline-none transition-all duration-300 focus:border-[var(--pixel-accent)] placeholder:text-gray-400 dark:placeholder:text-gray-500"
+            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
+          />
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setShowSuggestions(false);
+              }}
+              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--pixel-accent)] transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          )}
+
+          {/* 자동완성 드롭다운 */}
+          {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
+            <div className="absolute z-10 w-full mt-2 bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border)] shadow-pixel max-h-60 sm:max-h-80 overflow-y-auto">
+              {isLoading ? (
+                <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
+                  검색 중...
+                </div>
+              ) : suggestions.length > 0 ? (
+                suggestions.map((stock, index) => (
+                  <button
+                    key={`${stock.exchange}-${stock.symbol}`}
+                    onClick={() => handleSelectSuggestion(stock)}
+                    onMouseEnter={() => setFocusedIndex(index)}
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-all border-b-[2px] border-[var(--pixel-border-muted)] last:border-b-0 ${
+                      focusedIndex === index ? 'bg-red-50 dark:bg-red-900/20 border-l-[3px] border-l-[var(--pixel-accent)]' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-bold border-2 flex-shrink-0 font-pixel ${getExchangeBadgeColor(stock.exchange)}`}>
+                        {getExchangeLabel(stock.exchange)}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-sm text-gray-900 dark:text-white">
+                            {highlightMatch(stock.symbol, searchQuery)}
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400 truncate">
+                            {highlightMatch(stock.nameKr || stock.name, searchQuery)}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </button>
-              ))
-            ) : null}
-          </div>
-        )}
+                  </button>
+                ))
+              ) : null}
+            </div>
+          )}
+        </div>
+
       </div>
 
       {showStockSuggestions && searchQuery && !showSuggestions && (

@@ -19,6 +19,7 @@ export interface FeedPost {
   closed_return_rate?: number;
   entries?: { price: number; date: string; timestamp: string }[];
   avgPrice?: number;
+  themes?: string[];
 }
 
 export interface FeedData {

@@ -17,7 +17,7 @@
 }
 
 .profileCard {
-  background: #1a1a2e;
+  background: #1c1714;
   border: 3px solid var(--pixel-border);
   box-shadow: var(--shadow-lg);
   padding: 1.5rem;
@@ -89,7 +89,7 @@
 .avatar {
   width: 5rem;
   height: 5rem;
-  background: #2a2a4a;
+  background: #2e2722;
   border: 3px solid var(--pixel-border);
   box-shadow: var(--shadow-md);
   display: flex;

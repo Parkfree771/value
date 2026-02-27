@@ -1,0 +1,135 @@
+{
+  "version": "2026-02-27",
+  "themes": [
+    {
+      "id": "physical-ai",
+      "name": "피지컬AI",
+      "nameEn": "Physical AI",
+      "description": "로봇, 자율주행 등 물리적 세계와 상호작용하는 AI 기술",
+      "symbols": [
+        "NVDA", "TSLA", "GOOGL", "MSFT",
+        "ISRG", "ROK", "HON", "PH",
+        "TER", "CGNX", "ZBRA",
+        "6954", "6861",
+        "005930", "005380", "012330",
+        "454910", "277810"
+      ]
+    },
+    {
+      "id": "quantum-computing",
+      "name": "양자컴퓨터",
+      "nameEn": "Quantum Computing",
+      "description": "양자 컴퓨팅 하드웨어 및 소프트웨어",
+      "symbols": [
+        "IONQ", "RGTI", "QBTS", "QUBT", "ARQQ",
+        "GOOGL", "IBM", "MSFT", "HON"
+      ]
+    },
+    {
+      "id": "secondary-battery",
+      "name": "2차전지",
+      "nameEn": "Secondary Battery",
+      "description": "배터리 소재, 셀, 모듈 제조사",
+      "symbols": [
+        "TSLA", "RIVN",
+        "ALB", "SQM", "LAC", "MP", "QS",
+        "6752",
+        "300750",
+        "373220", "006400", "247540", "003670",
+        "051910", "096770", "361610",
+        "086520", "066970",
+        "005490", "078600"
+      ]
+    },
+    {
+      "id": "ai-semiconductor",
+      "name": "AI반도체",
+      "nameEn": "AI Semiconductor",
+      "description": "AI 학습/추론용 반도체 설계 및 제조, 장비, 소재, 패키징",
+      "symbols": [
+        "NVDA", "AMD", "AVGO", "QCOM", "MRVL", "ARM", "INTC", "MU", "TXN", "NXPI", "MPWR", "MCHP", "RMBS", "SITM", "ON",
+        "CDNS", "SNPS",
+        "ASML", "AMAT", "LRCX", "KLAC", "ONTO", "ACLS", "MKSI",
+        "TSM", "AMKR", "ENTG",
+        "000660", "005930",
+        "042700", "240810", "357780", "403870", "039030"
+      ]
+    },
+    {
+      "id": "robotics",
+      "name": "로봇",
+      "nameEn": "Robotics",
+      "description": "산업용/서비스 로봇 및 자동화 기업",
+      "symbols": [
+        "ISRG", "ROK", "HON", "PH",
+        "TER", "CGNX", "ZBRA",
+        "6954", "6861",
+        "005380", "012330",
+        "454910", "277810"
+      ]
+    },
+    {
+      "id": "autonomous-driving",
+      "name": "자율주행",
+      "nameEn": "Autonomous Driving",
+      "description": "자율주행 기술 및 관련 부품 기업",
+      "symbols": [
+        "TSLA", "GOOGL", "GM", "APTV",
+        "MBLY", "NXPI", "ON",
+        "LAZR", "OUST", "INVZ",
+        "005380", "000270", "012330", "204320"
+      ]
+    },
+    {
+      "id": "bio-healthcare",
+      "name": "바이오/헬스케어",
+      "nameEn": "Bio/Healthcare",
+      "description": "제약, 바이오텍, 의료기기, 진단",
+      "symbols": [
+        "LLY", "NVO", "JNJ", "AZN", "PFE", "MRK", "ABBV", "AMGN", "GILD", "REGN", "BMY", "MRNA", "UNH",
+        "ISRG", "ABT", "BSX", "MDT", "SYK", "EW",
+        "TMO", "DHR", "A",
+        "207940", "068270", "000100", "196170",
+        "141080", "328130", "145020", "009420", "326030"
+      ]
+    },
+    {
+      "id": "space-aerospace",
+      "name": "우주항공",
+      "nameEn": "Space & Aerospace",
+      "description": "위성, 로켓, 우주 탐사 관련 기업",
+      "symbols": [
+        "LMT", "BA", "NOC", "RTX", "HII",
+        "RKLB", "ASTS", "LUNR",
+        "PL", "SPIR", "BKSY",
+        "KTOS",
+        "012450", "047810", "272210", "082740",
+        "099320", "211270"
+      ]
+    },
+    {
+      "id": "nuclear-energy",
+      "name": "원자력",
+      "nameEn": "Nuclear Energy",
+      "description": "원전 건설, 핵연료, SMR, 우라늄 관련 기업",
+      "symbols": [
+        "CCJ", "SMR", "LEU", "BWXT", "NNE", "OKLO",
+        "DNN", "UEC", "NXE", "UUUU",
+        "CEG", "VST", "ETR",
+        "034020", "015760", "052690", "267260"
+      ]
+    },
+    {
+      "id": "defense",
+      "name": "방산",
+      "nameEn": "Defense",
+      "description": "방위산업 및 군사 기술",
+      "symbols": [
+        "LMT", "RTX", "NOC", "GD", "BA", "HII", "LHX", "LDOS",
+        "KTOS", "AXON", "CACI", "SAIC",
+        "TDG", "HEI",
+        "012450", "047810", "272210", "079550", "064350", "042660", "103140"
+      ]
+    }
+  ]
+}

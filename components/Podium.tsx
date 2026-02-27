@@ -18,96 +18,40 @@ interface PodiumProps {
 const Podium = memo(function Podium({ topThree }: PodiumProps) {
   const [first, second, third] = topThree;
 
+  const renderCard = (data: Investor | undefined, rank: number) => {
+    if (!data) return null;
+
+    const cardClass = `${styles.card} ${
+      rank === 1 ? styles.cardFirst : rank === 2 ? styles.cardSecond : styles.cardThird
+    }`;
+    const rankClass = `${styles.rankNumber} ${
+      rank === 1 ? styles.rankFirst : rank === 2 ? styles.rankSecond : styles.rankThird
+    }`;
+    const nameClass = `${styles.name} ${rank === 1 ? styles.nameFirst : ''}`;
+    const returnClass = `${styles.returnRate} ${rank === 1 ? styles.returnFirst : ''} ${
+      data.avgReturnRate >= 0 ? styles.returnPositive : styles.returnNegative
+    }`;
+
+    return (
+      <Link
+        href={data.linkPath || `/user/${encodeURIComponent(data.name)}`}
+        className={cardClass}
+      >
+        <div className={rankClass}>{rank}</div>
+        <div className={nameClass}>{data.name}</div>
+        <div className={returnClass}>
+          {data.avgReturnRate >= 0 ? '+' : ''}{data.avgReturnRate.toFixed(2)}%
+        </div>
+      </Link>
+    );
+  };
+
   return (
     <div className={styles.container}>
-      <div className={styles.darkBox}>
-        <div className={styles.topLine}></div>
-
-        <div className={styles.content}>
-          {/* 헤더 */}
-          <div className={styles.header}>
-            <div className={styles.headerInner}>
-              <p className={styles.subtitle}>Hall of Fame</p>
-              <h2 className={styles.title}>TOP 3</h2>
-              <div className={styles.headerLine}></div>
-            </div>
-          </div>
-
-          <div className={styles.podiumLayout}>
-            {/* 2위 */}
-            {second && (
-              <div className={styles.rankColumn}>
-                <Link
-                  href={second.linkPath || `/user/${encodeURIComponent(second.name)}`}
-                  className={styles.rankLink}
-                >
-                  <div className={styles.profileArea}>
-                    <div className={`${styles.badge} ${styles.badgeSecond}`}>
-                      <div className={styles.badgeSecondInner}></div>
-                      <div className={styles.badgeSecondShine}></div>
-                      <span className={styles.badgeSecondNumber}>2</span>
-                    </div>
-                    <div className={styles.name}>{second.name}</div>
-                    <div className={`${styles.returnBadge} ${second.avgReturnRate >= 0 ? styles.returnPositive : styles.returnNegative}`}>
-                      {second.avgReturnRate >= 0 ? '+' : ''}{second.avgReturnRate.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className={`${styles.bottomLine} ${styles.bottomLineGold}`}></div>
-                </Link>
-              </div>
-            )}
-
-            {/* 1위 - 다이아몬드 */}
-            {first && (
-              <div className={styles.rankColumn}>
-                <Link
-                  href={first.linkPath || `/user/${encodeURIComponent(first.name)}`}
-                  className={styles.rankLink}
-                >
-                  <div className={`${styles.profileArea} ${styles.profileAreaFirst}`}>
-                    <div className={`${styles.badge} ${styles.badgeFirst}`}>
-                      <div className={styles.badgeFirstGlow}></div>
-                      <div className={styles.badgeFirstInner}></div>
-                      <div className={styles.badgeFirstShine}></div>
-                      <div className={styles.badgeFirstSparkle}></div>
-                      <span className={styles.badgeFirstNumber}>1</span>
-                    </div>
-                    <div className={`${styles.name} ${styles.nameFirst}`}>{first.name}</div>
-                    <div className={`${styles.returnBadge} ${styles.returnBadgeFirst} ${first.avgReturnRate >= 0 ? styles.returnPositive : styles.returnNegative}`}>
-                      {first.avgReturnRate >= 0 ? '+' : ''}{first.avgReturnRate.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className={`${styles.bottomLine} ${styles.bottomLineDiamond}`}></div>
-                </Link>
-              </div>
-            )}
-
-            {/* 3위 - 실버 */}
-            {third && (
-              <div className={styles.rankColumn}>
-                <Link
-                  href={third.linkPath || `/user/${encodeURIComponent(third.name)}`}
-                  className={styles.rankLink}
-                >
-                  <div className={styles.profileArea}>
-                    <div className={`${styles.badge} ${styles.badgeThird}`}>
-                      <div className={styles.badgeThirdInner}></div>
-                      <div className={styles.badgeThirdShine}></div>
-                      <span className={styles.badgeThirdNumber}>3</span>
-                    </div>
-                    <div className={styles.name}>{third.name}</div>
-                    <div className={`${styles.returnBadge} ${third.avgReturnRate >= 0 ? styles.returnPositive : styles.returnNegative}`}>
-                      {third.avgReturnRate >= 0 ? '+' : ''}{third.avgReturnRate.toFixed(2)}%
-                    </div>
-                  </div>
-                  <div className={`${styles.bottomLine} ${styles.bottomLineSilver}`}></div>
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className={styles.bottomLine}></div>
+      <div className={styles.podiumLayout}>
+        {renderCard(second, 2)}
+        {renderCard(first, 1)}
+        {renderCard(third, 3)}
       </div>
     </div>
   );

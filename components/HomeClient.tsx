@@ -1,17 +1,15 @@
 'use client';
 
-import { useState, useMemo, memo, useEffect } from 'react';
-import Link from 'next/link';
+import { useState, useMemo, memo, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
 import ReportCard from '@/components/ReportCard';
 import { useBookmark } from '@/contexts/BookmarkContext';
+import { loadThemes, getSymbolsForThemes } from '@/lib/themeStocks';
+import type { Theme } from '@/types/theme';
 
 // SSR 활성화: ReportCard는 직접 import (가장 중요한 콘텐츠)
 // 덜 중요한 컴포넌트만 dynamic import
-const FilterBar = dynamic(() => import('@/components/FilterBar'), {
-  loading: () => <div className="animate-pulse h-[52px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
-});
 const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
   loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-4 sm:mb-8" />,
 });
@@ -20,6 +18,34 @@ const SearchBar = dynamic(() => import('@/components/SearchBar'), {
 });
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
+type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK';
+
+const marketLabels: Record<MarketFilter, string> = {
+  all: '전체', KR: '한국', US: '미국', JP: '일본', CN: '중국', HK: '홍콩',
+};
+const MARKET_EXCHANGES: Record<string, string[]> = {
+  KR: ['KRX'], US: ['NAS', 'NYS', 'AMS'], JP: ['TSE'], CN: ['SHS', 'SZS'], HK: ['HKS'],
+};
+const marketKeys = Object.keys(marketLabels) as MarketFilter[];
+
+// 필터 (텍스트 스타일 - 검색 페이지와 동일)
+const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
+const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
+const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
+
+/** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
+function measureFirstRow(container: HTMLElement | null): number {
+  if (!container) return Infinity;
+  const children = Array.from(container.children) as HTMLElement[];
+  if (children.length <= 1) return Infinity;
+  const firstTop = children[0].offsetTop;
+  let count = 0;
+  for (const child of children) {
+    if (child.offsetTop !== firstTop) break;
+    count++;
+  }
+  return count >= children.length ? Infinity : Math.max(count - 1, 1);
+}
 
 // feed.json API 엔드포인트 (클라이언트 재검증용)
 const FEED_API = '/api/feed/public';
@@ -43,6 +69,7 @@ interface FeedPost {
   is_closed?: boolean;
   avgPrice?: number;
   entries?: { price: number; date: string; timestamp: string }[];
+  themes?: string[];
 }
 
 interface FeedData {
@@ -75,6 +102,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     positionType: post.positionType,
     avgPrice: post.avgPrice,
     entries: post.entries,
+    themes: post.themes,
     stockData: undefined,
   }));
 }
@@ -89,15 +117,42 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   const [isLoading, setIsLoading] = useState(!initialData);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
-  const [filters, setFilters] = useState({
-    period: 'all',
-    market: 'all',
-    opinion: 'all',
-    sortBy: 'returnRate',
-  });
+  const [allThemes, setAllThemes] = useState<Theme[]>([]);
+  const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
+  const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
+
+  // 테마 칩 더보기
+  const [themeExpanded, setThemeExpanded] = useState(false);
+  const [themeVisible, setThemeVisible] = useState(Infinity);
+  const themeMeasureRef = useRef<HTMLDivElement>(null);
 
   // 북마크 상태
   const { bookmarkedIds } = useBookmark();
+
+  useEffect(() => {
+    loadThemes().then(setAllThemes).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    const measure = () => {
+      if (!themeExpanded) setThemeVisible(measureFirstRow(themeMeasureRef.current));
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [allThemes, themeExpanded]);
+
+  const themeSymbols = useMemo(() => {
+    if (!selectedTheme || allThemes.length === 0) return null;
+    return getSymbolsForThemes(allThemes, [selectedTheme]);
+  }, [selectedTheme, allThemes]);
+
+  const themeItems = useMemo(() => [
+    { id: null, name: '전체' },
+    ...allThemes.map(t => ({ id: t.id as string | null, name: t.name })),
+  ], [allThemes]);
+
+  const totalThemes = themeItems.length;
 
   // 서버에서 데이터를 받지 못했을 경우에만 클라이언트에서 fetch
   useEffect(() => {
@@ -148,9 +203,22 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   // 검색 및 필터링
   const filteredReports = useMemo(() => {
     return sortedReports.filter((report) => {
-      // 북마크 탭: 북마크한 글만 표시
+      // 북마크 탭
       if (activeTab === 'following') {
         if (!bookmarkedIds.includes(report.id)) return false;
+      }
+
+      // 테마 필터
+      if (themeSymbols) {
+        const hasTagMatch = report.themes?.some((t: string) => t === selectedTheme);
+        const hasSymbolMatch = themeSymbols.has(report.ticker.toUpperCase());
+        if (!hasTagMatch && !hasSymbolMatch) return false;
+      }
+
+      // 상장사 필터
+      if (marketFilter !== 'all') {
+        const exchanges = MARKET_EXCHANGES[marketFilter];
+        if (!exchanges || !report.exchange || !exchanges.includes(report.exchange.toUpperCase())) return false;
       }
 
       // 검색어 필터링
@@ -165,19 +233,9 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         if (!matchesSearch) return false;
       }
 
-      // 시장 카테고리 필터링
-      if (filters.market !== 'all') {
-        if (!report.category || report.category !== filters.market) return false;
-      }
-
-      // 의견 필터링
-      if (filters.opinion !== 'all') {
-        if (report.opinion !== filters.opinion) return false;
-      }
-
       return true;
     });
-  }, [sortedReports, searchQuery, filters, activeTab, bookmarkedIds]);
+  }, [sortedReports, searchQuery, activeTab, bookmarkedIds, themeSymbols, selectedTheme, marketFilter]);
 
   // 로딩 중 스켈레톤 UI
   if (isLoading) {
@@ -186,17 +244,14 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         {/* TOP 10 스켈레톤 */}
         <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-4 sm:mb-8" />
 
-        {/* 검색바 스켈레톤 */}
-        <div className="hidden md:block mb-8">
-          <div className="animate-pulse h-[48px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-6" />
-          <div className="animate-pulse h-[52px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />
-        </div>
-
-        {/* 탭 스켈레톤 */}
-        <div className="flex gap-2 sm:gap-4 mb-4 sm:mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="animate-pulse h-[36px] sm:h-[40px] w-[70px] sm:w-[100px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />
-          ))}
+        {/* 검색바 + 탭 스켈레톤 */}
+        <div className="mb-4">
+          <div className="animate-pulse h-[40px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-3" />
+          <div className="flex gap-2">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="animate-pulse h-[20px] w-[50px] bg-[var(--pixel-border-muted)]/30" />
+            ))}
+          </div>
         </div>
 
         {/* 카드 스켈레톤 */}
@@ -214,50 +269,30 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider reports={reports} />
 
-      {/* 데스크탑: 검색바 + 필터바 */}
-      <div className="hidden md:block mb-4">
-        <div className="flex flex-col gap-3">
-          <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-          <FilterBar onFilterChange={setFilters} />
-        </div>
-      </div>
+      {/* 검색바 */}
+      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="" showStockSuggestions={false} />
 
-      {/* 모바일: 검색 버튼 */}
-      <div className="md:hidden mb-3">
-        <Link href="/search">
-          <button className="w-full px-4 py-2.5 bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border-muted)] text-left text-gray-400 flex items-center gap-3 hover:border-[var(--pixel-accent)] transition-all font-pixel text-xs">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <span>종목명, 티커, 작성자로 검색...</span>
-          </button>
-        </Link>
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="mb-3 sm:mb-4">
-        {/* 모바일: 4개 탭 한 줄 */}
-        <div className="flex gap-2 md:hidden overflow-x-auto pb-1 -mx-1 px-1">
-          {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
+      {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 */}
+      <div className="mb-3 sm:mb-4 flex justify-between items-center overflow-x-auto scrollbar-hide">
+        <div className="flex gap-0.5 sm:gap-1 flex-nowrap items-center">
+          {marketKeys.map((m) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={activeTab === tab ? 'pixel-tab-active flex-shrink-0 !text-xs !px-3 !py-2' : 'pixel-tab flex-shrink-0 !text-xs !px-3 !py-2'}
+              key={m}
+              onClick={() => setMarketFilter(m)}
+              className={marketFilter === m ? FILTER_ACTIVE : FILTER_INACTIVE}
             >
-              {{ all: '전체', following: '북마크', popular: '인기', return: '수익률' }[tab]}
+              {marketLabels[m]}
             </button>
           ))}
         </div>
-
-        {/* 데스크탑: 4개 탭 */}
-        <div className="hidden md:flex gap-4">
+        <div className="flex gap-0.5 sm:gap-1 flex-nowrap ml-2 items-center">
           {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={activeTab === tab ? 'pixel-tab-active' : 'pixel-tab'}
+              className={activeTab === tab ? FILTER_ACTIVE : FILTER_INACTIVE}
             >
-              {{ all: '전체 피드', following: '북마크', popular: '인기순', return: '수익률순' }[tab]}
+              {{ all: '전체', following: '북마크', popular: '인기순', return: '수익률순' }[tab]}
             </button>
           ))}
         </div>

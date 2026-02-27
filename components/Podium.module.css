@@ -1,309 +1,158 @@
 /* ============================================
-   Podium Component - Dark Theme
-   TOP 3 스타일 (시상대 없음)
-   1위: 다이아몬드 (반짝이는 크리스탈)
-   2위: 골드
-   3위: 실버
+   Podium Component - Pixel Card Style
+   1위: accent (빨강), 2위: 골드, 3위: 실버
+   높이: 1위 > 2위 > 3위
    ============================================ */
 
-/* 컨테이너 */
 .container {
-  position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 3.5rem;
 }
 
-/* 다크 배경 박스 */
-.darkBox {
-  background: linear-gradient(to bottom, #111827, #111827, #1f2937);
-  border-radius: 1rem;
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
+@media (min-width: 640px) {
+  .container {
+    margin-bottom: 3.5rem;
+  }
 }
 
-/* 상단 다이아몬드 라인 */
-.topLine {
-  height: 4px;
-  background: linear-gradient(to right, transparent, #06b6d4, #a855f7, #06b6d4, transparent);
-}
-
-/* 하단 라인 */
-.bottomLine {
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(6, 182, 212, 0.3), transparent);
-}
-
-/* 내부 컨텐츠 영역 */
-.content {
-  max-width: 48rem;
-  margin: 0 auto;
-  padding: 2rem 1rem 2rem;
-}
-
-/* 헤더 영역 */
-.header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-}
-
-.headerInner {
-  display: inline-block;
-}
-
-.subtitle {
-  color: rgba(6, 182, 212, 0.8);
-  font-size: 0.75rem;
-  letter-spacing: 0.3em;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-}
-
-.title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  background: linear-gradient(to right, #67e8f9, #a5f3fc, #c4b5fd, #a5f3fc, #67e8f9);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-.headerLine {
-  height: 1px;
-  margin-top: 0.75rem;
-  background: linear-gradient(to right, transparent, rgba(6, 182, 212, 0.5), transparent);
-}
-
-/* 레이아웃 - 수평 배치, 바닥 정렬 */
+/* 3장 카드 레이아웃: 2위 | 1위 | 3위, 바닥 정렬 */
 .podiumLayout {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 1rem;
-  max-width: 40rem;
-  margin: 0 auto;
+  gap: 0.5rem;
 }
 
 @media (min-width: 640px) {
   .podiumLayout {
-    gap: 2rem;
+    gap: 1rem;
   }
 }
 
-/* 개별 순위 컬럼 */
-.rankColumn {
+/* 개별 카드 공통 */
+.card {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  max-width: 10rem;
-}
-
-.rankLink {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  max-width: 12rem;
+  text-align: center;
+  background: var(--pixel-bg-card);
+  border: 3px solid var(--pixel-border-muted);
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
-/* 프로필 영역 */
-.profileArea {
-  text-align: center;
-  transition: transform 0.3s ease;
+.card:hover {
+  transform: translateY(-2px);
 }
 
-.rankLink:hover .profileArea {
-  transform: translateY(-4px);
+/* 1위 카드 - accent + 가장 높음 */
+.cardFirst {
+  border-color: var(--pixel-accent);
+  padding: 1.5rem 0.5rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(153, 27, 27, 0.1);
 }
 
-.profileAreaFirst {
-  /* 1위는 배지와 시상대 크기로 강조 */
-}
-
-.rankLink:hover .profileAreaFirst {
-  transform: translateY(-8px);
-}
-
-/* 순위 배지 공통 - 다이아몬드 모양 */
-.badge {
-  position: relative;
-  margin: 0 auto 1rem;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform: rotate(45deg);
-}
-
-/* 숫자만 역회전 (배경 요소는 부모와 함께 회전) */
-.badgeFirstNumber,
-.badgeSecondNumber,
-.badgeThirdNumber {
-  transform: rotate(-45deg);
-}
-
-/* ============================================
-   1위 배지 - 다이아몬드 (반짝이는 크리스탈)
-   ============================================ */
-.badgeFirst {
-  width: 5rem;
-  height: 5rem;
-  margin-bottom: 1.25rem;
+.cardFirst:hover {
+  border-color: var(--pixel-accent-dark);
 }
 
 @media (min-width: 640px) {
-  .badgeFirst {
-    width: 6rem;
-    height: 6rem;
+  .cardFirst {
+    padding: 2.5rem 1rem 2rem;
   }
 }
 
-.badgeFirstGlow {
-  position: absolute;
-  inset: -6px;
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.4), rgba(168, 85, 247, 0.3), rgba(6, 182, 212, 0.4));
-  border-radius: 0;
-  filter: blur(10px);
-  animation: diamondPulse 2s ease-in-out infinite;
+/* 2위 카드 - 골드 + 중간 높이 */
+.cardSecond {
+  border-color: #d97706;
+  padding: 1rem 0.5rem 0.75rem;
 }
 
-.badgeFirstInner {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #ecfeff, #cffafe, #a5f3fc, #e0e7ff, #c4b5fd, #a5f3fc, #ecfeff);
-  background-size: 200% 200%;
-  border-radius: 0;
-  border: 2px solid rgba(6, 182, 212, 0.5);
-  box-shadow:
-    0 0 20px rgba(6, 182, 212, 0.3),
-    inset 0 0 20px rgba(255, 255, 255, 0.5);
-  animation: diamondShimmer 3s ease-in-out infinite;
+.cardSecond:hover {
+  border-color: #b45309;
 }
 
-.badgeFirstShine {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, transparent 50%, rgba(255, 255, 255, 0.3) 100%);
-  border-radius: 0;
+:global(.dark) .cardSecond {
+  border-color: #b45309;
 }
 
-.badgeFirstSparkle {
-  position: absolute;
-  top: 10%;
-  left: 50%;
-  width: 6px;
-  height: 6px;
-  background: white;
-  border-radius: 50%;
-  filter: blur(1px);
-  animation: sparkle 1.5s ease-in-out infinite;
-  transform: rotate(-45deg);
+:global(.dark) .cardSecond:hover {
+  border-color: #d97706;
 }
 
-.badgeFirstNumber {
-  position: relative;
-  z-index: 10;
-  font-size: 1.875rem;
+@media (min-width: 640px) {
+  .cardSecond {
+    padding: 1.5rem 1rem 1.25rem;
+  }
+}
+
+/* 3위 카드 - 실버 + 가장 낮음 */
+.cardThird {
+  border-color: #9ca3af;
+  padding: 0.75rem 0.5rem 0.5rem;
+}
+
+.cardThird:hover {
+  border-color: #6b7280;
+}
+
+:global(.dark) .cardThird {
+  border-color: #6b7280;
+}
+
+:global(.dark) .cardThird:hover {
+  border-color: #9ca3af;
+}
+
+@media (min-width: 640px) {
+  .cardThird {
+    padding: 1.25rem 1rem 1rem;
+  }
+}
+
+/* 순위 숫자 */
+.rankNumber {
   font-weight: 900;
-  background: linear-gradient(135deg, #0891b2, #6366f1, #0891b2);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.rankFirst {
+  font-size: 2rem;
+  color: var(--pixel-accent);
+  margin-bottom: 0.75rem;
 }
 
 @media (min-width: 640px) {
-  .badgeFirstNumber {
-    font-size: 2.25rem;
+  .rankFirst {
+    font-size: 2.5rem;
   }
 }
 
-/* ============================================
-   2위 배지 - 골드
-   ============================================ */
-.badgeSecond {
-  width: 3.5rem;
-  height: 3.5rem;
-}
-
-@media (min-width: 640px) {
-  .badgeSecond {
-    width: 4rem;
-    height: 4rem;
-  }
-}
-
-.badgeSecondInner {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #fef3c7, #fcd34d, #f59e0b, #fbbf24, #fef3c7);
-  border-radius: 0;
-  border: 2px solid rgba(251, 191, 36, 0.5);
-  box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.3);
-}
-
-.badgeSecondShine {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
-  border-radius: 0;
-}
-
-.badgeSecondNumber {
-  position: relative;
-  z-index: 10;
+.rankSecond {
   font-size: 1.25rem;
-  font-weight: 900;
-  color: #78350f;
+  color: #d97706;
+}
+
+:global(.dark) .rankSecond {
+  color: #fbbf24;
 }
 
 @media (min-width: 640px) {
-  .badgeSecondNumber {
+  .rankSecond {
     font-size: 1.5rem;
   }
 }
 
-/* ============================================
-   3위 배지 - 실버
-   ============================================ */
-.badgeThird {
-  width: 3.5rem;
-  height: 3.5rem;
-}
-
-@media (min-width: 640px) {
-  .badgeThird {
-    width: 4rem;
-    height: 4rem;
-  }
-}
-
-.badgeThirdInner {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8, #cbd5e1, #e2e8f0, #f8fafc);
-  border-radius: 0;
-  border: 2px solid rgba(203, 213, 225, 0.5);
-  box-shadow: 0 10px 15px -3px rgba(148, 163, 184, 0.3);
-}
-
-.badgeThirdShine {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, transparent 50%);
-  border-radius: 0;
-}
-
-.badgeThirdNumber {
-  position: relative;
-  z-index: 10;
+.rankThird {
   font-size: 1.25rem;
-  font-weight: 900;
-  color: #334155;
+  color: #6b7280;
+}
+
+:global(.dark) .rankThird {
+  color: #9ca3af;
 }
 
 @media (min-width: 640px) {
-  .badgeThirdNumber {
+  .rankThird {
     font-size: 1.5rem;
   }
 }
@@ -311,159 +160,60 @@
 /* 이름 */
 .name {
   font-weight: 600;
-  font-size: 0.875rem;
-  color: #e5e7eb;
-  margin-bottom: 0.5rem;
-  padding: 0 0.25rem;
-  transition: color 0.3s ease;
-  text-align: center;
-  width: 100%;
-  max-width: 8rem;
+  font-size: 0.75rem;
+  color: var(--foreground);
+  margin-bottom: 0.375rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rankLink:hover .name {
-  color: #ffffff;
-}
-
 .nameFirst {
   font-weight: 700;
-  font-size: 1rem;
-  color: #cffafe;
-}
-
-@media (min-width: 640px) {
-  .nameFirst {
-    font-size: 1.125rem;
-  }
-}
-
-.rankLink:hover .nameFirst {
-  color: #ecfeff;
-}
-
-/* 수익률 배지 */
-.returnBadge {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.returnBadgeFirst {
-  padding: 0.375rem 1rem;
   font-size: 0.875rem;
 }
 
 @media (min-width: 640px) {
-  .returnBadgeFirst {
+  .name {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  .nameFirst {
     font-size: 1rem;
   }
 }
 
-.returnPositive {
-  background: #dc2626;
-  color: #ffffff;
-  border: none;
+/* 수익률 */
+.returnRate {
   font-weight: 800;
+  font-size: 0.75rem;
+}
+
+.returnFirst {
+  font-size: 1rem;
+}
+
+@media (min-width: 640px) {
+  .returnRate {
+    font-size: 0.875rem;
+  }
+  .returnFirst {
+    font-size: 1.25rem;
+  }
+}
+
+.returnPositive {
+  color: #dc2626;
+}
+
+:global(.dark) .returnPositive {
+  color: #f87171;
 }
 
 .returnNegative {
-  background: rgba(59, 130, 246, 0.3);
-  color: #6bb3ff;
-  border: 1px solid rgba(59, 130, 246, 0.5);
-  text-shadow: 0 0 10px rgba(107, 179, 255, 0.5);
+  color: #2563eb;
 }
 
-/* ============================================
-   바닥 라인 - 빛나는 효과
-   ============================================ */
-.bottomLine {
-  width: 100%;
-  height: 3px;
-  margin-top: 1rem;
-  border-radius: 2px;
-  position: relative;
-}
-
-/* 1위 - 다이아몬드 라인 */
-.bottomLineDiamond {
-  height: 4px;
-  background: linear-gradient(90deg, transparent, #67e8f9, #a5f3fc, #c4b5fd, #a5f3fc, #67e8f9, transparent);
-  box-shadow:
-    0 0 10px rgba(6, 182, 212, 0.6),
-    0 0 20px rgba(6, 182, 212, 0.4),
-    0 0 30px rgba(168, 85, 247, 0.3);
-  animation: lineGlow 2s ease-in-out infinite;
-}
-
-/* 2위 - 골드 라인 */
-.bottomLineGold {
-  background: linear-gradient(90deg, transparent, #fcd34d, #f59e0b, #fcd34d, transparent);
-  box-shadow:
-    0 0 8px rgba(251, 191, 36, 0.5),
-    0 0 15px rgba(245, 158, 11, 0.3);
-}
-
-/* 3위 - 실버 라인 */
-.bottomLineSilver {
-  background: linear-gradient(90deg, transparent, #e2e8f0, #cbd5e1, #e2e8f0, transparent);
-  box-shadow:
-    0 0 6px rgba(203, 213, 225, 0.5),
-    0 0 12px rgba(148, 163, 184, 0.3);
-}
-
-@keyframes lineGlow {
-  0%, 100% {
-    box-shadow:
-      0 0 10px rgba(6, 182, 212, 0.6),
-      0 0 20px rgba(6, 182, 212, 0.4),
-      0 0 30px rgba(168, 85, 247, 0.3);
-  }
-  50% {
-    box-shadow:
-      0 0 15px rgba(6, 182, 212, 0.8),
-      0 0 30px rgba(6, 182, 212, 0.5),
-      0 0 45px rgba(168, 85, 247, 0.4);
-  }
-}
-
-/* ============================================
-   애니메이션
-   ============================================ */
-@keyframes diamondPulse {
-  0%, 100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.05);
-  }
-}
-
-@keyframes diamondShimmer {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes sparkle {
-  0%, 100% {
-    opacity: 0.3;
-    transform: scale(0.8);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.2);
-  }
+:global(.dark) .returnNegative {
+  color: #60a5fa;
 }

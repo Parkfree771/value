@@ -147,6 +147,8 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       // 물타기 데이터 (feed.json 우선, Firestore fallback)
       entries: feedPost?.entries ?? data.entries ?? undefined,
       avgPrice: feedPost?.avgPrice ?? data.avgPrice ?? undefined,
+      // 테마 태그
+      themes: data.themes || undefined,
     };
 
     // 확정된 수익률이 있으면 사용

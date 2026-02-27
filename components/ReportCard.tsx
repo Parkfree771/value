@@ -10,6 +10,20 @@ import { inferCurrency, getCurrencySymbol } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
 
+// 테마 ID → 이름 정적 맵 (theme-stocks.json과 동기화)
+const THEME_NAMES: Record<string, string> = {
+  'physical-ai': '피지컬AI',
+  'quantum-computing': '양자컴퓨터',
+  'secondary-battery': '2차전지',
+  'ai-semiconductor': 'AI반도체',
+  'robotics': '로봇',
+  'autonomous-driving': '자율주행',
+  'bio-healthcare': '바이오/헬스케어',
+  'space-aerospace': '우주항공',
+  'nuclear-energy': '원자력',
+  'defense': '방산',
+};
+
 interface ReportCardProps {
   id: string;
   title: string;
@@ -38,6 +52,7 @@ interface ReportCardProps {
   closed_price?: number; // 확정 가격
   avgPrice?: number; // 물타기 평균단가
   entries?: { price: number; date: string }[]; // 물타기 기록
+  themes?: string[]; // 테마 태그 ID 배열
 }
 
 const ReportCard = memo(function ReportCard({
@@ -65,6 +80,7 @@ const ReportCard = memo(function ReportCard({
   closed_price,
   avgPrice,
   entries,
+  themes,
 }: ReportCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -153,6 +169,18 @@ const ReportCard = memo(function ReportCard({
               <span className="flex-shrink-0"><OpinionBadge opinion={opinion} /></span>
             </div>
             <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 mb-1.5 sm:mb-2 truncate">{title}</h2>
+            {themes && themes.length > 0 && (
+              <div className="flex flex-wrap gap-1 mb-1">
+                {themes.slice(0, 2).map(themeId => (
+                  <span key={themeId} className="font-pixel text-[10px] px-1.5 py-0.5 border border-[var(--pixel-border-muted)] text-gray-500 dark:text-gray-400">
+                    #{THEME_NAMES[themeId] || themeId}
+                  </span>
+                ))}
+                {themes.length > 2 && (
+                  <span className="text-[10px] text-gray-400">+{themes.length - 2}</span>
+                )}
+              </div>
+            )}
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
             <div className="text-base sm:text-2xl font-black font-heading tracking-tight">

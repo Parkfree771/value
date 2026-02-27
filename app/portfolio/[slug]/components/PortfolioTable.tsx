@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { PortfolioHolding } from '@/lib/sec13f/types';
 import StatusBadge from './StatusBadge';
 
-type FilterStatus = 'ALL' | 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM';
+type FilterStatus = 'ALL' | 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM' | 'BUY_ALL' | 'SELL_ALL';
+type SortType = 'default' | 'weightChange';
 
 function formatValue(value: number): string {
   if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
@@ -34,39 +35,82 @@ interface PortfolioTableProps {
   prices?: PriceData; // Storage JSON에서 가져온 가격 데이터
 }
 
+const sortLabels: Record<SortType, string> = {
+  default: '기본순',
+  weightChange: '비중변화순',
+};
+const sortKeys = Object.keys(sortLabels) as SortType[];
+
+const SORT_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
+const SORT_ACTIVE = `${SORT_BASE} font-bold text-ant-red-600 dark:text-ant-red-400 border-b-2 border-ant-red-600 dark:border-ant-red-400`;
+const SORT_INACTIVE = `${SORT_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
+
 export default function PortfolioTable({ holdings, filingDate, prices = {} }: PortfolioTableProps) {
   const [filter, setFilter] = useState<FilterStatus>('ALL');
+  const [sortType, setSortType] = useState<SortType>('default');
 
   const filters: { key: FilterStatus; label: string; count: number }[] = [
     { key: 'ALL', label: '전체', count: holdings.length },
+    { key: 'BUY_ALL', label: '매수', count: holdings.filter(h => h.status === 'NEW BUY' || h.status === 'ADD').length },
+    { key: 'SELL_ALL', label: '매도', count: holdings.filter(h => h.status === 'SOLD OUT' || h.status === 'TRIM').length },
     { key: 'NEW BUY', label: '신규매수', count: holdings.filter(h => h.status === 'NEW BUY').length },
-    { key: 'SOLD OUT', label: '전량매도', count: holdings.filter(h => h.status === 'SOLD OUT').length },
     { key: 'ADD', label: '비중확대', count: holdings.filter(h => h.status === 'ADD').length },
+    { key: 'SOLD OUT', label: '전량매도', count: holdings.filter(h => h.status === 'SOLD OUT').length },
     { key: 'TRIM', label: '비중축소', count: holdings.filter(h => h.status === 'TRIM').length },
   ];
 
-  const filtered = filter === 'ALL'
+  const filteredList = filter === 'ALL'
     ? holdings
+    : filter === 'BUY_ALL'
+    ? holdings.filter(h => h.status === 'NEW BUY' || h.status === 'ADD')
+    : filter === 'SELL_ALL'
+    ? holdings.filter(h => h.status === 'SOLD OUT' || h.status === 'TRIM')
     : holdings.filter(h => h.status === filter);
+
+  const filtered = useMemo(() => {
+    if (sortType === 'default') return filteredList;
+
+    const isActive = (h: PortfolioHolding) => h.status !== 'HOLD';
+
+    return [...filteredList].sort((a, b) => {
+      const aChange = isActive(a) ? Math.abs(a.weight_curr - (a.weight_prev ?? 0)) : 0;
+      const bChange = isActive(b) ? Math.abs(b.weight_curr - (b.weight_prev ?? 0)) : 0;
+      return bChange - aChange;
+    });
+  }, [filteredList, sortType]);
 
   return (
     <div>
-      {/* 필터 탭 */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        {filters.map(f => (
+      {/* 필터 + 정렬 */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap gap-2">
+          {filters.map(f => (
+            <button
+              key={f.key}
+              onClick={() => setFilter(f.key)}
+              className={`px-3 py-1.5 text-xs font-bold border-2 transition-colors ${
+                filter === f.key
+                  ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
+                  : 'bg-pixel-card text-foreground border-pixel-border hover:bg-pixel-bg'
+              }`}
+              style={{ boxShadow: filter === f.key ? 'var(--shadow-sm)' : 'none' }}
+            >
+              {f.label} ({f.count})
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-0.5 sm:gap-1 items-center flex-shrink-0 ml-2">
+        {sortKeys.map((s) => (
           <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 text-xs font-bold border-2 transition-colors ${
-              filter === f.key
-                ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
-                : 'bg-pixel-card text-foreground border-pixel-border hover:bg-pixel-bg'
-            }`}
-            style={{ boxShadow: filter === f.key ? 'var(--shadow-sm)' : 'none' }}
+            key={s}
+            onClick={() => setSortType(s)}
+            className={sortType === s ? SORT_ACTIVE : SORT_INACTIVE}
           >
-            {f.label} ({f.count})
+            {sortLabels[s]}
           </button>
         ))}
+        </div>
       </div>
 
       {/* 테이블 */}
