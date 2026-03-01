@@ -103,6 +103,16 @@ const Navbar = memo(function Navbar() {
             >
               GURU
             </Link>
+            <Link
+              href="/indicators"
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
+                isActive('/indicators')
+                  ? 'pixel-nav-active'
+                  : 'pixel-nav-inactive'
+              }`}
+            >
+              경제지표
+            </Link>
             <span className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></span>
             <Link
               href="/write"
@@ -314,6 +324,17 @@ const Navbar = memo(function Navbar() {
                 }`}
               >
                 GURU
+              </Link>
+              <Link
+                href="/indicators"
+                onClick={closeMobileMenu}
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
+                  isActive('/indicators')
+                    ? 'pixel-nav-mobile-active'
+                    : 'pixel-nav-mobile-inactive'
+                }`}
+              >
+                경제지표
               </Link>
               <Link
                 href="/write"
