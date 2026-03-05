@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { inferCurrency } from '@/utils/currency';
+import { INITIAL_BALANCES } from '@/lib/constants';
 import { revalidatePath } from 'next/cache';
 import { jsonCache, CACHE_KEYS } from '@/lib/jsonCache';
 
@@ -94,6 +96,27 @@ export async function POST(request: NextRequest) {
       closed_return_rate: finalReturnRate,
       closed_price: finalPrice,
     });
+
+    // 수량이 있으면 해당 통화 잔고 복구 (매도금 = 확정가 * 수량)
+    if (data.quantity && data.quantity > 0) {
+      try {
+        const currency = inferCurrency({ exchange: data.exchange, stockData: data.stockData });
+        const sellAmount = finalPrice * data.quantity;
+        const userRef = adminDb.collection('users').doc(userId);
+        const userDoc = await userRef.get();
+        let balances: Record<string, number> = { ...INITIAL_BALANCES };
+        if (userDoc.exists) {
+          const userData = userDoc.data();
+          if (userData?.virtualBalances) {
+            balances = { ...INITIAL_BALANCES, ...userData.virtualBalances };
+          }
+        }
+        balances[currency] = (balances[currency] ?? 0) + sellAmount;
+        await userRef.update({ virtualBalances: balances });
+      } catch (balanceError) {
+        console.error('[Close Position] 잔고 복구 실패:', balanceError);
+      }
+    }
 
     // feed.json도 동기화 (위에서 이미 읽은 feed 재사용)
     try {

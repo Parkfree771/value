@@ -72,6 +72,8 @@ export async function POST() {
         entries,
         avgPrice,
         themes: data.themes || undefined,
+        quantity: data.quantity || undefined,
+        investedAmount: data.investedAmount || undefined,
       });
 
       // prices 맵에 추가

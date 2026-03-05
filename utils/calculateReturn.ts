@@ -50,6 +50,48 @@ export function calcReturnRate(data: Record<string, unknown>): number {
 }
 
 /**
+ * 금액 기반 수익금 계산
+ * @param initialPrice - 매수 단가 (또는 평균단가)
+ * @param currentPrice - 현재가
+ * @param quantity - 매수 수량
+ * @param positionType - 포지션 타입
+ * @returns 수익금 (원)
+ */
+export function calculateProfitAmount(
+  initialPrice: number,
+  currentPrice: number,
+  quantity: number,
+  positionType: 'long' | 'short' = 'long'
+): number {
+  if (!quantity || quantity <= 0) return 0;
+  if (positionType === 'long') {
+    return (currentPrice - initialPrice) * quantity;
+  } else {
+    return (initialPrice - currentPrice) * quantity;
+  }
+}
+
+/**
+ * 수익금 포맷팅 (예: +320,000원, -150,000원)
+ */
+export function formatProfitAmount(amount: number, currency: string = 'KRW'): string {
+  const sign = amount >= 0 ? '+' : '';
+  const abs = Math.round(Math.abs(amount)).toLocaleString();
+  const cur = currency.toUpperCase();
+  switch (cur) {
+    case 'KRW': return `${sign}${amount < 0 ? '-' : ''}${abs}원`;
+    case 'JPY': return `${sign}${amount < 0 ? '-' : ''}${abs}円`;
+    case 'CNY':
+    case 'CNH': return `${sign}${amount < 0 ? '-' : ''}${abs}元`;
+    case 'HKD': return `${sign}${amount < 0 ? '-' : ''}HK$${abs}`;
+    case 'USD': return `${sign}${amount < 0 ? '-' : ''}$${abs}`;
+    case 'EUR': return `${sign}${amount < 0 ? '-' : ''}€${abs}`;
+    case 'GBP': return `${sign}${amount < 0 ? '-' : ''}£${abs}`;
+    default: return `${sign}${amount < 0 ? '-' : ''}$${abs}`;
+  }
+}
+
+/**
  * 수익률을 포맷팅하는 함수
  * @param returnRate - 수익률 (백분율)
  * @param decimalPlaces - 소수점 자릿수 (기본값: 2)

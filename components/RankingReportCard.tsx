@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Card from './Card';
 import { OpinionBadge } from './Badge';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
-import { inferCurrency, getCurrencySymbol } from '@/utils/currency';
+import { inferCurrency, formatPrice } from '@/utils/currency';
 import styles from './RankingReportCard.module.css';
 
 interface RankingReportCardProps {
@@ -44,8 +44,6 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
     ticker: report.ticker,
     stockData: report.stockData
   });
-  const currencySymbol = getCurrencySymbol(currency);
-
   const getRankBadge = () => {
     if (rank === 1) {
       return (
@@ -109,13 +107,13 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
             {/* Price Info */}
             <div className="flex gap-4 sm:gap-6 mb-1.5 sm:mb-3 text-xs sm:text-sm">
               <div>
-                <span className="text-gray-500 dark:text-gray-400">작성시: </span>
-                <span className="font-semibold text-gray-900 dark:text-white">{currencySymbol}{report.initialPrice.toLocaleString()}</span>
+                <span className="text-gray-500 dark:text-gray-400">매수 </span>
+                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(report.initialPrice, currency)}</span>
               </div>
               <div>
-                <span className="text-gray-500 dark:text-gray-400">현재: </span>
+                <span className="text-gray-500 dark:text-gray-400">현재 </span>
                 <span className={`font-semibold ${getReturnColorClass(report.returnRate)}`}>
-                  {currencySymbol}{report.currentPrice.toLocaleString()}
+                  {formatPrice(report.currentPrice, currency)}
                 </span>
               </div>
             </div>

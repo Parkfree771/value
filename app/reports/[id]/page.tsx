@@ -149,6 +149,9 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       avgPrice: feedPost?.avgPrice ?? data.avgPrice ?? undefined,
       // 테마 태그
       themes: data.themes || undefined,
+      // 가상 매수 수량
+      quantity: data.quantity || undefined,
+      investedAmount: data.investedAmount || undefined,
     };
 
     // 확정된 수익률이 있으면 사용

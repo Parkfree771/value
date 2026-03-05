@@ -1,34 +1,5 @@
 import HomeClient from '@/components/HomeClient';
-
-// feed.json 구조
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  stockName: string;
-  ticker: string;
-  exchange: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  positionType: 'long' | 'short';
-  initialPrice: number;
-  currentPrice: number;
-  returnRate: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  category: string;
-  is_closed?: boolean;
-  closed_return_rate?: number;
-  closed_price?: number;
-  avgPrice?: number;
-  entries?: { price: number; date: string; timestamp: string }[];
-}
-
-interface FeedData {
-  lastUpdated: string;
-  totalPosts: number;
-  posts: FeedPost[];
-}
+import type { FeedData } from '@/types/feed';
 
 // 서버에서 초기 피드 데이터 fetch
 async function getInitialFeed(): Promise<FeedData | null> {

@@ -140,6 +140,8 @@ export async function POST(request: NextRequest) {
       entries: postData.entries || undefined,
       avgPrice: postData.avgPrice || undefined,
       themes: postData.themes || undefined,
+      quantity: postData.quantity || undefined,
+      investedAmount: postData.investedAmount || undefined,
     };
 
     // 중복 체크 후 추가 (기존 포스트의 크론 관리 데이터 보존)
@@ -162,6 +164,11 @@ export async function POST(request: NextRequest) {
       // 테마 데이터 보존
       if (!newPost.themes && existing.themes) {
         newPost.themes = existing.themes;
+      }
+      // 수량 데이터 보존
+      if (!newPost.quantity && existing.quantity) {
+        newPost.quantity = existing.quantity;
+        newPost.investedAmount = existing.investedAmount;
       }
       // 기존 views/likes 보존
       newPost.views = existing.views || 0;

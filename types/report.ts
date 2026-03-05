@@ -8,6 +8,12 @@ export interface AveragingEntry {
   timestamp: string;
 }
 
+/** 가상 매수 수량 정보 */
+export interface VirtualTrade {
+  quantity: number;        // 매수 수량
+  investedAmount: number;  // 총 투자금액 (initialPrice * quantity)
+}
+
 /**
  * 리포트 리스트용 요약 타입 (홈페이지, 검색 결과 등)
  */
@@ -37,6 +43,8 @@ export interface ReportSummary {
   entries?: AveragingEntry[];
   avgPrice?: number;
   themes?: string[];
+  quantity?: number;
+  investedAmount?: number;
 }
 
 export interface Report {
@@ -77,6 +85,8 @@ export interface Report {
   entries?: AveragingEntry[];
   avgPrice?: number;
   themes?: string[];
+  quantity?: number;
+  investedAmount?: number;
 }
 
 export interface UserProfile {

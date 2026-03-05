@@ -10,6 +10,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { calculateProfitAmount, formatProfitAmount } from '@/utils/calculateReturn';
+import { formatPrice } from '@/utils/currency';
 import { processUserWithdrawal } from '@/lib/users';
 import styles from './MyPage.module.css';
 
@@ -32,6 +34,7 @@ export default function MyPage() {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawConfirmText, setWithdrawConfirmText] = useState('');
+  const [virtualBalances, setVirtualBalances] = useState<Record<string, number> | null>(null);
 
   // 로그인 체크 (Auth가 준비된 후에만)
   useEffect(() => {
@@ -40,6 +43,28 @@ export default function MyPage() {
       router.push('/login');
     }
   }, [user, authReady, router]);
+
+  // 가상 잔고 로드
+  useEffect(() => {
+    if (!user) return;
+    const fetchBalance = async () => {
+      try {
+        const { auth } = await import('@/lib/firebase');
+        const token = await auth.currentUser?.getIdToken();
+        if (!token) return;
+        const res = await fetch('/api/user/balance', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setVirtualBalances(data.balances);
+        }
+      } catch (e) {
+        console.error('잔고 로드 실패:', e);
+      }
+    };
+    fetchBalance();
+  }, [user]);
 
   // 사용자 리포트 가져오기
   useEffect(() => {
@@ -91,6 +116,8 @@ export default function MyPage() {
           closed_at: data.closed_at,
           closed_return_rate: data.closed_return_rate,
           closed_price: data.closed_price,
+          quantity: data.quantity || 0,
+          investedAmount: data.investedAmount || 0,
         }));
 
         setMyReports(fetchedReports);
@@ -120,6 +147,21 @@ export default function MyPage() {
     : '0';
   const totalViews = myReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = myReports.reduce((sum, r) => sum + r.likes, 0);
+
+  // 총 수익금 계산 (수량이 있는 리포트만)
+  const totalProfitAmount = myReports.reduce((sum, r) => {
+    if (!r.quantity || r.quantity <= 0) return sum;
+    const basePrice = (r as any).avgPrice || r.initialPrice;
+    const price = r.is_closed && r.closed_price ? r.closed_price : r.currentPrice;
+    const posType = (r as any).positionType || 'long';
+    return sum + calculateProfitAmount(basePrice, price, r.quantity, posType);
+  }, 0);
+
+  // 총 투자금액
+  const totalInvested = myReports.reduce((sum, r) => sum + (r.investedAmount || 0), 0);
+
+  // KRW 잔고 (대표 잔고로 표시)
+  const krwBalance = virtualBalances?.KRW ?? 0;
 
   // 북마크된 게시물 필터링 (이미 로드된 allPosts에서)
   const bookmarkedReports: Report[] = allPosts
@@ -286,17 +328,37 @@ export default function MyPage() {
                 </div>
               </div>
               <div className={styles.mainStatCard}>
-                <div className={styles.mainStatLabel}>승률</div>
-                <div className={styles.mainStatValue}>{winRate}%</div>
+                <div className={styles.mainStatLabel}>총 수익금</div>
+                <div className={`${styles.mainStatValue} ${totalProfitAmount >= 0 ? styles.mainStatPositive : styles.mainStatNegative}`}>
+                  {formatProfitAmount(totalProfitAmount)}
+                </div>
               </div>
               <div className={styles.mainStatCard}>
-                <div className={styles.mainStatLabel}>총 리포트</div>
-                <div className={styles.mainStatValue}>{totalReports}</div>
+                <div className={styles.mainStatLabel}>승률</div>
+                <div className={styles.mainStatValue}>{winRate}%</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 통화별 잔고 */}
+      {virtualBalances && (
+        <div className="card-base p-4 sm:p-5 mb-6 sm:mb-8">
+          <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wider">가상 잔고</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            {Object.entries(virtualBalances).map(([cur, bal]) => (
+              <div key={cur} className="text-center p-2 border-2 border-[var(--pixel-border-muted)]">
+                <div className="text-[10px] text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">{cur}</div>
+                <div className="text-sm font-bold tabular-nums">{formatPrice(bal, cur)}</div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-[10px] text-gray-400 dark:text-gray-500">
+            본 서비스의 모의투자는 가상 자금을 사용하며, 실제 금융거래와 무관합니다.
+          </p>
+        </div>
+      )}
 
       {/* 상세 통계 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">

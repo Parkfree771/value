@@ -3,6 +3,7 @@
 import { useState, useMemo, memo, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
+import type { FeedPost, FeedData } from '@/types/feed';
 import ReportCard from '@/components/ReportCard';
 import { useBookmark } from '@/contexts/BookmarkContext';
 import { loadThemes, getSymbolsForThemes } from '@/lib/themeStocks';
@@ -50,34 +51,6 @@ function measureFirstRow(container: HTMLElement | null): number {
 // feed.json API 엔드포인트 (클라이언트 재검증용)
 const FEED_API = '/api/feed/public';
 
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  stockName: string;
-  ticker: string;
-  exchange: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  positionType: 'long' | 'short';
-  initialPrice: number;
-  currentPrice: number;
-  returnRate: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  category: string;
-  is_closed?: boolean;
-  avgPrice?: number;
-  entries?: { price: number; date: string; timestamp: string }[];
-  themes?: string[];
-}
-
-interface FeedData {
-  lastUpdated: string;
-  totalPosts: number;
-  posts: FeedPost[];
-}
-
 interface HomeClientProps {
   initialData: FeedData | null;
 }
@@ -103,6 +76,8 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     avgPrice: post.avgPrice,
     entries: post.entries,
     themes: post.themes,
+    quantity: post.quantity,
+    investedAmount: post.investedAmount,
     stockData: undefined,
   }));
 }

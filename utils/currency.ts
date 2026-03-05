@@ -78,3 +78,23 @@ export function getCurrencySymbol(currency: string): string {
     default: return '$';
   }
 }
+
+/**
+ * 가격을 통화에 맞는 포맷으로 반환합니다.
+ * 한국/일본/중국: 숫자 뒤에 단위 (50,000원, 5,000円, 500元)
+ * 서양: 기호 + 숫자 ($100, €100, £100, HK$100)
+ */
+export function formatPrice(amount: number, currency: string): string {
+  const formatted = amount.toLocaleString();
+  switch (currency.toUpperCase()) {
+    case 'KRW': return `${formatted}원`;
+    case 'JPY': return `${formatted}円`;
+    case 'CNY':
+    case 'CNH': return `${formatted}元`;
+    case 'HKD': return `HK$${formatted}`;
+    case 'USD': return `$${formatted}`;
+    case 'EUR': return `€${formatted}`;
+    case 'GBP': return `£${formatted}`;
+    default: return `$${formatted}`;
+  }
+}

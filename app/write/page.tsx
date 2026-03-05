@@ -13,6 +13,7 @@ import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory, AveragingEntry } from '@/types/report';
 import type { StockData } from '@/types/stock';
 import { getCryptoImageUrl } from '@/lib/cryptoCoins';
+import { inferCurrency, getCurrencySymbol, formatPrice } from '@/utils/currency';
 import { loadThemes, getThemesForSymbol } from '@/lib/themeStocks';
 import type { Theme } from '@/types/theme';
 import dynamic from 'next/dynamic';
@@ -48,6 +49,9 @@ function WritePageContent() {
   const [isClosed, setIsClosed] = useState(false);
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [allThemes, setAllThemes] = useState<Theme[]>([]);
+  const [quantity, setQuantity] = useState<string>('');
+  const [virtualBalances, setVirtualBalances] = useState<Record<string, number> | null>(null);
+  const [existingQuantity, setExistingQuantity] = useState<number | null>(null); // 기존 글의 수량 (수정 모드)
 
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
@@ -56,6 +60,33 @@ function WritePageContent() {
   useEffect(() => {
     loadThemes().then(setAllThemes).catch(console.error);
   }, []);
+
+  // 가상 잔고 로드
+  useEffect(() => {
+    if (!user) return;
+    const fetchBalance = async () => {
+      try {
+        const { auth } = await import('@/lib/firebase');
+        const token = await auth.currentUser?.getIdToken();
+        if (!token) return;
+        const res = await fetch('/api/user/balance', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setVirtualBalances(data.balances);
+        }
+      } catch (e) {
+        console.error('잔고 로드 실패:', e);
+      }
+    };
+    fetchBalance();
+  }, [user]);
+
+  // 현재 선택된 종목의 통화 + 해당 통화 잔고
+  const stockCurrency = stockData ? inferCurrency({ exchange: stockData.exchange, stockData: { currency: stockData.currency } }) : 'KRW';
+  const currencySymbol = getCurrencySymbol(stockCurrency);
+  const currentBalance = virtualBalances ? (virtualBalances[stockCurrency] ?? 0) : null;
 
   // 종목 선택 시 관련 테마 자동 추천
   useEffect(() => {
@@ -101,6 +132,10 @@ function WritePageContent() {
         setExistingEntries(reportData.entries || []);
         setIsClosed(reportData.is_closed || false);
         setSelectedThemes(reportData.themes || []);
+        if (reportData.quantity) {
+          setQuantity(reportData.quantity.toString());
+          setExistingQuantity(reportData.quantity);
+        }
 
         // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
@@ -265,6 +300,10 @@ function WritePageContent() {
   const [isClosing, setIsClosing] = useState(false);
   const handleClosePosition = async () => {
     if (!editId || !user || isClosing) return;
+    if (existingQuantity === null || existingQuantity <= 0) {
+      alert('수익 확정을 하려면 먼저 수량을 설정해주세요.');
+      return;
+    }
     if (!confirm('현재 수익률로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.')) return;
 
     setIsClosing(true);
@@ -280,6 +319,22 @@ function WritePageContent() {
       });
       const data = await response.json();
       if (data.success) {
+        // 서버에서 잔고 복구 완료, 클라이언트 잔고 갱신
+        try {
+          const { auth: authModule } = await import('@/lib/firebase');
+          const balanceToken = await authModule.currentUser?.getIdToken();
+          if (balanceToken) {
+            const balanceRes = await fetch('/api/user/balance', {
+              headers: { 'Authorization': `Bearer ${balanceToken}` },
+            });
+            if (balanceRes.ok) {
+              const balanceData = await balanceRes.json();
+              setVirtualBalances(balanceData.balances);
+            }
+          }
+        } catch (balanceError) {
+          console.error('잔고 갱신 실패:', balanceError);
+        }
         alert('수익이 확정되었습니다!');
         setIsClosed(true);
       } else {
@@ -295,22 +350,35 @@ function WritePageContent() {
 
   // 물타기 (사이드바 빠른 물타기)
   const [isQuickAveraging, setIsQuickAveraging] = useState(false);
+  const [averagingQuantity, setAveragingQuantity] = useState<string>('');
   const handleQuickAveragingDown = async () => {
     if (!editId || !user || isQuickAveraging) return;
+    if (existingQuantity === null || existingQuantity <= 0) {
+      alert('물타기를 하려면 먼저 수량을 설정해주세요.');
+      return;
+    }
+    const addQty = parseInt(averagingQuantity.replace(/,/g, ''), 10);
+    if (!addQty || addQty <= 0) {
+      alert('추가 매수 수량을 입력해주세요.');
+      return;
+    }
     const remaining = 3 - existingEntries.length;
-    if (!confirm(`현재 시장가로 물타기하시겠습니까?\n(${existingEntries.length}/3회 사용, ${remaining}회 남음)`)) return;
+    if (!confirm(`${addQty}주 추가 매수하시겠습니까?\n(${existingEntries.length}/3회 사용, ${remaining}회 남음)`)) return;
 
     setIsQuickAveraging(true);
     try {
       const response = await fetch('/api/averaging-down', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: editId, userId: user.uid }),
+        body: JSON.stringify({ postId: editId, userId: user.uid, additionalQuantity: addQty }),
       });
       const data = await response.json();
       if (data.success) {
         setExistingEntries(data.data.entries);
-        alert(`물타기 완료!\n평균단가: ${Math.round(data.data.avgPrice).toLocaleString()}`);
+        setExistingQuantity(data.data.quantity);
+        if (data.data.balances) setVirtualBalances(data.data.balances);
+        setAveragingQuantity('');
+        alert(`물타기 완료!\n추가: ${addQty}주 → 총 ${data.data.quantity}주\n평균단가: ${Math.round(data.data.avgPrice).toLocaleString()}\n총 투자금: ${currencySymbol}${Math.round(data.data.investedAmount).toLocaleString()}`);
       } else {
         alert(data.error || '물타기에 실패했습니다.');
       }
@@ -339,6 +407,20 @@ function WritePageContent() {
     if (isUploading) {
       alert('이미지 업로드 중입니다. 잠시만 기다려주세요.');
       return;
+    }
+
+    // 새 글 작성 시 수량 검증
+    const qty = parseInt(quantity.replace(/,/g, ''), 10);
+    if (!isEditMode) {
+      if (!qty || qty <= 0) {
+        alert('매수 수량을 입력해주세요.');
+        return;
+      }
+      const totalCost = (stockData?.currentPrice || 0) * qty;
+      if (currentBalance !== null && totalCost > currentBalance) {
+        alert(`잔고가 부족합니다.\n필요 금액: ${currencySymbol}${totalCost.toLocaleString()}\n현재 잔고: ${currencySymbol}${currentBalance.toLocaleString()}`);
+        return;
+      }
     }
 
     setIsUploading(true);
@@ -423,7 +505,11 @@ function WritePageContent() {
         likes: 0,
         likedBy: [],
 
-        // 9. 타임스탬프
+        // 9. 가상 매수 수량
+        quantity: qty || 0,
+        investedAmount: (stockData?.currentPrice || 0) * (qty || 0),
+
+        // 10. 타임스탬프
         createdAt: serverTimestamp(),
       };
 
@@ -534,6 +620,31 @@ function WritePageContent() {
 
         console.log('리포트가 저장되었습니다. ID:', docRef.id);
 
+        // 가상 잔고 차감 (해당 통화)
+        if (qty > 0) {
+          try {
+            const { auth: authModule } = await import('@/lib/firebase');
+            const balanceToken = await authModule.currentUser?.getIdToken();
+            if (balanceToken) {
+              const totalCost = (stockData?.currentPrice || 0) * qty;
+              const balanceRes = await fetch('/api/user/balance', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${balanceToken}`,
+                },
+                body: JSON.stringify({ action: 'deduct', amount: totalCost, currency: stockCurrency }),
+              });
+              if (balanceRes.ok) {
+                const balanceData = await balanceRes.json();
+                setVirtualBalances(balanceData.balances);
+              }
+            }
+          } catch (balanceError) {
+            console.error('잔고 차감 실패:', balanceError);
+          }
+        }
+
         // 홈 페이지 캐시 즉시 무효화
         await fetch('/api/revalidate', {
           method: 'POST',
@@ -607,21 +718,35 @@ function WritePageContent() {
                 {isUploading ? '업로드 중...' : '수정 완료'}
               </button>
               {!isClosed && existingEntries.length < 3 && (
-                <button
-                  type="button"
-                  onClick={handleQuickAveragingDown}
-                  disabled={isQuickAveraging}
-                  className="px-3 py-1.5 bg-blue-600 text-white border-2 border-blue-800 font-pixel text-xs sm:text-sm font-bold transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
-                >
-                  {isQuickAveraging ? '처리 중...' : `물타기 (${existingEntries.length}/3)`}
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={averagingQuantity}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                      setAveragingQuantity(raw === '' ? '' : Number(raw).toLocaleString());
+                    }}
+                    className="pixel-input !py-1 !px-2 !text-xs w-20"
+                    placeholder="추가수량"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleQuickAveragingDown}
+                    disabled={isQuickAveraging || !averagingQuantity}
+                    className="px-3 py-1.5 bg-blue-600 text-white border-2 border-blue-800 font-pixel text-xs sm:text-sm font-bold transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
+                  >
+                    {isQuickAveraging ? '처리 중...' : `물타기 (${existingEntries.length}/3)`}
+                  </button>
+                </div>
               )}
               {!isClosed && (
                 <button
                   type="button"
                   onClick={handleClosePosition}
-                  disabled={isClosing}
+                  disabled={isClosing || existingQuantity === null || existingQuantity <= 0}
                   className="px-3 py-1.5 border-2 border-emerald-600 bg-emerald-600 text-white font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
+                  title={existingQuantity === null || existingQuantity <= 0 ? '수량을 먼저 설정해주세요' : ''}
                 >
                   {isClosing ? '처리 중...' : '수익확정'}
                 </button>
@@ -806,6 +931,107 @@ function WritePageContent() {
                 />
               </div>
             </div>
+
+            {/* 가상 매수 수량 */}
+            {stockData && (
+              <div>
+                <label className="pixel-label mb-2">
+                  매수 수량 *
+                </label>
+                {currentBalance !== null && (
+                  <div className="mb-2 flex items-center gap-2">
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      {stockCurrency} 잔고:
+                    </span>
+                    <span className="text-xs font-bold text-[var(--pixel-accent)]">
+                      {formatPrice(currentBalance, stockCurrency)}
+                    </span>
+                  </div>
+                )}
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={quantity}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/[^0-9]/g, '');
+                    if (raw === '') {
+                      setQuantity('');
+                    } else {
+                      setQuantity(Number(raw).toLocaleString());
+                    }
+                  }}
+                  className="pixel-input"
+                  placeholder="예: 10"
+                  disabled={isEditMode && existingQuantity !== null}
+                />
+                {stockData.currentPrice > 0 && quantity && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      총 투자금액: <span className="font-bold text-gray-900 dark:text-white">
+                        {formatPrice(stockData.currentPrice * parseInt(quantity.replace(/,/g, '') || '0', 10), stockCurrency)}
+                      </span>
+                    </p>
+                    {currentBalance !== null && (() => {
+                      const totalCost = stockData.currentPrice * parseInt(quantity.replace(/,/g, '') || '0', 10);
+                      const remaining = currentBalance - totalCost;
+                      return (
+                        <p className={`text-xs ${
+                          totalCost > currentBalance ? 'text-red-600 dark:text-red-400 font-bold' : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          매수 후 잔고: {formatPrice(remaining, stockCurrency)}
+                          {totalCost > currentBalance && ' (잔고 부족!)'}
+                        </p>
+                      );
+                    })()}
+                  </div>
+                )}
+                {isEditMode && existingQuantity !== null && existingQuantity > 0 && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    수량은 최초 설정 후 변경할 수 없습니다. ({existingQuantity.toLocaleString()}주)
+                  </p>
+                )}
+                {isEditMode && existingQuantity === null && quantity && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const qty = parseInt(quantity.replace(/,/g, ''), 10);
+                      if (!qty || qty <= 0) { alert('수량을 입력해주세요.'); return; }
+                      if (!editId || !user) return;
+                      const totalCost = (originalInitialPrice || stockData?.currentPrice || 0) * qty;
+                      if (currentBalance !== null && totalCost > currentBalance) {
+                        alert(`잔고가 부족합니다.\n필요: ${currencySymbol}${totalCost.toLocaleString()}\n잔고: ${currencySymbol}${currentBalance.toLocaleString()}`);
+                        return;
+                      }
+                      if (!confirm(`${qty}주를 가상 매수하시겠습니까?\n투자금액: ${currencySymbol}${totalCost.toLocaleString()} (작성가 기준)`)) return;
+                      try {
+                        const { auth: authModule } = await import('@/lib/firebase');
+                        const token = await authModule.currentUser?.getIdToken();
+                        if (!token) return;
+                        const res = await fetch('/api/reports/set-quantity', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                          body: JSON.stringify({ postId: editId, quantity: qty }),
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                          setExistingQuantity(qty);
+                          setVirtualBalances(data.data.balances);
+                          alert(`수량 설정 완료! (${qty}주, 투자금액: ${currencySymbol}${data.data.investedAmount.toLocaleString()})`);
+                        } else {
+                          alert(data.error || '수량 설정에 실패했습니다.');
+                        }
+                      } catch (err) {
+                        console.error('수량 설정 오류:', err);
+                        alert('수량 설정 중 오류가 발생했습니다.');
+                      }
+                    }}
+                    className="mt-2 w-full btn-primary !py-2 !text-sm"
+                  >
+                    수량 설정하기 (1회)
+                  </button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* 테마 태그 */}
@@ -1061,10 +1287,31 @@ function WritePageContent() {
                 {/* 물타기 */}
                 {!isClosed && existingEntries.length < 3 && stockData && (
                   <div className="card-base p-4 space-y-2">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400">추가 매수 수량</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={averagingQuantity}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/[^0-9]/g, '');
+                        setAveragingQuantity(raw === '' ? '' : Number(raw).toLocaleString());
+                      }}
+                      className="pixel-input !py-1.5 !text-sm"
+                      placeholder="추가 수량 입력"
+                    />
+                    {averagingQuantity && stockData.currentPrice > 0 && (() => {
+                      const addQty = parseInt(averagingQuantity.replace(/,/g, ''), 10) || 0;
+                      const addCost = stockData.currentPrice * addQty;
+                      return (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          추가 투자: <span className="font-bold">{formatPrice(addCost, stockCurrency)}</span>
+                        </p>
+                      );
+                    })()}
                     <button
                       type="button"
                       onClick={handleQuickAveragingDown}
-                      disabled={isQuickAveraging}
+                      disabled={isQuickAveraging || !averagingQuantity}
                       className="w-full font-pixel px-4 py-2.5 text-sm font-bold transition-all disabled:opacity-50 bg-blue-600 text-white border-2 border-blue-800 shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)]"
                     >
                       {isQuickAveraging ? '처리 중...' : `물타기 (${existingEntries.length}/3)`}
@@ -1089,14 +1336,21 @@ function WritePageContent() {
                 {/* 수익확정 + 삭제 */}
                 <div className="card-base p-4 space-y-2">
                   {!isClosed && (
-                    <button
-                      type="button"
-                      onClick={handleClosePosition}
-                      disabled={isClosing}
-                      className="w-full font-pixel px-4 py-2.5 bg-emerald-600 text-white border-2 border-emerald-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
-                    >
-                      {isClosing ? '처리 중...' : '수익 확정하기'}
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleClosePosition}
+                        disabled={isClosing || existingQuantity === null || existingQuantity <= 0}
+                        className="w-full font-pixel px-4 py-2.5 bg-emerald-600 text-white border-2 border-emerald-800 text-sm font-bold transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_rgba(0,0,0,0.5)] disabled:opacity-50"
+                      >
+                        {isClosing ? '처리 중...' : '수익 확정하기'}
+                      </button>
+                      {(existingQuantity === null || existingQuantity <= 0) && (
+                        <p className="text-xs text-center text-red-500 dark:text-red-400">
+                          수량을 먼저 설정해야 확정할 수 있습니다
+                        </p>
+                      )}
+                    </>
                   )}
                   {isClosed && (
                     <div className="text-center py-2 text-sm font-pixel text-emerald-600 dark:text-emerald-400 font-bold">
@@ -1139,6 +1393,30 @@ function WritePageContent() {
                   </div>
                 )}
               </>
+            )}
+
+            {/* 가상 잔고 카드 */}
+            {virtualBalances !== null && (
+              <div className="card-base p-4">
+                <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">가상 잔고</h3>
+                {stockData ? (
+                  <>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">{stockCurrency}</div>
+                    <div className="text-lg font-bold tabular-nums text-[var(--pixel-accent)]">
+                      {formatPrice(currentBalance ?? 0, stockCurrency)}
+                    </div>
+                  </>
+                ) : (
+                  <div className="space-y-1.5">
+                    {Object.entries(virtualBalances).map(([cur, bal]) => (
+                      <div key={cur} className="flex justify-between text-xs">
+                        <span className="text-gray-500 dark:text-gray-400">{cur}</span>
+                        <span className="font-bold tabular-nums">{formatPrice(bal, cur)}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* 새 글 작성 모드 + 종목 선택됨 */}

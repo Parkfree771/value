@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { inferCurrency } from '@/utils/currency';
 import { revalidatePath } from 'next/cache';
 import { jsonCache, CACHE_KEYS } from '@/lib/jsonCache';
 import { calculateReturn, calculateAvgPrice } from '@/utils/calculateReturn';
+import { INITIAL_BALANCES } from '@/lib/constants';
 
 async function getFeed() {
   try {
@@ -29,7 +31,7 @@ async function saveFeed(feedData: Record<string, unknown>) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { postId, userId } = body;
+    const { postId, userId, additionalQuantity } = body;
 
     if (!postId || !userId) {
       return NextResponse.json(
@@ -110,12 +112,59 @@ export async function POST(request: NextRequest) {
       calculateReturn(avgPrice, currentPrice, positionType).toFixed(2)
     );
 
+    // 수량 검증
+    if (!data.quantity || data.quantity <= 0) {
+      return NextResponse.json(
+        { error: '수량이 설정되지 않은 글은 물타기할 수 없습니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 추가 수량 검증
+    const addQty = parseInt(additionalQuantity, 10);
+    if (!addQty || addQty <= 0) {
+      return NextResponse.json(
+        { error: '추가 매수 수량을 입력해주세요.' },
+        { status: 400 }
+      );
+    }
+
+    // 추가 매수 비용 계산
+    const additionalCost = currentPrice * addQty;
+
+    // 통화 추론 + 잔고 확인
+    const currency = inferCurrency({ exchange: data.exchange, stockData: data.stockData });
+    const userRef = adminDb.collection('users').doc(userId);
+    const userDoc = await userRef.get();
+    let balances: Record<string, number> = { ...INITIAL_BALANCES };
+    if (userDoc.exists) {
+      const userData = userDoc.data();
+      if (userData?.virtualBalances) {
+        balances = { ...INITIAL_BALANCES, ...userData.virtualBalances };
+      }
+    }
+    const curBalance = balances[currency] ?? 0;
+
+    if (curBalance < additionalCost) {
+      return NextResponse.json({
+        error: `잔고가 부족합니다. (현재: ${curBalance.toLocaleString()}, 필요: ${additionalCost.toLocaleString()})`,
+      }, { status: 400 });
+    }
+
+    const newQuantity = data.quantity + addQty;
+    const newInvestedAmount = (data.investedAmount || 0) + additionalCost;
+    balances[currency] = curBalance - additionalCost;
+    const newBalance = balances[currency];
+    await userRef.update({ virtualBalances: balances });
+
     // Firestore 업데이트 (Admin SDK)
     await docRef.update({
       entries: newEntries,
       avgPrice,
       currentPrice,
       returnRate,
+      quantity: newQuantity,
+      investedAmount: newInvestedAmount,
     });
 
     // feed.json 동기화 (위에서 이미 읽은 feed 재사용)
@@ -127,6 +176,8 @@ export async function POST(request: NextRequest) {
           feed.posts[postIndex].avgPrice = avgPrice;
           feed.posts[postIndex].currentPrice = currentPrice;
           feed.posts[postIndex].returnRate = returnRate;
+          feed.posts[postIndex].quantity = newQuantity;
+          feed.posts[postIndex].investedAmount = newInvestedAmount;
           feed.lastUpdated = now.toISOString();
           await saveFeed(feed);
         }
@@ -153,6 +204,10 @@ export async function POST(request: NextRequest) {
           avgPrice,
           currentPrice,
           returnRate,
+          quantity: newQuantity,
+          investedAmount: newInvestedAmount,
+          balance: newBalance,
+          balances,
         },
       },
       { status: 200 }

@@ -20,6 +20,8 @@ export interface FeedPost {
   entries?: { price: number; date: string; timestamp: string }[];
   avgPrice?: number;
   themes?: string[];
+  quantity?: number;
+  investedAmount?: number;
 }
 
 export interface FeedData {

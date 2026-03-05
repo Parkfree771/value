@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useState, memo, useCallback } from 'react';
 import Card from './Card';
 import Badge, { OpinionBadge } from './Badge';
-import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
-import { inferCurrency, getCurrencySymbol } from '@/utils/currency';
+import { formatReturn, getReturnColorClass, calculateProfitAmount, formatProfitAmount } from '@/utils/calculateReturn';
+import { inferCurrency, formatPrice } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
 
@@ -53,6 +53,8 @@ interface ReportCardProps {
   avgPrice?: number; // 물타기 평균단가
   entries?: { price: number; date: string }[]; // 물타기 기록
   themes?: string[]; // 테마 태그 ID 배열
+  quantity?: number; // 가상 매수 수량
+  investedAmount?: number; // 총 투자금액
 }
 
 const ReportCard = memo(function ReportCard({
@@ -81,6 +83,8 @@ const ReportCard = memo(function ReportCard({
   avgPrice,
   entries,
   themes,
+  quantity,
+  investedAmount,
 }: ReportCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -98,8 +102,6 @@ const ReportCard = memo(function ReportCard({
 
   // 통화 추론 및 기호 (utils/currency.ts 사용)
   const currency = inferCurrency({ exchange, category, ticker, stockData });
-  const currencySymbol = getCurrencySymbol(currency);
-
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -167,49 +169,62 @@ const ReportCard = memo(function ReportCard({
               <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{stockName}</h3>
               <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>
               <span className="flex-shrink-0"><OpinionBadge opinion={opinion} /></span>
+              {themes && themes.length > 0 && themes.slice(0, 2).map(themeId => (
+                <span key={themeId} className="font-pixel text-[10px] px-1.5 py-0.5 border border-[var(--pixel-border-muted)] text-gray-500 dark:text-gray-400 flex-shrink-0">
+                  #{THEME_NAMES[themeId] || themeId}
+                </span>
+              ))}
+              {themes && themes.length > 2 && (
+                <span className="text-[10px] text-gray-400 flex-shrink-0">+{themes.length - 2}</span>
+              )}
             </div>
-            <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 mb-1.5 sm:mb-2 truncate">{title}</h2>
-            {themes && themes.length > 0 && (
-              <div className="flex flex-wrap gap-1 mb-1">
-                {themes.slice(0, 2).map(themeId => (
-                  <span key={themeId} className="font-pixel text-[10px] px-1.5 py-0.5 border border-[var(--pixel-border-muted)] text-gray-500 dark:text-gray-400">
-                    #{THEME_NAMES[themeId] || themeId}
-                  </span>
-                ))}
-                {themes.length > 2 && (
-                  <span className="text-[10px] text-gray-400">+{themes.length - 2}</span>
-                )}
-              </div>
-            )}
+            <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate">{title}</h2>
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
             <div className="text-base sm:text-2xl font-black font-heading tracking-tight">
               {formatReturn(returnRate)}
             </div>
+            {quantity && quantity > 0 && (
+              <div className="text-[10px] sm:text-xs font-bold tabular-nums mt-0.5">
+                {formatProfitAmount(
+                  calculateProfitAmount(
+                    avgPrice || initialPrice,
+                    is_closed && closed_price ? closed_price : currentPrice,
+                    quantity,
+                    'long'
+                  ),
+                  currency
+                )}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Price Info */}
-        <div className="flex gap-4 sm:gap-6 mb-2 sm:mb-4 text-xs sm:text-sm">
-          <div>
+        {/* Price Info - 한 줄 */}
+        <div className="mb-2 sm:mb-4 text-xs sm:text-sm flex items-center gap-2 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
+          <span>
+            매수{' '}
             {avgPrice && entries && entries.length > 0 ? (
-              <>
-                <span className="text-gray-500 dark:text-gray-400">{currencySymbol}{initialPrice.toLocaleString()} → </span>
-                <span className="font-semibold text-blue-600 dark:text-blue-400">{currencySymbol}{Number.isInteger(avgPrice) ? avgPrice.toLocaleString() : parseFloat(avgPrice.toFixed(2)).toLocaleString()}</span>
-              </>
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{formatPrice(Number.isInteger(avgPrice) ? avgPrice : parseFloat(avgPrice.toFixed(2)), currency)}</span>
             ) : (
-              <>
-                <span className="text-gray-500 dark:text-gray-400">작성시: </span>
-                <span className="font-semibold text-gray-900 dark:text-white">{currencySymbol}{initialPrice.toLocaleString()}</span>
-              </>
+              <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
             )}
-          </div>
-          <div>
-            <span className="text-gray-500 dark:text-gray-400">현재: </span>
-            <span className={`font-semibold ${getReturnColorClass(returnRate)}`}>
-              {currencySymbol}{currentPrice.toLocaleString()}
-            </span>
-          </div>
+          </span>
+          <span className="text-gray-300 dark:text-gray-600">|</span>
+          <span>
+            현재{' '}
+            <span className={`font-semibold ${getReturnColorClass(returnRate)}`}>{formatPrice(currentPrice, currency)}</span>
+          </span>
+          {investedAmount && investedAmount > 0 && (
+            <>
+              <span className="text-gray-300 dark:text-gray-600">|</span>
+              <span>
+                투자{' '}
+                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(Math.round(investedAmount), currency)}</span>
+                <span className="ml-1 text-gray-400 dark:text-gray-500">({quantity?.toLocaleString()}주)</span>
+              </span>
+            </>
+          )}
         </div>
 
         {/* Footer */}

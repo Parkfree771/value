@@ -8,7 +8,7 @@ import { OpinionBadge } from '@/components/Badge';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/utils/sanitizeHtml';
-import { getReturnColorClass } from '@/utils/calculateReturn';
+import { getReturnColorClass, calculateProfitAmount, formatProfitAmount } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
 import { useBookmark } from '@/contexts/BookmarkContext';
@@ -262,6 +262,19 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 'text-gray-900 dark:text-white'
               }`}>
                 {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
+                {report.quantity && report.quantity > 0 && (
+                  <span className="block text-sm font-bold">
+                    {formatProfitAmount(
+                      calculateProfitAmount(
+                        report.avgPrice || report.initialPrice,
+                        report.currentPrice,
+                        report.quantity,
+                        report.positionType || 'long'
+                      ),
+                      report.stockData?.currency || 'KRW'
+                    )}
+                  </span>
+                )}
               </span>
             </div>
             {/* 테마 태그 */}
@@ -308,6 +321,17 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">목표가</div>
                 <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.targetPrice?.toLocaleString() || '-'}</div>
               </div>
+              {report.quantity && report.quantity > 0 && (
+                <div style={{ flex: 1, padding: '10px 16px', borderLeft: '1px solid var(--pixel-border-muted)' }}>
+                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">수량 / 투자금</div>
+                  <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">
+                    {report.quantity.toLocaleString()}주
+                    <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
+                      ({(report.investedAmount || 0).toLocaleString()})
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             {/* 3행: PER · PBR · EPS (코인이면 숨김) */}
             {report.stockData?.exchange !== 'CRYPTO' && (
