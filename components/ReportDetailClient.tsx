@@ -237,7 +237,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {/* 1행: 종목명 · 티커 · 거래소 · 의견배지 | 수익률 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px' }}>
               <div className="flex items-center gap-2 min-w-0">
-                <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate">{report.stockName}</span>
+                <span className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate inline-block max-w-[40vw] sm:max-w-[360px] align-bottom">{report.stockName}</span>
                 <span className="font-mono text-xs text-gray-400">{report.ticker}</span>
                 {report.stockData?.exchange && (
                   <span className={report.stockData.exchange === 'CRYPTO' ? 'text-xs px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-xs text-gray-400'}>

@@ -494,7 +494,8 @@ const IndicatorCard = memo(function IndicatorCard({
     return `${month} ${d.getFullYear().toString().slice(2)}`;
   }, [timeRange]);
 
-  const yAxisWidth = configId === 'M2SL' || configId === '101Y018' ? 58 : 48;
+  const wideYAxis = ['M2SL', '101Y018', '301Y017', '161Y005'].includes(configId);
+  const yAxisWidth = wideYAxis ? 72 : 48;
   const tickInterval = Math.max(1, Math.floor(observations.length / 6) - 1);
   const showBrush = observations.length > 30;
 

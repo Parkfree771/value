@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 
 const FRED_API_KEY = process.env.FRED_API_KEY;
 const FRED_BASE_URL = 'https://api.stlouisfed.org/fred/series/observations';
@@ -7,11 +8,18 @@ const VALID_SERIES = ['VIXCLS', 'T10Y2Y', 'UNRATE', 'PCEPI', 'CPIAUCSL', 'M2SL',
 
 // 서버 메모리 캐시 (1시간 TTL)
 const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 60 * 60 * 1000;
+const CACHE_TTL = 12 * 60 * 60 * 1000;
 
 export async function GET(request: NextRequest) {
   const seriesId = request.nextUrl.searchParams.get('series_id');
   const limit = request.nextUrl.searchParams.get('limit') || '365';
+
+  // 레이트 리밋: IP당 분당 30회
+  const ip = getClientIP(request);
+  const rateLimit = checkRateLimit(`fred:${ip}`, 30, 60 * 1000);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
 
   if (!seriesId || !VALID_SERIES.includes(seriesId)) {
     return NextResponse.json(

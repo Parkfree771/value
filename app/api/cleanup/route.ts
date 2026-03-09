@@ -4,10 +4,16 @@
  * - tickers 컬렉션 삭제 (posts에서 직접 읽음)
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, adminStorage } from '@/lib/firebase-admin';
+import { verifyAdmin } from '@/lib/admin/adminVerify';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // 관리자 인증 필수
+  const admin = await verifyAdmin(request.headers.get('authorization'));
+  if (!admin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const results: string[] = [];
 
   try {

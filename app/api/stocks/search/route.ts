@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { getCryptoStocksForIndex } from '@/lib/cryptoCoins';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 
 interface GlobalStock {
   symbol: string;
@@ -171,6 +172,13 @@ function searchStocks(query: string, limit: number): GlobalStock[] {
 }
 
 export async function GET(request: NextRequest) {
+  // 레이트 리밋: IP당 분당 60회 (검색 자동완성 고려)
+  const ip = getClientIP(request);
+  const rateLimit = checkRateLimit(`stock-search:${ip}`, 60, 60 * 1000);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q');

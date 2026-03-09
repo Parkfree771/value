@@ -9,10 +9,12 @@
  * 3. feed.json 업데이트
  */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { adminStorage } from '@/lib/firebase-admin';
 import { getKISTokenWithCache } from '@/lib/kisTokenManager';
 import { calculateReturn } from '@/utils/calculateReturn';
+import { verifyAdmin } from '@/lib/admin/adminVerify';
+import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 import type { FeedPost, FeedData } from '@/types/feed';
 
 // KIS API 설정
@@ -114,7 +116,20 @@ async function getStockPrice(token: string, ticker: string, exchange: string): P
   }
 }
 
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // 관리자 인증 필수
+  const admin = await verifyAdmin(request.headers.get('authorization'));
+  if (!admin) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // 레이트 리밋: 시간당 10회 (외부 API 비용 방어)
+  const ip = getClientIP(request);
+  const rateLimit = checkRateLimit(`update-prices:${ip}`, 10, 60 * 60 * 1000);
+  if (!rateLimit.success) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+  }
+
   const startTime = Date.now();
   console.log('[Update Prices] ===== Starting price update =====');
 
@@ -263,7 +278,7 @@ export async function POST() {
   }
 }
 
-// GET도 지원 (브라우저에서 쉽게 테스트 가능)
+// GET 비활성화 (인증 필요한 엔드포인트는 POST만 허용)
 export async function GET() {
-  return POST();
+  return NextResponse.json({ error: 'Use POST with admin authentication' }, { status: 405 });
 }
