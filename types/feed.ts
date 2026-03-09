@@ -15,13 +15,7 @@ export interface FeedPost {
   likes: number;
   category: string;
   targetPrice?: number;
-  is_closed?: boolean;
-  closed_return_rate?: number;
-  entries?: { price: number; date: string; timestamp: string }[];
-  avgPrice?: number;
   themes?: string[];
-  quantity?: number;
-  investedAmount?: number;
 }
 
 export interface FeedData {

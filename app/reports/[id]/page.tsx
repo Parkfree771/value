@@ -21,11 +21,6 @@ interface FeedPost {
   initialPrice: number;
   views: number;
   likes: number;
-  is_closed?: boolean;
-  closed_return_rate?: number;
-  closed_price?: number;
-  avgPrice?: number;
-  entries?: { price: number; date: string; timestamp: string }[];
 }
 
 interface FeedData {
@@ -139,30 +134,9 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       files: data.files || [],
       positionType: data.positionType || 'long',
       stockData: data.stockData || {},
-      // 확정 상태
-      is_closed: feedPost?.is_closed ?? data.is_closed ?? false,
-      closed_at: data.closed_at,
-      closed_return_rate: feedPost?.closed_return_rate ?? data.closed_return_rate,
-      closed_price: feedPost?.closed_price ?? data.closed_price,
-      // 물타기 데이터 (feed.json 우선, Firestore fallback)
-      entries: feedPost?.entries ?? data.entries ?? undefined,
-      avgPrice: feedPost?.avgPrice ?? data.avgPrice ?? undefined,
       // 테마 태그
       themes: data.themes || undefined,
-      // 가상 매수 수량
-      quantity: data.quantity || undefined,
-      investedAmount: data.investedAmount || undefined,
     };
-
-    // 확정된 수익률이 있으면 사용
-    if (report.is_closed) {
-      if (report.closed_return_rate !== undefined) {
-        report.returnRate = report.closed_return_rate;
-      }
-      if (report.closed_price !== undefined) {
-        report.currentPrice = report.closed_price;
-      }
-    }
 
     return report;
   } catch (error) {

@@ -106,12 +106,6 @@ export interface GuruTrackingEvent {
   views?: number;
   likes?: number;
 
-  // 수익 확정 관련 필드
-  is_closed?: boolean; // 포지션 청산(수익 확정) 여부
-  closed_at?: string; // 확정 일시 (ISO 8601)
-  closed_return_rate?: number; // 확정된 수익률 (%)
-  closed_price?: number; // 확정 시점의 주가
-
   // 작성자 정보
   author_id?: string; // 작성자 UID
   author_email?: string; // 작성자 이메일

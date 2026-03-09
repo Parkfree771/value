@@ -12,9 +12,9 @@ import {
   Brush,
   ReferenceLine,
 } from 'recharts';
-import type { FredIndicatorConfig, FredObservation, FredApiResponse, TimeRange } from './types';
+import type { FredIndicatorConfig, FredObservation, FredApiResponse, TimeRange, EcosIndicatorConfig, Country } from './types';
 
-/* ─── 지표 설정 ─── */
+/* ─── 지표 설정 (미국 FRED) ─── */
 
 const INDICATORS: FredIndicatorConfig[] = [
   {
@@ -95,6 +95,78 @@ const INDICATORS: FredIndicatorConfig[] = [
   },
 ];
 
+/* ─── 지표 설정 (한국 ECOS) ─── */
+
+const KR_INDICATORS: EcosIndicatorConfig[] = [
+  {
+    statCode: '901Y009',
+    cycle: 'M',
+    name: '소비자물가지수 (CPI)',
+    nameEn: 'Consumer Price Index',
+    description: '소비자가 체감하는 물가 수준. 전년 대비 상승률이 한은 목표치(2%)를 크게 벗어나면 금리 조정 신호.',
+    unit: '',
+    color: '#8b5cf6',
+    decimals: 1,
+    yoyChange: true,
+    format: (v: number) => `${v.toFixed(1)}%`,
+  },
+  {
+    statCode: '161Y005',
+    cycle: 'M',
+    name: 'M2 통화량',
+    nameEn: 'M2 Money Supply',
+    description: '광의통화(M2). 시중 유동성의 크기를 나타내며, 급증 시 인플레이션 압력.',
+    unit: '',
+    color: '#06b6d4',
+    decimals: 1,
+    format: (v: number) => `${(v / 10000).toFixed(0)}조원`,
+  },
+  {
+    statCode: '404Y015',
+    cycle: 'M',
+    name: '생산자물가지수 (PPI)',
+    nameEn: 'Producer Price Index',
+    description: '기업이 생산한 상품의 출하 시점 가격. CPI의 선행 지표로, PPI 상승 → 소비자물가 상승 압력.',
+    unit: '',
+    color: '#a855f7',
+    decimals: 1,
+    yoyChange: true,
+    format: (v: number) => `${v.toFixed(1)}%`,
+  },
+  {
+    statCode: '301Y017',
+    cycle: 'M',
+    name: '경상수지',
+    nameEn: 'Current Account Balance',
+    description: '무역·서비스·소득 수지의 합계. 흑자가 지속되면 원화 강세 요인, 적자 전환 시 경고 신호.',
+    unit: '',
+    color: '#14b8a6',
+    decimals: 0,
+    format: (v: number) => `${(v / 100).toFixed(1)}억달러`,
+  },
+  {
+    statCode: '901Y062',
+    cycle: 'M',
+    name: '주택매매가격지수',
+    nameEn: 'Housing Price Index (KB)',
+    description: 'KB부동산에서 집계하는 전국 주택매매가격지수. 부동산 시장의 과열·침체를 판단하는 핵심 지표.',
+    unit: '',
+    color: '#f43f5e',
+    decimals: 1,
+  },
+  {
+    statCode: '511Y002',
+    cycle: 'M',
+    name: '소비자심리지수 (CSI)',
+    nameEn: 'Consumer Sentiment Index',
+    description: '소비자가 느끼는 경기 체감 지수. 100 이상이면 낙관, 100 미만이면 비관. 소비 지출 전망에 직결.',
+    unit: '',
+    color: '#0ea5e9',
+    decimals: 0,
+    referenceLine: { value: 100, label: '기준선 (100)', color: '#0ea5e9' },
+  },
+];
+
 const TIME_RANGES: { key: TimeRange; label: string; days: string; daysNum: number }[] = [
   { key: '1M', label: '1M', days: '30', daysNum: 30 },
   { key: '3M', label: '3M', days: '90', daysNum: 90 },
@@ -103,6 +175,13 @@ const TIME_RANGES: { key: TimeRange; label: string; days: string; daysNum: numbe
   { key: '5Y', label: '5Y', days: '1825', daysNum: 1825 },
   { key: 'MAX', label: 'MAX', days: 'max', daysNum: Infinity },
 ];
+
+/** 분기(Q)/연간(A) 데이터는 짧은 기간이 의미 없으므로 필터 */
+function getAvailableRanges(cycle?: string): typeof TIME_RANGES {
+  if (cycle === 'Q') return TIME_RANGES.filter(r => ['1Y', '5Y', 'MAX'].includes(r.key));
+  if (cycle === 'A') return TIME_RANGES.filter(r => ['5Y', 'MAX'].includes(r.key));
+  return TIME_RANGES;
+}
 
 const MAX_CHART_POINTS = 300;
 
@@ -256,7 +335,7 @@ const ChartTooltip = memo(function ChartTooltip({ active, payload, label, config
   active?: boolean;
   payload?: Array<{ value: number }>;
   label?: string;
-  config: FredIndicatorConfig;
+  config: FredIndicatorConfig | EcosIndicatorConfig;
 }) {
   if (!active || !payload?.length) return null;
   const value = payload[0].value;
@@ -301,20 +380,30 @@ function SkeletonCard() {
 
 const IndicatorCard = memo(function IndicatorCard({
   config,
+  apiType = 'fred',
 }: {
-  config: FredIndicatorConfig;
+  config: FredIndicatorConfig | EcosIndicatorConfig;
+  apiType?: 'fred' | 'ecos';
 }) {
   const { ref, inView } = useInView();
-  const [timeRange, setTimeRange] = useState<TimeRange>('1Y');
+  const defaultRange = apiType === 'ecos' && (config as EcosIndicatorConfig).cycle === 'Q' ? '5Y'
+    : apiType === 'ecos' && (config as EcosIndicatorConfig).cycle === 'A' ? '5Y' : '1Y';
+  const [timeRange, setTimeRange] = useState<TimeRange>(defaultRange as TimeRange);
   const [rawData, setRawData] = useState<FredObservation[]>([]);
   const [loading, setLoading] = useState(true);
 
   // 측정선 상태
   const [measureEnabled, setMeasureEnabled] = useState(false);
   const [measureValue, setMeasureValue] = useState<number>(0);
+  const [measureInput, setMeasureInput] = useState<string>('');
   const chartContainerRef = useRef<HTMLDivElement>(null);
 
-  const currentRange = TIME_RANGES.find((r) => r.key === timeRange)!;
+  // 지표 ID (FRED: seriesId, ECOS: statCode)
+  const configId = apiType === 'fred' ? (config as FredIndicatorConfig).seriesId : (config as EcosIndicatorConfig).statCode;
+  const configCycle = apiType === 'ecos' ? (config as EcosIndicatorConfig).cycle : undefined;
+
+  const availableRanges = useMemo(() => getAvailableRanges(configCycle), [configCycle]);
+  const currentRange = availableRanges.find((r) => r.key === timeRange) || availableRanges[availableRanges.length - 2] || availableRanges[0];
 
   const fetchData = useCallback(async (range: typeof TIME_RANGES[number]) => {
     // YoY 지표: 실제 API 요청 일수 (변환에 필요한 추가 기간 포함)
@@ -323,9 +412,8 @@ const IndicatorCard = memo(function IndicatorCard({
     const actualDaysNum = needsExtra ? range.daysNum + YOY_EXTRA_DAYS : range.daysNum;
 
     // 캐시에서 찾기 (더 큰 범위 포함)
-    const cached = resolveFromCache(config.seriesId, actualDaysNum);
+    const cached = resolveFromCache(configId, actualDaysNum);
     if (cached) {
-      // YoY 변환 후 요청 기간으로 슬라이스
       if (config.yoyChange) {
         const yoyData = toYoYPercent(cached);
         setRawData(sliceByDays(yoyData, range.daysNum));
@@ -339,15 +427,21 @@ const IndicatorCard = memo(function IndicatorCard({
     // 캐시 없으면 API 호출
     setLoading(true);
     try {
-      const res = await fetch(`/api/fred?series_id=${config.seriesId}&limit=${actualDays}`);
+      let url: string;
+      if (apiType === 'ecos') {
+        url = `/api/ecos?stat_code=${configId}&cycle=${configCycle}&limit=${actualDays}`;
+      } else {
+        url = `/api/fred?series_id=${configId}&limit=${actualDays}`;
+      }
+
+      const res = await fetch(url);
       if (!res.ok) throw new Error('Failed');
-      const json: FredApiResponse = await res.json();
-      const data = json.observations;
+      const json = await res.json();
+      const data: FredObservation[] = json.observations;
 
       // 원본 데이터를 캐시에 저장
-      setToCache(config.seriesId, actualDays, data);
+      setToCache(configId, actualDays, data);
 
-      // YoY 변환 후 요청 기간으로 슬라이스
       if (config.yoyChange) {
         const yoyData = toYoYPercent(data);
         setRawData(sliceByDays(yoyData, range.daysNum));
@@ -359,7 +453,7 @@ const IndicatorCard = memo(function IndicatorCard({
     } finally {
       setLoading(false);
     }
-  }, [config.seriesId, config.yoyChange]);
+  }, [configId, configCycle, config.yoyChange, apiType]);
 
   // 화면에 보일 때 첫 fetch
   useEffect(() => {
@@ -371,9 +465,9 @@ const IndicatorCard = memo(function IndicatorCard({
   // 기간 변경
   const handleRangeChange = useCallback((key: TimeRange) => {
     setTimeRange(key);
-    const range = TIME_RANGES.find((r) => r.key === key)!;
+    const range = availableRanges.find((r) => r.key === key)!;
     fetchData(range);
-  }, [fetchData]);
+  }, [fetchData, availableRanges]);
 
   // 차트용 다운샘플링
   const observations = useMemo(() => downsample(rawData, MAX_CHART_POINTS), [rawData]);
@@ -400,7 +494,7 @@ const IndicatorCard = memo(function IndicatorCard({
     return `${month} ${d.getFullYear().toString().slice(2)}`;
   }, [timeRange]);
 
-  const yAxisWidth = config.seriesId === 'M2SL' ? 58 : 48;
+  const yAxisWidth = configId === 'M2SL' || configId === '101Y018' ? 58 : 48;
   const tickInterval = Math.max(1, Math.floor(observations.length / 6) - 1);
   const showBrush = observations.length > 30;
 
@@ -417,6 +511,12 @@ const IndicatorCard = memo(function IndicatorCard({
     return [Math.min(...values), Math.max(...values)];
   }, [observations]);
 
+  // 측정값 + 입력필드 동기화
+  const updateMeasure = useCallback((val: number) => {
+    setMeasureValue(val);
+    setMeasureInput(val.toFixed(config.decimals));
+  }, [config.decimals]);
+
   // 측정선 토글
   const toggleMeasure = useCallback(() => {
     if (measureEnabled) {
@@ -424,10 +524,10 @@ const IndicatorCard = memo(function IndicatorCard({
     } else {
       setMeasureEnabled(true);
       if (observations.length > 0) {
-        setMeasureValue((yRange[0] + yRange[1]) / 2);
+        updateMeasure((yRange[0] + yRange[1]) / 2);
       }
     }
-  }, [measureEnabled, observations, yRange]);
+  }, [measureEnabled, observations, yRange, updateMeasure]);
 
   // 차트 영역에서 마우스 Y → 값 변환 (측정 모드 드래그용)
   const chartHeight = showBrush ? 360 : 300;
@@ -448,14 +548,14 @@ const IndicatorCard = memo(function IndicatorCard({
     const containerRect = container.getBoundingClientRect();
     const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
     // 첫 클릭 위치로 즉시 이동
-    setMeasureValue(pixelToValue(clientY - containerRect.top));
+    updateMeasure(pixelToValue(clientY - containerRect.top));
 
     document.body.style.cursor = 'ns-resize';
     document.body.style.userSelect = 'none';
 
     const onMove = (ev: MouseEvent | TouchEvent) => {
       const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
-      setMeasureValue(pixelToValue(cy - containerRect.top));
+      updateMeasure(pixelToValue(cy - containerRect.top));
     };
 
     const onUp = () => {
@@ -511,7 +611,7 @@ const IndicatorCard = memo(function IndicatorCard({
 
         {/* 기간 선택 버튼 + 측정 토글 */}
         <div className="flex gap-1 flex-shrink-0 items-center">
-          {TIME_RANGES.map((range) => (
+          {availableRanges.map((range) => (
             <button
               key={range.key}
               onClick={() => handleRangeChange(range.key)}
@@ -539,6 +639,38 @@ const IndicatorCard = memo(function IndicatorCard({
           >
             측정
           </button>
+          {measureEnabled && (
+            <input
+              type="text"
+              inputMode="decimal"
+              value={measureInput}
+              onFocus={() => setMeasureInput(measureValue.toFixed(config.decimals))}
+              onChange={(e) => {
+                const raw = e.target.value;
+                if (raw === '' || raw === '-' || raw === '.' || raw === '-.') {
+                  setMeasureInput(raw);
+                  return;
+                }
+                if (/^-?\d*\.?\d*$/.test(raw)) {
+                  setMeasureInput(raw);
+                  const val = parseFloat(raw);
+                  if (!isNaN(val)) {
+                    setMeasureValue(Math.max(yRange[0], Math.min(yRange[1], val)));
+                  }
+                }
+              }}
+              onBlur={() => {
+                const val = parseFloat(measureInput);
+                if (isNaN(val) || measureInput === '') {
+                  updateMeasure(0);
+                } else {
+                  updateMeasure(Math.max(yRange[0], Math.min(yRange[1], val)));
+                }
+              }}
+              className="font-mono text-[11px] sm:text-xs w-20 sm:w-24 px-2 py-1 sm:py-1.5 ml-1 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] text-[var(--foreground)] font-bold focus:border-[var(--pixel-accent)] focus:outline-none transition-colors"
+              title="측정선 수치 직접 입력"
+            />
+          )}
         </div>
       </div>
 
@@ -565,7 +697,7 @@ const IndicatorCard = memo(function IndicatorCard({
           <ResponsiveContainer>
             <AreaChart data={observations} margin={{ top: 5, right: 5, left: 0, bottom: showBrush ? 5 : 0 }}>
               <defs>
-                <linearGradient id={`gradient-${config.seriesId}-${timeRange}`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`gradient-${configId}-${timeRange}`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor={config.color} stopOpacity={0.25} />
                   <stop offset="95%" stopColor={config.color} stopOpacity={0} />
                 </linearGradient>
@@ -633,7 +765,7 @@ const IndicatorCard = memo(function IndicatorCard({
                 dataKey="value"
                 stroke={config.color}
                 strokeWidth={2}
-                fill={`url(#gradient-${config.seriesId}-${timeRange})`}
+                fill={`url(#gradient-${configId}-${timeRange})`}
                 dot={false}
                 activeDot={{
                   r: 5,
@@ -700,7 +832,25 @@ const IndicatorCard = memo(function IndicatorCard({
 
 /* ─── 메인 컴포넌트 ─── */
 
+const COUNTRY_INFO = {
+  US: {
+    subtitle: 'FRED 데이터로 보는 미국 핵심 매크로 지표',
+    detail: 'VIX 공포지수, 장단기금리차, 실업률, PCE, CPI, M2 통화량까지.\n투자 판단에 필요한 거시경제 데이터를 한눈에 확인하세요.',
+    source: 'Federal Reserve Economic Data (FRED), Federal Reserve Bank of St. Louis',
+    notice: 'This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.',
+  },
+  KR: {
+    subtitle: 'ECOS 데이터로 보는 한국 핵심 매크로 지표',
+    detail: '기준금리, 국고채, 실업률, CPI, GDP, M2, 원/달러 환율까지.\n한국 경제의 흐름을 한눈에 확인하세요.',
+    source: '자료: 한국은행 경제통계시스템(ECOS)',
+    notice: '본 서비스는 한국은행 Open API를 활용하며, 한국은행의 공식 인증을 받은 서비스가 아닙니다.',
+  },
+};
+
 export default function EconomicClient() {
+  const [country, setCountry] = useState<Country>('US');
+  const info = COUNTRY_INFO[country];
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 히어로 섹션 */}
@@ -717,35 +867,62 @@ export default function EconomicClient() {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-pixel">
             경제 지표
           </h1>
+
+          {/* 미국 / 한국 토글 */}
+          <div className="flex justify-center gap-2 mt-3 sm:mt-4 mb-3 sm:mb-4">
+            <button
+              onClick={() => setCountry('US')}
+              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-3 transition-all duration-150 ${
+                country === 'US'
+                  ? 'bg-white text-ant-red-950 border-white shadow-[2px_2px_0px_rgba(0,0,0,0.3)]'
+                  : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
+              }`}
+            >
+              미국
+            </button>
+            <button
+              onClick={() => setCountry('KR')}
+              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-3 transition-all duration-150 ${
+                country === 'KR'
+                  ? 'bg-white text-ant-red-950 border-white shadow-[2px_2px_0px_rgba(0,0,0,0.3)]'
+                  : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
+              }`}
+            >
+              한국
+            </button>
+          </div>
+
           <p className="font-heading text-sm sm:text-base font-bold text-ant-red-300 tracking-wide">
-            FRED 데이터로 보는 미국 핵심 매크로 지표
+            {info.subtitle}
           </p>
-          <p className="font-heading text-xs sm:text-sm text-gray-400 mt-2 sm:mt-3 max-w-xl mx-auto leading-relaxed">
-            VIX 공포지수, 장단기금리차, 실업률, PCE, CPI, M2 통화량까지.
-            <br className="hidden sm:block" />
-            투자 판단에 필요한 거시경제 데이터를 한눈에 확인하세요.
+          <p className="font-heading text-xs sm:text-sm text-gray-400 mt-2 sm:mt-3 max-w-xl mx-auto leading-relaxed whitespace-pre-line">
+            {info.detail}
           </p>
         </div>
       </section>
 
       {/* 지표 목록 */}
       <section className="space-y-4 sm:space-y-6 mb-8 sm:mb-12">
-        {INDICATORS.map((config) => (
-          <IndicatorCard key={config.seriesId} config={config} />
-        ))}
+        {country === 'US'
+          ? INDICATORS.map((config) => (
+              <IndicatorCard key={config.seriesId} config={config} apiType="fred" />
+            ))
+          : KR_INDICATORS.map((config) => (
+              <IndicatorCard key={config.statCode} config={config} apiType="ecos" />
+            ))
+        }
       </section>
 
-      {/* FRED 출처 표기 */}
+      {/* 출처 표기 */}
       <section
         className="p-5 sm:p-6 bg-pixel-card border-3 border-pixel-border-muted border-l-ant-red-600 dark:border-l-ant-red-400"
         style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}
       >
         <p className="font-heading text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 leading-relaxed">
-          This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.
+          {info.notice}
         </p>
         <p className="font-heading text-xs font-medium text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-          데이터 출처: Federal Reserve Economic Data (FRED), Federal Reserve Bank of St. Louis.
-          각 지표의 업데이트 주기는 일간(VIX, 금리차) 또는 월간(실업률, PCE, CPI, M2)입니다.
+          데이터 출처: {info.source}
         </p>
       </section>
     </div>

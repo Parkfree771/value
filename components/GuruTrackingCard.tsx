@@ -3,28 +3,19 @@
 import { useState, memo } from 'react';
 import { GuruTrackingEvent, BadgeLabel } from '@/app/guru-tracker/types';
 import { useStockPrice } from '@/hooks/useStockPrice';
-import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/utils/sanitizeHtml';
 
 interface GuruTrackingCardProps {
   event: GuruTrackingEvent;
-  collection?: 'posts'; // 어느 컬렉션에서 온 데이터인지
 }
 
-const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'posts' }: GuruTrackingCardProps) {
+const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
   const [isDeleted, setIsDeleted] = useState(false);
-  const [isClosed, setIsClosed] = useState(event.is_closed || false);
-  const { user } = useAuth();
-  const isOwner = user && event.author_id === user.uid;
 
-  // 수익 확정 버튼 표시 조건
-  const showCloseButton = !isClosed && isOwner;
-
-  // 실시간 주식 가격 가져오기 (확정되지 않은 경우에만)
+  // 실시간 주식 가격 가져오기
   const { currentPrice, currency, returnRate, loading: priceLoading, lastUpdated } = useStockPrice(
-    !isClosed ? (event.target_ticker ?? undefined) : undefined, // 확정된 경우 실시간 업데이트 중지
+    event.target_ticker ?? undefined,
     event.base_price,
     event.tracking_data.action_direction,
     60000 // 1분마다 갱신
@@ -53,13 +44,8 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
     return 'USD'; // 기본값
   };
 
-  // 확정된 경우 확정 수익률/가격 사용, 아니면 실시간 또는 기존 가격 사용
-  const displayPrice = isClosed
-    ? (event.closed_price ?? event.current_price)
-    : (currentPrice ?? event.current_price);
-  const displayReturnRate = isClosed
-    ? (event.closed_return_rate ?? event.return_rate)
-    : (returnRate ?? event.return_rate);
+  const displayPrice = currentPrice ?? event.current_price;
+  const displayReturnRate = returnRate ?? event.return_rate;
   const displayCurrency = currency ?? inferCurrencyFromExchange(event.exchange, event.target_ticker ?? undefined);
 
   // 통화 기호 가져오기
@@ -178,46 +164,6 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
     return `${Math.floor(diffDays / 365)}년 전`;
   };
 
-  // 수익 확정 처리
-  const handleClosePosition = async () => {
-    if (!user || !event.id || isClosing) return;
-
-    const confirmMessage = `현재 수익률 ${displayReturnRate?.toFixed(2)}%로 수익을 확정하시겠습니까?\n\n확정 후에는 더 이상 실시간 주가 업데이트가 되지 않습니다.`;
-    if (!confirm(confirmMessage)) return;
-
-    setIsClosing(true);
-
-    try {
-      const response = await fetch('/api/close-position', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          postId: event.id,
-          collection,
-          userId: user.uid,
-          closedPrice: displayPrice,
-          closedReturnRate: displayReturnRate,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        alert('수익이 확정되었습니다!');
-        setIsClosed(true);
-      } else {
-        alert(data.error || '수익 확정에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('수익 확정 오류:', error);
-      alert('수익 확정 중 오류가 발생했습니다.');
-    } finally {
-      setIsClosing(false);
-    }
-  };
-
   // 삭제된 경우 렌더링하지 않음
   if (isDeleted) return null;
 
@@ -254,14 +200,9 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
                 ? 'bg-blue-500/10 border-blue-300 dark:border-blue-700'
                 : 'bg-[var(--pixel-bg)] border-[var(--pixel-border-muted)]'
             }`}>
-              {isClosed && (
-                <div className="absolute -top-2 -right-2 bg-green-500 text-white font-pixel text-xs font-bold px-2 py-1 border-2 border-green-700">
-                  확정
-                </div>
-              )}
               <div className="font-pixel text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1.5">
                 수익률
-                {priceLoading && !isClosed && <span className="text-yellow-500 animate-spin">⟳</span>}
+                {priceLoading && <span className="text-yellow-500 animate-spin">⟳</span>}
               </div>
               <div className={`text-3xl font-black font-pixel ${
                 displayReturnRate > 0
@@ -374,19 +315,6 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
               </a>
             )}
 
-            {/* Close Position Button */}
-            {showCloseButton && (
-              <button
-                onClick={handleClosePosition}
-                disabled={isClosing}
-                className={`inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 border-2 border-emerald-800 hover:bg-emerald-700 text-white font-pixel text-xs font-bold transition-all shadow-[2px_2px_0px_rgba(0,0,0,0.3)] ${
-                  isClosing ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                <span className="text-lg">💰</span>
-                <span>{isClosing ? '처리중...' : '수익 확정'}</span>
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -407,17 +335,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event, collection = 'p
             </svg>
             <span className="font-semibold">{event.likes || 0}</span>
           </span>
-          {(isClosed && event.closed_at) ? (
-            <>
-              <span className="text-gray-300 dark:text-gray-600">|</span>
-              <span className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>확정: {new Date(event.closed_at).toLocaleDateString('ko-KR')}</span>
-              </span>
-            </>
-          ) : lastUpdated ? (
+          {lastUpdated ? (
             <>
               <span className="text-gray-300 dark:text-gray-600">|</span>
               <span className="flex items-center gap-2">

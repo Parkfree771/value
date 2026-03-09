@@ -22,7 +22,6 @@ interface FeedPost {
   views: number;
   likes: number;
   category: string;
-  is_closed?: boolean;
 }
 
 export default function UserPage() {

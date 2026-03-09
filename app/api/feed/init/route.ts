@@ -27,19 +27,11 @@ export async function POST() {
       const ticker = (data.ticker || '').toUpperCase();
       const exchange = data.exchange || '';
       const initialPrice = data.initialPrice || 0;
-      const avgPrice = data.avgPrice || undefined;
-      const entries = data.entries || undefined;
       const currentPrice = data.currentPrice || initialPrice;
       const positionType: 'long' | 'short' = data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
 
-      // 수익률 계산 (물타기 평균단가 우선)
-      const basePrice = avgPrice || initialPrice;
-      let returnRate: number;
-      if (data.is_closed && data.closed_return_rate != null) {
-        returnRate = data.closed_return_rate;
-      } else {
-        returnRate = calculateReturn(basePrice, currentPrice, positionType);
-      }
+      // 수익률 계산
+      const returnRate = calculateReturn(initialPrice, currentPrice, positionType);
 
       let createdAtStr = '';
       if (data.createdAt?.toDate) {
@@ -67,13 +59,7 @@ export async function POST() {
         likes: data.likes || 0,
         category: data.category || '',
         targetPrice: data.targetPrice || 0,
-        is_closed: data.is_closed || false,
-        closed_return_rate: data.closed_return_rate,
-        entries,
-        avgPrice,
         themes: data.themes || undefined,
-        quantity: data.quantity || undefined,
-        investedAmount: data.investedAmount || undefined,
       });
 
       // prices 맵에 추가

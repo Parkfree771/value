@@ -8,7 +8,7 @@ import { OpinionBadge } from '@/components/Badge';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml } from '@/utils/sanitizeHtml';
-import { getReturnColorClass, calculateProfitAmount, formatProfitAmount } from '@/utils/calculateReturn';
+import { getReturnColorClass } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
 import { useBookmark } from '@/contexts/BookmarkContext';
@@ -49,7 +49,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [commentText, setCommentText] = useState('');
   const [isLiked, setIsLiked] = useState(false);
   const [likesCount, setLikesCount] = useState(report.likes || 0);
-  const [isClosed, setIsClosed] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentCount, setCommentCount] = useState(0);
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
@@ -57,15 +56,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ id: string; author: string } | null>(null);
   const [replyText, setReplyText] = useState('');
-
-  // 물타기 데이터 (report에서 직접 읽기, 표시용)
-  const entries = report.entries || [];
-  const avgPrice = report.avgPrice;
-
-  // 수익 확정 상태 확인
-  useEffect(() => {
-    setIsClosed(report.is_closed || false);
-  }, [report.is_closed]);
 
   // 사용자 닉네임 로드
   useEffect(() => {
@@ -262,19 +252,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 'text-gray-900 dark:text-white'
               }`}>
                 {report.returnRate > 0 ? '+' : ''}{report.returnRate?.toFixed(2)}%
-                {report.quantity && report.quantity > 0 && (
-                  <span className="block text-sm font-bold">
-                    {formatProfitAmount(
-                      calculateProfitAmount(
-                        report.avgPrice || report.initialPrice,
-                        report.currentPrice,
-                        report.quantity,
-                        report.positionType || 'long'
-                      ),
-                      report.stockData?.currency || 'KRW'
-                    )}
-                  </span>
-                )}
               </span>
             </div>
             {/* 테마 태그 */}
@@ -290,24 +267,11 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 ))}
               </div>
             )}
-            {/* 2행: 작성가(→평균단가) · 현재가 · 목표가 */}
+            {/* 2행: 작성가 · 현재가 · 목표가 */}
             <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }}>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
-                {avgPrice && entries.length > 0 ? (
-                  <>
-                    <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가 → 평균단가</div>
-                    <div className="text-sm sm:text-base font-bold tabular-nums mt-0.5">
-                      <span className="text-gray-400 dark:text-gray-500">{report.initialPrice?.toLocaleString()}</span>
-                      <span className="text-gray-400 dark:text-gray-500 mx-1">→</span>
-                      <span className="text-blue-600 dark:text-blue-400">{Number.isInteger(avgPrice) ? avgPrice.toLocaleString() : parseFloat(avgPrice.toFixed(2)).toLocaleString()}</span>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가</div>
-                    <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
-                  </>
-                )}
+                <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가</div>
+                <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
               </div>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">현재가</div>
@@ -321,17 +285,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">목표가</div>
                 <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.targetPrice?.toLocaleString() || '-'}</div>
               </div>
-              {report.quantity && report.quantity > 0 && (
-                <div style={{ flex: 1, padding: '10px 16px', borderLeft: '1px solid var(--pixel-border-muted)' }}>
-                  <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">수량 / 투자금</div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">
-                    {report.quantity.toLocaleString()}주
-                    <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
-                      ({(report.investedAmount || 0).toLocaleString()})
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
             {/* 3행: PER · PBR · EPS (코인이면 숨김) */}
             {report.stockData?.exchange !== 'CRYPTO' && (
@@ -862,9 +815,9 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
             </Card>
 
-            {/* 날짜 · 물타기 · 조회수 */}
+            {/* 날짜 · 조회수 */}
             <Card className="p-4 space-y-3 text-sm">
-              {/* 작성일 · 수정일 · 조회수 - 그리드 */}
+              {/* 작성일 · 조회수 - 그리드 */}
               <div className="grid grid-cols-2 gap-2 text-center">
                 <div>
                   <div className="text-[11px] text-gray-400 dark:text-gray-500">작성일</div>
@@ -887,32 +840,6 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   </div>
                 );
               })()}
-
-              {/* 물타기 기록 */}
-              {entries.length > 0 && (
-                <>
-                  <div className="border-t-[3px] border-[var(--pixel-border-muted)]"></div>
-                  <div>
-                    <div className="text-[11px] text-gray-400 dark:text-gray-500 mb-2">물타기 기록</div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-gray-500 dark:text-gray-400">매수 · {report.createdAt}</span>
-                        <span className="font-bold tabular-nums">{report.initialPrice?.toLocaleString()}</span>
-                      </div>
-                      {entries.map((entry, index) => (
-                        <div key={index} className="flex justify-between text-xs">
-                          <span className="text-blue-600 dark:text-blue-400">#{index + 1} · {entry.date}</span>
-                          <span className="font-bold tabular-nums text-blue-600 dark:text-blue-400">{entry.price?.toLocaleString()}</span>
-                        </div>
-                      ))}
-                      <div className="flex justify-between text-xs font-bold pt-1.5 mt-1 border-t border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300">
-                        <span>평균단가</span>
-                        <span className="tabular-nums">{avgPrice ? (Number.isInteger(avgPrice) ? avgPrice.toLocaleString() : parseFloat(avgPrice.toFixed(2)).toLocaleString()) : '-'}</span>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
             </Card>
           </div>
         </div>

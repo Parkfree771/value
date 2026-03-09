@@ -21,7 +21,6 @@ export interface FeedPost {
   views: number;
   likes: number;
   category: string;
-  is_closed?: boolean;
 }
 
 export interface FeedData {

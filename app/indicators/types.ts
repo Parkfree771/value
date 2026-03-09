@@ -30,3 +30,29 @@ export interface FredIndicatorConfig {
 
 /** 기간 선택 */
 export type TimeRange = '1M' | '3M' | '6M' | '1Y' | '5Y' | 'MAX';
+
+/** 국가 선택 */
+export type Country = 'US' | 'KR';
+
+/** ECOS(한국) 지표 설정 - FRED와 동일한 구조 재사용 */
+export interface EcosIndicatorConfig {
+  statCode: string;
+  cycle: 'D' | 'M' | 'Q' | 'A'; // 일간/월간/분기/연간
+  name: string;
+  nameEn: string;
+  description: string;
+  unit: string;
+  color: string;
+  decimals: number;
+  format?: (value: number) => string;
+  referenceLine?: { value: number; label: string; color: string; strokeWidth?: number };
+  yoyChange?: boolean;
+}
+
+/** ECOS API 응답 형식 */
+export interface EcosApiResponse {
+  stat_code: string;
+  observations: FredObservation[]; // 같은 { date, value } 형태
+  count: number;
+  lastUpdated: string;
+}

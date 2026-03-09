@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
 import Card from './Card';
+import podiumStyles from './Podium.module.css';
 
 interface TopReturn {
   id: string;
@@ -58,8 +59,46 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
     return null;
   }
 
-  const getMedal = (rank: number) => {
-    return rank;
+  const getRankNumber = (rank: number) => {
+    if (rank <= 3) {
+      const rankClass = `${podiumStyles.rankNumber} ${
+        rank === 1 ? podiumStyles.rankFirst : rank === 2 ? podiumStyles.rankSecond : podiumStyles.rankThird
+      }`;
+      return <div className={rankClass}>{rank}</div>;
+    }
+    return (
+      <span className="w-7 text-center text-sm font-bold text-gray-400 dark:text-gray-500">
+        {rank}
+      </span>
+    );
+  };
+
+  const getCardInfo = (rank: number, isActive: boolean) => {
+    if (rank === 1) {
+      return {
+        className: 'border-[var(--pixel-accent)] bg-[var(--pixel-bg-card)]',
+        shadow: isActive ? '4px 4px 0px var(--pixel-accent)' : 'var(--shadow-md)',
+      };
+    } else if (rank === 2) {
+      return {
+        className: 'border-[#d97706] dark:border-[#b45309] bg-[var(--pixel-bg-card)]',
+        shadow: isActive ? '4px 4px 0px #d97706' : 'var(--shadow-md)',
+      };
+    } else if (rank === 3) {
+      return {
+        className: 'border-[#9ca3af] dark:border-[#6b7280] bg-[var(--pixel-bg-card)]',
+        shadow: isActive ? '4px 4px 0px #9ca3af' : 'var(--shadow-md)',
+      };
+    } else if (isActive) {
+      return {
+        className: 'bg-ant-red-50 dark:bg-ant-red-900/20 border-ant-red-500 dark:border-ant-red-500',
+        shadow: '',
+      };
+    }
+    return {
+      className: 'card-base hover:bg-gray-50 dark:hover:bg-gray-700',
+      shadow: '',
+    };
   };
 
   const getReturnColorClass = (returnRate: number) => {
@@ -90,11 +129,9 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
           {topReturns.map((item) => (
             <Link key={item.id} href={`/reports/${item.id}`}>
               <div className="flex items-center gap-3 h-[44px] active:bg-gray-50 dark:active:bg-gray-800 transition-colors">
-                <span className={`w-5 text-center text-sm font-bold flex-shrink-0 ${
-                  item.rank <= 3 ? 'text-ant-red' : 'text-gray-400 dark:text-gray-500'
-                }`}>
-                  {item.rank}
-                </span>
+                <div className="flex-shrink-0 w-7 flex items-center justify-center">
+                  {getRankNumber(item.rank)}
+                </div>
                 <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white truncate">{item.stockName} <span className="font-normal text-xs text-gray-400 font-mono">{item.ticker}</span></span>
                 <span className={`text-sm font-bold tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
                   {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
@@ -108,21 +145,24 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
       {/* 데스크탑: 가로 슬라이더 */}
       <div className="hidden sm:block">
         <div className="relative -mx-4 px-4">
-          <div className="scroll-container flex gap-4 px-2">
-            {topReturns.map((item, index) => (
+          <div className="scroll-container flex gap-4 px-[6px]">
+            {topReturns.map((item, index) => {
+              const isActive = currentIndex === index;
+              const info = getCardInfo(item.rank, isActive);
+
+              return (
               <Link key={item.id} href={`/reports/${item.id}`}>
                 <div
-                  className={`flex-shrink-0 w-80 p-5 transition-all cursor-pointer snap-start border-2 ${
-                    currentIndex === index
-                      ? 'bg-ant-red-50 dark:bg-ant-red-900/20 border-ant-red-500 dark:border-ant-red-500 scale-[1.02]'
-                      : 'card-base hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
+                  className={`flex-shrink-0 w-80 p-5 transition-all cursor-pointer snap-start ${
+                    item.rank <= 3 ? 'border-[3px]' : 'border-2'
+                  } ${info.className} ${isActive ? 'scale-[1.02]' : ''}`}
+                  style={info.shadow ? { boxShadow: info.shadow } : undefined}
                   onMouseEnter={() => setCurrentIndex(index)}
                 >
                   {/* Rank + Author */}
                   <div className="flex items-start gap-3 mb-3 h-[56px]">
-                    <div className="text-2xl font-bold text-muted flex-shrink-0">
-                      {getMedal(item.rank)}
+                    <div className="flex-shrink-0 pt-0.5">
+                      {getRankNumber(item.rank)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg text-heading mb-1 truncate">{item.author}</h3>
@@ -144,7 +184,8 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                   </div>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

@@ -2,18 +2,6 @@ export type Opinion = 'buy' | 'sell' | 'hold';
 export type EditorMode = 'text' | 'html';
 export type MarketCategory = 'KOSPI' | 'KOSDAQ' | 'NASDAQ' | 'NYSE' | 'NIKKEI' | 'HANGSENG' | 'CRYPTO' | 'OTHER';
 
-export interface AveragingEntry {
-  price: number;
-  date: string;
-  timestamp: string;
-}
-
-/** 가상 매수 수량 정보 */
-export interface VirtualTrade {
-  quantity: number;        // 매수 수량
-  investedAmount: number;  // 총 투자금액 (initialPrice * quantity)
-}
-
 /**
  * 리포트 리스트용 요약 타입 (홈페이지, 검색 결과 등)
  */
@@ -38,13 +26,7 @@ export interface ReportSummary {
     currency?: string;
     [key: string]: any;
   };
-  is_closed?: boolean;
-  closed_return_rate?: number;
-  entries?: AveragingEntry[];
-  avgPrice?: number;
   themes?: string[];
-  quantity?: number;
-  investedAmount?: number;
 }
 
 export interface Report {
@@ -78,15 +60,7 @@ export interface Report {
     pbr?: number;
     [key: string]: any;
   };
-  is_closed?: boolean;
-  closed_at?: string;
-  closed_return_rate?: number;
-  closed_price?: number;
-  entries?: AveragingEntry[];
-  avgPrice?: number;
   themes?: string[];
-  quantity?: number;
-  investedAmount?: number;
 }
 
 export interface UserProfile {

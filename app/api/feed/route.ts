@@ -135,13 +135,7 @@ export async function POST(request: NextRequest) {
       likes: 0,
       category: postData.category || '',
       targetPrice: postData.targetPrice || 0,
-      is_closed: postData.is_closed || false,
-      closed_return_rate: postData.closed_return_rate,
-      entries: postData.entries || undefined,
-      avgPrice: postData.avgPrice || undefined,
       themes: postData.themes || undefined,
-      quantity: postData.quantity || undefined,
-      investedAmount: postData.investedAmount || undefined,
     };
 
     // 중복 체크 후 추가 (기존 포스트의 크론 관리 데이터 보존)
@@ -151,24 +145,9 @@ export async function POST(request: NextRequest) {
       // 크론이 관리하는 현재가/수익률 보존 (수정 페이지의 stale 값으로 덮어쓰기 방지)
       newPost.currentPrice = existing.currentPrice;
       newPost.returnRate = existing.returnRate;
-      // is_closed 관련 필드 보존
-      if (!newPost.is_closed && existing.is_closed) {
-        newPost.is_closed = existing.is_closed;
-        newPost.closed_return_rate = existing.closed_return_rate;
-      }
-      // 물타기 데이터 보존
-      if (!newPost.entries && existing.entries) {
-        newPost.entries = existing.entries;
-        newPost.avgPrice = existing.avgPrice;
-      }
       // 테마 데이터 보존
       if (!newPost.themes && existing.themes) {
         newPost.themes = existing.themes;
-      }
-      // 수량 데이터 보존
-      if (!newPost.quantity && existing.quantity) {
-        newPost.quantity = existing.quantity;
-        newPost.investedAmount = existing.investedAmount;
       }
       // 기존 views/likes 보존
       newPost.views = existing.views || 0;

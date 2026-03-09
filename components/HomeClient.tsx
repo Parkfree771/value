@@ -73,11 +73,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     exchange: post.exchange,
     category: post.category,
     positionType: post.positionType,
-    avgPrice: post.avgPrice,
-    entries: post.entries,
     themes: post.themes,
-    quantity: post.quantity,
-    investedAmount: post.investedAmount,
     stockData: undefined,
   }));
 }

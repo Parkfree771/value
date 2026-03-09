@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useState, memo, useCallback } from 'react';
 import Card from './Card';
 import Badge, { OpinionBadge } from './Badge';
-import { formatReturn, getReturnColorClass, calculateProfitAmount, formatProfitAmount } from '@/utils/calculateReturn';
+import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { inferCurrency, formatPrice } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
@@ -28,33 +28,25 @@ interface ReportCardProps {
   id: string;
   title: string;
   author: string;
-  authorId?: string; // 작성자 ID 추가
+  authorId?: string;
   stockName: string;
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
   initialPrice: number;
   currentPrice: number;
-  returnRate: number; // API에서 이미 계산된 수익률 사용
+  returnRate: number;
   createdAt: string;
   views: number;
   likes: number;
-  showActions?: boolean; // 수정/삭제 버튼 표시 여부
-  onDelete?: () => void; // 삭제 후 콜백
+  showActions?: boolean;
+  onDelete?: () => void;
   category?: string;
-  exchange?: string; // 거래소 정보 추가
+  exchange?: string;
   stockData?: {
     currency?: string;
     [key: string]: any;
   };
-  is_closed?: boolean; // 수익 확정 여부
-  closed_at?: string; // 확정 일시
-  closed_return_rate?: number; // 확정 수익률
-  closed_price?: number; // 확정 가격
-  avgPrice?: number; // 물타기 평균단가
-  entries?: { price: number; date: string }[]; // 물타기 기록
-  themes?: string[]; // 테마 태그 ID 배열
-  quantity?: number; // 가상 매수 수량
-  investedAmount?: number; // 총 투자금액
+  themes?: string[];
 }
 
 const ReportCard = memo(function ReportCard({
@@ -76,21 +68,12 @@ const ReportCard = memo(function ReportCard({
   category,
   exchange,
   stockData,
-  is_closed = false,
-  closed_at,
-  closed_return_rate,
-  closed_price,
-  avgPrice,
-  entries,
   themes,
-  quantity,
-  investedAmount,
 }: ReportCardProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { isBookmarked, toggleBookmark } = useBookmark();
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isClosed, setIsClosed] = useState(is_closed);
 
   const bookmarked = isBookmarked(id);
 
@@ -100,7 +83,7 @@ const ReportCard = memo(function ReportCard({
     await toggleBookmark(id);
   };
 
-  // 통화 추론 및 기호 (utils/currency.ts 사용)
+  // 통화 추론 (utils/currency.ts 사용)
   const currency = inferCurrency({ exchange, category, ticker, stockData });
   const handleEdit = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -152,9 +135,6 @@ const ReportCard = memo(function ReportCard({
     }
   };
 
-  // OpinionBadge 컴포넌트 사용으로 대체됨
-  // const getOpinionBadge = () => { ... };
-
   const handleCardClick = () => {
     router.push(`/reports/${id}`);
   };
@@ -184,19 +164,6 @@ const ReportCard = memo(function ReportCard({
             <div className="text-base sm:text-2xl font-black font-heading tracking-tight">
               {formatReturn(returnRate)}
             </div>
-            {quantity && quantity > 0 && (
-              <div className="text-[10px] sm:text-xs font-bold tabular-nums mt-0.5">
-                {formatProfitAmount(
-                  calculateProfitAmount(
-                    avgPrice || initialPrice,
-                    is_closed && closed_price ? closed_price : currentPrice,
-                    quantity,
-                    'long'
-                  ),
-                  currency
-                )}
-              </div>
-            )}
           </div>
         </div>
 
@@ -204,27 +171,13 @@ const ReportCard = memo(function ReportCard({
         <div className="mb-2 sm:mb-4 text-xs sm:text-sm flex items-center gap-2 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
           <span>
             매수{' '}
-            {avgPrice && entries && entries.length > 0 ? (
-              <span className="font-semibold text-blue-600 dark:text-blue-400">{formatPrice(Number.isInteger(avgPrice) ? avgPrice : parseFloat(avgPrice.toFixed(2)), currency)}</span>
-            ) : (
-              <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
-            )}
+            <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
           </span>
           <span className="text-gray-300 dark:text-gray-600">|</span>
           <span>
             현재{' '}
             <span className={`font-semibold ${getReturnColorClass(returnRate)}`}>{formatPrice(currentPrice, currency)}</span>
           </span>
-          {investedAmount && investedAmount > 0 && (
-            <>
-              <span className="text-gray-300 dark:text-gray-600">|</span>
-              <span>
-                투자{' '}
-                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(Math.round(investedAmount), currency)}</span>
-                <span className="ml-1 text-gray-400 dark:text-gray-500">({quantity?.toLocaleString()}주)</span>
-              </span>
-            </>
-          )}
         </div>
 
         {/* Footer */}
@@ -263,11 +216,6 @@ const ReportCard = memo(function ReportCard({
             )}
             {showActions && (
               <>
-                {isClosed && (
-                  <Badge variant="success" size="lg">
-                    수익 확정 완료
-                  </Badge>
-                )}
                 <button
                   onClick={handleEdit}
                   disabled={isDeleting}

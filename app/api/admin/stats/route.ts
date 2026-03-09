@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
-import { calcReturnRate } from '@/utils/calculateReturn';
+import { calculateReturn } from '@/utils/calculateReturn';
 
 // 통계 조회 (관리자용)
 export async function GET(request: NextRequest) {
@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
         title: data.title || '',
         views: data.views || 0,
         likes: data.likes || 0,
-        returnRate: parseFloat(calcReturnRate(data).toFixed(2)),
+        returnRate: parseFloat(calculateReturn(data.initialPrice || 0, data.currentPrice || 0, data.positionType || 'long').toFixed(2)),
         authorName: data.authorName || '익명',
       };
     });

@@ -3,7 +3,7 @@ import { db } from '@/lib/firebase';
 import { collection, getDocs, orderBy, query, limit, startAfter, Timestamp, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { adminStorage } from '@/lib/firebase-admin';
-import { calcReturnRate } from '@/utils/calculateReturn';
+import { calculateReturn } from '@/utils/calculateReturn';
 
 // 게시글 목록 조회 (관리자용)
 export async function GET(request: NextRequest) {
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
         views: data.views || 0,
         likes: data.likes || 0,
-        returnRate: parseFloat(calcReturnRate(data).toFixed(2)),
+        returnRate: parseFloat(calculateReturn(data.initialPrice || 0, data.currentPrice || 0, data.positionType || 'long').toFixed(2)),
       };
     });
 
