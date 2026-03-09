@@ -11,7 +11,7 @@ export interface ImageUploadOptions {
 const DEFAULT_OPTIONS: ImageUploadOptions = {
   maxWidth: 1920,
   maxHeight: 1920,
-  quality: 0.85,
+  quality: 1.0,
   maxSizeMB: 2,
 };
 
@@ -57,6 +57,11 @@ export async function compressImage(
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
+        // WebP 지원 여부 확인 후 WebP로 변환 (미지원 시 JPEG 폴백)
+        const useWebP = typeof canvas.toBlob === 'function' &&
+          document.createElement('canvas').toDataURL('image/webp').startsWith('data:image/webp');
+        const outputType = useWebP ? 'image/webp' : 'image/jpeg';
+
         canvas.toBlob(
           (blob) => {
             if (!blob) {
@@ -73,7 +78,7 @@ export async function compressImage(
               resolve(blob);
             }
           },
-          file.type.startsWith('image/png') ? 'image/png' : 'image/jpeg',
+          outputType,
           quality
         );
       };
@@ -97,11 +102,14 @@ export async function uploadImage(
   try {
     const compressedBlob = await compressImage(file, options);
 
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${file.name}`;
+    // 확장자를 실제 변환 포맷에 맞춤
+    const ext = compressedBlob.type === 'image/webp' ? '.webp' : compressedBlob.type === 'image/png' ? '.png' : '.jpg';
+    const baseName = file.name.replace(/\.[^.]+$/, '');
+    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${baseName}${ext}`;
     const storageRef = ref(storage, `${path}/${fileName}`);
 
     const metadata = {
-      contentType: file.type,
+      contentType: compressedBlob.type,
       customMetadata: {
         originalName: file.name,
         uploadedAt: new Date().toISOString(),
