@@ -24,7 +24,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: {
     default: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
-    template: '%s | AntStreet',
+    template: 'AntStreet | %s',
   },
   description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요. 실시간 수익률 랭킹, 투자자 랭킹, 투자 분석 리포트를 확인하세요.',
   keywords: ['투자', '주식', '리포트', '수익률', '투자분석', '주식투자', '증권', '투자커뮤니티', 'AntStreet', '앤트스트릿', '개미투자자', '가치투자', '투자전략', '주식분석', '삼성전자', 'TSLA', 'NVDA', 'AAPL', '코스피', '나스닥'],
@@ -74,6 +74,9 @@ export const metadata: Metadata = {
     icon: '/logo-background.png',
     shortcut: '/logo-background.png',
     apple: '/logo-background.png',
+  },
+  alternates: {
+    canonical: '/',
   },
 };
 

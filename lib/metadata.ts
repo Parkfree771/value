@@ -19,7 +19,8 @@ export function generateReportMetadata(
   const returnRateText = formatReturnRate(returnRate);
 
   // 메타 타이틀: 리포트 제목을 중심으로, 작성 당시 대비 수익률 표시
-  const title = `${report.title} (작성 당시 대비 ${returnRateText}) - ${SITE_NAME}`;
+  // layout template이 "| AntStreet"을 붙이므로 여기서는 브랜드명 제외
+  const title = `${report.title} (작성 당시 대비 ${returnRateText})`;
 
   // 작성 날짜 계산
   const createdDate = new Date(report.createdAt);

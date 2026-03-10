@@ -5,8 +5,11 @@ export const metadata: Metadata = {
   title: '개인정보처리방침',
   description: 'AntStreet 개인정보처리방침입니다. 수집하는 개인정보 항목, 이용 목적, 보유 기간, 이용자 권리 등을 안내합니다.',
   openGraph: {
-    title: '개인정보처리방침 | AntStreet',
+    title: '개인정보처리방침',
     description: 'AntStreet 개인정보처리방침입니다.',
+  },
+  alternates: {
+    canonical: '/privacy',
   },
 };
 

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       '투자 대가', 'guru portfolio', '헤지펀드',
     ],
     openGraph: {
-      title: `${title} | AntStreet`,
+      title,
       description,
     },
     alternates: {

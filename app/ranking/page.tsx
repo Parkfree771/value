@@ -6,12 +6,43 @@ export const metadata: Metadata = {
   title: '랭킹',
   description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요. 최고 수익률 리포트와 인기 투자자를 한눈에 볼 수 있습니다.',
   openGraph: {
-    title: '랭킹 | AntStreet',
+    title: '수익률 랭킹 · 투자자 랭킹 · 인기글',
     description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
   },
   alternates: {
     canonical: '/ranking',
   },
+};
+
+const faqJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'AntStreet 랭킹은 어떻게 산정되나요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '리포트 작성 시점의 주가 대비 현재 주가를 기준으로 실시간 수익률을 계산합니다. 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 제공합니다.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '수익률은 실시간으로 업데이트되나요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '네, 실시간 시세를 기반으로 수익률이 자동 계산됩니다. 한국, 미국, 일본, 중국, 홍콩 주식을 지원합니다.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: '투자자 랭킹은 어떤 기준인가요?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: '작성한 리포트들의 평균 수익률, 리포트 수, 조회수, 좋아요 수 등을 종합적으로 반영하여 투자자 순위를 산정합니다.',
+      },
+    },
+  ],
 };
 
 // 1분마다 재검증
@@ -117,10 +148,16 @@ export default async function RankingPage() {
     .map((investor, index) => ({ ...investor, rank: index + 1 }));
 
   return (
-    <RankingClient
-      initialReports={reportsWithDays}
-      initialInvestors={investorsData}
-      initialTrending={trendingData}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <RankingClient
+        initialReports={reportsWithDays}
+        initialInvestors={investorsData}
+        initialTrending={trendingData}
+      />
+    </>
   );
 }
