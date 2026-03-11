@@ -33,170 +33,149 @@
       overflow: hidden;
     }
 
-    .canvas-scaler {
-      transform-origin: top left;
-      position: absolute;
-    }
-
-    /* === 영상 캔버스 === */
+    /* === DOM Video Canvas === */
     .video-canvas {
-      width: 1080px;
-      height: 1920px;
-      background: #1c1714;
+      position: absolute;
+      transform-origin: top left;
+      overflow: hidden;
+      will-change: transform;
+      font-family: 'Galmuri11', monospace;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
+      -webkit-text-stroke: 0.3px;
       display: flex;
       flex-direction: column;
-      position: relative;
-      overflow: hidden;
     }
-    .video-canvas.res-landscape { width: 1920px; height: 1080px; }
-    .video-canvas.res-square { width: 1080px; height: 1080px; }
 
     .video-header {
       height: 140px;
-      background: #1c1714;
-      border-bottom: 4px solid #e94560;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 14px;
-      flex-shrink: 0;
+      gap: 16px;
       position: relative;
-    }
-    .video-header::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(233,69,96,0.03) 3px, rgba(233,69,96,0.03) 4px);
-    }
-    .video-header .logo {
-      width: 90px; height: 90px;
-      image-rendering: pixelated;
-      position: relative; z-index: 1;
-    }
-    .video-header .brand-name {
-      font-family: 'Inter', Arial, sans-serif;
-      font-weight: 900; font-size: 46px;
-      letter-spacing: -0.03em;
-      color: #e94560;
-      position: relative; z-index: 1;
+      border-bottom: 4px solid;
+      flex-shrink: 0;
     }
 
-    .video-header.hidden-header { display: none; }
+    .video-header::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        var(--scanline-color, rgba(233,69,96,0.03)) 3px,
+        var(--scanline-color, rgba(233,69,96,0.03)) 4px
+      );
+    }
+
+    .video-header .logo {
+      width: 90px;
+      height: 90px;
+      image-rendering: pixelated;
+    }
+
+    .video-header .brand-text {
+      font-size: 52px;
+      font-weight: 900;
+      font-family: 'Inter', Arial, sans-serif;
+      letter-spacing: -0.5px;
+      -webkit-text-stroke: 0.5px;
+    }
 
     .video-body {
       flex: 1;
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 50px 70px;
       position: relative;
-      overflow: hidden;
     }
 
-    /* 슬라이드 컨텐츠 영역 */
     .slide-layer {
-      position: absolute;
-      inset: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 50px 70px;
-      gap: 40px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    .slide-layer.active { opacity: 1; }
-
-    /* 레이아웃 타입 */
-    .slide-layer.layout-text-only {
-      justify-content: center;
-    }
-    .slide-layer.layout-image-top {
-      justify-content: flex-start;
-      padding-top: 40px;
-    }
-    .slide-layer.layout-image-center {
-      justify-content: center;
-    }
-    .slide-layer.layout-image-bg {
-      padding: 0;
+      width: 100%;
+      backface-visibility: hidden;
     }
 
     .slide-title {
-      font-family: 'Galmuri11', monospace;
-      font-weight: bold; font-size: 60px;
-      color: #e94560;
-      text-align: center; line-height: 1.4;
-      text-shadow: 3px 3px 0px #0d0a08;
+      font-weight: bold;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: keep-all;
       width: 100%;
-    }
-    .slide-title .cursor {
-      display: inline-block; width: 4px; height: 60px;
-      background: #e94560; margin-left: 4px;
-      animation: blink 0.6s step-end infinite;
-      vertical-align: middle;
+      -webkit-text-stroke: 0.5px;
+      letter-spacing: 0.3px;
+      filter: contrast(1.1);
     }
 
     .slide-body-text {
-      font-family: 'Galmuri11', monospace;
-      font-size: 38px;
-      color: #e0dcd8;
-      text-align: center; line-height: 1.7;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: keep-all;
+      margin-top: 40px;
       width: 100%;
-    }
-    .slide-body-text .cursor {
-      display: inline-block; width: 3px; height: 38px;
-      background: #e0dcd8; margin-left: 3px;
-      animation: blink 0.6s step-end infinite;
-      vertical-align: middle;
-    }
-
-    .slide-subtitle {
-      font-family: 'Galmuri11', monospace;
-      font-size: 28px;
-      color: #a09890;
-      text-align: center; line-height: 1.5;
-      position: absolute;
-      bottom: 30px;
-      left: 50px; right: 50px;
-      z-index: 5;
+      -webkit-text-stroke: 0.2px;
+      letter-spacing: 0.2px;
+      filter: contrast(1.05);
     }
 
     .slide-image {
       max-width: 900px;
+      width: calc(100% - 140px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .slide-image img {
+      max-width: 100%;
       max-height: 700px;
       object-fit: contain;
       border: 4px solid #3e3530;
-      image-rendering: auto;
     }
 
     .slide-image-bg {
       position: absolute;
-      inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-size: cover;
+      background-position: center;
       opacity: 0.3;
+      pointer-events: none;
     }
 
-    .slide-image-bg + .slide-content-over {
-      position: relative; z-index: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      flex: 1; padding: 50px 70px; gap: 40px;
+    .slide-subtitle {
+      font-size: 28px;
+      text-align: center;
+      padding-bottom: 30px;
+      flex-shrink: 0;
+      -webkit-text-stroke: 0.2px;
+      text-shadow: 1px 1px 0px rgba(0,0,0,0.5);
     }
 
-    /* (footer, disclaimer, progress bar, slide indicator 제거됨) */
+    .typing-cursor {
+      animation: blink 0.3s step-end infinite alternate;
+    }
 
-    /* Fade to black overlay */
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
     .fade-to-black-overlay {
       position: absolute;
-      inset: 0;
-      background: #000;
-      opacity: 0;
-      z-index: 8;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: black;
+      z-index: 100;
       pointer-events: none;
-      transition: opacity 0.4s ease;
     }
-    .fade-to-black-overlay.active { opacity: 1; }
 
     /* === 오른쪽: 편집 패널 === */
     .editor {
@@ -367,28 +346,6 @@
     .inline-row label { flex-shrink: 0; white-space: nowrap; }
     .inline-row input, .inline-row select { flex: 1; min-width: 0; }
 
-    /* 전환 효과 */
-    .transition-fade .slide-layer { transition: opacity 0.5s ease; }
-    .transition-none .slide-layer { transition: none; }
-    .transition-slide-up .slide-layer {
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      transform: translateY(40px);
-    }
-    .transition-slide-up .slide-layer.active { transform: translateY(0); }
-
-    /* Text animation classes */
-    .anim-fade-in {
-      animation: animFadeIn 0.8s ease forwards;
-    }
-    .anim-slide-up {
-      animation: animSlideUp 0.6s ease forwards;
-    }
-    @keyframes animFadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes animSlideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-
-    @keyframes brandShine { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
     /* === Timeline bar === */
     .timeline-bar {
       height: 40px;
@@ -427,25 +384,81 @@
     ::-webkit-scrollbar-track { background: #1c1714; }
     ::-webkit-scrollbar-thumb { background: #3e3530; }
     ::-webkit-scrollbar-thumb:hover { background: #e94560; }
+
+    /* OBS Recording Mode */
+    body.obs-mode {
+      overflow: hidden;
+    }
+    body.obs-mode .editor {
+      display: none !important;
+    }
+    body.obs-mode .timeline-bar {
+      display: none !important;
+    }
+    body.obs-mode .preview-area {
+      flex: 1;
+      width: 100vw;
+      height: 100vh;
+    }
+    body.obs-mode .main-area {
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .obs-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background: #DC2626;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      z-index: 9999;
+      font-family: 'Galmuri11', monospace;
+    }
+
+    .obs-controls {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      gap: 12px;
+    }
+
+    .obs-controls .btn {
+      font-size: 16px;
+      padding: 12px 30px;
+    }
   </style>
 </head>
 <body>
 
   <div class="main-area">
-    <!-- 미리보기 영역 -->
+    <!-- 미리보기 영역: DOM 기반 -->
     <div class="preview-area" id="previewArea">
-      <div class="canvas-scaler" id="canvasScaler">
-        <div class="video-canvas transition-fade" id="videoCanvas">
-          <div class="video-header" id="videoHeader">
-            <img class="logo" src="logo.png" alt="AntStreet">
-            <div class="brand-name">AntStreet Report</div>
-          </div>
-          <div class="video-body" id="videoBody">
-            <!-- 슬라이드 레이어들이 여기에 동적 생성 -->
-          </div>
-          <div class="fade-to-black-overlay" id="fadeOverlay"></div>
-          <!-- footer/disclaimer/progress/indicator 제거됨 -->
+      <div id="videoCanvas" class="video-canvas">
+        <div class="video-header" id="videoHeader">
+          <img class="logo" src="/logo.png" alt="logo">
+          <span class="brand-text" id="brandText">AntStreet Report</span>
         </div>
+        <div class="video-body" id="videoBody">
+          <div class="slide-image-bg" id="slideImageBg" style="display:none;"></div>
+          <div class="slide-image" id="slideImageTop" style="display:none;"></div>
+          <div class="slide-layer" id="slideLayer">
+            <div class="slide-title" id="slideTitle"></div>
+            <div class="slide-body-text" id="slideBodyText"></div>
+          </div>
+          <div class="slide-image" id="slideImageCenter" style="display:none;"></div>
+        </div>
+        <div class="slide-subtitle" id="slideSubtitle"></div>
+        <div class="fade-to-black-overlay" id="fadeOverlay" style="display:none;"></div>
       </div>
     </div>
 
@@ -512,6 +525,13 @@
     let currentSlide = 0;
     let isPlaying = false;
     let animationId = null;
+    let isOBSMode = false;
+
+    // YouTube 업로드
+    let ytAccessToken = null;
+    let ytClientId = localStorage.getItem('yt_client_id') || '';
+    let lastExportedBlob = null;
+
     let settings = {
       typeSpeed: 50,
       slidePause: 2000,
@@ -524,40 +544,44 @@
 
     // 테마 설정
     let theme = {
-      frameBg: '#1c1714',       // 프레임 배경색
-      headerBg: '#1c1714',      // 헤더 배경색
-      headerBorder: '#e94560',  // 헤더 하단 테두리
-      defaultTitleColor: '#e94560',  // 기본 제목 색
-      defaultBodyColor: '#e0dcd8',   // 기본 본문 색
-      defaultBgColor: '#1c1714',     // 기본 슬라이드 배경
-      subtitleColor: '#a09890',      // 기본 자막 색
-      brandFont: 'inter'             // 'inter' 또는 'pixel'
+      frameBg: '#1c1714',
+      headerBg: '#1c1714',
+      headerBorder: '#e94560',
+      defaultTitleColor: '#e94560',
+      defaultBodyColor: '#e0dcd8',
+      defaultBgColor: '#1c1714',
+      subtitleColor: '#a09890',
+      brandFont: 'inter'
     };
 
-    function applyTheme() {
-      const canvas = document.getElementById('videoCanvas');
-      const header = document.getElementById('videoHeader');
-      canvas.style.background = theme.frameBg;
-      header.style.background = theme.headerBg;
-      header.style.borderBottomColor = theme.headerBorder;
-      // 브랜드 폰트
-      const brandEl = header.querySelector('.brand-name');
-      if(brandEl) {
-        brandEl.style.color = theme.headerBorder;
-        if(theme.brandFont === 'pixel') {
-          brandEl.style.fontFamily = "'Galmuri11', monospace";
-          brandEl.style.letterSpacing = '0';
-        } else {
-          brandEl.style.fontFamily = "'Inter', Arial, sans-serif";
-          brandEl.style.letterSpacing = '-0.03em';
+    // isExporting kept for compatibility
+    let isExporting = false;
+
+    // ==========================================
+    //  이미지 프리로드
+    // ==========================================
+    function preloadSlideImages() {
+      slides.forEach(s => {
+        if(s.image && !s._imgEl) {
+          const img = new Image();
+          img.src = s.image;
+          img.onload = () => { s._imgEl = img; };
+          img.onerror = () => { s._imgEl = null; };
+        } else if(!s.image) {
+          s._imgEl = null;
         }
-      }
+      });
+    }
+
+    // ==========================================
+    //  테마
+    // ==========================================
+    function applyTheme() {
       defaultSlideProps.titleColor = theme.defaultTitleColor;
       defaultSlideProps.bodyColor = theme.defaultBodyColor;
       defaultSlideProps.bgColor = theme.defaultBgColor;
       defaultSlideProps.subtitleColor = theme.subtitleColor;
-      renderSlides();
-      activateSlide(currentSlide);
+      renderCurrentSlide();
     }
 
     function applyThemeToAll() {
@@ -574,18 +598,18 @@
       theme = {
         frameBg: '#1c1714', headerBg: '#1c1714', headerBorder: '#e94560',
         defaultTitleColor: '#e94560', defaultBodyColor: '#e0dcd8',
-        defaultBgColor: '#1c1714', subtitleColor: '#a09890'
+        defaultBgColor: '#1c1714', subtitleColor: '#a09890', brandFont: 'inter'
       };
       applyTheme();
     }
 
     const themePresets = {
-      dark:     { frameBg:'#1c1714', headerBg:'#1c1714', headerBorder:'#e94560', defaultTitleColor:'#e94560', defaultBodyColor:'#e0dcd8', defaultBgColor:'#1c1714', subtitleColor:'#a09890' },
-      light:    { frameBg:'#f5f0eb', headerBg:'#f5f0eb', headerBorder:'#991b1b', defaultTitleColor:'#991b1b', defaultBodyColor:'#2e2722', defaultBgColor:'#f5f0eb', subtitleColor:'#7a7068' },
-      midnight: { frameBg:'#0f172a', headerBg:'#0f172a', headerBorder:'#60a5fa', defaultTitleColor:'#60a5fa', defaultBodyColor:'#e2e8f0', defaultBgColor:'#0f172a', subtitleColor:'#94a3b8' },
-      forest:   { frameBg:'#14532d', headerBg:'#14532d', headerBorder:'#4ade80', defaultTitleColor:'#4ade80', defaultBodyColor:'#dcfce7', defaultBgColor:'#14532d', subtitleColor:'#86efac' },
-      sunset:   { frameBg:'#431407', headerBg:'#431407', headerBorder:'#fb923c', defaultTitleColor:'#fb923c', defaultBodyColor:'#fed7aa', defaultBgColor:'#431407', subtitleColor:'#fdba74' },
-      mono:     { frameBg:'#1a1a1a', headerBg:'#1a1a1a', headerBorder:'#a0a0a0', defaultTitleColor:'#ffffff', defaultBodyColor:'#c0c0c0', defaultBgColor:'#1a1a1a', subtitleColor:'#808080' }
+      dark:     { frameBg:'#1c1714', headerBg:'#1c1714', headerBorder:'#e94560', defaultTitleColor:'#e94560', defaultBodyColor:'#e0dcd8', defaultBgColor:'#1c1714', subtitleColor:'#a09890', brandFont:'inter' },
+      light:    { frameBg:'#f5f0eb', headerBg:'#f5f0eb', headerBorder:'#991b1b', defaultTitleColor:'#991b1b', defaultBodyColor:'#2e2722', defaultBgColor:'#f5f0eb', subtitleColor:'#7a7068', brandFont:'inter' },
+      midnight: { frameBg:'#0f172a', headerBg:'#0f172a', headerBorder:'#60a5fa', defaultTitleColor:'#60a5fa', defaultBodyColor:'#e2e8f0', defaultBgColor:'#0f172a', subtitleColor:'#94a3b8', brandFont:'inter' },
+      forest:   { frameBg:'#14532d', headerBg:'#14532d', headerBorder:'#4ade80', defaultTitleColor:'#4ade80', defaultBodyColor:'#dcfce7', defaultBgColor:'#14532d', subtitleColor:'#86efac', brandFont:'inter' },
+      sunset:   { frameBg:'#431407', headerBg:'#431407', headerBorder:'#fb923c', defaultTitleColor:'#fb923c', defaultBodyColor:'#fed7aa', defaultBgColor:'#431407', subtitleColor:'#fdba74', brandFont:'inter' },
+      mono:     { frameBg:'#1a1a1a', headerBg:'#1a1a1a', headerBorder:'#a0a0a0', defaultTitleColor:'#ffffff', defaultBodyColor:'#c0c0c0', defaultBgColor:'#1a1a1a', subtitleColor:'#808080', brandFont:'inter' }
     };
 
     function loadPreset(name) {
@@ -596,7 +620,7 @@
     }
 
     // BGM state
-    let bgmData = null; // base64 data URL
+    let bgmData = null;
     let bgmFileName = '';
     let bgmVolume = 50;
     let bgmAudioEl = null;
@@ -628,7 +652,6 @@
       }
     }
 
-    // BGM functions
     function startBGM() {
       if(!bgmData) return;
       stopBGM();
@@ -660,7 +683,7 @@
     }
 
     // ==========================================
-    //  슬라이드 렌더링
+    //  해상도
     // ==========================================
     function getCanvasRes() {
       const r = settings.resolution;
@@ -670,136 +693,220 @@
     }
 
     function applyResolution() {
-      const canvas = document.getElementById('videoCanvas');
-      canvas.classList.remove('res-landscape','res-square');
-      if(settings.resolution === '1920x1080') canvas.classList.add('res-landscape');
-      else if(settings.resolution === '1080x1080') canvas.classList.add('res-square');
-      fitCanvas();
+      const vc = document.getElementById('videoCanvas');
+      const res = getCanvasRes();
+      vc.style.width = res.w + 'px';
+      vc.style.height = res.h + 'px';
+      fitVideoCanvas();
+      renderCurrentSlide();
     }
 
-    function renderSlides() {
-      const body = document.getElementById('videoBody');
-      body.innerHTML = '';
-      slides.forEach((s, i) => {
-        s = ensureSlideDefaults(Object.assign({}, defaultSlideProps, s));
-        slides[i] = s;
+    // ==========================================
+    //  DOM 렌더링
+    // ==========================================
+    function renderCurrentSlide() {
+      const s = ensureSlideDefaults(slides[currentSlide] || slides[0]);
+      const vc = document.getElementById('videoCanvas');
+      const res = getCanvasRes();
 
-        const layer = document.createElement('div');
-        layer.className = `slide-layer layout-${s.layout}` + (i===currentSlide?' active':'');
-        layer.id = `slide-${i}`;
-        layer.style.background = s.bgColor || '#1c1714';
+      // Set canvas size
+      vc.style.width = res.w + 'px';
+      vc.style.height = res.h + 'px';
 
-        const titleStyle = `color:${s.titleColor};font-size:${s.titleFontSize}px;text-align:${s.textAlign};`;
-        const bodyStyle = `color:${s.bodyColor};font-size:${s.bodyFontSize}px;text-align:${s.textAlign};`;
+      // Background color
+      vc.style.backgroundColor = s.bgColor || '#1c1714';
 
-        if(s.layout === 'image-bg' && s.image) {
-          layer.innerHTML = `
-            <img class="slide-image-bg" src="${s.image}">
-            <div class="slide-content-over">
-              <div class="slide-title" style="${titleStyle}"><span class="text"></span></div>
-              <div class="slide-body-text" style="${bodyStyle}"><span class="text"></span></div>
-            </div>`;
-        } else if((s.layout === 'image-top' || s.layout === 'image-center') && s.image) {
-          const imgHtml = `<img class="slide-image" src="${s.image}">`;
-          const textHtml = `
-            <div class="slide-title" style="${titleStyle}"><span class="text"></span></div>
-            <div class="slide-body-text" style="${bodyStyle}"><span class="text"></span></div>`;
-          layer.innerHTML = s.layout==='image-top' ? imgHtml + textHtml : textHtml + imgHtml;
+      // Header
+      const header = document.getElementById('videoHeader');
+      if(s.showHeader !== false) {
+        header.style.display = 'flex';
+        header.style.backgroundColor = theme.headerBg;
+        header.style.borderBottomColor = theme.headerBorder;
+        // Scanline color CSS variable
+        const hbc = theme.headerBorder;
+        const r = parseInt(hbc.slice(1,3),16), g = parseInt(hbc.slice(3,5),16), b = parseInt(hbc.slice(5,7),16);
+        header.style.setProperty('--scanline-color', `rgba(${r},${g},${b},0.03)`);
+
+        // Brand text
+        const brandText = document.getElementById('brandText');
+        brandText.style.color = theme.headerBorder;
+        if(theme.brandFont === 'pixel') {
+          brandText.style.fontFamily = "'Galmuri11', monospace";
+          brandText.style.fontSize = '48px';
+          brandText.style.fontWeight = 'bold';
         } else {
-          layer.innerHTML = `
-            <div class="slide-title" style="${titleStyle}"><span class="text"></span></div>
-            <div class="slide-body-text" style="${bodyStyle}"><span class="text"></span></div>`;
+          brandText.style.fontFamily = "'Inter', Arial, sans-serif";
+          brandText.style.fontSize = '52px';
+          brandText.style.fontWeight = '900';
         }
+      } else {
+        header.style.display = 'none';
+      }
 
-        // Subtitle
-        if(s.subtitle) {
-          const subEl = document.createElement('div');
-          subEl.className = 'slide-subtitle';
-          subEl.style.color = s.subtitleColor || '#a09890';
-          subEl.textContent = s.subtitle;
-          layer.appendChild(subEl);
-        }
+      // Background image
+      const bgImg = document.getElementById('slideImageBg');
+      if(s.layout === 'image-bg' && s.image) {
+        bgImg.style.display = 'block';
+        bgImg.style.backgroundImage = `url(${s.image})`;
+      } else {
+        bgImg.style.display = 'none';
+      }
 
-        body.appendChild(layer);
-      });
-      renderTimeline();
-    }
+      // Image top
+      const imgTop = document.getElementById('slideImageTop');
+      if(s.image && s.layout === 'image-top') {
+        imgTop.style.display = 'flex';
+        imgTop.innerHTML = `<img src="${s.image}" style="max-height:700px;object-fit:contain;border:4px solid #3e3530;">`;
+      } else {
+        imgTop.style.display = 'none';
+        imgTop.innerHTML = '';
+      }
 
-    function activateSlide(index) {
-      // Header show/hide
-      const hdr = document.getElementById('videoHeader');
-      const s = slides[index] || {};
-      if(s.showHeader === false) hdr.classList.add('hidden-header');
-      else hdr.classList.remove('hidden-header');
+      // Image center/bottom
+      const imgCenter = document.getElementById('slideImageCenter');
+      if(s.image && s.layout === 'image-center') {
+        imgCenter.style.display = 'flex';
+        imgCenter.innerHTML = `<img src="${s.image}" style="max-height:700px;object-fit:contain;border:4px solid #3e3530;">`;
+      } else {
+        imgCenter.style.display = 'none';
+        imgCenter.innerHTML = '';
+      }
 
-      document.querySelectorAll('.slide-layer').forEach((el,i) => {
-        el.classList.toggle('active', i===index);
-      });
-      renderTimeline();
+      // Title
+      const titleEl = document.getElementById('slideTitle');
+      titleEl.textContent = s.title || '';
+      titleEl.style.color = s.titleColor || '#e94560';
+      titleEl.style.fontSize = (s.titleFontSize || 60) + 'px';
+      titleEl.style.textAlign = s.textAlign || 'center';
+      titleEl.style.textShadow = `3px 3px 0px #0d0a08, 0 0 1px ${s.titleColor || '#e94560'}`;
+      titleEl.style.opacity = '1';
+      titleEl.style.transform = '';
+
+      // Body
+      const bodyEl = document.getElementById('slideBodyText');
+      bodyEl.textContent = s.body || '';
+      bodyEl.style.color = s.bodyColor || '#e0dcd8';
+      bodyEl.style.fontSize = (s.bodyFontSize || 38) + 'px';
+      bodyEl.style.textAlign = s.textAlign || 'center';
+      bodyEl.style.textShadow = `2px 2px 0px #0d0a08, 0 0 1px ${s.bodyColor || '#e0dcd8'}`;
+      bodyEl.style.opacity = '1';
+      bodyEl.style.transform = '';
+      bodyEl.style.display = s.body ? 'block' : 'none';
+
+      // Subtitle
+      const subEl = document.getElementById('slideSubtitle');
+      subEl.textContent = s.subtitle || '';
+      subEl.style.color = s.subtitleColor || '#a09890';
+      subEl.style.display = s.subtitle ? 'block' : 'none';
+
+      // Fade overlay
+      const fadeOv = document.getElementById('fadeOverlay');
+      fadeOv.style.display = 'none';
+      fadeOv.style.opacity = '0';
     }
 
     // ==========================================
-    //  텍스트 애니메이션
+    //  DOM 애니메이션
     // ==========================================
+    function wait(ms) { return new Promise(r => { animationId = setTimeout(r, ms); }); }
+
     function typeText(element, text, speed) {
       return new Promise(resolve => {
-        if(!element){resolve();return;}
-        element.innerHTML = '';
-        const cursor = document.createElement('span');
-        cursor.className = 'cursor';
-        element.parentElement.appendChild(cursor);
         let i = 0;
+        const cursor = document.createElement('span');
+        cursor.className = 'typing-cursor';
+        cursor.textContent = '|';
+
         function tick() {
-          if(!isPlaying){cursor.remove();resolve();return;}
+          if(!isPlaying) { cursor.remove(); resolve(); return; }
           if(i < text.length) {
-            if(text[i]==='\n') element.innerHTML += '<br>';
-            else { element.innerHTML += text[i]; playTypeSound(); }
+            if(text[i] !== '\n') playTypeSound();
             i++;
-            animationId = setTimeout(tick, speed + Math.random()*(speed*0.5));
-          } else { cursor.remove(); resolve(); }
+            element.textContent = text.substring(0, i);
+            element.appendChild(cursor);
+            animationId = setTimeout(tick, speed + Math.random() * (speed * 0.5));
+          } else {
+            cursor.remove();
+            resolve();
+          }
         }
         tick();
       });
     }
 
-    function fadeInText(element, text) {
+    function fadeInElement(element, duration) {
       return new Promise(resolve => {
-        if(!element){resolve();return;}
-        element.innerHTML = text.replace(/\n/g, '<br>');
+        const start = performance.now();
         element.style.opacity = '0';
-        element.classList.add('anim-fade-in');
-        element.style.opacity = '';
-        setTimeout(resolve, 800);
+
+        function step() {
+          if(!isPlaying) { element.style.opacity = '1'; resolve(); return; }
+          const t = Math.min(1, (performance.now() - start) / duration);
+          element.style.opacity = String(t);
+          if(t < 1) animationId = requestAnimationFrame(step);
+          else resolve();
+        }
+        step();
       });
     }
 
-    function slideUpText(element, text) {
+    function slideUpElement(element, duration) {
       return new Promise(resolve => {
-        if(!element){resolve();return;}
-        element.innerHTML = text.replace(/\n/g, '<br>');
-        element.classList.add('anim-slide-up');
-        setTimeout(resolve, 600);
+        const start = performance.now();
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(40px)';
+
+        function step() {
+          if(!isPlaying) { element.style.opacity = '1'; element.style.transform = ''; resolve(); return; }
+          const t = Math.min(1, (performance.now() - start) / duration);
+          const ease = 1 - Math.pow(1 - t, 3);
+          element.style.opacity = String(ease);
+          element.style.transform = `translateY(${40 * (1 - ease)}px)`;
+          if(t < 1) animationId = requestAnimationFrame(step);
+          else resolve();
+        }
+        step();
       });
     }
 
-    function instantText(element, text) {
+    function fadeToBlackAnim(fadeIn, duration) {
       return new Promise(resolve => {
-        if(!element){resolve();return;}
-        element.innerHTML = text.replace(/\n/g, '<br>');
-        resolve();
+        const overlay = document.getElementById('fadeOverlay');
+        overlay.style.display = 'block';
+        const start = performance.now();
+
+        function step() {
+          if(!isPlaying) { resolve(); return; }
+          const t = Math.min(1, (performance.now() - start) / duration);
+          overlay.style.opacity = fadeIn ? String(t) : String(1 - t);
+          if(t < 1) animationId = requestAnimationFrame(step);
+          else {
+            if(!fadeIn) overlay.style.display = 'none';
+            resolve();
+          }
+        }
+        step();
       });
     }
 
-    function animateText(element, text, speed, animType) {
-      if(animType === 'fade-in') return fadeInText(element, text);
-      if(animType === 'slide-up') return slideUpText(element, text);
-      if(animType === 'instant') return instantText(element, text);
-      return typeText(element, text, speed); // typing (default)
+    // ==========================================
+    //  슬라이드 렌더링
+    // ==========================================
+    function renderSlides() {
+      slides = slides.map(s => ensureSlideDefaults(s));
+      preloadSlideImages();
+      renderTimeline();
     }
 
-    function wait(ms) { return new Promise(r => { animationId = setTimeout(r, ms); }); }
+    function activateSlide(index) {
+      currentSlide = index;
+      renderCurrentSlide();
+      renderTimeline();
+    }
 
-    // Timing tracking
+    // ==========================================
+    //  Timing tracking
+    // ==========================================
     let playStartTime = 0;
     let totalEstDuration = 0;
 
@@ -820,52 +927,93 @@
       return slides.reduce((acc, s) => acc + estimateSlideDuration(s), 0) + 2000;
     }
 
+    // ==========================================
+    //  슬라이드 재생 (DOM 기반)
+    // ==========================================
     async function playSlide(index) {
-      const s = slides[index];
+      const s = ensureSlideDefaults(slides[index]);
+      currentSlide = index;
+
+      const titleEl = document.getElementById('slideTitle');
+      const bodyEl = document.getElementById('slideBodyText');
 
       // Fade to black transition
       if(settings.fadeToBlack && index > 0) {
-        const overlay = document.getElementById('fadeOverlay');
-        overlay.classList.add('active');
-        await wait(400);
-        activateSlide(index);
+        await fadeToBlackAnim(true, 400);
+
+        // Switch slide while black
+        renderCurrentSlide();
+        titleEl.textContent = '';
+        bodyEl.textContent = '';
+        bodyEl.style.display = s.body ? 'block' : 'none';
         await wait(100);
-        overlay.classList.remove('active');
-        await wait(400);
+
+        await fadeToBlackAnim(false, 400);
       } else {
-        activateSlide(index);
+        renderCurrentSlide();
+        titleEl.textContent = '';
+        bodyEl.textContent = '';
+        bodyEl.style.display = s.body ? 'block' : 'none';
       }
-
-      const layer = document.getElementById(`slide-${index}`);
-      if(!layer) return;
-
-      const titleSpan = layer.querySelector('.slide-title .text');
-      const bodySpan = layer.querySelector('.slide-body-text .text');
-      if(titleSpan) titleSpan.innerHTML = '';
-      if(bodySpan) bodySpan.innerHTML = '';
 
       const anim = s.animation || 'typing';
 
-      // Duration override with simple wait
+      // Duration override (non-typing)
       if(s.durationOverride > 0 && anim !== 'typing') {
         await wait(200);
-        if(titleSpan && s.title) await animateText(titleSpan, s.title, settings.typeSpeed, anim);
+        if(s.title) {
+          titleEl.textContent = s.title;
+          if(anim === 'fade-in') { bodyEl.style.opacity = '0'; await fadeInElement(titleEl, 800); }
+          else if(anim === 'slide-up') { bodyEl.style.opacity = '0'; await slideUpElement(titleEl, 600); }
+        }
         await wait(200);
-        if(bodySpan && s.body) await animateText(bodySpan, s.body, settings.typeSpeed * 0.8, anim);
-        const elapsed = anim === 'typing' ? 0 : 1200;
-        const remaining = Math.max(0, s.durationOverride - elapsed);
+        if(s.body) {
+          bodyEl.textContent = s.body;
+          if(anim === 'fade-in') await fadeInElement(bodyEl, 800);
+          else if(anim === 'slide-up') await slideUpElement(bodyEl, 600);
+        }
+        const remaining = Math.max(0, s.durationOverride - 1200);
         await wait(remaining);
         return;
       }
 
+      // Normal mode
       await wait(400);
 
-      if(titleSpan && s.title) {
-        await animateText(titleSpan, s.title, settings.typeSpeed, anim);
+      if(anim === 'typing') {
+        if(s.title) {
+          await typeText(titleEl, s.title, settings.typeSpeed);
+          await wait(300);
+        }
+        if(s.body) {
+          bodyEl.style.display = 'block';
+          await typeText(bodyEl, s.body, settings.typeSpeed * 0.8);
+        }
+      } else if(anim === 'fade-in') {
+        if(s.title) {
+          titleEl.textContent = s.title;
+          bodyEl.style.opacity = '0';
+          await fadeInElement(titleEl, 800);
+        }
         await wait(300);
-      }
-      if(bodySpan && s.body) {
-        await animateText(bodySpan, s.body, settings.typeSpeed * 0.8, anim);
+        if(s.body) {
+          bodyEl.textContent = s.body;
+          await fadeInElement(bodyEl, 800);
+        }
+      } else if(anim === 'slide-up') {
+        if(s.title) {
+          titleEl.textContent = s.title;
+          bodyEl.style.opacity = '0';
+          await slideUpElement(titleEl, 600);
+        }
+        await wait(300);
+        if(s.body) {
+          bodyEl.textContent = s.body;
+          await slideUpElement(bodyEl, 600);
+        }
+      } else { // instant
+        titleEl.textContent = s.title || '';
+        bodyEl.textContent = s.body || '';
       }
     }
 
@@ -881,7 +1029,7 @@
       for(let i=0; i<slides.length; i++) {
         if(!isPlaying) break;
         currentSlide = i;
-        if(document.getElementById('tabSlides').classList.contains('active')) renderSlidesTab();
+        if(document.getElementById('tabSlides') && document.getElementById('tabSlides').classList.contains('active')) renderSlidesTab();
         await playSlide(i);
         if(i < slides.length-1 && isPlaying) await wait(slides[i].durationOverride > 0 ? 0 : settings.slidePause);
       }
@@ -889,19 +1037,25 @@
       isPlaying = false;
       stopBGM();
       setStatus('재생 완료', false);
+
+      // OBS mode: auto-return to edit mode
+      if(isOBSMode) {
+        exitOBSMode();
+      }
     }
 
     function stopPlay() {
       isPlaying = false;
-      if(animationId){clearTimeout(animationId);animationId=null;}
+      if(animationId) {
+        clearTimeout(animationId);
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
       stopBGM();
     }
 
-    function resetCanvas() {
+    function resetPreview() {
       stopPlay();
-      document.querySelectorAll('.slide-title .text, .slide-body-text .text').forEach(el => el.innerHTML='');
-      document.querySelectorAll('.cursor').forEach(el => el.remove());
-      document.getElementById('fadeOverlay').classList.remove('active');
       activateSlide(currentSlide);
     }
 
@@ -918,8 +1072,7 @@
         const pct = (dur / totalDur) * 100;
         const bg = s.bgColor || '#1c1714';
         const isActive = i === currentSlide;
-        const layoutIcon = s.image ? (s.layout==='image-bg'?'BG':'IMG') : 'TXT';
-        html += `<div class="timeline-block ${isActive?'active':''}" style="width:${pct}%;background:${bg};min-width:24px;" onclick="jumpToSlide(${i})" title="슬라이드 ${i+1}: ${s.title.replace(/\n/g,' ').substring(0,20)}"><span>${i+1}</span></div>`;
+        html += `<div class="timeline-block ${isActive?'active':''}" style="width:${pct}%;background:${bg};min-width:24px;" onclick="jumpToSlide(${i})" title="슬라이드 ${i+1}: ${(s.title||'').replace(/\n/g,' ').substring(0,20)}"><span>${i+1}</span></div>`;
       });
       bar.innerHTML = html;
     }
@@ -942,9 +1095,7 @@
       else if(tab==='export') renderExportTab();
     }
 
-    // Collapsible state
     let collapsedSections = {};
-
     function toggleSection(name) {
       collapsedSections[name] = !collapsedSections[name];
       const el = document.getElementById('section-' + name);
@@ -970,7 +1121,7 @@
     // --- 슬라이드 탭 ---
     function renderSlidesTab() {
       const c = document.getElementById('editorContent');
-      const s = slides[currentSlide];
+      const s = ensureSlideDefaults(slides[currentSlide]);
 
       let listHTML = '';
       slides.forEach((sl,i) => {
@@ -979,21 +1130,20 @@
         const layoutIcon = sl.image ? (sl.layout==='image-bg'?'BG':'IMG') : 'T';
         listHTML += `
           <div class="slide-item ${i===currentSlide?'active':''}" onclick="selectSlide(${i})">
-            <span class="drag-handle">⠿</span>
+            <span class="drag-handle">\u2807</span>
             <span class="slide-thumb" style="background:${thumbBg};border-color:${sl.titleColor||'#3e3530'};">${layoutIcon}</span>
             <span class="slide-num">${i+1}</span>
             <span class="slide-label">${(sl.title||'').replace(/\n/g,' ')}</span>
             <span class="slide-type">${typeLabel}</span>
             <span class="slide-actions">
-              ${i>0?`<button onclick="event.stopPropagation();moveSlide(${i},-1)">↑</button>`:''}
-              ${i<slides.length-1?`<button onclick="event.stopPropagation();moveSlide(${i},1)">↓</button>`:''}
+              ${i>0?`<button onclick="event.stopPropagation();moveSlide(${i},-1)">\u2191</button>`:''}
+              ${i<slides.length-1?`<button onclick="event.stopPropagation();moveSlide(${i},1)">\u2193</button>`:''}
               <button onclick="event.stopPropagation();duplicateSlide(${i})">복제</button>
-              <button onclick="event.stopPropagation();deleteSlide(${i})">×</button>
+              <button onclick="event.stopPropagation();deleteSlide(${i})">x</button>
             </span>
           </div>`;
       });
 
-      // Slide list section
       let slideListContent = `
         <div class="slide-list">${listHTML}</div>
         <div class="btn-row" style="margin-top:6px;">
@@ -1004,7 +1154,6 @@
           <button class="btn btn-ghost btn-sm" onclick="clearAllSlides()">모두 삭제</button>
         </div>`;
 
-      // Edit section
       let editContent = `
         <label>레이아웃</label>
         <select onchange="updateField('layout',this.value)">
@@ -1013,20 +1162,16 @@
           <option value="image-center" ${s.layout==='image-center'?'selected':''}>텍스트 위 + 이미지 아래</option>
           <option value="image-bg" ${s.layout==='image-bg'?'selected':''}>이미지 배경 + 텍스트 오버레이</option>
         </select>
-
         <label>제목</label>
         <textarea rows="3" oninput="updateField('title',this.value)">${s.title||''}</textarea>
-
         <label>본문</label>
         <textarea rows="4" oninput="updateField('body',this.value)">${s.body||''}</textarea>
-
         <label>이미지</label>
         <div class="image-upload-zone ${s.image?'has-image':''}" onclick="uploadImage()" id="imageZone">
           ${s.image
             ? `<img src="${s.image}"><br><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();removeImage()" style="margin-top:6px;">이미지 제거</button>`
             : '클릭하여 이미지 업로드<br>(PNG, JPG, GIF)'}
         </div>
-
         <div class="color-row">
           <label style="flex:1">제목 색상</label>
           <input type="color" value="${s.titleColor||'#e94560'}" onchange="updateField('titleColor',this.value)">
@@ -1035,40 +1180,33 @@
           <label style="flex:1">본문 색상</label>
           <input type="color" value="${s.bodyColor||'#e0dcd8'}" onchange="updateField('bodyColor',this.value)">
         </div>
-
         <div class="btn-row" style="margin-top:8px;">
           <button class="btn btn-secondary" onclick="previewCurrent()">이 슬라이드만 미리보기</button>
         </div>`;
 
-      // Per-slide settings section
       let perSlideContent = `
         <div class="color-row">
           <label style="flex:1">배경색</label>
           <input type="color" value="${s.bgColor||'#1c1714'}" onchange="updateField('bgColor',this.value)">
         </div>
-
         <label>슬라이드 지속시간 (ms, 0=자동)</label>
         <input type="number" value="${s.durationOverride||0}" min="0" max="30000" step="500" onchange="updateField('durationOverride',parseInt(this.value)||0)">
-
         <div class="inline-row">
           <label>제목 크기</label>
           <input type="range" min="30" max="80" value="${s.titleFontSize||60}" oninput="updateField('titleFontSize',parseInt(this.value));this.nextElementSibling.textContent=this.value+'px'">
           <span style="font-size:11px;color:#888;width:36px;">${s.titleFontSize||60}px</span>
         </div>
-
         <div class="inline-row">
           <label>본문 크기</label>
           <input type="range" min="20" max="50" value="${s.bodyFontSize||38}" oninput="updateField('bodyFontSize',parseInt(this.value));this.nextElementSibling.textContent=this.value+'px'">
           <span style="font-size:11px;color:#888;width:36px;">${s.bodyFontSize||38}px</span>
         </div>
-
         <label>텍스트 정렬</label>
         <select onchange="updateField('textAlign',this.value)">
           <option value="left" ${s.textAlign==='left'?'selected':''}>왼쪽</option>
           <option value="center" ${(s.textAlign||'center')==='center'?'selected':''}>가운데</option>
           <option value="right" ${s.textAlign==='right'?'selected':''}>오른쪽</option>
         </select>
-
         <label>텍스트 애니메이션</label>
         <select onchange="updateField('animation',this.value)">
           <option value="typing" ${(s.animation||'typing')==='typing'?'selected':''}>타이핑 (기본)</option>
@@ -1076,13 +1214,11 @@
           <option value="slide-up" ${s.animation==='slide-up'?'selected':''}>슬라이드 업</option>
           <option value="instant" ${s.animation==='instant'?'selected':''}>즉시 표시</option>
         </select>
-
         <div class="inline-row">
           <label style="flex:1">헤더 표시</label>
           <input type="checkbox" ${s.showHeader!==false?'checked':''} onchange="updateField('showHeader',this.checked)" style="width:auto;">
         </div>`;
 
-      // Subtitle section
       let subtitleContent = `
         <label>자막 텍스트 (하단)</label>
         <input type="text" value="${s.subtitle||''}" oninput="updateField('subtitle',this.value)" placeholder="자막 없음">
@@ -1091,11 +1227,11 @@
           <input type="color" value="${s.subtitleColor||'#a09890'}" onchange="updateField('subtitleColor',this.value)">
         </div>`;
 
-      let html = `
+      c.innerHTML = `
         <div class="btn-row">
-          <button class="btn btn-primary" onclick="playAll()">▶ 전체 재생</button>
-          <button class="btn btn-ghost" onclick="stopPlay()">■ 정지</button>
-          <button class="btn btn-ghost" onclick="resetCanvas()">↺</button>
+          <button class="btn btn-primary" onclick="playAll()">\u25B6 전체 재생</button>
+          <button class="btn btn-ghost" onclick="stopPlay()">\u25A0 정지</button>
+          <button class="btn btn-ghost" onclick="resetPreview()">\u21BA</button>
         </div>
         ${sectionHTML('slideList', '슬라이드 목록', slideListContent, true)}
         <hr class="divider">
@@ -1104,8 +1240,6 @@
         ${sectionHTML('slideSettings', '슬라이드 설정', perSlideContent, false)}
         <hr class="divider">
         ${sectionHTML('subtitle', '자막', subtitleContent, false)}`;
-
-      c.innerHTML = html;
     }
 
     // --- 스타일 탭 ---
@@ -1181,16 +1315,11 @@
         <hr class="divider">
         ${sectionHTML('presets', '프리셋', presetContent, false)}
         <hr class="divider">
-
         <h3>타이핑 설정</h3>
         <label>타이핑 속도 (ms)</label>
-        <input type="number" value="${settings.typeSpeed}" min="10" max="300"
-          onchange="settings.typeSpeed=parseInt(this.value)">
-
+        <input type="number" value="${settings.typeSpeed}" min="10" max="300" onchange="settings.typeSpeed=parseInt(this.value)">
         <label>슬라이드 간 대기 (ms)</label>
-        <input type="number" value="${settings.slidePause}" min="500" max="10000"
-          onchange="settings.slidePause=parseInt(this.value)">
-
+        <input type="number" value="${settings.slidePause}" min="500" max="10000" onchange="settings.slidePause=parseInt(this.value)">
         <h3>타자 소리</h3>
         <select onchange="settings.soundType=this.value">
           <option value="mechanical" ${settings.soundType==='mechanical'?'selected':''}>기계식 키보드</option>
@@ -1199,18 +1328,10 @@
           <option value="none" ${settings.soundType==='none'?'selected':''}>소리 없음</option>
         </select>
         <button class="btn btn-ghost btn-sm" onclick="initAudio();playTypeSound();">소리 테스트</button>
-
-        <h3>전환 효과</h3>
-        <select onchange="setTransition(this.value)">
-          <option value="fade" ${settings.transition==='fade'?'selected':''}>페이드</option>
-          <option value="none" ${settings.transition==='none'?'selected':''}>없음 (즉시 전환)</option>
-          <option value="slide-up" ${settings.transition==='slide-up'?'selected':''}>슬라이드 업</option>
-        </select>
-
         <hr class="divider">
         ${sectionHTML('bgm', 'BGM / 배경음악', bgmContent, true)}
         <hr class="divider">
-        ${sectionHTML('canvasOpts', '캔버스 설정', canvasContent, true)}
+        ${sectionHTML('canvasOpts', '재생 설정', canvasContent, true)}
       `;
     }
 
@@ -1221,62 +1342,130 @@
       const totalSec = (totalMs / 1000).toFixed(1);
 
       c.innerHTML = `
-        <h3>영상 생성 (Canvas 렌더링)</h3>
-        <p style="font-size:12px;color:#a09890;">
-          버튼 하나로 영상 파일을 생성합니다.<br>
-          화면 공유 없이 원본 해상도 그대로 렌더링됩니다.
-        </p>
-
+        <h3>OBS 녹화 (권장)</h3>
+        <div style="font-size:12px;color:#a09890;line-height:1.8;margin-bottom:8px;padding:10px;background:#1c1714;border:2px solid #3e3530;">
+          <b style="color:#e94560;">권장 녹화 방법:</b><br>
+          1. 아래 [OBS 녹화 모드] 버튼 클릭<br>
+          2. OBS에서 브라우저 창 캡처<br>
+          3. \u25B6 재생 버튼 클릭<br>
+          4. 녹화 완료 후 OBS 정지
+        </div>
+        <button class="btn btn-success" onclick="enterOBSMode()" style="margin-top:4px;">
+          \uD83C\uDFAC OBS 녹화 모드
+        </button>
+        <hr class="divider">
         <h3>해상도</h3>
         <select onchange="settings.resolution=this.value;applyResolution();renderExportTab();">
           <option value="1080x1920" ${settings.resolution==='1080x1920'?'selected':''}>1080x1920 (Shorts/Reels)</option>
           <option value="1920x1080" ${settings.resolution==='1920x1080'?'selected':''}>1920x1080 (가로)</option>
           <option value="1080x1080" ${settings.resolution==='1080x1080'?'selected':''}>1080x1080 (정사각)</option>
         </select>
-
-        <h3>화질</h3>
-        <select onchange="settings.videoBitrate=parseInt(this.value);renderExportTab();">
-          <option value="3000000" ${settings.videoBitrate===3000000?'selected':''}>저화질 (3Mbps / 30fps)</option>
-          <option value="5000000" ${settings.videoBitrate===5000000?'selected':''}>중간 (5Mbps / 30fps)</option>
-          <option value="8000000" ${settings.videoBitrate===8000000?'selected':''}>고화질 (8Mbps / 30fps)</option>
-          <option value="15000000" ${settings.videoBitrate===15000000?'selected':''}>최고화질 (15Mbps / 60fps)</option>
-          <option value="25000000" ${settings.videoBitrate===25000000?'selected':''}>극화질 (25Mbps / 60fps)</option>
-        </select>
-
         <div style="font-size:12px;color:#888;margin-top:4px;">
           예상 길이: <b style="color:#e94560;">${totalSec}초</b> / ${slides.length}개 슬라이드
         </div>
-
-        <button class="btn btn-success" onclick="exportVideo()" style="margin-top:8px;">
-          영상 생성 (.webm 다운로드)
-        </button>
-
-        <button class="btn btn-danger btn-sm" onclick="cancelExport()" style="margin-top:4px;">
-          생성 취소
-        </button>
-
         <hr class="divider">
-
-        ${sectionHTML('popupRecord', '화면 녹화 방식 (대안)', '<p style="font-size:12px;color:#a09890;margin-bottom:8px;">팝업 창 + 화면 공유를 통한 녹화 방식입니다.<br>Canvas 렌더링이 안 될 경우 사용하세요.</p><button class="btn btn-secondary btn-record" id="btnRecord" onclick="startRecord()">녹화 시작 (팝업 방식)</button><button class="btn btn-ghost btn-sm" onclick="stopRecord()" style="margin-top:4px;">녹화 중지</button>', false)}
-
+        ${sectionHTML('youtubeUpload', 'YouTube 직접 업로드', `
+          <p style="font-size:12px;color:#a09890;margin-bottom:8px;">
+            OBS로 녹화한 영상 파일을 YouTube에 업로드합니다.<br>
+            Google Cloud Console에서 OAuth Client ID가 필요합니다.
+          </p>
+          <label>Client ID</label>
+          <input type="text" id="ytClientIdInput" value="${ytClientId}" placeholder="xxxx.apps.googleusercontent.com"
+            style="font-size:11px;" onchange="ytClientId=this.value;localStorage.setItem('yt_client_id',this.value);">
+          <label>영상 제목</label>
+          <input type="text" id="ytTitle" value="AntStreet Report" placeholder="영상 제목">
+          <label>설명</label>
+          <textarea id="ytDesc" rows="2" placeholder="#Shorts 태그 포함 권장" style="font-size:12px;resize:vertical;">#Shorts #AntStreet</textarea>
+          <label>공개 설정</label>
+          <select id="ytPrivacy">
+            <option value="private">비공개</option>
+            <option value="unlisted">일부공개</option>
+            <option value="public">공개</option>
+          </select>
+          <label style="margin-top:8px;">녹화 파일 선택</label>
+          <input type="file" id="ytFileInput" accept="video/*" style="width:100%;padding:6px;background:#1c1714;border:2px solid #3e3530;color:#e0dcd8;font-family:'Galmuri11',monospace;font-size:12px;">
+          <div style="margin-top:8px;">
+            <button class="btn btn-success" onclick="uploadSelectedFile()" style="background:#ff0000;">
+              YouTube 업로드
+            </button>
+          </div>
+          <div id="ytUploadStatus" style="font-size:11px;color:#a09890;margin-top:6px;"></div>
+        `, false)}
         <hr class="divider">
-
         <h3>프로젝트 저장/불러오기</h3>
         <div class="btn-row">
           <button class="btn btn-secondary" onclick="saveProject()">프로젝트 저장</button>
           <button class="btn btn-ghost" onclick="loadProject()">불러오기</button>
         </div>
-
         <hr class="divider">
-
         <h3>단축키</h3>
         <div style="font-size:11px;color:#666;line-height:1.8;">
           <b>P</b> — 편집 패널 숨기기/보이기<br>
           <b>Space</b> — 전체 재생/정지<br>
-          <b>←→</b> — 슬라이드 이동<br>
-          <b>R</b> — 녹화 시작
+          <b>\u2190\u2192</b> — 슬라이드 이동<br>
+          <b>ESC</b> — OBS 녹화 모드 종료
         </div>
       `;
+    }
+
+    // ==========================================
+    //  OBS 녹화 모드
+    // ==========================================
+    function enterOBSMode() {
+      isOBSMode = true;
+      document.body.classList.add('obs-mode');
+
+      // Banner
+      const banner = document.createElement('div');
+      banner.className = 'obs-banner';
+      banner.id = 'obsBanner';
+      banner.innerHTML = '\u25CF REC 준비완료 - OBS로 이 창을 캡처하세요';
+      document.body.appendChild(banner);
+
+      // Controls
+      const controls = document.createElement('div');
+      controls.className = 'obs-controls';
+      controls.id = 'obsControls';
+      controls.innerHTML = `
+        <button class="btn btn-success" onclick="obsStartPlay()">\u25B6 재생 시작</button>
+        <button class="btn btn-danger" onclick="exitOBSMode()">ESC 나가기</button>
+      `;
+      document.body.appendChild(controls);
+
+      fitVideoCanvas();
+      renderCurrentSlide();
+    }
+
+    function exitOBSMode() {
+      isOBSMode = false;
+      stopPlay();
+      document.body.classList.remove('obs-mode');
+
+      const banner = document.getElementById('obsBanner');
+      if(banner) banner.remove();
+      const controls = document.getElementById('obsControls');
+      if(controls) controls.remove();
+
+      fitVideoCanvas();
+      renderCurrentSlide();
+      setStatus('편집 모드로 돌아왔습니다', false);
+    }
+
+    function obsStartPlay() {
+      // Hide controls during playback
+      const controls = document.getElementById('obsControls');
+      if(controls) controls.style.display = 'none';
+      const banner = document.getElementById('obsBanner');
+      if(banner) banner.innerHTML = '\u25CF REC 녹화 중...';
+
+      initAudio();
+      playAll().then(() => {
+        // Show controls again when done (if still in OBS mode it will auto-exit)
+        if(isOBSMode) {
+          if(controls) controls.style.display = 'flex';
+          if(banner) banner.innerHTML = '\u25CF REC 재생 완료';
+        }
+      });
     }
 
     // ==========================================
@@ -1291,20 +1480,20 @@
     function addSlide() {
       slides.push(Object.assign({}, defaultSlideProps));
       currentSlide = slides.length-1;
-      renderSlides(); renderSlidesTab();
+      renderSlides(); activateSlide(currentSlide); renderSlidesTab();
     }
 
     function deleteSlide(i) {
       if(slides.length<=1) return;
       slides.splice(i,1);
       if(currentSlide>=slides.length) currentSlide=slides.length-1;
-      renderSlides(); renderSlidesTab();
+      renderSlides(); activateSlide(currentSlide); renderSlidesTab();
     }
 
     function duplicateSlide(i) {
       slides.splice(i+1, 0, JSON.parse(JSON.stringify(slides[i])));
       currentSlide = i+1;
-      renderSlides(); renderSlidesTab();
+      renderSlides(); activateSlide(currentSlide); renderSlidesTab();
     }
 
     function moveSlide(i, dir) {
@@ -1312,12 +1501,13 @@
       if(j<0||j>=slides.length) return;
       [slides[i], slides[j]] = [slides[j], slides[i]];
       currentSlide = j;
-      renderSlides(); renderSlidesTab();
+      renderSlides(); activateSlide(currentSlide); renderSlidesTab();
     }
 
     function updateField(field, value) {
       slides[currentSlide][field] = value;
-      renderSlides();
+      slides[currentSlide] = ensureSlideDefaults(slides[currentSlide]);
+      preloadSlideImages();
       activateSlide(currentSlide);
     }
 
@@ -1330,41 +1520,40 @@
       reader.onload = (ev) => {
         slides[currentSlide].image = ev.target.result;
         if(slides[currentSlide].layout==='text-only') slides[currentSlide].layout = 'image-top';
-        renderSlides(); activateSlide(currentSlide); renderSlidesTab();
+        preloadSlideImages();
+        activateSlide(currentSlide);
+        renderSlidesTab();
       };
       reader.readAsDataURL(file);
     }
 
     function removeImage() {
       slides[currentSlide].image = null;
+      slides[currentSlide]._imgEl = null;
       slides[currentSlide].layout = 'text-only';
-      renderSlides(); activateSlide(currentSlide); renderSlidesTab();
+      activateSlide(currentSlide);
+      renderSlidesTab();
     }
 
     function clearAllSlides() {
       if(!confirm('모든 슬라이드를 삭제하시겠습니까?')) return;
       slides = [Object.assign({}, defaultSlideProps)];
       currentSlide = 0;
-      renderSlides(); renderSlidesTab();
+      renderSlides(); activateSlide(0); renderSlidesTab();
     }
 
     function importSlidesFromText() {
       const text = prompt('여러 줄의 텍스트를 입력하세요.\n빈 줄로 슬라이드를 구분합니다.\n각 슬라이드의 첫 줄이 제목, 나머지가 본문이 됩니다.');
       if(!text) return;
-
       const paragraphs = text.split(/\n\s*\n/).filter(p => p.trim());
       if(paragraphs.length === 0) return;
-
       const newSlides = paragraphs.map(p => {
         const lines = p.trim().split('\n');
-        const title = lines[0] || '슬라이드';
-        const body = lines.slice(1).join('\n') || '';
-        return Object.assign({}, defaultSlideProps, { title, body });
+        return Object.assign({}, defaultSlideProps, { title: lines[0] || '슬라이드', body: lines.slice(1).join('\n') || '' });
       });
-
       slides = slides.concat(newSlides);
       currentSlide = slides.length - newSlides.length;
-      renderSlides(); renderSlidesTab();
+      renderSlides(); activateSlide(currentSlide); renderSlidesTab();
       setStatus(`${newSlides.length}개 슬라이드를 가져왔습니다`, false);
     }
 
@@ -1379,524 +1568,109 @@
       setStatus('미리보기 완료', false);
     }
 
-    function setTransition(t) {
-      settings.transition = t;
-      const canvas = document.getElementById('videoCanvas');
-      canvas.className = canvas.className.replace(/transition-\S+/g, '') + ' transition-' + t;
+    // ==========================================
+    //  YouTube 직접 업로드
+    // ==========================================
+    function ytSetStatus(msg) {
+      const el = document.getElementById('ytUploadStatus');
+      if(el) el.textContent = msg;
     }
 
-    // ==========================================
-    //  Canvas 영상 생성
-    // ==========================================
-    let isExporting = false;
-    let logoImg = null;
-    // Load logo as base64 to avoid canvas taint (CORS/file:// issue)
-    (function loadLogoAsBase64() {
-      const c = document.createElement('canvas');
-      const img = document.querySelector('.video-header .logo');
-      if(!img || !img.complete) {
-        const i2 = new Image();
-        i2.crossOrigin = 'anonymous';
-        i2.src = 'logo.png';
-        i2.onload = () => { convertToBase64(i2); };
-        i2.onerror = () => { logoImg = null; };
-        return;
+    async function ytAuth() {
+      if(!ytClientId) { ytSetStatus('Client ID를 먼저 입력하세요.'); return null; }
+      const redirectUri = window.location.origin + window.location.pathname;
+      const scope = 'https://www.googleapis.com/auth/youtube.upload';
+      if(ytAccessToken) {
+        try { const r = await fetch('https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=' + ytAccessToken); if(r.ok) return ytAccessToken; } catch(e) {}
+        ytAccessToken = null;
       }
-      convertToBase64(img);
-      function convertToBase64(srcImg) {
-        try {
-          c.width = 128; c.height = 128;
-          const cx = c.getContext('2d');
-          cx.imageSmoothingEnabled = false;
-          cx.drawImage(srcImg, 0, 0, 128, 128);
-          const dataUrl = c.toDataURL('image/png');
-          const cleanImg = new Image();
-          cleanImg.src = dataUrl;
-          cleanImg.onload = () => { logoImg = cleanImg; };
-        } catch(e) {
-          // fallback: no logo in export
-          logoImg = null;
+      const hash = window.location.hash;
+      if(hash.includes('access_token=')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get('access_token');
+        if(token) { ytAccessToken = token; window.history.replaceState(null, '', window.location.pathname + window.location.search); return token; }
+      }
+      return new Promise((resolve) => {
+        const authUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({ client_id: ytClientId, redirect_uri: redirectUri, response_type: 'token', scope, include_granted_scopes: 'true', prompt: 'consent' }).toString();
+        const authWin = window.open(authUrl, 'GoogleAuth', 'width=500,height=700');
+        if(!authWin) { ytSetStatus('팝업이 차단되었습니다.'); resolve(null); return; }
+        const checkInterval = setInterval(() => {
+          try {
+            if(authWin.closed) { clearInterval(checkInterval); resolve(null); return; }
+            const url = authWin.location.href;
+            if(url.includes('access_token=')) {
+              const h = new URL(url).hash;
+              const p = new URLSearchParams(h.substring(1));
+              const t = p.get('access_token');
+              clearInterval(checkInterval); authWin.close();
+              if(t) { ytAccessToken = t; resolve(t); } else resolve(null);
+            }
+          } catch(e) {}
+        }, 500);
+        setTimeout(() => { clearInterval(checkInterval); if(!authWin.closed) authWin.close(); resolve(null); }, 300000);
+      });
+    }
+
+    async function uploadToYouTube(videoBlob) {
+      const token = await ytAuth();
+      if(!token) { ytSetStatus('YouTube 인증 실패'); return false; }
+      const title = document.getElementById('ytTitle')?.value || 'AntStreet Report';
+      const description = document.getElementById('ytDesc')?.value || '';
+      const privacy = document.getElementById('ytPrivacy')?.value || 'private';
+      ytSetStatus('YouTube 업로드 시작...');
+      const metadata = { snippet: { title, description, categoryId: '22' }, status: { privacyStatus: privacy, selfDeclaredMadeForKids: false } };
+      try {
+        const initResp = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {
+          method: 'POST', headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json; charset=UTF-8', 'X-Upload-Content-Length': videoBlob.size, 'X-Upload-Content-Type': videoBlob.type || 'video/mp4' }, body: JSON.stringify(metadata)
+        });
+        if(!initResp.ok) { ytSetStatus('업로드 초기화 실패: ' + await initResp.text()); return false; }
+        const uploadUrl = initResp.headers.get('Location');
+        if(!uploadUrl) { ytSetStatus('업로드 URL 없음'); return false; }
+        const chunkSize = 5 * 1024 * 1024;
+        let offset = 0;
+        const totalSize = videoBlob.size;
+        while(offset < totalSize) {
+          const end = Math.min(offset + chunkSize, totalSize);
+          const chunk = videoBlob.slice(offset, end);
+          ytSetStatus(`YouTube 업로드 중... ${Math.round((offset/totalSize)*100)}%`);
+          const uploadResp = await fetch(uploadUrl, { method: 'PUT', headers: { 'Content-Range': `bytes ${offset}-${end-1}/${totalSize}`, 'Content-Type': videoBlob.type || 'video/mp4' }, body: chunk });
+          if(uploadResp.status === 200 || uploadResp.status === 201) {
+            const result = await uploadResp.json();
+            ytSetStatus(`업로드 완료! https://youtu.be/${result.id}`);
+            setStatus(`YouTube 업로드 완료! ID: ${result.id}`, false);
+            return true;
+          } else if(uploadResp.status === 308) {
+            const range = uploadResp.headers.get('Range');
+            offset = range ? parseInt(range.split('-')[1]) + 1 : end;
+          } else { ytSetStatus('업로드 실패: ' + await uploadResp.text()); return false; }
         }
+        return true;
+      } catch(e) { ytSetStatus('업로드 오류: ' + e.message); return false; }
+    }
+
+    async function uploadSelectedFile() {
+      const fileInput = document.getElementById('ytFileInput');
+      if(!fileInput || !fileInput.files[0]) { ytSetStatus('녹화 파일을 선택하세요.'); return; }
+      if(!ytClientId) { ytSetStatus('OAuth Client ID를 입력하세요.'); return; }
+      ytSetStatus('Google 인증 진행 중...');
+      const token = await ytAuth();
+      if(!token) { ytSetStatus('인증 실패.'); return; }
+      ytSetStatus('인증 완료! 업로드 시작...');
+      await uploadToYouTube(fileInput.files[0]);
+    }
+
+    (function checkOAuthReturn() {
+      const hash = window.location.hash;
+      if(hash.includes('access_token=')) {
+        const params = new URLSearchParams(hash.substring(1));
+        ytAccessToken = params.get('access_token');
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
       }
     })();
 
-    function canvasDrawHeader(ctx, w, time) {
-      const headerH = 140;
-      ctx.fillStyle = theme.headerBg;
-      ctx.fillRect(0, 0, w, headerH);
-
-      // Scanlines (tinted with header border color)
-      const hbc = theme.headerBorder;
-      const r = parseInt(hbc.slice(1,3),16), g = parseInt(hbc.slice(3,5),16), b = parseInt(hbc.slice(5,7),16);
-      ctx.fillStyle = `rgba(${r},${g},${b},0.03)`;
-      for(let y = 0; y < headerH; y += 4) ctx.fillRect(0, y+3, w, 1);
-
-      // Border
-      ctx.fillStyle = theme.headerBorder;
-      ctx.fillRect(0, headerH-4, w, 4);
-
-      // Logo
-      if(logoImg) {
-        const logoSize = 90;
-        ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(logoImg, w/2 - logoSize - 40, (headerH-logoSize)/2, logoSize, logoSize);
-        ctx.imageSmoothingEnabled = true;
-      }
-
-      // Brand text with animated gradient
-      const brandFontFace = theme.brandFont === 'pixel' ? 'bold 48px Galmuri11, monospace' : '900 52px Inter, Arial, sans-serif';
-      ctx.font = brandFontFace;
-      ctx.textBaseline = 'middle';
-      const brandX = w/2 + 10;
-      ctx.fillStyle = theme.headerBorder;
-      ctx.fillText('AntStreet Report', brandX, headerH/2);
-
-      return headerH;
-    }
-
-    function canvasDrawSlide(ctx, w, h, slide, opts) {
-      const s = ensureSlideDefaults(slide);
-
-      // Background
-      ctx.fillStyle = s.bgColor || '#1c1714';
-      ctx.fillRect(0, 0, w, h);
-
-      // Background image
-      if(s.layout === 'image-bg' && s._imgEl) {
-        ctx.save();
-        ctx.globalAlpha = 0.3;
-        const iw = s._imgEl.naturalWidth, ih = s._imgEl.naturalHeight;
-        const scale = Math.max(w/iw, h/ih);
-        const dw = iw*scale, dh = ih*scale;
-        ctx.drawImage(s._imgEl, (w-dw)/2, (h-dh)/2, dw, dh);
-        ctx.restore();
-      }
-
-      // Header
-      const headerH = s.showHeader !== false ? canvasDrawHeader(ctx, w, opts.time) : 0;
-
-      // Non-bg images
-      let imgH = 0;
-      let imgY = 0;
-      if(s.image && s._imgEl && s.layout !== 'image-bg') {
-        const maxImgW = Math.min(900, w - 140);
-        const maxImgH = Math.min(700, (h - headerH) * 0.4);
-        const iw = s._imgEl.naturalWidth, ih = s._imgEl.naturalHeight;
-        const imgScale = Math.min(maxImgW/iw, maxImgH/ih, 1);
-        const dw = iw * imgScale, dh = ih * imgScale;
-        imgH = dh + 40;
-        if(s.layout === 'image-top') {
-          imgY = headerH + 40;
-          ctx.strokeStyle = '#3e3530';
-          ctx.lineWidth = 4;
-          ctx.strokeRect(w/2 - dw/2, imgY, dw, dh);
-          ctx.drawImage(s._imgEl, w/2 - dw/2, imgY, dw, dh);
-        }
-      }
-
-      // Content area
-      const contentTop = headerH + (s.layout === 'image-top' ? imgH : 0) + 50;
-      const contentH = h - contentTop - 50 - (s.layout === 'image-center' ? imgH : 0);
-      const centerX = w / 2;
-
-      // Title
-      const titleText = s.title || '';
-      const bodyText = s.body || '';
-      const dispTitle = opts.titleChars >= 0 ? titleText.substring(0, opts.titleChars) : titleText;
-      const dispBody = opts.bodyChars >= 0 ? bodyText.substring(0, opts.bodyChars) : bodyText;
-
-      // Measure title
-      ctx.font = `bold ${s.titleFontSize}px Galmuri11, monospace`;
-      ctx.textBaseline = 'top';
-      const titleLineH = s.titleFontSize * 1.4;
-      const titleLines = dispTitle ? dispTitle.split('\n') : [];
-
-      ctx.font = `${s.bodyFontSize}px Galmuri11, monospace`;
-      const bodyLineH = s.bodyFontSize * 1.7;
-      const bodyLines = dispBody ? dispBody.split('\n') : [];
-
-      const titleH = titleLines.length * titleLineH;
-      const bodyH = dispBody ? bodyLines.length * bodyLineH : 0;
-      const gap = 40;
-      const totalH = titleH + (dispBody ? gap + bodyH : 0);
-
-      let y = contentTop + (contentH - totalH) / 2;
-
-      // Draw title
-      if(dispTitle) {
-        ctx.save();
-        ctx.globalAlpha = opts.titleOpacity !== undefined ? opts.titleOpacity : 1;
-        ctx.font = `bold ${s.titleFontSize}px Galmuri11, monospace`;
-        ctx.textBaseline = 'top';
-        for(let i = 0; i < titleLines.length; i++) {
-          const line = titleLines[i];
-          const m = ctx.measureText(line);
-          let lx = s.textAlign === 'center' ? centerX - m.width/2 : s.textAlign === 'right' ? w - 70 - m.width : 70;
-          ctx.fillStyle = '#0d0a08';
-          ctx.fillText(line, lx+3, y + i*titleLineH + 3 + (opts.titleOffsetY||0));
-          ctx.fillStyle = s.titleColor;
-          ctx.fillText(line, lx, y + i*titleLineH + (opts.titleOffsetY||0));
-        }
-        if(opts.showCursor && opts.cursorTarget === 'title' && opts.cursorVisible) {
-          const last = titleLines[titleLines.length-1] || '';
-          const lm = ctx.measureText(last);
-          let cx = s.textAlign === 'center' ? centerX + lm.width/2 + 4 : 70 + lm.width + 4;
-          ctx.fillStyle = s.titleColor;
-          ctx.fillRect(cx, y + (titleLines.length-1)*titleLineH, 4, s.titleFontSize);
-        }
-        ctx.restore();
-        y += titleH + gap;
-      }
-
-      // Draw body
-      if(dispBody) {
-        ctx.save();
-        ctx.globalAlpha = opts.bodyOpacity !== undefined ? opts.bodyOpacity : 1;
-        ctx.font = `${s.bodyFontSize}px Galmuri11, monospace`;
-        ctx.textBaseline = 'top';
-        for(let i = 0; i < bodyLines.length; i++) {
-          const line = bodyLines[i];
-          const m = ctx.measureText(line);
-          let lx = s.textAlign === 'center' ? centerX - m.width/2 : s.textAlign === 'right' ? w - 70 - m.width : 70;
-          ctx.fillStyle = '#0d0a08';
-          ctx.fillText(line, lx+2, y + i*bodyLineH + 2 + (opts.bodyOffsetY||0));
-          ctx.fillStyle = s.bodyColor;
-          ctx.fillText(line, lx, y + i*bodyLineH + (opts.bodyOffsetY||0));
-        }
-        if(opts.showCursor && opts.cursorTarget === 'body' && opts.cursorVisible) {
-          const last = bodyLines[bodyLines.length-1] || '';
-          const lm = ctx.measureText(last);
-          let cx = s.textAlign === 'center' ? centerX + lm.width/2 + 3 : 70 + lm.width + 3;
-          ctx.fillStyle = s.bodyColor;
-          ctx.fillRect(cx, y + (bodyLines.length-1)*bodyLineH, 3, s.bodyFontSize);
-        }
-        ctx.restore();
-      }
-
-      // Image center/bottom
-      if(s.image && s._imgEl && s.layout === 'image-center') {
-        const maxImgW = Math.min(900, w - 140);
-        const maxImgH = Math.min(700, (h - headerH) * 0.4);
-        const iw = s._imgEl.naturalWidth, ih = s._imgEl.naturalHeight;
-        const imgScale = Math.min(maxImgW/iw, maxImgH/ih, 1);
-        const dw = iw * imgScale, dh = ih * imgScale;
-        const iy = h - 50 - dh;
-        ctx.strokeStyle = '#3e3530';
-        ctx.lineWidth = 4;
-        ctx.strokeRect(w/2 - dw/2, iy, dw, dh);
-        ctx.drawImage(s._imgEl, w/2 - dw/2, iy, dw, dh);
-      }
-
-      // Subtitle
-      if(s.subtitle) {
-        ctx.save();
-        ctx.font = '28px Galmuri11, monospace';
-        ctx.textBaseline = 'bottom';
-        ctx.textAlign = 'center';
-        const subM = ctx.measureText(s.subtitle);
-        ctx.fillStyle = s.subtitleColor || '#a09890';
-        ctx.fillText(s.subtitle, w/2, h - 30);
-        ctx.restore();
-      }
-
-      // Fade to black
-      if(opts.fadeToBlack > 0) {
-        ctx.fillStyle = `rgba(0,0,0,${opts.fadeToBlack})`;
-        ctx.fillRect(0, 0, w, h);
-      }
-    }
-
-    function animateFrames(ctx, canvas, res, durationMs, drawFn) {
-      return new Promise(resolve => {
-        if(durationMs <= 0) { resolve(); return; }
-        const fps = settings.videoBitrate >= 15000000 ? 60 : 30;
-        const frameInterval = 1000 / fps;
-        const totalFrames = Math.max(1, Math.ceil(durationMs / frameInterval));
-        let frameIdx = 0;
-        const startTime = performance.now();
-
-        function frame() {
-          if(!isExporting) { resolve(); return; }
-          const t = Math.min(1, frameIdx / totalFrames);
-          const time = startTime + frameIdx * frameInterval;
-          drawFn(t, time);
-          frameIdx++;
-          if(frameIdx <= totalFrames) {
-            setTimeout(frame, frameInterval);
-          } else {
-            resolve();
-          }
-        }
-        frame();
-      });
-    }
-
-    async function exportVideo() {
-      if(isExporting) return;
-      isExporting = true;
-      try { await _doExport(); } catch(err) {
-        console.error('Export error:', err);
-        setStatus('영상 생성 오류: ' + err.message, false);
-        isExporting = false;
-      }
-    }
-    async function _doExport() {
-
-      // Load fonts
-      try {
-        await document.fonts.load('bold 60px Galmuri11');
-        await document.fonts.load('900 52px Inter');
-      } catch(e) {}
-      await new Promise(r => setTimeout(r, 300));
-
-      // Pre-load slide images
-      for(let i = 0; i < slides.length; i++) {
-        const s = ensureSlideDefaults(slides[i]);
-        slides[i] = s;
-        if(s.image) {
-          try {
-            const img = new Image();
-            img.src = s.image;
-            await new Promise((resolve, reject) => {
-              img.onload = resolve;
-              img.onerror = resolve;
-            });
-            s._imgEl = img;
-          } catch(e) { s._imgEl = null; }
-        }
-      }
-
-      const res = getCanvasRes();
-      const offCanvas = document.createElement('canvas');
-      offCanvas.width = res.w;
-      offCanvas.height = res.h;
-      offCanvas.style.cssText = 'position:fixed;top:-9999px;left:-9999px;pointer-events:none;';
-      document.body.appendChild(offCanvas);
-      const ctx = offCanvas.getContext('2d');
-
-      // Draw initial frame so captureStream has content
-      ctx.fillStyle = theme.frameBg;
-      ctx.fillRect(0, 0, res.w, res.h);
-      canvasDrawHeader(ctx, res.w, 0);
-
-      const fps = settings.videoBitrate >= 15000000 ? 60 : 30;
-      const videoStream = offCanvas.captureStream(fps);
-
-      // Audio context for export
-      const expAudioCtx = new AudioContext();
-      const expAudioDest = expAudioCtx.createMediaStreamDestination();
-
-      function expPlayTypeSound() {
-        if(settings.soundType==='none') return;
-        const osc = expAudioCtx.createOscillator();
-        const gain = expAudioCtx.createGain();
-        const now = expAudioCtx.currentTime;
-        osc.connect(gain); gain.connect(expAudioDest);
-        if(settings.soundType==='mechanical'){
-          osc.type='square';osc.frequency.setValueAtTime(800+Math.random()*400,now);
-          osc.frequency.exponentialRampToValueAtTime(200,now+0.03);
-          gain.gain.setValueAtTime(0.15,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.05);
-          osc.start(now);osc.stop(now+0.05);
-        } else if(settings.soundType==='soft'){
-          osc.type='sine';osc.frequency.setValueAtTime(600+Math.random()*200,now);
-          gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.04);
-          osc.start(now);osc.stop(now+0.04);
-        } else if(settings.soundType==='retro'){
-          osc.type='square';osc.frequency.setValueAtTime(1200+Math.random()*600,now);
-          osc.frequency.setValueAtTime(400+Math.random()*200,now+0.02);
-          gain.gain.setValueAtTime(0.12,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.06);
-          osc.start(now);osc.stop(now+0.06);
-        }
-      }
-
-      // BGM for export
-      let expBgmSource = null;
-      if(bgmData) {
-        try {
-          const resp = await fetch(bgmData);
-          const arrBuf = await resp.arrayBuffer();
-          const audioBuf = await expAudioCtx.decodeAudioData(arrBuf);
-          expBgmSource = expAudioCtx.createBufferSource();
-          expBgmSource.buffer = audioBuf;
-          expBgmSource.loop = true;
-          const gainNode = expAudioCtx.createGain();
-          gainNode.gain.value = bgmVolume / 100;
-          expBgmSource.connect(gainNode);
-          gainNode.connect(expAudioDest);
-        } catch(e) { console.warn('BGM load failed:', e); }
-      }
-
-      // Merge streams
-      const merged = new MediaStream([
-        ...videoStream.getVideoTracks(),
-        ...expAudioDest.stream.getAudioTracks()
-      ]);
-
-      let mimeType = 'video/webm;codecs=vp9,opus';
-      if(!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=vp8,opus';
-        if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
-      }
-
-      const recorder = new MediaRecorder(merged, {
-        mimeType,
-        videoBitsPerSecond: settings.videoBitrate,
-        audioBitsPerSecond: settings.videoBitrate >= 15000000 ? 256000 : 128000
-      });
-
-      const chunks = [];
-      recorder.ondataavailable = e => {
-        if(e.data && e.data.size > 0) chunks.push(e.data);
-      };
-
-      const exportDone = new Promise(resolve => {
-        recorder.onstop = () => {
-          setTimeout(() => {
-            if(offCanvas.parentNode) offCanvas.parentNode.removeChild(offCanvas);
-            const blob = new Blob(chunks, {type: 'video/webm'});
-            console.log('Export chunks:', chunks.length, 'blob size:', blob.size);
-            if(chunks.length === 0) {
-              setStatus('영상 생성 실패: 데이터 없음 (chunks=0)', false);
-            } else {
-              const a = document.createElement('a');
-              a.href = URL.createObjectURL(blob);
-              a.download = `AntStreet_${new Date().toISOString().slice(0,10)}.webm`;
-              document.body.appendChild(a);
-              a.click();
-              document.body.removeChild(a);
-              setTimeout(() => URL.revokeObjectURL(a.href), 3000);
-              setStatus(`다운로드 완료! (${(blob.size/1024/1024).toFixed(1)}MB)`, false);
-            }
-            isExporting = false;
-            if(expBgmSource) try { expBgmSource.stop(); } catch(e) {}
-            expAudioCtx.close();
-            slides.forEach(s => { delete s._imgEl; });
-            resolve();
-          }, 500);
-        };
-      });
-
-      recorder.start(500);
-      if(expBgmSource) expBgmSource.start();
-      setStatus('영상 생성 중... (탭을 전환하지 마세요)', true);
-
-      // Wait for recorder to stabilize
-      await new Promise(r => setTimeout(r, 500));
-
-      // Render loop
-      for(let si = 0; si < slides.length; si++) {
-        if(!isExporting) break;
-        const s = ensureSlideDefaults(slides[si]);
-        setStatus(`영상 생성 중... ${si+1}/${slides.length} 슬라이드`, true);
-
-        // Fade to black transition (between slides)
-        if(settings.fadeToBlack && si > 0) {
-          const prevS = ensureSlideDefaults(slides[si-1]);
-          await animateFrames(ctx, offCanvas, res, 400, (t, time) => {
-            canvasDrawSlide(ctx, res.w, res.h, prevS, { time, titleChars:-1, bodyChars:-1, titleOpacity:1, bodyOpacity:1, fadeToBlack: t });
-          });
-          await animateFrames(ctx, offCanvas, res, 100, (t, time) => {
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars:0, bodyChars:0, fadeToBlack: 1 });
-          });
-          await animateFrames(ctx, offCanvas, res, 400, (t, time) => {
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars:0, bodyChars:0, fadeToBlack: 1-t });
-          });
-        }
-
-        // Initial pause
-        await animateFrames(ctx, offCanvas, res, 400, (t, time) => {
-          canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars:0, bodyChars:0 });
-        });
-
-        const anim = s.animation || 'typing';
-        const titleLen = (s.title||'').length;
-        const bodyLen = (s.body||'').length;
-
-        if(anim === 'typing') {
-          // Type title
-          const titleDuration = titleLen * settings.typeSpeed * 1.25;
-          let lastTitleChar = 0;
-          await animateFrames(ctx, offCanvas, res, titleDuration || 1, (t, time) => {
-            const chars = Math.floor(t * titleLen);
-            if(chars > lastTitleChar) { for(let c = lastTitleChar; c < chars; c++) expPlayTypeSound(); lastTitleChar = chars; }
-            const cursorVis = Math.floor(time / 300) % 2 === 0;
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: chars, bodyChars: 0, showCursor: true, cursorTarget:'title', cursorVisible: cursorVis });
-          });
-
-          // Pause between title and body
-          await animateFrames(ctx, offCanvas, res, 300, (t, time) => {
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: titleLen, bodyChars: 0 });
-          });
-
-          // Type body
-          if(bodyLen > 0) {
-            const bodyDuration = bodyLen * settings.typeSpeed * 0.8 * 1.25;
-            let lastBodyChar = 0;
-            await animateFrames(ctx, offCanvas, res, bodyDuration || 1, (t, time) => {
-              const chars = Math.floor(t * bodyLen);
-              if(chars > lastBodyChar) { for(let c = lastBodyChar; c < chars; c++) expPlayTypeSound(); lastBodyChar = chars; }
-              const cursorVis = Math.floor(time / 300) % 2 === 0;
-              canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: titleLen, bodyChars: chars, showCursor: true, cursorTarget:'body', cursorVisible: cursorVis });
-            });
-          }
-        } else if(anim === 'fade-in') {
-          await animateFrames(ctx, offCanvas, res, 800, (t, time) => {
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: -1, bodyChars: -1, titleOpacity: t, bodyOpacity: 0 });
-          });
-          if(bodyLen > 0) {
-            await animateFrames(ctx, offCanvas, res, 800, (t, time) => {
-              canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: -1, bodyChars: -1, titleOpacity: 1, bodyOpacity: t });
-            });
-          }
-        } else if(anim === 'slide-up') {
-          await animateFrames(ctx, offCanvas, res, 600, (t, time) => {
-            const ease = 1 - Math.pow(1-t, 3);
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: -1, bodyChars: -1, titleOpacity: ease, bodyOpacity: 0, titleOffsetY: 40*(1-ease) });
-          });
-          if(bodyLen > 0) {
-            await animateFrames(ctx, offCanvas, res, 600, (t, time) => {
-              const ease = 1 - Math.pow(1-t, 3);
-              canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: -1, bodyChars: -1, titleOpacity: 1, bodyOpacity: ease, bodyOffsetY: 40*(1-ease) });
-            });
-          }
-        } else { // instant
-          await animateFrames(ctx, offCanvas, res, 100, (t, time) => {
-            canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: -1, bodyChars: -1 });
-          });
-        }
-
-        // Hold / slide pause
-        const holdDuration = s.durationOverride > 0 ? s.durationOverride : settings.slidePause;
-        await animateFrames(ctx, offCanvas, res, holdDuration, (t, time) => {
-          canvasDrawSlide(ctx, res.w, res.h, s, { time, titleChars: -1, bodyChars: -1 });
-        });
-      }
-
-      // Final hold
-      if(isExporting && slides.length > 0) {
-        await animateFrames(ctx, offCanvas, res, 2000, (t, time) => {
-          const lastS = ensureSlideDefaults(slides[slides.length-1]);
-          canvasDrawSlide(ctx, res.w, res.h, lastS, { time, titleChars: -1, bodyChars: -1 });
-        });
-      }
-
-      // Stop and wait for file to be ready
-      if(recorder.state !== 'inactive') recorder.stop();
-      await exportDone;
-    }
-
-    function cancelExport() {
-      isExporting = false;
-      setStatus('영상 생성 취소됨', false);
-    }
-
     // ==========================================
-    //  녹화 (팝업 윈도우 방식 - 대안)
+    //  유틸
     // ==========================================
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let recordPopup = null;
-
     function setStatus(text, isRec) {
       const bar = document.getElementById('statusBar');
       if(!bar) return;
@@ -1904,337 +1678,11 @@
       bar.className = 'status-bar' + (isRec?' recording':'');
     }
 
-    function buildPopupHTML() {
-      const res = getCanvasRes();
-      const popupCSS = `
-        @font-face { font-family:'Galmuri11'; src:url('https://cdn.jsdelivr.net/npm/galmuri/dist/Galmuri11.woff2') format('woff2'); font-weight:normal; }
-        @font-face { font-family:'Galmuri11'; src:url('https://cdn.jsdelivr.net/npm/galmuri/dist/Galmuri11-Bold.woff2') format('woff2'); font-weight:bold; }
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@900&display=swap');
-        *{margin:0;padding:0;box-sizing:border-box;}
-        body{background:#000;margin:0;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;}
-        .scale-wrap{transform-origin:center center;}
-        .video-canvas{width:${res.w}px;height:${res.h}px;background:#1c1714;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-        .video-header{height:140px;background:#1c1714;border-bottom:4px solid #e94560;display:flex;align-items:center;justify-content:center;gap:14px;flex-shrink:0;position:relative;}
-        .video-header.hidden-header{display:none;}
-        .video-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(233,69,96,0.03) 3px,rgba(233,69,96,0.03) 4px);}
-        .video-header .logo{width:90px;height:90px;image-rendering:pixelated;position:relative;z-index:1;}
-        .video-header .brand-name{font-family:'Inter',Arial,sans-serif;font-weight:900;font-size:46px;letter-spacing:-0.03em;color:#e94560;position:relative;z-index:1;}
-        .video-body{flex:1;position:relative;overflow:hidden;}
-        .slide-layer{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 70px;gap:40px;opacity:0;transition:opacity 0.5s ease;}
-        .slide-layer.active{opacity:1;}
-        .slide-layer.layout-image-top{justify-content:flex-start;padding-top:40px;}
-        .slide-layer.layout-image-bg{padding:0;}
-        .slide-title{font-family:'Galmuri11',monospace;font-weight:bold;font-size:60px;color:#e94560;text-align:center;line-height:1.4;text-shadow:3px 3px 0px #0d0a08;width:100%;}
-        .slide-title .cursor{display:inline-block;width:4px;height:60px;background:#e94560;margin-left:4px;animation:blink 0.6s step-end infinite;vertical-align:middle;}
-        .slide-body-text{font-family:'Galmuri11',monospace;font-size:38px;color:#e0dcd8;text-align:center;line-height:1.7;width:100%;}
-        .slide-body-text .cursor{display:inline-block;width:3px;height:38px;background:#e0dcd8;margin-left:3px;animation:blink 0.6s step-end infinite;vertical-align:middle;}
-        .slide-subtitle{font-family:'Galmuri11',monospace;font-size:28px;color:#a09890;text-align:center;line-height:1.5;position:absolute;bottom:30px;left:50px;right:50px;z-index:5;}
-        .slide-image{max-width:900px;max-height:700px;object-fit:contain;border:4px solid #3e3530;}
-        .slide-image-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.3;}
-        .slide-image-bg+.slide-content-over{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:50px 70px;gap:40px;}
-        .fade-to-black-overlay{position:absolute;inset:0;background:#000;opacity:0;z-index:8;pointer-events:none;transition:opacity 0.4s ease;}
-        .fade-to-black-overlay.active{opacity:1;}
-        .anim-fade-in{animation:animFadeIn 0.8s ease forwards;}
-        .anim-slide-up{animation:animSlideUp 0.6s ease forwards;}
-        @keyframes animFadeIn{from{opacity:0}to{opacity:1}}
-        @keyframes animSlideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes brandShine{0%{background-position:100% 0}100%{background-position:-100% 0}}
-        @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-      `;
-
-      let slidesHTML = '';
-      slides.forEach((s, i) => {
-        s = ensureSlideDefaults(s);
-        const titleStyle = `color:${s.titleColor};font-size:${s.titleFontSize}px;text-align:${s.textAlign};`;
-        const bodyStyle = `color:${s.bodyColor};font-size:${s.bodyFontSize}px;text-align:${s.textAlign};`;
-        let inner = '';
-        if(s.layout === 'image-bg' && s.image) {
-          inner = `<img class="slide-image-bg" src="${s.image}"><div class="slide-content-over"><div class="slide-title" style="${titleStyle}"><span class="text"></span></div><div class="slide-body-text" style="${bodyStyle}"><span class="text"></span></div></div>`;
-        } else if((s.layout === 'image-top' || s.layout === 'image-center') && s.image) {
-          const img = `<img class="slide-image" src="${s.image}">`;
-          const txt = `<div class="slide-title" style="${titleStyle}"><span class="text"></span></div><div class="slide-body-text" style="${bodyStyle}"><span class="text"></span></div>`;
-          inner = s.layout==='image-top' ? img+txt : txt+img;
-        } else {
-          inner = `<div class="slide-title" style="${titleStyle}"><span class="text"></span></div><div class="slide-body-text" style="${bodyStyle}"><span class="text"></span></div>`;
-        }
-        if(s.subtitle) {
-          inner += `<div class="slide-subtitle" style="color:${s.subtitleColor||'#a09890'}">${s.subtitle}</div>`;
-        }
-        slidesHTML += `<div class="slide-layer layout-${s.layout}${i===0?' active':''}" id="slide-${i}" style="background:${s.bgColor||'#1c1714'}">${inner}</div>`;
-      });
-
-      const logoSrc = new URL('logo.png', window.location.href).href;
-
-      // Check first slide header visibility
-      const firstSlideHeader = slides[0]?.showHeader !== false ? '' : ' hidden-header';
-
-      // BGM audio tag
-      const bgmTag = bgmData ? `<audio id="bgmAudio" src="${bgmData}" loop preload="auto"></audio>` : '';
-
-      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Recording</title><style>${popupCSS}</style></head><body>
-        ${bgmTag}
-        <div class="scale-wrap" id="scaleWrap">
-          <div class="video-canvas" id="videoCanvas">
-            <div class="video-header${firstSlideHeader}" id="videoHeader">
-              <img class="logo" src="${logoSrc}" alt="AntStreet">
-              <div class="brand-name">AntStreet Report</div>
-            </div>
-            <div class="video-body" id="videoBody">${slidesHTML}</div>
-            <div class="fade-to-black-overlay" id="fadeOverlay"></div>
-          </div>
-        </div>
-        <script>
-          // 화면에 맞게 캔버스 자동 축소
-          function fitToScreen() {
-            const wrap = document.getElementById('scaleWrap');
-            const cw = ${res.w}, ch = ${res.h};
-            const sw = window.innerWidth, sh = window.innerHeight;
-            const scale = Math.min(sw / cw, sh / ch);
-            wrap.style.transform = 'scale(' + scale + ')';
-          }
-          fitToScreen();
-          window.addEventListener('resize', fitToScreen);
-          const slides = ${JSON.stringify(slides)};
-          const settings = ${JSON.stringify(settings)};
-          const bgmVolume = ${bgmVolume};
-          let isPlaying = true;
-          let animationId = null;
-
-          // BGM
-          const bgmEl = document.getElementById('bgmAudio');
-          if(bgmEl) { bgmEl.volume = bgmVolume / 100; }
-
-          // Audio
-          let audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-          function playTypeSound(){
-            if(settings.soundType==='none') return;
-            const osc=audioCtx.createOscillator(),gain=audioCtx.createGain(),now=audioCtx.currentTime;
-            osc.connect(gain);gain.connect(audioCtx.destination);
-            if(settings.soundType==='mechanical'){osc.type='square';osc.frequency.setValueAtTime(800+Math.random()*400,now);osc.frequency.exponentialRampToValueAtTime(200,now+0.03);gain.gain.setValueAtTime(0.15,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.05);osc.start(now);osc.stop(now+0.05);}
-            else if(settings.soundType==='soft'){osc.type='sine';osc.frequency.setValueAtTime(600+Math.random()*200,now);gain.gain.setValueAtTime(0.08,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.04);osc.start(now);osc.stop(now+0.04);}
-            else if(settings.soundType==='retro'){osc.type='square';osc.frequency.setValueAtTime(1200+Math.random()*600,now);osc.frequency.setValueAtTime(400+Math.random()*200,now+0.02);gain.gain.setValueAtTime(0.12,now);gain.gain.exponentialRampToValueAtTime(0.001,now+0.06);osc.start(now);osc.stop(now+0.06);}
-          }
-
-          function wait(ms){return new Promise(r=>{animationId=setTimeout(r,ms);});}
-
-          function typeText(el,text,speed){
-            return new Promise(resolve=>{
-              if(!el){resolve();return;}
-              el.innerHTML='';
-              const cursor=document.createElement('span');cursor.className='cursor';
-              el.parentElement.appendChild(cursor);
-              let i=0;
-              function tick(){
-                if(!isPlaying){cursor.remove();resolve();return;}
-                if(i<text.length){
-                  if(text[i]==='\\n')el.innerHTML+='<br>';
-                  else{el.innerHTML+=text[i];playTypeSound();}
-                  i++;animationId=setTimeout(tick,speed+Math.random()*(speed*0.5));
-                }else{cursor.remove();resolve();}
-              }
-              tick();
-            });
-          }
-
-          function fadeInText(el,text){return new Promise(r=>{if(!el){r();return;}el.innerHTML=text.replace(/\\n/g,'<br>');el.style.opacity='0';el.classList.add('anim-fade-in');el.style.opacity='';setTimeout(r,800);});}
-          function slideUpText(el,text){return new Promise(r=>{if(!el){r();return;}el.innerHTML=text.replace(/\\n/g,'<br>');el.classList.add('anim-slide-up');setTimeout(r,600);});}
-          function instantText(el,text){return new Promise(r=>{if(!el){r();return;}el.innerHTML=text.replace(/\\n/g,'<br>');r();});}
-
-          function animateText(el,text,speed,animType){
-            if(animType==='fade-in')return fadeInText(el,text);
-            if(animType==='slide-up')return slideUpText(el,text);
-            if(animType==='instant')return instantText(el,text);
-            return typeText(el,text,speed);
-          }
-
-          function activateSlide(idx){
-            const hdr=document.getElementById('videoHeader');
-            const s=slides[idx]||{};
-            if(s.showHeader===false)hdr.classList.add('hidden-header');
-            else hdr.classList.remove('hidden-header');
-            document.querySelectorAll('.slide-layer').forEach((el,i)=>el.classList.toggle('active',i===idx));
-          }
-
-          // Timing
-          let playStartTime=0,totalEstDuration=0;
-          function estimateSlideDuration(s){
-            if(s.durationOverride>0)return s.durationOverride;
-            if((s.animation||'typing')==='typing'){
-              const tl=(s.title||'').length,bl=(s.body||'').length;
-              return 400+tl*settings.typeSpeed*1.25+300+bl*settings.typeSpeed*0.8*1.25+settings.slidePause;
-            }
-            return 400+800+300+600+settings.slidePause;
-          }
-          function getTotalDuration(){return slides.reduce((a,s)=>a+estimateSlideDuration(s),0)+2000;}
-
-          async function playSlide(idx){
-            const s=slides[idx];
-            if(settings.fadeToBlack&&idx>0){
-              const ov=document.getElementById('fadeOverlay');
-              ov.classList.add('active');await wait(400);
-              activateSlide(idx);await wait(100);
-              ov.classList.remove('active');await wait(400);
-            }else{activateSlide(idx);}
-            const layer=document.getElementById('slide-'+idx);if(!layer)return;
-            const ts=layer.querySelector('.slide-title .text');
-            const bs=layer.querySelector('.slide-body-text .text');
-            if(ts)ts.innerHTML='';if(bs)bs.innerHTML='';
-            const anim=s.animation||'typing';
-            if(s.durationOverride>0&&anim!=='typing'){
-              await wait(200);
-              if(ts&&s.title)await animateText(ts,s.title,settings.typeSpeed,anim);
-              await wait(200);
-              if(bs&&s.body)await animateText(bs,s.body,settings.typeSpeed*0.8,anim);
-              const remaining=Math.max(0,s.durationOverride-1200);
-              await wait(remaining);return;
-            }
-            await wait(400);
-            if(ts&&s.title){await animateText(ts,s.title,settings.typeSpeed,anim);await wait(300);}
-            if(bs&&s.body)await animateText(bs,s.body,settings.typeSpeed*0.8,anim);
-          }
-
-          async function playAll(){
-            window.opener.postMessage({type:'popup-ready'},'*');
-            await wait(1000);
-
-            if(bgmEl){bgmEl.play().catch(()=>{});}
-
-            playStartTime=Date.now();
-            totalEstDuration=getTotalDuration();
-
-            for(let i=0;i<slides.length;i++){
-              if(!isPlaying)break;
-              await playSlide(i);
-              if(i<slides.length-1&&isPlaying)await wait(slides[i].durationOverride>0?0:settings.slidePause);
-            }
-            if(isPlaying)await wait(2500);
-            if(bgmEl){bgmEl.pause();}
-            window.opener.postMessage({type:'playback-done'},'*');
-          }
-
-          document.fonts.ready.then(()=>{ setTimeout(playAll, 500); });
-        <\/script>
-      </body></html>`;
-    }
-
-    async function startRecord() {
-      try {
-        setStatus('팝업 윈도우 열기...', false);
-
-        const res = getCanvasRes();
-        // 화면 크기에 맞춰 팝업 열기 (캔버스는 내부에서 자동 축소됨)
-        const popupWidth = Math.min(res.w, screen.availWidth - 50);
-        const popupHeight = Math.min(res.h, screen.availHeight - 80);
-        const left = Math.max(0, (screen.availWidth - popupWidth) / 2);
-        const top = Math.max(0, (screen.availHeight - popupHeight) / 2);
-
-        recordPopup = window.open('', 'AntStreet_Record',
-          `width=${popupWidth},height=${popupHeight},left=${left},top=${top},menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=yes`
-        );
-
-        if(!recordPopup) {
-          setStatus('팝업이 차단되었습니다. 팝업 허용 후 다시 시도하세요.', false);
-          return;
-        }
-
-        recordPopup.document.open();
-        recordPopup.document.write(buildPopupHTML());
-        recordPopup.document.close();
-
-        setStatus('팝업에서 화면 공유를 선택하세요...', false);
-
-        await new Promise((resolve) => {
-          const handler = (e) => {
-            if(e.data?.type === 'popup-ready') {
-              window.removeEventListener('message', handler);
-              resolve();
-            }
-          };
-          window.addEventListener('message', handler);
-          setTimeout(() => { window.removeEventListener('message', handler); resolve(); }, 10000);
-        });
-
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: { displaySurface: 'window', width: { ideal: res.w }, height: { ideal: res.h }, frameRate: { ideal: 30 } },
-          audio: true
-        });
-
-        recordedChunks = [];
-
-        let mimeType = 'video/webm;codecs=vp9';
-        if(!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm;codecs=vp8';
-          if(!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
-        }
-
-        mediaRecorder = new MediaRecorder(stream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: settings.videoBitrate
-        });
-
-        mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
-
-        mediaRecorder.onstop = () => {
-          stream.getTracks().forEach(t => t.stop());
-
-          const blob = new Blob(recordedChunks, { type: 'video/webm' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `AntStreet_${new Date().toISOString().slice(0,10)}.webm`;
-          a.click();
-          URL.revokeObjectURL(url);
-
-          setStatus(`다운로드 완료! (${(blob.size/1024/1024).toFixed(1)}MB)`, false);
-        };
-
-        stream.getVideoTracks()[0].onended = () => {
-          if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-        };
-
-        mediaRecorder.start();
-        setStatus('🔴 녹화 중... 팝업 창의 재생이 끝나면 자동 저장됩니다', true);
-
-        await new Promise((resolve) => {
-          const handler = (e) => {
-            if(e.data?.type === 'playback-done') {
-              window.removeEventListener('message', handler);
-              resolve();
-            }
-          };
-          window.addEventListener('message', handler);
-          setTimeout(() => { window.removeEventListener('message', handler); resolve(); }, 300000);
-        });
-
-        await new Promise(r => setTimeout(r, 1000));
-        if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-
-        if(recordPopup && !recordPopup.closed) recordPopup.close();
-
-      } catch(err) {
-        if(recordPopup && !recordPopup.closed) recordPopup.close();
-        setStatus('취소됨: ' + err.message, false);
-      }
-    }
-
-    function stopRecord() {
-      isPlaying = false;
-      if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-      if(recordPopup && !recordPopup.closed) recordPopup.close();
-    }
-
     // ==========================================
     //  프로젝트 저장/불러오기
     // ==========================================
     function saveProject() {
-      const data = JSON.stringify({
-        slides,
-        settings,
-        theme,
-        bgmData,
-        bgmFileName,
-        bgmVolume
-      }, null, 2);
+      const data = JSON.stringify({ slides, settings, theme, bgmData, bgmFileName, bgmVolume }, null, 2);
       const blob = new Blob([data], {type:'application/json'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -2260,7 +1708,7 @@
           if(data.theme) { Object.assign(theme, data.theme); applyTheme(); }
           currentSlide = 0;
           applyResolution();
-          renderSlides(); renderSlidesTab();
+          renderSlides(); activateSlide(0); renderSlidesTab();
           setStatus('프로젝트 불러오기 완료', false);
         } catch(err) {
           setStatus('파일 오류: '+err.message, false);
@@ -2275,43 +1723,55 @@
     function toggleEditor() {
       const ed = document.getElementById('editor');
       ed.style.display = ed.style.display==='none'?'flex':'none';
-      fitCanvas();
+      fitVideoCanvas();
     }
 
     document.addEventListener('keydown', e => {
       if(e.target.tagName==='TEXTAREA'||e.target.tagName==='INPUT') return;
+      if(e.key==='Escape' && isOBSMode) { exitOBSMode(); return; }
       if(e.key==='p'||e.key==='P') toggleEditor();
       if(e.key===' '){e.preventDefault(); isPlaying?stopPlay():playAll();}
       if(e.key==='ArrowRight'&&!isPlaying){currentSlide=Math.min(currentSlide+1,slides.length-1);activateSlide(currentSlide);renderSlidesTab();}
       if(e.key==='ArrowLeft'&&!isPlaying){currentSlide=Math.max(currentSlide-1,0);activateSlide(currentSlide);renderSlidesTab();}
-      if((e.key==='r'||e.key==='R')&&!isPlaying) startRecord();
     });
 
     // ==========================================
-    //  캔버스 크기 자동 조절
+    //  DOM 비디오 캔버스 크기 자동 조절
     // ==========================================
-    function fitCanvas() {
+    function fitVideoCanvas() {
       const area = document.getElementById('previewArea');
-      const scaler = document.getElementById('canvasScaler');
+      const vc = document.getElementById('videoCanvas');
       const res = getCanvasRes();
       const w = area.clientWidth, h = area.clientHeight;
-      const scale = Math.min(w/res.w, h/res.h) * 0.95;
-      const scaledW = res.w * scale;
-      const scaledH = res.h * scale;
-      scaler.style.transform = `scale(${scale})`;
-      scaler.style.left = ((w - scaledW) / 2) + 'px';
-      scaler.style.top = ((h - scaledH) / 2) + 'px';
+      const scale = Math.min(w / res.w, h / res.h) * 0.95;
+
+      vc.style.width = res.w + 'px';
+      vc.style.height = res.h + 'px';
+      vc.style.transform = `scale(${scale})`;
+      vc.style.transformOrigin = 'top left';
+      vc.style.left = ((w - res.w * scale) / 2) + 'px';
+      vc.style.top = ((h - res.h * scale) / 2) + 'px';
     }
 
-    window.addEventListener('resize', fitCanvas);
+    window.addEventListener('resize', fitVideoCanvas);
 
     // ==========================================
     //  초기화
     // ==========================================
-    renderSlides();
-    renderSlidesTab();
-    activateSlide(0);
-    setTimeout(fitCanvas, 100);
+    document.fonts.ready.then(() => {
+      renderSlides();
+      renderSlidesTab();
+      activateSlide(0);
+      fitVideoCanvas();
+    });
+
+    // Fallback in case fonts.ready is slow
+    setTimeout(() => {
+      renderSlides();
+      renderSlidesTab();
+      activateSlide(0);
+      fitVideoCanvas();
+    }, 500);
   </script>
 
 </body>
