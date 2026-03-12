@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { getCachedFeed } from '@/lib/jsonCache';
 import RankingClient from './RankingClient';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
+
 export const metadata: Metadata = {
   title: '랭킹',
   description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요. 최고 수익률 리포트와 인기 투자자를 한눈에 볼 수 있습니다.',
@@ -10,7 +12,7 @@ export const metadata: Metadata = {
     description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
   },
   alternates: {
-    canonical: '/ranking',
+    canonical: `${SITE_URL}/ranking`,
   },
 };
 

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
+
 export const metadata: Metadata = {
   title: '경제 지표 대시보드 - VIX, 장단기금리차, 실업률, CPI, PCE, M2',
   description: 'FRED 경제 지표 대시보드. VIX 공포지수, 장단기금리차(T10Y2Y), 미국 실업률, CPI 소비자물가지수, PCE 물가지수, M2 통화량을 차트와 함께 확인하세요.',
@@ -13,7 +15,7 @@ export const metadata: Metadata = {
     description: 'FRED 경제 지표 대시보드. VIX, 장단기금리차, 실업률, CPI, PCE, M2를 한눈에.',
   },
   alternates: {
-    canonical: '/indicators',
+    canonical: `${SITE_URL}/indicators`,
   },
 };
 

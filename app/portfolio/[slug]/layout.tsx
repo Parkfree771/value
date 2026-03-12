@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { GURU_LIST } from '@/app/guru-tracker/types';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
+
 function getGuruBySlug(slug: string) {
   const guruNameEn = slug
     .split('-')
@@ -35,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
     },
     alternates: {
-      canonical: `/portfolio/${slug}`,
+      canonical: `${SITE_URL}/portfolio/${slug}`,
     },
   };
 }

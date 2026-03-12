@@ -76,7 +76,7 @@ export const metadata: Metadata = {
     apple: '/logo-background.png',
   },
   alternates: {
-    canonical: '/',
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr',
   },
 };
 

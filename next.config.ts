@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // trailing slash 통일 → /page와 /page/ 중복 방지
+  trailingSlash: false,
+
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -38,9 +41,17 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // 삭제된 페이지 리다이렉트 (Google 봇 404 방지)
+  // 리다이렉트 설정
   async redirects() {
     return [
+      // www → non-www 301 리다이렉트 (중복 도메인 방지)
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.antstreet.kr' }],
+        destination: 'https://antstreet.kr/:path*',
+        permanent: true,
+      },
+      // 삭제된 페이지 리다이렉트 (Google 봇 404 방지)
       {
         source: '/market-call',
         destination: '/',

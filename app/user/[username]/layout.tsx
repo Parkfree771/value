@@ -19,7 +19,7 @@ export async function generateMetadata({
       url: `${SITE_URL}/user/${username}`,
     },
     alternates: {
-      canonical: `/user/${username}`,
+      canonical: `${SITE_URL}/user/${username}`,
     },
   };
 }
