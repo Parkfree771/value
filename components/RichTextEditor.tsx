@@ -12,6 +12,10 @@ import Color from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
+import { Table } from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
 import ImageResize from 'tiptap-extension-resize-image';
 import styles from './RichTextEditor.module.css';
 
@@ -164,6 +168,12 @@ function TiptapEditor({ value, onChange, placeholder, onEditorReady }: RichTextE
         placeholder: placeholder || '내용을 입력하세요...',
       }),
       ImageResize,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
     ],
     content: value || '',
     onUpdate: ({ editor: ed }) => {
@@ -458,6 +468,116 @@ function TiptapEditor({ value, onChange, placeholder, onEditorReady }: RichTextE
             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
           </svg>
         </button>
+
+        <div className={styles.separator} />
+
+        {/* 표 */}
+        <button
+          type="button"
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          className={styles.btn}
+          title="표 삽입"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="3" width="18" height="18" rx="1" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="3" y1="15" x2="21" y2="15" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+            <line x1="15" y1="3" x2="15" y2="21" />
+          </svg>
+        </button>
+        {editor.isActive('table') && (
+          <>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().addColumnAfter().run()}
+              className={styles.btn}
+              title="열 추가"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="12" height="18" rx="1" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <line x1="19" y1="8" x2="19" y2="16" />
+                <line x1="15" y1="12" x2="23" y2="12" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              className={styles.btn}
+              title="열 삭제"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="12" height="18" rx="1" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <line x1="16" y1="9" x2="22" y2="15" />
+                <line x1="22" y1="9" x2="16" y2="15" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().addRowAfter().run()}
+              className={styles.btn}
+              title="행 추가"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="12" rx="1" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="8" y1="19" x2="16" y2="19" />
+                <line x1="12" y1="15" x2="12" y2="23" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              className={styles.btn}
+              title="행 삭제"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="12" rx="1" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="8" y1="18" x2="16" y2="22" />
+                <line x1="16" y1="18" x2="8" y2="22" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().mergeCells().run()}
+              className={styles.btn}
+              title="셀 병합"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="1" />
+                <path d="M8 12h8M8 12l2-2M8 12l2 2M16 12l-2-2M16 12l-2 2" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().splitCell().run()}
+              className={styles.btn}
+              title="셀 분할"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="1" />
+                <path d="M16 12H8M16 12l-2-2M16 12l-2 2M8 12l2-2M8 12l2 2" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              className={styles.btn}
+              title="표 삭제"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="18" height="18" rx="1" />
+                <line x1="3" y1="9" x2="21" y2="9" />
+                <line x1="9" y1="3" x2="9" y2="21" />
+                <line x1="15" y1="3" x2="15" y2="21" />
+                <line x1="5" y1="5" x2="19" y2="19" strokeWidth="2.5" stroke="#DC2626" />
+              </svg>
+            </button>
+          </>
+        )}
 
         <div className={styles.separator} />
 

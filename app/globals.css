@@ -754,3 +754,67 @@ body {
   border-radius: 2px;
   padding: 0 2px;
 }
+
+/* 표 (Table) */
+.article-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 16px 0;
+  overflow: hidden;
+  table-layout: fixed;
+}
+
+.article-content th,
+.article-content td {
+  border: 1px solid #d1d5db;
+  padding: 8px 12px;
+  vertical-align: top;
+  min-width: 80px;
+  position: relative;
+}
+
+.article-content th {
+  background: #f3f4f6;
+  font-weight: 700;
+  text-align: left;
+}
+
+.dark .article-content th,
+.dark .article-content td {
+  border-color: #4b5563;
+}
+
+.dark .article-content th {
+  background: #1f2937;
+}
+
+/* TipTap 테이블 선택 하이라이트 */
+.article-content .selectedCell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(59, 130, 246, 0.15);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* TipTap 테이블 리사이즈 핸들 */
+.article-content .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: #3b82f6;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+.article-content .tableWrapper {
+  overflow-x: auto;
+  margin: 16px 0;
+}
+
+.article-content .resize-cursor {
+  cursor: col-resize;
+}
