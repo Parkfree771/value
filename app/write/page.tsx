@@ -567,7 +567,7 @@ function WritePageContent() {
         <form id="write-form" onSubmit={handleSubmit}>
           <div className="flex gap-4" style={{ height: 'calc(100vh - 140px)' }}>
             {/* ── 왼쪽 ── */}
-            <div className="flex flex-col gap-4 w-[480px] flex-shrink-0 min-h-0">
+            <div className="flex flex-col gap-4 w-[600px] flex-shrink-0 min-h-0">
               {/* 왼쪽 상단: 폼 입력 (컴팩트) */}
               <div className="card-base p-4 space-y-3 flex-shrink-0 overflow-y-auto" style={{ maxHeight: '45%' }}>
                 <input
