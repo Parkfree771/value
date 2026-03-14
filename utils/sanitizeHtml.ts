@@ -224,6 +224,230 @@ export function sanitizeHtmlStrict(html: string): string {
   });
 }
 
+// ── HTML 모드 전용 허용 태그 ──
+// 기본 ALLOWED_TAGS + SVG + 약어 등 추가
+// 차단 유지: script, iframe, object, embed, form, input, textarea, select, button,
+//           video, audio, source, foreignObject, animate, animateTransform, set
+const HTML_MODE_TAGS = [
+  ...ALLOWED_TAGS,
+
+  // 약어
+  'abbr',
+
+  // SVG — 차트, 아이콘, 다이어그램 용도
+  // 보안 위험 태그 제외: foreignObject(HTML 삽입), animate*(클릭재킹), set
+  'svg', 'g', 'path', 'circle', 'rect', 'ellipse', 'line',
+  'polyline', 'polygon', 'text', 'tspan',
+  'defs', 'use', 'symbol', 'clipPath', 'mask',
+  'linearGradient', 'radialGradient', 'stop', 'pattern',
+];
+
+// ── HTML 모드 전용 허용 속성 ──
+const HTML_MODE_ATTRIBUTES: Record<string, string[]> = {
+  ...ALLOWED_ATTRIBUTES,
+
+  'abbr': ['title'],
+
+  // SVG 공통 속성
+  'svg': ['viewBox', 'width', 'height', 'xmlns', 'fill', 'stroke', 'class', 'style', 'role', 'aria-label', 'aria-hidden'],
+  'g': ['transform', 'fill', 'stroke', 'stroke-width', 'opacity', 'class', 'style', 'clip-path', 'mask'],
+  'path': ['d', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset', 'opacity', 'transform', 'class', 'style', 'fill-rule', 'clip-rule'],
+  'circle': ['cx', 'cy', 'r', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
+  'ellipse': ['cx', 'cy', 'rx', 'ry', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
+  'rect': ['x', 'y', 'width', 'height', 'rx', 'ry', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
+  'line': ['x1', 'y1', 'x2', 'y2', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-dasharray', 'opacity', 'transform', 'class', 'style'],
+  'polyline': ['points', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'transform', 'class', 'style'],
+  'polygon': ['points', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
+  'text': ['x', 'y', 'dx', 'dy', 'text-anchor', 'dominant-baseline', 'font-size', 'font-family', 'font-weight', 'fill', 'stroke', 'opacity', 'transform', 'class', 'style'],
+  'tspan': ['x', 'y', 'dx', 'dy', 'text-anchor', 'font-size', 'font-weight', 'fill', 'class', 'style'],
+  'defs': [],
+  'use': ['href', 'xlink:href', 'x', 'y', 'width', 'height', 'class', 'style'],
+  'symbol': ['viewBox', 'id', 'class'],
+  'clipPath': ['id'],
+  'mask': ['id', 'x', 'y', 'width', 'height'],
+  'linearGradient': ['id', 'x1', 'y1', 'x2', 'y2', 'gradientUnits', 'gradientTransform'],
+  'radialGradient': ['id', 'cx', 'cy', 'r', 'fx', 'fy', 'gradientUnits', 'gradientTransform'],
+  'stop': ['offset', 'stop-color', 'stop-opacity', 'style'],
+  'pattern': ['id', 'x', 'y', 'width', 'height', 'patternUnits', 'patternTransform', 'viewBox'],
+};
+
+/**
+ * HTML 모드 전용 살균 함수
+ * 기본 sanitizeHtml보다 더 많은 태그를 허용하되, 보안 위협은 차단합니다.
+ * - script, iframe, object, embed, form, input 등 위험 태그 차단
+ * - SVG의 foreignObject, animate, set 차단
+ * - on* 이벤트 핸들러 차단
+ * - javascript: URL 차단
+ * - position:fixed/sticky 차단 (페이지 오버레이 공격 방지)
+ */
+export function sanitizeHtmlMode(html: string): string {
+  if (!html || typeof html !== 'string') return '';
+
+  return sanitizeHtmlLib(html, {
+    ...sanitizeOptions,
+    allowedTags: HTML_MODE_TAGS,
+    allowedAttributes: HTML_MODE_ATTRIBUTES,
+    allowedStyles: {
+      '*': {
+        ...sanitizeOptions.allowedStyles?.['*'],
+        // 포지셔닝 (fixed/sticky 제외)
+        'position': [/^(static|relative|absolute)$/],
+        // Flexbox
+        'flex': [/.*/],
+        'flex-direction': [/.*/],
+        'flex-wrap': [/.*/],
+        'flex-flow': [/.*/],
+        'flex-grow': [/.*/],
+        'flex-shrink': [/.*/],
+        'flex-basis': [/.*/],
+        'justify-content': [/.*/],
+        'align-items': [/.*/],
+        'align-self': [/.*/],
+        'align-content': [/.*/],
+        'place-items': [/.*/],
+        'place-content': [/.*/],
+        'gap': [/.*/],
+        'row-gap': [/.*/],
+        'column-gap': [/.*/],
+        'order': [/.*/],
+        // Grid
+        'grid-template-columns': [/.*/],
+        'grid-template-rows': [/.*/],
+        'grid-template-areas': [/.*/],
+        'grid-column': [/.*/],
+        'grid-row': [/.*/],
+        'grid-area': [/.*/],
+        'grid-gap': [/.*/],
+        'grid-auto-flow': [/.*/],
+        'grid-auto-columns': [/.*/],
+        'grid-auto-rows': [/.*/],
+        // 오버플로우
+        'overflow': [/^(visible|hidden|scroll|auto)$/],
+        'overflow-x': [/^(visible|hidden|scroll|auto)$/],
+        'overflow-y': [/^(visible|hidden|scroll|auto)$/],
+        // 시각 효과
+        'opacity': [/.*/],
+        'transform': [/.*/],
+        'transition': [/.*/],
+        'box-shadow': [/.*/],
+        'text-shadow': [/.*/],
+        'filter': [/^(?!.*url\s*\().*$/],  // url() 제외한 filter만 허용 (blur, grayscale 등)
+        'backdrop-filter': [/^(?!.*url\s*\().*$/],
+        // 개별 보더
+        'border-bottom': [/.*/],
+        'border-top': [/.*/],
+        'border-left': [/.*/],
+        'border-right': [/.*/],
+        'border-color': [/.*/],
+        'border-style': [/.*/],
+        'border-width': [/.*/],
+        'border-collapse': [/.*/],
+        'border-spacing': [/.*/],
+        // 리스트
+        'list-style': [/.*/],
+        'list-style-type': [/.*/],
+        // 텍스트
+        'letter-spacing': [/.*/],
+        'word-spacing': [/.*/],
+        'white-space': [/.*/],
+        'word-break': [/.*/],
+        'overflow-wrap': [/.*/],
+        'text-indent': [/.*/],
+        'text-transform': [/.*/],
+        'text-overflow': [/.*/],
+        // 다단 레이아웃
+        'column-count': [/.*/],
+        'columns': [/.*/],
+        // 기타
+        'cursor': [/.*/],
+        'outline': [/.*/],
+        'float': [/.*/],
+        'clear': [/.*/],
+        'top': [/.*/],
+        'right': [/.*/],
+        'bottom': [/.*/],
+        'left': [/.*/],
+        'z-index': [/^\d+$/],
+        'object-fit': [/.*/],
+        'object-position': [/.*/],
+        'aspect-ratio': [/.*/],
+        'clip-path': [/^(?!.*url\s*\().*$/],
+        'content': [/.*/],
+        'counter-reset': [/.*/],
+        'counter-increment': [/.*/],
+        // 배경 이미지 (javascript: URL 제외)
+        'background-image': [/^(?!.*javascript:).*$/],
+        'background-size': [/.*/],
+        'background-position': [/.*/],
+        'background-repeat': [/.*/],
+      },
+    },
+  });
+}
+
+/**
+ * HTML 모드의 CSS를 살균합니다.
+ * 위험한 CSS 패턴을 제거합니다.
+ */
+// @import 허용 도메인 (폰트 서비스만 허용)
+const ALLOWED_IMPORT_DOMAINS = [
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'cdn.jsdelivr.net/gh',       // 오픈소스 폰트 CDN
+  'fastly.jsdelivr.net',
+  'unpkg.com',
+  'cdnjs.cloudflare.com',
+];
+
+export function sanitizeCssForHtmlMode(css: string): string {
+  if (!css) return '';
+  let sanitized = css;
+  // @import: 허용된 폰트 도메인만 통과, 나머지 차단
+  sanitized = sanitized.replace(/@import\b[^;]*;/gi, (match) => {
+    const isAllowed = ALLOWED_IMPORT_DOMAINS.some(domain => match.includes(domain));
+    return isAllowed ? match : '';
+  });
+  // position:fixed/sticky 차단
+  sanitized = sanitized.replace(/position\s*:\s*(fixed|sticky)/gi, 'position: relative');
+  // javascript: in url() 차단
+  sanitized = sanitized.replace(/url\s*\(\s*["']?\s*javascript:/gi, 'url(');
+  // expression() 차단 (IE)
+  sanitized = sanitized.replace(/expression\s*\(/gi, '');
+  // behavior: 차단 (IE)
+  sanitized = sanitized.replace(/behavior\s*:/gi, '');
+  // -moz-binding 차단
+  sanitized = sanitized.replace(/-moz-binding\s*:/gi, '');
+  return sanitized;
+}
+
+/**
+ * CSS 셀렉터에 스코프 클래스를 붙여 다른 요소에 영향을 주지 않도록 합니다.
+ * 예: "h1 { color: red }" → ".scope h1 { color: red }"
+ */
+export function scopeCssSelectors(css: string, scopeClass: string): string {
+  if (!css) return '';
+
+  // @media, @keyframes 등 at-rule은 그대로 유지하되, 내부 셀렉터만 스코핑
+  return css.replace(/([^{}@]+)(\{[^}]*\})/g, (match, selectors, block) => {
+    // at-rule 내부가 아닌 일반 셀렉터만 처리
+    const trimmed = selectors.trim();
+    if (trimmed.startsWith('@') || trimmed === '') return match;
+
+    const scoped = trimmed
+      .split(',')
+      .map((s: string) => {
+        const sel = s.trim();
+        if (!sel) return sel;
+        // body, html, :root 같은 건 스코프 클래스로 대체
+        if (/^(body|html|:root)$/i.test(sel)) return `.${scopeClass}`;
+        return `.${scopeClass} ${sel}`;
+      })
+      .join(', ');
+
+    return `${scoped} ${block}`;
+  });
+}
+
 /**
  * 텍스트에서 모든 HTML 태그를 제거합니다.
  * 순수 텍스트만 필요할 때 사용합니다.

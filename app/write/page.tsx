@@ -19,6 +19,8 @@ import dynamic from 'next/dynamic';
 import type { Editor } from '@tiptap/react';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
+const HtmlCodeEditor = dynamic(() => import('@/components/HtmlCodeEditor'), { ssr: false });
+const HtmlPreviewPanel = dynamic(() => import('@/components/HtmlCodeEditor').then(m => ({ default: m.HtmlPreviewPanel })), { ssr: false });
 
 type Opinion = 'buy' | 'sell' | 'hold';
 type PositionType = 'long' | 'short';
@@ -36,6 +38,10 @@ function WritePageContent() {
   const [opinion, setOpinion] = useState<Opinion>('buy');
   const [targetPrice, setTargetPrice] = useState('');
   const [content, setContent] = useState('');
+  const [editorMode, setEditorMode] = useState<'text' | 'html'>('text');
+  const [htmlContent, setHtmlContent] = useState('');
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewCss, setPreviewCss] = useState('');
   const [images, setImages] = useState<File[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
@@ -93,7 +99,12 @@ function WritePageContent() {
         setStockData(reportData.stockData || null);
         setOpinion(reportData.opinion || 'buy');
         setTargetPrice(reportData.targetPrice ? Number(reportData.targetPrice).toLocaleString() : '');
-        setContent(reportData.content || '');
+        if (reportData.mode === 'html') {
+          setEditorMode('html');
+          setHtmlContent(reportData.content || '');
+        } else {
+          setContent(reportData.content || '');
+        }
         setOriginalInitialPrice(reportData.initialPrice || null);
         setSelectedThemes(reportData.themes || []);
 
@@ -347,8 +358,8 @@ function WritePageContent() {
         themes: selectedThemes.length > 0 ? selectedThemes : [],
 
         // 7. 콘텐츠
-        content: finalContent,
-        mode: 'text',
+        content: editorMode === 'html' ? htmlContent : finalContent,
+        mode: editorMode,
         images: imageUrls,
         files: uploadedFiles,
 
@@ -511,6 +522,144 @@ function WritePageContent() {
     );
   }
 
+  // ═══════════════════════════════════════════════════
+  // HTML 모드 전용 레이아웃
+  // 왼쪽 상단: 폼 입력 (컴팩트) / 왼쪽 하단: 코드 에디터
+  // 오른쪽 전체: 미리보기
+  // ═══════════════════════════════════════════════════
+  if (editorMode === 'html') {
+    return (
+      <div className="write-page w-full px-4 sm:px-6 py-4 sm:py-6" style={{ maxWidth: '100%' }}>
+        {/* 상단 바: 제목 + 모드 전환 + 액션 */}
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-lg font-bold">
+            {isEditMode ? '리포트 수정' : '리포트 작성'}
+            <span className="ml-2 text-xs font-normal px-2 py-0.5 bg-[var(--pixel-accent)] text-white border border-[var(--pixel-accent-dark)]">HTML</span>
+          </h1>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setEditorMode('text')}
+              className="px-3 py-1 text-xs font-bold border-2 bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all"
+            >
+              텍스트 모드
+            </button>
+            <button
+              type="submit"
+              form="write-form"
+              disabled={isUploading}
+              className="px-4 py-1 text-xs font-bold bg-[var(--pixel-accent)] text-white border-2 border-[var(--pixel-accent-dark)] transition-all disabled:opacity-50"
+            >
+              {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}
+            </button>
+            {isEditMode && editId && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-3 py-1 text-xs font-bold border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-red-500 hover:text-red-500 transition-all"
+              >
+                삭제
+              </button>
+            )}
+          </div>
+        </div>
+
+        <form id="write-form" onSubmit={handleSubmit}>
+          <div className="flex gap-4" style={{ height: 'calc(100vh - 140px)' }}>
+            {/* ── 왼쪽 ── */}
+            <div className="flex flex-col gap-4 w-[480px] flex-shrink-0 min-h-0">
+              {/* 왼쪽 상단: 폼 입력 (컴팩트) */}
+              <div className="card-base p-4 space-y-3 flex-shrink-0 overflow-y-auto" style={{ maxHeight: '45%' }}>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                  className="pixel-input !py-1.5 !text-sm"
+                  placeholder="리포트 제목"
+                />
+                <StockSearchInput
+                  onStockSelect={handleStockSelect}
+                  selectedStock={stockData}
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <select
+                    value={opinion}
+                    onChange={(e) => setOpinion(e.target.value as Opinion)}
+                    className="pixel-input !py-1.5 !text-sm"
+                  >
+                    <option value="buy">매수 (롱)</option>
+                    <option value="sell">매도 (숏)</option>
+                    <option value="hold">보유</option>
+                  </select>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={targetPrice}
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/[^0-9]/g, '');
+                      setTargetPrice(raw === '' ? '' : Number(raw).toLocaleString());
+                    }}
+                    required
+                    className="pixel-input !py-1.5 !text-sm"
+                    placeholder="목표가격"
+                  />
+                </div>
+                {/* 테마 태그 (컴팩트) */}
+                {allThemes.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {allThemes.map((theme) => (
+                      <button
+                        key={theme.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedThemes(prev =>
+                            prev.includes(theme.id)
+                              ? prev.filter(id => id !== theme.id)
+                              : [...prev, theme.id]
+                          )
+                        }
+                        className={`px-2 py-0.5 text-[10px] border transition-all ${
+                          selectedThemes.includes(theme.id)
+                            ? 'pixel-chip-active font-bold'
+                            : 'bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)]'
+                        }`}
+                      >
+                        {theme.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <p className="text-[10px] text-gray-400">
+                  script, iframe, on* 이벤트는 보안상 차단됩니다.
+                </p>
+              </div>
+
+              {/* 왼쪽 하단: 코드 에디터 */}
+              <div className="flex-1 min-h-0">
+                <HtmlCodeEditor
+                  value={htmlContent}
+                  onChange={setHtmlContent}
+                  onPreviewUpdate={(h, c) => { setPreviewHtml(h); setPreviewCss(c); }}
+                  placeholder={'<style>\n  .card {\n    padding: 20px;\n    border-radius: 8px;\n    background: #f8f9fa;\n  }\n</style>\n\n<div class="card">\n  <h2>제목</h2>\n  <p>내용을 입력하세요...</p>\n</div>'}
+                  editorOnly
+                />
+              </div>
+            </div>
+
+            {/* ── 오른쪽: 프리뷰 전체 ── */}
+            <div className="flex-1 min-w-0 min-h-0">
+              <HtmlPreviewPanel html={previewHtml} css={previewCss} />
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════
+  // 텍스트 모드 (기존 레이아웃)
+  // ═══════════════════════════════════════════════════
   return (
     <div className="write-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
@@ -756,15 +905,36 @@ function WritePageContent() {
 
           {/* 에디터 */}
           <div>
-              <label className="pixel-label mb-2">
-                내용
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="pixel-label">
+                  내용
+                </label>
+                {/* 모드 선택 — 모바일에서는 숨김 */}
+                <div className="hidden md:flex items-center gap-1">
+                  <button
+                    type="button"
+                    className="px-3 py-1 text-xs font-bold border-2 pixel-chip-active"
+                    disabled
+                  >
+                    텍스트
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditorMode('html')}
+                    className="px-3 py-1 text-xs font-bold border-2 bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all"
+                  >
+                    HTML
+                  </button>
+                </div>
+              </div>
+
               <RichTextEditor
                 value={content}
                 onChange={setContent}
                 placeholder="리포트 본문을 입력하세요..."
                 onEditorReady={setTiptapEditor}
               />
+
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                 툴바를 사용하여 굵게, 색상, 정렬 등 서식을 적용할 수 있습니다. 다른 곳에서 복사/붙여넣기하면 서식이 유지됩니다.
               </p>

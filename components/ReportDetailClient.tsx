@@ -7,7 +7,7 @@ import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
-import { sanitizeHtml } from '@/utils/sanitizeHtml';
+import { sanitizeHtml, sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
@@ -375,16 +375,44 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           {/* Report Content - 넓고 여유롭게 */}
           <Card className="p-3 sm:p-6 lg:p-8">
             {/* 리포트 본문 */}
-            <div
-              className="article-content max-w-none"
-              dangerouslySetInnerHTML={{
-                __html: /<[a-z][\s\S]*>/i.test(report.content)
-                  ? sanitizeHtml(report.content)
-                    // Tiptap 빈 줄 보존: <p></p> → <p><br></p> (속성 있는 경우도 처리)
-                    .replace(/<p([^>]*)><\/p>/g, '<p$1><br></p>')
-                  : report.content.replace(/\n/g, '<br />')
-              }}
-            />
+            {report.mode === 'html' ? (
+              <>
+                {(() => {
+                  // HTML 모드: <style> 태그 추출 → 스코핑 → 본문 살균
+                  const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
+                  const cssMatches: string[] = [];
+                  let match;
+                  while ((match = styleRegex.exec(report.content)) !== null) {
+                    cssMatches.push(match[1]);
+                  }
+                  const htmlOnly = report.content.replace(styleRegex, '');
+                  const sanitizedCss = sanitizeCssForHtmlMode(cssMatches.join('\n'));
+                  const scopedCss = scopeCssSelectors(sanitizedCss, 'html-report-scope');
+
+                  return (
+                    <>
+                      {scopedCss && (
+                        <style dangerouslySetInnerHTML={{ __html: scopedCss }} />
+                      )}
+                      <div
+                        className="article-content max-w-none html-report-scope"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtmlMode(htmlOnly) }}
+                      />
+                    </>
+                  );
+                })()}
+              </>
+            ) : (
+              <div
+                className="article-content max-w-none"
+                dangerouslySetInnerHTML={{
+                  __html: /<[a-z][\s\S]*>/i.test(report.content)
+                    ? sanitizeHtml(report.content)
+                      .replace(/<p([^>]*)><\/p>/g, '<p$1><br></p>')
+                    : report.content.replace(/\n/g, '<br />')
+                }}
+              />
+            )}
           </Card>
 
           {/* 첨부 파일 */}

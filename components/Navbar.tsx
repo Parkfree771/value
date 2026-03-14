@@ -113,17 +113,6 @@ const Navbar = memo(function Navbar() {
             >
               경제지표
             </Link>
-            <Link
-              href="/mini-game"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/mini-game')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-              title="개미의 월스트리트 생존기"
-            >
-              미니게임
-            </Link>
             <span className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></span>
             <Link
               href="/write"
@@ -346,17 +335,6 @@ const Navbar = memo(function Navbar() {
                 }`}
               >
                 경제지표
-              </Link>
-              <Link
-                href="/mini-game"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/mini-game')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                미니게임
               </Link>
               <Link
                 href="/write"

@@ -1,0 +1,116 @@
+/* ── 기본 split 모드 (fallback) ── */
+.container {
+  display: flex;
+  border: 2px solid var(--pixel-border-muted);
+  background: var(--pixel-bg-card);
+  overflow: hidden;
+  height: 600px;
+  min-height: 400px;
+}
+
+.editorPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.previewPanel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.divider {
+  width: 3px;
+  background: var(--pixel-border-muted);
+  flex-shrink: 0;
+}
+
+/* ── editorOnly 모드 (standalone) ── */
+.editorStandalone {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--pixel-border-muted);
+  background: var(--pixel-bg-card);
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ── 프리뷰 standalone ── */
+.previewStandalone {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--pixel-border-muted);
+  background: var(--pixel-bg-card);
+  overflow: hidden;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ── 공통 ── */
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 2px solid var(--pixel-border-muted);
+  background: var(--pixel-bg);
+  flex-shrink: 0;
+}
+
+.panelLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--foreground);
+}
+
+.panelHint {
+  font-size: 10px;
+  color: #9ca3af;
+}
+
+:global(.dark) .panelHint {
+  color: #6b7280;
+}
+
+.editorMount {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.editorMount :global(.cm-editor) {
+  height: 100%;
+}
+
+.editorMount :global(.cm-scroller) {
+  overflow: auto !important;
+}
+
+.editorMount :global(.cm-editor .cm-gutters) {
+  border-right: 1px solid #e5e7eb;
+}
+
+:global(.dark) .editorMount :global(.cm-editor .cm-gutters) {
+  border-right: 1px solid #374151;
+}
+
+.previewContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  min-height: 0;
+}
+
+/* 실제 상세 페이지 본문 너비에 맞춤 (max-w-7xl - 사이드바 - padding) */
+.previewContent > :global(.article-content) {
+  max-width: 860px;
+  margin: 0 auto;
+}
