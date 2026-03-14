@@ -387,7 +387,14 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   }
                   const htmlOnly = report.content.replace(styleRegex, '');
                   const sanitizedCss = sanitizeCssForHtmlMode(cssMatches.join('\n'));
-                  const scopedCss = scopeCssSelectors(sanitizedCss, 'html-report-scope');
+                  // @import를 먼저 분리 (scopeCssSelectors 정규식이 깨뜨리는 것 방지)
+                  const importStatements: string[] = [];
+                  const cssWithoutImports = sanitizedCss.replace(/@import\b[^;]*;/gi, (m) => {
+                    importStatements.push(m);
+                    return '';
+                  });
+                  // @import 제거된 CSS만 스코핑 후, @import를 최상단에 배치
+                  const scopedCss = importStatements.join('\n') + '\n' + scopeCssSelectors(cssWithoutImports, 'html-report-scope');
 
                   return (
                     <>
