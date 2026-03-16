@@ -428,25 +428,102 @@ export function sanitizeCssForHtmlMode(css: string): string {
 export function scopeCssSelectors(css: string, scopeClass: string): string {
   if (!css) return '';
 
-  // @media, @keyframes 등 at-rule은 그대로 유지하되, 내부 셀렉터만 스코핑
-  return css.replace(/([^{}@]+)(\{[^}]*\})/g, (match, selectors, block) => {
-    // at-rule 내부가 아닌 일반 셀렉터만 처리
-    const trimmed = selectors.trim();
-    if (trimmed.startsWith('@') || trimmed === '') return match;
+  // CSS를 토큰 단위로 분리: at-rule 블록 vs 일반 규칙
+  const tokens: string[] = [];
+  let i = 0;
 
-    const scoped = trimmed
-      .split(',')
-      .map((s: string) => {
-        const sel = s.trim();
-        if (!sel) return sel;
-        // body, html, :root 같은 건 스코프 클래스로 대체
-        if (/^(body|html|:root)$/i.test(sel)) return `.${scopeClass}`;
-        return `.${scopeClass} ${sel}`;
-      })
-      .join(', ');
+  while (i < css.length) {
+    // 공백 건너뛰기
+    if (/\s/.test(css[i])) {
+      let ws = '';
+      while (i < css.length && /\s/.test(css[i])) ws += css[i++];
+      tokens.push(ws);
+      continue;
+    }
 
-    return `${scoped} ${block}`;
-  });
+    // @rule 감지 (@media, @keyframes, @supports 등 중첩 블록을 가지는 at-rule)
+    if (css[i] === '@') {
+      let rule = '';
+      // at-rule 이름과 조건부 읽기 (첫 번째 { 또는 ; 까지)
+      while (i < css.length && css[i] !== '{' && css[i] !== ';') {
+        rule += css[i++];
+      }
+
+      const atName = rule.trim().split(/\s/)[0].toLowerCase();
+
+      if (i < css.length && css[i] === ';') {
+        // @import, @charset 등 단일 라인 at-rule
+        rule += css[i++];
+        tokens.push(rule);
+        continue;
+      }
+
+      if (i < css.length && css[i] === '{') {
+        // 중첩 블록을 가지는 at-rule — 중괄호 깊이 추적으로 전체 블록 추출
+        rule += css[i++];
+        let depth = 1;
+        while (i < css.length && depth > 0) {
+          if (css[i] === '{') depth++;
+          else if (css[i] === '}') depth--;
+          rule += css[i++];
+        }
+
+        // @keyframes, @font-face는 내부 스코핑 불필요
+        if (/^@(keyframes|font-face)/i.test(atName)) {
+          tokens.push(rule);
+        } else {
+          // @media, @supports 등은 내부 셀렉터를 재귀적으로 스코핑
+          const openIdx = rule.indexOf('{');
+          const header = rule.substring(0, openIdx + 1);
+          const inner = rule.substring(openIdx + 1, rule.length - 1);
+          tokens.push(header + scopeCssSelectors(inner, scopeClass) + '}');
+        }
+        continue;
+      }
+
+      tokens.push(rule);
+      continue;
+    }
+
+    // 일반 CSS 규칙: 셀렉터 { ... }
+    let selector = '';
+    while (i < css.length && css[i] !== '{') {
+      selector += css[i++];
+    }
+
+    if (i < css.length && css[i] === '{') {
+      let block = '{';
+      i++;
+      let depth = 1;
+      while (i < css.length && depth > 0) {
+        if (css[i] === '{') depth++;
+        else if (css[i] === '}') depth--;
+        block += css[i++];
+      }
+
+      const trimmed = selector.trim();
+      if (!trimmed) {
+        tokens.push(selector + block);
+        continue;
+      }
+
+      const scoped = trimmed
+        .split(',')
+        .map((s: string) => {
+          const sel = s.trim();
+          if (!sel) return sel;
+          if (/^(body|html|:root)$/i.test(sel)) return `.${scopeClass}`;
+          return `.${scopeClass} ${sel}`;
+        })
+        .join(', ');
+
+      tokens.push(scoped + ' ' + block);
+    } else {
+      tokens.push(selector);
+    }
+  }
+
+  return tokens.join('');
 }
 
 /**

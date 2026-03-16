@@ -498,8 +498,12 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
 
                                   setDeletingCommentId(comment.id);
                                   try {
+                                    const token = await auth.currentUser?.getIdToken();
                                     const response = await fetch(`/api/reports/${report.id}/comments/${comment.id}`, {
                                       method: 'DELETE',
+                                      headers: {
+                                        'Authorization': `Bearer ${token}`,
+                                      },
                                     });
                                     const data = await response.json();
                                     if (data.success) {
@@ -532,10 +536,13 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                                 return;
                               }
                               try {
+                                const token = await auth.currentUser?.getIdToken();
                                 const response = await fetch(`/api/reports/${report.id}/comments/${comment.id}`, {
                                   method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ userId: user.uid }),
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                  },
                                 });
                                 const data = await response.json();
                                 if (data.success) {
@@ -645,8 +652,12 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                                     if (!confirm('답글을 삭제하시겠습니까?')) return;
                                     setDeletingCommentId(reply.id);
                                     try {
+                                      const token = await auth.currentUser?.getIdToken();
                                       const response = await fetch(`/api/reports/${report.id}/comments/${reply.id}`, {
                                         method: 'DELETE',
+                                        headers: {
+                                          'Authorization': `Bearer ${token}`,
+                                        },
                                       });
                                       const data = await response.json();
                                       if (data.success) {
@@ -675,10 +686,13 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                                 return;
                               }
                               try {
+                                const token = await auth.currentUser?.getIdToken();
                                 const response = await fetch(`/api/reports/${report.id}/comments/${reply.id}`, {
                                   method: 'POST',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ userId: user.uid }),
+                                  headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`,
+                                  },
                                 });
                                 const data = await response.json();
                                 if (data.success) {

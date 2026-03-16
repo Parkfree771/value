@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { updateReportReturnRate } from '@/lib/stockPrice';
+import { verifyAuthToken } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
+    // 토큰 인증
+    const authHeader = request.headers.get('authorization');
+    const userId = await verifyAuthToken(authHeader);
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: '로그인이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { ticker, initialPrice, positionType = 'long' } = body;
 

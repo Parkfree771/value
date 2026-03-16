@@ -15,13 +15,8 @@ service cloud.firestore {
       allow read: if true; // 모든 게시글 읽기 가능
       allow create: if request.auth != null; // 로그인 사용자만 작성 가능
 
-      // 작성자는 전체 수정 가능
-      // 다른 로그인 사용자는 특정 필드만 업데이트 가능
-      allow update: if request.auth != null && (
-        request.auth.uid == resource.data.authorId ||
-        request.resource.data.diff(resource.data).affectedKeys()
-          .hasOnly(['views', 'likes', 'likedBy', 'currentPrice', 'returnRate', 'is_closed', 'closed_at', 'closed_return_rate', 'closed_price', 'commentCount'])
-      );
+      // 작성자만 수정 가능 (가격/통계 업데이트는 Admin SDK로 처리)
+      allow update: if request.auth != null && request.auth.uid == resource.data.authorId;
       allow delete: if request.auth != null && request.auth.uid == resource.data.authorId;
 
       // 게시글별 좋아요 정보 (서브컬렉션)

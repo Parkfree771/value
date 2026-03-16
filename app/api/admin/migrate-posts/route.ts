@@ -1,11 +1,23 @@
 // 기존 posts 문서를 새 구조로 마이그레이션하는 API
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb, Timestamp } from '@/lib/firebase-admin';
+import { verifyAdmin } from '@/lib/admin/adminVerify';
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
 
   try {
+    // 관리자 인증
+    const authHeader = request.headers.get('authorization');
+    const admin = await verifyAdmin(authHeader);
+
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, error: '관리자 권한이 필요합니다.' },
+        { status: 403 }
+      );
+    }
+
     const { collection: collectionName } = await request.json();
 
     if (!collectionName || collectionName !== 'posts') {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminDb, FieldValue } from '@/lib/firebase-admin';
+import { adminDb, FieldValue, verifyAuthToken } from '@/lib/firebase-admin';
 
 // 댓글 좋아요 토글
 export async function POST(
@@ -8,8 +8,10 @@ export async function POST(
 ) {
   try {
     const { id, commentId } = await params;
-    const body = await request.json();
-    const { userId } = body;
+
+    // 토큰 인증
+    const authHeader = request.headers.get('authorization');
+    const userId = await verifyAuthToken(authHeader);
 
     if (!userId) {
       return NextResponse.json(
@@ -105,6 +107,17 @@ export async function DELETE(
   try {
     const { id, commentId } = await params;
 
+    // 토큰 인증
+    const authHeader = request.headers.get('authorization');
+    const userId = await verifyAuthToken(authHeader);
+
+    if (!userId) {
+      return NextResponse.json(
+        { success: false, error: '로그인이 필요합니다.' },
+        { status: 401 }
+      );
+    }
+
     // 리포트 존재 여부 확인
     const postRef = adminDb.collection('posts').doc(id);
     const postSnap = await postRef.get();
@@ -124,6 +137,15 @@ export async function DELETE(
       return NextResponse.json(
         { success: false, error: '댓글을 찾을 수 없습니다.' },
         { status: 404 }
+      );
+    }
+
+    // 댓글 작성자 본인 확인
+    const commentData = commentSnap.data();
+    if (commentData?.authorId !== userId) {
+      return NextResponse.json(
+        { success: false, error: '본인의 댓글만 삭제할 수 있습니다.' },
+        { status: 403 }
       );
     }
 

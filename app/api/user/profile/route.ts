@@ -85,7 +85,6 @@ export async function GET(request: NextRequest) {
       user: {
         id: userId,
         nickname: userData.nickname || username,
-        email: userData.email || '',
         createdAt: userData.createdAt || '',
         reports,
       },
