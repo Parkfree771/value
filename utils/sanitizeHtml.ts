@@ -403,7 +403,8 @@ export function sanitizeCssForHtmlMode(css: string): string {
   if (!css) return '';
   let sanitized = css;
   // @import: 허용된 폰트 도메인만 통과, 나머지 차단
-  sanitized = sanitized.replace(/@import\b[^;]*;/gi, (match) => {
+  // url() 안의 세미콜론(예: wght@400;500;700)을 고려하여 괄호/따옴표 쌍을 인식
+  sanitized = sanitized.replace(/@import\s+url\s*\([^)]*\)\s*;|@import\s+(['"])[^'"]*\1\s*;|@import\b[^;]*;/gi, (match) => {
     const isAllowed = ALLOWED_IMPORT_DOMAINS.some(domain => match.includes(domain));
     return isAllowed ? match : '';
   });

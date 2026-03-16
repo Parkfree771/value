@@ -389,7 +389,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                   const sanitizedCss = sanitizeCssForHtmlMode(cssMatches.join('\n'));
                   // @import를 먼저 분리 (scopeCssSelectors 정규식이 깨뜨리는 것 방지)
                   const importStatements: string[] = [];
-                  const cssWithoutImports = sanitizedCss.replace(/@import\b[^;]*;/gi, (m) => {
+                  const cssWithoutImports = sanitizedCss.replace(/@import\s+url\s*\([^)]*\)\s*;|@import\s+(['"])[^'"]*\1\s*;|@import\b[^;]*;/gi, (m) => {
                     importStatements.push(m);
                     return '';
                   });

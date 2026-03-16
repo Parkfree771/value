@@ -135,7 +135,14 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, place
 
     const sanitizedHtml = sanitizeHtmlMode(htmlOnly);
     const sanitizedCss = sanitizeCssForHtmlMode(cssMatches.join('\n'));
-    const scopedCss = scopeCssSelectors(sanitizedCss, 'html-preview-scope');
+
+    // @import를 먼저 분리 (scopeCssSelectors가 url() 안의 세미콜론을 깨뜨리는 것 방지)
+    const importStatements: string[] = [];
+    const cssWithoutImports = sanitizedCss.replace(
+      /@import\s+url\s*\([^)]*\)\s*;|@import\s+(['"])[^'"]*\1\s*;|@import\b[^;]*;/gi,
+      (m) => { importStatements.push(m); return ''; }
+    );
+    const scopedCss = importStatements.join('\n') + (importStatements.length ? '\n' : '') + scopeCssSelectors(cssWithoutImports, 'html-preview-scope');
 
     setPreviewHtml(sanitizedHtml);
     setPreviewCss(scopedCss);
