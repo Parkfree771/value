@@ -1,9 +1,11 @@
 /**
  * DART 기업코드 인덱스
- * CORPCODE.xml을 다운로드·파싱하여 상장기업 검색 지원
+ * public/data/dart-corps.json에서 상장기업 목록을 로드하여 검색 지원
+ * (런타임 DART API 호출 불필요)
  */
 
-import JSZip from 'jszip';
+import { promises as fs } from 'fs';
+import path from 'path';
 
 export interface DartCorpEntry {
   corpCode: string;
@@ -12,60 +14,36 @@ export interface DartCorpEntry {
   stockCode: string;
 }
 
-let cachedIndex: DartCorpEntry[] | null = null;
-let cacheTimestamp = 0;
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24시간
-
-/** CORPCODE.xml 다운로드 및 파싱 */
-async function downloadAndParse(): Promise<DartCorpEntry[]> {
-  const apiKey = process.env.DART_API_KEY;
-  if (!apiKey) throw new Error('DART_API_KEY not configured');
-
-  const url = `https://opendart.fss.or.kr/api/corpCode.xml?crtfc_key=${apiKey}`;
-  const response = await fetch(url);
-  if (!response.ok) throw new Error(`DART corpCode download failed: ${response.status}`);
-
-  // zip 해제
-  const buffer = Buffer.from(await response.arrayBuffer());
-  const zip = await JSZip.loadAsync(buffer);
-  const xmlFile = Object.values(zip.files).find(f => f.name.endsWith('.xml'));
-  if (!xmlFile) throw new Error('No XML file found in CORPCODE.zip');
-  const xml = await xmlFile.async('string');
-
-  // 상장기업만 파싱 (stock_code가 6자리 이상인 것)
-  const entries: DartCorpEntry[] = [];
-  const regex = /<list>\s*<corp_code>(\d+)<\/corp_code>\s*<corp_name>([^<]+)<\/corp_name>\s*<corp_eng_name>([^<]*)<\/corp_eng_name>\s*<stock_code>(\S+)<\/stock_code>/g;
-
-  let match;
-  while ((match = regex.exec(xml)) !== null) {
-    const stockCode = match[4].trim();
-    if (stockCode.length >= 6) {
-      entries.push({
-        corpCode: match[1],
-        corpName: match[2].trim(),
-        corpNameEng: match[3].trim(),
-        stockCode,
-      });
-    }
-  }
-
-  return entries;
+interface CompactEntry {
+  c: string; // corpCode
+  n: string; // corpName
+  s: string; // stockCode
 }
 
+let cachedIndex: DartCorpEntry[] | null = null;
 
-/** 인덱스 가져오기 (캐시 포함) */
+/** JSON 파일에서 인덱스 로드 */
+async function loadIndex(): Promise<DartCorpEntry[]> {
+  const filePath = path.join(process.cwd(), 'public', 'data', 'dart-corps.json');
+  const raw = await fs.readFile(filePath, 'utf-8');
+  const compact: CompactEntry[] = JSON.parse(raw);
+
+  return compact.map(e => ({
+    corpCode: e.c,
+    corpName: e.n,
+    corpNameEng: '',
+    stockCode: e.s,
+  }));
+}
+
+/** 인덱스 가져오기 (메모리 캐시) */
 export async function getCorpIndex(): Promise<DartCorpEntry[]> {
-  if (cachedIndex && Date.now() - cacheTimestamp < CACHE_TTL) {
-    return cachedIndex;
-  }
+  if (cachedIndex) return cachedIndex;
 
-  console.log('[DART Corp Index] Downloading and parsing CORPCODE.xml...');
-  const entries = await downloadAndParse();
-  console.log(`[DART Corp Index] Indexed ${entries.length} listed companies`);
-
-  cachedIndex = entries;
-  cacheTimestamp = Date.now();
-  return entries;
+  console.log('[DART Corp Index] Loading from dart-corps.json...');
+  cachedIndex = await loadIndex();
+  console.log(`[DART Corp Index] Loaded ${cachedIndex.length} listed companies`);
+  return cachedIndex;
 }
 
 /** 기업 검색 */
@@ -85,11 +63,10 @@ export async function searchCorps(query: string, limit = 20): Promise<DartCorpEn
 
   for (const entry of index) {
     const nameLower = entry.corpName.toLowerCase();
-    const engLower = entry.corpNameEng.toLowerCase();
 
-    if (nameLower.startsWith(q) || engLower.startsWith(q)) {
+    if (nameLower.startsWith(q)) {
       startsWith.push(entry);
-    } else if (nameLower.includes(q) || engLower.includes(q) || entry.stockCode.includes(q)) {
+    } else if (nameLower.includes(q) || entry.stockCode.includes(q)) {
       contains.push(entry);
     }
   }
