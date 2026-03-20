@@ -16,12 +16,11 @@ import { getStorage } from 'firebase-admin/storage';
 // ============================================================
 
 // 변경할 닉네임
-const NEW_AUTHOR_NAME = 'gururu';
+const NEW_AUTHOR_NAME = '선반영';
 
 // 변경할 게시글 제목 목록
 const TARGET_TITLES = [
-  '거물들의 브라질 증시 매수',
-  '빌 애크먼의 1픽 Brookfield',
+  'AI, 반도체 다음 스탭은?',
 ];
 
 // ============================================================
