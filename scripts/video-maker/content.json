@@ -1,0 +1,15 @@
+{
+  "settings": {
+    "fps": 30,
+    "typingSpeed": 70,
+    "pauseBetweenScenes": 1500,
+    "sound": true,
+    "soundVolume": 0.6
+  },
+  "scenes": [
+    {
+      "text": "코스피 **2% 하락**",
+      "image": null
+    }
+  ]
+}
