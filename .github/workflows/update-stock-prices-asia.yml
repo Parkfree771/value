@@ -2,9 +2,11 @@ name: Update Stock Prices (Asia)
 
 on:
   schedule:
-    # 아시아 시장 시간: 09:00~17:00 KST = 00:00~08:00 UTC
-    # 15분마다 실행
-    - cron: '*/15 0-8 * * *'
+    # 아시아 시장 백업 (로컬 스케줄러 보조)
+    # 장 시작 09:00 KST = 00:00 UTC
+    # 점심   12:00 KST = 03:00 UTC
+    # 장 마감 16:00 KST = 07:00 UTC (평일만)
+    - cron: '0 0,3,7 * * 1-5'
   workflow_dispatch:
     inputs:
       market_type:

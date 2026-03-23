@@ -2,9 +2,11 @@ name: Update Stock Prices (US)
 
 on:
   schedule:
-    # 미국 시장 시간: 22:30~06:00 KST = 13:30~21:00 UTC
-    # 15분마다 실행 (13:00~21:00 UTC로 넉넉하게)
-    - cron: '*/15 13-21 * * *'
+    # 미국 시장 백업 (로컬 스케줄러 보조)
+    # 장 시작 22:30 KST = 13:30 UTC
+    # 중간   01:00 KST = 16:00 UTC
+    # 장 마감 05:30 KST = 20:30 UTC (평일만)
+    - cron: '30 13,16,20 * * 1-5'
   workflow_dispatch:
     inputs:
       market_type:
