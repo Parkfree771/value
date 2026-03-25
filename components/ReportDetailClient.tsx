@@ -7,7 +7,7 @@ import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
-import { sanitizeHtml, sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors } from '@/utils/sanitizeHtml';
+import { sanitizeHtml, sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors, ALLOWED_IMPORT_DOMAINS } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
 import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
@@ -378,14 +378,27 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             {report.mode === 'html' ? (
               <>
                 {(() => {
-                  // HTML 모드: <style> 태그 추출 → 스코핑 → 본문 살균
+                  // HTML 모드: <link> → @import 변환 → <style> 추출 → 스코핑 → 본문 살균
+                  const linkImports: string[] = [];
+                  const contentWithoutLinks = report.content.replace(
+                    /<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/gi,
+                    (fullMatch, href: string) => {
+                      if (!/rel\s*=\s*["']stylesheet["']/i.test(fullMatch)) return '';
+                      const isAllowed = ALLOWED_IMPORT_DOMAINS.some(domain => href.includes(domain));
+                      if (isAllowed) {
+                        linkImports.push(`@import url('${href}');`);
+                      }
+                      return '';
+                    }
+                  );
                   const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
                   const cssMatches: string[] = [];
+                  if (linkImports.length) cssMatches.push(linkImports.join('\n'));
                   let match;
-                  while ((match = styleRegex.exec(report.content)) !== null) {
+                  while ((match = styleRegex.exec(contentWithoutLinks)) !== null) {
                     cssMatches.push(match[1]);
                   }
-                  const htmlOnly = report.content.replace(styleRegex, '');
+                  const htmlOnly = contentWithoutLinks.replace(styleRegex, '');
                   const sanitizedCss = sanitizeCssForHtmlMode(cssMatches.join('\n'));
                   // @import를 먼저 분리 (scopeCssSelectors 정규식이 깨뜨리는 것 방지)
                   const importStatements: string[] = [];

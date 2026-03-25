@@ -390,7 +390,7 @@ export function sanitizeHtmlMode(html: string): string {
  * 위험한 CSS 패턴을 제거합니다.
  */
 // @import 허용 도메인 (폰트 서비스만 허용)
-const ALLOWED_IMPORT_DOMAINS = [
+export const ALLOWED_IMPORT_DOMAINS = [
   'fonts.googleapis.com',
   'fonts.gstatic.com',
   'cdn.jsdelivr.net/gh',       // 오픈소스 폰트 CDN

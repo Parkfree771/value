@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors } from '@/utils/sanitizeHtml';
+import { sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors, ALLOWED_IMPORT_DOMAINS } from '@/utils/sanitizeHtml';
 import styles from './HtmlCodeEditor.module.css';
 
 interface HtmlCodeEditorProps {
@@ -125,13 +125,31 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, place
   }, [value, mounted]);
 
   const updatePreview = useCallback((rawHtml: string) => {
+    // <link rel="stylesheet" href="..."> → @import url('...') 자동 변환
+    // 허용된 폰트 도메인의 <link>만 @import로 변환, 나머지는 제거
+    const linkImports: string[] = [];
+    const htmlWithoutLinks = rawHtml.replace(
+      /<link\s+[^>]*href\s*=\s*["']([^"']+)["'][^>]*>/gi,
+      (fullMatch, href: string) => {
+        // rel="stylesheet"인 경우만 처리
+        if (!/rel\s*=\s*["']stylesheet["']/i.test(fullMatch)) return '';
+        const isAllowed = ALLOWED_IMPORT_DOMAINS.some(domain => href.includes(domain));
+        if (isAllowed) {
+          linkImports.push(`@import url('${href}');`);
+        }
+        return '';
+      }
+    );
+
     const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
     const cssMatches: string[] = [];
+    // link에서 변환된 @import를 CSS 맨 앞에 추가
+    if (linkImports.length) cssMatches.push(linkImports.join('\n'));
     let match;
-    while ((match = styleRegex.exec(rawHtml)) !== null) {
+    while ((match = styleRegex.exec(htmlWithoutLinks)) !== null) {
       cssMatches.push(match[1]);
     }
-    const htmlOnly = rawHtml.replace(styleRegex, '');
+    const htmlOnly = htmlWithoutLinks.replace(styleRegex, '');
 
     const sanitizedHtml = sanitizeHtmlMode(htmlOnly);
     const sanitizedCss = sanitizeCssForHtmlMode(cssMatches.join('\n'));

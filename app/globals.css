@@ -800,6 +800,83 @@ body {
   background: #1f2937;
 }
 
+/* HTML 모드 리포트: article-content 기본 스타일 무효화 → 사용자 CSS만 적용
+   :where()로 specificity를 0-1-1로 유지해서, 이후 삽입되는 사용자 스코핑 CSS가 덮어쓸 수 있게 함 */
+.article-content:where(.html-preview-scope) p,
+.article-content:where(.html-report-scope) p,
+.article-content:where(.html-preview-scope) h1,
+.article-content:where(.html-report-scope) h1,
+.article-content:where(.html-preview-scope) h2,
+.article-content:where(.html-report-scope) h2,
+.article-content:where(.html-preview-scope) h3,
+.article-content:where(.html-report-scope) h3,
+.article-content:where(.html-preview-scope) h4,
+.article-content:where(.html-report-scope) h4,
+.article-content:where(.html-preview-scope) h5,
+.article-content:where(.html-report-scope) h5,
+.article-content:where(.html-preview-scope) h6,
+.article-content:where(.html-report-scope) h6,
+.article-content:where(.html-preview-scope) ul,
+.article-content:where(.html-report-scope) ul,
+.article-content:where(.html-preview-scope) ol,
+.article-content:where(.html-report-scope) ol,
+.article-content:where(.html-preview-scope) li,
+.article-content:where(.html-report-scope) li,
+.article-content:where(.html-preview-scope) a,
+.article-content:where(.html-report-scope) a,
+.article-content:where(.html-preview-scope) img,
+.article-content:where(.html-report-scope) img,
+.article-content:where(.html-preview-scope) hr,
+.article-content:where(.html-report-scope) hr,
+.article-content:where(.html-preview-scope) code,
+.article-content:where(.html-report-scope) code,
+.article-content:where(.html-preview-scope) pre,
+.article-content:where(.html-report-scope) pre,
+.article-content:where(.html-preview-scope) blockquote,
+.article-content:where(.html-report-scope) blockquote,
+.article-content:where(.html-preview-scope) mark,
+.article-content:where(.html-report-scope) mark,
+.article-content:where(.html-preview-scope) table,
+.article-content:where(.html-report-scope) table,
+.article-content:where(.html-preview-scope) thead,
+.article-content:where(.html-report-scope) thead,
+.article-content:where(.html-preview-scope) tbody,
+.article-content:where(.html-report-scope) tbody,
+.article-content:where(.html-preview-scope) tfoot,
+.article-content:where(.html-report-scope) tfoot,
+.article-content:where(.html-preview-scope) tr,
+.article-content:where(.html-report-scope) tr,
+.article-content:where(.html-preview-scope) th,
+.article-content:where(.html-report-scope) th,
+.article-content:where(.html-preview-scope) td,
+.article-content:where(.html-report-scope) td,
+.article-content:where(.html-preview-scope) strong,
+.article-content:where(.html-report-scope) strong {
+  all: revert;
+}
+.dark .article-content:where(.html-preview-scope) p,
+.dark .article-content:where(.html-report-scope) p,
+.dark .article-content:where(.html-preview-scope) h1,
+.dark .article-content:where(.html-report-scope) h1,
+.dark .article-content:where(.html-preview-scope) h2,
+.dark .article-content:where(.html-report-scope) h2,
+.dark .article-content:where(.html-preview-scope) h3,
+.dark .article-content:where(.html-report-scope) h3,
+.dark .article-content:where(.html-preview-scope) th,
+.dark .article-content:where(.html-report-scope) th,
+.dark .article-content:where(.html-preview-scope) td,
+.dark .article-content:where(.html-report-scope) td,
+.dark .article-content:where(.html-preview-scope) blockquote,
+.dark .article-content:where(.html-report-scope) blockquote,
+.dark .article-content:where(.html-preview-scope) code,
+.dark .article-content:where(.html-report-scope) code,
+.dark .article-content:where(.html-preview-scope) hr,
+.dark .article-content:where(.html-report-scope) hr,
+.dark .article-content:where(.html-preview-scope) a,
+.dark .article-content:where(.html-report-scope) a {
+  all: revert;
+}
+
 /* TipTap 테이블 선택 하이라이트 */
 .article-content .selectedCell::after {
   content: "";
