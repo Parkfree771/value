@@ -67,7 +67,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
       return <div className={rankClass}>{rank}</div>;
     }
     return (
-      <span className="w-7 text-center text-sm font-bold text-gray-400 dark:text-gray-500">
+      <span className="w-7 text-center text-sm font-bold text-gray-500 dark:text-gray-400">
         {rank}
       </span>
     );

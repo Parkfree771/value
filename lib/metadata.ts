@@ -78,6 +78,7 @@ export function generateReportMetadata(
       siteName: SITE_NAME,
       locale: 'ko_KR',
       publishedTime: report.createdAt,
+      images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
     },
     twitter: {
       card: 'summary',
@@ -134,14 +135,15 @@ export function generateReportJsonLd(
       },
     },
     datePublished: report.createdAt,
+    image: `${SITE_URL}/logo-background.png`,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${SITE_URL}/reports/${report.id}`,
     },
     about: {
-      '@type': 'FinancialProduct',
-      name: report.stockName,
-      identifier: report.ticker,
+      '@type': 'Thing',
+      name: `${report.stockName} (${report.ticker})`,
+      description: `${report.stockName} 주식 투자 분석`,
     },
     keywords: `${report.stockName}, ${report.ticker}, 주식 리포트, 투자 분석`,
     articleBody: report.content,

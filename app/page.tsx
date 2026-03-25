@@ -13,6 +13,7 @@ export const metadata: Metadata = {
     title: 'AntStreet - 주식 리포트 & 실시간 수익률 인증 플랫폼',
     description: '개미 투자자들의 투자 리포트 공유 플랫폼. 실시간 수익률 추적, 수익률 랭킹, 13F 구루 포트폴리오.',
     url: SITE_URL,
+    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: SITE_URL,

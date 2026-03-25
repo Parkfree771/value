@@ -71,9 +71,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/logo-background.png',
-    shortcut: '/logo-background.png',
-    apple: '/logo-background.png',
+    icon: '/favicon.png',
+    shortcut: '/favicon.png',
+    apple: '/favicon.png',
   },
   alternates: {
     canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr',
@@ -115,7 +115,6 @@ const jsonLd = {
         addressRegion: "경기도",
         addressCountry: "KR",
       },
-      sameAs: [],
     },
     {
       "@type": "WebSite",

@@ -175,6 +175,7 @@ const SearchBar = memo(function SearchBar({
             backgroundColor: 'var(--pixel-accent)',
             boxShadow: '0 2px 8px rgba(153,27,27,0.2)',
           }}
+          aria-label="검색"
         >
           <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -195,6 +196,7 @@ const SearchBar = memo(function SearchBar({
             onFocus={() => showStockSuggestions && setShowSuggestions(true)}
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
+            aria-label="검색어 입력"
             className="w-full font-heading font-medium tracking-wide bg-[var(--pixel-bg-card)] text-[var(--foreground)] border-[3px] border-[var(--pixel-border-muted)] pl-3 pr-8 sm:pl-4 sm:pr-10 py-1.5 sm:py-2 text-xs sm:text-sm outline-none transition-all duration-300 focus:border-[var(--pixel-accent)] placeholder:text-gray-400 dark:placeholder:text-gray-500"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
           />
@@ -205,6 +207,7 @@ const SearchBar = memo(function SearchBar({
                 setShowSuggestions(false);
               }}
               className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--pixel-accent)] transition-colors"
+              aria-label="검색어 지우기"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path

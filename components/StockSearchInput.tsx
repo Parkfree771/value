@@ -258,6 +258,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="기업명 또는 티커 입력 (예: 삼성전자, 나이키, AAPL)"
+              aria-label="종목 검색"
               className="pixel-input !py-3"
             />
             {isLoading && (

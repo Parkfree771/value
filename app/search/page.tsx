@@ -44,7 +44,7 @@ const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--pixel-accent)] bord
 // 필터 (텍스트 스타일 - 상장사 & 정렬 공통)
 const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
 const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
-const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
+const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-500 dark:text-gray-400 hover:text-[var(--foreground)]`;
 
 /** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
 function measureFirstRow(container: HTMLElement | null): number {

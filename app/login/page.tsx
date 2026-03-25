@@ -90,9 +90,9 @@ export default function LoginPage() {
             `}</style>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <span className="brand-title text-3xl leading-none">
+            <h1 className="brand-title text-3xl leading-none">
               AntStreet
-            </span>
+            </h1>
           </div>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             개미 투자자들의 리포트 공유 플랫폼

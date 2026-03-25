@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: '기업 분석 - DART 재무제표 기반 핵심 지표',
     description: 'DART 공시 데이터로 보는 핵심 재무 지표. 매출, 영업이익, ROE, 부채비율을 한눈에.',
+    url: `${SITE_URL}/analysis`,
+    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/analysis`,

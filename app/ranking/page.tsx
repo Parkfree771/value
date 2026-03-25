@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: '수익률 랭킹 · 투자자 랭킹 · 인기글',
     description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
+    url: `${SITE_URL}/ranking`,
+    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/ranking`,

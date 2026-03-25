@@ -155,7 +155,7 @@ const ReportCard = memo(function ReportCard({
                 </span>
               ))}
               {themes && themes.length > 2 && (
-                <span className="text-[10px] text-gray-400 flex-shrink-0">+{themes.length - 2}</span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400 flex-shrink-0">+{themes.length - 2}</span>
               )}
             </div>
             <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate">{title}</h2>
@@ -200,7 +200,7 @@ const ReportCard = memo(function ReportCard({
                 <button
                   onClick={handleBookmarkClick}
                   className="group/bm p-1.5 -m-1 ml-0.5 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-                  title={bookmarked ? '북마크 해제' : '북마크'}
+                  aria-label={bookmarked ? '북마크 해제' : '북마크'}
                 >
                   {bookmarked ? (
                     <svg className="w-5 h-5 sm:w-6 sm:h-6 text-neon-green-500" fill="currentColor" viewBox="0 0 24 24">

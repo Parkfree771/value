@@ -246,6 +246,7 @@ const Navbar = memo(function Navbar() {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
+              aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
             >
               {mobileMenuOpen ? (
                 <svg className="h-5 w-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -281,6 +282,7 @@ const Navbar = memo(function Navbar() {
             <button
               onClick={closeMobileMenu}
               className="p-2 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+              aria-label="메뉴 닫기"
             >
               <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

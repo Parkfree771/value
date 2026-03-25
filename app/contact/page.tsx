@@ -9,6 +9,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: '문의하기',
     description: 'AntStreet 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
+    url: `${SITE_URL}/contact`,
+    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/contact`,

@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   description: 'AntStreet 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
   openGraph: {
     title: '이용약관',
-    description: 'AntStreet 서비스 이용약관입니다.',
+    description: 'AntStreet 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
+    url: `${SITE_URL}/terms`,
+    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/terms`,

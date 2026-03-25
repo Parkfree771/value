@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   description: 'AntStreet 투자 정보 면책 조항. 본 사이트의 투자 정보는 참고용이며 투자 판단의 책임은 이용자에게 있습니다.',
   openGraph: {
     title: '투자 면책 조항',
-    description: 'AntStreet 투자 정보 면책 조항.',
+    description: 'AntStreet 투자 정보 면책 조항. 본 사이트의 투자 정보는 참고용이며 투자 판단의 책임은 이용자에게 있습니다.',
+    url: `${SITE_URL}/disclaimer`,
+    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/disclaimer`,
