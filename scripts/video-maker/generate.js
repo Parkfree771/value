@@ -49,13 +49,21 @@ function parseInputTxt(filePath) {
     block = block.trim();
     if (!block) continue;
 
+    // image: 파일명 추출 (블록 내 어디든 위치 가능)
+    let image = null;
+    const imageMatch = block.match(/^image:\s*(.+)$/m);
+    if (imageMatch) {
+      image = imageMatch[1].trim();
+      block = block.replace(/^image:\s*.+$/m, '').trim();
+    }
+
     if (block.startsWith('thumbnail')) {
       const text = block.replace(/^thumbnail\s*\n?/, '').trim();
-      if (text) thumbnail = { text, image: null };
+      if (text) thumbnail = { text, image };
       continue;
     }
 
-    scenes.push({ text: block, image: null });
+    scenes.push({ text: block, image });
   }
 
   return { scenes, thumbnail };
@@ -78,6 +86,7 @@ const TYPING_MS = settings.typingSpeed || 70;
 const PAUSE_MS = settings.pauseBetweenScenes || 1500;
 const SOUND = settings.sound !== false;
 const VOLUME = settings.soundVolume || 0.6;
+const NEWLINE_PAUSE_MS = settings.newlinePause || 150;
 const THUMBNAIL_MODE = process.argv.includes('--thumbnail');
 const THUMBNAIL_FILE = path.join(OUTPUT_DIR, 'thumbnail.png');
 
@@ -153,7 +162,7 @@ function generateTypingSteps(plainText) {
   for (const ch of plainText) {
     if (ch === '\n') {
       completed += ch;
-      steps.push({ completed, partial: '', sound: true });
+      steps.push({ completed, partial: '', sound: false });
     } else if (isHangul(ch)) {
       const subs = hangulSubsteps(ch);
       for (let i = 0; i < subs.length; i++) {
@@ -217,7 +226,10 @@ function baseHTML() {
   .nav img{width:90px;height:90px;image-rendering:pixelated}
   .nav .brand{font-family:'Inter',sans-serif;font-weight:900;font-size:50px;letter-spacing:-0.03em;color:#EF4444;line-height:1;
     text-shadow:1px 1px 0 #991b1b,2px 2px 0 #991b1b,3px 3px 0 #991b1b,4px 4px 0 #991b1b,5px 5px 0 #991b1b,6px 6px 0 #991b1b}
-  .content{position:absolute;top:120px;bottom:120px;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 50px}
+  .content{position:absolute;top:120px;bottom:120px;left:0;right:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:0 50px}
+  #scene-image{margin-top:200px;text-align:center;flex-shrink:0}
+  #scene-image img{max-width:900px;max-height:500px;border:4px solid #3e3530}
+  #text-wrap{margin-top:70px;display:flex;flex-direction:column;align-items:center;width:100%}
   #text{font-family:'Mulmaru',sans-serif;font-size:68px;font-weight:900;text-align:center;line-height:1.8;color:#f5f0eb;
     text-shadow:1px 1px 0 #d4ccc4,2px 2px 0 #d4ccc4,3px 3px 0 #d4ccc4,4px 4px 0 #d4ccc4,5px 5px 0 #d4ccc4,6px 6px 0 #d4ccc4,
     7px 7px 0 #d4ccc4,8px 8px 0 #d4ccc4,9px 9px 0 rgba(0,0,0,.15),10px 10px 0 rgba(0,0,0,.1),11px 11px 0 rgba(0,0,0,.06),12px 12px 0 rgba(0,0,0,.03)}
@@ -226,8 +238,7 @@ function baseHTML() {
     7px 7px 0 #a32d42,8px 8px 0 #a32d42,9px 9px 0 rgba(0,0,0,.15),10px 10px 0 rgba(0,0,0,.1),11px 11px 0 rgba(0,0,0,.06),12px 12px 0 rgba(0,0,0,.03)}
   #cursor{display:none;width:4px;height:58px;background:#e94560;margin-left:4px;vertical-align:middle}
   #cursor.on{display:inline-block}
-  #scene-image{margin-top:40px;text-align:center}
-  #scene-image img{max-width:900px;max-height:500px;border:4px solid #3e3530}
+  /* scene-image styles moved to .content block above */
   .footer{position:absolute;bottom:0;width:100%;height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
   .dots{display:flex;gap:14px}
   .dot{width:10px;height:10px;background:#3e3530}
@@ -246,8 +257,8 @@ function baseHTML() {
     <span class="brand">AntStreet</span>
   </div>
   <div class="content">
-    <div id="text"></div><span id="cursor"></span>
     <div id="scene-image"></div>
+    <div id="text-wrap"><div id="text"></div><span id="cursor"></span></div>
     <div class="outro" id="outro">
       <img src="data:image/png;base64,${logoB64}">
       <div class="brand2">AntStreet</div>
@@ -556,6 +567,15 @@ async function main() {
         copyFrame(framePath(fi - dup), framePath(fi));
       }
       fi++;
+
+      // 줄바꿈 후 살짝 딜레이 (자연스러운 타이핑 느낌)
+      if (step.completed.endsWith('\n')) {
+        const nlPauseFrames = Math.round((NEWLINE_PAUSE_MS / 1000) * FPS);
+        for (let np = 0; np < nlPauseFrames; np++) {
+          copyFrame(framePath(fi - 1), framePath(fi));
+          fi++;
+        }
+      }
 
       if ((s + 1) % 5 === 0 || s === steps.length - 1) {
         process.stdout.write(`\r    ${s + 1}/${steps.length} 키 입력`);
