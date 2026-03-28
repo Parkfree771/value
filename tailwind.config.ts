@@ -61,8 +61,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ['var(--font-body)', 'Inter', 'sans-serif'],
-        body: ['var(--font-body)', 'Inter', 'sans-serif'],
+        heading: ['var(--font-inter)', 'var(--font-noto)', 'Inter', 'Noto Sans KR', 'sans-serif'],
+        body: ['var(--font-inter)', 'var(--font-noto)', 'Inter', 'Noto Sans KR', 'sans-serif'],
+        mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
         pixel: ["'Galmuri11'", 'monospace'],
       },
       boxShadow: {

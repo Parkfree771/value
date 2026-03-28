@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
 import dynamic from "next/dynamic";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -82,7 +82,19 @@ export const metadata: Metadata = {
 
 const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-body",
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const notoSansKR = Noto_Sans_KR({
+  subsets: ["latin"],
+  variable: "--font-noto",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -144,7 +156,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="ko" className={`${inter.variable} ${notoSansKR.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
         {/* Google Search Console 인증 */}
         <meta name="google-site-verification" content="thbsZW7iVjN1ZXSUejzzm9S_b-3uTv-Qv0S-tGiqGII" />
