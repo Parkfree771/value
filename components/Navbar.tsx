@@ -2,7 +2,6 @@
 
 import { useState, memo, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -54,9 +53,8 @@ const Navbar = memo(function Navbar() {
           <div className="flex justify-between items-center h-16">
           {/* Logo + Navigation Links */}
           <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-            <Image src="/logo.webp" alt="AntStreet" width={48} height={48} className="sm:w-14 sm:h-14" priority />
-            <span className="brand-title text-xl sm:text-2xl leading-none">
+          <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
+            <span className="brand-title text-2xl sm:text-3xl leading-none">
               AntStreet
             </span>
           </Link>
@@ -273,8 +271,7 @@ const Navbar = memo(function Navbar() {
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b-[3px] border-[var(--pixel-border-muted)]">
-            <Link href="/" onClick={closeMobileMenu} className="flex items-center gap-2">
-              <Image src="/logo.webp" alt="AntStreet" width={40} height={40} />
+            <Link href="/" onClick={closeMobileMenu} className="flex items-center">
               <span className="brand-title text-lg leading-none">
                 AntStreet
               </span>
