@@ -34,10 +34,10 @@ export default function PortfolioSummary({ portfolio }: PortfolioSummaryProps) {
           <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold tracking-wider mb-1">
             포트폴리오 가치
           </p>
-          <p className="text-lg sm:text-xl font-black text-foreground">
+          <p className="text-lg sm:text-xl font-black font-mono text-foreground">
             {formatValue(portfolio.total_value_curr)}
           </p>
-          <p className={`text-xs font-bold ${valueChange >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
+          <p className={`text-xs font-bold font-mono ${valueChange >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
             {valueChange >= 0 ? '+' : ''}{valueChangePct.toFixed(1)}% vs Q3
           </p>
         </div>
@@ -47,7 +47,7 @@ export default function PortfolioSummary({ portfolio }: PortfolioSummaryProps) {
           <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold tracking-wider mb-1">
             보유 종목
           </p>
-          <p className="text-lg sm:text-xl font-black text-foreground">
+          <p className="text-lg sm:text-xl font-black font-mono text-foreground">
             {portfolio.holdings_count}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -61,9 +61,9 @@ export default function PortfolioSummary({ portfolio }: PortfolioSummaryProps) {
             신규 / 매도
           </p>
           <p className="text-lg sm:text-xl font-black text-foreground">
-            <span className="text-ant-red-600 dark:text-ant-red-400">{newBuyCount}</span>
+            <span className="text-ant-red-600 dark:text-ant-red-400 font-mono">{newBuyCount}</span>
             <span className="text-gray-400 mx-1">/</span>
-            <span className="text-blue-600 dark:text-blue-400">{soldOutCount}</span>
+            <span className="text-blue-600 dark:text-blue-400 font-mono">{soldOutCount}</span>
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             신규매수 / 전량매도

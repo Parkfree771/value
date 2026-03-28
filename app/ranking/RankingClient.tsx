@@ -372,7 +372,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                         ? 'text-red-600 dark:text-red-400'
                         : 'text-blue-600 dark:text-blue-400'
                     }`}>
-                      {investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%
+                      <span className="font-mono">{investor.avgReturnRate >= 0 ? '+' : ''}{investor.avgReturnRate.toFixed(2)}%</span>
                     </div>
                     <div className="text-xs text-gray-500 dark:text-gray-400 hidden sm:block">평균 수익률</div>
                   </div>

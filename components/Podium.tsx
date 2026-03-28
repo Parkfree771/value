@@ -40,7 +40,7 @@ const Podium = memo(function Podium({ topThree }: PodiumProps) {
         <div className={rankClass}>{rank}</div>
         <div className={nameClass}>{data.name}</div>
         <div className={returnClass}>
-          {data.avgReturnRate >= 0 ? '+' : ''}{data.avgReturnRate.toFixed(2)}%
+          <span className="font-mono">{data.avgReturnRate >= 0 ? '+' : ''}{data.avgReturnRate.toFixed(2)}%</span>
         </div>
       </Link>
     );

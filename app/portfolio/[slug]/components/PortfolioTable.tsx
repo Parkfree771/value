@@ -177,7 +177,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                       <span className={`text-sm font-bold ${
                         h.shares_change_pct > 0 ? 'text-red-500' : 'text-blue-500'
                       }`}>
-                        {h.shares_change_pct > 0 ? '+' : ''}{h.shares_change_pct.toFixed(1)}%
+                        <span className="font-mono">{h.shares_change_pct > 0 ? '+' : ''}{h.shares_change_pct.toFixed(1)}%</span>
                       </span>
                     ) : (
                       <span className="text-sm text-gray-400">0%</span>
@@ -186,28 +186,28 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
 
                   {/* 주식수 */}
                   <td className="px-3 py-3 text-right hidden md:table-cell">
-                    <span className="text-sm text-foreground">
+                    <span className="text-sm text-foreground font-mono">
                       {h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}
                     </span>
                   </td>
 
                   {/* 평가액 */}
                   <td className="px-3 py-3 text-right">
-                    <span className="text-sm text-foreground font-bold">
+                    <span className="text-sm text-foreground font-bold font-mono">
                       {h.value_curr > 0 ? formatValue(h.value_curr) : '—'}
                     </span>
                   </td>
 
                   {/* 비중 */}
                   <td className="px-3 py-3 text-right">
-                    <span className="text-sm text-foreground font-bold">
+                    <span className="text-sm text-foreground font-bold font-mono">
                       {h.weight_curr > 0 ? `${h.weight_curr.toFixed(2)}%` : '—'}
                     </span>
                   </td>
 
                   {/* 공시일 가격 (KIS API 과거 종가) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    <span className="text-sm text-foreground">
+                    <span className="text-sm text-foreground font-mono">
                       {h.price_at_filing != null
                         ? `$${h.price_at_filing.toFixed(2)}`
                         : h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
@@ -216,7 +216,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
 
                   {/* 현재가 (Storage JSON) */}
                   <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    <span className="text-sm text-foreground font-bold">
+                    <span className="text-sm text-foreground font-bold font-mono">
                       {h.ticker && prices[h.ticker]?.currentPrice != null
                         ? `$${prices[h.ticker].currentPrice.toFixed(2)}`
                         : '—'}
@@ -235,7 +235,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                       return (
                         <span className={`text-sm font-bold ${
                           rate > 0 ? 'text-red-500' : rate < 0 ? 'text-blue-500' : 'text-gray-400'
-                        }`}>
+                        } font-mono`}>
                           {rate > 0 ? '+' : ''}{rate.toFixed(1)}%
                         </span>
                       );

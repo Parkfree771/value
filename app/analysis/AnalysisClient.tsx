@@ -421,10 +421,10 @@ export default function AnalysisClient() {
               </div>
               {stockProfile && (
                 <div className="text-right flex-shrink-0">
-                  <p className="font-heading text-2xl sm:text-3xl font-black text-[var(--foreground)] leading-none tabular-nums">{fmtPrice(stockProfile.currentPrice)}</p>
+                  <p className="font-heading text-2xl sm:text-3xl font-black text-[var(--foreground)] leading-none font-mono tabular-nums">{fmtPrice(stockProfile.currentPrice)}</p>
                   <div className="flex items-center justify-end gap-3 mt-1.5">
-                    {stockProfile.per && <span className="font-heading text-sm text-gray-500 dark:text-gray-400">PER <b className="text-[var(--foreground)] tabular-nums">{stockProfile.per.toFixed(1)}</b></span>}
-                    {stockProfile.pbr && <span className="font-heading text-sm text-gray-500 dark:text-gray-400">PBR <b className="text-[var(--foreground)] tabular-nums">{stockProfile.pbr.toFixed(2)}</b></span>}
+                    {stockProfile.per && <span className="font-heading text-sm text-gray-500 dark:text-gray-400">PER <b className="text-[var(--foreground)] font-mono tabular-nums">{stockProfile.per.toFixed(1)}</b></span>}
+                    {stockProfile.pbr && <span className="font-heading text-sm text-gray-500 dark:text-gray-400">PBR <b className="text-[var(--foreground)] font-mono tabular-nums">{stockProfile.pbr.toFixed(2)}</b></span>}
                   </div>
                 </div>
               )}

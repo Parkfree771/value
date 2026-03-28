@@ -227,7 +227,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
                 {selectedStock.symbol} · {selectedStock.exchange === 'CRYPTO' ? '코인' : selectedStock.exchange}
               </div>
               {selectedStock.exchange !== 'CRYPTO' && (
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 grid grid-cols-2 gap-2">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 grid grid-cols-2 gap-2 font-mono">
                   <div>현재가: {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}</div>
                   {selectedStock.per && selectedStock.per > 0 && <div>PER: {selectedStock.per.toFixed(2)}</div>}
                   {selectedStock.pbr && selectedStock.pbr > 0 && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}

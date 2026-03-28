@@ -246,7 +246,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
                 )}
                 <OpinionBadge opinion={report.opinion} />
               </div>
-              <span className={`flex-shrink-0 ml-4 text-xl sm:text-2xl font-black tabular-nums ${
+              <span className={`flex-shrink-0 ml-4 text-xl sm:text-2xl font-black font-mono tabular-nums ${
                 report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
                 report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
                 'text-gray-900 dark:text-white'
@@ -271,11 +271,11 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }}>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">작성가</div>
-                <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
+                <div className="text-sm sm:text-base font-bold font-mono tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.initialPrice?.toLocaleString()}</div>
               </div>
               <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">현재가</div>
-                <div className={`text-sm sm:text-base font-bold tabular-nums mt-0.5 ${
+                <div className={`text-sm sm:text-base font-bold font-mono tabular-nums mt-0.5 ${
                   report.returnRate > 0 ? 'text-red-600 dark:text-red-500' :
                   report.returnRate < 0 ? 'text-blue-600 dark:text-blue-500' :
                   'text-gray-800 dark:text-gray-100'
@@ -283,7 +283,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
               <div style={{ flex: 1, padding: '10px 16px' }}>
                 <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">목표가</div>
-                <div className="text-sm sm:text-base font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.targetPrice?.toLocaleString() || '-'}</div>
+                <div className="text-sm sm:text-base font-bold font-mono tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.targetPrice?.toLocaleString() || '-'}</div>
               </div>
             </div>
             {/* 3행: PER · PBR · EPS (코인이면 숨김) */}
@@ -291,15 +291,15 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               <div style={{ display: 'flex', borderTop: '1px solid var(--pixel-border-muted)' }} className="bg-gray-50/50 dark:bg-gray-800/30">
                 <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
                   <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">PER</div>
-                  <div className="text-sm font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.per?.toFixed(1) || '-'}</div>
+                  <div className="text-sm font-bold font-mono tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.per?.toFixed(1) || '-'}</div>
                 </div>
                 <div style={{ flex: 1, padding: '10px 16px', borderRight: '1px solid var(--pixel-border-muted)' }}>
                   <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">PBR</div>
-                  <div className="text-sm font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.pbr?.toFixed(2) || '-'}</div>
+                  <div className="text-sm font-bold font-mono tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.pbr?.toFixed(2) || '-'}</div>
                 </div>
                 <div style={{ flex: 1, padding: '10px 16px' }}>
                   <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">EPS</div>
-                  <div className="text-sm font-bold tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.eps?.toFixed(0) || '-'}</div>
+                  <div className="text-sm font-bold font-mono tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.stockData?.eps?.toFixed(0) || '-'}</div>
                 </div>
               </div>
             )}

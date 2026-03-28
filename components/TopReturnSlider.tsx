@@ -133,7 +133,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                   {getRankNumber(item.rank)}
                 </div>
                 <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white truncate">{item.stockName} <span className="font-normal text-xs text-gray-400 font-mono">{item.ticker}</span></span>
-                <span className={`text-sm font-bold tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
+                <span className={`text-sm font-bold font-mono tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
                   {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
                 </span>
               </div>
@@ -172,7 +172,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
 
                   {/* Return Rate */}
                   <div className="mb-2 h-[40px] flex items-center">
-                    <div className={`text-3xl font-black font-heading ${getReturnColorClass(item.returnRate)}`}>
+                    <div className={`text-3xl font-black font-heading font-mono ${getReturnColorClass(item.returnRate)}`}>
                       {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
                     </div>
                   </div>

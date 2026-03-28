@@ -211,7 +211,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
                   ? 'text-blue-600 dark:text-blue-400'
                   : 'text-gray-600 dark:text-gray-400'
               }`}>
-                {displayReturnRate > 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%
+                <span className="font-mono">{displayReturnRate > 0 ? '+' : ''}{displayReturnRate.toFixed(2)}%</span>
               </div>
               {event.base_price && displayPrice && (
                 <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-mono">

@@ -98,7 +98,7 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
                 <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate">{report.title}</h2>
               </div>
               <div className={`text-right flex-shrink-0 ${getReturnColorClass(report.returnRate)}`}>
-                <div className="text-base sm:text-2xl font-black font-heading tracking-tight">
+                <div className="text-base sm:text-2xl font-black font-heading font-mono tracking-tight">
                   {formatReturn(report.returnRate)}
                 </div>
               </div>
@@ -108,11 +108,11 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
             <div className="flex gap-4 sm:gap-6 mb-1.5 sm:mb-3 text-xs sm:text-sm">
               <div>
                 <span className="text-gray-500 dark:text-gray-400">매수 </span>
-                <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(report.initialPrice, currency)}</span>
+                <span className="font-semibold font-mono text-gray-900 dark:text-white">{formatPrice(report.initialPrice, currency)}</span>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400">현재 </span>
-                <span className={`font-semibold ${getReturnColorClass(report.returnRate)}`}>
+                <span className={`font-semibold font-mono ${getReturnColorClass(report.returnRate)}`}>
                   {formatPrice(report.currentPrice, currency)}
                 </span>
               </div>

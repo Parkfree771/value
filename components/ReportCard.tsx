@@ -161,7 +161,7 @@ const ReportCard = memo(function ReportCard({
             <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate">{title}</h2>
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
-            <div className="text-base sm:text-2xl font-black font-heading tracking-tight">
+            <div className="text-base sm:text-2xl font-black font-heading font-mono tracking-tight">
               {formatReturn(returnRate)}
             </div>
           </div>
@@ -171,12 +171,12 @@ const ReportCard = memo(function ReportCard({
         <div className="mb-2 sm:mb-4 text-xs sm:text-sm flex items-center gap-2 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
           <span>
             매수{' '}
-            <span className="font-semibold text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
+            <span className="font-semibold font-mono text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
           </span>
           <span className="text-gray-300 dark:text-gray-600">|</span>
           <span>
             현재{' '}
-            <span className={`font-semibold ${getReturnColorClass(returnRate)}`}>{formatPrice(currentPrice, currency)}</span>
+            <span className={`font-semibold font-mono ${getReturnColorClass(returnRate)}`}>{formatPrice(currentPrice, currency)}</span>
           </span>
         </div>
 
