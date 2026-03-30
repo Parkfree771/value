@@ -48,9 +48,9 @@ const Navbar = memo(function Navbar() {
         />
       )}
 
-      <nav className="bg-[var(--pixel-bg)] border-b-[3px] border-[var(--pixel-border-muted)] shadow-pixel sticky top-0 z-50 transition-colors">
+      <nav className="bg-[var(--theme-bg)] border-b-2 border-[var(--theme-border-muted)] shadow-md sticky top-0 z-50 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-12 sm:h-14">
           {/* Logo + Navigation Links */}
           <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
@@ -95,7 +95,7 @@ const Navbar = memo(function Navbar() {
               href="/guru-tracker"
               className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
                 isActive('/guru-tracker')
-                  ? 'text-white bg-neon-orange border-2 border-neon-orange-700 shadow-pixel-sm'
+                  ? 'text-white bg-neon-orange border-2 border-neon-orange-700 shadow-sm'
                   : 'pixel-nav-inactive'
               }`}
             >
@@ -163,7 +163,7 @@ const Navbar = memo(function Navbar() {
             {/* Theme Toggle Button */}
             <button
               onClick={toggleTheme}
-              className="p-1.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] transition-all"
+              className="p-1.5 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] rounded-lg transition-all"
               aria-label="Toggle theme"
             >
               {!mounted ? (
@@ -186,18 +186,18 @@ const Navbar = memo(function Navbar() {
                     <img
                       src={user.photoURL}
                       alt="프로필"
-                      className="w-8 h-8 rounded-full border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all"
+                      className="w-8 h-8 rounded-full border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] bg-[var(--pixel-accent)] flex items-center justify-center text-white font-pixel text-xs font-bold transition-all">
+                    <div className="w-8 h-8 rounded-full border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] bg-[var(--theme-accent)] flex items-center justify-center text-white font-semibold text-xs font-bold transition-all">
                       {(user.displayName || user.email || '?')[0]}
                     </div>
                   )}
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--pixel-accent)] transition-colors"
+                  className="font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors"
                 >
                   로그아웃
                 </button>
@@ -206,13 +206,13 @@ const Navbar = memo(function Navbar() {
               <>
                 <Link
                   href="/login"
-                  className="font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--pixel-accent)] transition-colors"
+                  className="font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors"
                 >
                   로그인
                 </Link>
                 <Link
                   href="/signup"
-                  className="px-3 py-1.5 text-sm font-bold bg-ant-red text-white border-2 border-ant-red-800 shadow-pixel-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all"
+                  className="btn-primary !py-1.5 !px-3 !text-sm"
                 >
                   회원가입
                 </Link>
@@ -225,7 +225,7 @@ const Navbar = memo(function Navbar() {
             {/* Theme Toggle for Mobile */}
             <button
               onClick={toggleTheme}
-              className="p-1.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-[var(--pixel-accent)] transition-all"
+              className="p-1.5 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] rounded-lg transition-all"
               aria-label="Toggle theme"
             >
               {!mounted ? (
@@ -264,13 +264,13 @@ const Navbar = memo(function Navbar() {
 
       {/* Mobile Sidebar Menu */}
       <div
-        className={`fixed top-0 right-0 h-full w-64 sm:w-72 bg-[var(--pixel-bg)] border-l-[3px] border-[var(--pixel-border)] shadow-pixel-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-64 sm:w-72 bg-[var(--theme-bg)] border-l-2 border-[var(--theme-border)] shadow-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 border-b-[3px] border-[var(--pixel-border-muted)]">
+          <div className="flex items-center justify-between p-4 border-b-2 border-[var(--theme-border-muted)]">
             <Link href="/" onClick={closeMobileMenu} className="flex items-center">
               <span className="brand-title text-lg leading-none" data-text="AntStreet">
                 AntStreet
@@ -328,7 +328,7 @@ const Navbar = memo(function Navbar() {
                 onClick={closeMobileMenu}
                 className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
                   isActive('/guru-tracker')
-                    ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-l-[3px] border-orange-500'
+                    ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-l-2 border-orange-500'
                     : 'pixel-nav-mobile-inactive'
                 }`}
               >
@@ -398,7 +398,7 @@ const Navbar = memo(function Navbar() {
           </div>
 
           {/* Sidebar Footer */}
-          <div className="border-t-[3px] border-[var(--pixel-border-muted)] p-3">
+          <div className="border-t-2 border-[var(--theme-border-muted)] p-3">
             {user ? (
               <div className="flex flex-col space-y-2">
                 <Link href="/mypage" onClick={closeMobileMenu} className="flex items-center gap-3 px-4 py-2.5">
@@ -406,21 +406,21 @@ const Navbar = memo(function Navbar() {
                     <img
                       src={user.photoURL}
                       alt="프로필"
-                      className="w-9 h-9 rounded-full border-2 border-[var(--pixel-border-muted)]"
+                      className="w-9 h-9 rounded-full border-2 border-[var(--theme-border-muted)]"
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <div className="w-9 h-9 rounded-full border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-accent)] flex items-center justify-center text-white font-pixel text-sm font-bold">
+                    <div className="w-9 h-9 rounded-full border-2 border-[var(--theme-border-muted)] bg-[var(--theme-accent)] flex items-center justify-center text-white font-semibold text-sm font-bold">
                       {(user.displayName || user.email || '?')[0]}
                     </div>
                   )}
-                  <span className="font-pixel text-sm font-bold text-gray-700 dark:text-gray-300">
+                  <span className="font-semibold text-sm font-bold text-gray-700 dark:text-gray-300">
                     {user.displayName || user.email}
                   </span>
                 </Link>
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-2.5 font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--pixel-accent)] transition-colors text-center w-full"
+                  className="px-4 py-2.5 font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors text-center w-full"
                 >
                   로그아웃
                 </button>
@@ -430,14 +430,14 @@ const Navbar = memo(function Navbar() {
                 <Link
                   href="/login"
                   onClick={closeMobileMenu}
-                  className="px-4 py-2.5 font-pixel text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--pixel-accent)] transition-colors text-center block"
+                  className="px-4 py-2.5 font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors text-center block"
                 >
                   로그인
                 </Link>
                 <Link
                   href="/signup"
                   onClick={closeMobileMenu}
-                  className="px-4 py-2.5 text-base font-bold bg-ant-red text-white border-2 border-ant-red-800 shadow-pixel-sm hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all text-center"
+                  className="btn-primary !py-2 !text-sm text-center block"
                 >
                   회원가입
                 </Link>
