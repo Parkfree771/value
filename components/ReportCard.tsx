@@ -145,17 +145,17 @@ const ReportCard = memo(function ReportCard({
         {/* Header */}
         <div className="flex justify-between items-start mb-2 sm:mb-4 gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2 overflow-hidden whitespace-nowrap">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2 overflow-hidden">
               <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{stockName}</h3>
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>
+              <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>
               <span className="flex-shrink-0"><OpinionBadge opinion={opinion} /></span>
               {themes && themes.length > 0 && themes.slice(0, 2).map(themeId => (
-                <span key={themeId} className="font-pixel text-[10px] px-1.5 py-0.5 border border-[var(--pixel-border-muted)] text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <span key={themeId} className="text-[10px] px-1 sm:px-1.5 py-0.5 border border-[var(--theme-border-muted)] rounded text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">
                   #{THEME_NAMES[themeId] || themeId}
                 </span>
               ))}
               {themes && themes.length > 2 && (
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 flex-shrink-0">+{themes.length - 2}</span>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">+{themes.length - 2}</span>
               )}
             </div>
             <h2 className="text-xs sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate">{title}</h2>
@@ -168,7 +168,7 @@ const ReportCard = memo(function ReportCard({
         </div>
 
         {/* Price Info - 한 줄 */}
-        <div className="mb-2 sm:mb-4 text-xs sm:text-sm flex items-center gap-2 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
+        <div className="mb-2 sm:mb-4 text-[11px] sm:text-sm flex items-center gap-1.5 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
           <span>
             매수{' '}
             <span className="font-semibold font-mono text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
@@ -181,7 +181,7 @@ const ReportCard = memo(function ReportCard({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3 gap-1 overflow-hidden whitespace-nowrap">
+        <div className="flex items-center text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-2 sm:pt-3 gap-1 overflow-hidden whitespace-nowrap">
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(author)}`; }}
           >

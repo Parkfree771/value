@@ -1,8 +1,9 @@
 /* ── 기본 split 모드 (fallback) ── */
 .container {
   display: flex;
-  border: 2px solid var(--pixel-border-muted);
-  background: var(--pixel-bg-card);
+  border: 2px solid var(--theme-border-muted);
+  border-radius: 12px;
+  background: var(--theme-bg-card);
   overflow: hidden;
   height: 600px;
   min-height: 400px;
@@ -26,7 +27,7 @@
 
 .divider {
   width: 3px;
-  background: var(--pixel-border-muted);
+  background: var(--theme-border-muted);
   flex-shrink: 0;
 }
 
@@ -34,8 +35,9 @@
 .editorStandalone {
   display: flex;
   flex-direction: column;
-  border: 2px solid var(--pixel-border-muted);
-  background: var(--pixel-bg-card);
+  border: 2px solid var(--theme-border-muted);
+  border-radius: 12px;
+  background: var(--theme-bg-card);
   overflow: hidden;
   height: 100%;
   min-height: 0;
@@ -45,8 +47,9 @@
 .previewStandalone {
   display: flex;
   flex-direction: column;
-  border: 2px solid var(--pixel-border-muted);
-  background: var(--pixel-bg-card);
+  border: 2px solid var(--theme-border-muted);
+  border-radius: 12px;
+  background: var(--theme-bg-card);
   overflow: hidden;
   height: 100%;
   min-height: 0;
@@ -58,8 +61,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-bottom: 2px solid var(--pixel-border-muted);
-  background: var(--pixel-bg);
+  border-bottom: 2px solid var(--theme-border-muted);
+  background: var(--theme-bg);
   flex-shrink: 0;
 }
 
@@ -109,7 +112,13 @@
   min-height: 0;
 }
 
-/* 실제 상세 페이지 본문 너비에 맞춤 (max-w-7xl - 사이드바 - padding) */
+@media (max-width: 639px) {
+  .previewContent {
+    padding: 16px 12px;
+  }
+}
+
+/* 실제 상세 페이지 본문 너비에 맞춤 */
 .previewContent > :global(.article-content) {
   max-width: 860px;
   margin: 0 auto;

@@ -55,13 +55,12 @@ export default function LoginPage() {
       <div className="w-full max-w-[400px]">
         {/* Header — 대표 로고 + 브랜드 타이틀 */}
         <div className="text-center mb-10">
-          <div className="mx-auto w-full mb-5 overflow-hidden relative" style={{ height: '192px' }}>
+          <div className="mx-auto w-full mb-5 overflow-hidden relative h-[140px] sm:h-[192px]">
             {[0, 1, 2].map((antIndex) => (
               <div
                 key={antIndex}
-                className="ant-walk absolute h-full"
+                className="ant-walk absolute h-full w-[140px] sm:w-[192px]"
                 style={{
-                  width: '192px',
                   animationDelay: `${antIndex * -2}s`,
                 }}
               >
@@ -74,7 +73,7 @@ export default function LoginPage() {
                     height={192}
                     priority={antIndex === 0 && i === 0}
                     style={{ visibility: i === frame ? 'visible' : 'hidden' }}
-                    className="absolute top-1/2 left-0 -translate-y-1/2"
+                    className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] h-[140px] sm:w-[192px] sm:h-[192px]"
                   />
                 ))}
               </div>
@@ -90,7 +89,7 @@ export default function LoginPage() {
             `}</style>
           </div>
           <div className="flex items-center justify-center gap-2 mb-2">
-            <h1 className="brand-title text-3xl leading-none">
+            <h1 className="brand-title text-3xl leading-none" data-text="AntStreet">
               AntStreet
             </h1>
           </div>
@@ -106,7 +105,7 @@ export default function LoginPage() {
           </h2>
 
           {error && (
-            <div className="mb-5 p-3 border-2 border-[var(--pixel-accent)] bg-red-500/10 text-xs text-red-600 dark:text-red-400">
+            <div className="mb-5 p-3 border-2 border-red-500 bg-red-500/10 text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -115,7 +114,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border-2 border-[var(--pixel-border-muted)] shadow-pixel-sm hover:border-[var(--pixel-accent)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border-2 border-[var(--theme-border-muted)] shadow-pixel-sm hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ fontFamily: "'Roboto', 'Noto Sans KR', sans-serif" }}
           >
             {/* Google G Logo */}
@@ -131,7 +130,7 @@ export default function LoginPage() {
           </button>
 
           {/* Coming Soon Section */}
-          <div className="mt-6 pt-6 border-t-[3px] border-[var(--pixel-border-muted)]">
+          <div className="mt-6 pt-6 border-t-2 border-[var(--theme-border-muted)]">
             <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-4">
               추가 로그인 옵션 (준비 중)
             </p>
@@ -165,15 +164,15 @@ export default function LoginPage() {
         {/* Terms */}
         <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
           로그인 시{' '}
-          <Link href="/terms" className="text-[var(--pixel-accent)] hover:underline">
+          <Link href="/terms" className="text-[var(--theme-accent)] hover:underline">
             이용약관
           </Link>
           ,{' '}
-          <Link href="/privacy" className="text-[var(--pixel-accent)] hover:underline">
+          <Link href="/privacy" className="text-[var(--theme-accent)] hover:underline">
             개인정보처리방침
           </Link>
           ,{' '}
-          <Link href="/disclaimer" className="text-[var(--pixel-accent)] hover:underline">
+          <Link href="/disclaimer" className="text-[var(--theme-accent)] hover:underline">
             투자 면책조항
           </Link>
           에 동의하게 됩니다.

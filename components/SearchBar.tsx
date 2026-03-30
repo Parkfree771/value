@@ -143,7 +143,7 @@ const SearchBar = memo(function SearchBar({
     return (
       <>
         {text.substring(0, index)}
-        <span className="font-bold text-red-600 dark:text-red-400">
+        <span className="font-bold text-[var(--theme-accent)] dark:text-[var(--theme-accent-light)]">
           {text.substring(index, index + query.length)}
         </span>
         {text.substring(index + query.length)}
@@ -166,14 +166,14 @@ const SearchBar = memo(function SearchBar({
 
   return (
     <div className="mb-4 sm:mb-6" ref={searchRef}>
-      <div className="flex gap-2 max-w-md">
+      <div className="flex gap-2 w-full sm:max-w-md">
         {/* 검색 버튼 (왼쪽) */}
         <button
           type="button"
-          className="flex-shrink-0 font-heading font-bold tracking-wide text-white text-xs sm:text-sm px-3 sm:px-5 py-1.5 sm:py-2 border-[3px] border-[var(--pixel-accent-dark)] transition-all duration-300 hover:brightness-110 active:translate-y-[1px]"
+          className="flex-shrink-0 font-heading font-bold tracking-wide text-white text-xs sm:text-sm px-3 sm:px-5 py-1.5 sm:py-2 border-2 border-[var(--theme-accent-dark)] transition-all duration-300 hover:brightness-110 active:translate-y-[1px]"
           style={{
-            backgroundColor: 'var(--pixel-accent)',
-            boxShadow: '0 2px 8px rgba(153,27,27,0.2)',
+            backgroundColor: 'var(--theme-accent)',
+            boxShadow: '0 2px 8px rgba(59,80,181,0.2)',
           }}
           aria-label="검색"
         >
@@ -197,7 +197,7 @@ const SearchBar = memo(function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             aria-label="검색어 입력"
-            className="w-full font-heading font-medium tracking-wide bg-[var(--pixel-bg-card)] text-[var(--foreground)] border-[3px] border-[var(--pixel-border-muted)] pl-3 pr-8 sm:pl-4 sm:pr-10 py-1.5 sm:py-2 text-xs sm:text-sm outline-none transition-all duration-300 focus:border-[var(--pixel-accent)] placeholder:text-gray-400 dark:placeholder:text-gray-500"
+            className="w-full font-heading font-medium tracking-wide bg-[var(--theme-bg-card)] text-[var(--foreground)] border-2 border-[var(--theme-border-muted)] pl-3 pr-8 sm:pl-4 sm:pr-10 py-1.5 sm:py-2 text-xs sm:text-sm outline-none transition-all duration-300 focus:border-[var(--theme-accent)] placeholder:text-gray-400 dark:placeholder:text-gray-500"
             style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
           />
           {searchQuery && (
@@ -206,7 +206,7 @@ const SearchBar = memo(function SearchBar({
                 setSearchQuery('');
                 setShowSuggestions(false);
               }}
-              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--pixel-accent)] transition-colors"
+              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--theme-accent)] transition-colors"
               aria-label="검색어 지우기"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -221,7 +221,7 @@ const SearchBar = memo(function SearchBar({
 
           {/* 자동완성 드롭다운 */}
           {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
-            <div className="absolute z-10 w-full mt-2 bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border)] shadow-pixel max-h-60 sm:max-h-80 overflow-y-auto">
+            <div className="absolute z-10 w-full mt-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] shadow-pixel max-h-60 sm:max-h-80 overflow-y-auto">
               {isLoading ? (
                 <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                   검색 중...
@@ -232,12 +232,12 @@ const SearchBar = memo(function SearchBar({
                     key={`${stock.exchange}-${stock.symbol}`}
                     onClick={() => handleSelectSuggestion(stock)}
                     onMouseEnter={() => setFocusedIndex(index)}
-                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/20 transition-all border-b-[2px] border-[var(--pixel-border-muted)] last:border-b-0 ${
-                      focusedIndex === index ? 'bg-red-50 dark:bg-red-900/20 border-l-[3px] border-l-[var(--pixel-accent)]' : ''
+                    className={`w-full px-3 sm:px-4 py-2 sm:py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all border-b-[2px] border-[var(--theme-border-muted)] last:border-b-0 ${
+                      focusedIndex === index ? 'bg-blue-50 dark:bg-blue-900/10 border-l-2 border-l-[var(--theme-accent)]' : ''
                     }`}
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-bold border-2 flex-shrink-0 font-pixel ${getExchangeBadgeColor(stock.exchange)}`}>
+                      <span className={`px-1.5 sm:px-2 py-0.5 text-xs font-bold border-2 flex-shrink-0 ${getExchangeBadgeColor(stock.exchange)}`}>
                         {getExchangeLabel(stock.exchange)}
                       </span>
                       <div className="flex-1 min-w-0">

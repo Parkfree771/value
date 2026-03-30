@@ -428,6 +428,27 @@ export function sanitizeCssForHtmlMode(css: string): string {
 export function scopeCssSelectors(css: string, scopeClass: string): string {
   if (!css) return '';
 
+  // 사용자 CSS를 스코핑한 뒤, 모바일 반응형 보정을 자동 주입
+  const scoped = _scopeCssSelectorsInner(css, scopeClass);
+
+  // 모바일 보정: 사용자 CSS 내 고정 width/font-size를 모바일에서 안전하게 제한
+  const mobileOverrides = `
+@media (max-width: 639px) {
+  .${scopeClass} * { max-width: 100% !important; box-sizing: border-box !important; }
+  .${scopeClass} img, .${scopeClass} svg { max-width: 100% !important; height: auto !important; }
+  .${scopeClass} table { display: block !important; overflow-x: auto !important; font-size: 13px !important; }
+  .${scopeClass} th, .${scopeClass} td { padding: 6px 8px !important; width: auto !important; min-width: 0 !important; word-break: break-word !important; white-space: normal !important; font-size: 12px !important; line-height: 1.4 !important; }
+  .${scopeClass} td *, .${scopeClass} th * { font-size: inherit !important; line-height: inherit !important; }
+  .${scopeClass} th { font-size: 11px !important; white-space: nowrap !important; }
+  .${scopeClass} col[style], .${scopeClass} td[style*="width"], .${scopeClass} th[style*="width"] { width: auto !important; min-width: 0 !important; }
+}`;
+
+  return scoped + mobileOverrides;
+}
+
+function _scopeCssSelectorsInner(css: string, scopeClass: string): string {
+  if (!css) return '';
+
   // CSS를 토큰 단위로 분리: at-rule 블록 vs 일반 규칙
   const tokens: string[] = [];
   let i = 0;
@@ -476,7 +497,7 @@ export function scopeCssSelectors(css: string, scopeClass: string): string {
           const openIdx = rule.indexOf('{');
           const header = rule.substring(0, openIdx + 1);
           const inner = rule.substring(openIdx + 1, rule.length - 1);
-          tokens.push(header + scopeCssSelectors(inner, scopeClass) + '}');
+          tokens.push(header + _scopeCssSelectorsInner(inner, scopeClass) + '}');
         }
         continue;
       }
