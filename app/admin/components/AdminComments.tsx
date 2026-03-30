@@ -42,7 +42,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]" />
+        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
       <div className="card-base overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[var(--pixel-bg)]">
+            <thead className="bg-[var(--theme-bg)]">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">댓글 내용</th>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">작성자</th>
@@ -81,7 +81,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
                 <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider">관리</th>
               </tr>
             </thead>
-            <tbody className="divide-y-[2px] divide-[var(--pixel-border-muted)]">
+            <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
               {paginated.map((comment) => (
                 <tr key={`${comment.postId}-${comment.id}`} className="hover:bg-red-50 dark:hover:bg-red-900/10">
                   <td className="px-4 py-3 text-xs max-w-xs">
@@ -91,7 +91,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
                   <td className="px-4 py-3">
                     <Link
                       href={`/reports/${comment.postId}`}
-                      className="text-xs text-[var(--pixel-accent)] hover:underline font-bold"
+                      className="text-xs text-[var(--theme-accent)] hover:underline font-bold"
                     >
                       보기
                     </Link>

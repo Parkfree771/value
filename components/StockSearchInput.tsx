@@ -270,15 +270,15 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
           {/* 검색 결과 드롭다운 */}
           {showResults && results.length > 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-[var(--pixel-bg-card)]
-                          border-[3px] border-[var(--pixel-border-muted)] shadow-pixel
+            <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-card)]
+                          border-2 border-[var(--theme-border-muted)] shadow-md
                           max-h-96 overflow-y-auto">
               {results.map((stock, index) => (
                 <button
                   key={`${stock.symbol}-${stock.exchange}-${index}`}
                   onClick={() => handleStockSelect(stock)}
                   className={`w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/10
-                            transition-colors border-b-[2px] border-[var(--pixel-border-muted)] last:border-b-0
+                            transition-colors border-b-[2px] border-[var(--theme-border-muted)] last:border-b-0
                             ${index === selectedIndex ? 'bg-red-50 dark:bg-red-900/10' : ''}`}
                 >
                   <div className="flex justify-between items-center">
@@ -318,8 +318,8 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
           {/* 검색 결과 없음 */}
           {showResults && !isLoading && query.length > 0 && results.length === 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-[var(--pixel-bg-card)]
-                          border-[3px] border-[var(--pixel-border-muted)] shadow-pixel p-4">
+            <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-card)]
+                          border-2 border-[var(--theme-border-muted)] shadow-md p-4">
               <p className="text-gray-500 dark:text-gray-400 text-center">
                 검색 결과가 없습니다
               </p>

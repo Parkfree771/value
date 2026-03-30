@@ -69,7 +69,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]" />
+        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
       </div>
     );
   }
@@ -105,7 +105,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
       <Card className="overflow-hidden" padding="none">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[var(--pixel-bg)]">
+            <thead className="bg-[var(--theme-bg)]">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">
                   제목
@@ -130,7 +130,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y-[2px] divide-[var(--pixel-border-muted)]">
+            <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
               {paginatedPosts.map((post) => (
                 <tr
                   key={post.id}
@@ -139,7 +139,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
                   <td className="px-4 py-3 max-w-[240px]">
                     <Link
                       href={`/reports/${post.id}`}
-                      className="text-xs text-[var(--pixel-accent)] hover:underline font-bold truncate block transition-colors"
+                      className="text-xs text-[var(--theme-accent)] hover:underline font-bold truncate block transition-colors"
                     >
                       {post.title}
                     </Link>

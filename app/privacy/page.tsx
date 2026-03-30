@@ -21,9 +21,9 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="p-8">
-        <h1 className="font-pixel text-2xl font-bold mb-8">개인정보처리방침</h1>
+        <h1 className="font-sans text-2xl font-bold mb-8">개인정보처리방침</h1>
 
-        <div className="space-y-6 font-pixel text-xs text-gray-700 dark:text-gray-300">
+        <div className="space-y-6 font-sans text-xs text-gray-700 dark:text-gray-300">
           <section>
             <p className="mb-4">
               AntStreet(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, &ldquo;개인정보 보호법&rdquo;, &ldquo;정보통신망 이용촉진 및
@@ -105,7 +105,7 @@ export default function PrivacyPage() {
             </ul>
 
             <h3 className="text-xs font-bold mb-2 mt-4">다. 회원 탈퇴 시 정보 처리</h3>
-            <div className="ml-6 p-4 bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)]">
+            <div className="ml-6 p-4 bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)]">
               <p className="mb-2">회원 탈퇴 시 개인정보는 다음과 같이 처리됩니다:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>닉네임, 프로필 사진, 자기소개 등: <strong>즉시 삭제 또는 익명화</strong></li>
@@ -191,7 +191,7 @@ export default function PrivacyPage() {
               회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및
               피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다:
             </p>
-            <div className="bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)] p-4 mt-3">
+            <div className="bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)] p-4 mt-3">
               <p><strong>개인정보 보호책임자</strong></p>
               <ul className="mt-2 space-y-1">
                 <li>이름: 박유로</li>
@@ -211,7 +211,7 @@ export default function PrivacyPage() {
             </p>
           </section>
 
-          <section className="pt-6 border-t-[3px] border-[var(--pixel-border-muted)]">
+          <section className="pt-6 border-t-[3px] border-[var(--theme-border-muted)]">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               <strong>시행일:</strong> 2026년 2월 1일
             </p>

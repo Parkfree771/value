@@ -76,17 +76,17 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
   const getCardInfo = (rank: number, isActive: boolean) => {
     if (rank === 1) {
       return {
-        className: 'border-[var(--pixel-accent)] bg-[var(--pixel-bg-card)]',
-        shadow: isActive ? '4px 4px 0px var(--pixel-accent)' : 'var(--shadow-md)',
+        className: 'border-[var(--theme-accent)] bg-[var(--theme-bg-card)]',
+        shadow: isActive ? '4px 4px 0px var(--theme-accent)' : 'var(--shadow-md)',
       };
     } else if (rank === 2) {
       return {
-        className: 'border-[#d97706] dark:border-[#b45309] bg-[var(--pixel-bg-card)]',
+        className: 'border-[#d97706] dark:border-[#b45309] bg-[var(--theme-bg-card)]',
         shadow: isActive ? '4px 4px 0px #d97706' : 'var(--shadow-md)',
       };
     } else if (rank === 3) {
       return {
-        className: 'border-[#9ca3af] dark:border-[#6b7280] bg-[var(--pixel-bg-card)]',
+        className: 'border-[#9ca3af] dark:border-[#6b7280] bg-[var(--theme-bg-card)]',
         shadow: isActive ? '4px 4px 0px #9ca3af' : 'var(--shadow-md)',
       };
     } else if (isActive) {
@@ -153,8 +153,8 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
               return (
               <Link key={item.id} href={`/reports/${item.id}`}>
                 <div
-                  className={`flex-shrink-0 w-80 p-5 transition-all cursor-pointer snap-start ${
-                    item.rank <= 3 ? 'border-[3px]' : 'border-2'
+                  className={`flex-shrink-0 w-80 p-5 rounded-xl transition-all cursor-pointer snap-start ${
+                    item.rank <= 3 ? 'border-2' : 'border-2'
                   } ${info.className} ${isActive ? 'scale-[1.02]' : ''}`}
                   style={info.shadow ? { boxShadow: info.shadow } : undefined}
                   onMouseEnter={() => setCurrentIndex(index)}

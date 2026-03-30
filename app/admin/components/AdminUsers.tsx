@@ -53,7 +53,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]" />
+        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
       </div>
     );
   }
@@ -93,8 +93,8 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
             onClick={() => setFilterTab(tab.key)}
             className={`px-4 py-2 text-xs font-bold border-2 transition-all ${
               filterTab === tab.key
-                ? 'bg-[var(--pixel-accent)] text-white border-[var(--pixel-accent-dark)] shadow-[2px_2px_0px_var(--pixel-accent-dark)]'
-                : 'bg-[var(--pixel-bg-card)] text-[var(--foreground)] border-[var(--pixel-border-muted)] shadow-[2px_2px_0px_rgba(0,0,0,0.3)] hover:border-[var(--pixel-accent)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.3)]'
+                ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)] shadow-[2px_2px_0px_var(--theme-accent-dark)]'
+                : 'bg-[var(--theme-bg-card)] text-[var(--foreground)] border-[var(--theme-border-muted)] shadow-[2px_2px_0px_rgba(0,0,0,0.3)] hover:border-[var(--theme-accent)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.3)]'
             }`}
           >
             {tab.label}
@@ -112,7 +112,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
       <Card className="overflow-hidden" padding="none">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-[var(--pixel-bg)]">
+            <thead className="bg-[var(--theme-bg)]">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider">
                   이메일
@@ -134,7 +134,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y-[2px] divide-[var(--pixel-border-muted)]">
+            <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
               {filteredUsers.map((user) => (
                 <tr
                   key={user.id}

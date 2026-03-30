@@ -18,7 +18,7 @@
 
 .profileCard {
   background: #1c1714;
-  border: 3px solid var(--pixel-border);
+  border: 2px solid var(--theme-border);
   box-shadow: var(--shadow-lg);
   padding: 1.5rem;
   color: white;
@@ -90,7 +90,7 @@
   width: 5rem;
   height: 5rem;
   background: #2e2722;
-  border: 3px solid var(--pixel-border);
+  border: 2px solid var(--theme-border);
   box-shadow: var(--shadow-md);
   display: flex;
   align-items: center;
@@ -141,9 +141,9 @@
   font-size: 0.625rem;
   font-weight: 700;
   padding: 2px 8px;
-  background: var(--pixel-accent);
+  background: var(--theme-accent);
   color: white;
-  border: 2px solid var(--pixel-accent-dark);
+  border: 2px solid var(--theme-accent-dark);
   box-shadow: var(--shadow-sm);
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -171,22 +171,22 @@
   font-size: 0.75rem;
   font-weight: 700;
   border: 2px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(59, 80, 181, 0.12);
   transition: all 0.1s ease;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.8);
 }
 
 .editButton:hover {
-  border-color: var(--pixel-accent);
+  border-color: var(--theme-accent);
   color: white;
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 3px rgba(59, 80, 181, 0.1);
 }
 
 .editButton:active {
   transform: translate(2px, 2px);
-  box-shadow: 0px 0px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: none;
 }
 
 .editButtonIcon {
@@ -328,7 +328,7 @@
 }
 
 .warningText {
-  font-family: 'Galmuri11', monospace;
+  font-family: 'Inter', sans-serif;
   font-size: 0.75rem;
   color: #92400e;
 }

@@ -108,7 +108,7 @@ export default function UserPage() {
           </p>
           <button
             onClick={() => router.back()}
-            className="btn-primary font-pixel"
+            className="btn-primary font-sans"
           >
             돌아가기
           </button>
@@ -135,11 +135,11 @@ export default function UserPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* 프로필 정보 */}
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[var(--pixel-accent)] border-[3px] border-pixel-accent-dark flex items-center justify-center text-white font-pixel text-xl sm:text-2xl font-bold shadow-pixel">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans text-xl sm:text-2xl font-bold shadow-md">
               {username[0]?.toUpperCase()}
             </div>
             <div>
-              <h1 className="font-pixel text-lg sm:text-xl font-bold">
+              <h1 className="font-sans text-lg sm:text-xl font-bold">
                 {username}
               </h1>
               <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">

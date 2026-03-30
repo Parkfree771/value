@@ -14,7 +14,7 @@ import { processUserWithdrawal } from '@/lib/users';
 import styles from './MyPage.module.css';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
-  loading: () => <div className="animate-pulse h-48 bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-48 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
 });
 
 export default function MyPage() {
@@ -379,8 +379,8 @@ export default function MyPage() {
         <div className="space-y-4">
           {loading ? (
             <div className="text-center py-12">
-              <div className="w-8 h-8 border-[3px] border-[var(--pixel-accent)] border-t-transparent animate-spin mx-auto mb-4" />
-              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
+              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent animate-spin mx-auto mb-4" />
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
             </div>
           ) : myReports.length > 0 ? (
             myReports.map((report) => (
@@ -393,13 +393,13 @@ export default function MyPage() {
             ))
           ) : (
             <div className="pixel-empty-state">
-              <div className="w-16 h-16 border-2 border-[var(--pixel-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <h3 className="font-pixel text-base font-bold mb-2">아직 작성한 리포트가 없습니다</h3>
-              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-6">첫 번째 투자 리포트를 작성해보세요!</p>
+              <h3 className="font-sans text-base font-bold mb-2">아직 작성한 리포트가 없습니다</h3>
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-6">첫 번째 투자 리포트를 작성해보세요!</p>
               <Link href="/write" className="btn-primary inline-flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -415,8 +415,8 @@ export default function MyPage() {
         <div className="space-y-4">
           {loading || bookmarkLoading ? (
             <div className="text-center py-12">
-              <div className="w-8 h-8 border-[3px] border-[var(--pixel-accent)] border-t-transparent animate-spin mx-auto mb-4" />
-              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
+              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent animate-spin mx-auto mb-4" />
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
             </div>
           ) : bookmarkedReports.length > 0 ? (
             bookmarkedReports.map((report) => (
@@ -424,13 +424,13 @@ export default function MyPage() {
             ))
           ) : (
             <div className="pixel-empty-state">
-              <div className="w-16 h-16 border-2 border-[var(--pixel-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
               </div>
-              <h3 className="font-pixel text-base font-bold mb-2">북마크한 리포트가 없습니다</h3>
-              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-6">관심있는 리포트를 북마크해보세요!</p>
+              <h3 className="font-sans text-base font-bold mb-2">북마크한 리포트가 없습니다</h3>
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-6">관심있는 리포트를 북마크해보세요!</p>
               <Link href="/" className="btn-primary inline-flex items-center gap-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -444,27 +444,27 @@ export default function MyPage() {
 
       {activeTab === 'settings' && (
         <div className="card-base overflow-hidden">
-          <div className="px-5 py-4 border-b-[3px] border-[var(--pixel-border-muted)]">
-            <h3 className="font-pixel text-base font-bold uppercase tracking-wider">계정 설정</h3>
+          <div className="px-5 py-4 border-b-[3px] border-[var(--theme-border-muted)]">
+            <h3 className="font-sans text-base font-bold uppercase tracking-wider">계정 설정</h3>
           </div>
           <div className="p-6">
-            <div className="py-4 border-b-2 border-[var(--pixel-border-muted)]">
-              <h4 className="font-pixel text-sm font-bold mb-1">이메일</h4>
-              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">{userEmail}</p>
+            <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
+              <h4 className="font-sans text-sm font-bold mb-1">이메일</h4>
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400">{userEmail}</p>
             </div>
 
-            <div className="py-4 border-b-2 border-[var(--pixel-border-muted)]">
-              <h4 className="font-pixel text-sm font-bold mb-1">알림 설정</h4>
+            <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
+              <h4 className="font-sans text-sm font-bold mb-1">알림 설정</h4>
               <div className="card-base p-4">
-                <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+                <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
                   알림 기능은 준비 중입니다. 곧 제공될 예정입니다.
                 </p>
               </div>
             </div>
 
             <div className="py-4">
-              <h4 className="font-pixel text-sm font-bold text-red-600 dark:text-red-400 mb-4">위험 영역</h4>
-              <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-3">
+              <h4 className="font-sans text-sm font-bold text-red-600 dark:text-red-400 mb-4">위험 영역</h4>
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-3">
                 회원 탈퇴 시 작성한 리포트와 댓글은 익명화되며, 일부 정보는 법적 의무에 따라 5년간 보관됩니다.
               </p>
               <button
@@ -504,7 +504,7 @@ export default function MyPage() {
                   maxLength={20}
                   disabled={isUpdating}
                 />
-                <p className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400">{newNickname.length}/20자</p>
+                <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">{newNickname.length}/20자</p>
               </div>
 
               <div className={styles.warningBox}>
@@ -559,10 +559,10 @@ export default function MyPage() {
 
             <div className="flex flex-col gap-4">
               <div className="p-4 bg-red-500/10 border-2 border-red-500 mb-2">
-                <p className="font-pixel text-xs text-red-600 dark:text-red-400 font-bold mb-2">
+                <p className="font-sans text-xs text-red-600 dark:text-red-400 font-bold mb-2">
                   탈퇴 시 다음 사항에 유의해주세요:
                 </p>
-                <ul className="font-pixel text-xs text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+                <ul className="font-sans text-xs text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
                   <li>작성한 리포트와 댓글은 익명화 처리됩니다</li>
                   <li>이메일, 동의 기록은 법적 의무에 따라 5년간 보관됩니다</li>
                   <li>탈퇴 후 동일 계정으로 재가입해도 이전 데이터는 복구되지 않습니다</li>

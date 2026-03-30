@@ -22,7 +22,7 @@ const Select = memo(function Select({
       )}
       <select
         className={`pixel-select ${
-          error ? '!border-[var(--pixel-accent)]' : ''
+          error ? '!border-[var(--theme-accent)]' : ''
         } ${className}`}
         {...props}
       >
@@ -33,7 +33,7 @@ const Select = memo(function Select({
         ))}
       </select>
       {error && (
-        <p className="mt-1 font-pixel text-xs text-red-600 dark:text-red-400">{error}</p>
+        <p className="mt-1 font-sans text-xs text-red-600 dark:text-red-400">{error}</p>
       )}
     </div>
   );

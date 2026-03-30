@@ -343,7 +343,7 @@ const ChartTooltip = memo(function ChartTooltip({ active, payload, label, config
 
   return (
     <div
-      className="bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border)] px-3 py-2"
+      className="bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] px-3 py-2"
       style={{ boxShadow: 'var(--shadow-sm)' }}
     >
       <p className="font-heading text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">{label}</p>
@@ -360,17 +360,17 @@ function SkeletonCard() {
       <div className="animate-pulse space-y-4">
         <div className="flex justify-between">
           <div className="space-y-2">
-            <div className="h-5 w-32 bg-[var(--pixel-border-muted)]/30 rounded-sm" />
-            <div className="h-4 w-44 bg-[var(--pixel-border-muted)]/20 rounded-sm" />
+            <div className="h-5 w-32 bg-[var(--theme-border-muted)]/30 rounded-sm" />
+            <div className="h-4 w-44 bg-[var(--theme-border-muted)]/20 rounded-sm" />
           </div>
           <div className="flex gap-1">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-7 w-8 bg-[var(--pixel-border-muted)]/20 rounded-sm" />
+              <div key={i} className="h-7 w-8 bg-[var(--theme-border-muted)]/20 rounded-sm" />
             ))}
           </div>
         </div>
-        <div className="h-4 w-full bg-[var(--pixel-border-muted)]/15 rounded-sm" />
-        <div className="h-[300px] bg-[var(--pixel-border-muted)]/10 rounded-sm" />
+        <div className="h-4 w-full bg-[var(--theme-border-muted)]/15 rounded-sm" />
+        <div className="h-[300px] bg-[var(--theme-border-muted)]/10 rounded-sm" />
       </div>
     </div>
   );
@@ -577,7 +577,7 @@ const IndicatorCard = memo(function IndicatorCard({
   return (
     <div
       ref={ref}
-      className="card-base p-5 sm:p-7 transition-[border-color] duration-200 hover:border-[var(--pixel-accent)]"
+      className="card-base p-5 sm:p-7 transition-[border-color] duration-200 hover:border-[var(--theme-accent)]"
       style={{ boxShadow: 'var(--shadow-md)' }}
     >
       {/* 헤더 + 기간 버튼 */}
@@ -620,8 +620,8 @@ const IndicatorCard = memo(function IndicatorCard({
               className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border-2 transition-colors duration-100
                 ${
                   timeRange === range.key
-                    ? 'bg-[var(--pixel-accent)] text-white border-[var(--pixel-accent-dark)]'
-                    : 'bg-[var(--pixel-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] hover:text-[var(--foreground)]'
+                    ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)]'
+                    : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--foreground)]'
                 }
                 ${loading ? 'opacity-50 cursor-wait' : ''}`}
             >
@@ -634,8 +634,8 @@ const IndicatorCard = memo(function IndicatorCard({
             className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border-2 transition-colors duration-100 ml-1
               ${
                 measureEnabled
-                  ? 'bg-[var(--pixel-accent)] text-white border-[var(--pixel-accent-dark)]'
-                  : 'bg-[var(--pixel-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] hover:text-[var(--foreground)]'
+                  ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)]'
+                  : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--foreground)]'
               }`}
           >
             측정
@@ -668,7 +668,7 @@ const IndicatorCard = memo(function IndicatorCard({
                   updateMeasure(Math.max(yRange[0], Math.min(yRange[1], val)));
                 }
               }}
-              className="font-mono text-[11px] sm:text-xs w-20 sm:w-24 px-2 py-1 sm:py-1.5 ml-1 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] text-[var(--foreground)] font-bold focus:border-[var(--pixel-accent)] focus:outline-none transition-colors"
+              className="font-mono text-[11px] sm:text-xs w-20 sm:w-24 px-2 py-1 sm:py-1.5 ml-1 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] text-[var(--foreground)] font-bold focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
               title="측정선 수치 직접 입력"
             />
           )}
@@ -682,7 +682,7 @@ const IndicatorCard = memo(function IndicatorCard({
 
       {/* 차트 */}
       {!inView || loading ? (
-        <div className="animate-pulse h-[300px] bg-[var(--pixel-border-muted)]/10 rounded-sm" />
+        <div className="animate-pulse h-[300px] bg-[var(--theme-border-muted)]/10 rounded-sm" />
       ) : observations.length === 0 ? (
         <div className="h-[300px] flex items-center justify-center">
           <p className="font-heading text-sm font-bold text-gray-400">데이터를 불러올 수 없습니다.</p>
@@ -705,21 +705,21 @@ const IndicatorCard = memo(function IndicatorCard({
               </defs>
               <CartesianGrid
                 strokeDasharray="3 3"
-                stroke="var(--pixel-border-muted)"
+                stroke="var(--theme-border-muted)"
                 opacity={0.4}
               />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 12, ...AXIS_FONT, fill: 'var(--foreground)' }}
-                tickLine={{ stroke: 'var(--pixel-border-muted)' }}
-                axisLine={{ stroke: 'var(--pixel-border-muted)', strokeWidth: 2 }}
+                tickLine={{ stroke: 'var(--theme-border-muted)' }}
+                axisLine={{ stroke: 'var(--theme-border-muted)', strokeWidth: 2 }}
                 tickFormatter={formatXAxis}
                 interval={tickInterval}
               />
               <YAxis
                 tick={{ fontSize: 12, ...AXIS_FONT, fill: 'var(--foreground)' }}
-                tickLine={{ stroke: 'var(--pixel-border-muted)' }}
-                axisLine={{ stroke: 'var(--pixel-border-muted)', strokeWidth: 2 }}
+                tickLine={{ stroke: 'var(--theme-border-muted)' }}
+                axisLine={{ stroke: 'var(--theme-border-muted)', strokeWidth: 2 }}
                 width={yAxisWidth}
                 tickFormatter={(v: number) =>
                   config.format ? config.format(v) : `${v}`
@@ -772,7 +772,7 @@ const IndicatorCard = memo(function IndicatorCard({
                   r: 5,
                   stroke: config.color,
                   strokeWidth: 2,
-                  fill: 'var(--pixel-bg-card)',
+                  fill: 'var(--theme-bg-card)',
                 }}
                 isAnimationActive={false}
               />
@@ -780,8 +780,8 @@ const IndicatorCard = memo(function IndicatorCard({
                 <Brush
                   dataKey="date"
                   height={30}
-                  stroke="var(--pixel-accent)"
-                  fill="var(--pixel-bg)"
+                  stroke="var(--theme-accent)"
+                  fill="var(--theme-bg)"
                   travellerWidth={10}
                   tickFormatter={formatXAxis}
                 >
@@ -856,7 +856,7 @@ export default function EconomicClient() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 히어로 섹션 */}
       <section
-        className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-3 border-pixel-border p-6 sm:p-8 relative overflow-hidden"
+        className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-2 border-[var(--theme-border)] p-6 sm:p-8 relative overflow-hidden"
         style={{ boxShadow: 'var(--shadow-lg)' }}
       >
         <div className="relative z-10 text-center">
@@ -865,7 +865,7 @@ export default function EconomicClient() {
               Economic Dashboard
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-pixel">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-md">
             경제 지표
           </h1>
 
@@ -873,7 +873,7 @@ export default function EconomicClient() {
           <div className="flex justify-center gap-2 mt-3 sm:mt-4 mb-3 sm:mb-4">
             <button
               onClick={() => setCountry('US')}
-              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-3 transition-all duration-150 ${
+              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-2 transition-all duration-150 ${
                 country === 'US'
                   ? 'bg-white text-ant-red-950 border-white shadow-[2px_2px_0px_rgba(0,0,0,0.3)]'
                   : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
@@ -883,7 +883,7 @@ export default function EconomicClient() {
             </button>
             <button
               onClick={() => setCountry('KR')}
-              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-3 transition-all duration-150 ${
+              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-2 transition-all duration-150 ${
                 country === 'KR'
                   ? 'bg-white text-ant-red-950 border-white shadow-[2px_2px_0px_rgba(0,0,0,0.3)]'
                   : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
@@ -916,7 +916,7 @@ export default function EconomicClient() {
 
       {/* 출처 표기 */}
       <section
-        className="p-5 sm:p-6 bg-pixel-card border-3 border-pixel-border-muted border-l-ant-red-600 dark:border-l-ant-red-400"
+        className="p-5 sm:p-6 bg-pixel-card border-2 border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400"
         style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}
       >
         <p className="font-heading text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 leading-relaxed">

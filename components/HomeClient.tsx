@@ -12,10 +12,10 @@ import type { Theme } from '@/types/theme';
 // SSR 활성화: ReportCard는 직접 import (가장 중요한 콘텐츠)
 // 덜 중요한 컴포넌트만 dynamic import
 const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
-  loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-4 sm:mb-8" />,
+  loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-4 sm:mb-8" />,
 });
 const SearchBar = dynamic(() => import('@/components/SearchBar'), {
-  loading: () => <div className="animate-pulse h-[48px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-[48px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
 });
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
@@ -31,7 +31,7 @@ const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 
 // 필터 (텍스트 스타일 - 검색 페이지와 동일)
 const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
-const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
+const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
 const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-500 dark:text-gray-400 hover:text-[var(--foreground)]`;
 
 /** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
@@ -213,14 +213,14 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-12">
         {/* TOP 10 스켈레톤 */}
-        <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-4 sm:mb-8" />
+        <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-4 sm:mb-8" />
 
         {/* 검색바 + 탭 스켈레톤 */}
         <div className="mb-4">
-          <div className="animate-pulse h-[40px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)] mb-3" />
+          <div className="animate-pulse h-[40px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-3" />
           <div className="flex gap-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse h-[20px] w-[50px] bg-[var(--pixel-border-muted)]/30" />
+              <div key={i} className="animate-pulse h-[20px] w-[50px] bg-[var(--theme-border-muted)]/30" />
             ))}
           </div>
         </div>
@@ -228,7 +228,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         {/* 카드 스켈레톤 */}
         <div className="space-y-3 sm:space-y-6">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="animate-pulse h-[140px] sm:h-[180px] bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />
+            <div key={i} className="animate-pulse h-[140px] sm:h-[180px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />
           ))}
         </div>
       </div>
@@ -278,10 +278,10 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
           ))
         ) : (
           <div className="pixel-empty-state">
-            <p className="font-pixel text-sm mb-2">
+            <p className="font-sans text-sm mb-2">
               {searchQuery ? '검색 결과가 없습니다.' : '아직 작성된 리포트가 없습니다.'}
             </p>
-            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+            <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
               {searchQuery ? '다른 검색어를 입력해보세요.' : '첫 번째 리포트를 작성해보세요!'}
             </p>
           </div>
@@ -291,7 +291,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* 게시물 수 표시 */}
       {filteredReports.length > 0 && (
         <div className="flex justify-center mt-8">
-          <span className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+          <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
             총 {total}개의 리포트
           </span>
         </div>

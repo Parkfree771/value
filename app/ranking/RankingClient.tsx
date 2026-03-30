@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic';
 import styles from './Ranking.module.css';
 
 const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
-  loading: () => <div className="animate-pulse h-32 bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-32 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
 });
 const Podium = dynamic(() => import('@/components/Podium'), {
-  loading: () => <div className="animate-pulse h-96 bg-[var(--pixel-border-muted)]/30 border-[3px] border-[var(--pixel-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-96 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
 });
 
 type TimePeriod = '1month' | '3months' | '6months' | '1year' | 'all';
@@ -25,12 +25,12 @@ const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 
 // 탭 (카테고리 스타일 - 검색 페이지와 동일)
 const TAB_CHIP = 'flex-shrink-0 font-heading tracking-wide px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm transition-all';
-const TAB_ACTIVE = `${TAB_CHIP} font-bold text-[var(--pixel-accent)] border border-[var(--pixel-accent)]`;
+const TAB_ACTIVE = `${TAB_CHIP} font-bold text-[var(--theme-accent)] border border-[var(--theme-accent)]`;
 const TAB_INACTIVE = `${TAB_CHIP} font-medium text-gray-600 dark:text-gray-300 hover:text-[var(--foreground)] hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`;
 
 // 날짜 필터 (텍스트 스타일 - 검색 페이지 정렬과 동일)
 const PERIOD_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
-const PERIOD_ACTIVE = `${PERIOD_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
+const PERIOD_ACTIVE = `${PERIOD_BASE} font-bold text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
 const PERIOD_INACTIVE = `${PERIOD_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
 
 interface RankedReport {
@@ -258,7 +258,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               })
             ) : (
               <div className="pixel-empty-state">
-                <p className="font-pixel text-sm">선택한 기간에 작성된 리포트가 없습니다.</p>
+                <p className="font-sans text-sm">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
@@ -269,7 +269,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
@@ -279,10 +279,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`font-pixel px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
                       currentPage === page
                         ? 'border-2 pixel-chip-active'
-                        : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
                     }`}
                   >
                     {page}
@@ -293,7 +293,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
@@ -339,7 +339,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                 <Link
                   key={investor.rank}
                   href={`/user/${encodeURIComponent(investor.name)}`}
-                  className="flex items-center justify-between p-3 sm:p-4 card-base hover:border-[var(--pixel-accent)] cursor-pointer"
+                  className="flex items-center justify-between p-3 sm:p-4 card-base hover:border-[var(--theme-accent)] cursor-pointer"
                 >
                   <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                     <div className={`${styles.investorRankBadge} ${
@@ -386,7 +386,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
@@ -396,10 +396,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`font-pixel px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
                       currentPage === page
                         ? 'border-2 pixel-chip-active'
-                        : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
                     }`}
                   >
                     {page}
@@ -410,7 +410,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
@@ -422,8 +422,8 @@ export default function RankingClient({ initialReports, initialInvestors, initia
       {activeTab === 'trending' && (
         <>
           <div className="mb-4 sm:mb-6">
-            <h2 className="font-pixel text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-center">인기글</h2>
-            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 text-center">조회수와 좋아요가 많은 인기 리포트</p>
+            <h2 className="font-sans text-lg sm:text-xl font-bold mb-1 sm:mb-2 text-center">인기글</h2>
+            <p className="font-sans text-xs text-gray-500 dark:text-gray-400 text-center">조회수와 좋아요가 많은 인기 리포트</p>
           </div>
 
           {/* Market + Period Filter */}
@@ -460,7 +460,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               })
             ) : (
               <div className="pixel-empty-state">
-                <p className="font-pixel text-sm">선택한 기간에 작성된 리포트가 없습니다.</p>
+                <p className="font-sans text-sm">선택한 기간에 작성된 리포트가 없습니다.</p>
               </div>
             )}
           </div>
@@ -471,7 +471,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
@@ -481,10 +481,10 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`font-pixel px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
                       currentPage === page
                         ? 'border-2 pixel-chip-active'
-                        : 'bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
                     }`}
                   >
                     {page}
@@ -495,7 +495,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="font-pixel px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--pixel-bg-card)] border-2 border-[var(--pixel-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--pixel-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>

@@ -133,7 +133,7 @@ function ChartTooltip({ active, payload, label, fmt }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)] px-3.5 py-2.5 shadow-[2px_2px_0px_var(--pixel-border-muted)]">
+    <div className="bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)] px-3.5 py-2.5 shadow-[2px_2px_0px_var(--theme-border-muted)]">
       <p className="font-heading text-[11px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 tracking-widest uppercase">{label}</p>
       {payload.map((e, i) => (
         <div key={i} className="flex items-center gap-2 min-w-[140px]">
@@ -364,7 +364,7 @@ export default function AnalysisClient() {
       {/* ── 검색 ── */}
       <div ref={searchRef} className="relative mb-4 sm:mb-6">
         <div className="flex mb-3">
-          <button className="flex-shrink-0 flex items-center justify-center w-10 bg-[var(--pixel-accent)] border-[3px] border-[var(--pixel-accent-dark)]">
+          <button className="flex-shrink-0 flex items-center justify-center w-10 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)]">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -375,7 +375,7 @@ export default function AnalysisClient() {
             onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
             onFocus={() => setSearchOpen(true)}
             placeholder="기업명 또는 종목코드 (예: 삼성전자, 005930)"
-            className="flex-1 px-3 py-2 font-heading text-sm font-bold bg-[var(--pixel-bg-card)] border-[3px] border-l-0 border-[var(--pixel-border-muted)] text-[var(--foreground)] placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--pixel-accent)] focus:outline-none transition-colors"
+            className="flex-1 px-3 py-2 font-heading text-sm font-bold bg-[var(--theme-bg-card)] border-2 border-l-0 border-[var(--theme-border-muted)] text-[var(--foreground)] placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
           />
         </div>
 
@@ -383,10 +383,10 @@ export default function AnalysisClient() {
         <div className="flex gap-1.5 flex-wrap">
           {displayCompanies.map((company) => (
             <button key={company.corpCode} onClick={() => selectCompany(company)}
-              className={`font-heading text-xs sm:text-sm px-3 py-1.5 font-bold border-[3px] transition-all ${
+              className={`font-heading text-xs sm:text-sm px-3 py-1.5 font-bold border-2 transition-all ${
                 selectedCorp?.corpCode === company.corpCode
-                  ? 'bg-[var(--pixel-accent)] text-white border-[var(--pixel-accent-dark)] shadow-[2px_2px_0px_var(--pixel-accent-dark)]'
-                  : 'bg-[var(--pixel-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] hover:text-[var(--pixel-accent)]'
+                  ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)] shadow-[2px_2px_0px_var(--theme-accent-dark)]'
+                  : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
               }`}>
               {company.corpName}
             </button>
@@ -395,10 +395,10 @@ export default function AnalysisClient() {
 
         {/* 검색 드롭다운 */}
         {searchOpen && searchResults.length > 0 && (
-          <div className="absolute z-50 left-0 right-0 top-[48px] bg-[var(--pixel-bg)] border-[3px] border-[var(--pixel-border)] shadow-[3px_3px_0px_rgba(0,0,0,0.15)] max-h-[280px] overflow-y-auto">
+          <div className="absolute z-50 left-0 right-0 top-[48px] bg-[var(--theme-bg)] border-2 border-[var(--theme-border)] shadow-[3px_3px_0px_rgba(0,0,0,0.15)] max-h-[280px] overflow-y-auto">
             {searchResults.map((r) => (
               <button key={r.corpCode} onClick={() => selectCompany(r)}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-[var(--pixel-accent)]/5 transition-colors border-b border-[var(--pixel-border-muted)]/30 last:border-b-0">
+                className="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-[var(--theme-accent)]/5 transition-colors border-b border-[var(--theme-border-muted)]/30 last:border-b-0">
                 <span className="font-heading text-sm font-bold text-[var(--foreground)]">{r.corpName}</span>
                 <span className="font-heading text-xs font-bold text-gray-400 tabular-nums">{r.stockCode}</span>
               </button>
@@ -479,7 +479,7 @@ export default function AnalysisClient() {
                 ) : (
                   <p className="font-heading text-sm text-gray-300 dark:text-gray-600 text-center py-4">-</p>
                 )}
-                <button onClick={() => setActiveTab('interest')} className="font-heading text-[11px] text-[var(--pixel-accent)] font-bold mt-1.5 hover:underline">
+                <button onClick={() => setActiveTab('interest')} className="font-heading text-[11px] text-[var(--theme-accent)] font-bold mt-1.5 hover:underline">
                   관심도 탭에서 자세히 보기 →
                 </button>
               </div>
@@ -529,7 +529,7 @@ export default function AnalysisClient() {
                 ) : (
                   <p className="font-heading text-sm text-gray-300 dark:text-gray-600 text-center py-4">-</p>
                 )}
-                <button onClick={() => setActiveTab('interest')} className="font-heading text-[11px] text-[var(--pixel-accent)] font-bold mt-1.5 hover:underline">
+                <button onClick={() => setActiveTab('interest')} className="font-heading text-[11px] text-[var(--theme-accent)] font-bold mt-1.5 hover:underline">
                   관심도 탭에서 자세히 보기 →
                 </button>
               </div>
@@ -539,20 +539,20 @@ export default function AnalysisClient() {
       )}
 
       {error && (
-        <div className="card-base p-3 mb-4 border-l-4 border-l-[var(--pixel-accent)]">
+        <div className="card-base p-3 mb-4 border-l-4 border-l-[var(--theme-accent)]">
           <p className="font-heading text-xs font-bold text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
 
       {/* ── 탭 + 필터 ── */}
       {selectedCorp && (
-        <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 border-b-[3px] border-[var(--pixel-border-muted)] pb-1">
+        <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 border-b-[3px] border-[var(--theme-border-muted)] pb-1">
           <div className="flex">
             {TABS.map((tab) => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)} disabled={loading}
                 className={`font-heading text-sm sm:text-base px-3 sm:px-5 py-2.5 font-bold tracking-wide transition-all relative ${
                   activeTab === tab.key
-                    ? 'text-[var(--pixel-accent)] after:absolute after:bottom-[-3px] after:left-0 after:right-0 after:h-[3px] after:bg-[var(--pixel-accent)]'
+                    ? 'text-[var(--theme-accent)] after:absolute after:bottom-[-3px] after:left-0 after:right-0 after:h-[3px] after:bg-[var(--theme-accent)]'
                     : 'text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]'
                 }`}>
                 {tab.label}
@@ -561,21 +561,21 @@ export default function AnalysisClient() {
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <div className="flex border-[3px] border-[var(--pixel-border-muted)]">
+            <div className="flex border-2 border-[var(--theme-border-muted)]">
               {YEAR_RANGES.map((r) => (
                 <button key={r.key} onClick={() => setYearRange(r.key)} disabled={loading}
                   className={`font-heading text-xs px-2.5 py-1 font-bold transition-all ${
-                    yearRange === r.key ? 'bg-[var(--pixel-accent)] text-white' : 'text-gray-400 hover:text-[var(--foreground)] bg-[var(--pixel-bg-card)]'
+                    yearRange === r.key ? 'bg-[var(--theme-accent)] text-white' : 'text-gray-400 hover:text-[var(--foreground)] bg-[var(--theme-bg-card)]'
                   }`}>
                   {r.label}
                 </button>
               ))}
             </div>
-            <div className="flex border-[3px] border-[var(--pixel-border-muted)]">
+            <div className="flex border-2 border-[var(--theme-border-muted)]">
               {(['annual', 'quarterly'] as ViewMode[]).map((m) => (
                 <button key={m} onClick={() => setViewMode(m)} disabled={loading}
                   className={`font-heading text-xs px-2.5 py-1 font-bold transition-all ${
-                    viewMode === m ? 'bg-[var(--pixel-accent)] text-white' : 'text-gray-400 hover:text-[var(--foreground)] bg-[var(--pixel-bg-card)]'
+                    viewMode === m ? 'bg-[var(--theme-accent)] text-white' : 'text-gray-400 hover:text-[var(--foreground)] bg-[var(--theme-bg-card)]'
                   }`}>
                   {m === 'annual' ? '연간' : '분기'}
                 </button>
@@ -591,8 +591,8 @@ export default function AnalysisClient() {
           <svg className="w-10 h-10 mx-auto mb-3 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <p className="font-pixel text-sm mb-2">기업을 선택하세요</p>
-          <p className="font-pixel text-xs text-gray-500">상장된 모든 기업의 재무제표를 분석할 수 있습니다</p>
+          <p className="font-sans text-sm mb-2">기업을 선택하세요</p>
+          <p className="font-sans text-xs text-gray-500">상장된 모든 기업의 재무제표를 분석할 수 있습니다</p>
         </div>
       ) : loading ? (
         <div className="space-y-3 sm:space-y-6">
@@ -607,8 +607,8 @@ export default function AnalysisClient() {
         </div>
       ) : financialData.length === 0 ? (
         <div className="pixel-empty-state">
-          <p className="font-pixel text-sm mb-2">재무 데이터가 없습니다</p>
-          <p className="font-pixel text-xs text-gray-500">해당 기간의 DART 공시가 존재하지 않을 수 있습니다</p>
+          <p className="font-sans text-sm mb-2">재무 데이터가 없습니다</p>
+          <p className="font-sans text-xs text-gray-500">해당 기간의 DART 공시가 존재하지 않을 수 있습니다</p>
         </div>
       ) : (
         <div className="space-y-3 sm:space-y-6">
@@ -621,7 +621,7 @@ export default function AnalysisClient() {
       )}
 
       {/* 출처 */}
-      <p className="font-pixel text-[9px] text-gray-400 dark:text-gray-600 mt-8 tracking-wide">
+      <p className="font-sans text-[9px] text-gray-400 dark:text-gray-600 mt-8 tracking-wide">
         DART Open API · 한국투자증권 · 연결재무제표(CFS) · 억원 단위
       </p>
     </div>
@@ -680,7 +680,7 @@ function PerformanceTab({ data }: { data: FinancialMetrics[] }) {
                   <XAxis dataKey="period" tick={AX} axisLine={false} tickLine={false} />
                   <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={38} />
                   <Tooltip content={<ChartTooltip fmt={(_, v) => fmtPct(v, true)} />} />
-                  <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1} />
+                  <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1} />
                   <Bar dataKey="revenueGrowth" name="매출 성장률" radius={[2, 2, 0, 0]} isAnimationActive={false}>
                     {data.map((d, i) => (
                       <Cell key={i} fill={d.revenueGrowth !== null && d.revenueGrowth >= 0 ? C.revenue : C.negative} fillOpacity={0.6} />
@@ -699,7 +699,7 @@ function PerformanceTab({ data }: { data: FinancialMetrics[] }) {
                   <XAxis dataKey="period" tick={AX} axisLine={false} tickLine={false} />
                   <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={38} />
                   <Tooltip content={<ChartTooltip fmt={(_, v) => fmtPct(v, true)} />} />
-                  <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1} />
+                  <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1} />
                   <Bar dataKey="profitGrowth" name="영업이익 성장률" radius={[2, 2, 0, 0]} isAnimationActive={false}>
                     {data.map((d, i) => (
                       <Cell key={i} fill={d.profitGrowth !== null && d.profitGrowth >= 0 ? C.operatingProfit : C.negative} fillOpacity={0.6} />
@@ -794,7 +794,7 @@ function ProfitabilityTab({ data, latest }: { data: FinancialMetrics[]; latest: 
               <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={36} />
               <Tooltip content={<ChartTooltip fmt={(_, v) => fmtPct(v)} />} />
               <Legend wrapperStyle={LEG} />
-              <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1} />
+              <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1} />
               <Area type="monotone" dataKey="operatingMargin" name="영업이익률" stroke={C.operatingMargin} strokeWidth={2.5} fill="url(#gOM)" dot={{ r: 3, fill: C.operatingMargin, stroke: '#fff', strokeWidth: 2 }} isAnimationActive={false} connectNulls />
               <Area type="monotone" dataKey="netMargin" name="순이익률" stroke={C.netMargin} strokeWidth={2.5} fill="url(#gNM)" dot={{ r: 3, fill: C.netMargin, stroke: '#fff', strokeWidth: 2 }} isAnimationActive={false} connectNulls />
             </AreaChart>
@@ -812,7 +812,7 @@ function ProfitabilityTab({ data, latest }: { data: FinancialMetrics[]; latest: 
               <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={36} />
               <Tooltip content={<ChartTooltip fmt={(_, v) => fmtPct(v)} />} />
               <Legend wrapperStyle={LEG} />
-              <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1} />
+              <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1} />
               <ReferenceLine y={10} stroke={C.positive} strokeWidth={1} strokeDasharray="6 3" label={{ value: '10%', position: 'right', fill: C.positive, fontSize: 9, fontWeight: 700 }} />
               <Bar dataKey="roe" name="ROE" fill={C.roe} fillOpacity={0.2} stroke={C.roe} strokeWidth={1} radius={[2, 2, 0, 0]} isAnimationActive={false} />
               <Line type="monotone" dataKey="roa" name="ROA" stroke={C.roa} strokeWidth={2.5} dot={{ r: 3, fill: C.roa, stroke: '#fff', strokeWidth: 2 }} isAnimationActive={false} connectNulls />
@@ -1040,7 +1040,7 @@ function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
               <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={fmtYB} width={48} />
               <Tooltip content={<ChartTooltip fmt={(_, v) => fmtB(v)} />} />
               <Legend wrapperStyle={LEG} />
-              <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1.5} />
+              <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1.5} />
               <Bar dataKey="operatingCashFlow" name="영업CF" fill={C.operatingCF} fillOpacity={0.7} radius={[2, 2, 0, 0]} isAnimationActive={false} />
               <Bar dataKey="investingCashFlow" name="투자CF" fill={C.investingCF} fillOpacity={0.7} radius={[2, 2, 0, 0]} isAnimationActive={false} />
               <Bar dataKey="financingCashFlow" name="재무CF" fill={C.financingCF} fillOpacity={0.7} radius={[2, 2, 0, 0]} isAnimationActive={false} />
@@ -1059,7 +1059,7 @@ function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
                 <XAxis dataKey="period" tick={AX} axisLine={false} tickLine={false} />
                 <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={fmtYB} width={42} />
                 <Tooltip content={<ChartTooltip fmt={(_, v) => fmtB(v)} />} />
-                <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1} />
+                <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1} />
                 <Bar dataKey="freeCashFlow" name="FCF" radius={[2, 2, 0, 0]} isAnimationActive={false}>
                   {data.map((e, i) => (
                     <Cell key={i} fill={e.freeCashFlow !== null && e.freeCashFlow >= 0 ? C.fcf : C.negative} fillOpacity={0.65} />
@@ -1084,7 +1084,7 @@ function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
                 <XAxis dataKey="period" tick={AX} axisLine={false} tickLine={false} />
                 <YAxis tick={AX} axisLine={false} tickLine={false} tickFormatter={fmtYB} width={42} />
                 <Tooltip content={<ChartTooltip fmt={(_, v) => fmtB(v)} />} />
-                <ReferenceLine y={0} stroke="var(--pixel-border-muted)" strokeWidth={1} />
+                <ReferenceLine y={0} stroke="var(--theme-border-muted)" strokeWidth={1} />
                 <Area type="monotone" dataKey="cumulativeFCF" name="누적 FCF" stroke={C.fcf} strokeWidth={2.5} fill="url(#gCF)" dot={{ r: 3, fill: C.fcf, stroke: '#fff', strokeWidth: 2 }} isAnimationActive={false} connectNulls />
               </AreaChart>
             </ResponsiveContainer>
@@ -1244,8 +1244,8 @@ function InterestTab({ data, loading, period, setPeriod, companyName }: {
   if (!hasAny) {
     return (
       <div className="pixel-empty-state">
-        <p className="font-pixel text-sm mb-2">관심도 데이터를 불러올 수 없습니다</p>
-        <p className="font-pixel text-xs text-gray-500">잠시 후 다시 시도해주세요</p>
+        <p className="font-sans text-sm mb-2">관심도 데이터를 불러올 수 없습니다</p>
+        <p className="font-sans text-xs text-gray-500">잠시 후 다시 시도해주세요</p>
       </div>
     );
   }
@@ -1258,11 +1258,11 @@ function InterestTab({ data, loading, period, setPeriod, companyName }: {
       {/* 기간 선택 */}
       <div className="flex items-center gap-2 mb-3">
         <span className="font-heading text-sm font-bold text-gray-400">기간</span>
-        <div className="flex border-[3px] border-[var(--pixel-border-muted)]">
+        <div className="flex border-2 border-[var(--theme-border-muted)]">
           {TREND_PERIODS.map((p) => (
             <button key={p.key} onClick={() => setPeriod(p.key)}
               className={`font-heading text-xs px-2.5 py-1 font-bold transition-all ${
-                period === p.key ? 'bg-[var(--pixel-accent)] text-white' : 'text-gray-400 hover:text-[var(--foreground)] bg-[var(--pixel-bg-card)]'
+                period === p.key ? 'bg-[var(--theme-accent)] text-white' : 'text-gray-400 hover:text-[var(--foreground)] bg-[var(--theme-bg-card)]'
               }`}>
               {p.label}
             </button>
@@ -1406,7 +1406,7 @@ function DataTable({ data, columns }: { data: FinancialMetrics[]; columns: ColDe
     <div className="overflow-x-auto -mx-1">
       <table className="w-full">
         <thead>
-          <tr className="border-b-2 border-[var(--pixel-border-muted)]">
+          <tr className="border-b-2 border-[var(--theme-border-muted)]">
             {columns.map(col => (
               <th key={col.key}
                 className={`font-heading text-xs font-bold py-2 px-2.5 text-gray-400 dark:text-gray-500 ${col.align === 'left' ? 'text-left' : 'text-right'} ${col.hideOnMobile ? 'hidden sm:table-cell' : ''}`}>
@@ -1417,7 +1417,7 @@ function DataTable({ data, columns }: { data: FinancialMetrics[]; columns: ColDe
         </thead>
         <tbody>
           {data.map((row) => (
-            <tr key={row.period} className="border-b border-[var(--pixel-border-muted)]/30 hover:bg-[var(--pixel-accent)]/[0.03] transition-colors">
+            <tr key={row.period} className="border-b border-[var(--theme-border-muted)]/30 hover:bg-[var(--theme-accent)]/[0.03] transition-colors">
               {columns.map(col => {
                 const val = (row as unknown as Record<string, unknown>)[col.key];
                 const numVal = typeof val === 'number' ? val : null;

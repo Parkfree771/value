@@ -120,7 +120,7 @@ export default function PortfolioPage() {
       </div>
 
       {/* 구루 헤더 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-pixel-card border-3 border-pixel-border p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
+      <section className="mb-6 sm:mb-8 bg-pixel-card border-2 border-[var(--theme-border)] p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
         <div className="relative z-10">
           <div>
             <div className="text-center sm:text-left">
@@ -130,7 +130,7 @@ export default function PortfolioPage() {
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-2 tracking-tight text-shadow-pixel">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-foreground mb-2 tracking-tight text-shadow-md">
                 {guruInfo.name_kr}
               </h1>
 
@@ -142,7 +142,7 @@ export default function PortfolioPage() {
                 {guruInfo.catchphrase}
               </p>
 
-              <div className="inline-block px-4 py-2 border-2 border-pixel-border-muted bg-pixel-bg" style={{ boxShadow: 'var(--shadow-sm)' }}>
+              <div className="inline-block px-4 py-2 border-2 border-[var(--theme-border-muted)] bg-pixel-bg" style={{ boxShadow: 'var(--shadow-sm)' }}>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">운용사</p>
                 <p className="text-sm font-bold text-foreground">{guruInfo.filing_name}</p>
               </div>
@@ -159,7 +159,7 @@ export default function PortfolioPage() {
 
         {loading ? (
           <div className="card-base p-12 text-center">
-            <div className="inline-block w-8 h-8 border-3 border-ant-red-600 border-t-transparent animate-spin mb-4" />
+            <div className="inline-block w-8 h-8 border-2 border-ant-red-600 border-t-transparent animate-spin mb-4" />
             <p className="text-sm text-gray-500 dark:text-gray-400">
               포트폴리오 데이터를 불러오는 중...
             </p>
@@ -183,7 +183,7 @@ export default function PortfolioPage() {
       </section>
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-3 border-pixel-border-muted border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
+      <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-2 border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>
@@ -199,7 +199,7 @@ export default function PortfolioPage() {
           </p>
         </div>
 
-        <div className="mt-6 pt-4 border-t-2 border-pixel-border-muted text-xs text-gray-600 dark:text-gray-400 space-y-2">
+        <div className="mt-6 pt-4 border-t-2 border-[var(--theme-border-muted)] text-xs text-gray-600 dark:text-gray-400 space-y-2">
           <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TIME LAG:</strong> <span>13F 공시는 매수 시점으로부터 최대 135일 지연된 데이터일 수 있습니다.</span></div>
           <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TRACKING METHOD:</strong> <span>표기된 수익률은 공시된 보고서 가격 대비 현재가를 산출한 것으로, 해당 투자자의 실제 평단가와는 무관합니다.</span></div>
           <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">FOR ENTERTAINMENT:</strong> <span>이 데이터는 투자 권유가 아니며, 유명 투자자들의 포트폴리오를 기반으로 한 후행적 분석 시뮬레이션입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>

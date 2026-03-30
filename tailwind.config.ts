@@ -49,45 +49,27 @@ const config: Config = {
           500: '#10B981',
           600: '#059669',
         },
-        // 픽셀 테마 색상
-        'pixel': {
-          bg: 'var(--pixel-bg)',
-          card: 'var(--pixel-bg-card)',
-          border: 'var(--pixel-border)',
-          'border-muted': 'var(--pixel-border-muted)',
-          accent: 'var(--pixel-accent)',
-          'accent-dark': 'var(--pixel-accent-dark)',
-          gold: '#F5A623',
-        },
       },
       fontFamily: {
         heading: ['var(--font-inter)', 'var(--font-noto)', 'Inter', 'Noto Sans KR', 'sans-serif'],
         body: ['var(--font-inter)', 'var(--font-noto)', 'Inter', 'Noto Sans KR', 'sans-serif'],
         mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
-        pixel: ["'Galmuri11'", 'monospace'],
       },
       boxShadow: {
-        // 픽셀 하드 그림자 (블러 0)
-        'pixel': '3px 3px 0px #000000',
-        'pixel-sm': '2px 2px 0px #000000',
-        'pixel-lg': '5px 5px 0px #000000',
-        'pixel-hover': '0 0 15px rgba(233, 69, 96, 0.4), 2px 2px 0px #000000',
-        // 네온 글로우 + 픽셀 그림자
-        'neon-red': '0 0 10px rgba(233, 69, 96, 0.6), 0 0 20px rgba(233, 69, 96, 0.3), 3px 3px 0px #000000',
-        'neon-orange': '0 0 10px rgba(255, 69, 0, 0.6), 0 0 20px rgba(255, 69, 0, 0.3), 3px 3px 0px #000000',
-        'glass': '4px 4px 0px rgba(0, 0, 0, 0.6)',
+        // 라운드 테마 소프트 그림자
+        'glass': '0 8px 32px rgba(59, 80, 181, 0.12)',
       },
-      // 픽셀 아트: 모든 rounded-* 를 각진 형태로 오버라이드
+      // 라운드 테마: 둥근 모서리
       borderRadius: {
         'none': '0px',
-        'sm': '0px',
-        DEFAULT: '0px',
-        'md': '2px',
-        'lg': '2px',
-        'xl': '4px',
-        '2xl': '4px',
-        '3xl': '4px',
-        'full': '4px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
+        '2xl': '20px',
+        '3xl': '24px',
+        'full': '9999px',
       },
       fontSize: {
         'xs': ['0.75rem', { lineHeight: '1rem' }],

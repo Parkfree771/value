@@ -221,7 +221,7 @@ const SearchBar = memo(function SearchBar({
 
           {/* 자동완성 드롭다운 */}
           {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
-            <div className="absolute z-10 w-full mt-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] shadow-pixel max-h-60 sm:max-h-80 overflow-y-auto">
+            <div className="absolute z-10 w-full mt-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] shadow-md max-h-60 sm:max-h-80 overflow-y-auto">
               {isLoading ? (
                 <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 text-center">
                   검색 중...

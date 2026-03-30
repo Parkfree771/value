@@ -9,8 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--pixel-border-muted);
-  background: var(--pixel-bg-card);
+  border: 2px solid var(--theme-border-muted);
+  background: var(--theme-bg-card);
   flex-shrink: 0;
 }
 
@@ -18,14 +18,14 @@
   .investorRankBadge {
     width: 2rem;
     height: 2rem;
-    border-width: 3px;
+    border-width: 2px;
   }
 }
 
 /* 1위 */
 .investorRankFirst {
-  border-color: var(--pixel-accent);
-  background: var(--pixel-accent);
+  border-color: var(--theme-accent);
+  background: var(--theme-accent);
 }
 
 /* 2위 */

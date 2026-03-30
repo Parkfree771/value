@@ -9,8 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--pixel-border-muted);
-  background: var(--pixel-bg-card);
+  border: 2px solid var(--theme-border-muted);
+  background: var(--theme-bg-card);
   font-weight: 900;
   font-size: 0.75rem;
 }
@@ -20,14 +20,14 @@
     width: 2rem;
     height: 2rem;
     font-size: 0.875rem;
-    border-width: 3px;
+    border-width: 2px;
   }
 }
 
 /* 1위 */
 .badgeFirst {
-  border-color: var(--pixel-accent);
-  background: var(--pixel-accent);
+  border-color: var(--theme-accent);
+  background: var(--theme-accent);
 }
 
 .badgeFirstNumber {

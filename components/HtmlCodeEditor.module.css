@@ -26,7 +26,7 @@
 }
 
 .divider {
-  width: 3px;
+  width: 2px;
   background: var(--theme-border-muted);
   flex-shrink: 0;
 }

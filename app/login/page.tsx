@@ -114,7 +114,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border-2 border-[var(--theme-border-muted)] shadow-pixel-sm hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border-2 border-[var(--theme-border-muted)] shadow-sm hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ fontFamily: "'Roboto', 'Noto Sans KR', sans-serif" }}
           >
             {/* Google G Logo */}

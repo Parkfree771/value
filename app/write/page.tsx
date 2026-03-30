@@ -514,7 +514,7 @@ function WritePageContent() {
       <div className="write-page max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="card-base p-8">
           <div className="text-center">
-            <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)] mx-auto mb-4"></div>
+            <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)] mx-auto mb-4"></div>
             <p className="text-sm text-gray-600 dark:text-gray-400">리포트를 불러오는 중...</p>
           </div>
         </div>
@@ -534,13 +534,13 @@ function WritePageContent() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg font-bold">
             {isEditMode ? '리포트 수정' : '리포트 작성'}
-            <span className="ml-2 text-xs font-normal px-2 py-0.5 bg-[var(--pixel-accent)] text-white border border-[var(--pixel-accent-dark)]">HTML</span>
+            <span className="ml-2 text-xs font-normal px-2 py-0.5 bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)]">HTML</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setEditorMode('text')}
-              className="px-3 py-1 text-xs font-bold border-2 bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all"
+              className="px-3 py-1 text-xs font-bold border-2 bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
             >
               텍스트 모드
             </button>
@@ -548,7 +548,7 @@ function WritePageContent() {
               type="submit"
               form="write-form"
               disabled={isUploading}
-              className="px-4 py-1 text-xs font-bold bg-[var(--pixel-accent)] text-white border-2 border-[var(--pixel-accent-dark)] transition-all disabled:opacity-50"
+              className="px-4 py-1 text-xs font-bold bg-[var(--theme-accent)] text-white border-2 border-[var(--theme-accent-dark)] transition-all disabled:opacity-50"
             >
               {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}
             </button>
@@ -556,7 +556,7 @@ function WritePageContent() {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-3 py-1 text-xs font-bold border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-red-500 hover:text-red-500 transition-all"
+                className="px-3 py-1 text-xs font-bold border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 transition-all"
               >
                 삭제
               </button>
@@ -622,7 +622,7 @@ function WritePageContent() {
                         className={`px-2 py-0.5 text-[10px] border transition-all ${
                           selectedThemes.includes(theme.id)
                             ? 'pixel-chip-active font-bold'
-                            : 'bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)]'
+                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)]'
                         }`}
                       >
                         {theme.name}
@@ -676,21 +676,21 @@ function WritePageContent() {
                 type="submit"
                 form="write-form"
                 disabled={isUploading}
-                className="px-3 py-1.5 bg-[var(--pixel-accent)] text-white border-2 border-[var(--pixel-accent-dark)] font-pixel text-xs sm:text-sm transition-all disabled:opacity-50"
+                className="px-3 py-1.5 bg-[var(--theme-accent)] text-white border-2 border-[var(--theme-accent-dark)] font-sans text-xs sm:text-sm transition-all disabled:opacity-50"
               >
                 {isUploading ? '업로드 중...' : '수정 완료'}
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-3 py-1.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] hover:border-red-500 hover:text-red-500 font-pixel text-xs sm:text-sm transition-all"
+                className="px-3 py-1.5 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 font-sans text-xs sm:text-sm transition-all"
               >
                 삭제
               </button>
               <button
                 type="button"
                 onClick={() => router.push(`/reports/${editId}`)}
-                className="px-3 py-1.5 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg-card)] font-pixel text-xs sm:text-sm transition-all"
+                className="px-3 py-1.5 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] font-sans text-xs sm:text-sm transition-all"
               >
                 글 보기
               </button>
@@ -722,7 +722,7 @@ function WritePageContent() {
             />
 
             {/* 종목 프로필 카드 (코인이면 숨김) */}
-            <div className={`mt-4 p-6 card-base border-[var(--pixel-accent)]/30 ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
+            <div className={`mt-4 p-6 card-base border-[var(--theme-accent)]/30 ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
               <h3 className="text-base font-bold mb-4">
                 종목 프로필
               </h3>
@@ -752,38 +752,38 @@ function WritePageContent() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
-                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-lg font-bold text-[var(--theme-accent)]">
                         {stockData.currency} {stockData.currentPrice.toLocaleString()}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PER</div>
-                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-lg font-bold text-[var(--theme-accent)]">
                         {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PBR</div>
-                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-lg font-bold text-[var(--theme-accent)]">
                         {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">EPS</div>
-                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-lg font-bold text-[var(--theme-accent)]">
                         {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
                       </div>
                     </div>
                     <div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">거래소</div>
-                      <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                      <div className="text-lg font-bold text-[var(--theme-accent)]">
                         {stockData.exchange}
                       </div>
                     </div>
                     {stockData.sector && (
                       <div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">섹터</div>
-                        <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                        <div className="text-lg font-bold text-[var(--theme-accent)]">
                           {stockData.sector}
                         </div>
                       </div>
@@ -791,7 +791,7 @@ function WritePageContent() {
                     {stockData.industry && (
                       <div>
                         <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">산업</div>
-                        <div className="text-lg font-bold text-[var(--pixel-accent)]">
+                        <div className="text-lg font-bold text-[var(--theme-accent)]">
                           {stockData.industry}
                         </div>
                       </div>
@@ -800,15 +800,15 @@ function WritePageContent() {
                 )
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="p-4 border-2 border-dashed border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
+                  <div className="p-4 border-2 border-dashed border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
                     <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
                   </div>
-                  <div className="p-4 border-2 border-dashed border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
+                  <div className="p-4 border-2 border-dashed border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PER</div>
                     <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
                   </div>
-                  <div className="p-4 border-2 border-dashed border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]">
+                  <div className="p-4 border-2 border-dashed border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
                     <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PBR</div>
                     <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
                   </div>
@@ -884,10 +884,10 @@ function WritePageContent() {
                           : [...prev, theme.id]
                       )
                     }
-                    className={`font-pixel px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 transition-all ${
+                    className={`font-sans px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 transition-all ${
                       selectedThemes.includes(theme.id)
                         ? 'pixel-chip-active font-bold'
-                        : 'bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
                     }`}
                     title={theme.description}
                   >
@@ -896,7 +896,7 @@ function WritePageContent() {
                 ))}
               </div>
               {selectedThemes.length > 0 && (
-                <p className="mt-2 text-xs text-[var(--pixel-accent)]">
+                <p className="mt-2 text-xs text-[var(--theme-accent)]">
                   {selectedThemes.length}개 테마 선택됨
                 </p>
               )}
@@ -921,7 +921,7 @@ function WritePageContent() {
                   <button
                     type="button"
                     onClick={() => setEditorMode('html')}
-                    className="px-3 py-1 text-xs font-bold border-2 bg-[var(--pixel-bg-card)] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all"
+                    className="px-3 py-1 text-xs font-bold border-2 bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
                   >
                     HTML
                   </button>
@@ -946,7 +946,7 @@ function WritePageContent() {
               이미지 첨부
             </label>
             <div className="space-y-3">
-              <label className="inline-flex items-center gap-2 px-4 py-2 border-[3px] border-[var(--pixel-border-muted)] cursor-pointer hover:border-[var(--pixel-accent)] transition-all bg-[var(--pixel-bg-card)] shadow-pixel-sm">
+              <label className="inline-flex items-center gap-2 px-4 py-2 border-2 border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)] shadow-sm">
                 <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
@@ -966,9 +966,9 @@ function WritePageContent() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {images.map((image, index) => (
-                      <div key={index} className="relative group border-[3px] border-[var(--pixel-border-muted)] p-3 bg-[var(--pixel-bg-card)]">
+                      <div key={index} className="relative group border-2 border-[var(--theme-border-muted)] p-3 bg-[var(--theme-bg-card)]">
                         <div className="flex gap-3">
-                          <div className="w-20 h-20 relative border-2 border-[var(--pixel-border-muted)] overflow-hidden flex-shrink-0">
+                          <div className="w-20 h-20 relative border-2 border-[var(--theme-border-muted)] overflow-hidden flex-shrink-0">
                             <Image
                               src={uploadedImageUrls[index] || URL.createObjectURL(image)}
                               alt={`preview-${index}`}
@@ -1014,7 +1014,7 @@ function WritePageContent() {
                     ))}
                   </div>
                   {uploadedImageUrls.length > 0 && (
-                    <div className="border-2 border-[var(--pixel-accent)] bg-red-500/10 p-3">
+                    <div className="border-2 border-[var(--theme-accent)] bg-red-500/10 p-3">
                       <p className="text-xs text-red-900 dark:text-red-100">
                         <strong>사용법:</strong> 각 이미지의 &quot;이미지 삽입&quot; 버튼을 클릭하면 본문에 이미지가 추가됩니다.
                       </p>
@@ -1031,7 +1031,7 @@ function WritePageContent() {
               PDF 첨부
             </label>
             <div className="space-y-3">
-              <label className="inline-flex items-center gap-2 px-4 py-2 border-[3px] border-[var(--pixel-border-muted)] cursor-pointer hover:border-[var(--pixel-accent)] transition-all bg-[var(--pixel-bg-card)] shadow-pixel-sm">
+              <label className="inline-flex items-center gap-2 px-4 py-2 border-2 border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)] shadow-sm">
                 <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                 </svg>
@@ -1052,7 +1052,7 @@ function WritePageContent() {
                   {files.map((file, index) => (
                     <div
                       key={index}
-                      className="flex items-center justify-between p-3 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]"
+                      className="flex items-center justify-between p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <svg className="w-8 h-8 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1095,9 +1095,9 @@ function WritePageContent() {
                 <span>이미지 업로드 중...</span>
                 <span>{Math.round(uploadProgress)}%</span>
               </div>
-              <div className="w-full bg-[var(--pixel-border-muted)] h-3 border-2 border-[var(--pixel-border-muted)]">
+              <div className="w-full bg-[var(--theme-border-muted)] h-3 border-2 border-[var(--theme-border-muted)]">
                 <div
-                  className="bg-[var(--pixel-accent)] h-full transition-all duration-300"
+                  className="bg-[var(--theme-accent)] h-full transition-all duration-300"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -1139,7 +1139,7 @@ function WritePageContent() {
                   <button
                     type="button"
                     onClick={handleDelete}
-                    className="w-full btn-danger font-pixel !py-2 !text-sm"
+                    className="w-full btn-danger font-sans !py-2 !text-sm"
                   >
                     삭제
                   </button>
@@ -1148,7 +1148,7 @@ function WritePageContent() {
                 {/* 종목 정보 요약 */}
                 {stockData && (
                   <div className="card-base p-4">
-                    <h3 className="font-pixel text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
+                    <h3 className="font-sans text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
                     <div className="space-y-1.5">
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500 dark:text-gray-400">종목</span>
@@ -1177,7 +1177,7 @@ function WritePageContent() {
             {/* 새 글 작성 모드 + 종목 선택됨 */}
             {!isEditMode && stockData && (
               <div className="card-base p-4">
-                <h3 className="font-pixel text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
+                <h3 className="font-sans text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500 dark:text-gray-400">종목</span>
@@ -1200,7 +1200,7 @@ function WritePageContent() {
 
       {/* 모바일: 하단 고정 제출 버튼 (새 글 작성 시) */}
       {!isEditMode && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[var(--pixel-bg)] border-t-[3px] border-[var(--pixel-border-muted)] z-40">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[var(--theme-bg)] border-t-[3px] border-[var(--theme-border-muted)] z-40">
           <div className="flex gap-3 max-w-5xl mx-auto">
             <button
               type="submit"

@@ -38,12 +38,12 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 // 테마 칩 (구루 포트 스타일)
 const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border-2 transition-colors';
 const THEME_ACTIVE = `${THEME_CHIP} bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400`;
-const THEME_INACTIVE = `${THEME_CHIP} bg-pixel-card text-foreground border-pixel-border hover:bg-pixel-bg`;
-const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--pixel-accent)] border-[var(--pixel-accent)]`;
+const THEME_INACTIVE = `${THEME_CHIP} bg-pixel-card text-foreground border-[var(--theme-border)] hover:bg-pixel-bg`;
+const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--theme-accent)] border-[var(--theme-accent)]`;
 
 // 필터 (텍스트 스타일 - 상장사 & 정렬 공통)
 const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
-const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--pixel-accent)] border-b-2 border-[var(--pixel-accent)]`;
+const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
 const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-500 dark:text-gray-400 hover:text-[var(--foreground)]`;
 
 /** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
@@ -231,9 +231,9 @@ export default function SearchPage() {
       {/* Results Summary */}
       {(searchQuery || selectedTheme) && (
         <div className="mb-4 px-2">
-          <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+          <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
             {selectedThemeName && (
-              <span className="text-[var(--pixel-accent)] font-bold">[{selectedThemeName}] </span>
+              <span className="text-[var(--theme-accent)] font-bold">[{selectedThemeName}] </span>
             )}
             {searchQuery && (
               <>검색: <span className="font-bold">&ldquo;{searchQuery}&rdquo;</span></>
@@ -247,7 +247,7 @@ export default function SearchPage() {
       <div className="space-y-3 sm:space-y-6">
         {loading ? (
           <div className="pixel-empty-state">
-            <p className="font-pixel text-sm">로딩 중...</p>
+            <p className="font-sans text-sm">로딩 중...</p>
           </div>
         ) : filteredReports.length > 0 ? (
           filteredReports.map((report) => (
@@ -255,21 +255,21 @@ export default function SearchPage() {
           ))
         ) : (searchQuery || selectedTheme || marketFilter !== 'all') ? (
           <div className="pixel-empty-state">
-            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--pixel-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--theme-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="font-pixel text-sm mb-1 sm:mb-2">검색 결과가 없습니다</p>
-            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+            <p className="font-sans text-sm mb-1 sm:mb-2">검색 결과가 없습니다</p>
+            <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
               다른 검색어를 입력하거나 필터를 변경해보세요
             </p>
           </div>
         ) : (
           <div className="pixel-empty-state">
-            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--pixel-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--theme-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-            <p className="font-pixel text-sm mb-1 sm:mb-2">검색어를 입력해주세요</p>
-            <p className="font-pixel text-xs text-gray-500 dark:text-gray-400">
+            <p className="font-sans text-sm mb-1 sm:mb-2">검색어를 입력해주세요</p>
+            <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
               테마를 선택하거나 검색어를 입력하세요
             </p>
           </div>
@@ -278,7 +278,7 @@ export default function SearchPage() {
 
       {filteredReports.length > 0 && (
         <div className="text-center mt-6 sm:mt-8">
-          <button className="w-full sm:w-auto btn-primary font-pixel">더 보기</button>
+          <button className="w-full sm:w-auto btn-primary font-sans">더 보기</button>
         </div>
       )}
     </Container>

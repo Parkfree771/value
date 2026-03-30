@@ -20,15 +20,15 @@ export const metadata: Metadata = {
 export default function DisclaimerPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="font-pixel text-2xl font-bold mb-8">
+      <h1 className="font-sans text-2xl font-bold mb-8">
         투자 면책 조항 (Investment Disclaimer)
       </h1>
 
       <div className="card-base p-6 sm:p-8">
-        <div className="space-y-6 font-pixel text-xs text-gray-700 dark:text-gray-300">
+        <div className="space-y-6 font-sans text-xs text-gray-700 dark:text-gray-300">
           {/* 중요 공지 */}
-          <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--pixel-accent)]">
-            <h2 className="text-base font-bold text-[var(--pixel-accent)] mb-2">
+          <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--theme-accent)]">
+            <h2 className="text-base font-bold text-[var(--theme-accent)] mb-2">
               [중요 공지]
             </h2>
             <p className="text-red-600 dark:text-red-300 font-bold">
@@ -142,7 +142,7 @@ export default function DisclaimerPage() {
             <h2 className="text-sm font-bold mb-3">
               9. 면책 동의
             </h2>
-            <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--pixel-accent)]">
+            <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--theme-accent)]">
               <p className="font-bold">
                 본 사이트를 이용함으로써, 사용자는 위의 모든 면책 조항을 이해하고 동의한 것으로 간주됩니다.
                 투자로 인한 모든 결과는 사용자 본인의 책임임을 인지하고 있음을 확인합니다.
@@ -157,7 +157,7 @@ export default function DisclaimerPage() {
             </h2>
             <p>
               본 면책 조항에 대한 질문이나 문의사항이 있으시면{' '}
-              <Link href="/terms" className="text-[var(--pixel-accent)] hover:underline">
+              <Link href="/terms" className="text-[var(--theme-accent)] hover:underline">
                 이용약관
               </Link>
               을 참조하거나 고객센터로 연락주시기 바랍니다.
@@ -165,7 +165,7 @@ export default function DisclaimerPage() {
           </section>
 
           {/* 최종 업데이트 */}
-          <div className="pt-6 border-t-[3px] border-[var(--pixel-border-muted)]">
+          <div className="pt-6 border-t-[3px] border-[var(--theme-border-muted)]">
             <p className="text-[0.625rem] text-gray-500 dark:text-gray-400">
               최종 업데이트: 2026년 2월 1일
             </p>
@@ -175,7 +175,7 @@ export default function DisclaimerPage() {
 
       {/* 뒤로가기 버튼 */}
       <div className="mt-8 text-center">
-        <Link href="/" className="btn-primary inline-block font-pixel">
+        <Link href="/" className="btn-primary inline-block font-sans">
           홈으로 돌아가기
         </Link>
       </div>

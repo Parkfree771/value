@@ -8,13 +8,13 @@ export default function GuruTrackerPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 소개 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-3 border-pixel-border p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
+      <section className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-2 border-[var(--theme-border)] p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
         <div className="relative z-10">
           <div className="text-center mb-6 sm:mb-7">
             <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
               <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">Investment Masters Observatory</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-pixel">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-md">
               GURU TRACKER
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-ant-red-300 tracking-wide font-bold">
@@ -79,7 +79,7 @@ export default function GuruTrackerPage() {
                 </p>
               </div>
 
-              <div className="mb-3 pb-3 border-b-2 border-pixel-border-muted">
+              <div className="mb-3 pb-3 border-b-2 border-[var(--theme-border-muted)]">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">운용사</p>
                 <p className="text-sm font-semibold text-foreground">
                   {guru.filing_name}
@@ -101,7 +101,7 @@ export default function GuruTrackerPage() {
       </section>
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-3 border-pixel-border-muted border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
+      <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-2 border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>
@@ -117,7 +117,7 @@ export default function GuruTrackerPage() {
           </p>
         </div>
 
-        <div className="mt-6 pt-4 border-t-2 border-pixel-border-muted text-xs text-gray-600 dark:text-gray-400 space-y-2">
+        <div className="mt-6 pt-4 border-t-2 border-[var(--theme-border-muted)] text-xs text-gray-600 dark:text-gray-400 space-y-2">
           <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TIME LAG:</strong> <span>13F 공시는 매수 시점으로부터 최대 135일 지연된 데이터일 수 있습니다.</span></div>
           <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">TRACKING METHOD:</strong> <span>표기된 수익률은 공시된 보고서 가격 대비 현재가를 산출한 것으로, 해당 투자자의 실제 평단가와는 무관합니다.</span></div>
           <div className="flex gap-2"><strong className="font-bold text-ant-red-600 dark:text-ant-red-400">FOR ENTERTAINMENT:</strong> <span>이 데이터는 투자 권유가 아니며, 유명 투자자들의 포트폴리오를 기반으로 한 후행적 분석 시뮬레이션입니다. 실제 투자의 책임은 본인에게 있습니다.</span></div>

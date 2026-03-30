@@ -11,8 +11,8 @@ const baseStyles = "font-bold disabled:opacity-50 disabled:cursor-not-allowed fl
 const variantStyles = {
   primary: 'btn-primary',
   secondary: 'btn-secondary',
-  outline: 'bg-transparent border-3 border-ant-red-500 text-ant-red-500 hover:bg-ant-red-500/10 shadow-pixel',
-  danger: 'bg-red-700 text-white border-3 border-red-900 shadow-pixel hover:bg-red-600',
+  outline: 'bg-transparent border-2 border-ant-red-500 text-ant-red-500 hover:bg-ant-red-500/10 shadow-md',
+  danger: 'bg-red-700 text-white border-2 border-red-900 shadow-md hover:bg-red-600',
 } as const;
 
 const sizeStyles = {

@@ -20,16 +20,16 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="font-pixel text-2xl font-bold mb-8">
+      <h1 className="font-sans text-2xl font-bold mb-8">
         문의하기
       </h1>
 
       {/* 운영 정보 */}
       <div className="card-base p-6 mb-8">
-        <h2 className="font-pixel text-base font-bold mb-4">
+        <h2 className="font-sans text-base font-bold mb-4">
           운영 정보
         </h2>
-        <div className="space-y-3 text-sm font-pixel">
+        <div className="space-y-3 text-sm font-sans">
           <div className="flex">
             <span className="w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">상호명</span>
             <span className="font-bold">부자FARM</span>
@@ -51,10 +51,10 @@ export default function ContactPage() {
 
       {/* 이메일 문의 */}
       <div className="card-base p-6 mb-8">
-        <h2 className="font-pixel text-base font-bold mb-4">
+        <h2 className="font-sans text-base font-bold mb-4">
           이메일 문의
         </h2>
-        <p className="font-pixel text-xs text-gray-500 dark:text-gray-400 mb-4">
+        <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-4">
           서비스 이용, 제안, 신고 등 모든 문의는 아래 이메일로 보내주세요.
         </p>
         <a
@@ -66,41 +66,41 @@ export default function ContactPage() {
           </svg>
           dbfh1498@gmail.com
         </a>
-        <p className="font-pixel mt-3 text-[0.625rem] text-gray-500 dark:text-gray-400">
+        <p className="font-sans mt-3 text-[0.625rem] text-gray-500 dark:text-gray-400">
           영업일 기준 1~2일 내에 답변드립니다.
         </p>
       </div>
 
       {/* 문의 유형 안내 */}
       <div className="card-base p-6 mb-8">
-        <h2 className="font-pixel text-base font-bold mb-4">
+        <h2 className="font-sans text-base font-bold mb-4">
           문의 유형
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 border-2 border-[var(--pixel-border-muted)]">
-            <h3 className="font-pixel text-sm font-bold mb-1">서비스 이용 문의</h3>
-            <p className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400">회원가입, 리포트 작성, 기능 사용 관련</p>
+          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+            <h3 className="font-sans text-sm font-bold mb-1">서비스 이용 문의</h3>
+            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">회원가입, 리포트 작성, 기능 사용 관련</p>
           </div>
-          <div className="p-4 border-2 border-[var(--pixel-border-muted)]">
-            <h3 className="font-pixel text-sm font-bold mb-1">버그 및 오류 신고</h3>
-            <p className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400">서비스 오류, 데이터 오류 등</p>
+          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+            <h3 className="font-sans text-sm font-bold mb-1">버그 및 오류 신고</h3>
+            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">서비스 오류, 데이터 오류 등</p>
           </div>
-          <div className="p-4 border-2 border-[var(--pixel-border-muted)]">
-            <h3 className="font-pixel text-sm font-bold mb-1">제안 및 피드백</h3>
-            <p className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400">새로운 기능, 서비스 개선 아이디어</p>
+          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+            <h3 className="font-sans text-sm font-bold mb-1">제안 및 피드백</h3>
+            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">새로운 기능, 서비스 개선 아이디어</p>
           </div>
-          <div className="p-4 border-2 border-[var(--pixel-border-muted)]">
-            <h3 className="font-pixel text-sm font-bold mb-1">신고</h3>
-            <p className="font-pixel text-[0.625rem] text-gray-500 dark:text-gray-400">부적절한 콘텐츠, 저작권 침해 등</p>
+          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+            <h3 className="font-sans text-sm font-bold mb-1">신고</h3>
+            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">부적절한 콘텐츠, 저작권 침해 등</p>
           </div>
         </div>
       </div>
 
       {/* 관련 링크 */}
-      <div className="text-center font-pixel text-xs text-gray-500 dark:text-gray-400 space-x-4">
-        <Link href="/terms" className="hover:text-[var(--pixel-accent)] transition-colors">이용약관</Link>
-        <Link href="/privacy" className="hover:text-[var(--pixel-accent)] transition-colors">개인정보처리방침</Link>
-        <Link href="/disclaimer" className="hover:text-[var(--pixel-accent)] transition-colors">면책조항</Link>
+      <div className="text-center font-sans text-xs text-gray-500 dark:text-gray-400 space-x-4">
+        <Link href="/terms" className="hover:text-[var(--theme-accent)] transition-colors">이용약관</Link>
+        <Link href="/privacy" className="hover:text-[var(--theme-accent)] transition-colors">개인정보처리방침</Link>
+        <Link href="/disclaimer" className="hover:text-[var(--theme-accent)] transition-colors">면책조항</Link>
       </div>
     </div>
   );

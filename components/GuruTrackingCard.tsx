@@ -64,7 +64,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
   const currencySymbol = getCurrencySymbol(displayCurrency);
 
   const getBadgeStyles = (label: BadgeLabel, intensity: string) => {
-    const baseStyles = 'px-3 py-1 font-pixel text-xs font-bold uppercase border-2';
+    const baseStyles = 'px-3 py-1 font-sans text-xs font-bold uppercase border-2';
 
     // Portfolio badges
     if (label === 'NEW BUY') {
@@ -168,19 +168,19 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
   if (isDeleted) return null;
 
   return (
-    <div className="group bg-[var(--pixel-bg-card)] border-[3px] border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] transition-all duration-300 overflow-hidden">
+    <div className="group bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all duration-300 overflow-hidden">
       {/* Main Content Area */}
       <div className="p-6 sm:p-8">
         {/* Header: Author + Badge + Return Rate */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           {/* Left: Author Info */}
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-[var(--pixel-accent)] border-2 border-pixel-accent-dark flex items-center justify-center text-white font-pixel font-bold text-lg flex-shrink-0">
+            <div className="w-12 h-12 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans font-bold text-lg flex-shrink-0">
               {event.guru_name.charAt(0)}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="font-pixel text-sm font-bold">
+                <h3 className="font-sans text-sm font-bold">
                   {event.guru_name}
                 </h3>
                 <span className={getBadgeStyles(event.badge_info.label, event.badge_info.intensity)}>
@@ -193,18 +193,18 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
 
           {/* Right: Return Rate - Prominent Display */}
           {displayReturnRate !== undefined && (
-            <div className={`relative px-6 py-4 border-[3px] ${
+            <div className={`relative px-6 py-4 border-2 ${
               displayReturnRate > 0
                 ? 'bg-red-500/10 border-red-300 dark:border-red-700'
                 : displayReturnRate < 0
                 ? 'bg-blue-500/10 border-blue-300 dark:border-blue-700'
-                : 'bg-[var(--pixel-bg)] border-[var(--pixel-border-muted)]'
+                : 'bg-[var(--theme-bg)] border-[var(--theme-border-muted)]'
             }`}>
-              <div className="font-pixel text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1.5">
+              <div className="font-sans text-xs font-bold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider flex items-center gap-1.5">
                 수익률
                 {priceLoading && <span className="text-yellow-500 animate-spin">⟳</span>}
               </div>
-              <div className={`text-3xl font-black font-pixel ${
+              <div className={`text-3xl font-black font-sans ${
                 displayReturnRate > 0
                   ? 'text-red-600 dark:text-red-400'
                   : displayReturnRate < 0
@@ -224,7 +224,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
 
         {/* Stock Info Bar */}
         {event.target_ticker && (
-          <div className="mb-6 p-4 bg-red-500/10 border-[3px] border-[var(--pixel-accent)]/30">
+          <div className="mb-6 p-4 bg-red-500/10 border-2 border-[var(--theme-accent)]/30">
             <div className="flex flex-wrap items-center gap-4 text-sm">
               {(event.company_name || event.stockData?.name) && (
                 <>
@@ -258,9 +258,9 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
         )}
 
         {/* Main Content: Title + Summary + Content */}
-        <div className="border-t-[3px] border-[var(--pixel-border-muted)] pt-6">
+        <div className="border-t-[3px] border-[var(--theme-border-muted)] pt-6">
           <div className="mb-4">
-            <h2 className="font-pixel text-base font-bold leading-tight mb-3">
+            <h2 className="font-sans text-base font-bold leading-tight mb-3">
               {event.title}
             </h2>
             <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
@@ -282,7 +282,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
           <div className="flex items-center gap-3 mt-4">
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--pixel-bg)] border-2 border-[var(--pixel-border-muted)] hover:border-[var(--pixel-accent)] font-pixel text-xs font-bold transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] font-sans text-xs font-bold transition-all"
             >
               {isExpanded ? (
                 <>
@@ -306,7 +306,7 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
                 href={event.source_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--pixel-accent)] border-2 border-pixel-accent-dark hover:bg-red-700 text-white font-pixel text-xs font-bold transition-all shadow-[2px_2px_0px_var(--pixel-accent-dark)]"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)] hover:bg-red-700 text-white font-sans text-xs font-bold transition-all shadow-[2px_2px_0px_var(--theme-accent-dark)]"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -320,8 +320,8 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
       </div>
 
       {/* Footer */}
-      <div className="px-6 sm:px-8 py-4 bg-[var(--pixel-bg)] border-t-[3px] border-[var(--pixel-border-muted)] flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-4 font-pixel text-xs text-gray-500 dark:text-gray-400">
+      <div className="px-6 sm:px-8 py-4 bg-[var(--theme-bg)] border-t-[3px] border-[var(--theme-border-muted)] flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-4 font-sans text-xs text-gray-500 dark:text-gray-400">
           <span className="flex items-center gap-2">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -349,10 +349,10 @@ const GuruTrackingCard = memo(function GuruTrackingCard({ event }: GuruTrackingC
         </div>
 
         <div className="flex items-center gap-2">
-          <span className={`px-3 py-1.5 font-pixel font-bold tracking-wider text-xs ${
+          <span className={`px-3 py-1.5 font-sans font-bold tracking-wider text-xs ${
             event.data_type === 'PORTFOLIO'
               ? 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 border-2 border-purple-300 dark:border-purple-700'
-              : 'bg-red-500/10 text-[var(--pixel-accent)] border-2 border-[var(--pixel-accent)]/50'
+              : 'bg-red-500/10 text-[var(--theme-accent)] border-2 border-[var(--theme-accent)]/50'
           }`}>
             {event.data_type === 'PORTFOLIO' ? 'WALLET WATCH' : 'MARKET CALL'}
           </span>

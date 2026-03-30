@@ -34,7 +34,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-[3px] border-[var(--pixel-border-muted)] border-t-[var(--pixel-accent)]" />
+        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
       </div>
     );
   }
@@ -57,7 +57,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
             전체 게시글
           </div>
-          <div className="text-2xl font-bold text-[var(--pixel-accent)]">
+          <div className="text-2xl font-bold text-[var(--theme-accent)]">
             {stats.totalPosts.toLocaleString()}
           </div>
         </div>
@@ -116,15 +116,15 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
             {stats.topPosts.slice(0, 5).map((post, index) => (
               <div
                 key={post.id}
-                className="flex items-center gap-3 p-3 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]"
+                className="flex items-center gap-3 p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-[var(--pixel-accent)] border-2 border-pixel-accent-dark flex items-center justify-center text-white font-bold text-sm">
+                <div className="flex-shrink-0 w-8 h-8 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-bold text-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <Link
                     href={`/reports/${post.id}`}
-                    className="text-sm font-bold hover:text-[var(--pixel-accent)] truncate block transition-colors"
+                    className="text-sm font-bold hover:text-[var(--theme-accent)] truncate block transition-colors"
                   >
                     {post.title}
                   </Link>
@@ -170,7 +170,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
             {stats.topUsers.slice(0, 5).map((user, index) => (
               <div
                 key={user.userId}
-                className="flex items-center gap-3 p-3 border-2 border-[var(--pixel-border-muted)] bg-[var(--pixel-bg)]"
+                className="flex items-center gap-3 p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               >
                 <div className="flex-shrink-0 w-8 h-8 bg-purple-600 border-2 border-purple-900 flex items-center justify-center text-white font-bold text-sm">
                   {index + 1}
@@ -184,7 +184,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
                   </div>
                 </div>
                 <div className="flex-shrink-0">
-                  <div className="text-sm font-bold text-[var(--pixel-accent)]">
+                  <div className="text-sm font-bold text-[var(--theme-accent)]">
                     게시글 {user.postCount}개
                   </div>
                 </div>
