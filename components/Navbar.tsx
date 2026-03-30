@@ -54,7 +54,7 @@ const Navbar = memo(function Navbar() {
           {/* Logo + Navigation Links */}
           <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
-            <span className="brand-title text-2xl sm:text-3xl leading-none">
+            <span className="brand-title text-2xl sm:text-3xl leading-none" data-text="AntStreet">
               AntStreet
             </span>
           </Link>
@@ -272,7 +272,7 @@ const Navbar = memo(function Navbar() {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b-[3px] border-[var(--pixel-border-muted)]">
             <Link href="/" onClick={closeMobileMenu} className="flex items-center">
-              <span className="brand-title text-lg leading-none">
+              <span className="brand-title text-lg leading-none" data-text="AntStreet">
                 AntStreet
               </span>
             </Link>
