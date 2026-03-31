@@ -133,11 +133,11 @@ function ChartTooltip({ active, payload, label, fmt }: {
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)] px-3.5 py-2.5 shadow-[2px_2px_0px_var(--theme-border-muted)]">
+    <div className="bg-[var(--theme-bg)] border border-[var(--theme-border-muted)] rounded-xl px-3.5 py-2.5 shadow-md">
       <p className="font-heading text-[11px] font-bold text-gray-400 dark:text-gray-500 mb-1.5 tracking-widest uppercase">{label}</p>
       {payload.map((e, i) => (
         <div key={i} className="flex items-center gap-2 min-w-[140px]">
-          <span className="w-2 h-2 flex-shrink-0" style={{ backgroundColor: e.color }} />
+          <span className="w-2 h-2 flex-shrink-0 rounded-full" style={{ backgroundColor: e.color }} />
           <span className="font-heading text-xs text-gray-400">{e.name}</span>
           <span className="font-heading text-xs font-black ml-auto tabular-nums" style={{ color: e.color }}>
             {fmt ? fmt(e.name, e.value) : e.value}
@@ -364,7 +364,7 @@ export default function AnalysisClient() {
       {/* ── 검색 ── */}
       <div ref={searchRef} className="relative mb-4 sm:mb-6">
         <div className="flex mb-3">
-          <button className="flex-shrink-0 flex items-center justify-center w-10 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)]">
+          <button className="flex-shrink-0 flex items-center justify-center w-10 bg-[var(--theme-accent)] border border-[var(--theme-accent)] rounded-l-xl">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -375,7 +375,7 @@ export default function AnalysisClient() {
             onChange={(e) => { setSearchQuery(e.target.value); setSearchOpen(true); }}
             onFocus={() => setSearchOpen(true)}
             placeholder="기업명 또는 종목코드 (예: 삼성전자, 005930)"
-            className="flex-1 px-3 py-2 font-heading text-sm font-bold bg-[var(--theme-bg-card)] border-2 border-l-0 border-[var(--theme-border-muted)] text-[var(--foreground)] placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
+            className="flex-1 px-3 py-2 font-heading text-sm font-bold bg-[var(--theme-bg-card)] border border-l-0 border-[var(--theme-border-muted)] rounded-r-xl text-[var(--foreground)] placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
           />
         </div>
 
@@ -383,9 +383,9 @@ export default function AnalysisClient() {
         <div className="flex gap-1.5 flex-wrap">
           {displayCompanies.map((company) => (
             <button key={company.corpCode} onClick={() => selectCompany(company)}
-              className={`font-heading text-xs sm:text-sm px-3 py-1.5 font-bold border-2 transition-all ${
+              className={`font-heading text-xs sm:text-sm px-3 py-1.5 font-bold border rounded-lg transition-all ${
                 selectedCorp?.corpCode === company.corpCode
-                  ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)] shadow-[2px_2px_0px_var(--theme-accent-dark)]'
+                  ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-md'
                   : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
               }`}>
               {company.corpName}
@@ -395,7 +395,7 @@ export default function AnalysisClient() {
 
         {/* 검색 드롭다운 */}
         {searchOpen && searchResults.length > 0 && (
-          <div className="absolute z-50 left-0 right-0 top-[48px] bg-[var(--theme-bg)] border-2 border-[var(--theme-border)] shadow-[3px_3px_0px_rgba(0,0,0,0.15)] max-h-[280px] overflow-y-auto">
+          <div className="absolute z-50 left-0 right-0 top-[48px] bg-[var(--theme-bg)] border border-[var(--theme-border)] rounded-xl shadow-lg max-h-[280px] overflow-y-auto">
             {searchResults.map((r) => (
               <button key={r.corpCode} onClick={() => selectCompany(r)}
                 className="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-[var(--theme-accent)]/5 transition-colors border-b border-[var(--theme-border-muted)]/30 last:border-b-0">
@@ -413,18 +413,18 @@ export default function AnalysisClient() {
           {/* 기업 정보 카드 */}
           <div className="card-base p-4 sm:p-5" style={{ boxShadow: 'var(--shadow-md)' }}>
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-heading text-2xl sm:text-3xl font-black text-[var(--foreground)] leading-none tracking-tight">
+              <div className="min-w-0">
+                <h2 className="font-heading text-lg sm:text-3xl font-black text-[var(--foreground)] leading-none tracking-tight truncate">
                   {selectedCorp?.corpName || companyInfo.corp_name}
                 </h2>
                 <p className="font-heading text-sm font-bold text-gray-400 tabular-nums mt-1.5">{companyInfo.stock_code}</p>
               </div>
               {stockProfile && (
                 <div className="text-right flex-shrink-0">
-                  <p className="font-heading text-2xl sm:text-3xl font-black text-[var(--foreground)] leading-none font-mono tabular-nums">{fmtPrice(stockProfile.currentPrice)}</p>
+                  <p className="font-heading text-lg sm:text-3xl font-black text-[var(--foreground)] leading-none font-mono tabular-nums">{fmtPrice(stockProfile.currentPrice)}</p>
                   <div className="flex items-center justify-end gap-3 mt-1.5">
-                    {stockProfile.per && <span className="font-heading text-sm text-gray-500 dark:text-gray-400">PER <b className="text-[var(--foreground)] font-mono tabular-nums">{stockProfile.per.toFixed(1)}</b></span>}
-                    {stockProfile.pbr && <span className="font-heading text-sm text-gray-500 dark:text-gray-400">PBR <b className="text-[var(--foreground)] font-mono tabular-nums">{stockProfile.pbr.toFixed(2)}</b></span>}
+                    {stockProfile.per && <span className="font-heading text-xs sm:text-sm text-gray-500 dark:text-gray-400">PER <b className="text-[var(--foreground)] font-mono tabular-nums">{stockProfile.per.toFixed(1)}</b></span>}
+                    {stockProfile.pbr && <span className="font-heading text-xs sm:text-sm text-gray-500 dark:text-gray-400">PBR <b className="text-[var(--foreground)] font-mono tabular-nums">{stockProfile.pbr.toFixed(2)}</b></span>}
                   </div>
                 </div>
               )}
@@ -546,8 +546,8 @@ export default function AnalysisClient() {
 
       {/* ── 탭 + 필터 ── */}
       {selectedCorp && (
-        <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6 border-b-[3px] border-[var(--theme-border-muted)] pb-1">
-          <div className="flex">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6 border-b-[3px] border-[var(--theme-border-muted)] pb-1">
+          <div className="flex overflow-x-auto scrollbar-hide">
             {TABS.map((tab) => (
               <button key={tab.key} onClick={() => setActiveTab(tab.key)} disabled={loading}
                 className={`font-heading text-sm sm:text-base px-3 sm:px-5 py-2.5 font-bold tracking-wide transition-all relative ${
@@ -560,8 +560,8 @@ export default function AnalysisClient() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <div className="flex border-2 border-[var(--theme-border-muted)]">
+          <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
+            <div className="flex border border-[var(--theme-border-muted)] rounded-lg overflow-hidden">
               {YEAR_RANGES.map((r) => (
                 <button key={r.key} onClick={() => setYearRange(r.key)} disabled={loading}
                   className={`font-heading text-xs px-2.5 py-1 font-bold transition-all ${
@@ -571,7 +571,7 @@ export default function AnalysisClient() {
                 </button>
               ))}
             </div>
-            <div className="flex border-2 border-[var(--theme-border-muted)]">
+            <div className="flex border border-[var(--theme-border-muted)] rounded-lg overflow-hidden">
               {(['annual', 'quarterly'] as ViewMode[]).map((m) => (
                 <button key={m} onClick={() => setViewMode(m)} disabled={loading}
                   className={`font-heading text-xs px-2.5 py-1 font-bold transition-all ${
@@ -1007,13 +1007,13 @@ function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
     <>
       {/* 패턴 진단 */}
       <div className="card-base p-4 sm:p-5 flex items-start gap-3">
-        <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center text-white font-black text-base rounded-sm" style={{ background: pattern.color }}>
+        <div className="w-12 h-12 flex-shrink-0 flex items-center justify-center text-white font-black text-base rounded-xl" style={{ background: pattern.color }}>
           {pattern.code}
         </div>
         <div className="min-w-0">
           <p className="font-heading text-base font-black text-[var(--foreground)] leading-tight">{pattern.name} <span className="text-xs font-bold text-gray-400 ml-1">{latest?.period}</span></p>
           {pattern.desc && <p className="font-heading text-xs text-gray-400 mt-0.5 leading-relaxed">{pattern.desc}</p>}
-          <div className="flex gap-4 mt-2 text-sm">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs sm:text-sm">
             {[
               { label: '영업CF', v: latest?.operatingCashFlow },
               { label: '투자CF', v: latest?.investingCashFlow },
@@ -1156,7 +1156,7 @@ function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
             const p = diagnoseCF(d);
             return (
               <div key={d.period} className="flex-shrink-0 text-center w-[68px]">
-                <div className="w-9 h-9 mx-auto mb-1 flex items-center justify-center text-white font-black text-xs" style={{ background: p.color }}>{p.code}</div>
+                <div className="w-9 h-9 mx-auto mb-1 flex items-center justify-center text-white font-black text-xs rounded-lg" style={{ background: p.color }}>{p.code}</div>
                 <p className="font-heading text-xs font-black text-[var(--foreground)]">{d.period}</p>
                 <p className="font-heading text-[10px] text-gray-400 leading-tight mt-0.5">{p.name}</p>
               </div>
@@ -1258,7 +1258,7 @@ function InterestTab({ data, loading, period, setPeriod, companyName }: {
       {/* 기간 선택 */}
       <div className="flex items-center gap-2 mb-3">
         <span className="font-heading text-sm font-bold text-gray-400">기간</span>
-        <div className="flex border-2 border-[var(--theme-border-muted)]">
+        <div className="flex border border-[var(--theme-border-muted)] rounded-lg overflow-hidden">
           {TREND_PERIODS.map((p) => (
             <button key={p.key} onClick={() => setPeriod(p.key)}
               className={`font-heading text-xs px-2.5 py-1 font-bold transition-all ${

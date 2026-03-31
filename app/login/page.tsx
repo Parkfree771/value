@@ -105,7 +105,7 @@ export default function LoginPage() {
           </h2>
 
           {error && (
-            <div className="mb-5 p-3 border-2 border-red-500 bg-red-500/10 text-xs text-red-600 dark:text-red-400">
+            <div className="mb-5 p-3 rounded-xl border-2 border-red-500 bg-red-500/10 text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -114,8 +114,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-[44px] flex items-center justify-center gap-3 bg-white border-2 border-[var(--theme-border-muted)] shadow-sm hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Roboto', 'Noto Sans KR', sans-serif" }}
+            className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-xl bg-white border-2 border-[var(--theme-border-muted)] shadow-sm hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed font-[Roboto,Noto_Sans_KR,sans-serif]"
           >
             {/* Google G Logo */}
             <svg className="w-[18px] h-[18px]" viewBox="0 0 48 48">
@@ -139,7 +138,7 @@ export default function LoginPage() {
               {/* Kakao - Disabled */}
               <button
                 disabled
-                className="w-full h-[44px] flex items-center justify-center gap-3 bg-[#FEE500] rounded opacity-40 cursor-not-allowed"
+                className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 bg-[#FEE500] rounded-xl opacity-40 cursor-not-allowed"
               >
                 <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
                   <path fill="#000000" d="M12 3C6.477 3 2 6.463 2 10.69c0 2.806 1.867 5.273 4.667 6.67-.167.615-.606 2.23-.695 2.576-.11.42.154.414.324.302.134-.088 2.129-1.45 2.995-2.04A12.6 12.6 0 0012 18.38c5.523 0 10-3.463 10-7.69S17.523 3 12 3z"/>
@@ -150,7 +149,7 @@ export default function LoginPage() {
               {/* Naver - Disabled */}
               <button
                 disabled
-                className="w-full h-[44px] flex items-center justify-center gap-3 bg-[#03C75A] rounded opacity-40 cursor-not-allowed"
+                className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 bg-[#03C75A] rounded-xl opacity-40 cursor-not-allowed"
               >
                 <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
                   <path fill="#FFFFFF" d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/>

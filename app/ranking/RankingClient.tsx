@@ -6,10 +6,10 @@ import dynamic from 'next/dynamic';
 import styles from './Ranking.module.css';
 
 const RankingReportCard = dynamic(() => import('@/components/RankingReportCard'), {
-  loading: () => <div className="animate-pulse h-32 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-32 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] rounded-2xl" />,
 });
 const Podium = dynamic(() => import('@/components/Podium'), {
-  loading: () => <div className="animate-pulse h-96 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-96 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] rounded-2xl" />,
 });
 
 type TimePeriod = '1month' | '3months' | '6months' | '1year' | 'all';
@@ -23,10 +23,10 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 };
 const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 
-// 탭 (카테고리 스타일 - 검색 페이지와 동일)
-const TAB_CHIP = 'flex-shrink-0 font-heading tracking-wide px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm transition-all';
-const TAB_ACTIVE = `${TAB_CHIP} font-bold text-[var(--theme-accent)] border border-[var(--theme-accent)]`;
-const TAB_INACTIVE = `${TAB_CHIP} font-medium text-gray-600 dark:text-gray-300 hover:text-[var(--foreground)] hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`;
+// 탭 (라운드 테마)
+const TAB_CHIP = 'flex-shrink-0 font-heading tracking-wide px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm rounded-xl transition-all';
+const TAB_ACTIVE = `${TAB_CHIP} font-bold text-[var(--theme-accent)] border-2 border-[var(--theme-accent)]`;
+const TAB_INACTIVE = `${TAB_CHIP} font-medium text-gray-600 dark:text-gray-300 border-2 border-transparent hover:text-[var(--foreground)] hover:bg-black/[0.03] dark:hover:bg-white/[0.03]`;
 
 // 날짜 필터 (텍스트 스타일 - 검색 페이지 정렬과 동일)
 const PERIOD_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
@@ -224,7 +224,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           }))} />
 
           {/* Market + Period Filter */}
-          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex justify-between items-center">
+          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
             <div className="flex gap-0.5 sm:gap-1 items-center">
               {marketKeys.map((market) => (
                 <button
@@ -269,17 +269,17 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
 
-              <div className="flex gap-1">
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${
                       currentPage === page
                         ? 'border-2 pixel-chip-active'
                         : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
@@ -293,7 +293,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
@@ -308,7 +308,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           <Podium topThree={investors.slice(0, 3)} />
 
           {/* Market + Period Filter */}
-          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex justify-between items-center">
+          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
             <div className="flex gap-0.5 sm:gap-1 items-center">
               {marketKeys.map((market) => (
                 <button
@@ -386,17 +386,17 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
 
-              <div className="flex gap-1">
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${
                       currentPage === page
                         ? 'border-2 pixel-chip-active'
                         : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
@@ -410,7 +410,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>
@@ -427,7 +427,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           </div>
 
           {/* Market + Period Filter */}
-          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex justify-between items-center">
+          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
             <div className="flex gap-0.5 sm:gap-1 items-center">
               {marketKeys.map((market) => (
                 <button
@@ -471,17 +471,17 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                 disabled={currentPage === 1}
-                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 이전
               </button>
 
-              <div className="flex gap-1">
+              <div className="flex gap-1 overflow-x-auto scrollbar-hide">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                    className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${
                       currentPage === page
                         ? 'border-2 pixel-chip-active'
                         : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
@@ -495,7 +495,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
               <button
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                 disabled={currentPage === totalPages}
-                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 다음
               </button>

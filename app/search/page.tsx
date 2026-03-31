@@ -35,10 +35,10 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
   HK: ['HKS'],
 };
 
-// 테마 칩 (구루 포트 스타일)
-const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border-2 transition-colors';
+// 테마 칩 (라운드 테마)
+const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border-2 rounded-lg transition-colors';
 const THEME_ACTIVE = `${THEME_CHIP} bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400`;
-const THEME_INACTIVE = `${THEME_CHIP} bg-pixel-card text-foreground border-[var(--theme-border)] hover:bg-pixel-bg`;
+const THEME_INACTIVE = `${THEME_CHIP} bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]`;
 const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--theme-accent)] border-[var(--theme-accent)]`;
 
 // 필터 (텍스트 스타일 - 상장사 & 정렬 공통)
@@ -177,7 +177,7 @@ export default function SearchPage() {
             ))}
           </div>
 
-          <div className={`flex gap-1.5 sm:gap-2 ${themeExpanded ? 'flex-wrap' : 'flex-nowrap'}`}>
+          <div className={`flex gap-1.5 sm:gap-2 ${themeExpanded ? 'flex-wrap' : 'flex-nowrap overflow-x-auto scrollbar-hide'}`}>
             {(themeExpanded ? themeItems : themeItems.slice(0, themeVisible)).map((t) => (
               <button
                 key={t.id ?? 'all'}
@@ -203,7 +203,7 @@ export default function SearchPage() {
       )}
 
       {/* 3. 필터: 왼쪽 상장사 | 오른쪽 정렬 */}
-      <div className="mb-3 sm:mb-4 flex justify-between items-center overflow-x-auto scrollbar-hide">
+      <div className="mb-3 sm:mb-4 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
         <div className="flex gap-0.5 sm:gap-1 flex-nowrap items-center">
           {marketKeys.map((m) => (
             <button

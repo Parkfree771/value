@@ -373,7 +373,7 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
           </div>
 
           {/* Report Content - 넓고 여유롭게, 모바일은 패딩 최소화 */}
-          <Card className="px-2 py-3 sm:p-6 lg:p-8 overflow-hidden">
+          <Card className="px-3 py-3 sm:p-6 lg:p-8 overflow-x-auto overflow-y-hidden">
             {/* 리포트 본문 */}
             {report.mode === 'html' ? (
               <>

@@ -619,7 +619,7 @@ function WritePageContent() {
                               : [...prev, theme.id]
                           )
                         }
-                        className={`px-2 py-0.5 text-[10px] border transition-all ${
+                        className={`px-2 py-0.5 text-[10px] border rounded-lg transition-all ${
                           selectedThemes.includes(theme.id)
                             ? 'pixel-chip-active font-bold'
                             : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)]'
@@ -884,7 +884,7 @@ function WritePageContent() {
                           : [...prev, theme.id]
                       )
                     }
-                    className={`font-sans px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 transition-all ${
+                    className={`font-sans px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border-2 rounded-lg transition-all ${
                       selectedThemes.includes(theme.id)
                         ? 'pixel-chip-active font-bold'
                         : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
@@ -913,7 +913,7 @@ function WritePageContent() {
                 <div className="hidden md:flex items-center gap-1">
                   <button
                     type="button"
-                    className="px-3 py-1 text-xs font-bold border-2 pixel-chip-active"
+                    className="px-3 py-1 text-xs font-bold border-2 rounded-lg pixel-chip-active"
                     disabled
                   >
                     텍스트
@@ -921,7 +921,7 @@ function WritePageContent() {
                   <button
                     type="button"
                     onClick={() => setEditorMode('html')}
-                    className="px-3 py-1 text-xs font-bold border-2 bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
+                    className="px-3 py-1 text-xs font-bold border-2 rounded-lg bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
                   >
                     HTML
                   </button>

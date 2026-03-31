@@ -205,29 +205,29 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
       </label>
 
       {selectedStock ? (
-        <div className={`flex items-center justify-between p-4 border-2 ${
+        <div className={`flex items-center justify-between p-3 sm:p-4 rounded-xl border-2 ${
           selectedStock.exchange === 'CRYPTO'
             ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
             : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700'
         }`}>
-          <div className="flex items-center gap-3 flex-1">
+          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
             {selectedStock.exchange === 'CRYPTO' && (
               <img
                 src={getCryptoImageUrl(selectedStock.symbol)}
                 alt={selectedStock.symbol}
-                className="w-10 h-10 rounded-full"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex-shrink-0"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             )}
-            <div className="flex-1">
-              <div className="font-semibold text-gray-900 dark:text-white">
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
                 {selectedStock.name}
               </div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
                 {selectedStock.symbol} · {selectedStock.exchange === 'CRYPTO' ? '코인' : selectedStock.exchange}
               </div>
               {selectedStock.exchange !== 'CRYPTO' && (
-                <div className="text-xs text-gray-500 dark:text-gray-400 mt-2 grid grid-cols-2 gap-2 font-mono">
+                <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1.5 sm:mt-2 grid grid-cols-2 gap-1 sm:gap-2 font-mono">
                   <div>현재가: {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}</div>
                   {selectedStock.per && selectedStock.per > 0 && <div>PER: {selectedStock.per.toFixed(2)}</div>}
                   {selectedStock.pbr && selectedStock.pbr > 0 && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}
@@ -235,7 +235,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
                 </div>
               )}
               {selectedStock.exchange === 'CRYPTO' && (
-                <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
                   {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}
                 </div>
               )}
@@ -243,8 +243,8 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
           </div>
           <button
             onClick={() => onStockSelect(null as any)}
-            className="ml-4 text-red-600 hover:text-red-700 dark:text-red-400
-                     dark:hover:text-red-300 font-medium"
+            className="ml-2 sm:ml-4 text-sm sm:text-base text-red-600 hover:text-red-700 dark:text-red-400
+                     dark:hover:text-red-300 font-medium flex-shrink-0"
           >
             변경
           </button>
@@ -270,43 +270,43 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
           {/* 검색 결과 드롭다운 */}
           {showResults && results.length > 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-card)]
-                          border-2 border-[var(--theme-border-muted)] shadow-md
-                          max-h-96 overflow-y-auto">
+            <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
+                          border-2 border-[var(--theme-border-muted)] rounded-xl shadow-lg
+                          max-h-[50vh] sm:max-h-96 overflow-y-auto">
               {results.map((stock, index) => (
                 <button
                   key={`${stock.symbol}-${stock.exchange}-${index}`}
                   onClick={() => handleStockSelect(stock)}
-                  className={`w-full px-4 py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/10
-                            transition-colors border-b-[2px] border-[var(--theme-border-muted)] last:border-b-0
+                  className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/10
+                            transition-colors border-b border-[var(--theme-border-muted)] last:border-b-0
                             ${index === selectedIndex ? 'bg-red-50 dark:bg-red-900/10' : ''}`}
                 >
                   <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       {stock.exchange === 'CRYPTO' && (
                         <img
                           src={getCryptoImageUrl(stock.symbol)}
                           alt={stock.symbol}
-                          className="w-7 h-7 rounded-full flex-shrink-0"
+                          className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex-shrink-0"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                       )}
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-900 dark:text-white">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
                           {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr ? stock.nameKr : stock.name}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                           {stock.symbol}
-                          {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr && <span className="ml-2 text-gray-400">· {stock.name}</span>}
+                          {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr && <span className="ml-1.5 sm:ml-2 text-gray-400">· {stock.name}</span>}
                         </div>
                       </div>
                     </div>
                     {stock.exchange === 'CRYPTO' ? (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium">
+                      <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium flex-shrink-0 ml-2">
                         코인
                       </span>
                     ) : (
-                      <div className="text-xs text-gray-400 dark:text-gray-500">
+                      <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2">
                         {stock.exchange}
                       </div>
                     )}
@@ -318,9 +318,9 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
           {/* 검색 결과 없음 */}
           {showResults && !isLoading && query.length > 0 && results.length === 0 && (
-            <div className="absolute z-50 w-full mt-2 bg-[var(--theme-bg-card)]
-                          border-2 border-[var(--theme-border-muted)] shadow-md p-4">
-              <p className="text-gray-500 dark:text-gray-400 text-center">
+            <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
+                          border-2 border-[var(--theme-border-muted)] rounded-xl shadow-lg p-4">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
                 검색 결과가 없습니다
               </p>
             </div>

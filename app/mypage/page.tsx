@@ -14,7 +14,7 @@ import { processUserWithdrawal } from '@/lib/users';
 import styles from './MyPage.module.css';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
-  loading: () => <div className="animate-pulse h-48 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
+  loading: () => <div className="animate-pulse h-48 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] rounded-[14px]" />,
 });
 
 export default function MyPage() {
@@ -245,15 +245,13 @@ export default function MyPage() {
         <div className={styles.profileCard}>
           {/* 배경 로고 */}
           <div className={styles.bgLogo}>
-            <Image src="/logo.webp" alt="" width={200} height={200} priority />
+            <Image src="/favicon.png" alt="" width={200} height={200} priority />
           </div>
-          {/* 스캔라인 오버레이 */}
-          <div className={styles.scanlines} />
 
           <div className={styles.profileContent}>
             <div className={styles.profileInfo}>
               <div className={styles.avatar}>
-                <Image src="/logo.webp" alt="프로필" width={80} height={80} className={styles.avatarImg} />
+                <Image src="/favicon.png" alt="프로필" width={80} height={80} className={styles.avatarImg} />
               </div>
               <div className={styles.userDetails}>
                 <div className={styles.userNameRow}>
@@ -290,7 +288,7 @@ export default function MyPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconGreen}`}>
+            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconGreen}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgGreen}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
@@ -306,7 +304,7 @@ export default function MyPage() {
 
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconRed}`}>
+            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconRed}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgRed}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
@@ -322,7 +320,7 @@ export default function MyPage() {
 
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconBlue}`}>
+            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconBlue}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgBlue}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -339,7 +337,7 @@ export default function MyPage() {
 
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 flex items-center justify-center ${styles.statIconPink}`}>
+            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconPink}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgPink}`} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
@@ -379,7 +377,7 @@ export default function MyPage() {
         <div className="space-y-4">
           {loading ? (
             <div className="text-center py-12">
-              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent animate-spin mx-auto mb-4" />
+              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="font-sans text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
             </div>
           ) : myReports.length > 0 ? (
@@ -393,7 +391,7 @@ export default function MyPage() {
             ))
           ) : (
             <div className="pixel-empty-state">
-              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 rounded-[12px] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -415,7 +413,7 @@ export default function MyPage() {
         <div className="space-y-4">
           {loading || bookmarkLoading ? (
             <div className="text-center py-12">
-              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent animate-spin mx-auto mb-4" />
+              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="font-sans text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
             </div>
           ) : bookmarkedReports.length > 0 ? (
@@ -424,7 +422,7 @@ export default function MyPage() {
             ))
           ) : (
             <div className="pixel-empty-state">
-              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 rounded-[12px] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
@@ -444,10 +442,10 @@ export default function MyPage() {
 
       {activeTab === 'settings' && (
         <div className="card-base overflow-hidden">
-          <div className="px-5 py-4 border-b-[3px] border-[var(--theme-border-muted)]">
+          <div className="px-5 py-4 border-b-2 border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-base font-bold uppercase tracking-wider">계정 설정</h3>
           </div>
-          <div className="p-6">
+          <div className="p-4 sm:p-6">
             <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
               <h4 className="font-sans text-sm font-bold mb-1">이메일</h4>
               <p className="font-sans text-xs text-gray-500 dark:text-gray-400">{userEmail}</p>
@@ -532,7 +530,7 @@ export default function MyPage() {
               >
                 {isUpdating ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     <span>저장 중...</span>
                   </>
                 ) : (
@@ -558,7 +556,7 @@ export default function MyPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="p-4 bg-red-500/10 border-2 border-red-500 mb-2">
+              <div className="p-4 bg-red-500/10 border-2 border-red-500 rounded-[10px] mb-2">
                 <p className="font-sans text-xs text-red-600 dark:text-red-400 font-bold mb-2">
                   탈퇴 시 다음 사항에 유의해주세요:
                 </p>

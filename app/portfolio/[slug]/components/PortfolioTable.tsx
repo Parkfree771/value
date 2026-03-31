@@ -82,16 +82,16 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
   return (
     <div>
       {/* 필터 + 정렬 */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <div className="flex flex-wrap gap-2">
           {filters.map(f => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 text-xs font-bold border-2 transition-colors ${
+              className={`px-3 py-1.5 text-xs font-bold border-2 rounded-xl transition-colors ${
                 filter === f.key
                   ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
-                  : 'bg-pixel-card text-foreground border-[var(--theme-border)] hover:bg-pixel-bg'
+                  : 'bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]'
               }`}
               style={{ boxShadow: filter === f.key ? 'var(--shadow-sm)' : 'none' }}
             >
@@ -100,7 +100,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
           ))}
         </div>
 
-        <div className="flex gap-0.5 sm:gap-1 items-center flex-shrink-0 ml-2">
+        <div className="flex gap-0.5 sm:gap-1 items-center flex-shrink-0">
         {sortKeys.map((s) => (
           <button
             key={s}
@@ -118,7 +118,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-pixel-bg border-b-3 border-[var(--theme-border)]">
+              <tr className="bg-[var(--theme-bg)] border-b-3 border-[var(--theme-border)]">
                 <th className={`${thClass} text-left w-8`}>#</th>
                 <th className={`${thClass} text-left`}>티커</th>
                 <th className={`${thClass} text-left hidden sm:table-cell`}>종목명</th>
@@ -132,7 +132,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                 <th className={`${thClass} text-right hidden sm:table-cell`}>수익률</th>
               </tr>
             </thead>
-            <tbody className="divide-y-[2px] divide-pixel-border-muted">
+            <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
               {filtered.map((h, i) => (
                 <tr
                   key={h.cusip}

@@ -85,7 +85,7 @@ export default function PortfolioPage() {
   if (!guruInfo) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="card-base p-12 text-center">
+        <div className="card-base p-6 sm:p-12 text-center">
           <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">404</div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
             구루를 찾을 수 없습니다
@@ -120,11 +120,11 @@ export default function PortfolioPage() {
       </div>
 
       {/* 구루 헤더 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-pixel-card border-2 border-[var(--theme-border)] p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
+      <section className="mb-6 sm:mb-8 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
         <div className="relative z-10">
           <div>
             <div className="text-center sm:text-left">
-              <div className="inline-block mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
+              <div className="inline-block mb-3 px-4 py-1.5 rounded-xl border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
                 <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">
                   {guruInfo.style}
                 </span>
@@ -142,7 +142,7 @@ export default function PortfolioPage() {
                 {guruInfo.catchphrase}
               </p>
 
-              <div className="inline-block px-4 py-2 border-2 border-[var(--theme-border-muted)] bg-pixel-bg" style={{ boxShadow: 'var(--shadow-sm)' }}>
+              <div className="inline-block px-4 py-2 rounded-xl border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]" style={{ boxShadow: 'var(--shadow-sm)' }}>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">운용사</p>
                 <p className="text-sm font-bold text-foreground">{guruInfo.filing_name}</p>
               </div>
@@ -158,14 +158,14 @@ export default function PortfolioPage() {
         </h2>
 
         {loading ? (
-          <div className="card-base p-12 text-center">
+          <div className="card-base p-6 sm:p-12 text-center">
             <div className="inline-block w-8 h-8 border-2 border-ant-red-600 border-t-transparent animate-spin mb-4" />
             <p className="text-sm text-gray-500 dark:text-gray-400">
               포트폴리오 데이터를 불러오는 중...
             </p>
           </div>
         ) : error || !portfolio ? (
-          <div className="card-base p-12 text-center">
+          <div className="card-base p-6 sm:p-12 text-center">
             <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
             <h3 className="text-lg font-semibold text-foreground mb-2">
               포트폴리오 데이터 준비중
@@ -183,7 +183,7 @@ export default function PortfolioPage() {
       </section>
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-2 border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
+      <section className="mt-12 p-6 sm:p-8 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] border-l-4 sm:border-l-[6px] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-2xl" style={{ boxShadow: 'var(--shadow-md)' }}>
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>

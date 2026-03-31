@@ -117,18 +117,18 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
         </div>
         <Link
           href="/ranking"
-          className="btn-primary text-xs sm:text-sm"
+          className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
-          전체보기
+          전체보기 →
         </Link>
       </div>
 
       {/* 모바일: 세로 리스트 (3개 보이고 스크롤) */}
-      <div className="sm:hidden max-h-[132px] overflow-y-auto">
+      <div className="sm:hidden max-h-[140px] overflow-y-auto -mr-3">
         <div className="divide-y divide-gray-100 dark:divide-gray-700/60">
           {topReturns.map((item) => (
             <Link key={item.id} href={`/reports/${item.id}`}>
-              <div className="flex items-center gap-3 h-[44px] active:bg-gray-50 dark:active:bg-gray-800 transition-colors">
+              <div className="flex items-center gap-3 h-[44px] active:bg-gray-50 dark:active:bg-gray-800 transition-colors pr-3">
                 <div className="flex-shrink-0 w-7 flex items-center justify-center">
                   {getRankNumber(item.rank)}
                 </div>

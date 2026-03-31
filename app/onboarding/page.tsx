@@ -195,7 +195,7 @@ export default function OnboardingPage() {
   const PixelCheck = ({ checked, size = 'sm' }: { checked: boolean; size?: 'sm' | 'lg' }) => {
     const sizeClass = size === 'lg' ? 'w-6 h-6' : 'w-5 h-5';
     return (
-      <div className={`${sizeClass} border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+      <div className={`${sizeClass} rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all ${
         checked
           ? 'bg-[var(--theme-accent)] border-[var(--theme-accent-dark)]'
           : 'border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]'
@@ -237,17 +237,17 @@ export default function OnboardingPage() {
         {/* Main Card */}
         <div className="card-base">
           {error && (
-            <div className="mx-6 mt-6 p-3 border-2 border-[var(--theme-accent)] bg-red-500/10 font-sans text-xs text-red-600 dark:text-red-400">
+            <div className="mx-4 sm:mx-6 mt-4 sm:mt-6 p-3 rounded-xl border-2 border-[var(--theme-accent)] bg-red-500/10 font-sans text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             {/* 계정 정보 */}
-            <div className="p-6 border-b-[3px] border-[var(--theme-border-muted)]">
+            <div className="p-4 sm:p-6 border-b-2 border-[var(--theme-border-muted)]">
               <h2 className="pixel-label mb-4">계정 정보</h2>
-              <div className="flex items-center gap-3 p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
-                <div className="w-10 h-10 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] flex items-center justify-center flex-shrink-0">
+              <div className="flex items-center gap-3 p-3 rounded-xl border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
+                <div className="w-10 h-10 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
@@ -260,7 +260,7 @@ export default function OnboardingPage() {
             </div>
 
             {/* 닉네임 */}
-            <div className="p-6 border-b-[3px] border-[var(--theme-border-muted)]">
+            <div className="p-4 sm:p-6 border-b-2 border-[var(--theme-border-muted)]">
               <h2 className="pixel-label mb-4">닉네임</h2>
               <div>
                 <input
@@ -293,12 +293,12 @@ export default function OnboardingPage() {
             </div>
 
             {/* 약관 동의 */}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <h2 className="pixel-label mb-4">약관 동의</h2>
 
               {/* 전체 동의 */}
               <div
-                className="flex items-center gap-3 p-4 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)] mb-3 cursor-pointer"
+                className="flex items-center gap-3 p-3 sm:p-4 rounded-xl border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)] mb-3 cursor-pointer"
                 onClick={() => handleAllAgree(!allAgreed)}
               >
                 <PixelCheck checked={allAgreed} size="lg" />
@@ -306,10 +306,10 @@ export default function OnboardingPage() {
               </div>
 
               {/* 개별 약관 */}
-              <div className="border-2 border-[var(--theme-border-muted)] divide-y-[2px] divide-[var(--theme-border-muted)]">
+              <div className="rounded-xl border-2 border-[var(--theme-border-muted)] divide-y-[2px] divide-[var(--theme-border-muted)] overflow-hidden">
                 {/* 이용약관 */}
                 <div>
-                  <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center justify-between p-3 sm:p-4">
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
                       onClick={() => setFormData(prev => ({ ...prev, termsAgreed: !prev.termsAgreed }))}
@@ -331,7 +331,7 @@ export default function OnboardingPage() {
                   </div>
                   {expandedSection === 'terms' && (
                     <div className="px-4 pb-4 pt-0">
-                      <div className="p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)] font-sans text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                      <div className="p-3 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)] font-sans text-xs text-gray-600 dark:text-gray-400 space-y-1">
                         <p>- 투자 리포트 작성 및 공유 서비스 이용</p>
                         <p>- 허위 정보, 명예훼손, 시세조종 목적 게시물 금지</p>
                         <p>- 작성한 리포트의 저작권은 회원에게 귀속</p>
@@ -345,7 +345,7 @@ export default function OnboardingPage() {
 
                 {/* 개인정보 수집 및 이용 */}
                 <div>
-                  <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center justify-between p-3 sm:p-4">
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
                       onClick={() => setFormData(prev => ({ ...prev, privacyAgreed: !prev.privacyAgreed }))}
@@ -367,9 +367,9 @@ export default function OnboardingPage() {
                   </div>
                   {expandedSection === 'privacy' && (
                     <div className="px-4 pb-4 pt-0">
-                      <div className="p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)] font-sans text-xs text-gray-600 dark:text-gray-400">
+                      <div className="p-3 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)] font-sans text-xs text-gray-600 dark:text-gray-400">
                         <table className="w-full">
-                          <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
+                          <tbody className="divide-y divide-[var(--theme-border-muted)]">
                             <tr>
                               <td className="py-1.5 text-gray-500 dark:text-gray-500 w-20">수집 항목</td>
                               <td className="py-1.5">이메일, 닉네임, 프로필 사진(선택)</td>
@@ -395,7 +395,7 @@ export default function OnboardingPage() {
 
                 {/* 투자 면책 조항 */}
                 <div>
-                  <div className="flex items-center justify-between p-4">
+                  <div className="flex items-center justify-between p-3 sm:p-4">
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
                       onClick={() => setFormData(prev => ({ ...prev, investmentDisclaimerAgreed: !prev.investmentDisclaimerAgreed }))}
@@ -417,7 +417,7 @@ export default function OnboardingPage() {
                   </div>
                   {expandedSection === 'disclaimer' && (
                     <div className="px-4 pb-4 pt-0">
-                      <div className="p-3 border-2 border-[var(--theme-accent)] bg-red-500/10 font-sans text-xs text-red-700 dark:text-red-400 space-y-1">
+                      <div className="p-3 rounded-lg border-2 border-[var(--theme-accent)] bg-red-500/10 font-sans text-xs text-red-700 dark:text-red-400 space-y-1">
                         <p className="font-bold mb-2">[필독] 투자 책임 안내</p>
                         <p>- 본 사이트의 정보는 투자 권유가 아닙니다</p>
                         <p>- 투자 손실의 책임은 전적으로 본인에게 있습니다</p>
@@ -432,7 +432,7 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* 마케팅 정보 수신 */}
-                <div className="flex items-center justify-between p-4">
+                <div className="flex items-center justify-between p-3 sm:p-4">
                   <div
                     className="flex items-center gap-3 flex-1 cursor-pointer"
                     onClick={() => setFormData(prev => ({ ...prev, marketingAgreed: !prev.marketingAgreed }))}
@@ -447,11 +447,11 @@ export default function OnboardingPage() {
             </div>
 
             {/* 가입 버튼 */}
-            <div className="p-6 pt-0">
+            <div className="p-4 sm:p-6 pt-0">
               <button
                 type="submit"
                 disabled={loading || !allRequiredAgreed || nicknameAvailable !== true}
-                className={`w-full font-sans py-3 font-bold text-sm transition-all ${
+                className={`w-full font-sans py-3.5 sm:py-3 font-bold text-sm rounded-xl transition-all ${
                   loading || !allRequiredAgreed || nicknameAvailable !== true
                     ? 'bg-[var(--theme-border-muted)] text-gray-500 border-2 border-[var(--theme-border-muted)] cursor-not-allowed'
                     : 'btn-primary'

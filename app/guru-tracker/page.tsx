@@ -8,10 +8,10 @@ export default function GuruTrackerPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 소개 섹션 */}
-      <section className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-2 border-[var(--theme-border)] p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
+      <section className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-2 border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden" style={{ boxShadow: 'var(--shadow-lg)' }}>
         <div className="relative z-10">
           <div className="text-center mb-6 sm:mb-7">
-            <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
+            <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 rounded-xl border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
               <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">Investment Masters Observatory</span>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-md">
@@ -101,7 +101,7 @@ export default function GuruTrackerPage() {
       </section>
 
       {/* 면책 조항 */}
-      <section className="mt-12 p-6 sm:p-8 bg-pixel-card border-2 border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400" style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}>
+      <section className="mt-12 p-6 sm:p-8 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] border-l-4 sm:border-l-[6px] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-2xl" style={{ boxShadow: 'var(--shadow-md)' }}>
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">
           13F 공시의 '135일 시차' 주의사항
         </h3>
