@@ -121,6 +121,16 @@ const Navbar = memo(function Navbar() {
             >
               기업분석
             </Link>
+            <Link
+              href="/news"
+              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
+                isActive('/news')
+                  ? 'pixel-nav-active'
+                  : 'pixel-nav-inactive'
+              }`}
+            >
+              뉴스
+            </Link>
             <span className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></span>
             <Link
               href="/write"
@@ -355,6 +365,17 @@ const Navbar = memo(function Navbar() {
                 }`}
               >
                 기업분석
+              </Link>
+              <Link
+                href="/news"
+                onClick={closeMobileMenu}
+                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
+                  isActive('/news')
+                    ? 'pixel-nav-mobile-active'
+                    : 'pixel-nav-mobile-inactive'
+                }`}
+              >
+                뉴스
               </Link>
               <Link
                 href="/write"
