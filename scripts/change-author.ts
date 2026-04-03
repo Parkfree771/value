@@ -15,19 +15,19 @@ import { getStorage } from 'firebase-admin/storage';
 // 여기서 편집하세요!
 // ============================================================
 
-// 변경할 닉네임
-const NEW_AUTHOR_NAME = '어디서바라보는가';
+// 변경할 닉네임 (users 컬렉션에서 이 닉네임의 uid를 자동 조회)
+const NEW_AUTHOR_NAME = '도널드덕';
 
 // 변경할 게시글 제목 목록
 const TARGET_TITLES = [
-  '사람들은 나쁜 것을 더 크게 본다',
+  '구조적 약세의 시작',
 ];
 
 // ============================================================
 
 // .env 로드
 import * as dotenv from 'dotenv';
-dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 // Firebase Admin 초기화
 if (getApps().length === 0) {
@@ -60,6 +60,21 @@ const bucket = getStorage().bucket();
 async function main() {
   console.log(`\n닉네임을 "${NEW_AUTHOR_NAME}"(으)로 변경합니다.\n`);
 
+  // 0. users 컬렉션에서 닉네임으로 uid 조회
+  const usersSnapshot = await db.collection('users')
+    .where('nickname', '==', NEW_AUTHOR_NAME)
+    .get();
+
+  let newAuthorId: string | null = null;
+  if (usersSnapshot.empty) {
+    console.log(`⚠ users 컬렉션에서 "${NEW_AUTHOR_NAME}" 닉네임을 찾지 못했습니다.`);
+    console.log('  authorName만 변경하고 authorId는 유지합니다.\n');
+  } else {
+    const userDoc = usersSnapshot.docs[0];
+    newAuthorId = userDoc.data().uid || userDoc.id;
+    console.log(`✓ 사용자 발견: ${NEW_AUTHOR_NAME} (uid: ${newAuthorId})\n`);
+  }
+
   // 1. posts 컬렉션에서 제목으로 검색
   const postsSnapshot = await db.collection('posts').get();
   const matchedPosts: { id: string; title: string; oldAuthor: string }[] = [];
@@ -68,7 +83,7 @@ async function main() {
     const data = doc.data();
     const title = (data.title || '').trim();
 
-    if (TARGET_TITLES.some(t => title.includes(t) || t.includes(title))) {
+    if (title && TARGET_TITLES.some(t => title.includes(t) || t.includes(title))) {
       matchedPosts.push({
         id: doc.id,
         title,
@@ -95,9 +110,13 @@ async function main() {
   console.log('\n[1/2] Firestore posts 업데이트 중...');
   const batch = db.batch();
   for (const post of matchedPosts) {
-    batch.update(db.collection('posts').doc(post.id), {
+    const updateData: Record<string, string> = {
       authorName: NEW_AUTHOR_NAME,
-    });
+    };
+    if (newAuthorId) {
+      updateData.authorId = newAuthorId;
+    }
+    batch.update(db.collection('posts').doc(post.id), updateData);
   }
   await batch.commit();
   console.log('  ✓ posts 컬렉션 업데이트 완료');
@@ -116,6 +135,9 @@ async function main() {
       for (const post of feedData.posts) {
         if (matchedPosts.some(mp => mp.id === post.id)) {
           post.author = NEW_AUTHOR_NAME;
+          if (newAuthorId) {
+            post.authorId = newAuthorId;
+          }
           feedUpdated++;
         }
       }
