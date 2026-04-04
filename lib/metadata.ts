@@ -78,13 +78,19 @@ export function generateReportMetadata(
       siteName: SITE_NAME,
       locale: 'ko_KR',
       publishedTime: report.createdAt,
-      images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
+      images: [{
+        url: `${SITE_URL}/api/og?title=${encodeURIComponent(report.title)}&stockName=${encodeURIComponent(report.stockName)}&ticker=${encodeURIComponent(report.ticker)}&returnRate=${returnRate.toFixed(2)}&opinion=${report.opinion}`,
+        width: 1200,
+        height: 630,
+        alt: `${report.stockName} - ${report.title}`,
+      }],
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title,
       description,
       creator: `@${report.author}`,
+      images: [`${SITE_URL}/api/og?title=${encodeURIComponent(report.title)}&stockName=${encodeURIComponent(report.stockName)}&ticker=${encodeURIComponent(report.ticker)}&returnRate=${returnRate.toFixed(2)}&opinion=${report.opinion}`],
     },
     robots: {
       index: true,
