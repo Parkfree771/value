@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
-import Card from './Card';
 import podiumStyles from './Podium.module.css';
 
 interface TopReturn {
@@ -108,9 +107,9 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
   };
 
   return (
-    <Card className="p-3 sm:p-6 mb-3 sm:mb-5">
+    <div className="mb-4 sm:mb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 sm:mb-8">
+      <div className="flex items-center justify-between mb-3 sm:mb-5">
         <div>
           <h2 className="text-lg sm:text-xl text-heading">수익률 TOP 10</h2>
           <p className="text-xs sm:text-sm text-muted mt-1 hidden sm:block">가장 높은 수익률을 기록한 리포트</p>
@@ -189,7 +188,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
           </div>
         </div>
       </div>
-    </Card>
+    </div>
   );
 });
 

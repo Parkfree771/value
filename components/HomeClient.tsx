@@ -30,9 +30,9 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 
 // 필터 (텍스트 스타일 - 검색 페이지와 동일)
-const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
-const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
-const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-500 dark:text-gray-400 hover:text-[var(--foreground)]`;
+const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 transition-all';
+const FILTER_ACTIVE = `${FILTER_BASE} font-black text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
+const FILTER_INACTIVE = `${FILTER_BASE} font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)]`;
 
 /** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
 function measureFirstRow(container: HTMLElement | null): number {
@@ -211,7 +211,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   // 로딩 중 스켈레톤 UI
   if (isLoading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-3 sm:pb-12">
         {/* TOP 10 스켈레톤 */}
         <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-4 sm:mb-8" />
 
@@ -236,7 +236,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-3 sm:pb-12">
       <h1 className="sr-only">AntStreet - 투자 리포트 피드</h1>
       {/* TOP 10 Return Rate Slider */}
       <TopReturnSlider reports={reports} />

@@ -125,6 +125,73 @@ export async function getKISStockPrice(stockCode: string) {
 }
 
 /**
+ * 국내 업종 현재지수 조회 (KOSPI, KOSDAQ, KOSPI200 등)
+ * @param indexCode 업종 코드 (0001: KOSPI, 1001: KOSDAQ, 2001: KOSPI200)
+ * @returns 지수 현재가 / 전일 대비 / 변동률
+ */
+export async function getKISDomesticIndex(indexCode: string): Promise<{
+  price: number;
+  change: number;
+  changePercent: number;
+} | null> {
+  try {
+    const token = await getKISTokenWithCache();
+
+    const params = new URLSearchParams({
+      fid_cond_mrkt_div_code: 'U', // U: 업종
+      fid_input_iscd: indexCode,
+    });
+
+    const url = `${process.env.KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-index-price?${params.toString()}`;
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'authorization': `Bearer ${token}`,
+        'appkey': process.env.KIS_APP_KEY!,
+        'appsecret': process.env.KIS_APP_SECRET!,
+        'tr_id': 'FHPUP02100000', // 국내업종 현재지수
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`[KIS Index] ${indexCode} 조회 실패: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.output) {
+      console.error(`[KIS Index] ${indexCode} 잘못된 응답:`, data);
+      return null;
+    }
+
+    // 응답 필드:
+    //   bstp_nmix_prpr  : 업종 지수 현재가
+    //   bstp_nmix_prdy_vrss : 전일 대비
+    //   bstp_nmix_prdy_ctrt : 전일 대비율
+    //   prdy_vrss_sign  : 부호 (1:상한 2:상승 3:보합 4:하한 5:하락)
+    const sign = data.output.prdy_vrss_sign;
+    const rawChange = parseFloat(data.output.bstp_nmix_prdy_vrss);
+    const rawChangePct = parseFloat(data.output.bstp_nmix_prdy_ctrt);
+
+    // sign 이 4/5(하락)이면 음수로 교정 (일부 엔드포인트는 절대값만 반환)
+    const isDown = sign === '4' || sign === '5';
+    const change = isDown && rawChange > 0 ? -rawChange : rawChange;
+    const changePercent = isDown && rawChangePct > 0 ? -rawChangePct : rawChangePct;
+
+    return {
+      price: parseFloat(data.output.bstp_nmix_prpr),
+      change,
+      changePercent,
+    };
+  } catch (err) {
+    console.error(`[KIS Index] ${indexCode} 예외:`, err);
+    return null;
+  }
+}
+
+/**
  * 해외 주식 현재가 조회
  * @param symbol 종목 심볼 (예: AAPL, TSLA)
  * @param exchange 거래소 코드 (예: NAS, NYS, HKS)

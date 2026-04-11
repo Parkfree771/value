@@ -364,31 +364,52 @@ body {
   /* 카드 스타일 - 둥근 모서리 + 소프트 그림자 */
   .card-base {
     background: var(--theme-bg-card);
-    border: 2px solid var(--theme-border-muted);
+    border: 2px solid #94a3b8;
     border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(59, 80, 181, 0.1), 0 1px 3px rgba(0,0,0,0.06);
+    box-shadow:
+      inset 1px 1px 0 0 rgba(255, 255, 255, 0.75),
+      2px 2px 0 0 rgba(59, 80, 181, 0.3),
+      4px 4px 0 0 rgba(59, 80, 181, 0.2),
+      6px 6px 0 0 rgba(59, 80, 181, 0.12);
     @apply transition-all duration-200;
   }
 
   .card-interactive {
     background: var(--theme-bg-card);
-    border: 2px solid var(--theme-border-muted);
+    border: 2px solid #94a3b8;
     border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(59, 80, 181, 0.1), 0 1px 3px rgba(0,0,0,0.06);
+    box-shadow:
+      inset 1px 1px 0 0 rgba(255, 255, 255, 0.75),
+      2px 2px 0 0 rgba(59, 80, 181, 0.3),
+      4px 4px 0 0 rgba(59, 80, 181, 0.2),
+      6px 6px 0 0 rgba(59, 80, 181, 0.12);
     @apply cursor-pointer transition-all duration-200;
   }
   .card-interactive:hover {
     border-color: var(--theme-accent);
-    box-shadow: 0 4px 16px rgba(59, 80, 181, 0.15), 0 2px 6px rgba(0,0,0,0.06);
-    transform: translateY(-2px);
+    box-shadow:
+      inset 1px 1px 0 0 rgba(255, 255, 255, 0.85),
+      3px 3px 0 0 rgba(59, 80, 181, 0.4),
+      6px 6px 0 0 rgba(59, 80, 181, 0.25),
+      9px 9px 0 0 rgba(59, 80, 181, 0.15);
+    transform: translate(-1px, -1px);
   }
 
   .dark .card-base,
   .dark .card-interactive {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.1);
+    border-color: #64748b;
+    box-shadow:
+      inset 1px 1px 0 0 rgba(255, 255, 255, 0.1),
+      2px 2px 0 0 rgba(107, 126, 214, 0.35),
+      4px 4px 0 0 rgba(107, 126, 214, 0.22),
+      6px 6px 0 0 rgba(107, 126, 214, 0.12);
   }
   .dark .card-interactive:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.25), 0 2px 6px rgba(99, 120, 209, 0.1);
+    box-shadow:
+      inset 1px 1px 0 0 rgba(255, 255, 255, 0.14),
+      3px 3px 0 0 rgba(107, 126, 214, 0.45),
+      6px 6px 0 0 rgba(107, 126, 214, 0.28),
+      9px 9px 0 0 rgba(107, 126, 214, 0.15);
   }
 
   /* 버튼 스타일 - 둥근 모서리 + 소프트 그림자 */
