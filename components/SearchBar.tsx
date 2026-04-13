@@ -170,10 +170,10 @@ const SearchBar = memo(function SearchBar({
         {/* 검색 버튼 (왼쪽) */}
         <button
           type="button"
-          className="btn-primary flex-shrink-0 !px-3 sm:!px-5 !py-1.5 sm:!py-2"
+          className="btn-primary flex-shrink-0 inline-flex items-center justify-center leading-none !px-3 sm:!px-5 !py-1.5 sm:!py-2"
           aria-label="검색"
         >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+          <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
