@@ -390,6 +390,7 @@ const IndicatorCard = memo(function IndicatorCard({
     : apiType === 'ecos' && (config as EcosIndicatorConfig).cycle === 'A' ? '5Y' : '1Y';
   const [timeRange, setTimeRange] = useState<TimeRange>(defaultRange as TimeRange);
   const [rawData, setRawData] = useState<FredObservation[]>([]);
+  const [releasedAt, setReleasedAt] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 측정선 상태
@@ -438,6 +439,7 @@ const IndicatorCard = memo(function IndicatorCard({
       if (!res.ok) throw new Error('Failed');
       const json = await res.json();
       const data: FredObservation[] = json.observations;
+      if (json.releasedAt) setReleasedAt(json.releasedAt);
 
       // 원본 데이터를 캐시에 저장
       setToCache(configId, actualDays, data);
@@ -823,9 +825,16 @@ const IndicatorCard = memo(function IndicatorCard({
 
       {/* 마지막 업데이트 */}
       {latest && !loading && (
-        <p className="font-heading text-xs font-bold text-gray-400 dark:text-gray-500 mt-2 text-right">
-          최종 데이터: {latest.date}
-        </p>
+        <div className="mt-2 text-right">
+          <p className="font-heading text-xs font-bold text-gray-400 dark:text-gray-500">
+            최종 데이터: {latest.date}
+          </p>
+          {releasedAt && (
+            <p className="font-heading text-[11px] font-bold text-gray-400 dark:text-gray-500">
+              발표일: {releasedAt.slice(0, 10)}
+            </p>
+          )}
+        </div>
       )}
     </div>
   );

@@ -528,6 +528,23 @@ body {
     @apply text-gray-400 dark:text-gray-500;
   }
 
+  /* 검색바: 버튼/입력창 높이 픽셀 단위 일치 */
+  .search-row .search-control {
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    box-sizing: border-box !important;
+    line-height: 1 !important;
+    vertical-align: middle;
+  }
+  @media (min-width: 640px) {
+    .search-row .search-control {
+      height: 44px !important;
+      min-height: 44px !important;
+      max-height: 44px !important;
+    }
+  }
+
   /* 셀렉트 */
   .pixel-select {
     width: 100%;

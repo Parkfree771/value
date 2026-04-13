@@ -54,12 +54,21 @@ export async function GET(request: NextRequest) {
       url += `&observation_start=${startDate.toISOString().split('T')[0]}`;
     }
 
-    const response = await fetch(url);
+    // 시리즈 메타(발표일 last_updated) 병렬 조회
+    const seriesInfoUrl = `https://api.stlouisfed.org/fred/series?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json`;
+
+    const [response, seriesInfoRes] = await Promise.all([
+      fetch(url),
+      fetch(seriesInfoUrl),
+    ]);
+
     if (!response.ok) {
       throw new Error(`FRED API error: ${response.status}`);
     }
 
     const data = await response.json();
+    const seriesInfo = seriesInfoRes.ok ? await seriesInfoRes.json() : null;
+    const releasedAt: string | null = seriesInfo?.seriess?.[0]?.last_updated || null;
 
     // "." 값(결측치) 필터링
     const observations = (data.observations || [])
@@ -73,6 +82,7 @@ export async function GET(request: NextRequest) {
       series_id: seriesId,
       observations,
       count: observations.length,
+      releasedAt,
       lastUpdated: new Date().toISOString(),
     };
 

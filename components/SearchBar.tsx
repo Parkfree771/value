@@ -166,11 +166,11 @@ const SearchBar = memo(function SearchBar({
 
   return (
     <div className="mb-4 sm:mb-6" ref={searchRef}>
-      <div className="flex gap-2 w-full sm:max-w-md">
+      <div className="search-row flex items-center gap-2 w-full sm:max-w-md">
         {/* 검색 버튼 (왼쪽) */}
         <button
           type="button"
-          className="btn-primary flex-shrink-0 inline-flex items-center justify-center leading-none !px-3 sm:!px-5 !py-1.5 sm:!py-2"
+          className="btn-primary search-control flex-shrink-0 inline-flex items-center justify-center leading-none !px-3 sm:!px-5 !py-0 !my-0"
           aria-label="검색"
         >
           <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
@@ -193,7 +193,7 @@ const SearchBar = memo(function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             aria-label="검색어 입력"
-            className="pixel-input !pl-3 !pr-8 sm:!pl-4 sm:!pr-10 !py-1.5 sm:!py-2 text-xs sm:text-sm font-heading font-medium tracking-wide"
+            className="pixel-input search-control !pl-3 !pr-8 sm:!pl-4 sm:!pr-10 !py-0 !my-0 text-xs sm:text-sm font-heading font-medium tracking-wide"
           />
           {searchQuery && (
             <button
