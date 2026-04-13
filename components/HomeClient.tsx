@@ -244,9 +244,9 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* 검색바 */}
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="" showStockSuggestions={false} />
 
-      {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 */}
-      <div className="mb-3 sm:mb-4 flex justify-between items-center overflow-x-auto scrollbar-hide">
-        <div className="flex gap-0.5 sm:gap-1 flex-nowrap items-center">
+      {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 (모바일에서는 세로로 쌓기) */}
+      <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 sm:gap-0">
+        <div className="flex gap-1 sm:gap-1 flex-nowrap items-center overflow-x-auto scrollbar-hide -mx-1 px-1">
           {marketKeys.map((m) => (
             <button
               key={m}
@@ -257,7 +257,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             </button>
           ))}
         </div>
-        <div className="flex gap-0.5 sm:gap-1 flex-nowrap ml-2 items-center">
+        <div className="flex gap-1 sm:gap-1 flex-nowrap sm:ml-2 items-center overflow-x-auto scrollbar-hide -mx-1 px-1">
           {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
             <button
               key={tab}

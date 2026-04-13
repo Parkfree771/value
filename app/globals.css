@@ -787,6 +787,10 @@ body {
 .dark .article-content {
   color: #d1d5db;
 }
+.dark .article-content.html-report-scope,
+.dark .article-content.html-preview-scope {
+  color: initial;
+}
 
 /* 문단 */
 .article-content p {
@@ -910,6 +914,9 @@ body {
 .article-content mark {
   border-radius: 2px;
   padding: 0 2px;
+}
+.dark .article-content mark {
+  color: #000 !important;
 }
 
 /* ============================================
