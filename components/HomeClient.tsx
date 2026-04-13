@@ -30,7 +30,7 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 
 // 필터 (텍스트 스타일 - 검색 페이지와 동일)
-const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-xs sm:text-sm px-2 py-1 sm:px-3 sm:py-1.5 transition-all';
+const FILTER_BASE = 'flex-shrink-0 font-heading tracking-tight sm:tracking-wide text-[10px] sm:text-sm px-1 py-0.5 sm:px-3 sm:py-1.5 transition-all';
 const FILTER_ACTIVE = `${FILTER_BASE} font-black text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
 const FILTER_INACTIVE = `${FILTER_BASE} font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)]`;
 
@@ -244,9 +244,9 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* 검색바 */}
       <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="" showStockSuggestions={false} />
 
-      {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 (모바일에서는 세로로 쌓기) */}
-      <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1.5 sm:gap-0">
-        <div className="flex gap-1 sm:gap-1 flex-nowrap items-center overflow-x-auto scrollbar-hide -mx-1 px-1">
+      {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 (한 줄 유지, 모바일 축소) */}
+      <div className="mb-3 sm:mb-4 flex justify-between items-center gap-1 overflow-x-auto scrollbar-hide">
+        <div className="flex gap-0 sm:gap-1 flex-nowrap items-center">
           {marketKeys.map((m) => (
             <button
               key={m}
@@ -257,7 +257,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
             </button>
           ))}
         </div>
-        <div className="flex gap-1 sm:gap-1 flex-nowrap sm:ml-2 items-center overflow-x-auto scrollbar-hide -mx-1 px-1">
+        <div className="flex gap-0 sm:gap-1 flex-nowrap sm:ml-2 items-center">
           {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
             <button
               key={tab}
