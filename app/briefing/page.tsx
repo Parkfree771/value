@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 
 const STORAGE_BASE = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o`;
 
-async function fetchJSON(filename: string) {
+async function fetchJSON(filename: string, tag: string) {
   try {
     const res = await fetch(`${STORAGE_BASE}/${filename}?alt=media`, {
-      next: { revalidate: 300 },
+      next: { revalidate: false, tags: [tag, 'briefing-all'] },
     });
     if (!res.ok) return null;
     return res.json();
@@ -26,12 +26,12 @@ async function fetchJSON(filename: string) {
 
 export default async function BriefingPage() {
   const [briefingUS, marketUS, briefingKR, marketKR, briefingJP, marketJP] = await Promise.all([
-    fetchJSON('briefing.json'),
-    fetchJSON('market.json'),
-    fetchJSON('briefing_korea.json'),
-    fetchJSON('market_korea.json'),
-    fetchJSON('briefing_japan.json'),
-    fetchJSON('market_japan.json'),
+    fetchJSON('briefing.json', 'briefing-us'),
+    fetchJSON('market.json', 'briefing-us'),
+    fetchJSON('briefing_korea.json', 'briefing-kr'),
+    fetchJSON('market_korea.json', 'briefing-kr'),
+    fetchJSON('briefing_japan.json', 'briefing-jp'),
+    fetchJSON('market_japan.json', 'briefing-jp'),
   ]);
 
   return (

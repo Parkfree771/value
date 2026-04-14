@@ -94,7 +94,7 @@ const bucket = getStorage().bucket();
 
 // ===== KIS API =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_BETWEEN_REQUESTS = 50;
+const DELAY_BETWEEN_REQUESTS = 500;
 
 function calculateReturn(initial: number, current: number, positionType: 'long' | 'short'): number {
   if (initial <= 0 || current <= 0) return 0;
