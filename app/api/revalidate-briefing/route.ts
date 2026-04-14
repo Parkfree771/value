@@ -22,7 +22,7 @@ async function handle(request: NextRequest) {
     return NextResponse.json({ error: `Unknown key: ${key}. Use us|kr|jp|all` }, { status: 400 });
   }
 
-  tags.forEach((t) => revalidateTag(t));
+  tags.forEach((t) => revalidateTag(t, 'max'));
 
   return NextResponse.json({ revalidated: true, key, tags, now: Date.now() });
 }
