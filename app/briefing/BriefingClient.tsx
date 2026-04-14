@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Container from '@/components/Container';
 
 /* ─── 타입 ─── */
@@ -49,6 +50,53 @@ interface BriefingData {
   issues: BriefingIssue[];
 }
 
+type CountryKey = 'US' | 'KR' | 'JP';
+
+interface CountryBundle {
+  briefing: BriefingData | null;
+  market: MarketData | null;
+}
+
+interface CountryTheme {
+  key: CountryKey;
+  label: string;
+  flag: string;
+  subtitle: string;
+  accent: string;
+  accentDark: string;
+  badge: string;
+}
+
+const THEMES: Record<CountryKey, CountryTheme> = {
+  US: {
+    key: 'US',
+    label: '미국',
+    flag: '🇺🇸',
+    subtitle: '미국 주요 매체 분석 기반 시장 브리핑',
+    accent: '#3b50b5',
+    accentDark: '#2a3a8a',
+    badge: 'US BRIEFING',
+  },
+  KR: {
+    key: 'KR',
+    label: '한국',
+    flag: '🇰🇷',
+    subtitle: '한국 주요 매체 분석 기반 시장 브리핑',
+    accent: '#3b50b5',
+    accentDark: '#2a3a8a',
+    badge: 'KR 브리핑',
+  },
+  JP: {
+    key: 'JP',
+    label: '일본',
+    flag: '🇯🇵',
+    subtitle: '일본 주요 매체 분석 기반 시장 브리핑',
+    accent: '#BC002D',
+    accentDark: '#800020',
+    badge: 'JP ブリーフィング',
+  },
+};
+
 /* ─── 유틸 ─── */
 
 function parsePercent(str: string): number {
@@ -95,135 +143,206 @@ function MiniChart({ data, positive, id }: { data: number[]; positive: boolean; 
   );
 }
 
-/* ─── 메인 ─── */
+/* ─── 국가별 패널 ─── */
 
-export default function BriefingClient({
-  briefing,
-  market,
-}: {
-  briefing: BriefingData | null;
-  market: MarketData | null;
-}) {
+function CountryPanel({ bundle, theme }: { bundle: CountryBundle; theme: CountryTheme }) {
+  const { briefing, market } = bundle;
+
   if (!briefing && !market) {
     return (
-      <Container>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <p className="text-xl mb-2 opacity-20 font-bold">BRIEFING</p>
-            <p className="text-muted text-sm">브리핑 데이터가 없습니다.</p>
-          </div>
-        </div>
-      </Container>
+      <div className="card-base p-6 text-center">
+        <p className="text-xl mb-2 opacity-20 font-bold">{theme.badge}</p>
+        <p className="text-muted text-sm">브리핑 데이터가 없습니다.</p>
+      </div>
     );
   }
 
   const dateStr = briefing?.generated_at_kr || market?.collected_at_kr || '';
 
   return (
-    <Container>
-      {/* 페이지 헤더 */}
-      <div className="mb-6">
-        <h1 className="text-xl sm:text-2xl font-black font-heading">글로벌 브리핑</h1>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">미국 주요 매체 분석 기반 시장 브리핑</p>
-      </div>
-
-      {/* ── 브리핑 카드 ── */}
-      <div className="flex flex-col gap-4">
-        <div className="card-base p-4 sm:p-6">
-
-          {/* 헤더 */}
-          <div className="flex items-center justify-between mb-5 pb-3 border-b-2 border-[var(--theme-border-muted)]">
-            <div className="flex items-center gap-2.5">
-              <span className="text-[10px] sm:text-xs font-black px-2.5 py-1 rounded-lg text-white tracking-wider" style={{ backgroundColor: 'var(--theme-accent)' }}>
-                BRIEFING
-              </span>
-              {dateStr && (
-                <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-bold">{dateStr}</span>
-              )}
-            </div>
-            {briefing && (
-              <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 font-semibold">{briefing.source_articles}개 기사 분석</span>
-            )}
-          </div>
-
-          {/* ── 시장 가격 3열 그리드 ── */}
-          {market && market.market.length > 0 && (
-            <div className="mb-6">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-                {market.market.map((item) => {
-                  if (!item.quote) return null;
-                  const pct = parsePercent(item.quote.changePercent);
-                  const positive = pct >= 0;
-                  const color = positive ? '#22c55e' : '#ef4444';
-                  const sparkData = item.sparkline.length > 0
-                    ? item.sparkline.map((s) => s.close)
-                    : [item.quote.previousClose, item.quote.price];
-
-                  return (
-                    <div
-                      key={item.symbol}
-                      className="rounded-xl p-3 sm:p-4 flex items-center gap-2 border-2 bg-[var(--theme-bg-card)] transition-all cursor-default"
-                      style={{
-                        borderColor: color,
-                        boxShadow: `1.7px 1.7px 0px ${color}`,
-                      }}
-                    >
-                      {/* 왼쪽: 종목명 + 가격 + 등락 */}
-                      <div className="shrink-0">
-                        <div className="text-base sm:text-lg font-black font-heading text-gray-900 dark:text-white leading-tight">
-                          {item.name}
-                        </div>
-                        <div className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 font-mono tracking-tight mt-0.5">
-                          {item.type === 'commodity' ? '$' : ''}{formatPrice(item.quote.price)}
-                        </div>
-                        <div
-                          className="text-lg sm:text-xl font-black font-heading tracking-tight leading-tight mt-0.5"
-                          style={{ color }}
-                        >
-                          {positive ? '+' : ''}{pct.toFixed(2)}%
-                        </div>
-                      </div>
-                      {/* 오른쪽: 미니 차트 — 남은 공간 꽉 채움 */}
-                      <div className="flex-1 min-w-0 flex items-end justify-end">
-                        <MiniChart data={sparkData} positive={positive} id={item.symbol} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* ── 이슈 리스트 ── */}
-          {briefing && briefing.issues.length > 0 && (
-            <div className="flex flex-col gap-3">
-              {briefing.issues.map((issue, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl p-3 sm:p-5 border-2 border-[var(--theme-accent)] bg-[var(--theme-bg-card)] transition-all"
-                  style={{ boxShadow: '1.7px 1.7px 0px var(--theme-accent)' }}
-                >
-                  <div className="flex gap-3 sm:gap-4">
-                    <span
-                      className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs sm:text-sm font-black text-white"
-                      style={{ backgroundColor: 'var(--theme-accent)' }}
-                    >
-                      {idx + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base sm:text-lg font-black font-heading leading-snug text-gray-900 dark:text-white mb-2">
-                        {issue.headline}
-                      </h3>
-                      <p className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 leading-relaxed">
-                        {issue.summary}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+    <div className="card-base p-4 sm:p-6" style={{ borderColor: theme.accent }}>
+      {/* 헤더 */}
+      <div
+        className="flex items-center justify-between mb-5 pb-3 border-b-2"
+        style={{ borderColor: `${theme.accent}33` }}
+      >
+        <div className="flex items-center gap-2.5">
+          <span
+            className="text-[10px] sm:text-xs font-black px-2.5 py-1 rounded-lg text-white tracking-wider"
+            style={{ backgroundColor: theme.accent }}
+          >
+            {theme.flag} {theme.badge}
+          </span>
+          {dateStr && (
+            <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 font-bold">{dateStr}</span>
           )}
         </div>
+        {briefing && (
+          <span className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 font-semibold">
+            {briefing.source_articles}개 기사 분석
+          </span>
+        )}
+      </div>
+
+      {/* 시장 가격 + 환율 */}
+      {market && (market.market.length > 0 || (market.forex && market.forex.length > 0)) && (
+        <div className="mb-6">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+            {market.market.map((item) => {
+              if (!item.quote) return null;
+              const pct = parsePercent(item.quote.changePercent);
+              const positive = pct >= 0;
+              const color = positive ? '#22c55e' : '#ef4444';
+              const sparkData = item.sparkline.length > 0
+                ? item.sparkline.map((s) => s.close)
+                : [item.quote.previousClose, item.quote.price];
+
+              return (
+                <div
+                  key={item.symbol}
+                  className="rounded-xl p-3 sm:p-4 flex items-center gap-2 border-2 bg-[var(--theme-bg-card)] transition-all cursor-default"
+                  style={{
+                    borderColor: color,
+                    boxShadow: `1.7px 1.7px 0px ${color}`,
+                  }}
+                >
+                  <div className="shrink-0">
+                    <div className="text-base sm:text-lg font-black font-heading text-gray-900 dark:text-white leading-tight">
+                      {item.name}
+                    </div>
+                    <div className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 font-mono tracking-tight mt-0.5">
+                      {item.type === 'commodity' ? '$' : ''}{formatPrice(item.quote.price)}
+                    </div>
+                    <div
+                      className="text-lg sm:text-xl font-black font-heading tracking-tight leading-tight mt-0.5"
+                      style={{ color }}
+                    >
+                      {positive ? '+' : ''}{pct.toFixed(2)}%
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0 flex items-end justify-end">
+                    <MiniChart data={sparkData} positive={positive} id={`${theme.key}-${item.symbol}`} />
+                  </div>
+                </div>
+              );
+            })}
+
+            {market.forex && market.forex.map((fx) => {
+              if (!fx.rate) return null;
+              const isJpy = fx.from === 'JPY';
+              const displayPrice = isJpy ? fx.rate.price * 100 : fx.rate.price;
+              const displayName = isJpy ? '100엔/원' : fx.name;
+              const displayPair = isJpy ? '100 JPY/KRW' : `${fx.from}/${fx.to}`;
+              return (
+                <div
+                  key={`fx-${fx.from}-${fx.to}`}
+                  className="rounded-xl p-3 sm:p-4 flex flex-col justify-center border-2 bg-[var(--theme-bg-card)] transition-all cursor-default"
+                  style={{
+                    borderColor: theme.accent,
+                    boxShadow: `1.7px 1.7px 0px ${theme.accent}`,
+                  }}
+                >
+                  <div className="text-base sm:text-lg font-black font-heading text-gray-900 dark:text-white leading-tight">
+                    {displayName}
+                  </div>
+                  <div className="text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 font-mono tracking-tight mt-0.5">
+                    {displayPair}
+                  </div>
+                  <div
+                    className="text-lg sm:text-xl font-black font-heading font-mono tracking-tight leading-tight mt-0.5"
+                    style={{ color: theme.accent }}
+                  >
+                    {Math.round(displayPrice).toLocaleString('en-US')}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* 이슈 리스트 */}
+      {briefing && briefing.issues.length > 0 && (
+        <div className="flex flex-col gap-3">
+          {briefing.issues.map((issue, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl p-3 sm:p-5 border-2 bg-[var(--theme-bg-card)] transition-all"
+              style={{
+                borderColor: theme.accent,
+                boxShadow: `1.7px 1.7px 0px ${theme.accent}`,
+              }}
+            >
+              <div className="flex gap-3 sm:gap-4">
+                <span
+                  className="shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center text-xs sm:text-sm font-black text-white"
+                  style={{ backgroundColor: theme.accent }}
+                >
+                  {idx + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-base sm:text-lg font-black font-heading leading-snug text-gray-900 dark:text-white mb-2">
+                    {issue.headline}
+                  </h3>
+                  <p className="text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 leading-relaxed">
+                    {issue.summary}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── 메인 ─── */
+
+export default function BriefingClient({
+  data,
+}: {
+  data: Record<CountryKey, CountryBundle>;
+}) {
+  const [active, setActive] = useState<CountryKey>('US');
+  const theme = THEMES[active];
+
+  return (
+    <Container>
+      {/* 페이지 헤더 */}
+      <div className="mb-4">
+        <h1 className="text-xl sm:text-2xl font-black font-heading">글로벌 브리핑</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{theme.subtitle}</p>
+      </div>
+
+      {/* 국가 탭 */}
+      <div className="flex gap-2 mb-5">
+        {(Object.keys(THEMES) as CountryKey[]).map((k) => {
+          const t = THEMES[k];
+          const isActive = k === active;
+          return (
+            <button
+              key={k}
+              onClick={() => setActive(k)}
+              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border-2 font-black text-sm sm:text-base transition-all"
+              style={{
+                borderColor: isActive ? t.accent : 'var(--theme-border-muted)',
+                backgroundColor: isActive ? t.accent : 'var(--theme-bg-card)',
+                color: isActive ? '#fff' : 'var(--theme-text)',
+                boxShadow: isActive ? `2px 2px 0px ${t.accentDark}` : 'none',
+                transform: isActive ? 'translate(-1px,-1px)' : 'none',
+              }}
+            >
+              <span className="mr-1.5">{t.flag}</span>
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 활성 국가 패널 */}
+      <div className="flex flex-col gap-4">
+        <CountryPanel bundle={data[active]} theme={theme} />
       </div>
     </Container>
   );

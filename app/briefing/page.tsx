@@ -25,10 +25,22 @@ async function fetchJSON(filename: string) {
 }
 
 export default async function BriefingPage() {
-  const [briefing, market] = await Promise.all([
+  const [briefingUS, marketUS, briefingKR, marketKR, briefingJP, marketJP] = await Promise.all([
     fetchJSON('briefing.json'),
     fetchJSON('market.json'),
+    fetchJSON('briefing_korea.json'),
+    fetchJSON('market_korea.json'),
+    fetchJSON('briefing_japan.json'),
+    fetchJSON('market_japan.json'),
   ]);
 
-  return <BriefingClient briefing={briefing} market={market} />;
+  return (
+    <BriefingClient
+      data={{
+        US: { briefing: briefingUS, market: marketUS },
+        KR: { briefing: briefingKR, market: marketKR },
+        JP: { briefing: briefingJP, market: marketJP },
+      }}
+    />
+  );
 }
