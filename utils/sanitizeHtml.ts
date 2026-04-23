@@ -89,6 +89,12 @@ const sanitizeOptions: sanitizeHtmlLib.IOptions = {
   allowedSchemesByTag: {
     img: ['http', 'https', 'data'],
   },
+  // SVG의 camelCase 속성(viewBox, markerWidth, refX, patternUnits, preserveAspectRatio 등) 보존.
+  // 기본값은 모든 속성명을 소문자화하여 브라우저가 인식 못 하게 만듦.
+  parser: {
+    lowerCaseTags: false,
+    lowerCaseAttributeNames: false,
+  },
   transformTags: {
     // 외부 링크에 rel="noopener noreferrer" 추가
     'a': (tagName, attribs) => {
@@ -238,9 +244,12 @@ const HTML_MODE_TAGS = [
   // 보안 위험 태그 제외: foreignObject(HTML 삽입), animate*(클릭재킹), set
   'svg', 'g', 'path', 'circle', 'rect', 'ellipse', 'line',
   'polyline', 'polygon', 'text', 'tspan',
-  'defs', 'use', 'symbol', 'clipPath', 'mask',
+  'defs', 'use', 'symbol', 'clipPath', 'mask', 'marker',
   'linearGradient', 'radialGradient', 'stop', 'pattern',
 ];
+
+// SVG 도형에 공통으로 허용할 marker 속성
+const MARKER_REF_ATTRS = ['marker-start', 'marker-mid', 'marker-end'];
 
 // ── HTML 모드 전용 허용 속성 ──
 const HTML_MODE_ATTRIBUTES: Record<string, string[]> = {
@@ -251,20 +260,22 @@ const HTML_MODE_ATTRIBUTES: Record<string, string[]> = {
   // SVG 공통 속성
   'svg': ['viewBox', 'width', 'height', 'xmlns', 'fill', 'stroke', 'class', 'style', 'role', 'aria-label', 'aria-hidden'],
   'g': ['transform', 'fill', 'stroke', 'stroke-width', 'opacity', 'class', 'style', 'clip-path', 'mask'],
-  'path': ['d', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset', 'opacity', 'transform', 'class', 'style', 'fill-rule', 'clip-rule'],
-  'circle': ['cx', 'cy', 'r', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
-  'ellipse': ['cx', 'cy', 'rx', 'ry', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
-  'rect': ['x', 'y', 'width', 'height', 'rx', 'ry', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
-  'line': ['x1', 'y1', 'x2', 'y2', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-dasharray', 'opacity', 'transform', 'class', 'style'],
-  'polyline': ['points', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'transform', 'class', 'style'],
-  'polygon': ['points', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style'],
-  'text': ['x', 'y', 'dx', 'dy', 'text-anchor', 'dominant-baseline', 'font-size', 'font-family', 'font-weight', 'fill', 'stroke', 'opacity', 'transform', 'class', 'style'],
-  'tspan': ['x', 'y', 'dx', 'dy', 'text-anchor', 'font-size', 'font-weight', 'fill', 'class', 'style'],
+  'path': ['d', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'stroke-dasharray', 'stroke-dashoffset', 'opacity', 'transform', 'class', 'style', 'fill-rule', 'clip-rule', ...MARKER_REF_ATTRS],
+  'circle': ['cx', 'cy', 'r', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style', ...MARKER_REF_ATTRS],
+  'ellipse': ['cx', 'cy', 'rx', 'ry', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style', ...MARKER_REF_ATTRS],
+  'rect': ['x', 'y', 'width', 'height', 'rx', 'ry', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style', ...MARKER_REF_ATTRS],
+  'line': ['x1', 'y1', 'x2', 'y2', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-dasharray', 'opacity', 'transform', 'class', 'style', ...MARKER_REF_ATTRS],
+  'polyline': ['points', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'opacity', 'transform', 'class', 'style', ...MARKER_REF_ATTRS],
+  'polygon': ['points', 'fill', 'stroke', 'stroke-width', 'opacity', 'transform', 'class', 'style', ...MARKER_REF_ATTRS],
+  'text': ['x', 'y', 'dx', 'dy', 'text-anchor', 'dominant-baseline', 'font-size', 'font-family', 'font-weight', 'font-style', 'letter-spacing', 'word-spacing', 'fill', 'stroke', 'opacity', 'transform', 'class', 'style'],
+  'tspan': ['x', 'y', 'dx', 'dy', 'text-anchor', 'font-size', 'font-weight', 'font-style', 'letter-spacing', 'word-spacing', 'fill', 'class', 'style'],
   'defs': [],
   'use': ['href', 'xlink:href', 'x', 'y', 'width', 'height', 'class', 'style'],
   'symbol': ['viewBox', 'id', 'class'],
   'clipPath': ['id'],
   'mask': ['id', 'x', 'y', 'width', 'height'],
+  // marker: 화살촉 등 라인 끝장식. orient는 'auto'|'auto-start-reverse'|각도값만 의미있음.
+  'marker': ['id', 'markerWidth', 'markerHeight', 'refX', 'refY', 'orient', 'viewBox', 'markerUnits', 'preserveAspectRatio', 'class', 'style'],
   'linearGradient': ['id', 'x1', 'y1', 'x2', 'y2', 'gradientUnits', 'gradientTransform'],
   'radialGradient': ['id', 'cx', 'cy', 'r', 'fx', 'fy', 'gradientUnits', 'gradientTransform'],
   'stop': ['offset', 'stop-color', 'stop-opacity', 'style'],
