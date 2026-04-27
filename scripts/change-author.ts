@@ -21,8 +21,16 @@ import { randomUUID } from 'crypto';
 // (users 컬렉션에 없는 닉네임은 NEW_USERS 항목으로 자동 생성됩니다)
 const POST_AUTHOR_MAP: { titleContains: string; authorName: string }[] = [
   {
-    titleContains: 'BofA 경제 전망 전면 수정',
-    authorName: '전문가 추적',
+    titleContains: '버핏과 리루가 보유한 Occidental Petroleum',
+    authorName: 'Boltzman',
+  },
+  {
+    titleContains: 'TPU vs GPU',
+    authorName: '선반영',
+  },
+  {
+    titleContains: '현대글로비스, 영업이익 2조 돌파',
+    authorName: 'Boltzman',
   },
 ];
 
