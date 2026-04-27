@@ -4,22 +4,37 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors, ALLOWED_IMPORT_DOMAINS } from '@/utils/sanitizeHtml';
 import styles from './HtmlCodeEditor.module.css';
 
+export interface HtmlCodeEditorHandle {
+  getValue: () => string;
+  flush: () => void;
+  /** 현재 커서 위치에 텍스트(예: <img ...>)를 삽입 */
+  insertAtCursor: (text: string) => void;
+}
+
 interface HtmlCodeEditorProps {
   value: string;
   onChange: (html: string) => void;
   onPreviewUpdate?: (html: string, css: string) => void;
+  onReady?: (api: HtmlCodeEditorHandle) => void;
   placeholder?: string;
   editorOnly?: boolean;
 }
 
-export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, placeholder, editorOnly }: HtmlCodeEditorProps) {
+export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onReady, placeholder, editorOnly }: HtmlCodeEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<any>(null);
   const [mounted, setMounted] = useState(false);
   const [previewHtml, setPreviewHtml] = useState('');
   const [previewCss, setPreviewCss] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const previewDebounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const onChangeDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const isExternalUpdate = useRef(false);
+
+  // 항상 최신 콜백을 가리키는 refs (CodeMirror 클로저 안에서 stale 방지)
+  const onChangeRef = useRef(onChange);
+  const onPreviewUpdateRef = useRef(onPreviewUpdate);
+  useEffect(() => { onChangeRef.current = onChange; }, [onChange]);
+  useEffect(() => { onPreviewUpdateRef.current = onPreviewUpdate; }, [onPreviewUpdate]);
 
   useEffect(() => {
     setMounted(true);
@@ -46,10 +61,15 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, place
       const updateListener = EditorView.updateListener.of((update: any) => {
         if (update.docChanged && !isExternalUpdate.current) {
           const newValue = update.state.doc.toString();
-          onChange(newValue);
 
-          if (debounceRef.current) clearTimeout(debounceRef.current);
-          debounceRef.current = setTimeout(() => {
+          // onChange를 디바운스해 키 입력마다 부모가 리렌더되지 않게 함
+          if (onChangeDebounceRef.current) clearTimeout(onChangeDebounceRef.current);
+          onChangeDebounceRef.current = setTimeout(() => {
+            onChangeRef.current(newValue);
+          }, 200);
+
+          if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
+          previewDebounceRef.current = setTimeout(() => {
             updatePreview(newValue);
           }, 300);
         }
@@ -99,12 +119,39 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, place
 
       viewRef.current = view;
       updatePreview(value || '');
+
+      // 부모에 flush API 노출 — 폼 제출 시 디바운스 미반영 값 회수
+      if (onReady) {
+        onReady({
+          getValue: () => viewRef.current?.state.doc.toString() ?? '',
+          flush: () => {
+            if (onChangeDebounceRef.current) {
+              clearTimeout(onChangeDebounceRef.current);
+              onChangeDebounceRef.current = undefined;
+            }
+            const v = viewRef.current?.state.doc.toString();
+            if (v != null) onChangeRef.current(v);
+          },
+          insertAtCursor: (text: string) => {
+            const v = viewRef.current;
+            if (!v) return;
+            const { from, to } = v.state.selection.main;
+            v.dispatch({
+              changes: { from, to, insert: text },
+              selection: { anchor: from + text.length },
+              scrollIntoView: true,
+            });
+            v.focus();
+          },
+        });
+      }
     };
 
     initEditor();
 
     return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
+      if (onChangeDebounceRef.current) clearTimeout(onChangeDebounceRef.current);
       view?.destroy();
       viewRef.current = null;
     };
@@ -162,13 +209,14 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, place
     );
     const scopedCss = importStatements.join('\n') + (importStatements.length ? '\n' : '') + scopeCssSelectors(cssWithoutImports, 'html-preview-scope');
 
-    setPreviewHtml(sanitizedHtml);
-    setPreviewCss(scopedCss);
-
-    if (onPreviewUpdate) {
-      onPreviewUpdate(sanitizedHtml, scopedCss);
+    // editorOnly 모드에서는 로컬 previewHtml/Css가 사용되지 않음 → 불필요한 setState 생략
+    if (!editorOnly) {
+      setPreviewHtml(sanitizedHtml);
+      setPreviewCss(scopedCss);
     }
-  }, [onPreviewUpdate]);
+
+    onPreviewUpdateRef.current?.(sanitizedHtml, scopedCss);
+  }, [editorOnly]);
 
   if (!mounted) {
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
@@ -17,6 +17,7 @@ import { loadThemes, getThemesForSymbol } from '@/lib/themeStocks';
 import type { Theme } from '@/types/theme';
 import dynamic from 'next/dynamic';
 import type { Editor } from '@tiptap/react';
+import type { HtmlCodeEditorHandle } from '@/components/HtmlCodeEditor';
 
 const RichTextEditor = dynamic(() => import('@/components/RichTextEditor'), { ssr: false });
 const HtmlCodeEditor = dynamic(() => import('@/components/HtmlCodeEditor'), { ssr: false });
@@ -52,8 +53,41 @@ function WritePageContent() {
   const [tiptapEditor, setTiptapEditor] = useState<Editor | null>(null);
   const [selectedThemes, setSelectedThemes] = useState<string[]>([]);
   const [allThemes, setAllThemes] = useState<Theme[]>([]);
+  const htmlEditorApiRef = useRef<HtmlCodeEditorHandle | null>(null);
   // 투자 의견에 따라 포지션 타입 자동 결정
   const positionType: PositionType = opinion === 'sell' ? 'short' : 'long';
+
+  // HtmlCodeEditor에 stable한 콜백을 넘겨 디바운스 효과를 살림
+  const handleHtmlPreviewUpdate = useCallback((h: string, c: string) => {
+    setPreviewHtml(h);
+    setPreviewCss(c);
+  }, []);
+  const handleHtmlEditorReady = useCallback((api: HtmlCodeEditorHandle) => {
+    htmlEditorApiRef.current = api;
+  }, []);
+
+  // HTML 모드: 업로드된 이미지를 <img ...> 스니펫으로 만들기
+  const buildImgSnippet = (url: string) =>
+    `<img src="${url}" alt="이미지" style="max-width:100%; height:auto;" />`;
+
+  // HTML 모드: 코드 에디터 커서 위치에 <img> 삽입
+  const insertImageSnippetToHtml = (url: string) => {
+    const api = htmlEditorApiRef.current;
+    if (!api) return;
+    api.insertAtCursor(`\n${buildImgSnippet(url)}\n`);
+  };
+
+  // HTML 모드: <img> 스니펫을 클립보드에 복사
+  const copyImageSnippet = async (url: string) => {
+    const snippet = buildImgSnippet(url);
+    try {
+      await navigator.clipboard.writeText(snippet);
+      alert('이미지 코드가 복사되었습니다. 원하는 위치에 붙여넣으세요.');
+    } catch {
+      // 클립보드 권한 거부 fallback
+      window.prompt('아래 코드를 복사해서 사용하세요', snippet);
+    }
+  };
 
   // 테마 데이터 로드
   useEffect(() => {
@@ -295,6 +329,11 @@ function WritePageContent() {
 
     // 사용자가 작성한 내용만 저장 (기업 프로필은 상세 페이지 상단에 표시됨)
     const finalContent = content;
+    // HTML 모드: 디바운스 때문에 부모 state가 한 박자 늦을 수 있으니 에디터에서 최신값 회수
+    const finalHtmlContent =
+      editorMode === 'html'
+        ? (htmlEditorApiRef.current?.getValue() ?? htmlContent)
+        : htmlContent;
 
       // 사용자 프로필에서 닉네임 가져오기
       let authorName = '익명';
@@ -358,7 +397,7 @@ function WritePageContent() {
         themes: selectedThemes.length > 0 ? selectedThemes : [],
 
         // 7. 콘텐츠
-        content: editorMode === 'html' ? htmlContent : finalContent,
+        content: editorMode === 'html' ? finalHtmlContent : finalContent,
         mode: editorMode,
         images: imageUrls,
         files: uploadedFiles,
@@ -630,6 +669,73 @@ function WritePageContent() {
                     ))}
                   </div>
                 )}
+
+                {/* HTML 모드: 이미지 첨부 (티스토리 HTML 모드 스타일) */}
+                <div className="border-t-2 border-[var(--theme-border-muted)] pt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold">이미지 첨부</span>
+                    <label
+                      className={`text-[10px] px-2 py-0.5 border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] bg-[var(--theme-bg-card)] transition-all ${
+                        isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
+                    >
+                      {isUploading ? `업로드 중 ${Math.round(uploadProgress)}%` : '파일 선택'}
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        multiple
+                        disabled={isUploading}
+                        onChange={handleImageUpload}
+                      />
+                    </label>
+                  </div>
+
+                  {uploadedImageUrls.length > 0 && (
+                    <div className="flex gap-2 overflow-x-auto pb-1">
+                      {uploadedImageUrls.map((url, idx) => (
+                        <div
+                          key={url + idx}
+                          className="relative flex-shrink-0 w-20 h-20 group border-2 border-[var(--theme-border-muted)]"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={url} alt={`업로드 ${idx + 1}`} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 hidden group-hover:flex flex-col items-center justify-center bg-black/70 gap-1">
+                            <button
+                              type="button"
+                              onClick={() => insertImageSnippetToHtml(url)}
+                              className="text-[10px] font-bold bg-[var(--theme-accent)] text-white px-2 py-0.5"
+                              title="에디터 커서 위치에 <img> 삽입"
+                            >
+                              삽입
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => copyImageSnippet(url)}
+                              className="text-[10px] font-bold bg-white text-black px-2 py-0.5"
+                              title="<img> 코드 복사"
+                            >
+                              코드 복사
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeImage(idx)}
+                            className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] leading-none rounded-full flex items-center justify-center"
+                            title="목록에서 제거"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <p className="text-[10px] text-gray-400">
+                    PNG/JPG/GIF · 최대 10MB · 업로드 후 [삽입] 또는 [코드 복사]
+                  </p>
+                </div>
+
                 <p className="text-[10px] text-gray-400">
                   script, iframe, on* 이벤트는 보안상 차단됩니다.
                 </p>
@@ -640,7 +746,8 @@ function WritePageContent() {
                 <HtmlCodeEditor
                   value={htmlContent}
                   onChange={setHtmlContent}
-                  onPreviewUpdate={(h, c) => { setPreviewHtml(h); setPreviewCss(c); }}
+                  onPreviewUpdate={handleHtmlPreviewUpdate}
+                  onReady={handleHtmlEditorReady}
                   placeholder={'<style>\n  .card {\n    padding: 20px;\n    border-radius: 8px;\n    background: #f8f9fa;\n  }\n</style>\n\n<div class="card">\n  <h2>제목</h2>\n  <p>내용을 입력하세요...</p>\n</div>'}
                   editorOnly
                 />
