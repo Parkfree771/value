@@ -7,9 +7,30 @@ import type { DartFinancialRaw, FinancialMetrics } from '@/app/analysis/types';
 const DART_API_KEY = process.env.DART_API_KEY;
 const DART_BASE = 'https://opendart.fss.or.kr/api';
 
-// 서버 메모리 캐시 (12시간)
-const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 12 * 60 * 60 * 1000;
+/**
+ * DART 단일회사 전체 재무제표 fetch (per-tuple 캐싱)
+ * - 과거 연도: 영구 캐시 (revalidate: false) — 마감된 보고서는 절대 안 바뀜
+ * - 진행 중인 연도: 1시간 캐시 — 새 분기 보고서가 올라올 수 있음
+ */
+async function fetchDartReport(corpCode: string, year: number, reprtCode: string): Promise<DartFinancialRaw[] | null> {
+  const isPastYear = year < new Date().getFullYear();
+  const url = `${DART_BASE}/fnlttSinglAcntAll.json?crtfc_key=${DART_API_KEY}&corp_code=${corpCode}&bsns_year=${year}&reprt_code=${reprtCode}&fs_div=CFS`;
+
+  try {
+    const resp = await fetch(url, {
+      next: {
+        revalidate: isPastYear ? false : 3600,
+        tags: [`dart-fin-${corpCode}`, `dart-fin-${corpCode}-${year}`],
+      },
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (data.status !== '000' || !data.list) return null;
+    return data.list as DartFinancialRaw[];
+  } catch {
+    return null;
+  }
+}
 
 /** DART 금액 문자열 → 억원 */
 function parseAmount(value: string | undefined | null): number | null {
@@ -191,14 +212,6 @@ export async function GET(request: NextRequest) {
     ? yearsParam.split(',').map(Number).filter(y => y >= 2015 && y <= currentYear)
     : Array.from({ length: 5 }, (_, i) => currentYear - 4 + i);
 
-  const cacheKey = `dart_financial_${corpCode}_${mode}_${years.join(',')}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    const res = NextResponse.json(cached.data);
-    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1800');
-    return res;
-  }
-
   try {
     const reprtCodes = mode === 'quarterly'
       ? ['11013', '11012', '11014', '11011']
@@ -206,16 +219,9 @@ export async function GET(request: NextRequest) {
 
     const requests = years.flatMap(year =>
       reprtCodes.map(async (reprtCode) => {
-        const url = `${DART_BASE}/fnlttSinglAcntAll.json?crtfc_key=${DART_API_KEY}&corp_code=${corpCode}&bsns_year=${year}&reprt_code=${reprtCode}&fs_div=CFS`;
-        try {
-          const resp = await fetch(url);
-          if (!resp.ok) return null;
-          const data = await resp.json();
-          if (data.status !== '000' || !data.list) return null;
-          return extractMetrics(data.list, year, reprtCode);
-        } catch {
-          return null;
-        }
+        const list = await fetchDartReport(corpCode, year, reprtCode);
+        if (!list) return null;
+        return extractMetrics(list, year, reprtCode);
       })
     );
 
@@ -235,14 +241,11 @@ export async function GET(request: NextRequest) {
       lastUpdated: new Date().toISOString(),
     };
 
-    cache.set(cacheKey, { data: result, timestamp: Date.now() });
-
     const res = NextResponse.json(result);
-    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1800');
+    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
     return res;
   } catch (error) {
     console.error('[DART Financial API] Error:', error);
-    if (cached) return NextResponse.json(cached.data);
     return NextResponse.json(
       { error: 'Failed to fetch financial data' },
       { status: 500 }

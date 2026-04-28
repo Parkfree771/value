@@ -4,10 +4,6 @@ import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 const DART_API_KEY = process.env.DART_API_KEY;
 const DART_BASE = 'https://opendart.fss.or.kr/api';
 
-// 서버 메모리 캐시 (12시간)
-const cache = new Map<string, { data: unknown; timestamp: number }>();
-const CACHE_TTL = 12 * 60 * 60 * 1000;
-
 export async function GET(request: NextRequest) {
   const corpCode = request.nextUrl.searchParams.get('corp_code');
 
@@ -25,17 +21,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'DART API key not configured' }, { status: 500 });
   }
 
-  const cacheKey = `dart_company_${corpCode}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    const res = NextResponse.json(cached.data);
-    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1800');
-    return res;
-  }
-
   try {
     const url = `${DART_BASE}/company.json?crtfc_key=${DART_API_KEY}&corp_code=${corpCode}`;
-    const response = await fetch(url);
+    const response = await fetch(url, {
+      next: {
+        revalidate: false,
+        tags: [`dart-company-${corpCode}`],
+      },
+    });
     if (!response.ok) throw new Error(`DART API error: ${response.status}`);
 
     const data = await response.json();
@@ -56,14 +49,11 @@ export async function GET(request: NextRequest) {
       acc_mt: data.acc_mt,
     };
 
-    cache.set(cacheKey, { data: result, timestamp: Date.now() });
-
     const res = NextResponse.json(result);
-    res.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=1800');
+    res.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
     return res;
   } catch (error) {
     console.error('[DART Company API] Error:', error);
-    if (cached) return NextResponse.json(cached.data);
     return NextResponse.json(
       { error: 'Failed to fetch company data' },
       { status: 500 }
