@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Container from '@/components/Container';
 
 /* ─── 타입 ─── */
@@ -50,7 +49,7 @@ interface BriefingData {
   issues: BriefingIssue[];
 }
 
-type CountryKey = 'US' | 'KR' | 'JP';
+type CountryKey = 'US';
 
 interface CountryBundle {
   briefing: BriefingData | null;
@@ -76,24 +75,6 @@ const THEMES: Record<CountryKey, CountryTheme> = {
     accent: '#3b50b5',
     accentDark: '#2a3a8a',
     badge: 'US BRIEFING',
-  },
-  KR: {
-    key: 'KR',
-    label: '한국',
-    flag: '🇰🇷',
-    subtitle: '한국 주요 매체 분석 기반 시장 브리핑',
-    accent: '#3b50b5',
-    accentDark: '#2a3a8a',
-    badge: 'KR 브리핑',
-  },
-  JP: {
-    key: 'JP',
-    label: '일본',
-    flag: '🇯🇵',
-    subtitle: '일본 주요 매체 분석 기반 시장 브리핑',
-    accent: '#BC002D',
-    accentDark: '#800020',
-    badge: 'JP ブリーフィング',
   },
 };
 
@@ -304,8 +285,7 @@ export default function BriefingClient({
 }: {
   data: Record<CountryKey, CountryBundle>;
 }) {
-  const [active, setActive] = useState<CountryKey>('US');
-  const theme = THEMES[active];
+  const theme = THEMES.US;
 
   return (
     <Container>
@@ -315,34 +295,9 @@ export default function BriefingClient({
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 font-medium">{theme.subtitle}</p>
       </div>
 
-      {/* 국가 탭 */}
-      <div className="flex gap-2 mb-5">
-        {(Object.keys(THEMES) as CountryKey[]).map((k) => {
-          const t = THEMES[k];
-          const isActive = k === active;
-          return (
-            <button
-              key={k}
-              onClick={() => setActive(k)}
-              className="flex-1 sm:flex-none px-4 py-2.5 rounded-xl border-2 font-black text-sm sm:text-base transition-all"
-              style={{
-                borderColor: isActive ? t.accent : 'var(--theme-border-muted)',
-                backgroundColor: isActive ? t.accent : 'var(--theme-bg-card)',
-                color: isActive ? '#fff' : 'var(--theme-text)',
-                boxShadow: isActive ? `2px 2px 0px ${t.accentDark}` : 'none',
-                transform: isActive ? 'translate(-1px,-1px)' : 'none',
-              }}
-            >
-              <span className="mr-1.5">{t.flag}</span>
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
-
       {/* 활성 국가 패널 */}
       <div className="flex flex-col gap-4">
-        <CountryPanel bundle={data[active]} theme={theme} />
+        <CountryPanel bundle={data.US} theme={theme} />
       </div>
     </Container>
   );

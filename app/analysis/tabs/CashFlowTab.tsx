@@ -14,10 +14,41 @@ import {
   ResponsiveContainer,
   ReferenceLine,
   BarChart,
+  LabelList,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
 import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtKRW, fmtKRWAxis, fmtX } from '../theme';
 import { Card, RichTooltip, KPIStat, KPIStrip } from '../components/primitives';
+
+/** 막대 위/아래에 KRW 값 라벨 (음수는 아래, 양수는 위) */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function renderCashLabel(props: any): JSX.Element | null {
+  const xRaw = props?.x;
+  const yRaw = props?.y;
+  const wRaw = props?.width;
+  const hRaw = props?.height;
+  const value = props?.value;
+  const x = typeof xRaw === 'number' ? xRaw : Number(xRaw) || 0;
+  const y = typeof yRaw === 'number' ? yRaw : Number(yRaw) || 0;
+  const width = typeof wRaw === 'number' ? wRaw : Number(wRaw) || 0;
+  const height = typeof hRaw === 'number' ? hRaw : Number(hRaw) || 0;
+  if (value === null || value === undefined || value === 0) return null;
+  if (typeof value !== 'number' || !isFinite(value)) return null;
+  const isNeg = value < 0;
+  return (
+    <text
+      x={x + width / 2}
+      y={isNeg ? y + height + 11 : y - 5}
+      fill="var(--foreground)"
+      fontSize={10}
+      fontWeight={700}
+      textAnchor="middle"
+      style={{ pointerEvents: 'none' }}
+    >
+      {fmtKRW(value)}
+    </text>
+  );
+}
 
 /** 연도별 색상 — 가장 최신은 primary, 과거는 slate 그라데이션 */
 const PERIOD_RAMP = ['#cbd5e1', '#94a3b8', '#64748b', '#475569', COLOR.primary];
@@ -174,7 +205,7 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
         <Card title="활동별 현금흐름" sub={`최근 ${periods.length}년 — 영업·투자·재무 활동 추이`}>
           <div style={{ height: 420 }}>
             <ResponsiveContainer>
-              <BarChart data={groupedCFData} margin={{ top: 18, right: 12, left: -4, bottom: 0 }} barCategoryGap="22%" barGap={2}>
+              <BarChart data={groupedCFData} margin={{ top: 28, right: 12, left: -4, bottom: 8 }} barCategoryGap="22%" barGap={2}>
                 <CartesianGrid {...GRID_PROPS} />
                 <XAxis
                   dataKey="activity"
@@ -195,7 +226,9 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
                     radius={[3, 3, 0, 0]}
                     maxBarSize={28}
                     isAnimationActive={false}
-                  />
+                  >
+                    <LabelList dataKey={p} content={renderCashLabel} />
+                  </Bar>
                 ))}
               </BarChart>
             </ResponsiveContainer>
@@ -210,16 +243,22 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
       <Card title="현금흐름 추이" sub="활동별 시계열 (단위: 억원)">
         <div style={{ height: 290 }}>
           <ResponsiveContainer>
-            <BarChart data={data} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%" barGap={2}>
+            <BarChart data={data} margin={{ top: 22, right: 8, left: -8, bottom: 8 }} barCategoryGap="22%" barGap={2}>
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
               <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
               <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
-              <Bar dataKey="operatingCashFlow" name="영업활동" fill={COLOR.primary} fillOpacity={0.85} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false} />
-              <Bar dataKey="investingCashFlow" name="투자활동" fill={COLOR.warning} fillOpacity={0.75} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false} />
-              <Bar dataKey="financingCashFlow" name="재무활동" fill={COLOR.series3} fillOpacity={0.75} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false} />
+              <Bar dataKey="operatingCashFlow" name="영업활동" fill={COLOR.primary} fillOpacity={0.85} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
+                <LabelList dataKey="operatingCashFlow" content={renderCashLabel} />
+              </Bar>
+              <Bar dataKey="investingCashFlow" name="투자활동" fill={COLOR.warning} fillOpacity={0.75} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
+                <LabelList dataKey="investingCashFlow" content={renderCashLabel} />
+              </Bar>
+              <Bar dataKey="financingCashFlow" name="재무활동" fill={COLOR.series3} fillOpacity={0.75} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
+                <LabelList dataKey="financingCashFlow" content={renderCashLabel} />
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -229,7 +268,7 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
       <Card title="잉여현금흐름 (FCF)" sub="기간별 FCF + 누적 — 자체 자금 창출 능력">
         <div style={{ height: 280 }}>
           <ResponsiveContainer>
-            <ComposedChart data={enriched} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%">
+            <ComposedChart data={enriched} margin={{ top: 22, right: 8, left: -8, bottom: 8 }} barCategoryGap="22%">
               <defs>
                 <linearGradient id="grad-fcf-pos" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={COLOR.positive} stopOpacity={0.85} />
@@ -259,6 +298,7 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
                     }
                   />
                 ))}
+                <LabelList dataKey="freeCashFlow" content={renderCashLabel} />
               </Bar>
               <Line
                 type="monotone"
