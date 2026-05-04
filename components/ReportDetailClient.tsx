@@ -2,9 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
+
+// recharts 번들이 무거우므로 lazy load (스켈레톤은 차트 카드 높이 유지)
+const PriceChart = dynamic(() => import('@/components/PriceChart'), {
+  ssr: false,
+  loading: () => (
+    <div className="card-base px-4 py-4 sm:px-6 sm:py-5 animate-pulse">
+      <div className="flex items-start justify-between mb-4 sm:mb-5">
+        <div className="space-y-2">
+          <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+        </div>
+        <div className="h-7 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+      </div>
+      <div className="h-[180px] sm:h-[220px] bg-gray-100 dark:bg-gray-800 rounded" />
+    </div>
+  ),
+});
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml, sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors, ALLOWED_IMPORT_DOMAINS } from '@/utils/sanitizeHtml';
@@ -371,6 +389,17 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               공유
             </button>
           </div>
+
+          {/* 수익률 추이 차트 (임시 미리보기 - 백필 후 실데이터로 교체) */}
+          <PriceChart
+            ticker={report.ticker}
+            initialPrice={report.initialPrice}
+            currentPrice={report.currentPrice}
+            createdAt={report.createdAt}
+            returnRate={report.returnRate}
+            positionType={report.positionType}
+            currency={report.stockData?.currency}
+          />
 
           {/* Report Content - 넓고 여유롭게, 모바일은 패딩 최소화 */}
           <Card className="px-3 py-3 sm:p-6 lg:p-8 overflow-x-auto overflow-y-hidden">
