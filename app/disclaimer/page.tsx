@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '투자 면책 조항',
     description: 'AntStreet 투자 정보 면책 조항. 본 사이트의 투자 정보는 참고용이며 투자 판단의 책임은 이용자에게 있습니다.',
     url: `${SITE_URL}/disclaimer`,
-    images: [{ url: '/OG.png', width: 1254, height: 1254, alt: 'AntStreet' }],
+    images: [{ url: '/OG.png', width: 1731, height: 909, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/disclaimer`,

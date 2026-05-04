@@ -79,9 +79,9 @@ export function generateReportMetadata(
       locale: 'ko_KR',
       publishedTime: report.createdAt,
       images: [{
-        url: `${SITE_URL}/api/og?title=${encodeURIComponent(report.title)}&stockName=${encodeURIComponent(report.stockName)}&ticker=${encodeURIComponent(report.ticker)}&returnRate=${returnRate.toFixed(2)}&opinion=${report.opinion}`,
-        width: 1200,
-        height: 630,
+        url: `${SITE_URL}/OG.png`,
+        width: 1731,
+        height: 909,
         alt: `${report.stockName} - ${report.title}`,
       }],
     },
@@ -90,7 +90,7 @@ export function generateReportMetadata(
       title,
       description,
       creator: `@${report.author}`,
-      images: [`${SITE_URL}/api/og?title=${encodeURIComponent(report.title)}&stockName=${encodeURIComponent(report.stockName)}&ticker=${encodeURIComponent(report.ticker)}&returnRate=${returnRate.toFixed(2)}&opinion=${report.opinion}`],
+      images: [`${SITE_URL}/OG.png`],
     },
     robots: {
       index: true,

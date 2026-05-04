@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: '수익률 랭킹 · 투자자 랭킹 · 인기글',
     description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
     url: `${SITE_URL}/ranking`,
-    images: [{ url: '/OG.png', width: 1254, height: 1254, alt: 'AntStreet' }],
+    images: [{ url: '/OG.png', width: 1731, height: 909, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/ranking`,
