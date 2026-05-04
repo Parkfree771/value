@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '문의하기',
     description: 'AntStreet 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
     url: `${SITE_URL}/contact`,
-    images: [{ url: '/OG.png', width: 1731, height: 909, alt: 'AntStreet' }],
+    images: [{ url: '/OG.png', width: 2400, height: 1260, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/contact`,

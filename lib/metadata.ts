@@ -80,8 +80,8 @@ export function generateReportMetadata(
       publishedTime: report.createdAt,
       images: [{
         url: `${SITE_URL}/OG.png`,
-        width: 1731,
-        height: 909,
+        width: 2400,
+        height: 1260,
         alt: `${report.stockName} - ${report.title}`,
       }],
     },

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     title: '13F 공시 포트폴리오 추적 - 워렌 버핏, 빌 애크먼, 하워드 막스',
     description: 'SEC 13F 공시 기반 투자 대가 포트폴리오 실시간 분석. 워렌 버핏, 빌 애크먼, 하워드 막스, 드러켄밀러, 세스 클라만, 리 루의 신규매수·전량매도·비중 변화를 한눈에.',
     url: `${SITE_URL}/guru-tracker`,
-    images: [{ url: '/OG.png', width: 1731, height: 909, alt: 'AntStreet' }],
+    images: [{ url: '/OG.png', width: 2400, height: 1260, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/guru-tracker`,

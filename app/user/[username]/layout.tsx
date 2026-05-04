@@ -17,7 +17,7 @@ export async function generateMetadata({
       title: `${decodedUsername}의 투자 프로필`,
       description: `${decodedUsername} 투자자의 리포트와 수익률을 확인하세요.`,
       url: `${SITE_URL}/user/${username}`,
-      images: [{ url: '/OG.png', width: 1731, height: 909, alt: 'AntStreet' }],
+      images: [{ url: '/OG.png', width: 2400, height: 1260, alt: 'AntStreet' }],
     },
     alternates: {
       canonical: `${SITE_URL}/user/${username}`,
