@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/OG.png',
-        width: 2400,
-        height: 1260,
+        width: 1731,
+        height: 909,
         alt: 'AntStreet',
       },
     ],
@@ -112,8 +112,8 @@ const jsonLd = {
       logo: {
         "@type": "ImageObject",
         url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/OG.png`,
-        width: 2400,
-        height: 1260,
+        width: 1731,
+        height: 909,
       },
       contactPoint: {
         "@type": "ContactPoint",
