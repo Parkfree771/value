@@ -3,7 +3,6 @@ import { Inter, Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
 import dynamic from "next/dynamic";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import MarketTickerBar from "@/components/MarketTickerBar";
 import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
@@ -198,7 +197,6 @@ export default function RootLayout({
           <AuthProvider>
             <BookmarkProvider>
               <Navbar />
-              <MarketTickerBar />
               <main className="flex-1">
                 {children}
               </main>

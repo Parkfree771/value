@@ -109,35 +109,36 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
   return (
     <div className="mb-4 sm:mb-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-3 sm:mb-5">
-        <div>
-          <h2 className="text-lg sm:text-xl text-heading">수익률 TOP 10</h2>
-          <p className="text-xs sm:text-sm text-muted mt-1 hidden sm:block">가장 높은 수익률을 기록한 리포트</p>
-        </div>
-        <Link
-          href="/ranking"
-          className="text-xs sm:text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-        >
-          전체보기 →
-        </Link>
+      <div className="mb-3 sm:mb-5">
+        <h2 className="text-lg sm:text-xl text-heading">수익률 TOP 10</h2>
+        <p className="text-xs sm:text-sm text-muted mt-1 hidden sm:block">가장 높은 수익률을 기록한 리포트</p>
       </div>
 
-      {/* 모바일: 세로 리스트 (3개 보이고 스크롤) */}
-      <div className="sm:hidden max-h-[140px] overflow-y-auto -mr-3">
-        <div className="divide-y divide-gray-100 dark:divide-gray-700/60">
-          {topReturns.map((item) => (
-            <Link key={item.id} href={`/reports/${item.id}`}>
-              <div className="flex items-center gap-3 h-[44px] active:bg-gray-50 dark:active:bg-gray-800 transition-colors pr-3">
-                <div className="flex-shrink-0 w-7 flex items-center justify-center">
-                  {getRankNumber(item.rank)}
+      {/* 모바일: 세로 리스트 (박스 안에서 터치 스크롤, 스크롤바는 숨김) */}
+      <div className="sm:hidden border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] rounded-lg overflow-hidden">
+        <div className="max-h-[176px] overflow-y-auto scrollbar-hide divide-y divide-gray-100 dark:divide-gray-700/60">
+          {topReturns.map((item) => {
+            const rankColor =
+              item.rank === 1 ? 'text-[var(--theme-accent)]' :
+              item.rank === 2 ? 'text-[#d97706] dark:text-[#fbbf24]' :
+              item.rank === 3 ? 'text-[#6b7280] dark:text-[#9ca3af]' :
+              'text-gray-500 dark:text-gray-400';
+            return (
+              <Link key={item.id} href={`/reports/${item.id}`}>
+                <div className="flex items-center gap-3 h-[44px] px-3 active:bg-gray-50 dark:active:bg-gray-800 transition-colors">
+                  <div className="flex-shrink-0 w-7 flex items-center justify-center">
+                    <span className={`w-7 text-center text-sm font-bold ${rankColor}`}>
+                      {item.rank}
+                    </span>
+                  </div>
+                  <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white truncate">{item.stockName} <span className="font-normal text-xs text-gray-400 font-mono">{item.ticker}</span></span>
+                  <span className={`text-sm font-bold font-mono tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
+                    {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
+                  </span>
                 </div>
-                <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white truncate">{item.stockName} <span className="font-normal text-xs text-gray-400 font-mono">{item.ticker}</span></span>
-                <span className={`text-sm font-bold font-mono tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
-                  {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
-                </span>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
 
