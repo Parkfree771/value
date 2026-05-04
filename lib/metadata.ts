@@ -141,7 +141,7 @@ export function generateReportJsonLd(
       },
     },
     datePublished: report.createdAt,
-    image: `${SITE_URL}/logo-background.png`,
+    image: `${SITE_URL}/OG.png`,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${SITE_URL}/reports/${report.id}`,

@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     siteName: 'AntStreet',
     images: [
       {
-        url: '/logo-background.png',
-        width: 1200,
-        height: 630,
+        url: '/OG.png',
+        width: 1254,
+        height: 1254,
         alt: 'AntStreet',
       },
     ],
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
     description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
-    images: ['/logo-background.png'],
+    images: ['/OG.png'],
   },
   robots: {
     index: true,
@@ -111,9 +111,9 @@ const jsonLd = {
       url: process.env.NEXT_PUBLIC_SITE_URL || "https://antstreet.kr",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/logo-background.png`,
-        width: 512,
-        height: 512,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/OG.png`,
+        width: 1254,
+        height: 1254,
       },
       contactPoint: {
         "@type": "ContactPoint",

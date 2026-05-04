@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     title: '경제 지표 대시보드 - VIX, 장단기금리차, 실업률, CPI, PCE, M2',
     description: 'FRED 경제 지표 대시보드. VIX, 장단기금리차, 실업률, CPI, PCE, M2를 한눈에.',
     url: `${SITE_URL}/indicators`,
-    images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
+    images: [{ url: '/OG.png', width: 1254, height: 1254, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/indicators`,

@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title,
       description,
       url: `${SITE_URL}/portfolio/${slug}`,
-      images: [{ url: '/logo-background.png', width: 512, height: 512, alt: 'AntStreet' }],
+      images: [{ url: '/OG.png', width: 1254, height: 1254, alt: 'AntStreet' }],
     },
     alternates: {
       canonical: `${SITE_URL}/portfolio/${slug}`,
