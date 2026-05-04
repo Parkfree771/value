@@ -79,7 +79,7 @@ export function generateReportMetadata(
       locale: 'ko_KR',
       publishedTime: report.createdAt,
       images: [{
-        url: `${SITE_URL}/OG.png`,
+        url: `${SITE_URL}/og-v2.png`,
         width: 1731,
         height: 909,
         alt: `${report.stockName} - ${report.title}`,
@@ -90,7 +90,7 @@ export function generateReportMetadata(
       title,
       description,
       creator: `@${report.author}`,
-      images: [`${SITE_URL}/OG.png`],
+      images: [`${SITE_URL}/og-v2.png`],
     },
     robots: {
       index: true,
@@ -141,7 +141,7 @@ export function generateReportJsonLd(
       },
     },
     datePublished: report.createdAt,
-    image: `${SITE_URL}/OG.png`,
+    image: `${SITE_URL}/og-v2.png`,
     mainEntityOfPage: {
       '@type': 'WebPage',
       '@id': `${SITE_URL}/reports/${report.id}`,
