@@ -59,6 +59,39 @@ function fallbackTwoPoint(
   ];
 }
 
+/**
+ * 달력 기준 forward-fill.
+ * Storage엔 거래일 종가만 sparse하게 저장되므로, 차트 X축이 달력 시간으로
+ * 자연스럽게 흐르도록 휴장일 빈 칸을 직전 종가로 채움.
+ *
+ * 예) [Fri:100, Mon:102] → [Fri:100, Sat:100, Sun:100, Mon:102]
+ *
+ * 입력은 정렬 안 되어 있어도 OK. UTC 기준으로 처리.
+ */
+function forwardFillCalendar(points: PricePoint[]): PricePoint[] {
+  if (points.length < 2) return points;
+  const sorted = [...points].sort((a, b) => a.date.localeCompare(b.date));
+  const result: PricePoint[] = [sorted[0]];
+
+  for (let i = 1; i < sorted.length; i++) {
+    const prev = sorted[i - 1];
+    const cur = sorted[i];
+    const cursor = new Date(`${prev.date}T00:00:00Z`);
+    const target = new Date(`${cur.date}T00:00:00Z`);
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    while (cursor < target) {
+      result.push({
+        date: cursor.toISOString().slice(0, 10),
+        close: prev.close,
+      });
+      cursor.setUTCDate(cursor.getUTCDate() + 1);
+    }
+    result.push(cur);
+  }
+
+  return result;
+}
+
 const formatDate = (d: string) => {
   const dt = new Date(d);
   const yy = String(dt.getFullYear()).slice(2);
@@ -139,31 +172,35 @@ export default function PriceChart({
       .then(async (res) => {
         if (cancelled) return;
         if (!res.ok) {
-          // 404 등 - fallback (작성가→현재가 두 점)
-          setHistory(fallbackTwoPoint(initialPrice, currentPrice, createdAt));
+          // 404 등 - fallback (작성가→현재가 두 점, 사이는 forward-fill)
+          setHistory(forwardFillCalendar(fallbackTwoPoint(initialPrice, currentPrice, createdAt)));
           return;
         }
         const data: ApiResponse = await res.json();
         const points: PricePoint[] = data.history.map((p) => ({ date: p.d, close: p.c }));
 
-        // 마지막 종가가 currentPrice와 다르거나 오늘 데이터가 없으면 현재가 한 점 추가
         const today = new Date().toISOString().slice(0, 10);
         if (points.length === 0) {
-          setHistory(fallbackTwoPoint(initialPrice, currentPrice, createdAt));
+          setHistory(forwardFillCalendar(fallbackTwoPoint(initialPrice, currentPrice, createdAt)));
           return;
-        }
-        const last = points[points.length - 1];
-        if (last.date < today) {
-          points.push({ date: today, close: currentPrice });
         }
         // 첫 점이 작성일보다 늦으면 (백필이 그 이전을 못 잡았을 때) 작성가 점 prepend
         if (points[0].date > from) {
           points.unshift({ date: from, close: initialPrice });
         }
-        setHistory(points);
+        // 마지막 점이 오늘보다 이전이면 currentPrice를 오늘 점으로 추가
+        // (휴장일이라 오늘 종가가 없는 경우 currentPrice ≈ 직전 종가 → 자연스럽게 평평)
+        const last = points[points.length - 1];
+        if (last.date < today) {
+          points.push({ date: today, close: currentPrice });
+        }
+        // 거래일만 들어있는 sparse 배열을 달력 기준으로 forward-fill
+        setHistory(forwardFillCalendar(points));
       })
       .catch(() => {
-        if (!cancelled) setHistory(fallbackTwoPoint(initialPrice, currentPrice, createdAt));
+        if (!cancelled) {
+          setHistory(forwardFillCalendar(fallbackTwoPoint(initialPrice, currentPrice, createdAt)));
+        }
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
