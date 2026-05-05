@@ -23,9 +23,7 @@ const GURU_USER_EMAIL = 'guru-tracker@system.local';
 
 // 변경할 게시글 제목 (부분 일치)
 const TARGET_TITLES = [
-  '노무라 증권 미-이란 전쟁에도',
-  'BillAckman',
-  '톰리 전쟁속에서도 S&P500',
+  '마이클 버리 숏 포지션 확대',
 ];
 
 // ============================================================
