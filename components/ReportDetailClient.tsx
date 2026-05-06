@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
+import ShareButtons from '@/components/ShareButtons';
 
 // recharts 번들이 무거우므로 lazy load (스켈레톤은 차트 카드 높이 유지)
 const PriceChart = dynamic(() => import('@/components/PriceChart'), {
@@ -47,6 +48,7 @@ const THEME_NAMES: Record<string, string> = {
 
 interface ReportDetailClientProps {
   report: Report;
+  relatedReports?: ReactNode;
 }
 
 interface Comment {
@@ -60,7 +62,7 @@ interface Comment {
   isLiked: boolean;
 }
 
-export default function ReportDetailClient({ report }: ReportDetailClientProps) {
+export default function ReportDetailClient({ report, relatedReports }: ReportDetailClientProps) {
   const router = useRouter();
   const { user } = useAuth();
   const { isBookmarked, toggleBookmark } = useBookmark();
@@ -464,6 +466,25 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
             )}
           </Card>
 
+          {/* 공유 섹션 */}
+          <Card className="px-3 py-3 sm:px-5 sm:py-4">
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white">
+                이 리포트가 도움이 됐다면 공유해주세요
+              </h3>
+            </div>
+            <ShareButtons
+              url={typeof window !== 'undefined' ? window.location.href : `https://antstreet.kr/reports/${report.id}`}
+              title={`${report.stockName ? `${report.stockName}(${report.ticker}) ` : ''}${report.title}`}
+              hashTags={[
+                report.stockName,
+                report.ticker?.replace(/\.[A-Z]+$/i, ''),
+                'AntStreet',
+                ...(report.themes || []),
+              ].filter(Boolean) as string[]}
+            />
+          </Card>
+
           {/* 첨부 파일 */}
           {report.files && report.files.length > 0 && (
             <Card className="p-3 sm:p-5">
@@ -830,6 +851,9 @@ export default function ReportDetailClient({ report }: ReportDetailClientProps) 
               </div>
             </div>
           </Card>
+
+          {/* 관련 리포트 (서버 렌더링 - SEO 내부 링크 강화) */}
+          {relatedReports}
         </div>
 
         {/* 오른쪽: 사이드바 (고정 폭) - 데스크톱만 */}

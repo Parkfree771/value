@@ -5,11 +5,21 @@ import RankingClient from './RankingClient';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
 export const metadata: Metadata = {
-  title: '랭킹',
-  description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요. 최고 수익률 리포트와 인기 투자자를 한눈에 볼 수 있습니다.',
+  title: '실시간 수익률 랭킹 · 검증된 투자자 랭킹',
+  description:
+    '작성가 vs 현재가로 검증되는 투자 리포트 수익률 랭킹. 최고 수익률 리포트, 누적 수익률 상위 투자자, 인기 리포트를 실시간으로 확인하세요. 한·미·일·중·홍콩 종목 모두 같은 기준으로 비교됩니다. 결과로 증명된 개미 투자자를 찾는 가장 빠른 방법.',
+  keywords: [
+    '주식 수익률 랭킹', '실시간 수익률 랭킹', '리포트 수익률 랭킹',
+    '투자자 랭킹', '인기 투자자', '검증된 투자자', '실력 투자자',
+    '인기 리포트', '오늘의 리포트', '주간 인기 리포트',
+    '주식 잘하는 사람', '수익률 인증', '실제 수익률', '주식 고수',
+    '한국 주식 수익률', '미국 주식 수익률',
+    'AntStreet', '앤트스트릿',
+  ],
   openGraph: {
-    title: '수익률 랭킹 · 투자자 랭킹 · 인기글',
-    description: '투자 리포트 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 확인하세요.',
+    title: '실시간 수익률 랭킹 · 검증된 투자자 랭킹 - AntStreet',
+    description:
+      '작성가 vs 현재가로 자동 검증되는 리포트·투자자 랭킹. 결과로 증명된 개미 투자자를 한눈에.',
     url: `${SITE_URL}/ranking`,
     images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet' }],
   },

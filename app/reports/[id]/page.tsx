@@ -5,57 +5,11 @@ import { db } from '@/lib/firebase';
 import { Report } from '@/types/report';
 import { generateReportMetadata, generateReportJsonLd } from '@/lib/metadata';
 import ReportDetailClient from '@/components/ReportDetailClient';
+import RelatedReports from '@/components/RelatedReports';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Link from 'next/link';
-
-// feed.json URL
-const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
-
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  returnRate: number;
-  currentPrice: number;
-  initialPrice: number;
-  views: number;
-  likes: number;
-}
-
-interface FeedData {
-  posts: FeedPost[];
-}
-
-// feed.json 캐시 (서버 사이드)
-let feedCache: { data: FeedData | null; timestamp: number } = { data: null, timestamp: 0 };
-const FEED_CACHE_TTL = 60 * 1000; // 1분
-
-/**
- * feed.json에서 최신 수익률 정보 가져오기
- */
-async function getFeedPost(id: string): Promise<FeedPost | null> {
-  try {
-    const now = Date.now();
-
-    // 캐시 유효하면 사용
-    if (feedCache.data && (now - feedCache.timestamp) < FEED_CACHE_TTL) {
-      return feedCache.data.posts.find(p => p.id === id) || null;
-    }
-
-    // feed.json 가져오기
-    const response = await fetch(FEED_URL, { next: { revalidate: 60 } });
-    if (!response.ok) return null;
-
-    const data: FeedData = await response.json();
-    feedCache = { data, timestamp: now };
-
-    return data.posts.find(p => p.id === id) || null;
-  } catch (error) {
-    console.error('[ReportPage] feed.json 가져오기 실패:', error);
-    return null;
-  }
-}
+import { getFeedPost } from '@/lib/feedData';
 
 /**
  * 리포트 데이터를 가져옵니다.
@@ -199,8 +153,19 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
         dangerouslySetInnerHTML={{ __html: jsonLd }}
       />
 
-      {/* 클라이언트 컴포넌트에서 실제 UI 렌더링 */}
-      <ReportDetailClient report={report} />
+      {/* 클라이언트 컴포넌트에서 실제 UI 렌더링 (관련 리포트는 서버에서 렌더링하여 SEO 대응) */}
+      <ReportDetailClient
+        report={report}
+        relatedReports={
+          <RelatedReports
+            currentId={report.id}
+            ticker={report.ticker}
+            stockName={report.stockName}
+            author={report.author}
+            themes={report.themes}
+          />
+        }
+      />
     </>
   );
 }

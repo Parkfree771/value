@@ -12,7 +12,10 @@ import { adminDb, adminStorage, verifyAuthToken } from '@/lib/firebase-admin';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
 import { calculateReturn } from '@/utils/calculateReturn';
+import { pingIndexNow } from '@/lib/indexnow';
 import type { FeedPost, FeedData } from '@/types/feed';
+
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr').replace(/\/$/, '');
 
 // Rate Limit 설정: 시간당 10개 게시글 (스팸 방지)
 const POST_RATE_LIMIT = 10;
@@ -176,6 +179,16 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Feed API] Post ${postId} added to feed.json`);
 
+    // IndexNow: Bing/네이버/Yandex에 새 글/수정 즉시 통보
+    // 새 글이면 sitemap·홈도 함께 통보하여 신규 발견 가속
+    const reportUrl = `${SITE_URL}/reports/${postId}`;
+    const urlsToNotify = existingIndex >= 0
+      ? [reportUrl]
+      : [reportUrl, `${SITE_URL}/`, `${SITE_URL}/sitemap.xml`, `${SITE_URL}/feed.xml`];
+    pingIndexNow(urlsToNotify).catch((err) =>
+      console.warn('[Feed API] IndexNow 핑 실패:', err?.message || err),
+    );
+
     return NextResponse.json({
       success: true,
       message: '게시글이 피드에 추가되었습니다.',
@@ -265,6 +278,14 @@ export async function DELETE(request: NextRequest) {
     await saveFeed(feed);
 
     console.log(`[Feed API] Post ${postId} removed from feed.json`);
+
+    // IndexNow: 삭제된 페이지(404)와 sitemap을 통보하여 색인 정리 유도
+    pingIndexNow([
+      `${SITE_URL}/reports/${postId}`,
+      `${SITE_URL}/sitemap.xml`,
+    ]).catch((err) =>
+      console.warn('[Feed API] IndexNow 핑 실패:', err?.message || err),
+    );
 
     return NextResponse.json({
       success: true,
