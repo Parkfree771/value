@@ -29,6 +29,10 @@ interface PricePoint {
   close: number;
 }
 
+interface ChartPoint extends PricePoint {
+  plot: number;
+}
+
 interface ApiResponse {
   ticker: string;
   exchange: string;
@@ -100,7 +104,7 @@ const formatDate = (d: string) => {
 
 interface TooltipPayload {
   value: number;
-  payload: PricePoint;
+  payload: ChartPoint;
 }
 
 interface CustomTooltipProps {
@@ -121,7 +125,8 @@ function CustomTooltip({
   positionType,
 }: CustomTooltipProps) {
   if (!active || !payload?.length || !label) return null;
-  const close = payload[0].value;
+  // payload[0].value는 미러링된 plot 값일 수 있으므로, 실제 종가는 payload에서 직접 가져옴
+  const close = payload[0].payload.close;
   const ret =
     positionType === 'short'
       ? ((initialPrice - close) / initialPrice) * 100
@@ -177,21 +182,17 @@ export default function PriceChart({
           return;
         }
         const data: ApiResponse = await res.json();
-        const points: PricePoint[] = data.history.map((p) => ({ date: p.d, close: p.c }));
-
         const today = new Date().toISOString().slice(0, 10);
-        if (points.length === 0) {
-          setHistory(forwardFillCalendar(fallbackTwoPoint(initialPrice, currentPrice, createdAt)));
-          return;
-        }
-        // 첫 점이 작성일보다 늦으면 (백필이 그 이전을 못 잡았을 때) 작성가 점 prepend
-        if (points[0].date > from) {
-          points.unshift({ date: from, close: initialPrice });
-        }
-        // 마지막 점이 오늘보다 이전이면 currentPrice를 오늘 점으로 추가
-        // (휴장일이라 오늘 종가가 없는 경우 currentPrice ≈ 직전 종가 → 자연스럽게 평평)
-        const last = points[points.length - 1];
-        if (last.date < today) {
+
+        // 작성일은 작성가(initialPrice)로 앵커링, 오늘은 currentPrice로 앵커링.
+        // API의 작성일/오늘 종가는 사용자가 입력한 작성가/현재가와 다를 수 있으므로
+        // 양 끝점은 표시값과 정확히 일치하도록 강제한다.
+        const points: PricePoint[] = data.history
+          .filter((p) => p.d > from && p.d < today)
+          .map((p) => ({ date: p.d, close: p.c }));
+
+        points.unshift({ date: from, close: initialPrice });
+        if (today > from) {
           points.push({ date: today, close: currentPrice });
         }
         // 거래일만 들어있는 sparse 배열을 달력 기준으로 forward-fill
@@ -211,7 +212,16 @@ export default function PriceChart({
     };
   }, [ticker, createdAt, initialPrice, currentPrice]);
 
-  const data = useMemo(() => history ?? [], [history]);
+  // 숏 포지션은 작성가 기준으로 가격을 미러링해서, "가격 하락=수익=차트 상승"으로 표시
+  const isShort = positionType === 'short';
+  const toPlot = (v: number) => (isShort ? 2 * initialPrice - v : v);
+
+  const data: ChartPoint[] = useMemo(
+    () => (history ?? []).map((p) => ({ ...p, plot: toPlot(p.close) })),
+    // toPlot는 isShort, initialPrice에 의존
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [history, isShort, initialPrice]
+  );
 
   if (!initialPrice || !currentPrice) return null;
   if (loading || data.length < 2) {
@@ -236,19 +246,21 @@ export default function PriceChart({
   const accentColor = isPositive ? '#dc2626' : isNegative ? '#2563eb' : '#6b7280';
   const gradientId = `priceGradient-${isPositive ? 'pos' : isNegative ? 'neg' : 'flat'}`;
 
-  const closes = data.map((d) => d.close);
-  const minClose = Math.min(...closes, initialPrice);
-  const maxClose = Math.max(...closes, initialPrice);
-  const range = maxClose - minClose || initialPrice * 0.05;
-  const yMin = minClose - range * 0.18;
-  const yMax = maxClose + range * 0.18;
+  // Y축은 차트에 실제 그려지는 값(plot) 기준
+  const plotValues = data.map((d) => d.plot);
+  const minPlot = Math.min(...plotValues, initialPrice);
+  const maxPlot = Math.max(...plotValues, initialPrice);
+  const range = maxPlot - minPlot || initialPrice * 0.05;
+  const yMin = minPlot - range * 0.18;
+  const yMax = maxPlot + range * 0.18;
 
   // Y축 정확히 균등 간격 (5개 눈금)
   const Y_TICK_COUNT = 5;
   const yStep = (yMax - yMin) / (Y_TICK_COUNT - 1);
   const yTicks = Array.from({ length: Y_TICK_COUNT }, (_, i) => yMin + yStep * i);
 
-  const priceDelta = currentPrice - initialPrice;
+  // 숏은 가격이 내려야 수익이므로 priceDelta 부호도 반전
+  const priceDelta = isShort ? initialPrice - currentPrice : currentPrice - initialPrice;
   const startDate = data[0].date;
   const endDate = data[data.length - 1].date;
 
@@ -332,10 +344,12 @@ export default function PriceChart({
               ticks={yTicks}
               interval={0}
               tickFormatter={(v) => {
-                if (Math.abs(v) >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
-                if (Math.abs(v) >= 10_000) return `${Math.round(v / 1000)}K`;
-                if (Math.abs(v) >= 1000) return Math.round(v).toLocaleString();
-                return v.toFixed(2);
+                // plot 공간 → 실제 가격으로 역변환 (toPlot은 self-inverse)
+                const raw = toPlot(v);
+                if (Math.abs(raw) >= 1_000_000) return `${(raw / 1_000_000).toFixed(1)}M`;
+                if (Math.abs(raw) >= 10_000) return `${Math.round(raw / 1000)}K`;
+                if (Math.abs(raw) >= 1000) return Math.round(raw).toLocaleString();
+                return raw.toFixed(2);
               }}
               tick={{ fontSize: 11, fill: 'currentColor', fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
               className="text-gray-600 dark:text-gray-300"
@@ -366,7 +380,7 @@ export default function PriceChart({
             />
             <Area
               type="monotone"
-              dataKey="close"
+              dataKey="plot"
               stroke={accentColor}
               strokeWidth={2.25}
               fill={`url(#${gradientId})`}
@@ -374,7 +388,7 @@ export default function PriceChart({
             />
             <ReferenceDot
               x={endDate}
-              y={currentPrice}
+              y={toPlot(currentPrice)}
               r={4}
               fill={accentColor}
               stroke="#ffffff"
