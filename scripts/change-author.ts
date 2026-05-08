@@ -21,25 +21,27 @@ import { randomUUID } from 'crypto';
 // (users 컬렉션에 없는 닉네임은 NEW_USERS 항목으로 자동 생성됩니다)
 const POST_AUTHOR_MAP: { titleContains: string; authorName: string }[] = [
   {
-    titleContains: '정신차리기 힘든 호황',
-    authorName: 'danielc',
+    titleContains: '리루는 왜 CROX',
+    authorName: 'gururu',
   },
   {
-    titleContains: '닌텐도 매출',
-    authorName: 'Boltzman',
+    titleContains: '인플레이션과 브라질',
+    authorName: '글로벌리서치',
   },
 ];
 
 // users 컬렉션에 없으면 자동으로 만들 신규 유저
 // (닉네임이 이미 존재하면 건너뜀)
 const NEW_USERS: { nickname: string; bio?: string }[] = [
-  { nickname: 'danielc' },
+  { nickname: 'gururu' },
+  { nickname: '글로벌리서치' },
 ];
 
 // ============================================================
 
 // .env 로드
 import * as dotenv from 'dotenv';
+dotenv.config({ path: '.env.local' });
 dotenv.config();
 
 // Firebase Admin 초기화
