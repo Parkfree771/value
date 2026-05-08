@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors, ALLOWED_IMPORT_DOMAINS } from '@/utils/sanitizeHtml';
 import styles from './HtmlCodeEditor.module.css';
 
@@ -29,6 +29,12 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
   const previewDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const onChangeDebounceRef = useRef<ReturnType<typeof setTimeout>>();
   const isExternalUpdate = useRef(false);
+  // 부모에게 마지막으로 emit한 값. 디바운스 중에 부모가 리렌더되면
+  // value가 currentDoc보다 한 박자 늦게 도달해 doc을 통째로 되돌리는 일이
+  // 생겨 커서 점프/입력 손실이 발생함. 이 ref와 비교해 내가 보낸 값이면 sync 스킵.
+  const lastEmittedValueRef = useRef<string>(value);
+  // 직전에 sanitize/preview를 만든 입력값. 같은 입력이 다시 들어오면 작업 스킵.
+  const lastPreviewInputRef = useRef<string>('');
 
   // 항상 최신 콜백을 가리키는 refs (CodeMirror 클로저 안에서 stale 방지)
   const onChangeRef = useRef(onChange);
@@ -54,7 +60,7 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
       const { defaultKeymap, history, historyKeymap, indentWithTab } = await import('@codemirror/commands');
       const { syntaxHighlighting, defaultHighlightStyle, bracketMatching, foldGutter, foldKeymap, indentOnInput } = await import('@codemirror/language');
       const { closeBrackets, closeBracketsKeymap, autocompletion, completionKeymap } = await import('@codemirror/autocomplete');
-      const { highlightSelectionMatches, searchKeymap } = await import('@codemirror/search');
+      const { searchKeymap } = await import('@codemirror/search');
 
       const isDark = document.documentElement.classList.contains('dark');
 
@@ -62,16 +68,19 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
         if (update.docChanged && !isExternalUpdate.current) {
           const newValue = update.state.doc.toString();
 
-          // onChange를 디바운스해 키 입력마다 부모가 리렌더되지 않게 함
+          // onChange를 디바운스해 키 입력마다 부모가 리렌더되지 않게 함.
+          // 부모 리렌더는 이미지 그리드/폼 등 무거운 자식 재평가를 유발하므로 길게 잡음.
+          // 사용자 제출 시점은 handleSubmit에서 flush()로 즉시 회수.
           if (onChangeDebounceRef.current) clearTimeout(onChangeDebounceRef.current);
           onChangeDebounceRef.current = setTimeout(() => {
+            lastEmittedValueRef.current = newValue;
             onChangeRef.current(newValue);
-          }, 200);
+          }, 500);
 
           if (previewDebounceRef.current) clearTimeout(previewDebounceRef.current);
           previewDebounceRef.current = setTimeout(() => {
             updatePreview(newValue);
-          }, 300);
+          }, 600);
         }
       });
 
@@ -87,8 +96,7 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
           indentOnInput(),
           bracketMatching(),
           closeBrackets(),
-          autocompletion(),
-          highlightSelectionMatches(),
+          autocompletion({ activateOnTyping: false }),
           syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
           html(),
           keymap.of([
@@ -130,7 +138,10 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
               onChangeDebounceRef.current = undefined;
             }
             const v = viewRef.current?.state.doc.toString();
-            if (v != null) onChangeRef.current(v);
+            if (v != null) {
+              lastEmittedValueRef.current = v;
+              onChangeRef.current(v);
+            }
           },
           insertAtCursor: (text: string) => {
             const v = viewRef.current;
@@ -158,8 +169,11 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
   }, [mounted]);
 
   // 외부에서 value 변경 시 에디터 동기화 (수정 모드 로드)
+  // 우리가 직접 emit한 값이 한 박자 늦게 다시 prop으로 돌아오는 케이스는 무시 —
+  // 그렇게 안 하면 디바운스 사이에 친 키 입력이 사라지고 커서가 튐.
   useEffect(() => {
     if (!viewRef.current || !mounted) return;
+    if (value === lastEmittedValueRef.current) return;
     const currentDoc = viewRef.current.state.doc.toString();
     if (currentDoc !== value && value) {
       isExternalUpdate.current = true;
@@ -167,11 +181,16 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
         changes: { from: 0, to: currentDoc.length, insert: value },
       });
       isExternalUpdate.current = false;
+      lastEmittedValueRef.current = value;
       updatePreview(value);
     }
   }, [value, mounted]);
 
   const updatePreview = useCallback((rawHtml: string) => {
+    // 같은 입력으로 또 호출되면 작업 스킵 (빈 호출/외부 sync 직후 등)
+    if (rawHtml === lastPreviewInputRef.current) return;
+    lastPreviewInputRef.current = rawHtml;
+
     // <link rel="stylesheet" href="..."> → @import url('...') 자동 변환
     // 허용된 폰트 도메인의 <link>만 @import로 변환, 나머지는 제거
     const linkImports: string[] = [];
@@ -274,8 +293,13 @@ export default function HtmlCodeEditor({ value, onChange, onPreviewUpdate, onRea
   );
 }
 
-/** 프리뷰 전용 컴포넌트 — 외부에서 html/css를 받아 렌더링 */
-export function HtmlPreviewPanel({ html, css, className }: { html: string; css: string; className?: string }) {
+/** 프리뷰 전용 컴포넌트 — 외부에서 html/css를 받아 렌더링.
+ *  부모가 무관한 이유로 리렌더돼도 html/css가 같으면 DOM 교체 비용을 피하도록 memo. */
+export const HtmlPreviewPanel = memo(function HtmlPreviewPanel({
+  html,
+  css,
+  className,
+}: { html: string; css: string; className?: string }) {
   return (
     <div className={`${styles.previewStandalone} ${className || ''}`}>
       <div className={styles.panelHeader}>
@@ -293,4 +317,4 @@ export function HtmlPreviewPanel({ html, css, className }: { html: string; css: 
       </div>
     </div>
   );
-}
+});

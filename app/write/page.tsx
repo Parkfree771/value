@@ -606,26 +606,27 @@ function WritePageContent() {
         <form id="write-form" onSubmit={handleSubmit}>
           <div className="flex gap-4" style={{ height: 'calc(100vh - 140px)' }}>
             {/* ── 왼쪽 ── */}
-            <div className="flex flex-col gap-4 w-[600px] flex-shrink-0 min-h-0">
-              {/* 왼쪽 상단: 폼 입력 (컴팩트) */}
-              <div className="card-base p-4 space-y-3 flex-shrink-0 overflow-y-auto" style={{ maxHeight: '45%' }}>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  className="pixel-input !py-1.5 !text-sm"
-                  placeholder="리포트 제목"
-                />
-                <StockSearchInput
-                  onStockSelect={handleStockSelect}
-                  selectedStock={stockData}
-                />
-                <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-4 w-[760px] flex-shrink-0 min-h-0">
+              {/* 왼쪽 상단: 폼 입력 — 좌(필드) / 우(이미지 첨부) 가로 분할 */}
+              <div className="card-base p-3 flex gap-3 flex-shrink-0 overflow-hidden" style={{ maxHeight: '42%' }}>
+                {/* 좌측: 입력 필드 */}
+                <div className="flex-1 min-w-0 space-y-2 overflow-y-auto pr-1">
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    className="pixel-input !py-2 !text-sm"
+                    placeholder="리포트 제목"
+                  />
+                  <StockSearchInput
+                    onStockSelect={handleStockSelect}
+                    selectedStock={stockData}
+                  />
                   <select
                     value={opinion}
                     onChange={(e) => setOpinion(e.target.value as Opinion)}
-                    className="pixel-input !py-1.5 !text-sm"
+                    className="pixel-input !py-1 !text-xs w-full"
                   >
                     <option value="buy">매수 (롱)</option>
                     <option value="sell">매도 (숏)</option>
@@ -640,46 +641,54 @@ function WritePageContent() {
                       setTargetPrice(raw === '' ? '' : Number(raw).toLocaleString());
                     }}
                     required
-                    className="pixel-input !py-1.5 !text-sm"
+                    className="pixel-input !py-1 !text-xs w-full"
                     placeholder="목표가격"
                   />
+                  {/* 테마 태그 (컴팩트) */}
+                  {allThemes.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {allThemes.map((theme) => (
+                        <button
+                          key={theme.id}
+                          type="button"
+                          onClick={() =>
+                            setSelectedThemes(prev =>
+                              prev.includes(theme.id)
+                                ? prev.filter(id => id !== theme.id)
+                                : [...prev, theme.id]
+                            )
+                          }
+                          className={`px-2 py-0.5 text-[10px] border rounded-lg transition-all ${
+                            selectedThemes.includes(theme.id)
+                              ? 'pixel-chip-active font-bold'
+                              : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)]'
+                          }`}
+                        >
+                          {theme.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {/* 테마 태그 (컴팩트) */}
-                {allThemes.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {allThemes.map((theme) => (
-                      <button
-                        key={theme.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedThemes(prev =>
-                            prev.includes(theme.id)
-                              ? prev.filter(id => id !== theme.id)
-                              : [...prev, theme.id]
-                          )
-                        }
-                        className={`px-2 py-0.5 text-[10px] border rounded-lg transition-all ${
-                          selectedThemes.includes(theme.id)
-                            ? 'pixel-chip-active font-bold'
-                            : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)]'
-                        }`}
-                      >
-                        {theme.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
 
-                {/* HTML 모드: 이미지 첨부 (티스토리 HTML 모드 스타일) */}
-                <div className="border-t-2 border-[var(--theme-border-muted)] pt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold">이미지 첨부</span>
+                {/* 세로 디바이더 */}
+                <div className="w-0.5 bg-[var(--theme-border-muted)] flex-shrink-0" />
+
+                {/* 우측: 이미지 첨부 전용 영역 */}
+                <div className="w-[320px] flex-shrink-0 flex flex-col min-h-0">
+                  <div className="flex items-center justify-between gap-2 mb-1.5 flex-shrink-0">
+                    <span className="text-xs font-bold">
+                      이미지 첨부
+                      {uploadedImageUrls.length > 0 && (
+                        <span className="ml-1 text-gray-500 font-normal">({uploadedImageUrls.length})</span>
+                      )}
+                    </span>
                     <label
                       className={`text-[10px] px-2 py-0.5 border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] bg-[var(--theme-bg-card)] transition-all ${
                         isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                       }`}
                     >
-                      {isUploading ? `업로드 중 ${Math.round(uploadProgress)}%` : '파일 선택'}
+                      {isUploading ? `업로드 ${Math.round(uploadProgress)}%` : '+ 파일 선택'}
                       <input
                         type="file"
                         className="hidden"
@@ -691,54 +700,60 @@ function WritePageContent() {
                     </label>
                   </div>
 
-                  {uploadedImageUrls.length > 0 && (
-                    <div className="flex gap-2 overflow-x-auto pb-1">
-                      {uploadedImageUrls.map((url, idx) => (
-                        <div
-                          key={url + idx}
-                          className="relative flex-shrink-0 w-20 h-20 group border-2 border-[var(--theme-border-muted)]"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img src={url} alt={`업로드 ${idx + 1}`} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 hidden group-hover:flex flex-col items-center justify-center bg-black/70 gap-1">
+                  {uploadedImageUrls.length > 0 ? (
+                    <div className="flex-1 overflow-y-auto pr-1">
+                      <div
+                        className="grid gap-1.5"
+                        style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
+                      >
+                        {uploadedImageUrls.map((url, idx) => (
+                          <div
+                            key={url + idx}
+                            className="relative border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
+                          >
+                            <div className="aspect-[4/3] overflow-hidden bg-black/5">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={url} alt={`업로드 ${idx + 1}`} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="flex border-t-2 border-[var(--theme-border-muted)]">
+                              <button
+                                type="button"
+                                onClick={() => insertImageSnippetToHtml(url)}
+                                className="flex-1 text-[11px] py-1 bg-[var(--theme-accent)] text-white font-bold hover:opacity-90 transition-opacity"
+                                title="에디터 커서 위치에 <img> 삽입"
+                              >
+                                삽입
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => copyImageSnippet(url)}
+                                className="flex-1 text-[11px] py-1 border-l-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg)] transition-colors"
+                                title="<img> 태그 코드 복사"
+                              >
+                                복사
+                              </button>
+                            </div>
                             <button
                               type="button"
-                              onClick={() => insertImageSnippetToHtml(url)}
-                              className="text-[10px] font-bold bg-[var(--theme-accent)] text-white px-2 py-0.5"
-                              title="에디터 커서 위치에 <img> 삽입"
+                              onClick={() => removeImage(idx)}
+                              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs leading-none rounded-full flex items-center justify-center font-bold shadow"
+                              title="목록에서 제거"
                             >
-                              삽입
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => copyImageSnippet(url)}
-                              className="text-[10px] font-bold bg-white text-black px-2 py-0.5"
-                              title="<img> 코드 복사"
-                            >
-                              코드 복사
+                              ×
                             </button>
                           </div>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(idx)}
-                            className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 text-white text-[10px] leading-none rounded-full flex items-center justify-center"
-                            title="목록에서 제거"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center border-2 border-dashed border-[var(--theme-border-muted)] rounded">
+                      <p className="text-[10px] text-gray-400 text-center px-2">
+                        PNG/JPG/GIF · 최대 10MB<br />
+                        업로드 후 [삽입] 또는 [복사]
+                      </p>
                     </div>
                   )}
-
-                  <p className="text-[10px] text-gray-400">
-                    PNG/JPG/GIF · 최대 10MB · 업로드 후 [삽입] 또는 [코드 복사]
-                  </p>
                 </div>
-
-                <p className="text-[10px] text-gray-400">
-                  script, iframe, on* 이벤트는 보안상 차단됩니다.
-                </p>
               </div>
 
               {/* 왼쪽 하단: 코드 에디터 */}
