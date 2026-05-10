@@ -134,7 +134,7 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   // 드러켄밀러 관련 (Duquesne)
   '22266T109': { ticker: 'CPNG', exchange: 'NYS' },  // Coupang (NOT CrowdStrike)
   '22788C105': { ticker: 'CRWD', exchange: 'NAS' },  // CrowdStrike
-  '03769M106': { ticker: 'APHA', exchange: 'NAS' },
+  '03769M106': { ticker: 'APO', exchange: 'NYS' },   // Apollo Global Management (Aphria 아님, 옛 매핑 오류 수정)
   '872589106': { ticker: 'TJX', exchange: 'NYS' },   // TJX
   '83406F102': { ticker: 'SOFI', exchange: 'NAS' },  // SoFi
   // SPY, IWM, IBIT → ETF 섹션으로 이동
@@ -235,6 +235,42 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '35969L108': { ticker: 'YMM', exchange: 'NYS' },   // Full Truck Alliance (ADR)
   '071734107': { ticker: 'BHC', exchange: 'NYS' },   // Bausch Health
   '87266J104': { ticker: 'TPIC', exchange: 'NAS' },  // TPI Composites
+
+  // 데이비드 테퍼 (Appaloosa) 미매핑 해결
+  '01609W102': { ticker: 'BABA', exchange: 'NYS' },  // Alibaba (ADR)
+  'N07059210': { ticker: 'ASML', exchange: 'NAS' },  // ASML Holding (ADR)
+  '502431109': { ticker: 'LHX', exchange: 'NYS' },   // L3Harris Technologies
+  '608190104': { ticker: 'MHK', exchange: 'NYS' },   // Mohawk Industries
+  '382550101': { ticker: 'GT', exchange: 'NAS' },    // Goodyear Tire & Rubber
+  '464286772': { ticker: 'EWY', exchange: 'AMS', name: 'iShares MSCI South Korea ETF' },
+  '464287184': { ticker: 'FXI', exchange: 'AMS', name: 'iShares China Large-Cap ETF' },
+  '89832Q109': { ticker: 'TFC', exchange: 'NYS' },   // Truist Financial
+
+  // 토마스 게이너 (Markel) 미매핑 해결
+  '548661107': { ticker: 'LOW', exchange: 'NYS' },   // Lowe's
+  '670100205': { ticker: 'NVO', exchange: 'NYS' },   // Novo Nordisk (ADR)
+  '571748102': { ticker: 'MRSH', exchange: 'NYS' },  // Marsh McLennan (2026-01-14 MMC → MRSH 티커 변경)
+  '882508104': { ticker: 'TXN', exchange: 'NAS' },   // Texas Instruments
+  '039483102': { ticker: 'ADM', exchange: 'NYS' },   // Archer-Daniels-Midland
+  '452308109': { ticker: 'ITW', exchange: 'NYS' },   // Illinois Tool Works
+  '655844108': { ticker: 'NSC', exchange: 'NYS' },   // Norfolk Southern
+  '303075105': { ticker: 'FDS', exchange: 'NYS' },   // FactSet
+  '824348106': { ticker: 'SHW', exchange: 'NYS' },   // Sherwin-Williams
+  '571903202': { ticker: 'MAR', exchange: 'NAS' },   // Marriott International
+  '115637100': { ticker: 'BF-A', exchange: 'NYS' },  // Brown-Forman Class A (의결권)
+  '115637209': { ticker: 'BF-B', exchange: 'NYS' },  // Brown-Forman Class B (무의결권)
+  '009158106': { ticker: 'APD', exchange: 'NYS' },   // Air Products & Chemicals
+  'L8681T102': { ticker: 'SPOT', exchange: 'NYS' },  // Spotify Technology (ADR)
+  '784117103': { ticker: 'SEIC', exchange: 'NAS' },  // SEI Investments
+  '064058100': { ticker: 'BK', exchange: 'NYS' },    // Bank of New York Mellon
+  '199908104': { ticker: 'FIX', exchange: 'NYS' },   // Comfort Systems USA
+  '169905106': { ticker: 'CHH', exchange: 'NYS' },   // Choice Hotels International
+  '12503M108': { ticker: 'CBOE', exchange: 'AMS' },  // Cboe Global Markets
+  '446413106': { ticker: 'HII', exchange: 'NYS' },   // Huntington Ingalls Industries
+  '038222105': { ticker: 'AMAT', exchange: 'NAS' },  // Applied Materials
+  '136375102': { ticker: 'CNI', exchange: 'NYS' },   // Canadian National Railway (ADR)
+  '084423102': { ticker: 'WRB', exchange: 'NYS' },   // W.R. Berkley
+  '13646K108': { ticker: 'CP', exchange: 'NYS' },    // Canadian Pacific Kansas City (ADR)
 };
 
 // global-stocks.json 로드 (이름 매칭용)

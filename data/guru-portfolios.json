@@ -1,7 +1,7 @@
 {
   "meta": {
-    "updated_at": "2026-02-24",
-    "total_unique_tickers": 173
+    "updated_at": "2026-05-10",
+    "total_unique_tickers": 310
   },
   "gurus": {
     "warren-buffett": {
@@ -49,7 +49,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 344.53
+          "price_at_filing": 343.4444
         },
         {
           "cusip": "060505104",
@@ -66,7 +66,7 @@
           "status": "TRIM",
           "shares_change_pct": -8.94,
           "ticker_source": "manual",
-          "price_at_filing": 52.74
+          "price_at_filing": 52.4435
         },
         {
           "cusip": "191216100",
@@ -83,7 +83,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 79.56
+          "price_at_filing": 79.0167
         },
         {
           "cusip": "166764100",
@@ -117,7 +117,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 423.22
+          "price_at_filing": 422.3071
         },
         {
           "cusip": "674599105",
@@ -134,7 +134,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 45.94
+          "price_at_filing": 45.7229
         },
         {
           "cusip": "H1467J104",
@@ -151,7 +151,7 @@
           "status": "ADD",
           "shares_change_pct": 9.31,
           "ticker_source": "auto",
-          "price_at_filing": 331.89
+          "price_at_filing": 330.9132
         },
         {
           "cusip": "500754106",
@@ -168,7 +168,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 23.78
+          "price_at_filing": 23.3874
         },
         {
           "cusip": "02079K305",
@@ -185,7 +185,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 302.02
+          "price_at_filing": 301.8077
         },
         {
           "cusip": "23918K108",
@@ -270,7 +270,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 521.93
+          "price_at_filing": 521.0344
         },
         {
           "cusip": "92343E102",
@@ -304,7 +304,7 @@
           "status": "TRIM",
           "shares_change_pct": -2.99,
           "ticker_source": "auto",
-          "price_at_filing": 152.7
+          "price_at_filing": 151.6879
         },
         {
           "cusip": "14040H105",
@@ -338,7 +338,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 289.09
+          "price_at_filing": 286.86
         },
         {
           "cusip": "25754A201",
@@ -355,7 +355,7 @@
           "status": "ADD",
           "shares_change_pct": 12.34,
           "ticker_source": "auto",
-          "price_at_filing": 373.5
+          "price_at_filing": 371.6228
         },
         {
           "cusip": "02005N100",
@@ -372,7 +372,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 41.29
+          "price_at_filing": 41.011
         },
         {
           "cusip": "G0403H108",
@@ -389,7 +389,7 @@
           "status": "TRIM",
           "shares_change_pct": -12.12,
           "ticker_source": "manual",
-          "price_at_filing": 325.96
+          "price_at_filing": 325.1024
         },
         {
           "cusip": "670346105",
@@ -406,7 +406,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 183.64
+          "price_at_filing": 183.0158
         },
         {
           "cusip": "530909308",
@@ -440,7 +440,7 @@
           "status": "TRIM",
           "shares_change_pct": -11.28,
           "ticker_source": "auto",
-          "price_at_filing": 255.46
+          "price_at_filing": 253.9456
         },
         {
           "cusip": "526057104",
@@ -457,7 +457,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 121.44
+          "price_at_filing": 120.7995
         },
         {
           "cusip": "023135106",
@@ -491,7 +491,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 88.86
+          "price_at_filing": 88.5408
         },
         {
           "cusip": "530909100",
@@ -525,7 +525,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "auto",
-          "price_at_filing": 74.03
+          "price_at_filing": 73.8266
         },
         {
           "cusip": "422806208",
@@ -610,7 +610,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 162.67
+          "price_at_filing": 162.0566
         },
         {
           "cusip": "62944T105",
@@ -644,7 +644,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 96.45
+          "price_at_filing": 95.486
         },
         {
           "cusip": "47233W109",
@@ -678,7 +678,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 121.44
+          "price_at_filing": 120.7995
         },
         {
           "cusip": "G9001E102",
@@ -826,7 +826,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 52.2
+          "price_at_filing": 51.9325
         },
         {
           "cusip": "457669307",
@@ -860,7 +860,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 202.52
+          "price_at_filing": 201.6573
         },
         {
           "cusip": "881624209",
@@ -928,7 +928,7 @@
           "status": "TRIM",
           "shares_change_pct": -29.02,
           "ticker_source": "manual",
-          "price_at_filing": 364.2
+          "price_at_filing": 363.177
         },
         {
           "cusip": "22266T109",
@@ -962,7 +962,7 @@
           "status": "ADD",
           "shares_change_pct": 276.71,
           "ticker_source": "manual",
-          "price_at_filing": 302.02
+          "price_at_filing": 301.8077
         },
         {
           "cusip": "81141R100",
@@ -1064,7 +1064,7 @@
           "status": "ADD",
           "shares_change_pct": 6.86,
           "ticker_source": "auto",
-          "price_at_filing": 68.13
+          "price_at_filing": 67.5337
         },
         {
           "cusip": "19240Q201",
@@ -1098,7 +1098,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "auto",
-          "price_at_filing": 57.47
+          "price_at_filing": 57.376
         },
         {
           "cusip": "29362U104",
@@ -1115,7 +1115,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "auto",
-          "price_at_filing": 129.56
+          "price_at_filing": 129.4705
         },
         {
           "cusip": "256163106",
@@ -1234,7 +1234,7 @@
           "status": "ADD",
           "shares_change_pct": 20.6,
           "ticker_source": "auto",
-          "price_at_filing": 122.02
+          "price_at_filing": 121.5917
         },
         {
           "cusip": "68404L201",
@@ -1285,7 +1285,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "auto",
-          "price_at_filing": 70.85
+          "price_at_filing": 70.6585
         },
         {
           "cusip": "910047109",
@@ -1404,7 +1404,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 916.04
+          "price_at_filing": 911.2445
         },
         {
           "cusip": "185899101",
@@ -1455,7 +1455,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 33.2
+          "price_at_filing": 33.1056
         },
         {
           "cusip": "91332U101",
@@ -1607,7 +1607,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 183.65
+          "price_at_filing": 182.0251
         },
         {
           "cusip": "02376R102",
@@ -1641,7 +1641,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "auto",
-          "price_at_filing": 406.88
+          "price_at_filing": 406.5496
         },
         {
           "cusip": "25809K105",
@@ -1726,7 +1726,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 18.25
+          "price_at_filing": 17.287
         },
         {
           "cusip": "97785W106",
@@ -2289,7 +2289,7 @@
           "status": "ADD",
           "shares_change_pct": 49.69,
           "ticker_source": "manual",
-          "price_at_filing": 47.78
+          "price_at_filing": 47.6946
         },
         {
           "cusip": "90353T100",
@@ -2340,7 +2340,7 @@
           "status": "TRIM",
           "shares_change_pct": -2.53,
           "ticker_source": "manual",
-          "price_at_filing": 302.82
+          "price_at_filing": 302.6068
         },
         {
           "cusip": "30303M102",
@@ -2357,7 +2357,7 @@
           "status": "NEW BUY",
           "shares_change_pct": null,
           "ticker_source": "manual",
-          "price_at_filing": 639.29
+          "price_at_filing": 638.7434
         },
         {
           "cusip": "76131D103",
@@ -2374,7 +2374,7 @@
           "status": "HOLD",
           "shares_change_pct": -0.21,
           "ticker_source": "auto",
-          "price_at_filing": 68.13
+          "price_at_filing": 67.5337
         },
         {
           "cusip": "44267T102",
@@ -2408,7 +2408,7 @@
           "status": "HOLD",
           "shares_change_pct": -0.06,
           "ticker_source": "auto",
-          "price_at_filing": 317.82
+          "price_at_filing": 317.67
         },
         {
           "cusip": "02079K305",
@@ -2425,7 +2425,7 @@
           "status": "TRIM",
           "shares_change_pct": -86,
           "ticker_source": "manual",
-          "price_at_filing": 302.02
+          "price_at_filing": 301.8077
         },
         {
           "cusip": "812215200",
@@ -2507,7 +2507,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 302.85
+          "price_at_filing": 302.6371
         },
         {
           "cusip": "02079K107",
@@ -2524,7 +2524,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 303.56
+          "price_at_filing": 303.3463
         },
         {
           "cusip": "060505104",
@@ -2541,7 +2541,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 52.77
+          "price_at_filing": 52.4734
         },
         {
           "cusip": "722304102",
@@ -2592,7 +2592,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 119.86
+          "price_at_filing": 119.0979
         },
         {
           "cusip": "674599105",
@@ -2609,7 +2609,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 51.53
+          "price_at_filing": 51.2865
         },
         {
           "cusip": "227046109",
@@ -2691,7 +2691,7 @@
           "status": "TRIM",
           "shares_change_pct": -2.09,
           "ticker_source": "auto",
-          "price_at_filing": 66.14
+          "price_at_filing": 65.5611
         },
         {
           "cusip": "023135106",
@@ -2725,7 +2725,7 @@
           "status": "ADD",
           "shares_change_pct": 24.66,
           "ticker_source": "auto",
-          "price_at_filing": 287.74
+          "price_at_filing": 286.7864
         },
         {
           "cusip": "036752103",
@@ -2742,7 +2742,7 @@
           "status": "TRIM",
           "shares_change_pct": -3.77,
           "ticker_source": "auto",
-          "price_at_filing": 346.8
+          "price_at_filing": 344.6752
         },
         {
           "cusip": "907818108",
@@ -2759,7 +2759,7 @@
           "status": "ADD",
           "shares_change_pct": 8.76,
           "ticker_source": "auto",
-          "price_at_filing": 260.68
+          "price_at_filing": 259.3247
         },
         {
           "cusip": "95082P105",
@@ -2776,7 +2776,7 @@
           "status": "TRIM",
           "shares_change_pct": -5.61,
           "ticker_source": "manual",
-          "price_at_filing": 307.1
+          "price_at_filing": 306.5042
         },
         {
           "cusip": "02079K107",
@@ -2793,7 +2793,7 @@
           "status": "TRIM",
           "shares_change_pct": -41.49,
           "ticker_source": "manual",
-          "price_at_filing": 306.02
+          "price_at_filing": 305.8046
         },
         {
           "cusip": "31620M106",
@@ -2810,7 +2810,7 @@
           "status": "ADD",
           "shares_change_pct": 18.84,
           "ticker_source": "manual",
-          "price_at_filing": 46.8
+          "price_at_filing": 46.4011
         },
         {
           "cusip": "256677105",
@@ -2827,7 +2827,7 @@
           "status": "TRIM",
           "shares_change_pct": -22.65,
           "ticker_source": "auto",
-          "price_at_filing": 153.84
+          "price_at_filing": 153.1139
         },
         {
           "cusip": "31488V107",
@@ -2844,7 +2844,7 @@
           "status": "TRIM",
           "shares_change_pct": -1.6,
           "ticker_source": "auto",
-          "price_at_filing": 261.36
+          "price_at_filing": 260.3901
         },
         {
           "cusip": "26969P108",
@@ -2861,7 +2861,7 @@
           "status": "ADD",
           "shares_change_pct": 26.14,
           "ticker_source": "manual",
-          "price_at_filing": 235.11
+          "price_at_filing": 234.7947
         },
         {
           "cusip": "G61188127",
@@ -2895,7 +2895,7 @@
           "status": "ADD",
           "shares_change_pct": 6.53,
           "ticker_source": "auto",
-          "price_at_filing": 147.16
+          "price_at_filing": 145.8248
         },
         {
           "cusip": "337738108",
@@ -2929,7 +2929,7 @@
           "status": "TRIM",
           "shares_change_pct": -68.29,
           "ticker_source": "auto",
-          "price_at_filing": 125.97
+          "price_at_filing": 125.5278
         },
         {
           "cusip": "G4412G101",
@@ -3014,7 +3014,7 @@
           "status": "TRIM",
           "shares_change_pct": -3.45,
           "ticker_source": "auto",
-          "price_at_filing": 12.36
+          "price_at_filing": 12.1119
         },
         {
           "cusip": "G61188101",
@@ -3096,7 +3096,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 102.75
+          "price_at_filing": 102.192
         },
         {
           "cusip": "G89479102",
@@ -3113,7 +3113,7 @@
           "status": "TRIM",
           "shares_change_pct": -34.88,
           "ticker_source": "auto",
-          "price_at_filing": 25.82
+          "price_at_filing": 25.1562
         },
         {
           "cusip": "G0378L100",
@@ -3130,7 +3130,7 @@
           "status": "TRIM",
           "shares_change_pct": -8.06,
           "ticker_source": "auto",
-          "price_at_filing": 106.17
+          "price_at_filing": 104.4158
         },
         {
           "cusip": "366505105",
@@ -3147,7 +3147,7 @@
           "status": "TRIM",
           "shares_change_pct": -46.4,
           "ticker_source": "auto",
-          "price_at_filing": 20.62
+          "price_at_filing": 20.539
         },
         {
           "cusip": "G4766E116",
@@ -3181,7 +3181,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 44
+          "price_at_filing": 43.4876
         },
         {
           "cusip": "879433829",
@@ -3198,7 +3198,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "manual",
-          "price_at_filing": 46.54
+          "price_at_filing": 46.4971
         },
         {
           "cusip": "06849F108",
@@ -3215,7 +3215,7 @@
           "status": "TRIM",
           "shares_change_pct": -9.9,
           "ticker_source": "auto",
-          "price_at_filing": 46.65
+          "price_at_filing": 46.2608
         },
         {
           "cusip": "87422Q109",
@@ -3266,7 +3266,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 7.3
+          "price_at_filing": 7.2683
         },
         {
           "cusip": "G3730V105",
@@ -3283,7 +3283,7 @@
           "status": "TRIM",
           "shares_change_pct": -11.59,
           "ticker_source": "auto",
-          "price_at_filing": 285.75
+          "price_at_filing": 285.2679
         },
         {
           "cusip": "465562106",
@@ -3300,7 +3300,7 @@
           "status": "ADD",
           "shares_change_pct": 9.13,
           "ticker_source": "manual",
-          "price_at_filing": 9.17
+          "price_at_filing": 9.0797
         },
         {
           "cusip": "G61188101",
@@ -3334,7 +3334,7 @@
           "status": "TRIM",
           "shares_change_pct": -16.22,
           "ticker_source": "auto",
-          "price_at_filing": 36.9
+          "price_at_filing": 36.3117
         },
         {
           "cusip": "40054J109",
@@ -3368,7 +3368,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 13.43
+          "price_at_filing": 13.3811
         },
         {
           "cusip": "8676EP108",
@@ -3419,7 +3419,7 @@
           "status": "TRIM",
           "shares_change_pct": -7.63,
           "ticker_source": "auto",
-          "price_at_filing": 61.09
+          "price_at_filing": 60.9558
         },
         {
           "cusip": "49427F108",
@@ -3436,7 +3436,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 31.81
+          "price_at_filing": 31.202
         },
         {
           "cusip": "151290889",
@@ -3453,7 +3453,7 @@
           "status": "TRIM",
           "shares_change_pct": -44.98,
           "ticker_source": "auto",
-          "price_at_filing": 12.5
+          "price_at_filing": 12.4739
         },
         {
           "cusip": "78163D100",
@@ -3470,7 +3470,7 @@
           "status": "TRIM",
           "shares_change_pct": -15.1,
           "ticker_source": "auto",
-          "price_at_filing": 8.46
+          "price_at_filing": 8.1057
         },
         {
           "cusip": "071705107",
@@ -3606,7 +3606,7 @@
           "status": "TRIM",
           "shares_change_pct": -7.32,
           "ticker_source": "manual",
-          "price_at_filing": 9.55
+          "price_at_filing": 9.4521
         },
         {
           "cusip": "Y8162K204",
@@ -3623,7 +3623,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 24.53
+          "price_at_filing": 24.1464
         },
         {
           "cusip": "48553T106",
@@ -3657,7 +3657,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 56.62
+          "price_at_filing": 56.2508
         },
         {
           "cusip": "879273209",
@@ -3742,7 +3742,7 @@
           "status": "HOLD",
           "shares_change_pct": 0,
           "ticker_source": "auto",
-          "price_at_filing": 12.01
+          "price_at_filing": 11.5772
         },
         {
           "cusip": "456788108",
@@ -4108,13 +4108,3277 @@
           "ticker_source": "manual"
         }
       ]
+    },
+    "carl-icahn": {
+      "guru_name_en": "Carl Icahn",
+      "guru_name_kr": "칼 아이칸",
+      "cik": "0000921669",
+      "filing_name": "Carl C. Icahn",
+      "report_date_prev": "2025-09-30",
+      "report_date_curr": "2025-12-31",
+      "filing_date_curr": "2026-02-17",
+      "total_value_prev": 9141598000,
+      "total_value_curr": 8445168000,
+      "holdings_count": 13,
+      "updated_at": "2026-05-10T07:04:52.681Z",
+      "holdings": [
+        {
+          "cusip": "451100101",
+          "ticker": "IEP",
+          "name_of_issuer": "ICAHN ENTERPRISES LP/CORP",
+          "title_of_class": "DEPOSITARY UNIT",
+          "exchange": "NAS",
+          "value_curr": 4147974000,
+          "shares_curr": 549400539,
+          "weight_curr": 49.12,
+          "value_prev": 4369415000,
+          "shares_prev": 518932944,
+          "weight_prev": 47.8,
+          "status": "ADD",
+          "shares_change_pct": 5.87,
+          "ticker_source": "auto",
+          "price_at_filing": 7.4974
+        },
+        {
+          "cusip": "12662P108",
+          "ticker": "CVI",
+          "name_of_issuer": "CVR ENERGY INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 1791446000,
+          "shares_curr": 70418471,
+          "weight_curr": 21.21,
+          "value_prev": 2568866000,
+          "shares_prev": 70418471,
+          "weight_prev": 28.1,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 22.52
+        },
+        {
+          "cusip": "844895102",
+          "ticker": "SWX",
+          "name_of_issuer": "SOUTHWEST GAS HOLDINGS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 482729000,
+          "shares_curr": 6032604,
+          "weight_curr": 5.72,
+          "value_prev": 472594000,
+          "shares_prev": 6032604,
+          "weight_prev": 5.17,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 88.24
+        },
+        {
+          "cusip": "126633205",
+          "ticker": "UAN",
+          "name_of_issuer": "CVR PARTNERS LP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 426838000,
+          "shares_curr": 4164274,
+          "weight_curr": 5.05,
+          "value_prev": 375284000,
+          "shares_prev": 4164274,
+          "weight_prev": 4.11,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 106.6024
+        },
+        {
+          "cusip": "278768106",
+          "ticker": "SATS",
+          "name_of_issuer": "ECHOSTAR CORPORATION",
+          "title_of_class": "CL A",
+          "exchange": "NAS",
+          "value_curr": 364639000,
+          "shares_curr": 3354542,
+          "weight_curr": 4.32,
+          "value_prev": 332513000,
+          "shares_prev": 4354542,
+          "weight_prev": 3.64,
+          "status": "TRIM",
+          "shares_change_pct": -22.96,
+          "ticker_source": "auto",
+          "price_at_filing": 113
+        },
+        {
+          "cusip": "155923105",
+          "ticker": "CTRI",
+          "name_of_issuer": "CENTURI HOLDINGS INC",
+          "title_of_class": "COM SHS",
+          "exchange": "NYS",
+          "value_curr": 361985000,
+          "shares_curr": 14336044,
+          "weight_curr": 4.29,
+          "value_prev": 229645000,
+          "shares_prev": 10847672,
+          "weight_prev": 2.51,
+          "status": "ADD",
+          "shares_change_pct": 32.16,
+          "ticker_source": "auto",
+          "price_at_filing": 31.29
+        },
+        {
+          "cusip": "459506101",
+          "ticker": "INTR",
+          "name_of_issuer": "INTER & CO INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 288092000,
+          "shares_curr": 4275000,
+          "weight_curr": 3.41,
+          "value_prev": 292315000,
+          "shares_prev": 4750000,
+          "weight_prev": 3.2,
+          "status": "TRIM",
+          "shares_change_pct": -10,
+          "ticker_source": "auto",
+          "price_at_filing": 8.4628
+        },
+        {
+          "cusip": "477143101",
+          "ticker": "JBLU",
+          "name_of_issuer": "JETBLUE AIRWAYS CORPORATION",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 152979000,
+          "shares_curr": 33621735,
+          "weight_curr": 1.81,
+          "value_prev": 165419000,
+          "shares_prev": 33621735,
+          "weight_prev": 1.81,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 6.07
+        },
+        {
+          "cusip": "025537101",
+          "ticker": "AEP",
+          "name_of_issuer": "AMERICAN ELECTRIC POWER CO INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 138983000,
+          "shares_curr": 1205300,
+          "weight_curr": 1.65,
+          "value_prev": 135596000,
+          "shares_prev": 1205300,
+          "weight_prev": 1.48,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 129.301
+        },
+        {
+          "cusip": "610236101",
+          "ticker": "MNRO",
+          "name_of_issuer": "MONRO INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 101775000,
+          "shares_curr": 5078573,
+          "weight_curr": 1.21,
+          "value_prev": 26326000,
+          "shares_prev": 1465000,
+          "weight_prev": 0.29,
+          "status": "ADD",
+          "shares_change_pct": 246.66,
+          "ticker_source": "auto",
+          "price_at_filing": 22.1827
+        },
+        {
+          "cusip": "80007P869",
+          "ticker": "SD",
+          "name_of_issuer": "SANDRIDGE ENERGY INC",
+          "title_of_class": "COM NEW",
+          "exchange": "NYS",
+          "value_curr": 70874000,
+          "shares_curr": 4911564,
+          "weight_curr": 0.84,
+          "value_prev": 54936000,
+          "shares_prev": 4870233,
+          "weight_prev": 0.6,
+          "status": "HOLD",
+          "shares_change_pct": 0.85,
+          "ticker_source": "auto",
+          "price_at_filing": 16.8799
+        },
+        {
+          "cusip": "071705107",
+          "ticker": "BLCO",
+          "name_of_issuer": "Bausch Plus Lomb Corp.",
+          "title_of_class": "COMMON SHARES",
+          "exchange": "NYS",
+          "value_curr": 59780000,
+          "shares_curr": 3500000,
+          "weight_curr": 0.71,
+          "value_prev": 52745000,
+          "shares_prev": 3500000,
+          "weight_prev": 0.58,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 17.73
+        },
+        {
+          "cusip": "12769G100",
+          "ticker": "CZR",
+          "name_of_issuer": "CAESARS ENTERTAINMENT INC NEW",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 57074000,
+          "shares_curr": 2440109,
+          "weight_curr": 0.68,
+          "value_prev": 65944000,
+          "shares_prev": 2440109,
+          "weight_prev": 0.72,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 18.95
+        }
+      ]
+    },
+    "david-tepper": {
+      "guru_name_en": "David Tepper",
+      "guru_name_kr": "데이비드 테퍼",
+      "cik": "0001656456",
+      "filing_name": "Appaloosa LP",
+      "report_date_prev": "2025-09-30",
+      "report_date_curr": "2025-12-31",
+      "filing_date_curr": "2026-02-17",
+      "total_value_prev": 7383593000,
+      "total_value_curr": 6853672000,
+      "holdings_count": 38,
+      "updated_at": "2026-05-10T07:07:34.254Z",
+      "holdings": [
+        {
+          "cusip": "01609W102",
+          "ticker": "BABA",
+          "name_of_issuer": "ALIBABA GROUP HLDG LTD",
+          "title_of_class": "SPONSORED ADS",
+          "exchange": "NYS",
+          "value_curr": 753118000,
+          "shares_curr": 5137931,
+          "weight_curr": 10.99,
+          "value_prev": 1152809000,
+          "shares_prev": 6450000,
+          "weight_prev": 15.61,
+          "status": "TRIM",
+          "shares_change_pct": -20.34,
+          "ticker_source": "manual",
+          "price_at_filing": 155.43
+        },
+        {
+          "cusip": "02079K107",
+          "ticker": "GOOG",
+          "name_of_issuer": "ALPHABET INC",
+          "title_of_class": "CAP STK CL C",
+          "exchange": "NAS",
+          "value_curr": 560739000,
+          "shares_curr": 1786931,
+          "weight_curr": 8.18,
+          "value_prev": 337926000,
+          "shares_prev": 1387500,
+          "weight_prev": 4.58,
+          "status": "ADD",
+          "shares_change_pct": 28.79,
+          "ticker_source": "manual",
+          "price_at_filing": 302.6068
+        },
+        {
+          "cusip": "023135106",
+          "ticker": "AMZN",
+          "name_of_issuer": "AMAZON COM INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 503047000,
+          "shares_curr": 2179391,
+          "weight_curr": 7.34,
+          "value_prev": 548925000,
+          "shares_prev": 2500000,
+          "weight_prev": 7.43,
+          "status": "TRIM",
+          "shares_change_pct": -12.82,
+          "ticker_source": "manual",
+          "price_at_filing": 201.15
+        },
+        {
+          "cusip": "595112103",
+          "ticker": "MU",
+          "name_of_issuer": "MICRON TECHNOLOGY INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 428115000,
+          "shares_curr": 1500000,
+          "weight_curr": 6.25,
+          "value_prev": 83660000,
+          "shares_prev": 500000,
+          "weight_prev": 1.13,
+          "status": "ADD",
+          "shares_change_pct": 200,
+          "ticker_source": "auto",
+          "price_at_filing": 399.6121
+        },
+        {
+          "cusip": "30303M102",
+          "ticker": "META",
+          "name_of_issuer": "META PLATFORMS INC",
+          "title_of_class": "CL A",
+          "exchange": "NAS",
+          "value_curr": 396054000,
+          "shares_curr": 600000,
+          "weight_curr": 5.78,
+          "value_prev": 271721000,
+          "shares_prev": 370000,
+          "weight_prev": 3.68,
+          "status": "ADD",
+          "shares_change_pct": 62.16,
+          "ticker_source": "manual",
+          "price_at_filing": 638.7434
+        },
+        {
+          "cusip": "874039100",
+          "ticker": "TSM",
+          "name_of_issuer": "TAIWAN SEMICONDUCTOR MFG LTD",
+          "title_of_class": "SPONSORED ADS",
+          "exchange": "NYS",
+          "value_curr": 343396000,
+          "shares_curr": 1130000,
+          "weight_curr": 5.01,
+          "value_prev": 296047000,
+          "shares_prev": 1060000,
+          "weight_prev": 4.01,
+          "status": "ADD",
+          "shares_change_pct": 6.6,
+          "ticker_source": "manual",
+          "price_at_filing": 363.177
+        },
+        {
+          "cusip": "67066G104",
+          "ticker": "NVDA",
+          "name_of_issuer": "NVIDIA CORPORATION",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 317050000,
+          "shares_curr": 1700000,
+          "weight_curr": 4.63,
+          "value_prev": 354502000,
+          "shares_prev": 1900000,
+          "weight_prev": 4.8,
+          "status": "TRIM",
+          "shares_change_pct": -10.53,
+          "ticker_source": "manual",
+          "price_at_filing": 184.97
+        },
+        {
+          "cusip": "963320106",
+          "ticker": "WHR",
+          "name_of_issuer": "WHIRLPOOL CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 282067000,
+          "shares_curr": 3910000,
+          "weight_curr": 4.12,
+          "value_prev": 432300000,
+          "shares_prev": 5500000,
+          "weight_prev": 5.85,
+          "status": "TRIM",
+          "shares_change_pct": -28.91,
+          "ticker_source": "auto",
+          "price_at_filing": 86.0845
+        },
+        {
+          "cusip": "629377508",
+          "ticker": "NRG",
+          "name_of_issuer": "NRG ENERGY INC",
+          "title_of_class": "COM NEW",
+          "exchange": "NYS",
+          "value_curr": 261154000,
+          "shares_curr": 1640000,
+          "weight_curr": 3.81,
+          "value_prev": 302847000,
+          "shares_prev": 1870000,
+          "weight_prev": 4.1,
+          "status": "TRIM",
+          "shares_change_pct": -12.3,
+          "ticker_source": "auto",
+          "price_at_filing": 172.9205
+        },
+        {
+          "cusip": "594918104",
+          "ticker": "MSFT",
+          "name_of_issuer": "MICROSOFT CORP",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 241810000,
+          "shares_curr": 500000,
+          "weight_curr": 3.53,
+          "value_prev": 239552000,
+          "shares_prev": 462500,
+          "weight_prev": 3.24,
+          "status": "ADD",
+          "shares_change_pct": 8.11,
+          "ticker_source": "manual",
+          "price_at_filing": 395.9563
+        },
+        {
+          "cusip": "02376R102",
+          "ticker": "AAL",
+          "name_of_issuer": "AMERICAN AIRLS GROUP INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 216920000,
+          "shares_curr": 14150000,
+          "weight_curr": 3.17,
+          "value_prev": 103970000,
+          "shares_prev": 9250000,
+          "weight_prev": 1.41,
+          "status": "ADD",
+          "shares_change_pct": 52.97,
+          "ticker_source": "manual",
+          "price_at_filing": 14.4
+        },
+        {
+          "cusip": "722304102",
+          "ticker": "PDD",
+          "name_of_issuer": "PDD HOLDINGS INC",
+          "title_of_class": "SPONSORED ADS",
+          "exchange": "NAS",
+          "value_curr": 201267000,
+          "shares_curr": 1775000,
+          "weight_curr": 2.94,
+          "value_prev": 237906000,
+          "shares_prev": 1800000,
+          "weight_prev": 3.22,
+          "status": "TRIM",
+          "shares_change_pct": -1.39,
+          "ticker_source": "manual",
+          "price_at_filing": 101.83
+        },
+        {
+          "cusip": "747525103",
+          "ticker": "QCOM",
+          "name_of_issuer": "QUALCOMM INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 195852000,
+          "shares_curr": 1145000,
+          "weight_curr": 2.86,
+          "value_prev": 207118000,
+          "shares_prev": 1245000,
+          "weight_prev": 2.81,
+          "status": "TRIM",
+          "shares_change_pct": -8.03,
+          "ticker_source": "auto",
+          "price_at_filing": 141.7202
+        },
+        {
+          "cusip": "464286772",
+          "ticker": "EWY",
+          "name_of_issuer": "iShares MSCI South Korea ETF",
+          "title_of_class": "MSCI STH KOR ETF",
+          "exchange": "AMS",
+          "value_curr": 182288000,
+          "shares_curr": 1875000,
+          "weight_curr": 2.66,
+          "value_prev": null,
+          "shares_prev": null,
+          "weight_prev": null,
+          "status": "NEW BUY",
+          "shares_change_pct": null,
+          "ticker_source": "manual",
+          "price_at_filing": 130.68
+        },
+        {
+          "cusip": "500767306",
+          "ticker": "AGIX",
+          "name_of_issuer": "KRANESHARES TRUST ARTIFICIAL INTELLIGENCE & TECHNOLOGY E",
+          "title_of_class": "CSI CHI INTERNET",
+          "exchange": "NAS",
+          "value_curr": 161738000,
+          "shares_curr": 4750000,
+          "weight_curr": 2.36,
+          "value_prev": 310874000,
+          "shares_prev": 7400000,
+          "weight_prev": 4.21,
+          "status": "TRIM",
+          "shares_change_pct": -35.81,
+          "ticker_source": "auto",
+          "price_at_filing": 34.15
+        },
+        {
+          "cusip": "92840M102",
+          "ticker": "VST",
+          "name_of_issuer": "VISTRA CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 152457000,
+          "shares_curr": 945000,
+          "weight_curr": 2.22,
+          "value_prev": 243920000,
+          "shares_prev": 1245000,
+          "weight_prev": 3.3,
+          "status": "TRIM",
+          "shares_change_pct": -24.1,
+          "ticker_source": "auto",
+          "price_at_filing": 173.4434
+        },
+        {
+          "cusip": "90353T100",
+          "ticker": "UBER",
+          "name_of_issuer": "UBER TECHNOLOGIES INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 151164000,
+          "shares_curr": 1850000,
+          "weight_curr": 2.21,
+          "value_prev": 235812000,
+          "shares_prev": 2406983,
+          "weight_prev": 3.19,
+          "status": "TRIM",
+          "shares_change_pct": -23.14,
+          "ticker_source": "auto",
+          "price_at_filing": 70.53
+        },
+        {
+          "cusip": "219350105",
+          "ticker": "COR",
+          "name_of_issuer": "CORNING INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 137487000,
+          "shares_curr": 1570200,
+          "weight_curr": 2.01,
+          "value_prev": 133299000,
+          "shares_prev": 1625000,
+          "weight_prev": 1.81,
+          "status": "TRIM",
+          "shares_change_pct": -3.37,
+          "ticker_source": "manual",
+          "price_at_filing": 359.97
+        },
+        {
+          "cusip": "D18190898",
+          "ticker": "DB",
+          "name_of_issuer": "DEUTSCHE BANK AG",
+          "title_of_class": "NAMEN AKT",
+          "exchange": "NYS",
+          "value_curr": 121464000,
+          "shares_curr": 3150000,
+          "weight_curr": 1.77,
+          "value_prev": 134204000,
+          "shares_prev": 3790000,
+          "weight_prev": 1.82,
+          "status": "TRIM",
+          "shares_change_pct": -16.89,
+          "ticker_source": "auto",
+          "price_at_filing": 35.94
+        },
+        {
+          "cusip": "47215P106",
+          "ticker": "JD",
+          "name_of_issuer": "JD.COM INC SPON ADS EACH REPR 2 ORD SHS CLASS A",
+          "title_of_class": "SPON ADS CL A",
+          "exchange": "NAS",
+          "value_curr": 119307000,
+          "shares_curr": 4157046,
+          "weight_curr": 1.74,
+          "value_prev": 217751000,
+          "shares_prev": 6225000,
+          "weight_prev": 2.95,
+          "status": "TRIM",
+          "shares_change_pct": -33.22,
+          "ticker_source": "auto",
+          "price_at_filing": 26.3892
+        },
+        {
+          "cusip": "690742101",
+          "ticker": "OC",
+          "name_of_issuer": "OWENS CORNING",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 106315000,
+          "shares_curr": 950000,
+          "weight_curr": 1.55,
+          "value_prev": 22846000,
+          "shares_prev": 161500,
+          "weight_prev": 0.31,
+          "status": "ADD",
+          "shares_change_pct": 488.24,
+          "ticker_source": "auto",
+          "price_at_filing": 132.5986
+        },
+        {
+          "cusip": "75513E101",
+          "ticker": "RTX",
+          "name_of_issuer": "RTX CORPORATION",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 91700000,
+          "shares_curr": 500000,
+          "weight_curr": 1.34,
+          "value_prev": 85255000,
+          "shares_prev": 509500,
+          "weight_prev": 1.15,
+          "status": "TRIM",
+          "shares_change_pct": -1.86,
+          "ticker_source": "auto",
+          "price_at_filing": 202.8264
+        },
+        {
+          "cusip": "502431109",
+          "ticker": "LHX",
+          "name_of_issuer": "L3HARRIS TECHNOLOGIES INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 86603000,
+          "shares_curr": 295000,
+          "weight_curr": 1.26,
+          "value_prev": 91623000,
+          "shares_prev": 300000,
+          "weight_prev": 1.24,
+          "status": "TRIM",
+          "shares_change_pct": -1.67,
+          "ticker_source": "manual",
+          "price_at_filing": 345.387
+        },
+        {
+          "cusip": "056752108",
+          "ticker": "BIDU",
+          "name_of_issuer": "BAIDU INC SPON ADS EACH REP 8 ORD SHS",
+          "title_of_class": "SPON ADR REP A",
+          "exchange": "NAS",
+          "value_curr": 75130000,
+          "shares_curr": 575000,
+          "weight_curr": 1.1,
+          "value_prev": 137700000,
+          "shares_prev": 1045000,
+          "weight_prev": 1.86,
+          "status": "TRIM",
+          "shares_change_pct": -44.98,
+          "ticker_source": "auto",
+          "price_at_filing": 137.33
+        },
+        {
+          "cusip": "608190104",
+          "ticker": "MHK",
+          "name_of_issuer": "MOHAWK INDS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 73778000,
+          "shares_curr": 675000,
+          "weight_curr": 1.08,
+          "value_prev": 20821000,
+          "shares_prev": 161500,
+          "weight_prev": 0.28,
+          "status": "ADD",
+          "shares_change_pct": 317.96,
+          "ticker_source": "manual",
+          "price_at_filing": 131.91
+        },
+        {
+          "cusip": "55087P104",
+          "ticker": "LYFT",
+          "name_of_issuer": "LYFT INC",
+          "title_of_class": "CL A COM",
+          "exchange": "NAS",
+          "value_curr": 73606000,
+          "shares_curr": 3800000,
+          "weight_curr": 1.07,
+          "value_prev": 123256000,
+          "shares_prev": 5600000,
+          "weight_prev": 1.67,
+          "status": "TRIM",
+          "shares_change_pct": -32.14,
+          "ticker_source": "auto",
+          "price_at_filing": 13.3
+        },
+        {
+          "cusip": "512807306",
+          "ticker": "LRCX",
+          "name_of_issuer": "LAM RESEARCH CORP",
+          "title_of_class": "COM NEW",
+          "exchange": "NAS",
+          "value_curr": 72752000,
+          "shares_curr": 425000,
+          "weight_curr": 1.06,
+          "value_prev": 49543000,
+          "shares_prev": 370000,
+          "weight_prev": 0.67,
+          "status": "ADD",
+          "shares_change_pct": 14.86,
+          "ticker_source": "auto",
+          "price_at_filing": 235.298
+        },
+        {
+          "cusip": "007903107",
+          "ticker": "AMD",
+          "name_of_issuer": "ADVANCED MICRO DEVICES INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 69602000,
+          "shares_curr": 325000,
+          "weight_curr": 1.02,
+          "value_prev": 153701000,
+          "shares_prev": 950000,
+          "weight_prev": 2.08,
+          "status": "TRIM",
+          "shares_change_pct": -65.79,
+          "ticker_source": "auto",
+          "price_at_filing": 203.08
+        },
+        {
+          "cusip": "N07059210",
+          "ticker": "ASML",
+          "name_of_issuer": "ASML HOLDING N V",
+          "title_of_class": "N Y REGISTRY SHS",
+          "exchange": "NAS",
+          "value_curr": 66866000,
+          "shares_curr": 62500,
+          "weight_curr": 0.98,
+          "value_prev": 61958000,
+          "shares_prev": 64000,
+          "weight_prev": 0.84,
+          "status": "TRIM",
+          "shares_change_pct": -2.34,
+          "ticker_source": "manual",
+          "price_at_filing": 1416.6849
+        },
+        {
+          "cusip": "91324P102",
+          "ticker": "UNH",
+          "name_of_issuer": "UNITEDHEALTH GROUP INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 66022000,
+          "shares_curr": 200000,
+          "weight_curr": 0.96,
+          "value_prev": 70269000,
+          "shares_prev": 203500,
+          "weight_prev": 0.95,
+          "status": "TRIM",
+          "shares_change_pct": -1.72,
+          "ticker_source": "manual",
+          "price_at_filing": 286.86
+        },
+        {
+          "cusip": "058498106",
+          "ticker": "BALL",
+          "name_of_issuer": "BALL CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 63564000,
+          "shares_curr": 1200000,
+          "weight_curr": 0.93,
+          "value_prev": null,
+          "shares_prev": null,
+          "weight_prev": null,
+          "status": "NEW BUY",
+          "shares_change_pct": null,
+          "ticker_source": "auto",
+          "price_at_filing": 66.3517
+        },
+        {
+          "cusip": "46266C105",
+          "ticker": "IQV",
+          "name_of_issuer": "IQVIA HOLDINGS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 63115000,
+          "shares_curr": 280000,
+          "weight_curr": 0.92,
+          "value_prev": 54133000,
+          "shares_prev": 285000,
+          "weight_prev": 0.73,
+          "status": "TRIM",
+          "shares_change_pct": -1.75,
+          "ticker_source": "auto",
+          "price_at_filing": 164.44
+        },
+        {
+          "cusip": "910047109",
+          "ticker": "UAL",
+          "name_of_issuer": "UNITED AIRLS HLDGS INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 51996000,
+          "shares_curr": 465000,
+          "weight_curr": 0.76,
+          "value_prev": 44631000,
+          "shares_prev": 462500,
+          "weight_prev": 0.6,
+          "status": "HOLD",
+          "shares_change_pct": 0.54,
+          "ticker_source": "manual",
+          "price_at_filing": 114.02
+        },
+        {
+          "cusip": "464287184",
+          "ticker": "FXI",
+          "name_of_issuer": "iShares China Large-Cap ETF",
+          "title_of_class": "CHINA LG-CAP ETF",
+          "exchange": "AMS",
+          "value_curr": 41640000,
+          "shares_curr": 1087500,
+          "weight_curr": 0.61,
+          "value_prev": 45665000,
+          "shares_prev": 1110000,
+          "weight_prev": 0.62,
+          "status": "TRIM",
+          "shares_change_pct": -2.03,
+          "ticker_source": "manual",
+          "price_at_filing": 38.52
+        },
+        {
+          "cusip": "29273V100",
+          "ticker": "ET",
+          "name_of_issuer": "ENERGY TRANSFER LP",
+          "title_of_class": "COM UT LTD PTN",
+          "exchange": "NYS",
+          "value_curr": 36134000,
+          "shares_curr": 2191250,
+          "weight_curr": 0.53,
+          "value_prev": 85066000,
+          "shares_prev": 4957235,
+          "weight_prev": 1.15,
+          "status": "TRIM",
+          "shares_change_pct": -55.8,
+          "ticker_source": "auto",
+          "price_at_filing": 18.2947
+        },
+        {
+          "cusip": "55336V100",
+          "ticker": "MPLX",
+          "name_of_issuer": "MPLX LP",
+          "title_of_class": "COM UNIT REP LTD",
+          "exchange": "NYS",
+          "value_curr": 33490000,
+          "shares_curr": 627500,
+          "weight_curr": 0.49,
+          "value_prev": 26723000,
+          "shares_prev": 535000,
+          "weight_prev": 0.36,
+          "status": "ADD",
+          "shares_change_pct": 17.29,
+          "ticker_source": "auto",
+          "price_at_filing": 56.2528
+        },
+        {
+          "cusip": "247361702",
+          "ticker": "DAL",
+          "name_of_issuer": "DELTA AIR LINES INC",
+          "title_of_class": "COM NEW",
+          "exchange": "NYS",
+          "value_curr": 32965000,
+          "shares_curr": 475000,
+          "weight_curr": 0.48,
+          "value_prev": 26247000,
+          "shares_prev": 462500,
+          "weight_prev": 0.36,
+          "status": "ADD",
+          "shares_change_pct": 2.7,
+          "ticker_source": "auto",
+          "price_at_filing": 70.6585
+        },
+        {
+          "cusip": "382550101",
+          "ticker": "GT",
+          "name_of_issuer": "GOODYEAR TIRE & RUBR CO",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 21900000,
+          "shares_curr": 2500000,
+          "weight_curr": 0.32,
+          "value_prev": 38447000,
+          "shares_prev": 5140000,
+          "weight_prev": 0.52,
+          "status": "TRIM",
+          "shares_change_pct": -51.36,
+          "ticker_source": "manual",
+          "price_at_filing": 8.86
+        },
+        {
+          "cusip": "337738108",
+          "ticker": "FI",
+          "name_of_issuer": "FISERV INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 119260000,
+          "shares_prev": 925000,
+          "weight_prev": 1.62,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "manual"
+        },
+        {
+          "cusip": "89832Q109",
+          "ticker": "TFC",
+          "name_of_issuer": "TRUIST FINL CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 63437000,
+          "shares_prev": 1387500,
+          "weight_prev": 0.86,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "manual"
+        },
+        {
+          "cusip": "12769G100",
+          "ticker": "CZR",
+          "name_of_issuer": "CAESARS ENTERTAINMENT INC NEW",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 56753000,
+          "shares_prev": 2100000,
+          "weight_prev": 0.77,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "493267108",
+          "ticker": "KEY",
+          "name_of_issuer": "KEYCORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 37754000,
+          "shares_prev": 2020000,
+          "weight_prev": 0.51,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "174610105",
+          "ticker": "CIA",
+          "name_of_issuer": "CITIZENS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 31896000,
+          "shares_prev": 600000,
+          "weight_prev": 0.43,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "200340107",
+          "ticker": "CMA",
+          "name_of_issuer": "COMERICA INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 31691000,
+          "shares_prev": 462500,
+          "weight_prev": 0.43,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "852234103",
+          "ticker": "XYZ",
+          "name_of_issuer": "BLOCK INC",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 26740000,
+          "shares_prev": 370000,
+          "weight_prev": 0.36,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "957638109",
+          "ticker": "WAL",
+          "name_of_issuer": "WESTERN ALLIANCE BANCORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 16910000,
+          "shares_prev": 195000,
+          "weight_prev": 0.23,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "989701107",
+          "ticker": "ZION",
+          "name_of_issuer": "ZIONS BANCORPORATION N A.",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 16125000,
+          "shares_prev": 285000,
+          "weight_prev": 0.22,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        }
+      ]
+    },
+    "thomas-gayner": {
+      "guru_name_en": "Thomas Gayner",
+      "guru_name_kr": "토마스 게이너",
+      "cik": "0001096343",
+      "filing_name": "Markel Group",
+      "report_date_prev": "2025-09-30",
+      "report_date_curr": "2025-12-31",
+      "filing_date_curr": "2026-02-06",
+      "total_value_prev": 12320983000,
+      "total_value_curr": 12544361000,
+      "holdings_count": 128,
+      "updated_at": "2026-05-10T07:11:19.005Z",
+      "holdings": [
+        {
+          "cusip": "02079K107",
+          "ticker": "GOOG",
+          "name_of_issuer": "ALPHABET INC",
+          "title_of_class": "CAP STK CL C",
+          "exchange": "NAS",
+          "value_curr": 862906000,
+          "shares_curr": 2749860,
+          "weight_curr": 6.88,
+          "value_prev": 669728000,
+          "shares_prev": 2749860,
+          "weight_prev": 5.44,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 322.8725
+        },
+        {
+          "cusip": "084670108",
+          "ticker": "BRK/A",
+          "name_of_issuer": "BERKSHIRE HATHAWAY INC",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 840847000,
+          "shares_curr": 1114,
+          "weight_curr": 6.7,
+          "value_prev": 840179000,
+          "shares_prev": 1114,
+          "weight_prev": 6.82,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 762569.63
+        },
+        {
+          "cusip": "084670702",
+          "ticker": "BRK-B",
+          "name_of_issuer": "BERKSHIRE HATHAWAY INC DEL",
+          "title_of_class": "CL B NEW",
+          "exchange": "NYS",
+          "value_curr": 770045000,
+          "shares_curr": 1531971,
+          "weight_curr": 6.14,
+          "value_prev": 770183000,
+          "shares_prev": 1531971,
+          "weight_prev": 6.25,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 508.09
+        },
+        {
+          "cusip": "11271J107",
+          "ticker": "BN",
+          "name_of_issuer": "BROOKFIELD CORP",
+          "title_of_class": "CL A LTD VT SH",
+          "exchange": "NYS",
+          "value_curr": 599948000,
+          "shares_curr": 13073609,
+          "weight_curr": 4.78,
+          "value_prev": 597725000,
+          "shares_prev": 8715741,
+          "weight_prev": 4.85,
+          "status": "ADD",
+          "shares_change_pct": 50,
+          "ticker_source": "manual",
+          "price_at_filing": 45.1292
+        },
+        {
+          "cusip": "023135106",
+          "ticker": "AMZN",
+          "name_of_issuer": "AMAZON COM INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 468740000,
+          "shares_curr": 2030760,
+          "weight_curr": 3.74,
+          "value_prev": 445894000,
+          "shares_prev": 2030760,
+          "weight_prev": 3.62,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 210.32
+        },
+        {
+          "cusip": "244199105",
+          "ticker": "DE",
+          "name_of_issuer": "DEERE & CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 408724000,
+          "shares_curr": 877900,
+          "weight_curr": 3.26,
+          "value_prev": 401429000,
+          "shares_prev": 877900,
+          "weight_prev": 3.26,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 581.4097
+        },
+        {
+          "cusip": "92826C839",
+          "ticker": "V",
+          "name_of_issuer": "VISA INC",
+          "title_of_class": "COM CL A",
+          "exchange": "NYS",
+          "value_curr": 350460000,
+          "shares_curr": 999285,
+          "weight_curr": 2.79,
+          "value_prev": 341136000,
+          "shares_prev": 999285,
+          "weight_prev": 2.77,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 330.8976
+        },
+        {
+          "cusip": "037833100",
+          "ticker": "AAPL",
+          "name_of_issuer": "APPLE INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 333651000,
+          "shares_curr": 1227290,
+          "weight_curr": 2.66,
+          "value_prev": 312505000,
+          "shares_prev": 1227290,
+          "weight_prev": 2.54,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 277.86
+        },
+        {
+          "cusip": "437076102",
+          "ticker": "HD",
+          "name_of_issuer": "HOME DEPOT INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 316572000,
+          "shares_curr": 920000,
+          "weight_curr": 2.52,
+          "value_prev": 372775000,
+          "shares_prev": 920000,
+          "weight_prev": 3.03,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 382.5922
+        },
+        {
+          "cusip": "38141G104",
+          "ticker": "GS",
+          "name_of_issuer": "GOLDMAN SACHS GROUP INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 315877000,
+          "shares_curr": 359360,
+          "weight_curr": 2.52,
+          "value_prev": 286177000,
+          "shares_prev": 359360,
+          "weight_prev": 2.32,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 923.888
+        },
+        {
+          "cusip": "032654105",
+          "ticker": "ADI",
+          "name_of_issuer": "ANALOG DEVICES INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 277504000,
+          "shares_curr": 1023245,
+          "weight_curr": 2.21,
+          "value_prev": 286897000,
+          "shares_prev": 1167671,
+          "weight_prev": 2.33,
+          "status": "TRIM",
+          "shares_change_pct": -12.37,
+          "ticker_source": "auto",
+          "price_at_filing": 319.4499
+        },
+        {
+          "cusip": "594918104",
+          "ticker": "MSFT",
+          "name_of_issuer": "MICROSOFT CORP",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 259066000,
+          "shares_curr": 535680,
+          "weight_curr": 2.07,
+          "value_prev": 275590000,
+          "shares_prev": 532080,
+          "weight_prev": 2.24,
+          "status": "HOLD",
+          "shares_change_pct": 0.68,
+          "ticker_source": "manual",
+          "price_at_filing": 400.2266
+        },
+        {
+          "cusip": "09290D101",
+          "ticker": "BLK",
+          "name_of_issuer": "BLACKROCK INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 235689000,
+          "shares_curr": 220200,
+          "weight_curr": 1.88,
+          "value_prev": 256724000,
+          "shares_prev": 220200,
+          "weight_prev": 2.08,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 1050.5319
+        },
+        {
+          "cusip": "254687106",
+          "ticker": "DIS",
+          "name_of_issuer": "DISNEY WALT CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 231143000,
+          "shares_curr": 2031665,
+          "weight_curr": 1.84,
+          "value_prev": 232626000,
+          "shares_prev": 2031665,
+          "weight_prev": 1.89,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 108.7
+        },
+        {
+          "cusip": "50212V100",
+          "ticker": "LPLA",
+          "name_of_issuer": "LPL FINL HLDGS INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 199998000,
+          "shares_curr": 559951,
+          "weight_curr": 1.59,
+          "value_prev": 184085000,
+          "shares_prev": 553321,
+          "weight_prev": 1.49,
+          "status": "ADD",
+          "shares_change_pct": 1.2,
+          "ticker_source": "auto",
+          "price_at_filing": 384.7707
+        },
+        {
+          "cusip": "942622200",
+          "ticker": "WSO",
+          "name_of_issuer": "WATSCO INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 194645000,
+          "shares_curr": 577669,
+          "weight_curr": 1.55,
+          "value_prev": 228498000,
+          "shares_prev": 565169,
+          "weight_prev": 1.85,
+          "status": "ADD",
+          "shares_change_pct": 2.21,
+          "ticker_source": "auto",
+          "price_at_filing": 416.5888
+        },
+        {
+          "cusip": "09260D107",
+          "ticker": "BKNG",
+          "name_of_issuer": "BLACKSTONE INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 189438000,
+          "shares_curr": 1229000,
+          "weight_curr": 1.51,
+          "value_prev": 209974000,
+          "shares_prev": 1229000,
+          "weight_prev": 1.7,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 177.881
+        },
+        {
+          "cusip": "149123101",
+          "ticker": "CAT",
+          "name_of_issuer": "CATERPILLAR INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 188273000,
+          "shares_curr": 328650,
+          "weight_curr": 1.5,
+          "value_prev": 156815000,
+          "shares_prev": 328650,
+          "weight_prev": 1.27,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 724.8202
+        },
+        {
+          "cusip": "48251W104",
+          "ticker": "KKR",
+          "name_of_issuer": "KKR & CO INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 185076000,
+          "shares_curr": 1451800,
+          "weight_curr": 1.48,
+          "value_prev": 188661000,
+          "shares_prev": 1451800,
+          "weight_prev": 1.53,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 103.0123
+        },
+        {
+          "cusip": "025816109",
+          "ticker": "AXP",
+          "name_of_issuer": "AMERICAN EXPRESS CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 180721000,
+          "shares_curr": 488500,
+          "weight_curr": 1.44,
+          "value_prev": 160849000,
+          "shares_prev": 484250,
+          "weight_prev": 1.31,
+          "status": "HOLD",
+          "shares_change_pct": 0.88,
+          "ticker_source": "auto",
+          "price_at_filing": 358.0183
+        },
+        {
+          "cusip": "02079K305",
+          "ticker": "GOOGL",
+          "name_of_issuer": "ALPHABET INC",
+          "title_of_class": "CAP STK CL A",
+          "exchange": "NAS",
+          "value_curr": 179036000,
+          "shares_curr": 572000,
+          "weight_curr": 1.43,
+          "value_prev": 139053000,
+          "shares_prev": 572000,
+          "weight_prev": 1.13,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 322.633
+        },
+        {
+          "cusip": "548661107",
+          "ticker": "LOW",
+          "name_of_issuer": "LOWES COS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 177127000,
+          "shares_curr": 734480,
+          "weight_curr": 1.41,
+          "value_prev": 182635000,
+          "shares_prev": 726730,
+          "weight_prev": 1.48,
+          "status": "ADD",
+          "shares_change_pct": 1.07,
+          "ticker_source": "manual",
+          "price_at_filing": 277.0502
+        },
+        {
+          "cusip": "743315103",
+          "ticker": "PGR",
+          "name_of_issuer": "PROGRESSIVE CORP(OHIO)",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 171644000,
+          "shares_curr": 753750,
+          "weight_curr": 1.37,
+          "value_prev": 186139000,
+          "shares_prev": 753750,
+          "weight_prev": 1.51,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 202.1854
+        },
+        {
+          "cusip": "30303M102",
+          "ticker": "META",
+          "name_of_issuer": "META PLATFORMS INC",
+          "title_of_class": "CL A",
+          "exchange": "NAS",
+          "value_curr": 163903000,
+          "shares_curr": 248303,
+          "weight_curr": 1.31,
+          "value_prev": 205833000,
+          "shares_prev": 280281,
+          "weight_prev": 1.67,
+          "status": "TRIM",
+          "shares_change_pct": -11.41,
+          "ticker_source": "manual",
+          "price_at_filing": 660.8945
+        },
+        {
+          "cusip": "749607107",
+          "ticker": "RLI",
+          "name_of_issuer": "RLI CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 153203000,
+          "shares_curr": 2394544,
+          "weight_curr": 1.22,
+          "value_prev": 156172000,
+          "shares_prev": 2394544,
+          "weight_prev": 1.27,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 61.5616
+        },
+        {
+          "cusip": "03769M106",
+          "ticker": "APO",
+          "name_of_issuer": "APOLLO GLOBAL MGMT INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 146569000,
+          "shares_curr": 1012500,
+          "weight_curr": 1.17,
+          "value_prev": 134936000,
+          "shares_prev": 1012500,
+          "weight_prev": 1.1,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 132.4888
+        },
+        {
+          "cusip": "670100205",
+          "ticker": "NVO",
+          "name_of_issuer": "NOVO-NORDISK A S",
+          "title_of_class": "ADR",
+          "exchange": "NYS",
+          "value_curr": 146014000,
+          "shares_curr": 2869774,
+          "weight_curr": 1.16,
+          "value_prev": 131436000,
+          "shares_prev": 2368649,
+          "weight_prev": 1.07,
+          "status": "ADD",
+          "shares_change_pct": 21.16,
+          "ticker_source": "manual",
+          "price_at_filing": 45.9545
+        },
+        {
+          "cusip": "571748102",
+          "ticker": "MRSH",
+          "name_of_issuer": "MARSH & MCLENNAN COS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 141320000,
+          "shares_curr": 761750,
+          "weight_curr": 1.13,
+          "value_prev": 152155000,
+          "shares_prev": 755000,
+          "weight_prev": 1.23,
+          "status": "HOLD",
+          "shares_change_pct": 0.89,
+          "ticker_source": "manual",
+          "price_at_filing": 184.0828
+        },
+        {
+          "cusip": "351858105",
+          "ticker": "FNV",
+          "name_of_issuer": "FRANCO NEVADA CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 141676000,
+          "shares_curr": 683500,
+          "weight_curr": 1.13,
+          "value_prev": 134972000,
+          "shares_prev": 605500,
+          "weight_prev": 1.1,
+          "status": "ADD",
+          "shares_change_pct": 12.88,
+          "ticker_source": "auto",
+          "price_at_filing": 231.6957
+        },
+        {
+          "cusip": "808513105",
+          "ticker": "SCHW",
+          "name_of_issuer": "SCHWAB CHARLES CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 137456000,
+          "shares_curr": 1375800,
+          "weight_curr": 1.1,
+          "value_prev": 130298000,
+          "shares_prev": 1364800,
+          "weight_prev": 1.06,
+          "status": "HOLD",
+          "shares_change_pct": 0.81,
+          "ticker_source": "manual",
+          "price_at_filing": 104.3519
+        },
+        {
+          "cusip": "369550108",
+          "ticker": "GD",
+          "name_of_issuer": "GENERAL DYNAMICS CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 131634000,
+          "shares_curr": 391000,
+          "weight_curr": 1.05,
+          "value_prev": 133331000,
+          "shares_prev": 391000,
+          "weight_prev": 1.08,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 358.4054
+        },
+        {
+          "cusip": "478160104",
+          "ticker": "JNJ",
+          "name_of_issuer": "JOHNSON & JOHNSON",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 126405000,
+          "shares_curr": 610800,
+          "weight_curr": 1.01,
+          "value_prev": 113254000,
+          "shares_prev": 610800,
+          "weight_prev": 0.92,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 238.7209
+        },
+        {
+          "cusip": "882508104",
+          "ticker": "TXN",
+          "name_of_issuer": "TEXAS INSTRS INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 125607000,
+          "shares_curr": 724000,
+          "weight_curr": 1,
+          "value_prev": 133020000,
+          "shares_prev": 724000,
+          "weight_prev": 1.08,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 220.3206
+        },
+        {
+          "cusip": "25243Q205",
+          "ticker": "DEO",
+          "name_of_issuer": "DIAGEO PLC ADR EA REPR 4 ORD GBX28.935185",
+          "title_of_class": "SPON ADR NEW",
+          "exchange": "NYS",
+          "value_curr": 118337000,
+          "shares_curr": 1371708,
+          "weight_curr": 0.94,
+          "value_prev": 130425000,
+          "shares_prev": 1366708,
+          "weight_prev": 1.06,
+          "status": "HOLD",
+          "shares_change_pct": 0.37,
+          "ticker_source": "auto",
+          "price_at_filing": 95.9117
+        },
+        {
+          "cusip": "57636Q104",
+          "ticker": "MA",
+          "name_of_issuer": "MASTERCARD INCORPORATED",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 118480000,
+          "shares_curr": 207540,
+          "weight_curr": 0.94,
+          "value_prev": 118051000,
+          "shares_prev": 207540,
+          "weight_prev": 0.96,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 547.7984
+        },
+        {
+          "cusip": "113004105",
+          "ticker": "BN",
+          "name_of_issuer": "BROOKFIELD CORPORATION",
+          "title_of_class": "CL A LMT VTG SHS",
+          "exchange": "NYS",
+          "value_curr": 114941000,
+          "shares_curr": 2193953,
+          "weight_curr": 0.92,
+          "value_prev": 124923000,
+          "shares_prev": 2193953,
+          "weight_prev": 1.01,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 45.1292
+        },
+        {
+          "cusip": "256677105",
+          "ticker": "DG",
+          "name_of_issuer": "DOLLAR GENERAL CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 115411000,
+          "shares_curr": 869250,
+          "weight_curr": 0.92,
+          "value_prev": 89837000,
+          "shares_prev": 869250,
+          "weight_prev": 0.73,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 145.9578
+        },
+        {
+          "cusip": "615369105",
+          "ticker": "MCO",
+          "name_of_issuer": "MOODYS CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 109266000,
+          "shares_curr": 213890,
+          "weight_curr": 0.87,
+          "value_prev": 101914000,
+          "shares_prev": 213890,
+          "weight_prev": 0.83,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 451.514
+        },
+        {
+          "cusip": "422806208",
+          "ticker": "HEI",
+          "name_of_issuer": "HEICO CORP",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 95833000,
+          "shares_curr": 379644,
+          "weight_curr": 0.76,
+          "value_prev": 96463000,
+          "shares_prev": 379644,
+          "weight_prev": 0.78,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 326.67
+        },
+        {
+          "cusip": "775711104",
+          "ticker": "ROL",
+          "name_of_issuer": "ROLLINS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 89372000,
+          "shares_curr": 1489025,
+          "weight_curr": 0.71,
+          "value_prev": 86687000,
+          "shares_prev": 1475775,
+          "weight_prev": 0.7,
+          "status": "HOLD",
+          "shares_change_pct": 0.9,
+          "ticker_source": "auto",
+          "price_at_filing": 64.6444
+        },
+        {
+          "cusip": "62944T105",
+          "ticker": "NVR",
+          "name_of_issuer": "NVR INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 87564000,
+          "shares_curr": 12007,
+          "weight_curr": 0.7,
+          "value_prev": 95588000,
+          "shares_prev": 11897,
+          "weight_prev": 0.78,
+          "status": "HOLD",
+          "shares_change_pct": 0.92,
+          "ticker_source": "auto",
+          "price_at_filing": 8009.84
+        },
+        {
+          "cusip": "039483102",
+          "ticker": "ADM",
+          "name_of_issuer": "ARCHER DANIELS MIDLAND CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 86568000,
+          "shares_curr": 1505800,
+          "weight_curr": 0.69,
+          "value_prev": 89956000,
+          "shares_prev": 1505800,
+          "weight_prev": 0.73,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 65.8338
+        },
+        {
+          "cusip": "G54950103",
+          "ticker": "LIN",
+          "name_of_issuer": "LINDE PLC",
+          "title_of_class": "SHS",
+          "exchange": "NAS",
+          "value_curr": 85320000,
+          "shares_curr": 200100,
+          "weight_curr": 0.68,
+          "value_prev": 91604000,
+          "shares_prev": 192850,
+          "weight_prev": 0.74,
+          "status": "ADD",
+          "shares_change_pct": 3.76,
+          "ticker_source": "auto",
+          "price_at_filing": 446.7393
+        },
+        {
+          "cusip": "55354G100",
+          "ticker": "MSCI",
+          "name_of_issuer": "MSCI INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 81958000,
+          "shares_curr": 142850,
+          "weight_curr": 0.65,
+          "value_prev": 81054000,
+          "shares_prev": 142850,
+          "weight_prev": 0.66,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 555.5902
+        },
+        {
+          "cusip": "46625H100",
+          "ticker": "JPM",
+          "name_of_issuer": "JPMORGAN CHASE & CO.",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 81377000,
+          "shares_curr": 252550,
+          "weight_curr": 0.65,
+          "value_prev": 79662000,
+          "shares_prev": 252550,
+          "weight_prev": 0.65,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 320.7583
+        },
+        {
+          "cusip": "452308109",
+          "ticker": "ITW",
+          "name_of_issuer": "ILLINOIS TOOL WKS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 80663000,
+          "shares_curr": 327500,
+          "weight_curr": 0.64,
+          "value_prev": 85399000,
+          "shares_prev": 327500,
+          "weight_prev": 0.69,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 291.7252
+        },
+        {
+          "cusip": "14316J108",
+          "ticker": "CG",
+          "name_of_issuer": "CARLYLE GROUP INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 78439000,
+          "shares_curr": 1327000,
+          "weight_curr": 0.63,
+          "value_prev": 83203000,
+          "shares_prev": 1327000,
+          "weight_prev": 0.68,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 58.3326
+        },
+        {
+          "cusip": "655844108",
+          "ticker": "NSC",
+          "name_of_issuer": "NORFOLK SOUTHN CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 78965000,
+          "shares_curr": 273500,
+          "weight_curr": 0.63,
+          "value_prev": 77055000,
+          "shares_prev": 256500,
+          "weight_prev": 0.63,
+          "status": "ADD",
+          "shares_change_pct": 6.63,
+          "ticker_source": "manual",
+          "price_at_filing": 305.1597
+        },
+        {
+          "cusip": "78409V104",
+          "ticker": "SPY",
+          "name_of_issuer": "SPDR S&P 500 ETF",
+          "title_of_class": "COM",
+          "exchange": "AMS",
+          "value_curr": 78749000,
+          "shares_curr": 150690,
+          "weight_curr": 0.63,
+          "value_prev": 73343000,
+          "shares_prev": 150690,
+          "weight_prev": 0.6,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 688.7388
+        },
+        {
+          "cusip": "278865100",
+          "ticker": "ECL",
+          "name_of_issuer": "ECOLAB INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 72009000,
+          "shares_curr": 274300,
+          "weight_curr": 0.57,
+          "value_prev": 75120000,
+          "shares_prev": 274300,
+          "weight_prev": 0.61,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 289.5539
+        },
+        {
+          "cusip": "679580100",
+          "ticker": "ODFL",
+          "name_of_issuer": "OLD DOMINION FREIGHT LINE INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 66115000,
+          "shares_curr": 421650,
+          "weight_curr": 0.53,
+          "value_prev": 50505000,
+          "shares_prev": 358750,
+          "weight_prev": 0.41,
+          "status": "ADD",
+          "shares_change_pct": 17.53,
+          "ticker_source": "auto",
+          "price_at_filing": 202.1876
+        },
+        {
+          "cusip": "773903109",
+          "ticker": "ROK",
+          "name_of_issuer": "ROCKWELL AUTOMATION INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 60267000,
+          "shares_curr": 154900,
+          "weight_curr": 0.48,
+          "value_prev": 54142000,
+          "shares_prev": 154900,
+          "weight_prev": 0.44,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 413.584
+        },
+        {
+          "cusip": "461804106",
+          "ticker": "ITIC",
+          "name_of_issuer": "INVESTORS TITLE CO",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 53248000,
+          "shares_curr": 213300,
+          "weight_curr": 0.42,
+          "value_prev": 57128000,
+          "shares_prev": 213300,
+          "weight_prev": 0.46,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 278.6587
+        },
+        {
+          "cusip": "855244109",
+          "ticker": "SBUX",
+          "name_of_issuer": "STARBUCKS CORP",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 52532000,
+          "shares_curr": 623818,
+          "weight_curr": 0.42,
+          "value_prev": 52775000,
+          "shares_prev": 623818,
+          "weight_prev": 0.43,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 98.8127
+        },
+        {
+          "cusip": "410867105",
+          "ticker": "THG",
+          "name_of_issuer": "HANOVER INSURANCE GROUP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 51359000,
+          "shares_curr": 281000,
+          "weight_curr": 0.41,
+          "value_prev": 51038000,
+          "shares_prev": 281000,
+          "weight_prev": 0.41,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 175.0108
+        },
+        {
+          "cusip": "902494103",
+          "ticker": "TSN",
+          "name_of_issuer": "TYSON FOODS INC",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 51849000,
+          "shares_curr": 884500,
+          "weight_curr": 0.41,
+          "value_prev": 46074000,
+          "shares_prev": 848500,
+          "weight_prev": 0.37,
+          "status": "ADD",
+          "shares_change_pct": 4.24,
+          "ticker_source": "auto",
+          "price_at_filing": 64.7367
+        },
+        {
+          "cusip": "G0403H108",
+          "ticker": "AON",
+          "name_of_issuer": "AON PLC",
+          "title_of_class": "SHS CL A",
+          "exchange": "NYS",
+          "value_curr": 47303000,
+          "shares_curr": 134050,
+          "weight_curr": 0.38,
+          "value_prev": 46284000,
+          "shares_prev": 129800,
+          "weight_prev": 0.38,
+          "status": "ADD",
+          "shares_change_pct": 3.27,
+          "ticker_source": "manual",
+          "price_at_filing": 341.1401
+        },
+        {
+          "cusip": "G1151C101",
+          "ticker": "ACN",
+          "name_of_issuer": "ACCENTURE PLC",
+          "title_of_class": "SHS CLASS A",
+          "exchange": "NYS",
+          "value_curr": 42767000,
+          "shares_curr": 159400,
+          "weight_curr": 0.34,
+          "value_prev": 39308000,
+          "shares_prev": 159400,
+          "weight_prev": 0.32,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 238.5966
+        },
+        {
+          "cusip": "405166109",
+          "ticker": "HGTY",
+          "name_of_issuer": "HAGERTY INC",
+          "title_of_class": "CL A COM",
+          "exchange": "NYS",
+          "value_curr": 41772000,
+          "shares_curr": 3108000,
+          "weight_curr": 0.33,
+          "value_prev": 37451000,
+          "shares_prev": 3108000,
+          "weight_prev": 0.3,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 12.6
+        },
+        {
+          "cusip": "75513E101",
+          "ticker": "RTX",
+          "name_of_issuer": "RTX CORPORATION",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 41082000,
+          "shares_curr": 224000,
+          "weight_curr": 0.33,
+          "value_prev": 37482000,
+          "shares_prev": 224000,
+          "weight_prev": 0.3,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 198.0024
+        },
+        {
+          "cusip": "40412C101",
+          "ticker": "HCA",
+          "name_of_issuer": "HCA HEALTHCARE INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 37666000,
+          "shares_curr": 80680,
+          "weight_curr": 0.3,
+          "value_prev": 32056000,
+          "shares_prev": 75213,
+          "weight_prev": 0.26,
+          "status": "ADD",
+          "shares_change_pct": 7.27,
+          "ticker_source": "auto",
+          "price_at_filing": 500.945
+        },
+        {
+          "cusip": "31488V107",
+          "ticker": "FERG",
+          "name_of_issuer": "FERGUSON ENTERPRISES INC.",
+          "title_of_class": "COMMON STOCK NEW",
+          "exchange": "NYS",
+          "value_curr": 36400000,
+          "shares_curr": 163500,
+          "weight_curr": 0.29,
+          "value_prev": 33013000,
+          "shares_prev": 147000,
+          "weight_prev": 0.27,
+          "status": "ADD",
+          "shares_change_pct": 11.22,
+          "ticker_source": "auto",
+          "price_at_filing": 261.7849
+        },
+        {
+          "cusip": "883556102",
+          "ticker": "TMO",
+          "name_of_issuer": "THERMO FISHER SCIENTIFIC INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 36389000,
+          "shares_curr": 62800,
+          "weight_curr": 0.29,
+          "value_prev": 27064000,
+          "shares_prev": 55800,
+          "weight_prev": 0.22,
+          "status": "ADD",
+          "shares_change_pct": 12.54,
+          "ticker_source": "auto",
+          "price_at_filing": 542.2937
+        },
+        {
+          "cusip": "92345Y106",
+          "ticker": "VRSK",
+          "name_of_issuer": "VERISK ANALYTICS INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 34884000,
+          "shares_curr": 155950,
+          "weight_curr": 0.28,
+          "value_prev": 39223000,
+          "shares_prev": 155950,
+          "weight_prev": 0.32,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 178.6478
+        },
+        {
+          "cusip": "303075105",
+          "ticker": "FDS",
+          "name_of_issuer": "FACTSET RESH SYS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 35366000,
+          "shares_curr": 121873,
+          "weight_curr": 0.28,
+          "value_prev": 33439000,
+          "shares_prev": 116720,
+          "weight_prev": 0.27,
+          "status": "ADD",
+          "shares_change_pct": 4.41,
+          "ticker_source": "manual",
+          "price_at_filing": 206.2556
+        },
+        {
+          "cusip": "22160K105",
+          "ticker": "COST",
+          "name_of_issuer": "COSTCO WHSL CORP NEW",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 33761000,
+          "shares_curr": 39150,
+          "weight_curr": 0.27,
+          "value_prev": 36238000,
+          "shares_prev": 39150,
+          "weight_prev": 0.29,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 999.7093
+        },
+        {
+          "cusip": "988498101",
+          "ticker": "YUM",
+          "name_of_issuer": "YUM BRANDS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 34258000,
+          "shares_curr": 226451,
+          "weight_curr": 0.27,
+          "value_prev": 34421000,
+          "shares_prev": 226451,
+          "weight_prev": 0.28,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 162.1825
+        },
+        {
+          "cusip": "020002101",
+          "ticker": "ALL",
+          "name_of_issuer": "ALLSTATE CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 32170000,
+          "shares_curr": 154550,
+          "weight_curr": 0.26,
+          "value_prev": 33174000,
+          "shares_prev": 154550,
+          "weight_prev": 0.27,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 206.5052
+        },
+        {
+          "cusip": "74144T108",
+          "ticker": "TROW",
+          "name_of_issuer": "PRICE T ROWE GROUPS",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 32147000,
+          "shares_curr": 314000,
+          "weight_curr": 0.26,
+          "value_prev": 32228000,
+          "shares_prev": 314000,
+          "weight_prev": 0.26,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 93.1921
+        },
+        {
+          "cusip": "907818108",
+          "ticker": "UNP",
+          "name_of_issuer": "UNION PACIFIC CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 32681000,
+          "shares_curr": 141278,
+          "weight_curr": 0.26,
+          "value_prev": 29967000,
+          "shares_prev": 126778,
+          "weight_prev": 0.24,
+          "status": "ADD",
+          "shares_change_pct": 11.44,
+          "ticker_source": "auto",
+          "price_at_filing": 251.3066
+        },
+        {
+          "cusip": "009066101",
+          "ticker": "ABNB",
+          "name_of_issuer": "AIRBNB INC",
+          "title_of_class": "COM CL A",
+          "exchange": "NAS",
+          "value_curr": 32612000,
+          "shares_curr": 240289,
+          "weight_curr": 0.26,
+          "value_prev": 27578000,
+          "shares_prev": 227133,
+          "weight_prev": 0.22,
+          "status": "ADD",
+          "shares_change_pct": 5.79,
+          "ticker_source": "auto",
+          "price_at_filing": 122.18
+        },
+        {
+          "cusip": "539830109",
+          "ticker": "LMT",
+          "name_of_issuer": "LOCKHEED MARTIN CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 31203000,
+          "shares_curr": 64513,
+          "weight_curr": 0.25,
+          "value_prev": 31082000,
+          "shares_prev": 62263,
+          "weight_prev": 0.25,
+          "status": "ADD",
+          "shares_change_pct": 3.61,
+          "ticker_source": "manual",
+          "price_at_filing": 620.3106
+        },
+        {
+          "cusip": "824348106",
+          "ticker": "SHW",
+          "name_of_issuer": "SHERWIN WILLIAMS CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 30515000,
+          "shares_curr": 94172,
+          "weight_curr": 0.24,
+          "value_prev": 32608000,
+          "shares_prev": 94172,
+          "weight_prev": 0.26,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 361.1815
+        },
+        {
+          "cusip": "20030N101",
+          "ticker": "CMCSA",
+          "name_of_issuer": "COMCAST CORP",
+          "title_of_class": "CL A",
+          "exchange": "NAS",
+          "value_curr": 28750000,
+          "shares_curr": 961880,
+          "weight_curr": 0.23,
+          "value_prev": 30222000,
+          "shares_prev": 961880,
+          "weight_prev": 0.25,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 31.0094
+        },
+        {
+          "cusip": "654106103",
+          "ticker": "NKE",
+          "name_of_issuer": "NIKE INC",
+          "title_of_class": "CL B",
+          "exchange": "NYS",
+          "value_curr": 28504000,
+          "shares_curr": 447400,
+          "weight_curr": 0.23,
+          "value_prev": 31198000,
+          "shares_prev": 447400,
+          "weight_prev": 0.25,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 63.4985
+        },
+        {
+          "cusip": "17275R102",
+          "ticker": "CSCO",
+          "name_of_issuer": "CISCO SYSTEMS INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 27384000,
+          "shares_curr": 355500,
+          "weight_curr": 0.22,
+          "value_prev": 24323000,
+          "shares_prev": 355500,
+          "weight_prev": 0.2,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 84.3629
+        },
+        {
+          "cusip": "571903202",
+          "ticker": "MAR",
+          "name_of_issuer": "MARRIOTT INTL INC NEW",
+          "title_of_class": "CL A",
+          "exchange": "NAS",
+          "value_curr": 27844000,
+          "shares_curr": 89750,
+          "weight_curr": 0.22,
+          "value_prev": 19077000,
+          "shares_prev": 73250,
+          "weight_prev": 0.15,
+          "status": "ADD",
+          "shares_change_pct": 22.53,
+          "ticker_source": "manual",
+          "price_at_filing": 332.5975
+        },
+        {
+          "cusip": "911363109",
+          "ticker": "URI",
+          "name_of_issuer": "UNITED RENTALS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 25210000,
+          "shares_curr": 31150,
+          "weight_curr": 0.2,
+          "value_prev": 29738000,
+          "shares_prev": 31150,
+          "weight_prev": 0.24,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 897.5287
+        },
+        {
+          "cusip": "512816109",
+          "ticker": "LAMR",
+          "name_of_issuer": "LAMAR ADVERTISING CO",
+          "title_of_class": "CL A",
+          "exchange": "NAS",
+          "value_curr": 23417000,
+          "shares_curr": 185000,
+          "weight_curr": 0.19,
+          "value_prev": 20811000,
+          "shares_prev": 170000,
+          "weight_prev": 0.17,
+          "status": "ADD",
+          "shares_change_pct": 8.82,
+          "ticker_source": "auto",
+          "price_at_filing": 133.23
+        },
+        {
+          "cusip": "115637100",
+          "ticker": "BF-A",
+          "name_of_issuer": "BROWN FORMAN CORP",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 22180000,
+          "shares_curr": 843000,
+          "weight_curr": 0.18,
+          "value_prev": 22685000,
+          "shares_prev": 843000,
+          "weight_prev": 0.18,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 29.5623
+        },
+        {
+          "cusip": "14040H105",
+          "ticker": "COF",
+          "name_of_issuer": "CAPITAL ONE FINL CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 22055000,
+          "shares_curr": 91000,
+          "weight_curr": 0.18,
+          "value_prev": 19344000,
+          "shares_prev": 91000,
+          "weight_prev": 0.16,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 221.9407
+        },
+        {
+          "cusip": "228368106",
+          "ticker": "CCK",
+          "name_of_issuer": "CROWN HOLDINGS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 21830000,
+          "shares_curr": 212000,
+          "weight_curr": 0.17,
+          "value_prev": 18304000,
+          "shares_prev": 189500,
+          "weight_prev": 0.15,
+          "status": "ADD",
+          "shares_change_pct": 11.87,
+          "ticker_source": "auto",
+          "price_at_filing": 112.5077
+        },
+        {
+          "cusip": "G7496G103",
+          "ticker": "RNR",
+          "name_of_issuer": "RENAISSANCERE HOLDINGS LTD",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 19681000,
+          "shares_curr": 70000,
+          "weight_curr": 0.16,
+          "value_prev": 17775000,
+          "shares_prev": 70000,
+          "weight_prev": 0.14,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 300.1371
+        },
+        {
+          "cusip": "718172109",
+          "ticker": "PM",
+          "name_of_issuer": "PHILIP MORRIS INTL INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 18366000,
+          "shares_curr": 114500,
+          "weight_curr": 0.15,
+          "value_prev": 18572000,
+          "shares_prev": 114500,
+          "weight_prev": 0.15,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 181.1925
+        },
+        {
+          "cusip": "949746101",
+          "ticker": "WFC",
+          "name_of_issuer": "WELLS FARGO CO NEW",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 19054000,
+          "shares_curr": 204450,
+          "weight_curr": 0.15,
+          "value_prev": 17137000,
+          "shares_prev": 204450,
+          "weight_prev": 0.14,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 93.4358
+        },
+        {
+          "cusip": "009158106",
+          "ticker": "APD",
+          "name_of_issuer": "AIR PRODS & CHEMS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 17662000,
+          "shares_curr": 71500,
+          "weight_curr": 0.14,
+          "value_prev": 17727000,
+          "shares_prev": 65000,
+          "weight_prev": 0.14,
+          "status": "ADD",
+          "shares_change_pct": 10,
+          "ticker_source": "manual",
+          "price_at_filing": 281.3559
+        },
+        {
+          "cusip": "294429105",
+          "ticker": "EFX",
+          "name_of_issuer": "EQUIFAX INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 15807000,
+          "shares_curr": 72850,
+          "weight_curr": 0.13,
+          "value_prev": 18688000,
+          "shares_prev": 72850,
+          "weight_prev": 0.15,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 195.0928
+        },
+        {
+          "cusip": "704326107",
+          "ticker": "PAYX",
+          "name_of_issuer": "PAYCHEX INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 16827000,
+          "shares_curr": 150000,
+          "weight_curr": 0.13,
+          "value_prev": 19014000,
+          "shares_prev": 150000,
+          "weight_prev": 0.15,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 98.53
+        },
+        {
+          "cusip": "82509L107",
+          "ticker": "SHOP",
+          "name_of_issuer": "SHOPIFY INC",
+          "title_of_class": "CL A SUB VTG SHS",
+          "exchange": "NAS",
+          "value_curr": 16540000,
+          "shares_curr": 102750,
+          "weight_curr": 0.13,
+          "value_prev": 15270000,
+          "shares_prev": 102750,
+          "weight_prev": 0.12,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 112.05
+        },
+        {
+          "cusip": "126408103",
+          "ticker": "CSX",
+          "name_of_issuer": "CSX CORP",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 15950000,
+          "shares_curr": 440000,
+          "weight_curr": 0.13,
+          "value_prev": 10120000,
+          "shares_prev": 285000,
+          "weight_prev": 0.08,
+          "status": "ADD",
+          "shares_change_pct": 54.39,
+          "ticker_source": "auto",
+          "price_at_filing": 40.4767
+        },
+        {
+          "cusip": "L8681T102",
+          "ticker": "SPOT",
+          "name_of_issuer": "SPOTIFY TECHNOLOGY S A",
+          "title_of_class": "SHS",
+          "exchange": "NYS",
+          "value_curr": 15040000,
+          "shares_curr": 25900,
+          "weight_curr": 0.12,
+          "value_prev": 18078000,
+          "shares_prev": 25900,
+          "weight_prev": 0.15,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 422.61
+        },
+        {
+          "cusip": "784117103",
+          "ticker": "SEIC",
+          "name_of_issuer": "SEI INVTS CO",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 14206000,
+          "shares_curr": 173200,
+          "weight_curr": 0.11,
+          "value_prev": 14696000,
+          "shares_prev": 173200,
+          "weight_prev": 0.12,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 84.45
+        },
+        {
+          "cusip": "064058100",
+          "ticker": "BK",
+          "name_of_issuer": "BANK NEW YORK MELLON CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 14105000,
+          "shares_curr": 121500,
+          "weight_curr": 0.11,
+          "value_prev": 13239000,
+          "shares_prev": 121500,
+          "weight_prev": 0.11,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 123.8284
+        },
+        {
+          "cusip": "713448108",
+          "ticker": "PEP",
+          "name_of_issuer": "PEPSICO INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 13808000,
+          "shares_curr": 96210,
+          "weight_curr": 0.11,
+          "value_prev": 13512000,
+          "shares_prev": 96210,
+          "weight_prev": 0.11,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 168.9808
+        },
+        {
+          "cusip": "428291108",
+          "ticker": "HXL",
+          "name_of_issuer": "HEXCEL CORPORATION",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 13967000,
+          "shares_curr": 189000,
+          "weight_curr": 0.11,
+          "value_prev": 11851000,
+          "shares_prev": 189000,
+          "weight_prev": 0.1,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 85.6525
+        },
+        {
+          "cusip": "14448C104",
+          "ticker": "CARR",
+          "name_of_issuer": "CARRIER GLOBAL CORPORATION",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 12417000,
+          "shares_curr": 235000,
+          "weight_curr": 0.1,
+          "value_prev": 14030000,
+          "shares_prev": 235000,
+          "weight_prev": 0.11,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 63.6931
+        },
+        {
+          "cusip": "115637209",
+          "ticker": "BF-B",
+          "name_of_issuer": "BROWN FORMAN CORP",
+          "title_of_class": "CL B",
+          "exchange": "NYS",
+          "value_curr": 12357000,
+          "shares_curr": 474187,
+          "weight_curr": 0.1,
+          "value_prev": 12841000,
+          "shares_prev": 474187,
+          "weight_prev": 0.1,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 29.1807
+        },
+        {
+          "cusip": "87612E106",
+          "ticker": "TGT",
+          "name_of_issuer": "TARGET CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 13001000,
+          "shares_curr": 133000,
+          "weight_curr": 0.1,
+          "value_prev": 11930000,
+          "shares_prev": 133000,
+          "weight_prev": 0.1,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 114.3866
+        },
+        {
+          "cusip": "199908104",
+          "ticker": "FIX",
+          "name_of_issuer": "COMFORT SYS USA INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 12133000,
+          "shares_curr": 13000,
+          "weight_curr": 0.1,
+          "value_prev": 10727000,
+          "shares_prev": 13000,
+          "weight_prev": 0.09,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 1229.6215
+        },
+        {
+          "cusip": "427866108",
+          "ticker": "HSY",
+          "name_of_issuer": "HERSHEY COMPANY",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 12284000,
+          "shares_curr": 67500,
+          "weight_curr": 0.1,
+          "value_prev": 10194000,
+          "shares_prev": 54500,
+          "weight_prev": 0.08,
+          "status": "ADD",
+          "shares_change_pct": 23.85,
+          "ticker_source": "auto",
+          "price_at_filing": 230.0197
+        },
+        {
+          "cusip": "12572Q105",
+          "ticker": "CME",
+          "name_of_issuer": "CME GROUP INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 12493000,
+          "shares_curr": 45750,
+          "weight_curr": 0.1,
+          "value_prev": 8646000,
+          "shares_prev": 32000,
+          "weight_prev": 0.07,
+          "status": "ADD",
+          "shares_change_pct": 42.97,
+          "ticker_source": "auto",
+          "price_at_filing": 296.444
+        },
+        {
+          "cusip": "169905106",
+          "ticker": "CHH",
+          "name_of_issuer": "CHOICE HOTELS INTL INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 11003000,
+          "shares_curr": 115500,
+          "weight_curr": 0.09,
+          "value_prev": 12348000,
+          "shares_prev": 115500,
+          "weight_prev": 0.1,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 108.9764
+        },
+        {
+          "cusip": "90353T100",
+          "ticker": "UBER",
+          "name_of_issuer": "UBER TECHNOLOGIES INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 11439000,
+          "shares_curr": 140000,
+          "weight_curr": 0.09,
+          "value_prev": 12099000,
+          "shares_prev": 123500,
+          "weight_prev": 0.1,
+          "status": "ADD",
+          "shares_change_pct": 13.36,
+          "ticker_source": "auto",
+          "price_at_filing": 74.77
+        },
+        {
+          "cusip": "68902V107",
+          "ticker": "OTIS",
+          "name_of_issuer": "OTIS WORLDWIDE CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 10012000,
+          "shares_curr": 114620,
+          "weight_curr": 0.08,
+          "value_prev": 10480000,
+          "shares_prev": 114620,
+          "weight_prev": 0.09,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 89.4387
+        },
+        {
+          "cusip": "810186106",
+          "ticker": "SMG",
+          "name_of_issuer": "SCOTTS MIRACLE-GRO COMPANY",
+          "title_of_class": "CL A",
+          "exchange": "NYS",
+          "value_curr": 9803000,
+          "shares_curr": 168000,
+          "weight_curr": 0.08,
+          "value_prev": 9568000,
+          "shares_prev": 168000,
+          "weight_prev": 0.08,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 65.7128
+        },
+        {
+          "cusip": "46266C105",
+          "ticker": "IQV",
+          "name_of_issuer": "IQVIA HOLDINGS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 10572000,
+          "shares_curr": 46900,
+          "weight_curr": 0.08,
+          "value_prev": 8908000,
+          "shares_prev": 46900,
+          "weight_prev": 0.07,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 187.49
+        },
+        {
+          "cusip": "12503M108",
+          "ticker": "CBOE",
+          "name_of_issuer": "CBOE GLOBAL MKTS INC",
+          "title_of_class": "COM",
+          "exchange": "AMS",
+          "value_curr": 10479000,
+          "shares_curr": 41750,
+          "weight_curr": 0.08,
+          "value_prev": 6990000,
+          "shares_prev": 28500,
+          "weight_prev": 0.06,
+          "status": "ADD",
+          "shares_change_pct": 46.49,
+          "ticker_source": "manual",
+          "price_at_filing": 272.6867
+        },
+        {
+          "cusip": "835699307",
+          "ticker": "SONY",
+          "name_of_issuer": "SONY GROUP CORPORATION SPON ADS EACH REPR 1 ORD SHS",
+          "title_of_class": "SPONSORED ADR",
+          "exchange": "NYS",
+          "value_curr": 8576000,
+          "shares_curr": 335000,
+          "weight_curr": 0.07,
+          "value_prev": 9645000,
+          "shares_prev": 335000,
+          "weight_prev": 0.08,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 22.26
+        },
+        {
+          "cusip": "91324P102",
+          "ticker": "UNH",
+          "name_of_issuer": "UNITEDHEALTH GROUP INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 8748000,
+          "shares_curr": 26500,
+          "weight_curr": 0.07,
+          "value_prev": 9150000,
+          "shares_prev": 26500,
+          "weight_prev": 0.07,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 274.5159
+        },
+        {
+          "cusip": "446413106",
+          "ticker": "HII",
+          "name_of_issuer": "HUNTINGTON INGALLS INDS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 8672000,
+          "shares_curr": 25500,
+          "weight_curr": 0.07,
+          "value_prev": 5902000,
+          "shares_prev": 20500,
+          "weight_prev": 0.05,
+          "status": "ADD",
+          "shares_change_pct": 24.39,
+          "ticker_source": "manual",
+          "price_at_filing": 396.5309
+        },
+        {
+          "cusip": "038222105",
+          "ticker": "AMAT",
+          "name_of_issuer": "APPLIED MATLS INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 8763000,
+          "shares_curr": 34100,
+          "weight_curr": 0.07,
+          "value_prev": 5374000,
+          "shares_prev": 26250,
+          "weight_prev": 0.04,
+          "status": "ADD",
+          "shares_change_pct": 29.9,
+          "ticker_source": "manual",
+          "price_at_filing": 322.1082
+        },
+        {
+          "cusip": "384637104",
+          "ticker": "GHC",
+          "name_of_issuer": "GRAHAM HOLDINGS CO",
+          "title_of_class": "COM CL B",
+          "exchange": "NYS",
+          "value_curr": 5713000,
+          "shares_curr": 5200,
+          "weight_curr": 0.05,
+          "value_prev": 6122000,
+          "shares_prev": 5200,
+          "weight_prev": 0.05,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 1156.2946
+        },
+        {
+          "cusip": "45778Q107",
+          "ticker": "NSP",
+          "name_of_issuer": "INSPERITY INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 5919000,
+          "shares_curr": 152873,
+          "weight_curr": 0.05,
+          "value_prev": 6481000,
+          "shares_prev": 131728,
+          "weight_prev": 0.05,
+          "status": "ADD",
+          "shares_change_pct": 16.05,
+          "ticker_source": "auto",
+          "price_at_filing": 37.8532
+        },
+        {
+          "cusip": "143130102",
+          "ticker": "KMX",
+          "name_of_issuer": "CARMAX INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 5274000,
+          "shares_curr": 136500,
+          "weight_curr": 0.04,
+          "value_prev": 6125000,
+          "shares_prev": 136500,
+          "weight_prev": 0.05,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 47.17
+        },
+        {
+          "cusip": "277432100",
+          "ticker": "EMN",
+          "name_of_issuer": "EASTMAN CHEMICAL CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 4784000,
+          "shares_curr": 74950,
+          "weight_curr": 0.04,
+          "value_prev": 4725000,
+          "shares_prev": 74950,
+          "weight_prev": 0.04,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 76.5086
+        },
+        {
+          "cusip": "136375102",
+          "ticker": "CNI",
+          "name_of_issuer": "CANADIAN NATL RY CO",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 4399000,
+          "shares_curr": 44500,
+          "weight_curr": 0.04,
+          "value_prev": 2358000,
+          "shares_prev": 25000,
+          "weight_prev": 0.02,
+          "status": "ADD",
+          "shares_change_pct": 78,
+          "ticker_source": "manual",
+          "price_at_filing": 100.8007
+        },
+        {
+          "cusip": "30231G102",
+          "ticker": "XOM",
+          "name_of_issuer": "EXXON MOBIL CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 4573000,
+          "shares_curr": 38000,
+          "weight_curr": 0.04,
+          "value_prev": 338000,
+          "shares_prev": 3000,
+          "weight_prev": 0,
+          "status": "ADD",
+          "shares_change_pct": 1166.67,
+          "ticker_source": "manual",
+          "price_at_filing": 148.0631
+        },
+        {
+          "cusip": "084423102",
+          "ticker": "WRB",
+          "name_of_issuer": "BERKLEY W R CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 4260000,
+          "shares_curr": 60750,
+          "weight_curr": 0.03,
+          "value_prev": 4655000,
+          "shares_prev": 60750,
+          "weight_prev": 0.04,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 70.3209
+        },
+        {
+          "cusip": "00508Y102",
+          "ticker": "AYI",
+          "name_of_issuer": "ACUITY INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 3510000,
+          "shares_curr": 9750,
+          "weight_curr": 0.03,
+          "value_prev": 3358000,
+          "shares_prev": 9750,
+          "weight_prev": 0.03,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 328.1582
+        },
+        {
+          "cusip": "117043109",
+          "ticker": "BC",
+          "name_of_issuer": "BRUNSWICK CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 3545000,
+          "shares_curr": 47750,
+          "weight_curr": 0.03,
+          "value_prev": 2119000,
+          "shares_prev": 33500,
+          "weight_prev": 0.02,
+          "status": "ADD",
+          "shares_change_pct": 42.54,
+          "ticker_source": "auto",
+          "price_at_filing": 87.4461
+        },
+        {
+          "cusip": "13646K108",
+          "ticker": "CP",
+          "name_of_issuer": "CANADIAN PACIFIC KANSAS CITY",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 3718000,
+          "shares_curr": 50500,
+          "weight_curr": 0.03,
+          "value_prev": 2309000,
+          "shares_prev": 31000,
+          "weight_prev": 0.02,
+          "status": "ADD",
+          "shares_change_pct": 62.9,
+          "ticker_source": "manual",
+          "price_at_filing": 80.2216
+        },
+        {
+          "cusip": "552953101",
+          "ticker": "MKTX",
+          "name_of_issuer": "MGM RESORTS INTERNATIONAL",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 3193000,
+          "shares_curr": 87500,
+          "weight_curr": 0.03,
+          "value_prev": 3033000,
+          "shares_prev": 87500,
+          "weight_prev": 0.02,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 161.6177
+        },
+        {
+          "cusip": "45866F104",
+          "ticker": "ICE",
+          "name_of_issuer": "INTERCONTINENTAL EXCHANGE IN",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 3380000,
+          "shares_curr": 20870,
+          "weight_curr": 0.03,
+          "value_prev": 947000,
+          "shares_prev": 5620,
+          "weight_prev": 0.01,
+          "status": "ADD",
+          "shares_change_pct": 271.35,
+          "ticker_source": "manual",
+          "price_at_filing": 168.4558
+        },
+        {
+          "cusip": "26969P108",
+          "ticker": "EXP",
+          "name_of_issuer": "EAGLE MATLS INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 3049000,
+          "shares_curr": 14750,
+          "weight_curr": 0.02,
+          "value_prev": 3437000,
+          "shares_prev": 14750,
+          "weight_prev": 0.03,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "manual",
+          "price_at_filing": 225.5471
+        },
+        {
+          "cusip": "25754A201",
+          "ticker": "DPZ",
+          "name_of_issuer": "DOMINOS PIZZA INC",
+          "title_of_class": "COM",
+          "exchange": "NAS",
+          "value_curr": 2293000,
+          "shares_curr": 5500,
+          "weight_curr": 0.02,
+          "value_prev": 2374000,
+          "shares_prev": 5500,
+          "weight_prev": 0.02,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 392.8953
+        },
+        {
+          "cusip": "871829107",
+          "ticker": "SYY",
+          "name_of_issuer": "SYSCO CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 2248000,
+          "shares_curr": 30500,
+          "weight_curr": 0.02,
+          "value_prev": 2511000,
+          "shares_prev": 30500,
+          "weight_prev": 0.02,
+          "status": "HOLD",
+          "shares_change_pct": 0,
+          "ticker_source": "auto",
+          "price_at_filing": 85.8826
+        },
+        {
+          "cusip": "115236101",
+          "ticker": "BRO",
+          "name_of_issuer": "BROWN & BROWN INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 877000,
+          "shares_curr": 11000,
+          "weight_curr": 0.01,
+          "value_prev": null,
+          "shares_prev": null,
+          "weight_prev": null,
+          "status": "NEW BUY",
+          "shares_change_pct": null,
+          "ticker_source": "auto",
+          "price_at_filing": 73.78
+        },
+        {
+          "cusip": "31428X106",
+          "ticker": "FDX",
+          "name_of_issuer": "FEDEX CORP",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 50227000,
+          "shares_prev": 213000,
+          "weight_prev": 0.41,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "auto"
+        },
+        {
+          "cusip": "89400J107",
+          "ticker": "TRU",
+          "name_of_issuer": "TRANSUNION",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 172000,
+          "shares_curr": 2000,
+          "weight_curr": 0,
+          "value_prev": 8466000,
+          "shares_prev": 101050,
+          "weight_prev": 0.07,
+          "status": "TRIM",
+          "shares_change_pct": -98.02,
+          "ticker_source": "auto",
+          "price_at_filing": 73.3563
+        },
+        {
+          "cusip": "00724F101",
+          "ticker": "AXP",
+          "name_of_issuer": "ADOBE INC",
+          "title_of_class": "COM",
+          "exchange": "NYS",
+          "value_curr": 0,
+          "shares_curr": 0,
+          "weight_curr": 0,
+          "value_prev": 4939000,
+          "shares_prev": 14000,
+          "weight_prev": 0.04,
+          "status": "SOLD OUT",
+          "shares_change_pct": -100,
+          "ticker_source": "manual"
+        }
+      ]
     }
   },
   "tickers": [
     {
       "ticker": "AA",
       "exchange": "NYS",
-      "filingPrice": 57.47
+      "filingPrice": 57.376
     },
     {
       "ticker": "AAL",
@@ -4127,14 +7391,39 @@
       "filingPrice": 260.58
     },
     {
+      "ticker": "ABNB",
+      "exchange": "NAS",
+      "filingPrice": 122.18
+    },
+    {
+      "ticker": "ACN",
+      "exchange": "NYS",
+      "filingPrice": 238.5966
+    },
+    {
       "ticker": "AD",
       "exchange": "NYS",
       "filingPrice": 51.24
     },
     {
+      "ticker": "ADI",
+      "exchange": "NAS",
+      "filingPrice": 319.4499
+    },
+    {
+      "ticker": "ADM",
+      "exchange": "NYS",
+      "filingPrice": 65.8338
+    },
+    {
       "ticker": "ADMA",
       "exchange": "NAS",
       "filingPrice": 15.95
+    },
+    {
+      "ticker": "AEP",
+      "exchange": "NAS",
+      "filingPrice": 129.301
     },
     {
       "ticker": "AERO",
@@ -4147,29 +7436,49 @@
       "filingPrice": 12.9
     },
     {
+      "ticker": "AGIX",
+      "exchange": "NAS",
+      "filingPrice": 34.15
+    },
+    {
       "ticker": "AGX",
       "exchange": "NYS",
-      "filingPrice": 406.88
+      "filingPrice": 406.5496
     },
     {
       "ticker": "AII",
       "exchange": "NYS",
-      "filingPrice": 18.25
+      "filingPrice": 17.287
+    },
+    {
+      "ticker": "ALL",
+      "exchange": "NYS",
+      "filingPrice": 206.5052
     },
     {
       "ticker": "ALLE",
       "exchange": "NYS",
-      "filingPrice": 162.67
+      "filingPrice": 162.0566
     },
     {
       "ticker": "ALLY",
       "exchange": "NYS",
-      "filingPrice": 41.29
+      "filingPrice": 41.011
     },
     {
       "ticker": "ALVO",
       "exchange": "NAS",
       "filingPrice": 4.64
+    },
+    {
+      "ticker": "AMAT",
+      "exchange": "NAS",
+      "filingPrice": 322.1082
+    },
+    {
+      "ticker": "AMD",
+      "exchange": "NAS",
+      "filingPrice": 203.08
     },
     {
       "ticker": "AMZN",
@@ -4179,27 +7488,57 @@
     {
       "ticker": "AON",
       "exchange": "NYS",
-      "filingPrice": 325.96
+      "filingPrice": 325.1024
+    },
+    {
+      "ticker": "APD",
+      "exchange": "NYS",
+      "filingPrice": 281.3559
+    },
+    {
+      "ticker": "APO",
+      "exchange": "NYS",
+      "filingPrice": 132.4888
+    },
+    {
+      "ticker": "ASML",
+      "exchange": "NAS",
+      "filingPrice": 1416.6849
     },
     {
       "ticker": "AU",
       "exchange": "NYS",
-      "filingPrice": 106.17
+      "filingPrice": 104.4158
     },
     {
       "ticker": "AXP",
       "exchange": "NYS",
-      "filingPrice": 344.53
+      "filingPrice": 343.4444
+    },
+    {
+      "ticker": "AYI",
+      "exchange": "NYS",
+      "filingPrice": 328.1582
     },
     {
       "ticker": "B",
       "exchange": "NYS",
-      "filingPrice": 46.65
+      "filingPrice": 46.2608
+    },
+    {
+      "ticker": "BABA",
+      "exchange": "NYS",
+      "filingPrice": 155.43
     },
     {
       "ticker": "BAC",
       "exchange": "NYS",
-      "filingPrice": 52.77
+      "filingPrice": 52.4734
+    },
+    {
+      "ticker": "BALL",
+      "exchange": "NYS",
+      "filingPrice": 66.3517
     },
     {
       "ticker": "BATL",
@@ -4212,9 +7551,24 @@
       "filingPrice": 47.86
     },
     {
+      "ticker": "BC",
+      "exchange": "NYS",
+      "filingPrice": 87.4461
+    },
+    {
       "ticker": "BE",
       "exchange": "NYS",
       "filingPrice": 145.32
+    },
+    {
+      "ticker": "BF-A",
+      "exchange": "NYS",
+      "filingPrice": 29.5623
+    },
+    {
+      "ticker": "BF-B",
+      "exchange": "NYS",
+      "filingPrice": 29.1807
     },
     {
       "ticker": "BHC",
@@ -4222,19 +7576,49 @@
       "filingPrice": 5.99
     },
     {
+      "ticker": "BIDU",
+      "exchange": "NAS",
+      "filingPrice": 137.33
+    },
+    {
+      "ticker": "BK",
+      "exchange": "NYS",
+      "filingPrice": 123.8284
+    },
+    {
+      "ticker": "BKNG",
+      "exchange": "NAS",
+      "filingPrice": 177.881
+    },
+    {
       "ticker": "BLCO",
       "exchange": "NYS",
       "filingPrice": 17.73
     },
     {
+      "ticker": "BLK",
+      "exchange": "NYS",
+      "filingPrice": 1050.5319
+    },
+    {
       "ticker": "BN",
       "exchange": "NYS",
-      "filingPrice": 47.78
+      "filingPrice": 47.6946
     },
     {
       "ticker": "BRK-B",
       "exchange": "NYS",
       "filingPrice": 496.94
+    },
+    {
+      "ticker": "BRK/A",
+      "exchange": "NYS",
+      "filingPrice": 762569.63
+    },
+    {
+      "ticker": "BRO",
+      "exchange": "NYS",
+      "filingPrice": 73.78
     },
     {
       "ticker": "BTAI",
@@ -4247,19 +7631,49 @@
       "filingPrice": 17.3
     },
     {
+      "ticker": "CARR",
+      "exchange": "NYS",
+      "filingPrice": 63.6931
+    },
+    {
+      "ticker": "CAT",
+      "exchange": "NYS",
+      "filingPrice": 724.8202
+    },
+    {
       "ticker": "CB",
       "exchange": "NYS",
-      "filingPrice": 331.89
+      "filingPrice": 330.9132
     },
     {
       "ticker": "CBL",
       "exchange": "NYS",
-      "filingPrice": 36.9
+      "filingPrice": 36.3117
+    },
+    {
+      "ticker": "CBOE",
+      "exchange": "AMS",
+      "filingPrice": 272.6867
+    },
+    {
+      "ticker": "CCK",
+      "exchange": "NYS",
+      "filingPrice": 112.5077
     },
     {
       "ticker": "CDTX",
       "exchange": "NAS",
       "filingPrice": 220.89
+    },
+    {
+      "ticker": "CG",
+      "exchange": "NAS",
+      "filingPrice": 58.3326
+    },
+    {
+      "ticker": "CHH",
+      "exchange": "NYS",
+      "filingPrice": 108.9764
     },
     {
       "ticker": "CHTR",
@@ -4272,9 +7686,24 @@
       "filingPrice": 10.52
     },
     {
+      "ticker": "CMCSA",
+      "exchange": "NAS",
+      "filingPrice": 31.0094
+    },
+    {
+      "ticker": "CME",
+      "exchange": "NAS",
+      "filingPrice": 296.444
+    },
+    {
       "ticker": "CMG",
       "exchange": "NYS",
       "filingPrice": 37.88
+    },
+    {
+      "ticker": "CNI",
+      "exchange": "NYS",
+      "filingPrice": 100.8007
     },
     {
       "ticker": "COF",
@@ -4289,12 +7718,27 @@
     {
       "ticker": "COLD",
       "exchange": "NYS",
-      "filingPrice": 12.36
+      "filingPrice": 12.1119
+    },
+    {
+      "ticker": "COR",
+      "exchange": "NYS",
+      "filingPrice": 359.97
     },
     {
       "ticker": "CORZ",
       "exchange": "NAS",
       "filingPrice": 17.23
+    },
+    {
+      "ticker": "COST",
+      "exchange": "NAS",
+      "filingPrice": 999.7093
+    },
+    {
+      "ticker": "CP",
+      "exchange": "NYS",
+      "filingPrice": 80.2216
     },
     {
       "ticker": "CPNG",
@@ -4304,17 +7748,37 @@
     {
       "ticker": "CRC",
       "exchange": "NYS",
-      "filingPrice": 56.62
+      "filingPrice": 56.2508
     },
     {
       "ticker": "CRH",
       "exchange": "NYS",
-      "filingPrice": 122.02
+      "filingPrice": 121.5917
     },
     {
       "ticker": "CROX",
       "exchange": "NAS",
       "filingPrice": 96.48
+    },
+    {
+      "ticker": "CSCO",
+      "exchange": "NAS",
+      "filingPrice": 84.3629
+    },
+    {
+      "ticker": "CSX",
+      "exchange": "NAS",
+      "filingPrice": 40.4767
+    },
+    {
+      "ticker": "CTRI",
+      "exchange": "NYS",
+      "filingPrice": 31.29
+    },
+    {
+      "ticker": "CVI",
+      "exchange": "NYS",
+      "filingPrice": 22.52
     },
     {
       "ticker": "CVX",
@@ -4324,7 +7788,12 @@
     {
       "ticker": "CX",
       "exchange": "NYS",
-      "filingPrice": 12.5
+      "filingPrice": 12.4739
+    },
+    {
+      "ticker": "CZR",
+      "exchange": "NAS",
+      "filingPrice": 18.95
     },
     {
       "ticker": "DAKT",
@@ -4334,7 +7803,7 @@
     {
       "ticker": "DAL",
       "exchange": "NYS",
-      "filingPrice": 70.85
+      "filingPrice": 70.6585
     },
     {
       "ticker": "DASH",
@@ -4342,14 +7811,29 @@
       "filingPrice": 162.34
     },
     {
+      "ticker": "DB",
+      "exchange": "NYS",
+      "filingPrice": 35.94
+    },
+    {
+      "ticker": "DE",
+      "exchange": "NYS",
+      "filingPrice": 581.4097
+    },
+    {
       "ticker": "DEO",
       "exchange": "NYS",
-      "filingPrice": 96.45
+      "filingPrice": 95.486
     },
     {
       "ticker": "DG",
       "exchange": "NYS",
-      "filingPrice": 153.84
+      "filingPrice": 153.1139
+    },
+    {
+      "ticker": "DIS",
+      "exchange": "NYS",
+      "filingPrice": 108.7
     },
     {
       "ticker": "DOCU",
@@ -4359,12 +7843,17 @@
     {
       "ticker": "DPZ",
       "exchange": "NAS",
-      "filingPrice": 373.5
+      "filingPrice": 371.6228
     },
     {
       "ticker": "DVA",
       "exchange": "NYS",
       "filingPrice": 150.41
+    },
+    {
+      "ticker": "ECL",
+      "exchange": "NYS",
+      "filingPrice": 289.5539
     },
     {
       "ticker": "ECVT",
@@ -4377,19 +7866,39 @@
       "filingPrice": 60.87
     },
     {
+      "ticker": "EFX",
+      "exchange": "NYS",
+      "filingPrice": 195.0928
+    },
+    {
       "ticker": "ELV",
       "exchange": "NYS",
-      "filingPrice": 346.8
+      "filingPrice": 344.6752
+    },
+    {
+      "ticker": "EMN",
+      "exchange": "NYS",
+      "filingPrice": 76.5086
     },
     {
       "ticker": "ENTG",
       "exchange": "NAS",
-      "filingPrice": 129.56
+      "filingPrice": 129.4705
+    },
+    {
+      "ticker": "ET",
+      "exchange": "NYS",
+      "filingPrice": 18.2947
     },
     {
       "ticker": "EWBC",
       "exchange": "NAS",
-      "filingPrice": 119.86
+      "filingPrice": 119.0979
+    },
+    {
+      "ticker": "EWY",
+      "exchange": "AMS",
+      "filingPrice": 130.68
     },
     {
       "ticker": "EWZ",
@@ -4399,22 +7908,27 @@
     {
       "ticker": "EXE",
       "exchange": "NAS",
-      "filingPrice": 102.75
+      "filingPrice": 102.192
     },
     {
       "ticker": "EXP",
       "exchange": "NYS",
-      "filingPrice": 235.11
+      "filingPrice": 234.7947
     },
     {
       "ticker": "FCX",
       "exchange": "NYS",
-      "filingPrice": 61.09
+      "filingPrice": 60.9558
+    },
+    {
+      "ticker": "FDS",
+      "exchange": "NYS",
+      "filingPrice": 206.2556
     },
     {
       "ticker": "FERG",
       "exchange": "NYS",
-      "filingPrice": 261.36
+      "filingPrice": 260.3901
     },
     {
       "ticker": "FI",
@@ -4429,7 +7943,12 @@
     {
       "ticker": "FIS",
       "exchange": "NYS",
-      "filingPrice": 46.8
+      "filingPrice": 46.4011
+    },
+    {
+      "ticker": "FIX",
+      "exchange": "NYS",
+      "filingPrice": 1229.6215
     },
     {
       "ticker": "FLUT",
@@ -4437,9 +7956,14 @@
       "filingPrice": 123.91
     },
     {
+      "ticker": "FNV",
+      "exchange": "NYS",
+      "filingPrice": 231.6957
+    },
+    {
       "ticker": "FTAI",
       "exchange": "NAS",
-      "filingPrice": 285.75
+      "filingPrice": 285.2679
     },
     {
       "ticker": "FWONK",
@@ -4447,24 +7971,39 @@
       "filingPrice": 86.74
     },
     {
+      "ticker": "FXI",
+      "exchange": "AMS",
+      "filingPrice": 38.52
+    },
+    {
+      "ticker": "GD",
+      "exchange": "NYS",
+      "filingPrice": 358.4054
+    },
+    {
       "ticker": "GDS",
       "exchange": "NAS",
       "filingPrice": 46.12
     },
     {
+      "ticker": "GHC",
+      "exchange": "NYS",
+      "filingPrice": 1156.2946
+    },
+    {
       "ticker": "GOOG",
       "exchange": "NAS",
-      "filingPrice": 303.56
+      "filingPrice": 303.3463
     },
     {
       "ticker": "GOOGL",
       "exchange": "NAS",
-      "filingPrice": 302.85
+      "filingPrice": 302.6371
     },
     {
       "ticker": "GPC",
       "exchange": "NYS",
-      "filingPrice": 147.16
+      "filingPrice": 145.8248
     },
     {
       "ticker": "GRAB",
@@ -4474,12 +8013,27 @@
     {
       "ticker": "GS",
       "exchange": "NYS",
-      "filingPrice": 916.04
+      "filingPrice": 911.2445
+    },
+    {
+      "ticker": "GT",
+      "exchange": "NAS",
+      "filingPrice": 8.86
     },
     {
       "ticker": "GTX",
       "exchange": "NAS",
-      "filingPrice": 20.62
+      "filingPrice": 20.539
+    },
+    {
+      "ticker": "HCA",
+      "exchange": "NYS",
+      "filingPrice": 500.945
+    },
+    {
+      "ticker": "HD",
+      "exchange": "NYS",
+      "filingPrice": 382.5922
     },
     {
       "ticker": "HDB",
@@ -4492,9 +8046,19 @@
       "filingPrice": 337.21
     },
     {
+      "ticker": "HGTY",
+      "exchange": "NYS",
+      "filingPrice": 12.6
+    },
+    {
       "ticker": "HHH",
       "exchange": "NYS",
       "filingPrice": 82.76
+    },
+    {
+      "ticker": "HII",
+      "exchange": "NYS",
+      "filingPrice": 396.5309
     },
     {
       "ticker": "HLF",
@@ -4504,12 +8068,32 @@
     {
       "ticker": "HLT",
       "exchange": "NYS",
-      "filingPrice": 317.82
+      "filingPrice": 317.67
+    },
+    {
+      "ticker": "HSY",
+      "exchange": "NYS",
+      "filingPrice": 230.0197
     },
     {
       "ticker": "HTZ",
       "exchange": "NAS",
       "filingPrice": 4.92
+    },
+    {
+      "ticker": "HXL",
+      "exchange": "NYS",
+      "filingPrice": 85.6525
+    },
+    {
+      "ticker": "ICE",
+      "exchange": "NYS",
+      "filingPrice": 168.4558
+    },
+    {
+      "ticker": "IEP",
+      "exchange": "NAS",
+      "filingPrice": 7.4974
     },
     {
       "ticker": "INDV",
@@ -4527,9 +8111,39 @@
       "filingPrice": 150.52
     },
     {
+      "ticker": "INTR",
+      "exchange": "NAS",
+      "filingPrice": 8.4628
+    },
+    {
+      "ticker": "IQV",
+      "exchange": "NYS",
+      "filingPrice": 164.44
+    },
+    {
+      "ticker": "ITIC",
+      "exchange": "NAS",
+      "filingPrice": 278.6587
+    },
+    {
       "ticker": "ITUB",
       "exchange": "NYS",
-      "filingPrice": 9.17
+      "filingPrice": 9.0797
+    },
+    {
+      "ticker": "ITW",
+      "exchange": "NYS",
+      "filingPrice": 291.7252
+    },
+    {
+      "ticker": "JBLU",
+      "exchange": "NAS",
+      "filingPrice": 6.07
+    },
+    {
+      "ticker": "JD",
+      "exchange": "NAS",
+      "filingPrice": 26.3892
     },
     {
       "ticker": "JEF",
@@ -4537,14 +8151,34 @@
       "filingPrice": 51.98
     },
     {
+      "ticker": "JNJ",
+      "exchange": "NYS",
+      "filingPrice": 238.7209
+    },
+    {
+      "ticker": "JPM",
+      "exchange": "NYS",
+      "filingPrice": 320.7583
+    },
+    {
       "ticker": "KHC",
       "exchange": "NAS",
-      "filingPrice": 23.78
+      "filingPrice": 23.3874
+    },
+    {
+      "ticker": "KKR",
+      "exchange": "NYS",
+      "filingPrice": 103.0123
+    },
+    {
+      "ticker": "KMX",
+      "exchange": "NYS",
+      "filingPrice": 47.17
     },
     {
       "ticker": "KO",
       "exchange": "NYS",
-      "filingPrice": 79.56
+      "filingPrice": 79.0167
     },
     {
       "ticker": "KR",
@@ -4554,7 +8188,7 @@
     {
       "ticker": "KRC",
       "exchange": "NYS",
-      "filingPrice": 31.81
+      "filingPrice": 31.202
     },
     {
       "ticker": "KRSP",
@@ -4579,7 +8213,12 @@
     {
       "ticker": "LEN",
       "exchange": "NYS",
-      "filingPrice": 121.44
+      "filingPrice": 120.7995
+    },
+    {
+      "ticker": "LHX",
+      "exchange": "NYS",
+      "filingPrice": 345.387
     },
     {
       "ticker": "LILA",
@@ -4592,6 +8231,11 @@
       "filingPrice": 7.93
     },
     {
+      "ticker": "LIN",
+      "exchange": "NAS",
+      "filingPrice": 446.7393
+    },
+    {
       "ticker": "LLYVA",
       "exchange": "NAS",
       "filingPrice": 91.79
@@ -4602,9 +8246,29 @@
       "filingPrice": 94.21
     },
     {
+      "ticker": "LMT",
+      "exchange": "NYS",
+      "filingPrice": 620.3106
+    },
+    {
+      "ticker": "LOW",
+      "exchange": "NYS",
+      "filingPrice": 277.0502
+    },
+    {
+      "ticker": "LPLA",
+      "exchange": "NAS",
+      "filingPrice": 384.7707
+    },
+    {
       "ticker": "LPX",
       "exchange": "NYS",
-      "filingPrice": 88.86
+      "filingPrice": 88.5408
+    },
+    {
+      "ticker": "LRCX",
+      "exchange": "NAS",
+      "filingPrice": 235.298
     },
     {
       "ticker": "LSCC",
@@ -4612,14 +8276,24 @@
       "filingPrice": 97.5
     },
     {
+      "ticker": "LYFT",
+      "exchange": "NAS",
+      "filingPrice": 13.3
+    },
+    {
       "ticker": "MA",
       "exchange": "NYS",
-      "filingPrice": 521.93
+      "filingPrice": 521.0344
+    },
+    {
+      "ticker": "MAR",
+      "exchange": "NAS",
+      "filingPrice": 332.5975
     },
     {
       "ticker": "MCO",
       "exchange": "NYS",
-      "filingPrice": 423.22
+      "filingPrice": 422.3071
     },
     {
       "ticker": "MELI",
@@ -4629,12 +8303,52 @@
     {
       "ticker": "META",
       "exchange": "NAS",
-      "filingPrice": 639.29
+      "filingPrice": 638.7434
+    },
+    {
+      "ticker": "MHK",
+      "exchange": "NYS",
+      "filingPrice": 131.91
+    },
+    {
+      "ticker": "MKTX",
+      "exchange": "NAS",
+      "filingPrice": 161.6177
+    },
+    {
+      "ticker": "MNRO",
+      "exchange": "NAS",
+      "filingPrice": 22.1827
     },
     {
       "ticker": "MOH",
       "exchange": "NYS",
       "filingPrice": 135.35
+    },
+    {
+      "ticker": "MPLX",
+      "exchange": "NYS",
+      "filingPrice": 56.2528
+    },
+    {
+      "ticker": "MRSH",
+      "exchange": "NYS",
+      "filingPrice": 184.0828
+    },
+    {
+      "ticker": "MSCI",
+      "exchange": "NYS",
+      "filingPrice": 555.5902
+    },
+    {
+      "ticker": "MSFT",
+      "exchange": "NAS",
+      "filingPrice": 395.9563
+    },
+    {
+      "ticker": "MU",
+      "exchange": "NAS",
+      "filingPrice": 399.6121
     },
     {
       "ticker": "MX",
@@ -4647,14 +8361,34 @@
       "filingPrice": 35.24
     },
     {
+      "ticker": "NKE",
+      "exchange": "NYS",
+      "filingPrice": 63.4985
+    },
+    {
       "ticker": "NOK",
       "exchange": "NYS",
-      "filingPrice": 7.3
+      "filingPrice": 7.2683
     },
     {
       "ticker": "NP",
       "exchange": "NYS",
       "filingPrice": 19.39
+    },
+    {
+      "ticker": "NRG",
+      "exchange": "NYS",
+      "filingPrice": 172.9205
+    },
+    {
+      "ticker": "NSC",
+      "exchange": "NYS",
+      "filingPrice": 305.1597
+    },
+    {
+      "ticker": "NSP",
+      "exchange": "NYS",
+      "filingPrice": 37.8532
     },
     {
       "ticker": "NTRA",
@@ -4669,7 +8403,17 @@
     {
       "ticker": "NUE",
       "exchange": "NYS",
-      "filingPrice": 183.64
+      "filingPrice": 183.0158
+    },
+    {
+      "ticker": "NVDA",
+      "exchange": "NAS",
+      "filingPrice": 184.97
+    },
+    {
+      "ticker": "NVO",
+      "exchange": "NYS",
+      "filingPrice": 45.9545
     },
     {
       "ticker": "NVR",
@@ -4679,12 +8423,22 @@
     {
       "ticker": "NYT",
       "exchange": "NYS",
-      "filingPrice": 74.03
+      "filingPrice": 73.8266
+    },
+    {
+      "ticker": "OC",
+      "exchange": "NYS",
+      "filingPrice": 132.5986
     },
     {
       "ticker": "OCSL",
       "exchange": "NAS",
-      "filingPrice": 12.01
+      "filingPrice": 11.5772
+    },
+    {
+      "ticker": "ODFL",
+      "exchange": "NAS",
+      "filingPrice": 202.1876
     },
     {
       "ticker": "ON",
@@ -4707,9 +8461,19 @@
       "filingPrice": 1.62
     },
     {
+      "ticker": "OTIS",
+      "exchange": "NYS",
+      "filingPrice": 89.4387
+    },
+    {
       "ticker": "OXY",
       "exchange": "NYS",
-      "filingPrice": 51.53
+      "filingPrice": 51.2865
+    },
+    {
+      "ticker": "PAYX",
+      "exchange": "NAS",
+      "filingPrice": 98.53
     },
     {
       "ticker": "PCT",
@@ -4722,19 +8486,29 @@
       "filingPrice": 101.95
     },
     {
+      "ticker": "PEP",
+      "exchange": "NAS",
+      "filingPrice": 168.9808
+    },
+    {
       "ticker": "PGNY",
       "exchange": "NAS",
       "filingPrice": 20.35
     },
     {
+      "ticker": "PGR",
+      "exchange": "NYS",
+      "filingPrice": 202.1854
+    },
+    {
       "ticker": "PM",
       "exchange": "NYS",
-      "filingPrice": 183.65
+      "filingPrice": 182.0251
     },
     {
       "ticker": "POOL",
       "exchange": "NAS",
-      "filingPrice": 255.46
+      "filingPrice": 253.9456
     },
     {
       "ticker": "PTGX",
@@ -4742,9 +8516,14 @@
       "filingPrice": 82.46
     },
     {
+      "ticker": "QCOM",
+      "exchange": "NAS",
+      "filingPrice": 141.7202
+    },
+    {
       "ticker": "QSR",
       "exchange": "NYS",
-      "filingPrice": 68.13
+      "filingPrice": 67.5337
     },
     {
       "ticker": "RH",
@@ -4752,19 +8531,44 @@
       "filingPrice": 208.72
     },
     {
+      "ticker": "RLI",
+      "exchange": "NYS",
+      "filingPrice": 61.5616
+    },
+    {
+      "ticker": "RNR",
+      "exchange": "NYS",
+      "filingPrice": 300.1371
+    },
+    {
+      "ticker": "ROK",
+      "exchange": "NYS",
+      "filingPrice": 413.584
+    },
+    {
       "ticker": "ROKU",
       "exchange": "NAS",
       "filingPrice": 88.58
     },
     {
+      "ticker": "ROL",
+      "exchange": "NYS",
+      "filingPrice": 64.6444
+    },
+    {
       "ticker": "RSP",
       "exchange": "AMS",
-      "filingPrice": 202.52
+      "filingPrice": 201.6573
+    },
+    {
+      "ticker": "RTX",
+      "exchange": "NYS",
+      "filingPrice": 202.8264
     },
     {
       "ticker": "RWAY",
       "exchange": "NAS",
-      "filingPrice": 8.46
+      "filingPrice": 8.1057
     },
     {
       "ticker": "SATS",
@@ -4774,12 +8578,27 @@
     {
       "ticker": "SBLK",
       "exchange": "NAS",
-      "filingPrice": 24.53
+      "filingPrice": 24.1464
+    },
+    {
+      "ticker": "SBUX",
+      "exchange": "NAS",
+      "filingPrice": 98.8127
     },
     {
       "ticker": "SCCO",
       "exchange": "NYS",
       "filingPrice": 188
+    },
+    {
+      "ticker": "SCHW",
+      "exchange": "NYS",
+      "filingPrice": 104.3519
+    },
+    {
+      "ticker": "SD",
+      "exchange": "NYS",
+      "filingPrice": 16.8799
     },
     {
       "ticker": "SE",
@@ -4792,14 +8611,49 @@
       "filingPrice": 20.27
     },
     {
+      "ticker": "SEIC",
+      "exchange": "NAS",
+      "filingPrice": 84.45
+    },
+    {
+      "ticker": "SHOP",
+      "exchange": "NAS",
+      "filingPrice": 112.05
+    },
+    {
+      "ticker": "SHW",
+      "exchange": "NYS",
+      "filingPrice": 361.1815
+    },
+    {
       "ticker": "SIRI",
       "exchange": "NAS",
       "filingPrice": 21.02
     },
     {
+      "ticker": "SMG",
+      "exchange": "NYS",
+      "filingPrice": 65.7128
+    },
+    {
       "ticker": "SMRT",
       "exchange": "NYS",
       "filingPrice": 1.61
+    },
+    {
+      "ticker": "SONY",
+      "exchange": "NYS",
+      "filingPrice": 22.26
+    },
+    {
+      "ticker": "SPOT",
+      "exchange": "NYS",
+      "filingPrice": 422.61
+    },
+    {
+      "ticker": "SPY",
+      "exchange": "AMS",
+      "filingPrice": 688.7388
     },
     {
       "ticker": "STKL",
@@ -4809,7 +8663,7 @@
     {
       "ticker": "STM",
       "exchange": "NYS",
-      "filingPrice": 33.2
+      "filingPrice": 33.1056
     },
     {
       "ticker": "STUB",
@@ -4819,12 +8673,22 @@
     {
       "ticker": "STZ",
       "exchange": "NYS",
-      "filingPrice": 152.7
+      "filingPrice": 151.6879
+    },
+    {
+      "ticker": "SWX",
+      "exchange": "NYS",
+      "filingPrice": 88.24
+    },
+    {
+      "ticker": "SYY",
+      "exchange": "NYS",
+      "filingPrice": 85.8826
     },
     {
       "ticker": "TAC",
       "exchange": "NYS",
-      "filingPrice": 13.43
+      "filingPrice": 13.3811
     },
     {
       "ticker": "TBBB",
@@ -4839,7 +8703,7 @@
     {
       "ticker": "TDS",
       "exchange": "NYS",
-      "filingPrice": 46.54
+      "filingPrice": 46.4971
     },
     {
       "ticker": "TEO",
@@ -4852,24 +8716,59 @@
       "filingPrice": 34.41
     },
     {
+      "ticker": "TGT",
+      "exchange": "NYS",
+      "filingPrice": 114.3866
+    },
+    {
+      "ticker": "THG",
+      "exchange": "NYS",
+      "filingPrice": 175.0108
+    },
+    {
       "ticker": "TLN",
       "exchange": "NAS",
       "filingPrice": 388.28
     },
     {
+      "ticker": "TMO",
+      "exchange": "NYS",
+      "filingPrice": 542.2937
+    },
+    {
       "ticker": "TRMD",
       "exchange": "NAS",
-      "filingPrice": 25.82
+      "filingPrice": 25.1562
+    },
+    {
+      "ticker": "TROW",
+      "exchange": "NAS",
+      "filingPrice": 93.1921
+    },
+    {
+      "ticker": "TRU",
+      "exchange": "NYS",
+      "filingPrice": 73.3563
     },
     {
       "ticker": "TSM",
       "exchange": "NYS",
-      "filingPrice": 364.2
+      "filingPrice": 363.177
+    },
+    {
+      "ticker": "TSN",
+      "exchange": "NYS",
+      "filingPrice": 64.7367
     },
     {
       "ticker": "TX",
       "exchange": "NYS",
       "filingPrice": 43.25
+    },
+    {
+      "ticker": "TXN",
+      "exchange": "NAS",
+      "filingPrice": 220.3206
     },
     {
       "ticker": "U",
@@ -4882,6 +8781,11 @@
       "filingPrice": 114.02
     },
     {
+      "ticker": "UAN",
+      "exchange": "NYS",
+      "filingPrice": 106.6024
+    },
+    {
       "ticker": "UBER",
       "exchange": "NYS",
       "filingPrice": 70.53
@@ -4889,12 +8793,17 @@
     {
       "ticker": "UNH",
       "exchange": "NYS",
-      "filingPrice": 289.09
+      "filingPrice": 286.86
     },
     {
       "ticker": "UNP",
       "exchange": "NYS",
-      "filingPrice": 260.68
+      "filingPrice": 259.3247
+    },
+    {
+      "ticker": "URI",
+      "exchange": "NYS",
+      "filingPrice": 897.5287
     },
     {
       "ticker": "V",
@@ -4914,12 +8823,22 @@
     {
       "ticker": "VNOM",
       "exchange": "NAS",
-      "filingPrice": 44
+      "filingPrice": 43.4876
+    },
+    {
+      "ticker": "VRSK",
+      "exchange": "NAS",
+      "filingPrice": 178.6478
     },
     {
       "ticker": "VRSN",
       "exchange": "NAS",
       "filingPrice": 215.4486
+    },
+    {
+      "ticker": "VST",
+      "exchange": "NYS",
+      "filingPrice": 173.4434
     },
     {
       "ticker": "WAB",
@@ -4929,7 +8848,17 @@
     {
       "ticker": "WCC",
       "exchange": "NYS",
-      "filingPrice": 307.1
+      "filingPrice": 306.5042
+    },
+    {
+      "ticker": "WFC",
+      "exchange": "NYS",
+      "filingPrice": 93.4358
+    },
+    {
+      "ticker": "WHR",
+      "exchange": "NYS",
+      "filingPrice": 86.0845
     },
     {
       "ticker": "WOLF",
@@ -4937,9 +8866,19 @@
       "filingPrice": 19.12
     },
     {
+      "ticker": "WRB",
+      "exchange": "NYS",
+      "filingPrice": 70.3209
+    },
+    {
+      "ticker": "WSO",
+      "exchange": "NYS",
+      "filingPrice": 416.5888
+    },
+    {
       "ticker": "WTW",
       "exchange": "NAS",
-      "filingPrice": 287.74
+      "filingPrice": 286.7864
     },
     {
       "ticker": "WVE",
@@ -4954,7 +8893,12 @@
     {
       "ticker": "XLF",
       "exchange": "AMS",
-      "filingPrice": 52.2
+      "filingPrice": 51.9325
+    },
+    {
+      "ticker": "XOM",
+      "exchange": "NYS",
+      "filingPrice": 148.0631
     },
     {
       "ticker": "XP",
@@ -4964,12 +8908,17 @@
     {
       "ticker": "YMM",
       "exchange": "NYS",
-      "filingPrice": 9.55
+      "filingPrice": 9.4521
     },
     {
       "ticker": "YPF",
       "exchange": "NYS",
       "filingPrice": 37.01
+    },
+    {
+      "ticker": "YUM",
+      "exchange": "NYS",
+      "filingPrice": 162.1825
     },
     {
       "ticker": "Z",

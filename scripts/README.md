@@ -11,6 +11,9 @@
 | `github-update-prices.ts` | 게시글 종목 현재가 일괄 업데이트 → `feed.json` 저장. `MARKET_TYPE`(ASIA/US/ALL)으로 거래소 필터링 | GitHub Actions 크론 (15분) |
 | `github-update-guru-prices.ts` | 구루 포트폴리오 현재가 업데이트 → `guru-stock-prices.json` 저장 | GitHub Actions 크론 (미장 마감 후 1회) |
 | `local-price-updater.ts` | 로컬 PC 상주형 가격 업데이트 스케줄러 (아시아장/미국장/암호화폐 시간대별) | 로컬 (상시 실행) |
+| `resolve-cusips.ts` | `guru-portfolios.json`의 미매핑 CUSIP을 OpenFIGI API로 자동 해결 → `cusipMap.ts`에 붙여넣을 코드 출력 | 로컬 (수동, 신규 종목/그루 추가 시) |
+
+13F 분기 갱신 프로세스는 `scripts/13F-UPDATE-GUIDE.md` 참조.
 
 ## 공통 환경변수
 

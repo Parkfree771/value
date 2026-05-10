@@ -65,6 +65,33 @@ export const GURU_LIST: GuruInfo[] = [
     catchphrase: '시장의 사이클을 지배하는 현자. 2차적 사고(Second-level thinking)로 리스크를 제어한다.',
     image_filename: 'GURU/max.webp'
   },
+  {
+    name_kr: '칼 아이칸',
+    name_en: 'Carl Icahn',
+    filing_name: 'Carl C. Icahn',
+    cik: '0000921669',
+    style: '행동주의',
+    catchphrase: '월스트리트가 두려워한 행동주의의 원조. 무능한 경영진을 흔들어 주주가치를 끌어내는 기업 사냥꾼.',
+    image_filename: 'GURU/Icahn.webp'
+  },
+  {
+    name_kr: '데이비드 테퍼',
+    name_en: 'David Tepper',
+    filing_name: 'Appaloosa LP',
+    cik: '0001656456',
+    style: '디스트레스/매크로',
+    catchphrase: '위기의 잿더미에서 황금을 캐는 헤지펀드의 전설. 공포가 극에 달한 순간 매수 버튼을 누르는 역발상의 대가.',
+    image_filename: 'GURU/Tepper.webp'
+  },
+  {
+    name_kr: '토마스 게이너',
+    name_en: 'Thomas Gayner',
+    filing_name: 'Markel Group',
+    cik: '0001096343',
+    style: '컴파운더 가치투자',
+    catchphrase: '보험 플로트로 굴러가는 미니 버크셔. 묵묵히 우량주를 모아가는 미국식 컴파운딩의 정석.',
+    image_filename: 'GURU/Gayner.webp'
+  },
 ];
 
 export type DataType = 'PORTFOLIO' | 'MENTION';
