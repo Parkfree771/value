@@ -15,11 +15,12 @@ import {
   BarChart,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
-import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtKRW, fmtKRWAxis, fmtPct, thresholdColor } from '../theme';
+import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtPct, thresholdColor, getCurrencyFmt, type Currency } from '../theme';
 import { stabilityInsights } from '../insights';
 import { Card, RichTooltip, KPIStat, KPIStrip, InsightList } from '../components/primitives';
 
-export function StabilityTab({ data }: { data: FinancialMetrics[] }) {
+export function StabilityTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
+  const { main: fmtMain, axis: fmtAxis } = getCurrencyFmt(currency);
   if (data.length === 0) return null;
   const latest = data[data.length - 1];
   const insights = stabilityInsights(data);
@@ -75,7 +76,7 @@ export function StabilityTab({ data }: { data: FinancialMetrics[] }) {
         />
         <KPIStat
           label="유동부채"
-          value={fmtKRW(latest.currentLiabilities)}
+          value={fmtMain(latest.currentLiabilities)}
           hint="1년 내 만기 도래"
         />
         <KPIStat
@@ -179,8 +180,8 @@ export function StabilityTab({ data }: { data: FinancialMetrics[] }) {
             <BarChart data={enriched} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%">
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <Bar dataKey="currentLiabilities" name="유동부채" stackId="d" fill={COLOR.negative} fillOpacity={0.75} maxBarSize={48} isAnimationActive={false} />
               <Bar dataKey="nonCurrentLiabilities" name="비유동부채" stackId="d" fill={COLOR.warning} fillOpacity={0.55} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />
@@ -196,8 +197,8 @@ export function StabilityTab({ data }: { data: FinancialMetrics[] }) {
             <BarChart data={data} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%">
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <Bar dataKey="totalLiabilities" name="부채" stackId="bs" fill={COLOR.negative} fillOpacity={0.4} maxBarSize={48} isAnimationActive={false} />
               <Bar dataKey="totalEquity" name="자본" stackId="bs" fill={COLOR.positive} fillOpacity={0.55} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />

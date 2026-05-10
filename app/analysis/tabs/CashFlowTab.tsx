@@ -17,12 +17,13 @@ import {
   LabelList,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
-import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtKRW, fmtKRWAxis, fmtX } from '../theme';
+import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtX, getCurrencyFmt, type Currency } from '../theme';
 import { Card, RichTooltip, KPIStat, KPIStrip } from '../components/primitives';
 
-/** 막대 위/아래에 KRW 값 라벨 (음수는 아래, 양수는 위) */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function renderCashLabel(props: any): JSX.Element | null {
+/** 막대 위/아래에 통화 값 라벨 (음수는 아래, 양수는 위) */
+function makeRenderCashLabel(fmtMain: (v: number | null) => string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return function renderCashLabel(props: any): JSX.Element | null {
   const xRaw = props?.x;
   const yRaw = props?.y;
   const wRaw = props?.width;
@@ -45,9 +46,10 @@ function renderCashLabel(props: any): JSX.Element | null {
       textAnchor="middle"
       style={{ pointerEvents: 'none' }}
     >
-      {fmtKRW(value)}
+      {fmtMain(value)}
     </text>
   );
+  };
 }
 
 /** 연도별 색상 — 가장 최신은 primary, 과거는 slate 그라데이션 */
@@ -124,7 +126,9 @@ function diagnoseCF(m: FinancialMetrics): PatternInfo {
   return { code: '-', name: '기타', desc: '', long: '', color: COLOR.axis };
 }
 
-export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
+export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
+  const { main: fmtMain, axis: fmtAxis, unitLabel } = getCurrencyFmt(currency);
+  const renderCashLabel = makeRenderCashLabel(fmtMain);
   if (data.length === 0) return null;
   const latest = data[data.length - 1];
   const pattern = diagnoseCF(latest);
@@ -178,23 +182,23 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
       <KPIStrip>
         <KPIStat
           label="영업활동 CF"
-          value={fmtKRW(latest.operatingCashFlow)}
+          value={fmtMain(latest.operatingCashFlow)}
           hint="본업 현금 창출"
           valueColor={latest.operatingCashFlow !== null && latest.operatingCashFlow < 0 ? COLOR.negative : COLOR.primary}
         />
         <KPIStat
           label="투자활동 CF"
-          value={fmtKRW(latest.investingCashFlow)}
+          value={fmtMain(latest.investingCashFlow)}
           hint="유·무형자산 투자"
         />
         <KPIStat
           label="재무활동 CF"
-          value={fmtKRW(latest.financingCashFlow)}
+          value={fmtMain(latest.financingCashFlow)}
           hint="차입금·배당·자사주"
         />
         <KPIStat
           label="FCF (잉여현금흐름)"
-          value={fmtKRW(latest.freeCashFlow)}
+          value={fmtMain(latest.freeCashFlow)}
           hint="영업CF − 투자지출"
           valueColor={latest.freeCashFlow !== null && latest.freeCashFlow < 0 ? COLOR.negative : COLOR.positive}
         />
@@ -213,8 +217,8 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
                   axisLine={false}
                   tickLine={false}
                 />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+                <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
                 <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
                 <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={2} />
                 {periods.map((p, i) => (
@@ -240,14 +244,14 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
       <PatternHero pattern={pattern} period={latest.period} />
 
       {/* 시계열: 영업·투자·재무 CF 추이 */}
-      <Card title="현금흐름 추이" sub="활동별 시계열 (단위: 억원)">
+      <Card title="현금흐름 추이" sub={`활동별 시계열 (단위: ${unitLabel})`}>
         <div style={{ height: 290 }}>
           <ResponsiveContainer>
             <BarChart data={data} margin={{ top: 22, right: 8, left: -8, bottom: 8 }} barCategoryGap="22%" barGap={2}>
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
               <Bar dataKey="operatingCashFlow" name="영업활동" fill={COLOR.primary} fillOpacity={0.85} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
@@ -281,8 +285,8 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
               </defs>
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
               <Bar dataKey="freeCashFlow" name="기간 FCF" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
@@ -353,9 +357,9 @@ export function CashFlowTab({ data }: { data: FinancialMetrics[] }) {
               <ComposedChart data={enriched} margin={{ top: 10, right: 0, left: -8, bottom: 0 }} barCategoryGap="22%">
                 <CartesianGrid {...GRID_PROPS} />
                 <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={50} />
+                <YAxis yAxisId="left" tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={50} />
                 <YAxis yAxisId="right" orientation="right" tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={36} />
-                <Tooltip content={<RichTooltip fmt={(n, v) => (n === 'CAPEX비율' ? `${v.toFixed(1)}%` : fmtKRW(v))} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                <Tooltip content={<RichTooltip fmt={(n, v) => (n === 'CAPEX비율' ? `${v.toFixed(1)}%` : fmtMain(v))} />} cursor={{ fill: COLOR.primaryAlpha }} />
                 <Bar yAxisId="left" dataKey="capex" name="투자지출" fill={COLOR.accent} fillOpacity={0.6} maxBarSize={42} radius={[4, 4, 0, 0]} isAnimationActive={false} />
                 <Line
                   yAxisId="right"

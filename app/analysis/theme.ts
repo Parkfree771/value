@@ -78,6 +78,54 @@ export function fmtKRWAxis(v: number): string {
   return `${sign}${abs}억`;
 }
 
+/* ─────────────── USD (백만 USD 단위 입력 가정) ─────────────── */
+
+/** 백만 USD 입력 → 사람 읽기 쉽게 ($60.9B / $500M / $250K) */
+export function fmtUSD(v: number | null | undefined): string {
+  if (v === null || v === undefined) return '—';
+  const abs = Math.abs(v);
+  const sign = v < 0 ? '-' : '';
+  if (abs >= 1_000_000) return `${sign}$${(abs / 1_000_000).toFixed(2)}T`;
+  if (abs >= 1000) return `${sign}$${(abs / 1000).toFixed(1)}B`;
+  if (abs >= 1) return `${sign}$${abs.toLocaleString(undefined, { maximumFractionDigits: 0 })}M`;
+  return `${sign}$${(abs * 1000).toFixed(0)}K`;
+}
+
+/** 축용 짧은 USD (60B / 500M) */
+export function fmtUSDAxis(v: number): string {
+  const abs = Math.abs(v);
+  const sign = v < 0 ? '-' : '';
+  if (abs >= 1_000_000) return `${sign}${(abs / 1_000_000).toFixed(1)}T`;
+  if (abs >= 1000) return `${sign}${(abs / 1000).toFixed(0)}B`;
+  return `${sign}${Math.round(abs)}M`;
+}
+
+/** USD 가격 ($1,234.56) */
+export function fmtUSDPrice(v: number): string {
+  return `$${v.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+}
+
+/** 통화 종류 */
+export type Currency = 'KRW' | 'USD';
+
+/** 통화별 포맷터 묶음 반환 */
+export function getCurrencyFmt(currency: Currency = 'KRW') {
+  if (currency === 'USD') {
+    return {
+      main: fmtUSD,
+      axis: fmtUSDAxis,
+      unitLabel: '백만 USD',
+      currency: 'USD' as const,
+    };
+  }
+  return {
+    main: fmtKRW,
+    axis: fmtKRWAxis,
+    unitLabel: '억원',
+    currency: 'KRW' as const,
+  };
+}
+
 /** 퍼센트 (옵션: 부호 표시) */
 export function fmtPct(v: number | null | undefined, opts?: { sign?: boolean; digits?: number }): string {
   if (v === null || v === undefined) return '—';

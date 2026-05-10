@@ -15,12 +15,12 @@ import {
   Cell,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
-import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtKRW, fmtKRWAxis, fmtPct } from '../theme';
+import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtPct, getCurrencyFmt, type Currency } from '../theme';
 import { performanceHighlights } from '../insights';
 import { Card, RichTooltip, KPIStat, KPIStrip, HighlightStat, HighlightPanel } from '../components/primitives';
 
-/** 막대 위 금액 라벨 (간략 표기: 540조 / 12조 / 8천억) */
-function renderBarLabel(color: string) {
+/** 막대 위 금액 라벨 (간략 표기: 540조 / 12조 / 8천억 / 60B / 500M) */
+function renderBarLabel(color: string, fmtAxis: (v: number) => string) {
   // Recharts LabelList content prop expects a flexible signature
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return function BarLabel(props: any) {
@@ -39,13 +39,14 @@ function renderBarLabel(color: string) {
         fill={color}
         style={{ fontFamily: 'inherit' }}
       >
-        {fmtKRWAxis(value)}
+        {fmtAxis(value)}
       </text>
     );
   };
 }
 
-export function PerformanceTab({ data }: { data: FinancialMetrics[] }) {
+export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
+  const { main: fmtMain, axis: fmtAxis, unitLabel } = getCurrencyFmt(currency);
   if (data.length === 0) return null;
   const latest = data[data.length - 1];
   const highlights = performanceHighlights(data);
@@ -75,20 +76,20 @@ export function PerformanceTab({ data }: { data: FinancialMetrics[] }) {
       <KPIStrip>
         <KPIStat
           label="매출액"
-          value={fmtKRW(latest.revenue)}
+          value={fmtMain(latest.revenue)}
           trend={revYoY}
           trendLabel="전년 대비"
         />
         <KPIStat
           label="영업이익"
-          value={fmtKRW(latest.operatingProfit)}
+          value={fmtMain(latest.operatingProfit)}
           trend={opYoY}
           trendLabel="전년 대비"
           valueColor={latest.operatingProfit !== null && latest.operatingProfit < 0 ? COLOR.negative : undefined}
         />
         <KPIStat
           label="순이익"
-          value={fmtKRW(latest.netIncome)}
+          value={fmtMain(latest.netIncome)}
           trend={niYoY}
           trendLabel="전년 대비"
           valueColor={latest.netIncome !== null && latest.netIncome < 0 ? COLOR.negative : undefined}
@@ -101,7 +102,7 @@ export function PerformanceTab({ data }: { data: FinancialMetrics[] }) {
       </KPIStrip>
 
       {/* 메인 차트: 매출+영업이익+순이익 (3-bar grouped) */}
-      <Card title="매출 · 영업이익 · 순이익" sub="추이 (단위: 억원)">
+      <Card title="매출 · 영업이익 · 순이익" sub={`추이 (단위: ${unitLabel})`}>
         <div style={{ height: 320 }}>
           <ResponsiveContainer>
             <BarChart data={data} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%" barGap={3}>
@@ -121,18 +122,18 @@ export function PerformanceTab({ data }: { data: FinancialMetrics[] }) {
               </defs>
               <CartesianGrid {...GRID_PROPS} />
               <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtKRWAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtKRW(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
               <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
               <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
               <Bar dataKey="revenue" name="매출액" fill="url(#grad-rev)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false}>
-                <LabelList dataKey="revenue" position="top" content={renderBarLabel(COLOR.primary)} />
+                <LabelList dataKey="revenue" position="top" content={renderBarLabel(COLOR.primary, fmtAxis)} />
               </Bar>
               <Bar dataKey="operatingProfit" name="영업이익" fill="url(#grad-op)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false}>
-                <LabelList dataKey="operatingProfit" position="top" content={renderBarLabel(COLOR.series2)} />
+                <LabelList dataKey="operatingProfit" position="top" content={renderBarLabel(COLOR.series2, fmtAxis)} />
               </Bar>
               <Bar dataKey="netIncome" name="순이익" fill="url(#grad-ni)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false}>
-                <LabelList dataKey="netIncome" position="top" content={renderBarLabel(COLOR.series3)} />
+                <LabelList dataKey="netIncome" position="top" content={renderBarLabel(COLOR.series3, fmtAxis)} />
               </Bar>
             </BarChart>
           </ResponsiveContainer>

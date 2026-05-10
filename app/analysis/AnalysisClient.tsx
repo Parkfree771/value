@@ -12,6 +12,7 @@ import type {
   TrendsResponse,
 } from './types';
 import { CompanyHeader } from './components/CompanyHeader';
+import { MarketTabs } from './components/MarketTabs';
 import { PerformanceTab } from './tabs/PerformanceTab';
 import { ProfitabilityTab } from './tabs/ProfitabilityTab';
 import { StabilityTab } from './tabs/StabilityTab';
@@ -76,13 +77,17 @@ export default function AnalysisClient() {
   const [trendsData, setTrendsData] = useState<TrendsResponse | null>(null);
   const [trendsLoading, setTrendsLoading] = useState(false);
 
+  // 한국인 거래량/검색량 상위 8종목 (산업 분산)
   const defaultCompanies: SearchResult[] = useMemo(
     () => [
       { corpCode: '00126380', corpName: '삼성전자', stockCode: '005930' },
       { corpCode: '00164779', corpName: 'SK하이닉스', stockCode: '000660' },
-      { corpCode: '00266961', corpName: '네이버', stockCode: '035420' },
-      { corpCode: '00258801', corpName: '카카오', stockCode: '035720' },
       { corpCode: '00164742', corpName: '현대차', stockCode: '005380' },
+      { corpCode: '01515323', corpName: 'LG에너지솔루션', stockCode: '373220' },
+      { corpCode: '00126566', corpName: '한화에어로스페이스', stockCode: '012450' },
+      { corpCode: '00159616', corpName: '두산에너빌리티', stockCode: '034020' },
+      { corpCode: '00877059', corpName: '삼성바이오로직스', stockCode: '207940' },
+      { corpCode: '00258801', corpName: '카카오', stockCode: '035720' },
     ],
     []
   );
@@ -202,97 +207,126 @@ export default function AnalysisClient() {
   /* ═══ 렌더링 ═══ */
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 타이틀 */}
-      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight mb-5 sm:mb-7 text-[var(--foreground)]">
+      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight mb-4 sm:mb-6 text-[var(--foreground)]">
         기업분석
       </h1>
 
-      {/* 검색 */}
-      <div ref={searchRef} className="relative mb-5 sm:mb-7">
-        <div
-          className={`group flex mb-3 rounded-xl overflow-hidden transition-all border-2 ${
-            searchOpen
-              ? 'border-[var(--theme-accent)]'
-              : 'border-[var(--theme-border-muted)] hover:border-[var(--theme-accent-light)]'
-          }`}
-          style={{
-            boxShadow: searchOpen
-              ? '0 4px 16px rgba(59, 80, 181, 0.18), 0 1px 3px rgba(15, 23, 42, 0.06)'
-              : '0 2px 8px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04)',
-          }}
-        >
-          <div className="flex-shrink-0 flex items-center justify-center w-12 bg-[var(--theme-accent)]">
-            <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setSearchOpen(true);
-            }}
-            onFocus={() => setSearchOpen(true)}
-            placeholder="기업명 또는 종목코드 (예: 삼성전자, 005930)"
-            className="flex-1 px-4 py-3 font-heading text-sm sm:text-[15px] font-bold bg-[var(--theme-bg-card)] text-[var(--foreground)] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none"
-          />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => {
-                setSearchQuery('');
-                setSearchResults([]);
-              }}
-              className="flex-shrink-0 flex items-center justify-center w-10 text-gray-400 hover:text-[var(--foreground)] transition-colors"
-              aria-label="지우기"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          )}
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-5 lg:gap-7">
+        {/* ─────────── 사이드바 (좌) ─────────── */}
+        <aside className="flex flex-col gap-5 lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto lg:pr-3 lg:pb-3">
+          {/* 시장 토글 */}
+          <MarketTabs active="kr" variant="block" />
 
-        {/* 기업 칩 */}
-        <div className="flex gap-1.5 flex-wrap">
-          {displayCompanies.map((company) => (
-            <button
-              key={company.corpCode}
-              onClick={() => selectCompany(company)}
-              className={`font-heading text-xs sm:text-sm px-3 py-1.5 font-bold border rounded-lg transition-all ${
-                selectedCorp?.corpCode === company.corpCode
-                  ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent)] shadow-md'
-                  : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
-              }`}
-            >
-              {company.corpName}
-            </button>
-          ))}
-        </div>
-
-        {/* 검색 드롭다운 */}
-        {searchOpen && searchResults.length > 0 && (
-          <div
-            className="absolute z-50 left-0 right-0 top-[60px] bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-xl max-h-[320px] overflow-y-auto"
-            style={{ boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12), 0 2px 6px rgba(15, 23, 42, 0.08)' }}
-          >
-            {searchResults.map((r) => (
-              <button
-                key={r.corpCode}
-                onClick={() => selectCompany(r)}
-                className="w-full flex items-center justify-between px-4 py-3 hover:bg-[var(--theme-accent)]/8 transition-colors border-b border-[var(--theme-border-muted)]/40 last:border-b-0"
+          {/* 검색 + 인기 종목 */}
+          <div ref={searchRef} className="flex flex-col gap-4">
+            {/* 검색 입력 + 드롭다운 */}
+            <div className="relative">
+              <p className="font-heading text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500 mb-2">
+                검색
+              </p>
+              <div
+                className={`flex rounded-xl overflow-hidden transition-all border-2 ${
+                  searchOpen
+                    ? 'border-[var(--theme-accent)]'
+                    : 'border-[#94a3b8] dark:border-[#64748b]'
+                }`}
+                style={{
+                  boxShadow: searchOpen
+                    ? 'inset 1px 1px 0 0 rgba(255, 255, 255, 0.75), 2px 2px 0 0 rgba(59, 80, 181, 0.55), 4px 4px 0 0 rgba(59, 80, 181, 0.40), 6px 6px 0 0 rgba(59, 80, 181, 0.25)'
+                    : 'inset 1px 1px 0 0 rgba(255, 255, 255, 0.75), 2px 2px 0 0 rgba(59, 80, 181, 0.30), 4px 4px 0 0 rgba(59, 80, 181, 0.20), 6px 6px 0 0 rgba(59, 80, 181, 0.12)',
+                }}
               >
-                <span className="font-heading text-sm font-bold text-[var(--foreground)]">{r.corpName}</span>
-                <span className="font-heading text-xs font-bold text-gray-400 tabular-nums">{r.stockCode}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+                <div className="flex-shrink-0 flex items-center justify-center w-11 bg-gradient-to-br from-[var(--theme-accent)] to-[var(--theme-accent-dark)]">
+                  <svg className="w-[18px] h-[18px] text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                  placeholder="삼성전자, 005930…"
+                  className="flex-1 px-3 py-3 font-heading text-sm font-bold bg-[var(--theme-bg-card)] text-[var(--foreground)] placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none min-w-0"
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                    }}
+                    className="flex-shrink-0 flex items-center justify-center w-9 text-gray-400 hover:text-[var(--foreground)] transition-colors"
+                    aria-label="지우기"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
 
-      {/* 기업 헤더 */}
+              {/* 검색 드롭다운 */}
+              {searchOpen && searchResults.length > 0 && (
+                <div
+                  className="absolute z-50 left-0 right-0 top-full mt-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-xl max-h-[360px] overflow-y-auto"
+                  style={{ boxShadow: '0 8px 24px rgba(15, 23, 42, 0.12)' }}
+                >
+                  {searchResults.map((r) => (
+                    <button
+                      key={r.corpCode}
+                      onClick={() => selectCompany(r)}
+                      className="w-full flex items-center justify-between gap-3 px-4 py-3 hover:bg-[var(--theme-accent)]/8 transition-colors border-b border-[var(--theme-border-muted)]/40 last:border-b-0"
+                    >
+                      <span className="font-heading text-sm font-bold text-[var(--foreground)] truncate">{r.corpName}</span>
+                      <span className="font-heading text-xs font-bold text-gray-400 tabular-nums flex-shrink-0">{r.stockCode}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 인기 종목 — 사이드바 세로 리스트 */}
+            <div>
+              <p className="font-heading text-[10px] font-bold uppercase tracking-[0.15em] text-gray-400 dark:text-gray-500 mb-2">
+                인기 종목
+              </p>
+              <div className="flex flex-col gap-1">
+                {displayCompanies.map((company) => (
+                  <button
+                    key={company.corpCode}
+                    onClick={() => selectCompany(company)}
+                    className={`flex items-center justify-between gap-2 font-heading text-sm px-3 py-2 font-bold rounded-lg transition-colors ${
+                      selectedCorp?.corpCode === company.corpCode
+                        ? 'bg-[var(--theme-accent)] text-white shadow-sm'
+                        : 'text-gray-500 dark:text-gray-400 hover:text-[var(--foreground)] hover:bg-[var(--theme-accent)]/8'
+                    }`}
+                  >
+                    <span className="truncate">{company.corpName}</span>
+                    <span
+                      className={`font-sans text-[10px] font-bold tracking-wider tabular-nums flex-shrink-0 ${
+                        selectedCorp?.corpCode === company.corpCode
+                          ? 'text-white/80'
+                          : 'text-gray-400 dark:text-gray-500'
+                      }`}
+                    >
+                      {company.stockCode}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* ─────────── 메인 (우) ─────────── */}
+        <main className="min-w-0">
+          {/* 기업 헤더 */}
       {companyInfo && !loading && (
         <div className="mb-5 sm:mb-7">
           <CompanyHeader
@@ -415,10 +449,12 @@ export default function AnalysisClient() {
         </>
       )}
 
-      {/* 출처 */}
-      <p className="font-sans text-[10px] text-gray-400 dark:text-gray-600 mt-10 tracking-wide text-center">
-        DART Open API · 한국투자증권 · 연결재무제표(CFS) · 단위: 억원
-      </p>
+          {/* 출처 */}
+          <p className="font-sans text-[10px] text-gray-400 dark:text-gray-600 mt-10 tracking-wide text-center">
+            DART Open API · 한국투자증권 · 연결재무제표(CFS) · 단위: 억원
+          </p>
+        </main>
+      </div>
     </div>
   );
 }

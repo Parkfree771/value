@@ -1,6 +1,6 @@
 {
   "version": "2026-01-05",
-  "updatedAt": "2026-01-05T09:50:12.670Z",
+  "updatedAt": "2026-05-10T11:18:02.261Z",
   "totalCount": 29801,
   "exchanges": {
     "NAS": 4968,
@@ -524,7 +524,8 @@
       "symbol": "ADI",
       "name": "ANALOG DEVICES INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "아날로그디바이스"
     },
     {
       "symbol": "ADIL",
@@ -1352,7 +1353,8 @@
       "symbol": "AMAT",
       "name": "APPLIED MATERIALS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "어플라이드머티리얼즈"
     },
     {
       "symbol": "AMBA",
@@ -1413,7 +1415,8 @@
       "symbol": "AMGN",
       "name": "AMGEN INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "암젠"
     },
     {
       "symbol": "AMID",
@@ -2008,7 +2011,8 @@
       "symbol": "ARM",
       "name": "ARM HOLDINGS PLC SPON ADS EACH REP 1 ORD SHS",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "ARM"
     },
     {
       "symbol": "ARMG",
@@ -2128,7 +2132,8 @@
       "symbol": "ASML",
       "name": "ASML HOLDING NV EUR0.09 NY REGISTRY SHS 2012",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "ASML"
     },
     {
       "symbol": "ASND",
@@ -3371,7 +3376,8 @@
       "symbol": "BIDU",
       "name": "BAIDU INC SPON ADS EACH REP 8 ORD SHS",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "바이두"
     },
     {
       "symbol": "BIIB",
@@ -3485,7 +3491,8 @@
       "symbol": "BKNG",
       "name": "BOOKING HOLDINGS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "부킹"
     },
     {
       "symbol": "BKR",
@@ -5201,7 +5208,8 @@
       "symbol": "CEG",
       "name": "CONSTELLATION ENERGY CORPORATION",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "컨스텔레이션에너지"
     },
     {
       "symbol": "CELC",
@@ -5934,7 +5942,8 @@
       "symbol": "CMCSA",
       "name": "COMCAST CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "컴캐스트"
     },
     {
       "symbol": "CMCT",
@@ -5946,7 +5955,8 @@
       "symbol": "CME",
       "name": "CME GROUP INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "CME"
     },
     {
       "symbol": "CMGG",
@@ -6168,7 +6178,8 @@
       "symbol": "COIN",
       "name": "COINBASE GLOBAL INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "코인베이스"
     },
     {
       "symbol": "COKE",
@@ -6631,7 +6642,8 @@
       "symbol": "CRWD",
       "name": "CROWDSTRIKE HOLDINGS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "크라우드스트라이크"
     },
     {
       "symbol": "CRWG",
@@ -6746,7 +6758,8 @@
       "symbol": "CSX",
       "name": "CSX CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "CSX"
     },
     {
       "symbol": "CTAS",
@@ -7130,7 +7143,8 @@
       "symbol": "DASH",
       "name": "DOORDASH INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "도어대시"
     },
     {
       "symbol": "DAVE",
@@ -7238,7 +7252,8 @@
       "symbol": "DDOG",
       "name": "DATADOG INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "데이터독"
     },
     {
       "symbol": "DECO",
@@ -7592,7 +7607,8 @@
       "symbol": "DOCU",
       "name": "DOCUSIGN INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "도큐사인"
     },
     {
       "symbol": "DOGZ",
@@ -8096,7 +8112,8 @@
       "symbol": "EA",
       "name": "ELECTRONIC ARTS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "EA"
     },
     {
       "symbol": "EASY",
@@ -8594,7 +8611,8 @@
       "symbol": "ENPH",
       "name": "ENPHASE ENERGY INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "엔페이즈에너지"
     },
     {
       "symbol": "ENSC",
@@ -8858,7 +8876,8 @@
       "symbol": "ETHA",
       "name": "ISHARES ETHEREUM TRUST ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "이더리움 ETF (블랙록)"
     },
     {
       "symbol": "ETHI",
@@ -10370,7 +10389,8 @@
       "symbol": "FSLR",
       "name": "FIRST SOLAR INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "퍼스트솔라"
     },
     {
       "symbol": "FSLY",
@@ -10514,7 +10534,8 @@
       "symbol": "FTNT",
       "name": "FORTINET INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "포티넷"
     },
     {
       "symbol": "FTQI",
@@ -11156,7 +11177,8 @@
       "symbol": "GILD",
       "name": "GILEAD SCIENCES INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "길리어드"
     },
     {
       "symbol": "GILT",
@@ -12412,13 +12434,15 @@
       "symbol": "HON",
       "name": "HONEYWELL INTERNATIONAL INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "허니웰"
     },
     {
       "symbol": "HOOD",
       "name": "ROBINHOOD MARKETS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "로빈후드"
     },
     {
       "symbol": "HOOG",
@@ -12982,7 +13006,8 @@
       "symbol": "IBIT",
       "name": "ISHARES BITCOIN TRUST ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "비트코인 ETF (블랙록)"
     },
     {
       "symbol": "IBKR",
@@ -13192,7 +13217,8 @@
       "symbol": "IEF",
       "name": "ISHARES TRUST 7-10 YEAR TREASURY BOND ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "7-10년 미국채 ETF"
     },
     {
       "symbol": "IEI",
@@ -13739,7 +13765,8 @@
       "symbol": "INTU",
       "name": "INTUIT INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "인튜이트"
     },
     {
       "symbol": "INTW",
@@ -14075,7 +14102,8 @@
       "symbol": "ISRG",
       "name": "INTUITIVE SURGICAL INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "인튜이티브서지컬"
     },
     {
       "symbol": "ISRL",
@@ -14333,7 +14361,8 @@
       "symbol": "JD",
       "name": "JD.COM INC SPON ADS EACH REPR 2 ORD SHS CLASS A",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "JD닷컴"
     },
     {
       "symbol": "JDOC",
@@ -14357,7 +14386,8 @@
       "symbol": "JEPQ",
       "name": "JP MORGAN ETF TRUST NASDAQ EQUITY PREMIUM INCOME ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "JEPQ 커버드콜"
     },
     {
       "symbol": "JFB",
@@ -14802,7 +14832,8 @@
       "symbol": "KLAC",
       "name": "KLA CORPORATION",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "KLA"
     },
     {
       "symbol": "KLAG",
@@ -14844,7 +14875,8 @@
       "symbol": "KMB",
       "name": "KIMBERLY CLARK CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "킴벌리클락"
     },
     {
       "symbol": "KMDA",
@@ -15324,7 +15356,8 @@
       "symbol": "LCID",
       "name": "LUCID GROUP INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "루시드"
     },
     {
       "symbol": "LCNB",
@@ -15564,7 +15597,8 @@
       "symbol": "LI",
       "name": "LI AUTO INC SPN ADS ECH REP 2 ORD SHS CL A",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "리오토"
     },
     {
       "symbol": "LICN",
@@ -15612,7 +15646,8 @@
       "symbol": "LIN",
       "name": "LINDE PLC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "린데"
     },
     {
       "symbol": "LINC",
@@ -15996,7 +16031,8 @@
       "symbol": "LRCX",
       "name": "LAM RESEARCH CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "램리서치"
     },
     {
       "symbol": "LRE",
@@ -16122,7 +16158,8 @@
       "symbol": "LULU",
       "name": "LULULEMON ATHLETICA INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "룰루레몬"
     },
     {
       "symbol": "LUNG",
@@ -16218,7 +16255,8 @@
       "symbol": "LYFT",
       "name": "LYFT INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "리프트"
     },
     {
       "symbol": "LYRA",
@@ -16314,7 +16352,8 @@
       "symbol": "MARA",
       "name": "MARA HOLDINGS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "마라톤디지털"
     },
     {
       "symbol": "MARPS",
@@ -16674,7 +16713,8 @@
       "symbol": "MDLZ",
       "name": "MONDELEZ INTL INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "몬델리즈"
     },
     {
       "symbol": "MDRR",
@@ -17329,7 +17369,8 @@
       "symbol": "MPWR",
       "name": "MONOLITHIC POWER SYSTEM INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "모놀리식파워"
     },
     {
       "symbol": "MQ",
@@ -17432,7 +17473,8 @@
       "symbol": "MRVL",
       "name": "MARVELL TECHNOLOGY INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "마벨"
     },
     {
       "symbol": "MRX",
@@ -17535,7 +17577,8 @@
       "symbol": "MSTR",
       "name": "STRATEGY INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "마이크로스트레티지"
     },
     {
       "symbol": "MSTX",
@@ -19416,7 +19459,8 @@
       "symbol": "ON",
       "name": "ON SEMICONDUCTOR CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "온세미컨덕터"
     },
     {
       "symbol": "ONB",
@@ -20034,7 +20078,8 @@
       "symbol": "PANW",
       "name": "PALO ALTO NETWORKS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "팔로알토네트웍스"
     },
     {
       "symbol": "PARK",
@@ -20280,7 +20325,8 @@
       "symbol": "PDD",
       "name": "PDD HOLDINGS INC SPON ADS EACH REP 4 ORD SHS",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "핀둬둬"
     },
     {
       "symbol": "PDDL",
@@ -20786,7 +20832,8 @@
       "symbol": "PLUG",
       "name": "PLUG POWER INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "플러그파워"
     },
     {
       "symbol": "PLUR",
@@ -22487,7 +22534,8 @@
       "symbol": "REGN",
       "name": "REGENERON PHARMACEUTICALS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "리제네론"
     },
     {
       "symbol": "REIT",
@@ -22781,7 +22829,8 @@
       "symbol": "RIOT",
       "name": "RIOT PLATFORMS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "라이엇"
     },
     {
       "symbol": "RITR",
@@ -22793,7 +22842,8 @@
       "symbol": "RIVN",
       "name": "RIVIAN AUTOMOTIVE INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "리비안"
     },
     {
       "symbol": "RJET",
@@ -22997,7 +23047,8 @@
       "symbol": "ROKU",
       "name": "ROKU INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "로쿠"
     },
     {
       "symbol": "ROMA",
@@ -23021,7 +23072,8 @@
       "symbol": "ROST",
       "name": "ROSS STORES INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "로스스토어"
     },
     {
       "symbol": "RPAY",
@@ -23982,7 +24034,8 @@
       "symbol": "SHOP",
       "name": "SHOPIFY INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "쇼피파이"
     },
     {
       "symbol": "SHPD",
@@ -24018,7 +24071,8 @@
       "symbol": "SHY",
       "name": "ISHARES TRUST 1-3 YEAR TREASURY BOND ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "단기 미국채 ETF"
     },
     {
       "symbol": "SIBN",
@@ -24421,7 +24475,8 @@
       "symbol": "SMH",
       "name": "VANECK ETF TR SEMICONDUCTOR ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "반도체 ETF (반에크)"
     },
     {
       "symbol": "SMHX",
@@ -24679,7 +24734,8 @@
       "symbol": "SOFI",
       "name": "SOFI TECHNOLOGIES INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "소파이"
     },
     {
       "symbol": "SOFX",
@@ -24823,7 +24879,8 @@
       "symbol": "SOXX",
       "name": "ISHARES TRUST ISHARES SEMICONDUCTOR ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "반도체 ETF"
     },
     {
       "symbol": "SPAI",
@@ -25033,7 +25090,8 @@
       "symbol": "SQQQ",
       "name": "PROSHARES ULTRAPRO SHORT QQQ",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "나스닥 인버스 3X"
     },
     {
       "symbol": "SRAD",
@@ -25381,7 +25439,8 @@
       "symbol": "STX",
       "name": "SEAGATE TECHNOLOGY HOLDINGS PLC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "시게이트"
     },
     {
       "symbol": "SUGP",
@@ -25993,7 +26052,8 @@
       "symbol": "TEAM",
       "name": "ATLASSIAN CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "아틀라시안"
     },
     {
       "symbol": "TECH",
@@ -26299,7 +26359,8 @@
       "symbol": "TLT",
       "name": "ISHARES TRUST 20+ YR TREAS BD ETF",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "장기 미국채 ETF"
     },
     {
       "symbol": "TLX",
@@ -26516,7 +26577,8 @@
       "symbol": "TQQQ",
       "name": "PROSHARES TRUST ULTRAPRO QQQ USD",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "나스닥 3X ETF"
     },
     {
       "symbol": "TQQY",
@@ -26889,7 +26951,8 @@
       "symbol": "TTWO",
       "name": "TAKE TWO INTERACTIVE SOFTWARE INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "테이크투인터랙티브"
     },
     {
       "symbol": "TUG",
@@ -27033,7 +27096,8 @@
       "symbol": "TXN",
       "name": "TEXAS INSTRUMENTS INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "텍사스인스트루먼트"
     },
     {
       "symbol": "TXRH",
@@ -28258,7 +28322,8 @@
       "symbol": "VRTX",
       "name": "VERTEX PHARMACEUTICAL",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "버텍스"
     },
     {
       "symbol": "VS",
@@ -28588,13 +28653,15 @@
       "symbol": "WDAY",
       "name": "WORKDAY INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "워크데이"
     },
     {
       "symbol": "WDC",
       "name": "WESTERN DIGITAL CORP",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "웨스턴디지털"
     },
     {
       "symbol": "WDFC",
@@ -29777,7 +29844,8 @@
       "symbol": "ZS",
       "name": "ZSCALER INC",
       "exchange": "NAS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "지스케일러"
     },
     {
       "symbol": "ZSPC",
@@ -29933,7 +30001,8 @@
       "symbol": "ABM",
       "name": "ABM INDUSTRIES INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "ABM인더스트리"
     },
     {
       "symbol": "ABR",
@@ -30408,7 +30477,8 @@
       "symbol": "AIG",
       "name": "AMERICAN INTERNATIONAL GROUP INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "AIG"
     },
     {
       "symbol": "AII",
@@ -30804,7 +30874,8 @@
       "symbol": "ANET",
       "name": "ARISTA NETWORKS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "아리스타네트웍스"
     },
     {
       "symbol": "ANF",
@@ -30894,7 +30965,8 @@
       "symbol": "APD",
       "name": "AIR PRODUCTS & CHEMICALS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "에어프로덕츠"
     },
     {
       "symbol": "APG",
@@ -31442,7 +31514,8 @@
       "symbol": "BABA",
       "name": "ALIBABA GROUP HOLDING LTD SPON ADS EACH REP 8 ORD SHS",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "알리바바"
     },
     {
       "symbol": "BAC",
@@ -32211,7 +32284,8 @@
       "symbol": "BLK",
       "name": "BLACKROCK INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "블랙록"
     },
     {
       "symbol": "BLND",
@@ -32301,7 +32375,8 @@
       "symbol": "BMY",
       "name": "BRISTOL-MYERS SQUIBB CO",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "브리스톨마이어스"
     },
     {
       "symbol": "BN",
@@ -32415,7 +32490,8 @@
       "symbol": "BP",
       "name": "BP SPON ADR EACH REP 6 ORD SHS",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "BP"
     },
     {
       "symbol": "BPRE",
@@ -32553,7 +32629,8 @@
       "symbol": "BSX",
       "name": "BOSTON SCIENTIFIC CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "보스톤사이언티픽"
     },
     {
       "symbol": "BTA",
@@ -32763,7 +32840,8 @@
       "symbol": "C",
       "name": "CITIGROUP INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "씨티그룹"
     },
     {
       "symbol": "C/N",
@@ -33185,7 +33263,8 @@
       "symbol": "CI",
       "name": "THE CIGNA GROUP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "시그나"
     },
     {
       "symbol": "CIA",
@@ -33317,7 +33396,8 @@
       "symbol": "CL",
       "name": "COLGATE-PALMOLIVE CO",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "콜게이트"
     },
     {
       "symbol": "CLB",
@@ -33431,7 +33511,8 @@
       "symbol": "CMG",
       "name": "CHIPOTLE MEXICAN GRILL",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "치폴레"
     },
     {
       "symbol": "CMI",
@@ -34118,7 +34199,8 @@
       "symbol": "CVS",
       "name": "CVS HEALTH CORPORATION",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "CVS"
     },
     {
       "symbol": "CVX",
@@ -34221,7 +34303,8 @@
       "symbol": "D",
       "name": "DOMINION ENERGY INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "도미니언에너지"
     },
     {
       "symbol": "DAC",
@@ -34359,7 +34442,8 @@
       "symbol": "DE",
       "name": "DEERE & CO",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "디어"
     },
     {
       "symbol": "DEA",
@@ -34443,7 +34527,8 @@
       "symbol": "DHR",
       "name": "DANAHER CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "다나허"
     },
     {
       "symbol": "DHT",
@@ -34762,7 +34847,8 @@
       "symbol": "DUK",
       "name": "DUKE ENERGY CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "듀크에너지"
     },
     {
       "symbol": "DUK/A",
@@ -35147,7 +35233,8 @@
       "symbol": "EL",
       "name": "ESTEE LAUDER COMPANIES INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "에스티로더"
     },
     {
       "symbol": "ELAN",
@@ -35195,7 +35282,8 @@
       "symbol": "ELV",
       "name": "ELEVANCE HEALTH INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "엘레반스헬스"
     },
     {
       "symbol": "EMA",
@@ -35249,7 +35337,8 @@
       "symbol": "EMR",
       "name": "EMERSON ELECTRIC CO",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "에머슨일렉트릭"
     },
     {
       "symbol": "ENB",
@@ -35309,7 +35398,8 @@
       "symbol": "EOG",
       "name": "EOG RESOURCES INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "EOG리소시스"
     },
     {
       "symbol": "EOI",
@@ -35537,7 +35627,8 @@
       "symbol": "ETN",
       "name": "EATON CORPORATION PLC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "이튼"
     },
     {
       "symbol": "ETO",
@@ -35814,7 +35905,8 @@
       "symbol": "FCX",
       "name": "FREEPORT-MCMORAN INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "프리포트맥모란"
     },
     {
       "symbol": "FDP",
@@ -35832,7 +35924,8 @@
       "symbol": "FDX",
       "name": "FEDEX CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "페덱스"
     },
     {
       "symbol": "FE",
@@ -36433,7 +36526,8 @@
       "symbol": "GD",
       "name": "GENERAL DYNAMICS CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "제너럴다이내믹스"
     },
     {
       "symbol": "GDDY",
@@ -36656,7 +36750,8 @@
       "symbol": "GIS",
       "name": "GENERAL MILLS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "제너럴밀스"
     },
     {
       "symbol": "GJH",
@@ -37625,7 +37720,8 @@
       "symbol": "HSY",
       "name": "HERSHEY COMPANY",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "허쉬"
     },
     {
       "symbol": "HTB",
@@ -37685,7 +37781,8 @@
       "symbol": "HUM",
       "name": "HUMANA INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "휴매나"
     },
     {
       "symbol": "HUN",
@@ -37787,7 +37884,8 @@
       "symbol": "IBM",
       "name": "INTERNATIONAL BUS MACH CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "IBM"
     },
     {
       "symbol": "IBN",
@@ -37811,7 +37909,8 @@
       "symbol": "ICE",
       "name": "INTERCONTINENTAL EXCHANGE INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "인터컨티넨탈익스체인지"
     },
     {
       "symbol": "ICL",
@@ -38135,7 +38234,8 @@
       "symbol": "ITW",
       "name": "ILLINOIS TOOL WORKS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "일리노이툴웍스"
     },
     {
       "symbol": "IVR",
@@ -38443,7 +38543,8 @@
       "symbol": "K",
       "name": "KELLANOVA",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "켈로그"
     },
     {
       "symbol": "KAI",
@@ -39069,7 +39170,8 @@
       "symbol": "LMT",
       "name": "LOCKHEED MARTIN CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "록히드마틴"
     },
     {
       "symbol": "LNC",
@@ -39457,7 +39559,8 @@
       "symbol": "MDT",
       "name": "MEDTRONIC PLC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "메드트로닉"
     },
     {
       "symbol": "MDU",
@@ -39902,7 +40005,8 @@
       "symbol": "MO",
       "name": "ALTRIA GROUP INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "알트리아"
     },
     {
       "symbol": "MOD",
@@ -39968,7 +40072,8 @@
       "symbol": "MPC",
       "name": "MARATHON PETROLEUM CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "마라톤페트롤리움"
     },
     {
       "symbol": "MPLX",
@@ -40498,7 +40603,8 @@
       "symbol": "NEE",
       "name": "NEXTERA ENERGY INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "넥스트에라에너지"
     },
     {
       "symbol": "NEE/N",
@@ -40528,13 +40634,15 @@
       "symbol": "NEM",
       "name": "NEWMONT CORPORATION",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "뉴몬트"
     },
     {
       "symbol": "NET",
       "name": "CLOUDFLARE INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "클라우드플레어"
     },
     {
       "symbol": "NEU",
@@ -40642,7 +40750,8 @@
       "symbol": "NIO",
       "name": "NIO INC SPON ADS EACH REP 1 ORD SHS CLASS A",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "니오"
     },
     {
       "symbol": "NIQ",
@@ -40805,7 +40914,8 @@
       "symbol": "NOC",
       "name": "NORTHROP GRUMMAN CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "노스롭그루먼"
     },
     {
       "symbol": "NOG",
@@ -40847,7 +40957,8 @@
       "symbol": "NOW",
       "name": "SERVICENOW INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "서비스나우"
     },
     {
       "symbol": "NP",
@@ -40985,7 +41096,8 @@
       "symbol": "NSC",
       "name": "NORFOLK SOUTHERN CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "노포크서던"
     },
     {
       "symbol": "NSP",
@@ -42011,7 +42123,8 @@
       "symbol": "PINS",
       "name": "PINTEREST INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "핀터레스트"
     },
     {
       "symbol": "PIPR",
@@ -42089,7 +42202,8 @@
       "symbol": "PM",
       "name": "PHILIP MORRIS INTERNATIONAL INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "필립모리스"
     },
     {
       "symbol": "PML",
@@ -42155,7 +42269,8 @@
       "symbol": "PNC",
       "name": "PNC FINANCIAL SERVICES GROUP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "PNC"
     },
     {
       "symbol": "PNFP",
@@ -42515,7 +42630,8 @@
       "symbol": "PSX",
       "name": "PHILLIPS 66",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "필립스66"
     },
     {
       "symbol": "PTA",
@@ -43241,7 +43357,8 @@
       "symbol": "RTX",
       "name": "RTX CORPORATION",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "RTX"
     },
     {
       "symbol": "RVLV",
@@ -43565,7 +43682,8 @@
       "symbol": "SCHW",
       "name": "SCHWAB(CHARLES)CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "찰스슈왑"
     },
     {
       "symbol": "SCHW/D",
@@ -43763,7 +43881,8 @@
       "symbol": "SHEL",
       "name": "SHELL PLC SPON ADS EA REP 2 ORD SHS",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "셸"
     },
     {
       "symbol": "SHG",
@@ -44034,7 +44153,8 @@
       "symbol": "SNAP",
       "name": "SNAP INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "스냅"
     },
     {
       "symbol": "SNDA",
@@ -44089,7 +44209,8 @@
       "symbol": "SO",
       "name": "SOUTHERN CO.",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "서던컴퍼니"
     },
     {
       "symbol": "SOBO",
@@ -44221,7 +44342,8 @@
       "symbol": "SPGI",
       "name": "S&P GLOBAL INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "S&P글로벌"
     },
     {
       "symbol": "SPH",
@@ -44275,7 +44397,8 @@
       "symbol": "SPOT",
       "name": "SPOTIFY TECHNOLOGY S.A.",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "스포티파이"
     },
     {
       "symbol": "SPR",
@@ -44678,7 +44801,8 @@
       "symbol": "SYK",
       "name": "STRYKER CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "스트라이커"
     },
     {
       "symbol": "SYY",
@@ -44931,7 +45055,8 @@
       "symbol": "TFC",
       "name": "TRUIST FINANCIAL CORPORATION",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "트루이스트"
     },
     {
       "symbol": "TFC/I",
@@ -45100,7 +45225,8 @@
       "symbol": "TJX",
       "name": "TJX COS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "TJX"
     },
     {
       "symbol": "TK",
@@ -45160,7 +45286,8 @@
       "symbol": "TMO",
       "name": "THERMO FISHER SCIENTIFIC INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "써모피셔"
     },
     {
       "symbol": "TNC",
@@ -45745,7 +45872,8 @@
       "symbol": "UNP",
       "name": "UNION PACIFIC CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "유니온퍼시픽"
     },
     {
       "symbol": "UP",
@@ -45757,7 +45885,8 @@
       "symbol": "UPS",
       "name": "UNITED PARCEL SERVICE INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "UPS"
     },
     {
       "symbol": "URI",
@@ -45781,7 +45910,8 @@
       "symbol": "USB",
       "name": "US BANCORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "US뱅크"
     },
     {
       "symbol": "USB/A",
@@ -46058,7 +46188,8 @@
       "symbol": "VLO",
       "name": "VALERO ENERGY CORP",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "발레로"
     },
     {
       "symbol": "VLRS",
@@ -46576,7 +46707,8 @@
       "symbol": "WM",
       "name": "WASTE MANAGEMENT INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "웨이스트매니지먼트"
     },
     {
       "symbol": "WMB",
@@ -46799,7 +46931,8 @@
       "symbol": "XPEV",
       "name": "XPENG INC SPON ADS EACH REP 2 CL A ORD SHS",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "샤오펑"
     },
     {
       "symbol": "XPO",
@@ -46919,7 +47052,8 @@
       "symbol": "YUM",
       "name": "YUM BRANDS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "얌브랜즈"
     },
     {
       "symbol": "YUMC",
@@ -46997,7 +47131,8 @@
       "symbol": "ZTS",
       "name": "ZOETIS INC",
       "exchange": "NYS",
-      "country": "US"
+      "country": "US",
+      "nameKr": "조에티스"
     },
     {
       "symbol": "ZVIA",

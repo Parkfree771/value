@@ -37,6 +37,28 @@ function tickerVariants(ticker: string): string[] {
   return Array.from(variants);
 }
 
+/**
+ * 동적 OG 이미지 URL 빌더
+ * /api/og가 ImageResponse로 1200x630 PNG 렌더 (Edge Runtime, ~200ms 콜드 / SNS 캐시 7일)
+ */
+function buildOgImageUrl(report: Report, returnRate: number): string {
+  const currency = report.stockData?.currency || (report.exchange === 'KRX' ? 'KRW' : 'USD');
+  const params = new URLSearchParams({
+    title: report.title || '',
+    stockName: report.stockName || '',
+    ticker: report.ticker || '',
+    exchange: report.exchange || '',
+    currency,
+    initialPrice: String(report.initialPrice ?? 0),
+    currentPrice: String(report.currentPrice ?? 0),
+    returnRate: String(returnRate ?? 0),
+    author: report.author || '익명',
+    date: report.createdAt || '',
+    positionType: report.positionType || 'long',
+  });
+  return `${SITE_URL}/api/og?${params.toString()}`;
+}
+
 function buildKeywords(report: Report): string[] {
   const op = opinionLabel(report.opinion);
   const pos = positionLabel(report.positionType);
@@ -143,8 +165,8 @@ export function generateReportMetadata(
     .join(' ')
     .substring(0, 200);
 
-  // OG 이미지: 정적 사용 (동적 OG는 Korean 폰트 이슈로 보류)
-  const ogImageUrl = `${SITE_URL}/og-v2.png`;
+  // OG 이미지: 동적 (피드 카드형) — /api/og 라우트가 1200x630 PNG 렌더
+  const ogImageUrl = buildOgImageUrl(report, returnRate);
   const themeTags = (report.themes || []).map((t) => THEME_NAMES[t] || t);
   const lastModified =
     report.updatedAt && report.updatedAt.length > 0
@@ -174,8 +196,8 @@ export function generateReportMetadata(
       images: [
         {
           url: ogImageUrl,
-          width: 1731,
-          height: 909,
+          width: 1200,
+          height: 630,
           alt: `${report.stockName}(${report.ticker}) ${op} ${returnRateText} - ${report.title}`,
           type: 'image/png',
         },
