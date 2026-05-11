@@ -4,7 +4,6 @@ import {
   ComposedChart,
   Bar,
   BarChart,
-  LabelList,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -17,33 +16,15 @@ import {
 import type { FinancialMetrics } from '../types';
 import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtPct, getCurrencyFmt, type Currency } from '../theme';
 import { performanceHighlights } from '../insights';
-import { Card, RichTooltip, KPIStat, KPIStrip, HighlightStat, HighlightPanel } from '../components/primitives';
-
-/** 막대 위 금액 라벨 (간략 표기: 540조 / 12조 / 8천억 / 60B / 500M) */
-function renderBarLabel(color: string, fmtAxis: (v: number) => string) {
-  // Recharts LabelList content prop expects a flexible signature
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function BarLabel(props: any) {
-    const x = typeof props.x === 'number' ? props.x : 0;
-    const y = typeof props.y === 'number' ? props.y : 0;
-    const width = typeof props.width === 'number' ? props.width : 0;
-    const value = typeof props.value === 'number' ? props.value : null;
-    if (value === null) return <g />;
-    return (
-      <text
-        x={x + width / 2}
-        y={y - 6}
-        textAnchor="middle"
-        fontSize={10}
-        fontWeight={800}
-        fill={color}
-        style={{ fontFamily: 'inherit' }}
-      >
-        {fmtAxis(value)}
-      </text>
-    );
-  };
-}
+import {
+  Card,
+  RichTooltip,
+  KPIStat,
+  KPIStrip,
+  HighlightStat,
+  HighlightPanel,
+  PeriodNumbersStrip,
+} from '../components/primitives';
 
 export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
   const { main: fmtMain, axis: fmtAxis, unitLabel } = getCurrencyFmt(currency);
@@ -101,44 +82,113 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
         />
       </KPIStrip>
 
-      {/* 메인 차트: 매출+영업이익+순이익 (3-bar grouped) */}
-      <Card title="매출 · 영업이익 · 순이익" sub={`추이 (단위: ${unitLabel})`}>
-        <div style={{ height: 320 }}>
-          <ResponsiveContainer>
-            <BarChart data={data} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%" barGap={3}>
-              <defs>
-                <linearGradient id="grad-rev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLOR.primary} stopOpacity={0.95} />
-                  <stop offset="100%" stopColor={COLOR.primary} stopOpacity={0.65} />
-                </linearGradient>
-                <linearGradient id="grad-op" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLOR.series2} stopOpacity={0.95} />
-                  <stop offset="100%" stopColor={COLOR.series2} stopOpacity={0.65} />
-                </linearGradient>
-                <linearGradient id="grad-ni" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLOR.series3} stopOpacity={0.95} />
-                  <stop offset="100%" stopColor={COLOR.series3} stopOpacity={0.65} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid {...GRID_PROPS} />
-              <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-              <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
-              <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
-              <Bar dataKey="revenue" name="매출액" fill="url(#grad-rev)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false}>
-                <LabelList dataKey="revenue" position="top" content={renderBarLabel(COLOR.primary, fmtAxis)} />
-              </Bar>
-              <Bar dataKey="operatingProfit" name="영업이익" fill="url(#grad-op)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false}>
-                <LabelList dataKey="operatingProfit" position="top" content={renderBarLabel(COLOR.series2, fmtAxis)} />
-              </Bar>
-              <Bar dataKey="netIncome" name="순이익" fill="url(#grad-ni)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false}>
-                <LabelList dataKey="netIncome" position="top" content={renderBarLabel(COLOR.series3, fmtAxis)} />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+      {/* 메인 차트: 매출+영업이익+순이익 (3-bar grouped) + 기간별 수치 부착 */}
+      <div
+        className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
+        style={{ boxShadow: 'var(--shadow-sm)' }}
+      >
+        <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2">
+          <div className="min-w-0">
+            <h3 className="font-heading text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+              매출 · 영업이익 · 순이익
+            </h3>
+            <p className="font-sans text-[11px] text-gray-400 dark:text-gray-500 mt-1 leading-snug">
+              추이 (단위: {unitLabel})
+            </p>
+          </div>
+        </header>
+
+        {/* Chart */}
+        <div className="px-5 pb-4">
+          <div style={{ height: 320 }}>
+            <ResponsiveContainer>
+              <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="22%" barGap={3}>
+                <defs>
+                  <linearGradient id="grad-rev" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={COLOR.primary} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={COLOR.primary} stopOpacity={0.65} />
+                  </linearGradient>
+                  <linearGradient id="grad-op" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={COLOR.series2} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={COLOR.series2} stopOpacity={0.65} />
+                  </linearGradient>
+                  <linearGradient id="grad-ni" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={COLOR.series3} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={COLOR.series3} stopOpacity={0.65} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid {...GRID_PROPS} />
+                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+                <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  height={28}
+                  iconType="circle"
+                  iconSize={8}
+                  wrapperStyle={{ ...LEGEND_STYLE, paddingTop: 0, paddingBottom: 4 }}
+                />
+                <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
+                <Bar dataKey="revenue" name="매출액" fill="url(#grad-rev)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                <Bar dataKey="operatingProfit" name="영업이익" fill="url(#grad-op)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                <Bar dataKey="netIncome" name="순이익" fill="url(#grad-ni)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
-      </Card>
+
+        {/* 기간별 수치 — 차트 박스에 붙어있지만 시각적으로 분리된 섹션 */}
+        <div className="border-t border-[var(--theme-border-muted)] bg-[var(--theme-bg)]/40 px-5 py-4">
+          <p className="font-heading text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500 mb-3">
+            기간별 수치
+          </p>
+          <PeriodNumbersStrip
+            periods={data.map((d) => d.period)}
+            rows={[
+              {
+                label: '매출 YoY',
+                highlight: 'yoy',
+                values: data.map((d) =>
+                  d.revenueGrowth === null
+                    ? null
+                    : `${d.revenueGrowth > 0 ? '+' : ''}${d.revenueGrowth.toFixed(1)}%`
+                ),
+                signedValues: data.map((d) => d.revenueGrowth),
+              },
+              {
+                label: '영업이익률',
+                highlight: 'negative',
+                values: data.map((d) => fmtPct(d.operatingMargin)),
+                signedValues: data.map((d) => d.operatingMargin),
+              },
+              {
+                label: '순이익률',
+                highlight: 'negative',
+                values: data.map((d) => fmtPct(d.netMargin)),
+                signedValues: data.map((d) => d.netMargin),
+              },
+              {
+                label: '매출액',
+                values: data.map((d) => fmtMain(d.revenue)),
+                signedValues: data.map((d) => d.revenue),
+              },
+              {
+                label: '영업이익',
+                highlight: 'negative',
+                values: data.map((d) => fmtMain(d.operatingProfit)),
+                signedValues: data.map((d) => d.operatingProfit),
+              },
+              {
+                label: '순이익',
+                highlight: 'negative',
+                values: data.map((d) => fmtMain(d.netIncome)),
+                signedValues: data.map((d) => d.netIncome),
+              },
+            ]}
+          />
+        </div>
+      </div>
 
       {/* 핵심 성장 지표 — 메인 차트 밑 (한눈에 보이게) */}
       {(highlights.revenueCAGR || highlights.marginTrend || highlights.netIncomeStatus?.tone === 'negative') && (

@@ -56,8 +56,14 @@ function annualValue(units: SecFactUnit[], year: number): number | null {
   return candidates[0].val;
 }
 
-/** 분기별 값 — 단일 분기(3개월) 기간만 매칭 */
+/** 분기별 값 — Q1/Q2/Q3는 직접 매칭, Q4는 10-K(FY)에서 도출 */
 function quarterValue(units: SecFactUnit[], year: number, quarter: 1 | 2 | 3 | 4): number | null {
+  if (quarter === 4) return quarterFourValue(units, year);
+  return quarterDirectValue(units, year, quarter);
+}
+
+/** Q1/Q2/Q3: fp='Q1/2/3' 매칭 — 단일분기 우선, YTD 폴백 허용 */
+function quarterDirectValue(units: SecFactUnit[], year: number, quarter: 1 | 2 | 3): number | null {
   const fpKey = `Q${quarter}`;
   const candidates = units.filter((u) => {
     if (u.fp !== fpKey) return false;
@@ -88,6 +94,63 @@ function quarterValue(units: SecFactUnit[], year: number, quarter: 1 | 2 | 3 | 4
   }
 
   // 폴백
+  candidates.sort((a, b) => (a.filed < b.filed ? 1 : -1));
+  return candidates[0].val;
+}
+
+/**
+ * Q4 단일 분기 값 도출.
+ *
+ * SEC는 fp='Q4' 태깅을 거의 안 함 — 4분기 숫자는 10-K(fp='FY')에 묻혀 들어감.
+ * - 흐름(IS·CF): Q4 = FY − (Q1 + Q2 + Q3 단일분기)
+ * - 잔액(BS): Q4 기말 = FY 기말 (같은 시점값이라 그대로 사용)
+ */
+function quarterFourValue(units: SecFactUnit[], year: number): number | null {
+  // 드물게 fp='Q4'로 직접 보고하는 회사 — 있으면 우선 사용
+  const directCandidates = units.filter((u) => {
+    if (u.fp !== 'Q4' || !u.end) return false;
+    return parseInt(u.end.slice(0, 4), 10) === year;
+  });
+  if (directCandidates.length > 0) {
+    const single = directCandidates.filter((u) => {
+      if (!u.start || !u.end) return false;
+      const days = (new Date(u.end).getTime() - new Date(u.start).getTime()) / (1000 * 60 * 60 * 24);
+      return days >= 80 && days <= 100;
+    });
+    const pick = single.length > 0 ? single : directCandidates.filter((u) => !u.start);
+    if (pick.length > 0) {
+      pick.sort((a, b) => (a.filed < b.filed ? 1 : -1));
+      return pick[0].val;
+    }
+  }
+
+  const fyVal = annualValue(units, year);
+  if (fyVal === null) return null;
+
+  // 잔액 항목(start 없는 시점값)은 FY 기말 = Q4 기말이므로 그대로 사용
+  const isFlow = units.some((u) => !!u.start);
+  if (!isFlow) return fyVal;
+
+  // 흐름 항목: FY에서 Q1+Q2+Q3 단일분기 차감
+  const q1 = quarterSingleValue(units, year, 1);
+  const q2 = quarterSingleValue(units, year, 2);
+  const q3 = quarterSingleValue(units, year, 3);
+  if (q1 === null || q2 === null || q3 === null) return null;
+  return fyVal - q1 - q2 - q3;
+}
+
+/** Q1/Q2/Q3 단일분기(3개월 ±)만. Q4 차감 정확도용 — YTD 폴백 없음 */
+function quarterSingleValue(units: SecFactUnit[], year: number, quarter: 1 | 2 | 3): number | null {
+  const fpKey = `Q${quarter}`;
+  const candidates = units.filter((u) => {
+    if (u.fp !== fpKey) return false;
+    if (!u.end || !u.start) return false;
+    const endYear = parseInt(u.end.slice(0, 4), 10);
+    if (endYear !== year) return false;
+    const days = (new Date(u.end).getTime() - new Date(u.start).getTime()) / (1000 * 60 * 60 * 24);
+    return days >= 80 && days <= 100;
+  });
+  if (candidates.length === 0) return null;
   candidates.sort((a, b) => (a.filed < b.filed ? 1 : -1));
   return candidates[0].val;
 }
@@ -174,7 +237,7 @@ function buildPeriodMetrics(
       ? operatingCashFlow + investingCashFlow
       : null;
 
-  const period = quarter && quarter < 4 ? `${year}Q${quarter}` : `${year}`;
+  const period = quarter ? `${year}Q${quarter}` : `${year}`;
 
   return {
     period,

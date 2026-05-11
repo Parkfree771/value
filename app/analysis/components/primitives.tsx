@@ -8,7 +8,7 @@
  * - Stat: 작은 통계 한 줄
  */
 
-import { ReactNode } from 'react';
+import { Fragment, ReactNode } from 'react';
 import { COLOR, toneColor, type Tone } from '../theme';
 import type { Insight } from '../insights';
 
@@ -407,6 +407,91 @@ export function HighlightPanel({ children }: { children: ReactNode }) {
       style={{ boxShadow: 'var(--shadow-sm)' }}
     >
       {children}
+    </div>
+  );
+}
+
+/* ═════════════════════ PeriodNumbersStrip ═════════════════════ */
+/**
+ * 차트 하단에 붙이는 기간별 숫자 표.
+ * - 차트와 정렬: 라벨 컬럼(48px) = 차트 Y축 영역, 우측 spacer(8px) = 차트 right-margin
+ * - 결과적으로 period 컬럼 중심이 위쪽 막대 그룹 중심과 정렬됨
+ * - highlight: 'yoy' = ± 색, 'negative' = 음수만 빨강, 'plain' = 톤 없음
+ */
+export function PeriodNumbersStrip({
+  periods,
+  rows,
+}: {
+  periods: string[];
+  rows: {
+    label: string;
+    values: (string | null)[];
+    /** highlight 색 결정 기준 — 보통 values와 같은 자리의 raw number */
+    signedValues?: (number | null)[];
+    highlight?: 'yoy' | 'negative' | 'plain';
+  }[];
+}) {
+  // 64px 라벨(=차트 Y축 56 + margin.left 8) + N개 period 컬럼 + 8px 우측 spacer(=차트 right-margin)
+  const cols = `64px repeat(${periods.length}, minmax(44px, 1fr)) 8px`;
+
+  const cellColor = (
+    raw: number | null | undefined,
+    highlight: 'yoy' | 'negative' | 'plain' = 'plain'
+  ): string => {
+    if (raw === null || raw === undefined) return COLOR.axisSoft;
+    if (highlight === 'yoy') {
+      if (raw > 0) return COLOR.positive;
+      if (raw < 0) return COLOR.negative;
+      return 'var(--foreground)';
+    }
+    if (highlight === 'negative' && raw < 0) return COLOR.negative;
+    return 'var(--foreground)';
+  };
+
+  return (
+    <div className="overflow-x-auto scrollbar-hide">
+      <div
+        className="grid"
+        style={{ gridTemplateColumns: cols, minWidth: 'max-content' }}
+      >
+        {/* Header row */}
+        <div />
+        {periods.map((p) => (
+          <div
+            key={p}
+            className="font-heading text-[12px] font-black text-gray-700 dark:text-gray-200 text-center tabular-nums pb-2"
+          >
+            {p}
+          </div>
+        ))}
+        <div />
+
+        {/* Data rows */}
+        {rows.map((row, ri) => {
+          const isFirst = ri === 0;
+          const borderCls = isFirst ? '' : 'border-t border-[var(--theme-border-muted)]/50';
+          return (
+            <Fragment key={ri}>
+              <div
+                className={`font-heading text-[11px] font-bold tracking-tight text-gray-700 dark:text-gray-200 py-2 truncate ${borderCls}`}
+                title={row.label}
+              >
+                {row.label}
+              </div>
+              {row.values.map((v, i) => (
+                <div
+                  key={i}
+                  className={`font-heading text-[13px] sm:text-[14px] font-bold tabular-nums text-center py-2 ${borderCls}`}
+                  style={{ color: cellColor(row.signedValues?.[i], row.highlight) }}
+                >
+                  {v ?? '—'}
+                </div>
+              ))}
+              <div className={borderCls} />
+            </Fragment>
+          );
+        })}
+      </div>
     </div>
   );
 }
