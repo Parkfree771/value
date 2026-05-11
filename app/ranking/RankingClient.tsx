@@ -41,6 +41,7 @@ interface RankedReport {
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
   returnRate: number;
+  prevReturnRate?: number;
   initialPrice: number;
   currentPrice: number;
   createdAt: string;
@@ -170,6 +171,19 @@ export default function RankingClient({ initialReports, initialInvestors, initia
     return `${rank}`;
   }, []);
 
+  // 필터된 결과 내에서의 직전 랭킹 맵 (id → prevRank)
+  // filteredReports는 이미 현재 returnRate 기준 desc 정렬이라 currentRank = index + 1
+  const prevRankMap = useMemo(() => {
+    const sortedByPrev = [...filteredReports].sort(
+      (a, b) => (b.prevReturnRate ?? b.returnRate) - (a.prevReturnRate ?? a.returnRate)
+    );
+    const map = new Map<string, number>();
+    sortedByPrev.forEach((report, index) => {
+      map.set(report.id, index + 1);
+    });
+    return map;
+  }, [filteredReports]);
+
   // Paginated data (memoized)
   const paginatedReports = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
@@ -254,7 +268,9 @@ export default function RankingClient({ initialReports, initialInvestors, initia
             {filteredReports.length > 0 ? (
               paginatedReports.map((report, index) => {
                 const actualRank = (currentPage - 1) * pageSize + index + 1;
-                return <RankingReportCard key={report.id} report={report} rank={actualRank} />;
+                const prevRank = prevRankMap.get(report.id) ?? actualRank;
+                const rankChange = prevRank - actualRank;
+                return <RankingReportCard key={report.id} report={report} rank={actualRank} rankChange={rankChange} />;
               })
             ) : (
               <div className="pixel-empty-state">

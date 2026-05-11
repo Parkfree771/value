@@ -65,6 +65,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     ticker: post.ticker,
     opinion: post.opinion,
     returnRate: post.returnRate,
+    prevReturnRate: post.prevReturnRate,
     initialPrice: post.initialPrice,
     currentPrice: post.currentPrice,
     createdAt: post.createdAt,
@@ -91,6 +92,8 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   const [allThemes, setAllThemes] = useState<Theme[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   // 테마 칩 더보기
   const [themeExpanded, setThemeExpanded] = useState(false);
@@ -208,6 +211,18 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
     });
   }, [sortedReports, searchQuery, activeTab, bookmarkedIds, themeSymbols, selectedTheme, marketFilter]);
 
+  // 필터/탭/검색이 바뀌면 1페이지로 리셋
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, marketFilter, searchQuery, selectedTheme]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredReports.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const paginatedReports = useMemo(() => {
+    const start = (safePage - 1) * pageSize;
+    return filteredReports.slice(start, start + pageSize);
+  }, [filteredReports, safePage, pageSize]);
+
   // 로딩 중 스켈레톤 UI
   if (isLoading) {
     return (
@@ -273,7 +288,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
       {/* Reports Grid */}
       <div className="space-y-3 sm:space-y-6">
         {filteredReports.length > 0 ? (
-          filteredReports.map((report) => (
+          paginatedReports.map((report) => (
             <ReportCard key={report.id} {...report} />
           ))
         ) : (
@@ -288,9 +303,46 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         )}
       </div>
 
+      {/* 페이지네이션 (랭킹 페이지와 동일 스타일) */}
+      {filteredReports.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-6 sm:mt-8">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={safePage === 1}
+            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            이전
+          </button>
+
+          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => setCurrentPage(page)}
+                className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${
+                  safePage === page
+                    ? 'border-2 pixel-chip-active'
+                    : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safePage === totalPages}
+            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          >
+            다음
+          </button>
+        </div>
+      )}
+
       {/* 게시물 수 표시 */}
       {filteredReports.length > 0 && (
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-4 sm:mt-6">
           <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
             총 {total}개의 리포트
           </span>

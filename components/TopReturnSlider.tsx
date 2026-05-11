@@ -7,6 +7,7 @@ import podiumStyles from './Podium.module.css';
 interface TopReturn {
   id: string;
   rank: number;
+  rankChange: number;
   title: string;
   stockName: string;
   ticker: string;
@@ -22,25 +23,75 @@ interface TopReturnSliderProps {
     stockName: string;
     ticker: string;
     returnRate: number;
+    prevReturnRate?: number;
     author: string;
     createdAt: string;
   }>;
 }
 
+// 직전 가격 업데이트 대비 랭킹 변동 (양수: 상승, 음수: 하락, 0: 변동 없음)
+function RankChangeIndicator({ change, className = '' }: { change: number; className?: string }) {
+  if (change === 0) return null;
+  const isUp = change > 0;
+  const colorClass = isUp
+    ? 'text-red-600 dark:text-red-400'
+    : 'text-blue-600 dark:text-blue-400';
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-bold font-mono ${colorClass} ${className}`}>
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {isUp ? (
+          <>
+            <path d="M12 19V5" />
+            <path d="m5 12 7-7 7 7" />
+          </>
+        ) : (
+          <>
+            <path d="M12 5v14" />
+            <path d="m19 12-7 7-7-7" />
+          </>
+        )}
+      </svg>
+      {Math.abs(change)}
+    </span>
+  );
+}
+
 const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopReturnSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // 수익률 상위 10개 리포트 추출
+  // 수익률 상위 10개 리포트 추출 (직전 업데이트 대비 ▲▼ 포함)
   const topReturns = useMemo(() => {
     if (reports.length === 0) return [];
 
-    return reports
-      .sort((a, b) => b.returnRate - a.returnRate) // 수익률 높은 순 (양수든 음수든)
-      .slice(0, 10) // 상위 10개
-      .map((report, index) => ({
+    const top10 = [...reports]
+      .sort((a, b) => b.returnRate - a.returnRate)
+      .slice(0, 10);
+
+    // 같은 top10 내에서 prevReturnRate 기준 순위 (필터 없는 단일 뷰)
+    const prevRankMap = new Map<string, number>();
+    [...top10]
+      .sort((a, b) => (b.prevReturnRate ?? b.returnRate) - (a.prevReturnRate ?? a.returnRate))
+      .forEach((r, i) => prevRankMap.set(r.id, i + 1));
+
+    return top10.map((report, index) => {
+      const currentRank = index + 1;
+      const prevRank = prevRankMap.get(report.id) ?? currentRank;
+      return {
         ...report,
-        rank: index + 1,
-      }));
+        rank: currentRank,
+        rankChange: prevRank - currentRank,
+      };
+    });
   }, [reports]);
 
   useEffect(() => {
@@ -132,6 +183,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                     </span>
                   </div>
                   <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white truncate">{item.stockName} <span className="font-normal text-xs text-gray-400 font-mono">{item.ticker}</span></span>
+                  <RankChangeIndicator change={item.rankChange} className="flex-shrink-0" />
                   <span className={`text-sm font-bold font-mono tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
                     {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
                   </span>
@@ -165,7 +217,10 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                       {getRankNumber(item.rank)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg text-heading mb-1 truncate">{item.author}</h3>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <h3 className="text-lg text-heading truncate min-w-0">{item.author}</h3>
+                        <RankChangeIndicator change={item.rankChange} className="flex-shrink-0" />
+                      </div>
                       <h4 className="text-sm text-subheading mb-2 line-clamp-2 min-h-[2.5rem]">{item.title}</h4>
                     </div>
                   </div>

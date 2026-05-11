@@ -10,6 +10,7 @@ export interface FeedPost {
   initialPrice: number;
   currentPrice: number;
   returnRate: number;
+  prevReturnRate?: number;
   createdAt: string;
   views: number;
   likes: number;

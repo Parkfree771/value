@@ -70,6 +70,7 @@ interface FeedPost {
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
   returnRate: number;
+  prevReturnRate?: number;
   initialPrice: number;
   currentPrice: number;
   createdAt: string;

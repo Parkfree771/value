@@ -227,12 +227,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. 각 게시글의 수익률 재계산
+    // 5. 각 게시글의 수익률 재계산 (직전 returnRate를 prevReturnRate에 보관 → 랭킹 ▲▼ 비교용)
     for (const post of feedData.posts) {
       const ticker = (post.ticker || '').toUpperCase();
       const priceData = prices[ticker];
 
       if (priceData) {
+        post.prevReturnRate = post.returnRate;
         post.currentPrice = priceData.currentPrice;
         post.returnRate = parseFloat(
           calculateReturn(post.initialPrice, priceData.currentPrice, post.positionType).toFixed(2)

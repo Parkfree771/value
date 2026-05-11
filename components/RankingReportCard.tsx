@@ -32,9 +32,47 @@ interface RankingReportCardProps {
     };
   };
   rank: number;
+  rankChange?: number;
 }
 
-const RankingReportCard = memo(function RankingReportCard({ report, rank }: RankingReportCardProps) {
+// 직전 가격 업데이트 대비 랭킹 변동 표시 (양수: 상승, 음수: 하락, 0: 변동 없음)
+function RankChangeIndicator({ change }: { change: number }) {
+  if (change === 0) return null;
+  const isUp = change > 0;
+  const colorClass = isUp
+    ? 'text-red-600 dark:text-red-400'
+    : 'text-blue-600 dark:text-blue-400';
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-bold font-mono ${colorClass}`}>
+      <svg
+        width="10"
+        height="10"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        {isUp ? (
+          <>
+            <path d="M12 19V5" />
+            <path d="m5 12 7-7 7 7" />
+          </>
+        ) : (
+          <>
+            <path d="M12 5v14" />
+            <path d="m19 12-7 7-7-7" />
+          </>
+        )}
+      </svg>
+      {Math.abs(change)}
+    </span>
+  );
+}
+
+const RankingReportCard = memo(function RankingReportCard({ report, rank, rankChange = 0 }: RankingReportCardProps) {
   const router = useRouter();
 
   // 통화 추론 및 기호
@@ -81,8 +119,9 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank }: Rank
       <Card variant="glass" padding="md">
         <div className="flex gap-2.5 sm:gap-4">
           {/* Rank Badge */}
-          <div className="flex-shrink-0 flex items-start pt-0.5 sm:pt-1">
+          <div className="flex-shrink-0 flex flex-col items-center pt-0.5 sm:pt-1 gap-0.5">
             {getRankBadge()}
+            <RankChangeIndicator change={rankChange} />
           </div>
 
           {/* Content */}

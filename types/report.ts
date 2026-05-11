@@ -16,6 +16,7 @@ export interface ReportSummary {
   exchange?: string;
   opinion: Opinion;
   returnRate: number;
+  prevReturnRate?: number;
   initialPrice: number;
   currentPrice: number;
   createdAt: string;
