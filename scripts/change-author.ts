@@ -21,20 +21,24 @@ import { randomUUID } from 'crypto';
 // (users 컬렉션에 없는 닉네임은 NEW_USERS 항목으로 자동 생성됩니다)
 const POST_AUTHOR_MAP: { titleContains: string; authorName: string }[] = [
   {
-    titleContains: '리루는 왜 CROX',
-    authorName: 'gururu',
+    titleContains: '골드만·뱅크오브아메리카',
+    authorName: '전문가 추적',
   },
   {
-    titleContains: '인플레이션과 브라질',
-    authorName: '글로벌리서치',
+    titleContains: '그 중심에 선 알리바바',
+    authorName: '만리경',
+  },
+  {
+    titleContains: '시총의 절반이 현금인 회사 PDD',
+    authorName: '만리경',
   },
 ];
 
 // users 컬렉션에 없으면 자동으로 만들 신규 유저
 // (닉네임이 이미 존재하면 건너뜀)
 const NEW_USERS: { nickname: string; bio?: string }[] = [
-  { nickname: 'gururu' },
-  { nickname: '글로벌리서치' },
+  { nickname: '전문가 추적' },
+  { nickname: '만리경' },
 ];
 
 // ============================================================
