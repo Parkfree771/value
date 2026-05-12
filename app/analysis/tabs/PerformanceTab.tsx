@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  ComposedChart,
   Bar,
   BarChart,
   XAxis,
@@ -11,13 +10,11 @@ import {
   Legend,
   ResponsiveContainer,
   ReferenceLine,
-  Cell,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
 import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtPct, getCurrencyFmt, type Currency } from '../theme';
 import { performanceHighlights } from '../insights';
 import {
-  Card,
   RichTooltip,
   KPIStat,
   KPIStrip,
@@ -89,7 +86,7 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
       >
         <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2">
           <div className="min-w-0">
-            <h3 className="font-heading text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+            <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
               매출 · 영업이익 · 순이익
             </h3>
             <p className="font-sans text-[11px] text-gray-400 dark:text-gray-500 mt-1 leading-snug">
@@ -190,16 +187,25 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
         </div>
       </div>
 
-      {/* 핵심 성장 지표 — 메인 차트 밑 (한눈에 보이게) */}
-      {(highlights.revenueCAGR || highlights.marginTrend || highlights.netIncomeStatus?.tone === 'negative') && (
+      {/* 핵심 성장 지표 — 메인 차트 밑 */}
+      {(highlights.revenueCAGR || highlights.profitCAGR || highlights.marginTrend) && (
         <HighlightPanel>
           {highlights.revenueCAGR && (
             <HighlightStat
-              label="매출 CAGR"
+              label="매출 연평균 성장률"
               value={highlights.revenueCAGR.value.toFixed(1)}
               unit="%"
-              caption={`${highlights.revenueCAGR.years}년 연평균 성장`}
+              caption={`${highlights.revenueCAGR.years}년 기준`}
               tone={highlights.revenueCAGR.tone}
+            />
+          )}
+          {highlights.profitCAGR && (
+            <HighlightStat
+              label="영업이익 연평균 성장률"
+              value={highlights.profitCAGR.value.toFixed(1)}
+              unit="%"
+              caption={`${highlights.profitCAGR.years}년 기준`}
+              tone={highlights.profitCAGR.tone}
             />
           )}
           {highlights.marginTrend && (
@@ -207,95 +213,41 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
               label="영업이익률 변화"
               value={highlights.marginTrend.value.toFixed(1)}
               unit="%p"
-              caption={`최근 ${highlights.marginTrend.periods}개 기간 ${highlights.marginTrend.tone === 'positive' ? '개선' : '악화'}`}
+              caption={`최근 ${highlights.marginTrend.periods}개 기간`}
               tone={highlights.marginTrend.tone}
-            />
-          )}
-          {highlights.netIncomeStatus?.tone === 'negative' && (
-            <HighlightStat
-              label="순이익"
-              value={highlights.netIncomeStatus.label}
-              caption={`${latest.period} 적자 전환`}
-              tone="negative"
             />
           )}
         </HighlightPanel>
       )}
 
-      {/* 성장률 (메인 차트 바로 밑) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        <Card title="매출 성장률" sub="전년 대비 증감률">
-          <div style={{ height: 220 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 8, left: -10, bottom: 0 }}>
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={40} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtPct(v, { sign: true })} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
-                <Bar dataKey="revenueGrowth" name="매출 성장률" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                  {data.map((d, i) => (
-                    <Cell
-                      key={i}
-                      fill={d.revenueGrowth === null ? COLOR.axisSoft : d.revenueGrowth >= 0 ? COLOR.positive : COLOR.negative}
-                      fillOpacity={0.85}
-                    />
-                  ))}
-                </Bar>
-              </ComposedChart>
-            </ResponsiveContainer>
+      {/* 성장률 비교 — 팩트만 */}
+      {highlights.growthGap && highlights.growthGap.higher !== 'equal' && (() => {
+        const g = highlights.growthGap;
+        const isOp = g.higher === 'operating';
+        const gapColor = isOp ? COLOR.positive : COLOR.negative;
+        const opStr = `${g.opCAGR >= 0 ? '+' : ''}${g.opCAGR.toFixed(1)}%`;
+        const revStr = `${g.revCAGR >= 0 ? '+' : ''}${g.revCAGR.toFixed(1)}%`;
+        return (
+          <div
+            className="rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] px-5 py-4"
+            style={{ boxShadow: 'var(--shadow-sm)' }}
+          >
+            <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
+              성장률 비교
+            </p>
+            <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+              {isOp ? '영업이익 성장률' : '매출 성장률'}이 {isOp ? '매출 성장률' : '영업이익 성장률'}보다{' '}
+              <span className="font-bold" style={{ color: gapColor }}>
+                {Math.abs(g.gap).toFixed(1)}%p
+              </span>{' '}
+              높음
+            </p>
+            <p className="font-sans text-[12px] font-bold text-gray-600 dark:text-gray-300 mt-1.5">
+              영업이익 {opStr} · 매출 {revStr}
+            </p>
           </div>
-        </Card>
-
-        <Card title="영업이익 성장률" sub="전년 대비 증감률">
-          <div style={{ height: 220 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 8, left: -10, bottom: 0 }}>
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={40} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtPct(v, { sign: true })} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
-                <Bar dataKey="profitGrowth" name="영업이익 성장률" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                  {data.map((d, i) => (
-                    <Cell
-                      key={i}
-                      fill={d.profitGrowth === null ? COLOR.axisSoft : d.profitGrowth >= 0 ? COLOR.positive : COLOR.negative}
-                      fillOpacity={0.85}
-                    />
-                  ))}
-                </Bar>
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
-
-      {/* 영업이익률 추이 (마지막 — 추가 컨텍스트) */}
-      {avgMargin !== null && (
-        <Card title="영업이익률" sub={`평균 ${avgMargin.toFixed(1)}% — 본업의 수익성 추이`}>
-          <div style={{ height: 200 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 8, left: -10, bottom: 0 }}>
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={40} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtPct(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <ReferenceLine y={avgMargin} stroke={COLOR.axis} strokeDasharray="4 4" strokeWidth={1.5} />
-                <Bar dataKey="operatingMargin" name="영업이익률" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                  {data.map((d, i) => (
-                    <Cell
-                      key={i}
-                      fill={d.operatingMargin !== null && d.operatingMargin >= avgMargin ? COLOR.positive : COLOR.warning}
-                      fillOpacity={0.85}
-                    />
-                  ))}
-                </Bar>
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      )}
+        );
+      })()}
     </div>
   );
 }

@@ -41,12 +41,12 @@ function buildYears(rangeKey: YearRangeKey, mode: ViewMode): string {
   return years.join(',');
 }
 
-const TABS: { key: AnalysisTab; label: string }[] = [
-  { key: 'performance', label: '실적' },
-  { key: 'profitability', label: '수익성' },
-  { key: 'stability', label: '안정성' },
-  { key: 'cashflow', label: '현금흐름' },
-  { key: 'interest', label: '관심도' },
+const TABS: { key: AnalysisTab; label: string; color: string }[] = [
+  { key: 'performance', label: '실적', color: '#3b50b5' },      // blue
+  { key: 'cashflow', label: '현금흐름', color: '#059669' },     // emerald
+  { key: 'profitability', label: '수익성', color: '#7c3aed' },  // violet
+  { key: 'stability', label: '부채', color: '#d97706' },        // amber
+  { key: 'interest', label: '관심도', color: '#db2777' },       // pink
 ];
 
 /* ═══════════════════════════════════════════ */
@@ -347,20 +347,31 @@ export default function AnalysisClient() {
       {selectedCorp && (
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5 sm:mb-6 border-b border-[var(--theme-border-muted)]">
           <div className="flex overflow-x-auto scrollbar-hide">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                disabled={loading}
-                className={`font-heading text-sm sm:text-[15px] px-3 sm:px-5 py-3 font-bold tracking-tight transition-all relative ${
-                  activeTab === tab.key
-                    ? 'text-[var(--theme-accent)] after:absolute after:bottom-[-1px] after:left-0 after:right-0 after:h-[2px] after:bg-[var(--theme-accent)]'
-                    : 'text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  disabled={loading}
+                  style={isActive ? { color: tab.color } : undefined}
+                  className={`font-sans text-sm sm:text-[15px] px-3 sm:px-5 py-3 font-bold tracking-tight transition-all relative ${
+                    isActive
+                      ? ''
+                      : 'text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]'
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && (
+                    <span
+                      aria-hidden
+                      className="absolute bottom-[-1px] left-0 right-0 h-[2px]"
+                      style={{ background: tab.color }}
+                    />
+                  )}
+                </button>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap pb-2 sm:pb-0">

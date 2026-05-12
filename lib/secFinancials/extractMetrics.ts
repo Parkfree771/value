@@ -205,6 +205,10 @@ function buildPeriodMetrics(
   const operatingCashFlow = v('operatingCashFlow');
   const investingCashFlow = v('investingCashFlow');
   const financingCashFlow = v('financingCashFlow');
+  const dividendsPaid = v('dividendsPaid');
+  const stockBuyback = v('stockBuyback');
+  const cashBalance = v('cashBalance');
+  const longTermDebt = v('longTermDebt');
 
   // 마진
   const operatingMargin =
@@ -263,6 +267,10 @@ function buildPeriodMetrics(
     investingCashFlow,
     financingCashFlow,
     freeCashFlow,
+    dividendsPaid,
+    stockBuyback,
+    cashBalance,
+    longTermDebt,
   };
 }
 

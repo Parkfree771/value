@@ -46,12 +46,12 @@ export function Card({
         <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-3">
           <div className="min-w-0">
             {title && (
-              <h3 className="font-heading text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+              <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
                 {title}
               </h3>
             )}
             {sub && (
-              <p className="font-sans text-[11px] text-gray-400 dark:text-gray-500 mt-1 leading-snug">
+              <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
                 {sub}
               </p>
             )}
@@ -222,7 +222,7 @@ export function KPIStat({
 
   return (
     <div className="relative">
-      <p className="font-heading text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500 mb-1.5">
+      <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-1.5">
         {label}
       </p>
       <p
@@ -379,11 +379,11 @@ export function HighlightStat({
         </svg>
       </span>
       <div className="min-w-0 flex-1">
-        <p className="font-heading text-[10px] font-bold uppercase tracking-[0.12em] text-gray-400 dark:text-gray-500">
+        <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300">
           {label}
         </p>
         <p
-          className="font-heading text-xl sm:text-[22px] font-black tabular-nums leading-tight"
+          className="font-heading text-xl sm:text-[22px] font-black tabular-nums leading-tight mt-0.5"
           style={{ color: tc.text }}
         >
           {needsPlusSign ? '+' : ''}
@@ -391,7 +391,7 @@ export function HighlightStat({
           {unit && <span className="text-[13px] font-bold ml-0.5">{unit}</span>}
         </p>
         {caption && (
-          <p className="font-sans text-[11px] text-gray-400 dark:text-gray-500 mt-0.5 leading-snug truncate">
+          <p className="font-sans text-[12px] text-gray-600 dark:text-gray-300 mt-1 leading-snug truncate">
             {caption}
           </p>
         )}
@@ -473,7 +473,7 @@ export function PeriodNumbersStrip({
           return (
             <Fragment key={ri}>
               <div
-                className={`font-heading text-[11px] font-bold tracking-tight text-gray-700 dark:text-gray-200 py-2 truncate ${borderCls}`}
+                className={`font-sans text-[12px] font-bold tracking-tight text-gray-700 dark:text-gray-200 py-2 pr-2 truncate ${borderCls}`}
                 title={row.label}
               >
                 {row.label}

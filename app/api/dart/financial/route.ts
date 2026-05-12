@@ -147,6 +147,8 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
     currentAssets, currentLiabilities,
     debtRatio, currentRatio, roe, roa,
     operatingCashFlow, investingCashFlow, financingCashFlow, freeCashFlow,
+    // 주주환원/현금잔액/차입금 — DART 파서 미지원, US/SEC 전용
+    dividendsPaid: null, stockBuyback: null, cashBalance: null, longTermDebt: null,
   };
 }
 

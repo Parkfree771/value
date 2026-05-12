@@ -17,7 +17,11 @@ export type MetricKey =
   | 'currentLiabilities'
   | 'operatingCashFlow'
   | 'investingCashFlow'
-  | 'financingCashFlow';
+  | 'financingCashFlow'
+  | 'dividendsPaid'
+  | 'stockBuyback'
+  | 'cashBalance'
+  | 'longTermDebt';
 
 interface TagPriority {
   /** 'us-gaap' 우선 시도 태그 (배열 앞쪽 우선) */
@@ -93,5 +97,29 @@ export const TAG_MAP: Record<MetricKey, TagPriority> = {
       'NetCashProvidedByUsedInFinancingActivitiesContinuingOperations',
     ],
     ifrs: ['CashFlowsFromUsedInFinancingActivities'],
+  },
+  // 배당 지급액 — Apple은 PaymentsOfDividends, MS는 PaymentsOfDividendsCommonStock
+  // 양수로 보고됨 (지급 금액의 절대값)
+  dividendsPaid: {
+    usGaap: ['PaymentsOfDividends', 'PaymentsOfDividendsCommonStock'],
+    ifrs: ['DividendsPaid'],
+  },
+  // 자사주 매입 — 양수로 보고됨 (매입 금액의 절대값)
+  stockBuyback: {
+    usGaap: ['PaymentsForRepurchaseOfCommonStock', 'PaymentsForRepurchaseOfEquity'],
+  },
+  // 현금성자산 잔액 (BS instant value)
+  cashBalance: {
+    usGaap: [
+      'CashAndCashEquivalentsAtCarryingValue',
+      'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents',
+      'Cash',
+    ],
+    ifrs: ['CashAndCashEquivalents'],
+  },
+  // 이자성 차입금 (장기부채 — 보통 1년내 만기 도래분 포함된 합계)
+  longTermDebt: {
+    usGaap: ['LongTermDebt', 'LongTermDebtNoncurrent'],
+    ifrs: ['LongtermBorrowings', 'BorrowingsNoncurrent', 'Borrowings'],
   },
 };

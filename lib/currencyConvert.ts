@@ -36,6 +36,10 @@ export function convertMetricsToKRW(
     investingCashFlow: millionsUsdToEokKrw(m.investingCashFlow, usdToKrwRate),
     financingCashFlow: millionsUsdToEokKrw(m.financingCashFlow, usdToKrwRate),
     freeCashFlow: millionsUsdToEokKrw(m.freeCashFlow, usdToKrwRate),
+    dividendsPaid: millionsUsdToEokKrw(m.dividendsPaid, usdToKrwRate),
+    stockBuyback: millionsUsdToEokKrw(m.stockBuyback, usdToKrwRate),
+    cashBalance: millionsUsdToEokKrw(m.cashBalance, usdToKrwRate),
+    longTermDebt: millionsUsdToEokKrw(m.longTermDebt, usdToKrwRate),
     // 비율 그대로 유지: operatingMargin, netMargin, revenueGrowth, profitGrowth,
     //                  debtRatio, currentRatio, roe, roa
   }));

@@ -112,9 +112,9 @@ const Navbar = memo(function Navbar() {
               경제지표
             </Link>
             <Link
-              href="/analysis"
+              href="/analysis/us"
               className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/analysis')
+                pathname.startsWith('/analysis')
                   ? 'pixel-nav-active'
                   : 'pixel-nav-inactive'
               }`}
@@ -356,10 +356,10 @@ const Navbar = memo(function Navbar() {
                 경제지표
               </Link>
               <Link
-                href="/analysis"
+                href="/analysis/us"
                 onClick={closeMobileMenu}
                 className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/analysis')
+                  pathname.startsWith('/analysis')
                     ? 'pixel-nav-mobile-active'
                     : 'pixel-nav-mobile-inactive'
                 }`}

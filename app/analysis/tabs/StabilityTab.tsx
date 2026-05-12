@@ -1,211 +1,296 @@
 'use client';
 
-import { useMemo } from 'react';
 import {
-  ComposedChart,
   Bar,
-  Cell,
+  BarChart,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   ReferenceLine,
-  BarChart,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
-import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtPct, thresholdColor, getCurrencyFmt, type Currency } from '../theme';
-import { stabilityInsights } from '../insights';
-import { Card, RichTooltip, KPIStat, KPIStrip, InsightList } from '../components/primitives';
+import { COLOR, AXIS_TICK, GRID_PROPS, fmtPct, getCurrencyFmt, type Currency } from '../theme';
+import {
+  RichTooltip,
+  KPIStat,
+  KPIStrip,
+  PeriodNumbersStrip,
+} from '../components/primitives';
+
+/* 부채 탭 컬러 */
+const DEBT_COLOR = {
+  debt: '#d97706',     // amber — 차입금
+  cash: '#0891b2',     // cyan — 현금
+  net: '#F97316',      // orange — 순차입금 (강조)
+};
 
 export function StabilityTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
-  const { main: fmtMain, axis: fmtAxis } = getCurrencyFmt(currency);
+  const { main: fmtMain, axis: fmtAxis, unitLabel } = getCurrencyFmt(currency);
   if (data.length === 0) return null;
   const latest = data[data.length - 1];
-  const insights = stabilityInsights(data);
 
-  const enriched = useMemo(
-    () =>
-      data.map((d) => ({
-        ...d,
-        nonCurrentLiabilities:
-          d.totalLiabilities !== null && d.currentLiabilities !== null
-            ? d.totalLiabilities - d.currentLiabilities
-            : null,
-        shortTermRatio:
-          d.currentLiabilities !== null && d.totalLiabilities !== null && d.totalLiabilities > 0
-            ? Math.round((d.currentLiabilities / d.totalLiabilities) * 1000) / 10
-            : null,
-      })),
-    [data]
+  // 파생: 순차입금 + 자기자본비율 + 부채구조
+  const chartData = data.map((d) => {
+    const netDebt =
+      d.longTermDebt !== null && d.cashBalance !== null
+        ? d.longTermDebt - d.cashBalance
+        : null;
+    const equityRatio =
+      d.totalEquity !== null && d.totalAssets !== null && d.totalAssets > 0
+        ? (d.totalEquity / d.totalAssets) * 100
+        : null;
+    const nonCurrentLiabilities =
+      d.totalLiabilities !== null && d.currentLiabilities !== null
+        ? d.totalLiabilities - d.currentLiabilities
+        : null;
+    return { ...d, netDebt, equityRatio, nonCurrentLiabilities };
+  });
+  const latestE = chartData[chartData.length - 1];
+
+  // 데이터 가용성
+  const hasDebtData = data.some((d) => d.longTermDebt !== null);
+  const hasCashData = data.some((d) => d.cashBalance !== null);
+  const hasStructureData = data.some(
+    (d) => d.currentLiabilities !== null && d.totalLiabilities !== null
   );
 
-  const latestE = enriched[enriched.length - 1];
+  // 부채 vs 현금 비교 (최신 기간)
+  const debtCashRatio =
+    latest.longTermDebt !== null && latest.cashBalance !== null && latest.cashBalance > 0
+      ? latest.longTermDebt / latest.cashBalance
+      : null;
 
   return (
     <div className="space-y-4 sm:space-y-5">
+      {/* KPI Strip */}
       <KPIStrip>
+        <KPIStat
+          label="차입금"
+          value={fmtMain(latest.longTermDebt)}
+          hint="이자성 부채 (장기 + 1년내 만기)"
+          valueColor={DEBT_COLOR.debt}
+        />
+        <KPIStat
+          label="현금"
+          value={fmtMain(latest.cashBalance)}
+          hint="현금성 자산 잔액"
+          valueColor={DEBT_COLOR.cash}
+        />
+        <KPIStat
+          label="순차입금"
+          value={fmtMain(latestE.netDebt)}
+          hint="차입금 − 현금"
+          valueColor={
+            latestE.netDebt === null
+              ? undefined
+              : latestE.netDebt < 0
+              ? COLOR.positive  // 현금 > 차입금 = 좋음
+              : DEBT_COLOR.net
+          }
+        />
         <KPIStat
           label="부채비율"
           value={fmtPct(latest.debtRatio)}
-          hint={
+          hint="부채총계 ÷ 자본"
+          valueColor={
             latest.debtRatio === null
-              ? '부채 ÷ 자본'
+              ? undefined
               : latest.debtRatio > 200
-              ? '재무 위험'
+              ? COLOR.negative
               : latest.debtRatio > 100
-              ? '보통'
-              : '안정'
+              ? COLOR.warning
+              : COLOR.positive
           }
-          valueColor={thresholdColor(latest.debtRatio, 100, 200, false)}
-        />
-        <KPIStat
-          label="유동비율"
-          value={fmtPct(latest.currentRatio)}
-          hint={
-            latest.currentRatio === null
-              ? '유동자산 ÷ 유동부채'
-              : latest.currentRatio < 100
-              ? '유동성 부족'
-              : latest.currentRatio >= 200
-              ? '유동성 충분'
-              : '적정'
-          }
-          valueColor={thresholdColor(latest.currentRatio, 200, 100, true)}
-        />
-        <KPIStat
-          label="유동부채"
-          value={fmtMain(latest.currentLiabilities)}
-          hint="1년 내 만기 도래"
-        />
-        <KPIStat
-          label="유동부채 비중"
-          value={fmtPct(latestE.shortTermRatio)}
-          hint={latestE.shortTermRatio !== null && latestE.shortTermRatio > 70 ? '단기 부담 과다' : '장기부채 위주'}
-          valueColor={thresholdColor(latestE.shortTermRatio, 50, 70, false)}
         />
       </KPIStrip>
 
-      {insights.length > 0 && <InsightList insights={insights} />}
+      {/* 메인 차트: 차입금 · 현금 · 순차입금 */}
+      {(hasDebtData || hasCashData) && (
+        <div
+          className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
+        >
+          <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2 flex-wrap">
+            <div className="min-w-0">
+              <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+                차입금 · 현금 · 순차입금
+              </h3>
+              <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                기간별 잔액 (단위: {unitLabel})
+              </p>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.debt }} />
+                차입금
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.cash }} />
+                현금
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.net }} />
+                순차입금
+              </span>
+            </div>
+          </header>
 
-      {/* 단기 vs 장기 안정성 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        <Card title="유동비율" sub="유동자산 ÷ 유동부채 · 100% 이상 안전권">
-          <div style={{ height: 240 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 8, left: -10, bottom: 0 }}>
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={40} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtPct(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <ReferenceLine
-                  y={100}
-                  stroke={COLOR.negative}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                  label={{ value: '100%', position: 'right', fill: COLOR.negative, fontSize: 10, fontWeight: 700 }}
-                />
-                <ReferenceLine
-                  y={200}
-                  stroke={COLOR.positive}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                  label={{ value: '200%', position: 'right', fill: COLOR.positive, fontSize: 10, fontWeight: 700 }}
-                />
-                <Bar dataKey="currentRatio" name="유동비율" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                  {data.map((d, i) => (
-                    <Cell
-                      key={i}
-                      fill={
-                        d.currentRatio === null
-                          ? COLOR.axisSoft
-                          : d.currentRatio >= 200
-                          ? COLOR.positive
-                          : d.currentRatio < 100
-                          ? COLOR.negative
-                          : COLOR.warning
-                      }
-                      fillOpacity={0.85}
-                    />
-                  ))}
-                </Bar>
-              </ComposedChart>
-            </ResponsiveContainer>
+          <div className="px-5 pb-4">
+            <div style={{ height: 320 }}>
+              <ResponsiveContainer>
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                  barCategoryGap="22%"
+                  barGap={3}
+                >
+                  <defs>
+                    <linearGradient id="grad-debt" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={DEBT_COLOR.debt} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={DEBT_COLOR.debt} stopOpacity={0.65} />
+                    </linearGradient>
+                    <linearGradient id="grad-cash" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={DEBT_COLOR.cash} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={DEBT_COLOR.cash} stopOpacity={0.65} />
+                    </linearGradient>
+                    <linearGradient id="grad-netdebt" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={DEBT_COLOR.net} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={DEBT_COLOR.net} stopOpacity={0.65} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid {...GRID_PROPS} />
+                  <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                  <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+                  <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                  <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
+                  <Bar dataKey="longTermDebt" name="차입금" fill="url(#grad-debt)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                  <Bar dataKey="cashBalance" name="현금" fill="url(#grad-cash)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                  <Bar dataKey="netDebt" name="순차입금" fill="url(#grad-netdebt)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </Card>
 
-        <Card title="부채비율" sub="부채총계 ÷ 자본총계 · 100% 이하 양호">
-          <div style={{ height: 240 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 8, left: -10, bottom: 0 }}>
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={40} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtPct(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <ReferenceLine
-                  y={100}
-                  stroke={COLOR.warning}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                  label={{ value: '100%', position: 'right', fill: COLOR.warning, fontSize: 10, fontWeight: 700 }}
-                />
-                <Bar dataKey="debtRatio" name="부채비율" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                  {data.map((d, i) => (
-                    <Cell
-                      key={i}
-                      fill={
-                        d.debtRatio === null
-                          ? COLOR.axisSoft
-                          : d.debtRatio > 200
-                          ? COLOR.negative
-                          : d.debtRatio > 100
-                          ? COLOR.warning
-                          : COLOR.positive
-                      }
-                      fillOpacity={0.85}
-                    />
-                  ))}
-                </Bar>
-              </ComposedChart>
-            </ResponsiveContainer>
+          {/* 기간별 수치 */}
+          <div className="border-t border-[var(--theme-border-muted)] bg-[var(--theme-bg)]/40 px-5 py-4">
+            <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-3">
+              기간별 수치
+            </p>
+            <PeriodNumbersStrip
+              periods={data.map((d) => d.period)}
+              rows={[
+                {
+                  label: '차입금',
+                  values: data.map((d) => fmtMain(d.longTermDebt)),
+                  signedValues: data.map((d) => d.longTermDebt),
+                },
+                {
+                  label: '현금',
+                  values: data.map((d) => fmtMain(d.cashBalance)),
+                  signedValues: data.map((d) => d.cashBalance),
+                },
+                {
+                  label: '순차입금',
+                  highlight: 'negative',
+                  values: chartData.map((d) => fmtMain(d.netDebt)),
+                  signedValues: chartData.map((d) => d.netDebt),
+                },
+                {
+                  label: '부채비율',
+                  values: data.map((d) =>
+                    d.debtRatio === null ? null : `${d.debtRatio.toFixed(0)}%`
+                  ),
+                  signedValues: data.map((d) => d.debtRatio),
+                },
+                {
+                  label: '자본 비중',
+                  values: chartData.map((d) =>
+                    d.equityRatio === null ? null : `${d.equityRatio.toFixed(0)}%`
+                  ),
+                  signedValues: chartData.map((d) => d.equityRatio),
+                },
+              ]}
+            />
+            <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-snug">
+              * 순차입금 = 차입금 − 현금 (음수 = 현금이 차입금보다 많음)
+            </p>
           </div>
-        </Card>
-      </div>
+        </div>
+      )}
+
+      {/* 부채 비교 — 팩트만 (메인 차트 바로 아래) */}
+      {debtCashRatio !== null && latest.longTermDebt !== null && latest.cashBalance !== null && (
+        <div
+          className="rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] px-5 py-4"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
+        >
+          <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
+            부채 비교
+          </p>
+          <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+            현재 차입금이 현금의{' '}
+            <span
+              className="font-bold"
+              style={{ color: debtCashRatio < 1 ? COLOR.positive : DEBT_COLOR.net }}
+            >
+              {debtCashRatio.toFixed(1)}배
+            </span>
+          </p>
+          <p className="font-sans text-[12px] font-bold text-gray-600 dark:text-gray-300 mt-1.5">
+            차입금 {fmtMain(latest.longTermDebt)} · 현금 {fmtMain(latest.cashBalance)} · 순차입금 {fmtMain(latestE.netDebt)}
+          </p>
+        </div>
+      )}
 
       {/* 부채 구조 (유동 vs 비유동) */}
-      <Card title="부채 구조" sub="유동부채(1년 이내 만기) vs 비유동부채">
-        <div style={{ height: 280 }}>
-          <ResponsiveContainer>
-            <BarChart data={enriched} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%">
-              <CartesianGrid {...GRID_PROPS} />
-              <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-              <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
-              <Bar dataKey="currentLiabilities" name="유동부채" stackId="d" fill={COLOR.negative} fillOpacity={0.75} maxBarSize={48} isAnimationActive={false} />
-              <Bar dataKey="nonCurrentLiabilities" name="비유동부채" stackId="d" fill={COLOR.warning} fillOpacity={0.55} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
+      {hasStructureData && (
+        <div
+          className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
+        >
+          <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2 flex-wrap">
+            <div className="min-w-0">
+              <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+                부채 구조 — 유동 · 비유동
+              </h3>
+              <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                만기 구조 (단위: {unitLabel})
+              </p>
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: COLOR.negative }} />
+                유동부채 (1년 내)
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.debt }} />
+                비유동부채
+              </span>
+            </div>
+          </header>
 
-      {/* 자산 = 부채 + 자본 */}
-      <Card title="재무상태표 구성" sub="자산 = 부채 + 자본">
-        <div style={{ height: 280 }}>
-          <ResponsiveContainer>
-            <BarChart data={data} margin={{ top: 10, right: 8, left: -8, bottom: 0 }} barCategoryGap="22%">
-              <CartesianGrid {...GRID_PROPS} />
-              <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-              <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
-              <Bar dataKey="totalLiabilities" name="부채" stackId="bs" fill={COLOR.negative} fillOpacity={0.4} maxBarSize={48} isAnimationActive={false} />
-              <Bar dataKey="totalEquity" name="자본" stackId="bs" fill={COLOR.positive} fillOpacity={0.55} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-            </BarChart>
-          </ResponsiveContainer>
+          <div className="px-5 pb-4">
+            <div style={{ height: 260 }}>
+              <ResponsiveContainer>
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                  barCategoryGap="22%"
+                >
+                  <CartesianGrid {...GRID_PROPS} />
+                  <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                  <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+                  <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                  <Bar dataKey="currentLiabilities" name="유동부채" stackId="d" fill={COLOR.negative} fillOpacity={0.75} maxBarSize={48} isAnimationActive={false} />
+                  <Bar dataKey="nonCurrentLiabilities" name="비유동부채" stackId="d" fill={DEBT_COLOR.debt} fillOpacity={0.7} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
-      </Card>
+      )}
     </div>
   );
 }

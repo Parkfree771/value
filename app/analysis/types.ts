@@ -63,6 +63,11 @@ export interface FinancialMetrics {
   investingCashFlow: number | null;   // 투자활동 현금흐름 (억원)
   financingCashFlow: number | null;   // 재무활동 현금흐름 (억원)
   freeCashFlow: number | null;        // 잉여현금흐름 (억원)
+  // 주주환원 + 현금잔액 + 차입금 (US/SEC만 지원, KR DART는 null)
+  dividendsPaid: number | null;       // 배당 지급액 (양수, 백만USD)
+  stockBuyback: number | null;        // 자사주 매입 (양수, 백만USD)
+  cashBalance: number | null;         // 현금성자산 기말 잔액 (백만USD)
+  longTermDebt: number | null;        // 이자성 차입금 기말 잔액 (백만USD)
 }
 
 /** 검색 결과 기업 */

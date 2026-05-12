@@ -51,8 +51,11 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ['var(--font-inter)', 'var(--font-noto)', 'Inter', 'Noto Sans KR', 'sans-serif'],
-        body: ['var(--font-inter)', 'var(--font-noto)', 'Inter', 'Noto Sans KR', 'sans-serif'],
+        // body와 동일한 스택 — `font-sans`/`font-heading`/`font-body` 클래스를 붙여도 인라인 인접 텍스트(클래스 없는 부분)와 한글이 동일 폰트로 렌더링되게 함.
+        // NumFont(Barlow)는 unicode-range로 숫자/%만 매칭되고, 한글은 Noto Sans KR로 일관 렌더링.
+        sans: ['NumFont', 'var(--font-noto)', 'var(--font-inter)', 'Noto Sans KR', 'Inter', 'sans-serif'],
+        heading: ['NumFont', 'var(--font-noto)', 'var(--font-inter)', 'Noto Sans KR', 'Inter', 'sans-serif'],
+        body: ['NumFont', 'var(--font-noto)', 'var(--font-inter)', 'Noto Sans KR', 'Inter', 'sans-serif'],
         mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },
       boxShadow: {

@@ -64,21 +64,34 @@ export function performanceInsights(data: FinancialMetrics[]): Insight[] {
 
 export interface PerformanceHighlights {
   revenueCAGR: { value: number; years: number; tone: 'positive' | 'negative' | 'neutral' } | null;
+  profitCAGR: { value: number; years: number; tone: 'positive' | 'negative' | 'neutral' } | null;
   marginTrend: { value: number; periods: number; tone: 'positive' | 'negative' } | null;
-  netIncomeStatus: { tone: 'positive' | 'negative'; label: string } | null;
+  /** 매출 성장률과 영업이익 성장률 비교 — 팩트만 (해석 없음) */
+  growthGap: { revCAGR: number; opCAGR: number; gap: number; higher: 'revenue' | 'operating' | 'equal' } | null;
 }
 
 export function performanceHighlights(data: FinancialMetrics[]): PerformanceHighlights {
-  const result: PerformanceHighlights = { revenueCAGR: null, marginTrend: null, netIncomeStatus: null };
+  const result: PerformanceHighlights = { revenueCAGR: null, profitCAGR: null, marginTrend: null, growthGap: null };
   if (data.length < 2) return result;
   const latest = last(data)!;
   const first = data[0];
+  const yearsSpan = latest.year - first.year;
 
   if (first.revenue && latest.revenue && data.length >= 3) {
-    const yearsSpan = latest.year - first.year;
     const c = cagr(first.revenue, latest.revenue, yearsSpan);
     if (c !== null) {
       result.revenueCAGR = {
+        value: c,
+        years: yearsSpan,
+        tone: c >= 5 ? 'positive' : c < 0 ? 'negative' : 'neutral',
+      };
+    }
+  }
+
+  if (first.operatingProfit && latest.operatingProfit && data.length >= 3) {
+    const c = cagr(first.operatingProfit, latest.operatingProfit, yearsSpan);
+    if (c !== null) {
+      result.profitCAGR = {
         value: c,
         years: yearsSpan,
         tone: c >= 5 ? 'positive' : c < 0 ? 'negative' : 'neutral',
@@ -94,10 +107,16 @@ export function performanceHighlights(data: FinancialMetrics[]): PerformanceHigh
     }
   }
 
-  if (latest.netIncome !== null) {
-    result.netIncomeStatus = latest.netIncome < 0
-      ? { tone: 'negative', label: '순손실' }
-      : { tone: 'positive', label: '순이익 흑자' };
+  if (result.revenueCAGR && result.profitCAGR) {
+    const r = result.revenueCAGR.value;
+    const o = result.profitCAGR.value;
+    const gap = o - r;
+    result.growthGap = {
+      revCAGR: r,
+      opCAGR: o,
+      gap,
+      higher: Math.abs(gap) < 0.1 ? 'equal' : gap > 0 ? 'operating' : 'revenue',
+    };
   }
 
   return result;

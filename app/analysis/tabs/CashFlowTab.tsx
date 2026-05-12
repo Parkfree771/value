@@ -1,180 +1,75 @@
 'use client';
 
-import { useMemo } from 'react';
 import {
-  ComposedChart,
   Bar,
-  Line,
-  Cell,
+  BarChart,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   ReferenceLine,
-  BarChart,
-  LabelList,
 } from 'recharts';
 import type { FinancialMetrics } from '../types';
-import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtX, getCurrencyFmt, type Currency } from '../theme';
-import { Card, RichTooltip, KPIStat, KPIStrip } from '../components/primitives';
+import { COLOR, AXIS_TICK, GRID_PROPS, fmtPct, getCurrencyFmt, type Currency } from '../theme';
+import {
+  RichTooltip,
+  KPIStat,
+  KPIStrip,
+  PeriodNumbersStrip,
+} from '../components/primitives';
 
-/** 막대 위/아래에 통화 값 라벨 (음수는 아래, 양수는 위) */
-function makeRenderCashLabel(fmtMain: (v: number | null) => string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function renderCashLabel(props: any): JSX.Element | null {
-  const xRaw = props?.x;
-  const yRaw = props?.y;
-  const wRaw = props?.width;
-  const hRaw = props?.height;
-  const value = props?.value;
-  const x = typeof xRaw === 'number' ? xRaw : Number(xRaw) || 0;
-  const y = typeof yRaw === 'number' ? yRaw : Number(yRaw) || 0;
-  const width = typeof wRaw === 'number' ? wRaw : Number(wRaw) || 0;
-  const height = typeof hRaw === 'number' ? hRaw : Number(hRaw) || 0;
-  if (value === null || value === undefined || value === 0) return null;
-  if (typeof value !== 'number' || !isFinite(value)) return null;
-  const isNeg = value < 0;
-  return (
-    <text
-      x={x + width / 2}
-      y={isNeg ? y + height + 11 : y - 5}
-      fill="var(--foreground)"
-      fontSize={10}
-      fontWeight={700}
-      textAnchor="middle"
-      style={{ pointerEvents: 'none' }}
-    >
-      {fmtMain(value)}
-    </text>
-  );
-  };
-}
-
-/** 연도별 색상 — 가장 최신은 primary, 과거는 slate 그라데이션 */
-const PERIOD_RAMP = ['#cbd5e1', '#94a3b8', '#64748b', '#475569', COLOR.primary];
-function getPeriodColor(idx: number, total: number): string {
-  if (idx === total - 1) return COLOR.primary;
-  const offset = Math.max(0, PERIOD_RAMP.length - total);
-  return PERIOD_RAMP[Math.min(idx + offset, PERIOD_RAMP.length - 2)];
-}
-
-/* 현금흐름 패턴 진단 */
-interface PatternInfo {
-  code: string;
-  name: string;
-  desc: string;
-  color: string;
-  long: string; // 자세한 한 줄 설명
-}
-
-function diagnoseCF(m: FinancialMetrics): PatternInfo {
-  const o = m.operatingCashFlow,
-    i = m.investingCashFlow,
-    f = m.financingCashFlow;
-  if (o === null || i === null || f === null)
-    return { code: '?', name: '데이터 부족', desc: '', long: '', color: COLOR.axis };
-  if (o > 0 && i < 0 && f < 0)
-    return {
-      code: 'A',
-      name: '우량 성숙기업',
-      desc: '영업으로 투자 + 부채상환',
-      long: '본업으로 충분한 현금을 만들어 자체 투자와 차입금 상환을 동시에 해내는 가장 이상적인 상태입니다.',
-      color: COLOR.positive,
-    };
-  if (o > 0 && i < 0 && f > 0)
-    return {
-      code: 'B',
-      name: '고성장 투자',
-      desc: '차입 포함 공격적 투자',
-      long: '본업도 수익이지만 더 적극적인 성장을 위해 외부 자금까지 끌어와 투자에 쏟고 있습니다.',
-      color: COLOR.primary,
-    };
-  if (o > 0 && i > 0 && f < 0)
-    return {
-      code: 'C',
-      name: '구조조정',
-      desc: '자산매각으로 부채상환',
-      long: '본업과 자산매각으로 만든 현금을 부채 상환에 쓰는 슬림화 단계입니다.',
-      color: COLOR.warning,
-    };
-  if (o < 0 && i < 0 && f > 0)
-    return {
-      code: 'E',
-      name: '적자 투자',
-      desc: '차입으로 적자 보전',
-      long: '본업이 적자인 와중에 투자도 하면서 차입으로 버티는 위험한 상태입니다.',
-      color: COLOR.negative,
-    };
-  if (o < 0 && i > 0 && f > 0)
-    return {
-      code: 'F',
-      name: '위기',
-      desc: '매각+차입으로 적자 보전',
-      long: '본업 적자를 자산매각과 차입으로 동시에 막고 있는 매우 위험한 상태입니다.',
-      color: COLOR.negative,
-    };
-  if (o < 0 && i > 0 && f < 0)
-    return {
-      code: 'G',
-      name: '철수',
-      desc: '자산매각으로 부채상환',
-      long: '본업이 적자라 자산을 팔아 부채를 상환 중인 사업 축소 단계입니다.',
-      color: COLOR.negative,
-    };
-  return { code: '-', name: '기타', desc: '', long: '', color: COLOR.axis };
-}
+/* 현금흐름 탭 컬러 — 녹색 계열로 통일 (실적/부채와 차별화) */
+const CF_COLOR = {
+  ocf: '#059669',      // emerald-600 — 영업CF (들어오는 현금)
+  capex: '#475569',    // slate-600 — CapEx (나가는 지출, 중립색)
+  fcf: '#65a30d',      // lime-600 — FCF (남은 잉여)
+  dividend: '#7c3aed', // violet — 배당 (회수 정기)
+  buyback: '#F97316',  // orange — 자사주 (재량 환원)
+};
 
 export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
   const { main: fmtMain, axis: fmtAxis, unitLabel } = getCurrencyFmt(currency);
-  const renderCashLabel = makeRenderCashLabel(fmtMain);
   if (data.length === 0) return null;
   const latest = data[data.length - 1];
-  const pattern = diagnoseCF(latest);
 
-  // 그룹드 바 차트 데이터: 활동별로 5년치 시리즈
-  const periods = useMemo(() => data.map((d) => d.period), [data]);
-  const groupedCFData = useMemo(() => {
-    const sumNet = (d: FinancialMetrics) => {
-      if (d.operatingCashFlow === null && d.investingCashFlow === null && d.financingCashFlow === null) return null;
-      return (d.operatingCashFlow ?? 0) + (d.investingCashFlow ?? 0) + (d.financingCashFlow ?? 0);
-    };
-    const buildRow = (activity: string, getter: (d: FinancialMetrics) => number | null) =>
-      data.reduce((acc, d) => ({ ...acc, [d.period]: getter(d) }), { activity });
-    return [
-      buildRow('영업활동', (d) => d.operatingCashFlow),
-      buildRow('투자활동', (d) => d.investingCashFlow),
-      buildRow('재무활동', (d) => d.financingCashFlow),
-      buildRow('순현금변동', sumNet),
-    ];
-  }, [data]);
+  // CapEx 표시값: -investingCashFlow (투자 시 양수, 자산매각 시 음수)
+  // 이렇게 하면 OCF − CapEx_display = OCF + IC = freeCashFlow 와 일관됨
+  const chartData = data.map((d) => ({
+    ...d,
+    capexDisplay: d.investingCashFlow !== null ? -d.investingCashFlow : null,
+  }));
 
-  const enriched = useMemo(() => {
-    let cum = 0;
-    return data.map((d) => {
-      if (d.freeCashFlow !== null) cum += d.freeCashFlow;
-      const ccr =
-        d.operatingCashFlow !== null && d.operatingProfit !== null && d.operatingProfit !== 0
-          ? Math.round((d.operatingCashFlow / d.operatingProfit) * 100) / 100
-          : null;
-      const capex = d.investingCashFlow !== null ? Math.abs(d.investingCashFlow) : null;
-      const capexR =
-        d.operatingCashFlow !== null && d.investingCashFlow !== null && d.operatingCashFlow > 0
-          ? Math.round((Math.abs(d.investingCashFlow) / d.operatingCashFlow) * 1000) / 10
-          : null;
-      return {
-        ...d,
-        cumulativeFCF: d.freeCashFlow !== null ? cum : null,
-        cashConversion: ccr,
-        capex,
-        capexRatio: capexR,
-      };
-    });
-  }, [data]);
+  // 최신값 KPI
+  const capexLatest = latest.investingCashFlow !== null ? -latest.investingCashFlow : null;
+  const fcfMarginLatest =
+    latest.freeCashFlow !== null && latest.revenue !== null && latest.revenue !== 0
+      ? (latest.freeCashFlow / latest.revenue) * 100
+      : null;
 
-  const hasCFData =
-    latest.operatingCashFlow !== null || latest.investingCashFlow !== null || latest.financingCashFlow !== null;
+  // 기간 누적 비교 (팩트만)
+  let ocfSum = 0, ocfCount = 0;
+  let capexSum = 0, capexCount = 0;
+  let fcfSum = 0, fcfCount = 0;
+  let divSum = 0, divCount = 0;
+  let buySum = 0, buyCount = 0;
+  for (const d of data) {
+    if (d.operatingCashFlow !== null) { ocfSum += d.operatingCashFlow; ocfCount++; }
+    if (d.investingCashFlow !== null) { capexSum += -d.investingCashFlow; capexCount++; }
+    if (d.freeCashFlow !== null) { fcfSum += d.freeCashFlow; fcfCount++; }
+    if (d.dividendsPaid !== null) { divSum += d.dividendsPaid; divCount++; }
+    if (d.stockBuyback !== null) { buySum += d.stockBuyback; buyCount++; }
+  }
+  const showComparison = ocfCount >= 2 && capexCount >= 2 && fcfCount >= 2 && capexSum > 0;
+  const ocfCapexRatio = showComparison ? ocfSum / capexSum : null;
+
+  // 주주환원: 배당 또는 자사주 데이터가 한 기간이라도 있으면 섹션 표시
+  const hasShareholderReturn = divCount > 0 || buyCount > 0;
+  const totalReturnSum = divSum + buySum;
+  const returnVsFcfPct = fcfSum > 0 && totalReturnSum > 0 ? (totalReturnSum / fcfSum) * 100 : null;
+
+  // 현금잔액 데이터 존재 여부
+  const hasCashBalance = data.some((d) => d.cashBalance !== null);
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -183,288 +78,296 @@ export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics
         <KPIStat
           label="영업활동 CF"
           value={fmtMain(latest.operatingCashFlow)}
-          hint="본업 현금 창출"
+          hint="본업으로 만든 현금"
           valueColor={latest.operatingCashFlow !== null && latest.operatingCashFlow < 0 ? COLOR.negative : COLOR.primary}
         />
         <KPIStat
-          label="투자활동 CF"
-          value={fmtMain(latest.investingCashFlow)}
+          label="CapEx (투자지출)"
+          value={fmtMain(capexLatest)}
           hint="유·무형자산 투자"
         />
         <KPIStat
-          label="재무활동 CF"
-          value={fmtMain(latest.financingCashFlow)}
-          hint="차입금·배당·자사주"
+          label="잉여현금흐름 (FCF)"
+          value={fmtMain(latest.freeCashFlow)}
+          hint="영업CF − CapEx"
+          valueColor={latest.freeCashFlow !== null && latest.freeCashFlow < 0 ? COLOR.negative : COLOR.positive}
         />
         <KPIStat
-          label="FCF (잉여현금흐름)"
-          value={fmtMain(latest.freeCashFlow)}
-          hint="영업CF − 투자지출"
-          valueColor={latest.freeCashFlow !== null && latest.freeCashFlow < 0 ? COLOR.negative : COLOR.positive}
+          label="FCF 마진"
+          value={fmtPct(fcfMarginLatest)}
+          hint="FCF ÷ 매출"
+          valueColor={fcfMarginLatest !== null && fcfMarginLatest < 0 ? COLOR.negative : undefined}
         />
       </KPIStrip>
 
-      {/* HERO: 활동별 현금흐름 (5년 그룹드 바) */}
-      {hasCFData && (
-        <Card title="활동별 현금흐름" sub={`최근 ${periods.length}년 — 영업·투자·재무 활동 추이`}>
-          <div style={{ height: 420 }}>
+      {/* 메인 차트: OCF + CapEx + FCF (3-bar grouped) + 기간별 수치 부착 */}
+      <div
+        className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
+        style={{ boxShadow: 'var(--shadow-sm)' }}
+      >
+        <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2 flex-wrap">
+          <div className="min-w-0">
+            <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+              영업CF · CapEx · 잉여현금흐름
+            </h3>
+            <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+              추이 (단위: {unitLabel})
+            </p>
+          </div>
+          <div className="flex items-center gap-3 sm:gap-4 text-[11px] font-bold">
+            <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+              <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.ocf }} />
+              영업CF
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+              <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.capex }} />
+              CapEx
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+              <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.fcf }} />
+              FCF
+            </span>
+          </div>
+        </header>
+
+        {/* Chart */}
+        <div className="px-5 pb-4">
+          <div style={{ height: 320 }}>
             <ResponsiveContainer>
-              <BarChart data={groupedCFData} margin={{ top: 28, right: 12, left: -4, bottom: 8 }} barCategoryGap="22%" barGap={2}>
+              <BarChart data={chartData} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="22%" barGap={3}>
+                <defs>
+                  <linearGradient id="grad-ocf" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CF_COLOR.ocf} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={CF_COLOR.ocf} stopOpacity={0.65} />
+                  </linearGradient>
+                  <linearGradient id="grad-capex" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CF_COLOR.capex} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={CF_COLOR.capex} stopOpacity={0.65} />
+                  </linearGradient>
+                  <linearGradient id="grad-fcf" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={CF_COLOR.fcf} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={CF_COLOR.fcf} stopOpacity={0.65} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid {...GRID_PROPS} />
-                <XAxis
-                  dataKey="activity"
-                  tick={{ ...AXIS_TICK, fontSize: 13, fontWeight: 700, fill: 'var(--foreground)' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
+                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                 <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
                 <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
-                <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={2} />
-                {periods.map((p, i) => (
-                  <Bar
-                    key={p}
-                    dataKey={p}
-                    name={p}
-                    fill={getPeriodColor(i, periods.length)}
-                    radius={[3, 3, 0, 0]}
-                    maxBarSize={28}
-                    isAnimationActive={false}
-                  >
-                    <LabelList dataKey={p} content={renderCashLabel} />
-                  </Bar>
-                ))}
+                <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
+                <Bar dataKey="operatingCashFlow" name="영업CF" fill="url(#grad-ocf)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                <Bar dataKey="capexDisplay" name="CapEx" fill="url(#grad-capex)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
+                <Bar dataKey="freeCashFlow" name="FCF" fill="url(#grad-fcf)" radius={[4, 4, 0, 0]} maxBarSize={36} isAnimationActive={false} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </Card>
+        </div>
+
+        {/* 기간별 수치 */}
+        <div className="border-t border-[var(--theme-border-muted)] bg-[var(--theme-bg)]/40 px-5 py-4">
+          <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-3">
+            기간별 수치
+          </p>
+          <PeriodNumbersStrip
+            periods={data.map((d) => d.period)}
+            rows={[
+              {
+                label: '영업CF',
+                highlight: 'negative',
+                values: data.map((d) => fmtMain(d.operatingCashFlow)),
+                signedValues: data.map((d) => d.operatingCashFlow),
+              },
+              {
+                label: 'CapEx',
+                values: chartData.map((d) => fmtMain(d.capexDisplay)),
+                signedValues: chartData.map((d) => d.capexDisplay),
+              },
+              {
+                label: 'FCF',
+                highlight: 'negative',
+                values: data.map((d) => fmtMain(d.freeCashFlow)),
+                signedValues: data.map((d) => d.freeCashFlow),
+              },
+              {
+                label: 'FCF 마진',
+                highlight: 'negative',
+                values: data.map((d) => {
+                  if (d.freeCashFlow === null || d.revenue === null || d.revenue === 0) return null;
+                  const m = (d.freeCashFlow / d.revenue) * 100;
+                  return `${m >= 0 ? '' : ''}${m.toFixed(1)}%`;
+                }),
+                signedValues: data.map((d) => {
+                  if (d.freeCashFlow === null || d.revenue === null || d.revenue === 0) return null;
+                  return (d.freeCashFlow / d.revenue) * 100;
+                }),
+              },
+              ...(hasCashBalance ? [{
+                label: '현금잔액',
+                values: data.map((d) => fmtMain(d.cashBalance)),
+                signedValues: data.map((d) => d.cashBalance),
+              }] : []),
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* 누적 비교 — 팩트만 (메인 차트 바로 아래) */}
+      {showComparison && ocfCapexRatio !== null && (
+        <div
+          className="rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] px-5 py-4"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
+        >
+          <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
+            누적 비교
+          </p>
+          <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+            최근 {data.length}년 영업CF가 CapEx의{' '}
+            <span
+              className="font-bold"
+              style={{ color: ocfCapexRatio >= 1 ? COLOR.positive : COLOR.negative }}
+            >
+              {ocfCapexRatio.toFixed(1)}배
+            </span>
+          </p>
+          <p className="font-sans text-[12px] font-bold text-gray-600 dark:text-gray-300 mt-1.5">
+            영업CF 합계 {fmtMain(ocfSum)} · CapEx 합계 {fmtMain(capexSum)} · 누적 FCF {fmtMain(fcfSum)}
+          </p>
+        </div>
       )}
 
-      {/* 패턴 진단 (워터폴 아래) */}
-      <PatternHero pattern={pattern} period={latest.period} />
-
-      {/* 시계열: 영업·투자·재무 CF 추이 */}
-      <Card title="현금흐름 추이" sub={`활동별 시계열 (단위: ${unitLabel})`}>
-        <div style={{ height: 290 }}>
-          <ResponsiveContainer>
-            <BarChart data={data} margin={{ top: 22, right: 8, left: -8, bottom: 8 }} barCategoryGap="22%" barGap={2}>
-              <CartesianGrid {...GRID_PROPS} />
-              <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-              <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
-              <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
-              <Bar dataKey="operatingCashFlow" name="영업활동" fill={COLOR.primary} fillOpacity={0.85} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
-                <LabelList dataKey="operatingCashFlow" content={renderCashLabel} />
-              </Bar>
-              <Bar dataKey="investingCashFlow" name="투자활동" fill={COLOR.warning} fillOpacity={0.75} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
-                <LabelList dataKey="investingCashFlow" content={renderCashLabel} />
-              </Bar>
-              <Bar dataKey="financingCashFlow" name="재무활동" fill={COLOR.series3} fillOpacity={0.75} radius={[4, 4, 0, 0]} maxBarSize={32} isAnimationActive={false}>
-                <LabelList dataKey="financingCashFlow" content={renderCashLabel} />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
-      {/* FCF + 누적 FCF */}
-      <Card title="잉여현금흐름 (FCF)" sub="기간별 FCF + 누적 — 자체 자금 창출 능력">
-        <div style={{ height: 280 }}>
-          <ResponsiveContainer>
-            <ComposedChart data={enriched} margin={{ top: 22, right: 8, left: -8, bottom: 8 }} barCategoryGap="22%">
-              <defs>
-                <linearGradient id="grad-fcf-pos" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLOR.positive} stopOpacity={0.85} />
-                  <stop offset="100%" stopColor={COLOR.positive} stopOpacity={0.55} />
-                </linearGradient>
-                <linearGradient id="grad-fcf-neg" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={COLOR.negative} stopOpacity={0.55} />
-                  <stop offset="100%" stopColor={COLOR.negative} stopOpacity={0.85} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid {...GRID_PROPS} />
-              <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-              <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
-              <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-              <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
-              <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
-              <Bar dataKey="freeCashFlow" name="기간 FCF" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                {enriched.map((e, i) => (
-                  <Cell
-                    key={i}
-                    fill={
-                      e.freeCashFlow === null
-                        ? COLOR.axisSoft
-                        : e.freeCashFlow >= 0
-                        ? 'url(#grad-fcf-pos)'
-                        : 'url(#grad-fcf-neg)'
-                    }
-                  />
-                ))}
-                <LabelList dataKey="freeCashFlow" content={renderCashLabel} />
-              </Bar>
-              <Line
-                type="monotone"
-                dataKey="cumulativeFCF"
-                name="누적 FCF"
-                stroke={COLOR.primary}
-                strokeWidth={2.5}
-                dot={{ r: 3.5, fill: COLOR.primary, stroke: '#fff', strokeWidth: 2 }}
-                activeDot={{ r: 5 }}
-                isAnimationActive={false}
-                connectNulls
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </Card>
-
-      {/* 품질 지표 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
-        <Card title="이익의 질" sub="영업CF ÷ 영업이익 · 1.0x 이상이면 이익이 현금으로 회수">
-          <div style={{ height: 240 }}>
-            <ResponsiveContainer>
-              <BarChart data={enriched} margin={{ top: 10, right: 8, left: -10, bottom: 0 }} barCategoryGap="22%">
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}x`} width={36} />
-                <Tooltip content={<RichTooltip fmt={(_, v) => fmtX(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <ReferenceLine
-                  y={1}
-                  stroke={COLOR.positive}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                  label={{ value: '1.0x', position: 'right', fill: COLOR.positive, fontSize: 10, fontWeight: 700 }}
-                />
-                <Bar dataKey="cashConversion" name="현금전환" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false}>
-                  {enriched.map((e, i) => (
-                    <Cell
-                      key={i}
-                      fill={e.cashConversion === null ? COLOR.axisSoft : e.cashConversion >= 1 ? COLOR.positive : COLOR.warning}
-                      fillOpacity={0.85}
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-
-        <Card title="CAPEX 비율" sub="투자지출 ÷ 영업CF · 투자 강도">
-          <div style={{ height: 240 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={enriched} margin={{ top: 10, right: 0, left: -8, bottom: 0 }} barCategoryGap="22%">
-                <CartesianGrid {...GRID_PROPS} />
-                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                <YAxis yAxisId="left" tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={50} />
-                <YAxis yAxisId="right" orientation="right" tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={36} />
-                <Tooltip content={<RichTooltip fmt={(n, v) => (n === 'CAPEX비율' ? `${v.toFixed(1)}%` : fmtMain(v))} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                <Bar yAxisId="left" dataKey="capex" name="투자지출" fill={COLOR.accent} fillOpacity={0.6} maxBarSize={42} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                <Line
-                  yAxisId="right"
-                  type="monotone"
-                  dataKey="capexRatio"
-                  name="CAPEX비율"
-                  stroke={COLOR.accent}
-                  strokeWidth={2.5}
-                  dot={{ r: 3, fill: COLOR.accent, stroke: '#fff', strokeWidth: 2 }}
-                  activeDot={{ r: 5 }}
-                  isAnimationActive={false}
-                  connectNulls
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </Card>
-      </div>
-
-      {/* 패턴 변화 타임라인 */}
-      <Card title="패턴 변화" sub="기간별 현금흐름 진단 코드">
-        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-          {data.map((d) => {
-            const p = diagnoseCF(d);
-            const isLatest = d.period === latest.period;
-            return (
-              <div
-                key={d.period}
-                className={`flex-shrink-0 text-center w-[80px] rounded-xl px-1.5 py-2 ${
-                  isLatest ? 'bg-[var(--theme-accent)]/5' : ''
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 mx-auto mb-2 flex items-center justify-center text-white font-black text-sm rounded-xl ${
-                    isLatest ? 'shadow-md ring-2 ring-offset-2 ring-offset-[var(--theme-bg-card)]' : 'shadow-sm'
-                  }`}
-                  style={{ background: p.color, ...(isLatest && { boxShadow: `0 0 0 2px ${p.color}` }) }}
-                >
-                  {p.code}
-                </div>
-                <p className="font-heading text-[12px] font-black text-[var(--foreground)] tabular-nums">{d.period}</p>
-                <p className="font-sans text-[10px] text-gray-400 dark:text-gray-500 leading-tight mt-0.5 truncate">
-                  {p.name}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-/* ─────────── Pattern Hero ─────────── */
-
-function PatternHero({ pattern, period }: { pattern: PatternInfo; period: string }) {
-  return (
-    <div
-      className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
-      style={{ boxShadow: 'var(--shadow-sm)' }}
-    >
-      {/* 좌측 컬러 액센트 */}
-      <span
-        aria-hidden
-        className="absolute left-0 top-0 h-full w-1"
-        style={{ background: pattern.color }}
-      />
-
-      <div className="flex items-center gap-4 sm:gap-5 p-4 sm:p-5 pl-5 sm:pl-6">
-        {/* 코드 배지 */}
+      {/* 주주환원 차트: 배당 + 자사주 */}
+      {hasShareholderReturn && (
         <div
-          className="flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center text-white font-black text-xl sm:text-2xl rounded-2xl"
-          style={{
-            background: `linear-gradient(135deg, ${pattern.color}, ${pattern.color}cc)`,
-            boxShadow: `0 4px 12px ${pattern.color}40`,
-          }}
+          className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
         >
-          {pattern.code}
-        </div>
-
-        {/* 본문 */}
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline gap-2 flex-wrap">
-            <p className="font-heading text-[10px] font-bold uppercase tracking-[0.14em] text-gray-400 dark:text-gray-500">
-              현금흐름 패턴 진단
-            </p>
-            <span className="font-sans text-[10px] text-gray-400 dark:text-gray-500">· {period}</span>
-          </div>
-          <div className="flex items-baseline gap-2 sm:gap-3 mt-1 flex-wrap">
-            <p className="font-heading text-lg sm:text-xl font-black text-[var(--foreground)] leading-tight">
-              {pattern.name}
-            </p>
-            {pattern.desc && (
-              <p className="font-sans text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                {pattern.desc}
+          <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2 flex-wrap">
+            <div className="min-w-0">
+              <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
+                주주환원 — 배당 · 자사주 매입
+              </h3>
+              <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                기간별 지급액 (단위: {unitLabel})
               </p>
-            )}
+            </div>
+            <div className="flex items-center gap-3 sm:gap-4 text-[11px] font-bold">
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.dividend }} />
+                배당
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
+                <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.buyback }} />
+                자사주
+              </span>
+            </div>
+          </header>
+
+          <div className="px-5 pb-4">
+            <div style={{ height: 280 }}>
+              <ResponsiveContainer>
+                <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="22%" barGap={3}>
+                  <defs>
+                    <linearGradient id="grad-div" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={CF_COLOR.dividend} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={CF_COLOR.dividend} stopOpacity={0.65} />
+                    </linearGradient>
+                    <linearGradient id="grad-buy" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={CF_COLOR.buyback} stopOpacity={0.95} />
+                      <stop offset="100%" stopColor={CF_COLOR.buyback} stopOpacity={0.65} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid {...GRID_PROPS} />
+                  <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                  <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
+                  <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                  <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
+                  <Bar dataKey="dividendsPaid" name="배당" fill="url(#grad-div)" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false} />
+                  <Bar dataKey="stockBuyback" name="자사주" fill="url(#grad-buy)" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-          {pattern.long && (
-            <p className="font-sans text-[12px] sm:text-[13px] leading-relaxed text-gray-600 dark:text-gray-300 mt-2">
-              {pattern.long}
+
+          <div className="border-t border-[var(--theme-border-muted)] bg-[var(--theme-bg)]/40 px-5 py-4">
+            <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-3">
+              기간별 수치
             </p>
-          )}
+            <PeriodNumbersStrip
+              periods={data.map((d) => d.period)}
+              rows={[
+                {
+                  label: '배당',
+                  values: data.map((d) => fmtMain(d.dividendsPaid)),
+                  signedValues: data.map((d) => d.dividendsPaid),
+                },
+                {
+                  label: '자사주',
+                  values: data.map((d) => fmtMain(d.stockBuyback)),
+                  signedValues: data.map((d) => d.stockBuyback),
+                },
+                {
+                  label: '환원 합계',
+                  values: data.map((d) => {
+                    if (d.dividendsPaid === null && d.stockBuyback === null) return null;
+                    return fmtMain((d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0));
+                  }),
+                  signedValues: data.map((d) => {
+                    if (d.dividendsPaid === null && d.stockBuyback === null) return null;
+                    return (d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0);
+                  }),
+                },
+                {
+                  label: '환원율',
+                  values: data.map((d) => {
+                    if ((d.dividendsPaid === null && d.stockBuyback === null) || d.netIncome === null || d.netIncome <= 0) return null;
+                    const total = (d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0);
+                    return `${((total / d.netIncome) * 100).toFixed(0)}%`;
+                  }),
+                  signedValues: data.map((d) => {
+                    if ((d.dividendsPaid === null && d.stockBuyback === null) || d.netIncome === null || d.netIncome <= 0) return null;
+                    const total = (d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0);
+                    return (total / d.netIncome) * 100;
+                  }),
+                },
+              ]}
+            />
+            <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-snug">
+              * 환원율 = (배당 + 자사주) ÷ 순이익
+            </p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* 주주환원 누적 비교 — 팩트만 */}
+      {hasShareholderReturn && totalReturnSum > 0 && (
+        <div
+          className="rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] px-5 py-4"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
+        >
+          <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
+            주주환원 누적
+          </p>
+          <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+            {returnVsFcfPct !== null ? (
+              <>
+                최근 {data.length}년 주주환원이 누적 FCF의{' '}
+                <span className="font-bold" style={{ color: CF_COLOR.ocf }}>
+                  {returnVsFcfPct.toFixed(0)}%
+                </span>
+              </>
+            ) : (
+              <>
+                최근 {data.length}년 주주환원 합계{' '}
+                <span className="font-bold" style={{ color: CF_COLOR.ocf }}>
+                  {fmtMain(totalReturnSum)}
+                </span>
+              </>
+            )}
+          </p>
+          <p className="font-sans text-[12px] font-bold text-gray-600 dark:text-gray-300 mt-1.5">
+            주주환원 합계 {fmtMain(totalReturnSum)} · 배당 {fmtMain(divSum)} · 자사주 {fmtMain(buySum)}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
