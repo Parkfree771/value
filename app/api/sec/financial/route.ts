@@ -3,7 +3,7 @@ import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 import { getCikByTicker } from '@/lib/secFinancials/cikMap';
 import { fetchCompanyFacts } from '@/lib/secFinancials/companyFacts';
 import { extractMetrics } from '@/lib/secFinancials/extractMetrics';
-import type { FinancialMetrics } from '@/app/analysis/types';
+import type { FinancialMetrics, SplitEvent } from '@/app/analysis/types';
 
 /**
  * 인메모리 결과 캐시
@@ -18,6 +18,8 @@ type CacheEntry = {
   entityName: string;
   /** 2010~current 전체 연도 풀 시계열 */
   metrics: FinancialMetrics[];
+  /** SEC 공시 + 시계열에 적용된 액면분할 이벤트 (ticker 단위 글로벌, slicing 영향 없음) */
+  splits: SplitEvent[];
   expires: number;
 };
 const resultCache = new Map<string, CacheEntry>();
@@ -59,6 +61,7 @@ export async function GET(request: NextRequest) {
       cik: cached.cik,
       entityName: cached.entityName,
       metrics: sliced,
+      splits: cached.splits,
       lastUpdated: new Date(cached.expires - CACHE_TTL_MS).toISOString(),
       cached: true,
     });
@@ -80,12 +83,13 @@ export async function GET(request: NextRequest) {
 
     // 풀 시계열 파싱 (2010 ~ 현재). years 파라미터에 의존하지 않음.
     const fullYears = Array.from({ length: currentYear - 2010 + 1 }, (_, i) => 2010 + i);
-    const fullMetrics = extractMetrics(facts, fullYears, mode);
+    const { metrics: fullMetrics, splits } = extractMetrics(facts, fullYears, mode);
 
     resultCache.set(cacheKey, {
       cik,
       entityName: facts.entityName,
       metrics: fullMetrics,
+      splits,
       expires: Date.now() + CACHE_TTL_MS,
     });
 
@@ -95,6 +99,7 @@ export async function GET(request: NextRequest) {
       cik,
       entityName: facts.entityName,
       metrics: sliced,
+      splits,
       lastUpdated: new Date().toISOString(),
     });
     res.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');

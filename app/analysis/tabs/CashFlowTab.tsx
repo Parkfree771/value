@@ -24,8 +24,6 @@ const CF_COLOR = {
   ocf: '#3b50b5',      // 인디고 — 영업CF (들어오는 현금 = 본업)
   capex: '#F97316',    // 오렌지 — CapEx (나가는 지출 = 보색)
   fcf: '#059669',      // 이메랄드 — FCF (남은 잉여 = 결과)
-  dividend: '#3b50b5', // 인디고 — 배당 (정기 환원)
-  buyback: '#F97316',  // 오렌지 — 자사주 (재량 환원)
 };
 
 export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
@@ -51,22 +49,13 @@ export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics
   let ocfSum = 0, ocfCount = 0;
   let capexSum = 0, capexCount = 0;
   let fcfSum = 0, fcfCount = 0;
-  let divSum = 0, divCount = 0;
-  let buySum = 0, buyCount = 0;
   for (const d of data) {
     if (d.operatingCashFlow !== null) { ocfSum += d.operatingCashFlow; ocfCount++; }
     if (d.investingCashFlow !== null) { capexSum += -d.investingCashFlow; capexCount++; }
     if (d.freeCashFlow !== null) { fcfSum += d.freeCashFlow; fcfCount++; }
-    if (d.dividendsPaid !== null) { divSum += d.dividendsPaid; divCount++; }
-    if (d.stockBuyback !== null) { buySum += d.stockBuyback; buyCount++; }
   }
   const showComparison = ocfCount >= 2 && capexCount >= 2 && fcfCount >= 2 && capexSum > 0;
   const ocfCapexRatio = showComparison ? ocfSum / capexSum : null;
-
-  // 주주환원: 배당 또는 자사주 데이터가 한 기간이라도 있으면 섹션 표시
-  const hasShareholderReturn = divCount > 0 || buyCount > 0;
-  const totalReturnSum = divSum + buySum;
-  const returnVsFcfPct = fcfSum > 0 && totalReturnSum > 0 ? (totalReturnSum / fcfSum) * 100 : null;
 
   // 현금잔액 데이터 존재 여부
   const hasCashBalance = data.some((d) => d.cashBalance !== null);
@@ -219,7 +208,7 @@ export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics
           <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
             누적 비교
           </p>
-          <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+          <p className="font-sans text-[14px] sm:text-[15px] font-bold leading-relaxed text-[var(--foreground)]">
             최근 {data.length}년 영업CF가 CapEx의{' '}
             <span
               className="font-bold"
@@ -234,140 +223,6 @@ export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics
         </div>
       )}
 
-      {/* 주주환원 차트: 배당 + 자사주 */}
-      {hasShareholderReturn && (
-        <div
-          className="relative overflow-hidden rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]"
-          style={{ boxShadow: 'var(--shadow-sm)' }}
-        >
-          <header className="flex items-end justify-between gap-3 px-5 pt-4 pb-2 flex-wrap">
-            <div className="min-w-0">
-              <h3 className="font-sans text-sm sm:text-[15px] font-bold tracking-tight text-[var(--foreground)] leading-tight">
-                주주환원 — 배당 · 자사주 매입
-              </h3>
-              <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
-                기간별 지급액 (단위: {unitLabel})
-              </p>
-            </div>
-            <div className="flex items-center gap-3 sm:gap-4 text-[11px] font-bold">
-              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
-                <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.dividend }} />
-                배당
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
-                <span className="w-2 h-2 rounded-full" style={{ background: CF_COLOR.buyback }} />
-                자사주
-              </span>
-            </div>
-          </header>
-
-          <div className="px-5 pb-4">
-            <div style={{ height: 280 }}>
-              <ResponsiveContainer>
-                <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 0 }} barCategoryGap="22%" barGap={3}>
-                  <defs>
-                    <linearGradient id="grad-div" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={CF_COLOR.dividend} stopOpacity={0.95} />
-                      <stop offset="100%" stopColor={CF_COLOR.dividend} stopOpacity={0.65} />
-                    </linearGradient>
-                    <linearGradient id="grad-buy" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={CF_COLOR.buyback} stopOpacity={0.95} />
-                      <stop offset="100%" stopColor={CF_COLOR.buyback} stopOpacity={0.65} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid {...GRID_PROPS} />
-                  <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
-                  <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
-                  <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                  <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1} />
-                  <Bar dataKey="dividendsPaid" name="배당" fill="url(#grad-div)" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false} />
-                  <Bar dataKey="stockBuyback" name="자사주" fill="url(#grad-buy)" radius={[4, 4, 0, 0]} maxBarSize={42} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="border-t border-[var(--theme-border-muted)] bg-[var(--theme-bg)]/40 px-5 py-4">
-            <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-3">
-              기간별 수치
-            </p>
-            <PeriodNumbersStrip
-              periods={data.map((d) => d.period)}
-              rows={[
-                {
-                  label: '배당',
-                  values: data.map((d) => fmtMain(d.dividendsPaid)),
-                  signedValues: data.map((d) => d.dividendsPaid),
-                },
-                {
-                  label: '자사주',
-                  values: data.map((d) => fmtMain(d.stockBuyback)),
-                  signedValues: data.map((d) => d.stockBuyback),
-                },
-                {
-                  label: '환원 합계',
-                  values: data.map((d) => {
-                    if (d.dividendsPaid === null && d.stockBuyback === null) return null;
-                    return fmtMain((d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0));
-                  }),
-                  signedValues: data.map((d) => {
-                    if (d.dividendsPaid === null && d.stockBuyback === null) return null;
-                    return (d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0);
-                  }),
-                },
-                {
-                  label: '환원율',
-                  values: data.map((d) => {
-                    if ((d.dividendsPaid === null && d.stockBuyback === null) || d.netIncome === null || d.netIncome <= 0) return null;
-                    const total = (d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0);
-                    return `${((total / d.netIncome) * 100).toFixed(0)}%`;
-                  }),
-                  signedValues: data.map((d) => {
-                    if ((d.dividendsPaid === null && d.stockBuyback === null) || d.netIncome === null || d.netIncome <= 0) return null;
-                    const total = (d.dividendsPaid ?? 0) + (d.stockBuyback ?? 0);
-                    return (total / d.netIncome) * 100;
-                  }),
-                },
-              ]}
-            />
-            <p className="font-sans text-[11px] text-gray-500 dark:text-gray-400 mt-2 leading-snug">
-              * 환원율 = (배당 + 자사주) ÷ 순이익
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* 주주환원 누적 비교 — 팩트만 */}
-      {hasShareholderReturn && totalReturnSum > 0 && (
-        <div
-          className="rounded-2xl border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] px-5 py-4"
-          style={{ boxShadow: 'var(--shadow-sm)' }}
-        >
-          <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
-            주주환원 누적
-          </p>
-          <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
-            {returnVsFcfPct !== null ? (
-              <>
-                최근 {data.length}년 주주환원이 누적 FCF의{' '}
-                <span className="font-bold" style={{ color: CF_COLOR.ocf }}>
-                  {returnVsFcfPct.toFixed(0)}%
-                </span>
-              </>
-            ) : (
-              <>
-                최근 {data.length}년 주주환원 합계{' '}
-                <span className="font-bold" style={{ color: CF_COLOR.ocf }}>
-                  {fmtMain(totalReturnSum)}
-                </span>
-              </>
-            )}
-          </p>
-          <p className="font-sans text-[12px] font-bold text-gray-600 dark:text-gray-300 mt-1.5">
-            주주환원 합계 {fmtMain(totalReturnSum)} · 배당 {fmtMain(divSum)} · 자사주 {fmtMain(buySum)}
-          </p>
-        </div>
-      )}
     </div>
   );
 }

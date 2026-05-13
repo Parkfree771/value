@@ -68,6 +68,11 @@ export interface FinancialMetrics {
   stockBuyback: number | null;        // 자사주 매입 (양수, 백만USD)
   cashBalance: number | null;         // 현금성자산 기말 잔액 (백만USD)
   longTermDebt: number | null;        // 이자성 차입금 기말 잔액 (백만USD)
+  // 주주환원 탭 전용 (US/SEC만, KR null)
+  shareBasedComp: number | null;      // 주식기반보상 비용 SBC (백만USD)
+  sharesOutstanding: number | null;   // 발행주식수 기말 잔량 (주, 환율 변환 불가)
+  epsBasic: number | null;            // 주당순이익 기본 (USD/주)
+  epsDiluted: number | null;          // 주당순이익 희석 (USD/주)
 }
 
 /** 검색 결과 기업 */
@@ -96,11 +101,28 @@ export interface DartFinancialResponse {
   lastUpdated: string;
 }
 
+/** 주식분할 이벤트 — SEC 분할 공시 또는 검증 안 된 점프 알림 */
+export interface SplitEvent {
+  /** SEC 보고 기준 분할 효력일 'YYYY-MM-DD'. unverified는 점프 발생 연도-01-01. */
+  effectiveDate: string;
+  /** 분할 비율. 10 = 10:1 정방향, 0.1 = 1:10 역방향. unverified는 관측 비율. */
+  ratio: number;
+  /** 시계열 중 어느 기간에 보정 적용됐는지 (UI 표기용). */
+  appliedAtPeriod: string | null;
+  /**
+   * 검출 출처:
+   *  - 'sec': SEC 분할 태그 기반. 정수 비율로 발행주식수·EPS 보정 적용.
+   *  - 'unverified': 발행주식수 ≥2배 점프 발견했지만 SEC 분할 공시 없음.
+   *    보정 미적용, UI에서 사용자에게 검증 요청 (유상증자·합병·SPAC 등 가능).
+   */
+  source: 'sec' | 'unverified';
+}
+
 /** 보기 모드 */
 export type ViewMode = 'annual' | 'quarterly';
 
 /** 분석 탭 */
-export type AnalysisTab = 'performance' | 'cashflow' | 'stability' | 'interest';
+export type AnalysisTab = 'performance' | 'cashflow' | 'stability' | 'shareholder' | 'interest';
 
 /** Google Trends 데이터 포인트 */
 export interface TrendPoint {

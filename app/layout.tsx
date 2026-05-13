@@ -6,6 +6,7 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
+import { UserBadgesProvider } from "@/contexts/UserBadgesContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import CookieConsent from "@/components/CookieConsent";
 
@@ -207,12 +208,14 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <BookmarkProvider>
-              <Navbar />
-              <main className="flex-1">
-                {children}
-              </main>
-              <Footer />
-              <CookieConsent />
+              <UserBadgesProvider>
+                <Navbar />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+                <CookieConsent />
+              </UserBadgesProvider>
             </BookmarkProvider>
           </AuthProvider>
         </ThemeProvider>

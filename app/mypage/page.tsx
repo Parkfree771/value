@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -8,9 +8,19 @@ import dynamic from 'next/dynamic';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
+import { useUserBadgesContext } from '@/contexts/UserBadgesContext';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { processUserWithdrawal } from '@/lib/users';
+import {
+  BADGES,
+  BADGES_BY_ID,
+  CATEGORY_LABEL,
+  calculateUserStats,
+  getUnlockedBadgeIds,
+  type BadgeCategory,
+} from '@/lib/badges';
+import BadgeIcon from '@/components/BadgeIcon';
 import styles from './MyPage.module.css';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
@@ -21,7 +31,7 @@ export default function MyPage() {
   const router = useRouter();
   const { user, authReady, signOut } = useAuth();
   const { bookmarkedIds, isLoading: bookmarkLoading } = useBookmark();
-  const [activeTab, setActiveTab] = useState<'reports' | 'bookmarks' | 'settings'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'bookmarks' | 'achievements' | 'settings'>('reports');
   const [myReports, setMyReports] = useState<Report[]>([]);
   const [allPosts, setAllPosts] = useState<any[]>([]); // 전체 게시물 (북마크 필터링용)
   const [loading, setLoading] = useState(true);
@@ -32,6 +42,9 @@ export default function MyPage() {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawConfirmText, setWithdrawConfirmText] = useState('');
+  const [equippedBadgeId, setEquippedBadgeId] = useState<string | null>(null);
+  const [isEquipping, setIsEquipping] = useState(false);
+  const { setBadge: setBadgeInCache } = useUserBadgesContext();
 
   // 로그인 체크 (Auth가 준비된 후에만)
   useEffect(() => {
@@ -100,6 +113,27 @@ export default function MyPage() {
     fetchUserData();
   }, [user]);
 
+  // 본인 프로필(닉네임·장착 배지) 로드 — 게시글이 없어도 정보 표시 필요
+  useEffect(() => {
+    if (!user) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDoc(doc(db, 'users', user.uid));
+        if (cancelled || !snap.exists()) return;
+        const data = snap.data();
+        setUserProfile((prev: any) => ({ ...(prev || {}), ...data }));
+        const badgeId = data.equippedBadgeId;
+        setEquippedBadgeId(typeof badgeId === 'string' && BADGES_BY_ID[badgeId] ? badgeId : null);
+      } catch (e) {
+        console.error('프로필 로드 실패:', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
   // 통계 계산
   const totalReports = myReports.length;
   const avgReturnRate = totalReports > 0
@@ -116,6 +150,49 @@ export default function MyPage() {
     : '0';
   const totalViews = myReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = myReports.reduce((sum, r) => sum + r.likes, 0);
+
+  // 배지 통계·해금 — 매 렌더마다 새 객체가 되지 않도록 useMemo
+  const badgeStats = useMemo(() => calculateUserStats(myReports), [myReports]);
+  const unlockedIds = useMemo(() => getUnlockedBadgeIds(badgeStats), [badgeStats]);
+  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds]);
+
+  // 장착 배지 변경
+  const handleEquipBadge = async (badgeId: string | null) => {
+    if (!user || isEquipping) return;
+    // 해금 안 된 배지는 장착 불가
+    if (badgeId !== null && !unlockedSet.has(badgeId)) return;
+    // 이미 같은 상태면 무시
+    if (badgeId === equippedBadgeId) return;
+
+    setIsEquipping(true);
+    try {
+      const { auth } = await import('@/lib/firebase');
+      const token = await auth.currentUser?.getIdToken();
+      if (!token) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
+      const res = await fetch('/api/user/badge', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ equippedBadgeId: badgeId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || '배지 업데이트 실패');
+      setEquippedBadgeId(badgeId);
+      // 인라인 표시 캐시 갱신 — 닉네임 키 기반
+      const nickname = userProfile?.nickname;
+      if (nickname) setBadgeInCache(nickname, badgeId);
+    } catch (e: any) {
+      console.error('배지 변경 오류:', e);
+      alert(e?.message || '배지 변경 중 오류가 발생했습니다.');
+    } finally {
+      setIsEquipping(false);
+    }
+  };
 
   // 북마크된 게시물 필터링 (이미 로드된 allPosts에서)
   const bookmarkedReports: Report[] = allPosts
@@ -255,8 +332,19 @@ export default function MyPage() {
               </div>
               <div className={styles.userDetails}>
                 <div className={styles.userNameRow}>
+                  {equippedBadgeId && BADGES_BY_ID[equippedBadgeId] && (
+                    <BadgeIcon
+                      id={equippedBadgeId}
+                      size={28}
+                      title={`${BADGES_BY_ID[equippedBadgeId].name} — ${BADGES_BY_ID[equippedBadgeId].description}`}
+                    />
+                  )}
                   <h1 className={styles.userName}>{userName}</h1>
-                  <span className={styles.userBadge}>INVESTOR</span>
+                  <span className={styles.userBadge}>
+                    {equippedBadgeId && BADGES_BY_ID[equippedBadgeId]
+                      ? BADGES_BY_ID[equippedBadgeId].name
+                      : 'INVESTOR'}
+                  </span>
                 </div>
                 <p className={styles.userEmail}>{userEmail}</p>
                 <button onClick={handleOpenEditModal} className={styles.editButton}>
@@ -365,6 +453,12 @@ export default function MyPage() {
           북마크 ({bookmarkedIds.length})
         </button>
         <button
+          onClick={() => setActiveTab('achievements')}
+          className={`pixel-tab ${activeTab === 'achievements' ? 'pixel-tab-active' : ''}`}
+        >
+          업적 ({unlockedIds.length}/{BADGES.length})
+        </button>
+        <button
           onClick={() => setActiveTab('settings')}
           className={`pixel-tab ${activeTab === 'settings' ? 'pixel-tab-active' : ''}`}
         >
@@ -437,6 +531,84 @@ export default function MyPage() {
               </Link>
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'achievements' && (
+        <div className="space-y-6">
+          {/* 장착 중 */}
+          <div className="card-base overflow-hidden">
+            <div className="px-5 py-4 border-b-2 border-[var(--theme-border-muted)] flex items-center justify-between">
+              <h3 className="font-sans text-base font-bold uppercase tracking-wider">장착 중인 배지</h3>
+              <span className="font-sans text-xs text-gray-500 dark:text-gray-400">닉네임 옆에 표시됩니다 · 1개만 장착 가능</span>
+            </div>
+            <div className="p-5 flex items-center gap-4">
+              {equippedBadgeId && BADGES_BY_ID[equippedBadgeId] ? (
+                <>
+                  <BadgeIcon id={equippedBadgeId} size={64} />
+                  <div className="flex-1">
+                    <div className="font-sans font-bold text-base">{BADGES_BY_ID[equippedBadgeId].name}</div>
+                    <div className="font-sans text-xs text-gray-600 dark:text-gray-300 mt-1">{BADGES_BY_ID[equippedBadgeId].description}</div>
+                  </div>
+                  <button
+                    onClick={() => handleEquipBadge(null)}
+                    disabled={isEquipping}
+                    className="btn-secondary text-xs disabled:opacity-50"
+                  >
+                    {isEquipping ? '처리 중...' : '해제'}
+                  </button>
+                </>
+              ) : (
+                <div className="text-sm text-gray-500 dark:text-gray-400">장착된 배지가 없습니다. 아래에서 해금된 배지를 클릭해 장착하세요.</div>
+              )}
+            </div>
+          </div>
+
+          {/* 카테고리별 그리드 */}
+          {(['activity', 'profit', 'inverse', 'special'] as BadgeCategory[]).map((cat) => {
+            const inCat = BADGES.filter((b) => b.category === cat);
+            return (
+              <div key={cat} className="card-base overflow-hidden">
+                <div className="px-5 py-4 border-b-2 border-[var(--theme-border-muted)] flex items-center justify-between">
+                  <h3 className="font-sans text-base font-bold uppercase tracking-wider">{CATEGORY_LABEL[cat]}</h3>
+                  <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
+                    {inCat.filter((b) => unlockedSet.has(b.id)).length}/{inCat.length} 해금
+                  </span>
+                </div>
+                <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {inCat.map((b) => {
+                    const unlocked = unlockedSet.has(b.id);
+                    const equipped = equippedBadgeId === b.id;
+                    return (
+                      <button
+                        key={b.id}
+                        onClick={() => unlocked && handleEquipBadge(equipped ? null : b.id)}
+                        disabled={!unlocked || isEquipping}
+                        className={`
+                          flex flex-col items-center p-3 rounded-[12px] border-2 transition-all
+                          ${equipped
+                            ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10'
+                            : unlocked
+                              ? 'border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] cursor-pointer'
+                              : 'border-[var(--theme-border-muted)] opacity-40 cursor-not-allowed grayscale'}
+                        `}
+                        title={unlocked ? (equipped ? '클릭하여 장착 해제' : '클릭하여 장착') : '잠금'}
+                      >
+                        <BadgeIcon id={b.id} size={56} />
+                        <div className="font-sans text-xs font-bold mt-2 text-center">{b.name}</div>
+                        <div className="font-sans text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center leading-tight">
+                          {b.description}
+                        </div>
+                        {equipped && (
+                          <div className="font-sans text-[10px] font-bold text-[var(--theme-accent)] mt-1.5">장착 중</div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
 

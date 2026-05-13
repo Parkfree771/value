@@ -2,6 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
+import UserBadgeInline from './UserBadgeInline';
 import styles from './Podium.module.css';
 
 interface Investor {
@@ -38,7 +39,10 @@ const Podium = memo(function Podium({ topThree }: PodiumProps) {
         className={cardClass}
       >
         <div className={rankClass}>{rank}</div>
-        <div className={nameClass}>{data.name}</div>
+        <div className={nameClass}>
+          <UserBadgeInline nickname={data.name} size={rank === 1 ? 18 : 14} className="mr-1" />
+          {data.name}
+        </div>
         <div className={returnClass}>
           <span className="font-mono">{data.avgReturnRate >= 0 ? '+' : ''}{data.avgReturnRate.toFixed(2)}%</span>
         </div>

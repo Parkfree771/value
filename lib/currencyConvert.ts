@@ -17,6 +17,12 @@ export function millionsUsdToEokKrw(millionsUsd: number | null, usdToKrwRate: nu
   return Math.round((millionsUsd * usdToKrwRate) / 100);
 }
 
+/** USD/주 (EPS) → KRW/주 — 단위 보존, 환율 곱하기만 */
+function epsUsdToKrw(eps: number | null, usdToKrwRate: number): number | null {
+  if (eps === null || !Number.isFinite(eps)) return null;
+  return Math.round(eps * usdToKrwRate * 10) / 10; // 소수 1자리
+}
+
 /** FinancialMetrics 배열 전체를 USD → KRW 변환 (절대값만, 비율은 그대로) */
 export function convertMetricsToKRW(
   metrics: FinancialMetrics[],
@@ -40,6 +46,11 @@ export function convertMetricsToKRW(
     stockBuyback: millionsUsdToEokKrw(m.stockBuyback, usdToKrwRate),
     cashBalance: millionsUsdToEokKrw(m.cashBalance, usdToKrwRate),
     longTermDebt: millionsUsdToEokKrw(m.longTermDebt, usdToKrwRate),
+    // 주주환원 — SBC는 금액(억원), EPS는 KRW/주, 주식수는 그대로(통화 무관)
+    shareBasedComp: millionsUsdToEokKrw(m.shareBasedComp, usdToKrwRate),
+    sharesOutstanding: m.sharesOutstanding,
+    epsBasic: epsUsdToKrw(m.epsBasic, usdToKrwRate),
+    epsDiluted: epsUsdToKrw(m.epsDiluted, usdToKrwRate),
     // 비율 그대로 유지: operatingMargin, netMargin, revenueGrowth, profitGrowth,
     //                  debtRatio, currentRatio, roe, roa
   }));

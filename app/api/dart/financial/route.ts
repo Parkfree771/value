@@ -149,6 +149,8 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
     operatingCashFlow, investingCashFlow, financingCashFlow, freeCashFlow,
     // 주주환원/현금잔액/차입금 — DART 파서 미지원, US/SEC 전용
     dividendsPaid: null, stockBuyback: null, cashBalance: null, longTermDebt: null,
+    // SBC·주식수·EPS — US/SEC 전용
+    shareBasedComp: null, sharesOutstanding: null, epsBasic: null, epsDiluted: null,
   };
 }
 

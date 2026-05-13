@@ -7,6 +7,7 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
 import ShareButtons from '@/components/ShareButtons';
+import UserBadgeInline from '@/components/UserBadgeInline';
 
 // recharts 번들이 무거우므로 lazy load (스켈레톤은 차트 카드 높이 유지)
 const PriceChart = dynamic(() => import('@/components/PriceChart'), {
@@ -242,7 +243,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
           {report.title}
         </h1>
         <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-wrap">
-          <span className="font-medium text-gray-700 dark:text-gray-300">{report.author}</span>
+          <span className="font-medium text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
+            <UserBadgeInline nickname={report.author} size={16} />
+            {report.author}
+          </span>
           <span>{report.createdAt}</span>
           <span>조회 {report.views}</span>
           <span>좋아요 {likesCount}</span>

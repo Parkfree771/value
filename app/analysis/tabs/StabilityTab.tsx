@@ -231,7 +231,7 @@ export function StabilityTab({ data, currency = 'KRW' }: { data: FinancialMetric
           <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
             부채 비교
           </p>
-          <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+          <p className="font-sans text-[14px] sm:text-[15px] font-bold leading-relaxed text-[var(--foreground)]">
             현재 차입금이 현금의{' '}
             <span
               className="font-bold"

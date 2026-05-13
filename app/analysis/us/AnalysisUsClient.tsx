@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import type { FinancialMetrics, AnalysisTab, ViewMode, TrendsResponse } from '../types';
+import type { FinancialMetrics, AnalysisTab, ViewMode, TrendsResponse, SplitEvent } from '../types';
 import type { SecSearchResult } from '@/lib/secFinancials/types';
 import { stockSearchIndex, type GlobalStock, type Stock } from '@/lib/stockSearchIndex';
 import { PerformanceTab } from '../tabs/PerformanceTab';
 import { StabilityTab } from '../tabs/StabilityTab';
 import { CashFlowTab } from '../tabs/CashFlowTab';
+import { ShareholderTab } from '../tabs/ShareholderTab';
 import { InterestTab } from '../tabs/InterestTab';
 import { MarketTabs } from '../components/MarketTabs';
 import { fmtUSDPrice } from '../theme';
@@ -78,6 +79,7 @@ const TABS: { key: AnalysisTab; label: string; color: string }[] = [
   { key: 'performance', label: '실적', color: '#3b50b5' },      // 인디고
   { key: 'cashflow', label: '현금흐름', color: '#059669' },     // 이메랄드
   { key: 'stability', label: '부채', color: '#F97316' },        // 오렌지
+  { key: 'shareholder', label: '주주환원', color: '#7c3aed' },  // 바이올렛
   { key: 'interest', label: '관심도', color: '#db2777' },       // 핑크
 ];
 
@@ -103,9 +105,6 @@ interface UsCompanyInfo {
 
 interface UsStockProfile {
   currentPrice: number;
-  per: number | null;
-  pbr: number | null;
-  eps: number | null;
   high52w: number | null;
   low52w: number | null;
   volume: number;
@@ -128,6 +127,7 @@ export default function AnalysisUsClient() {
   const [companyInfo, setCompanyInfo] = useState<UsCompanyInfo | null>(null);
   const [stockProfile, setStockProfile] = useState<UsStockProfile | null>(null);
   const [financialData, setFinancialData] = useState<FinancialMetrics[]>([]);
+  const [splits, setSplits] = useState<SplitEvent[]>([]);
 
   const [viewMode, setViewMode] = useState<ViewMode>('annual');
   const [yearRange, setYearRange] = useState<YearRangeKey>('5Y');
@@ -226,8 +226,15 @@ export default function AnalysisUsClient() {
         if (cancelled) return;
 
         if (fin.status === 'fulfilled' && fin.value) {
-          const finData = fin.value as { ticker: string; cik: string; entityName: string; metrics: FinancialMetrics[] };
+          const finData = fin.value as {
+            ticker: string;
+            cik: string;
+            entityName: string;
+            metrics: FinancialMetrics[];
+            splits?: SplitEvent[];
+          };
           setFinancialData(finData.metrics || []);
+          setSplits(finData.splits || []);
           setCompanyInfo({
             ticker: selectedStock!.ticker,
             cik: finData.cik,
@@ -237,6 +244,7 @@ export default function AnalysisUsClient() {
           });
         } else {
           setFinancialData([]);
+          setSplits([]);
           setCompanyInfo(null);
           setError('SEC 재무 데이터를 불러올 수 없습니다');
         }
@@ -245,9 +253,6 @@ export default function AnalysisUsClient() {
           const p = profile.value.profile;
           setStockProfile({
             currentPrice: p.currentPrice ?? 0,
-            per: p.per ?? null,
-            pbr: p.pbr ?? null,
-            eps: p.eps ?? null,
             high52w: p.high52w ?? null,
             low52w: p.low52w ?? null,
             volume: p.volume ?? 0,
@@ -349,6 +354,7 @@ export default function AnalysisUsClient() {
     }
     return financialData;
   }, [financialData, currency, exchangeRate]);
+
 
   const openRateModal = useCallback(async () => {
     if (currency === 'KRW') {
@@ -579,23 +585,6 @@ export default function AnalysisUsClient() {
                 <p className="font-heading text-2xl sm:text-[34px] font-black text-[var(--foreground)] leading-none tabular-nums">
                   {fmtUSDPrice(stockProfile.currentPrice)}
                 </p>
-                <div className="flex items-center justify-end gap-3 sm:gap-4 mt-2 flex-wrap">
-                  {stockProfile.per !== null && (
-                    <span className="font-heading text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-                      PER <b className="text-[var(--foreground)] tabular-nums ml-0.5">{stockProfile.per.toFixed(1)}</b>
-                    </span>
-                  )}
-                  {stockProfile.pbr !== null && (
-                    <span className="font-heading text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-                      PBR <b className="text-[var(--foreground)] tabular-nums ml-0.5">{stockProfile.pbr.toFixed(2)}</b>
-                    </span>
-                  )}
-                  {stockProfile.eps !== null && (
-                    <span className="font-heading text-xs sm:text-sm text-gray-400 dark:text-gray-500">
-                      EPS <b className="text-[var(--foreground)] tabular-nums ml-0.5">${stockProfile.eps.toFixed(2)}</b>
-                    </span>
-                  )}
-                </div>
               </div>
             )}
           </div>
@@ -730,6 +719,7 @@ export default function AnalysisUsClient() {
           {activeTab === 'performance' && <PerformanceTab data={displayedFinancialData} currency={currency} />}
           {activeTab === 'cashflow' && <CashFlowTab data={displayedFinancialData} currency={currency} />}
           {activeTab === 'stability' && <StabilityTab data={displayedFinancialData} currency={currency} />}
+          {activeTab === 'shareholder' && <ShareholderTab data={displayedFinancialData} currency={currency} splits={splits} />}
           {activeTab === 'interest' && (
             <InterestTab
               data={trendsData}

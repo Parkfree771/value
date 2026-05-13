@@ -9,6 +9,7 @@ import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { inferCurrency, formatPrice } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
+import UserBadgeInline from './UserBadgeInline';
 
 // 테마 ID → 이름 정적 맵 (theme-stocks.json과 동기화)
 const THEME_NAMES: Record<string, string> = {
@@ -184,6 +185,7 @@ const ReportCard = memo(function ReportCard({
 
         {/* Footer */}
         <div className="flex items-center text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
+          <UserBadgeInline nickname={author} size={14} className="mr-0.5" />
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(author)}`; }}
           >

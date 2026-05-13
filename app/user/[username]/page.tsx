@@ -1,10 +1,20 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import ReportCard from '@/components/ReportCard';
 import Link from 'next/link';
 import Card from '@/components/Card';
+import BadgeIcon from '@/components/BadgeIcon';
+import { useUserBadge } from '@/contexts/UserBadgesContext';
+import {
+  BADGES,
+  BADGES_BY_ID,
+  CATEGORY_LABEL,
+  calculateUserStats,
+  getUnlockedBadgeIds,
+  type BadgeCategory,
+} from '@/lib/badges';
 
 interface FeedPost {
   id: string;
@@ -22,6 +32,7 @@ interface FeedPost {
   views: number;
   likes: number;
   category: string;
+  authorId?: string;
 }
 
 export default function UserPage() {
@@ -85,6 +96,15 @@ export default function UserPage() {
   const totalViews = userReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = userReports.reduce((sum, r) => sum + r.likes, 0);
 
+  // 배지 통계·해금 — 게시글 통계 기반 매번 계산 (저장 안 함)
+  const badgeStats = useMemo(() => calculateUserStats(userReports), [userReports]);
+  const unlockedIds = useMemo(() => getUnlockedBadgeIds(badgeStats), [badgeStats]);
+  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds]);
+
+  // 장착 배지는 닉네임으로 조회 (UserBadgesContext)
+  const equippedBadgeId = useUserBadge(notFound ? null : username);
+  const equippedDef = equippedBadgeId ? BADGES_BY_ID[equippedBadgeId] : null;
+
   if (loading) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -139,13 +159,29 @@ export default function UserPage() {
               {username[0]?.toUpperCase()}
             </div>
             <div>
-              <h1 className="font-sans text-lg sm:text-xl font-bold">
-                {username}
-              </h1>
+              <div className="flex items-center gap-2">
+                {equippedBadgeId && (
+                  <BadgeIcon
+                    id={equippedBadgeId}
+                    size={24}
+                    title={equippedDef ? `${equippedDef.name} — ${equippedDef.description}` : undefined}
+                  />
+                )}
+                <h1 className="font-sans text-lg sm:text-xl font-bold">
+                  {username}
+                </h1>
+                {equippedDef && (
+                  <span className="font-sans text-xs px-2 py-0.5 border-2 border-[var(--theme-accent)] text-[var(--theme-accent)] rounded-[6px] font-bold">
+                    {equippedDef.name}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                 <span>{totalReports}개 리포트</span>
                 <span>·</span>
                 <span>승률 {winRate}%</span>
+                <span>·</span>
+                <span>업적 {unlockedIds.length}/{BADGES.length}</span>
               </div>
             </div>
           </div>
@@ -182,6 +218,49 @@ export default function UserPage() {
           <span>좋아요 {totalLikes.toLocaleString()}</span>
         </div>
       </Card>
+
+      {/* 배지 (해금 + 잠금 모두 표시, 카테고리별) */}
+      {totalReports > 0 && (
+        <Card variant="glass" padding="md" className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-sans text-base font-bold uppercase tracking-wider">업적</h2>
+            <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
+              {unlockedIds.length}/{BADGES.length} 해금
+            </span>
+          </div>
+          <div className="space-y-4">
+            {(['activity', 'profit', 'inverse', 'special'] as BadgeCategory[]).map((cat) => {
+              const inCat = BADGES.filter((b) => b.category === cat);
+              return (
+                <div key={cat}>
+                  <div className="font-sans text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">
+                    {CATEGORY_LABEL[cat]} · {inCat.filter((b) => unlockedSet.has(b.id)).length}/{inCat.length}
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {inCat.map((b) => {
+                      const unlocked = unlockedSet.has(b.id);
+                      return (
+                        <div
+                          key={b.id}
+                          className={`flex flex-col items-center p-2 rounded-[10px] border-2 ${
+                            unlocked
+                              ? 'border-[var(--theme-border-muted)]'
+                              : 'border-[var(--theme-border-muted)] opacity-30 grayscale'
+                          }`}
+                          title={`${b.name} — ${b.description}`}
+                        >
+                          <BadgeIcon id={b.id} size={40} />
+                          <div className="font-sans text-[10px] font-bold mt-1.5 text-center leading-tight">{b.name}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       {/* User Reports */}
       <div className="mb-4 sm:mb-6">

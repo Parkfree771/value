@@ -49,6 +49,9 @@ export interface UserProfile {
   // 추가 정보
   bio?: string;
   website?: string;
+
+  // 장착 중인 배지 ID (lib/badges.ts의 BADGES 중 1개). null/undefined = 미장착
+  equippedBadgeId?: string | null;
 }
 
 const USERS_COLLECTION = "users";

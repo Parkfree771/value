@@ -238,7 +238,7 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
             <p className="font-sans text-[12px] font-bold tracking-tight text-gray-600 dark:text-gray-300 mb-2">
               성장률 비교
             </p>
-            <p className="font-sans text-[14px] sm:text-[15px] leading-relaxed text-[var(--foreground)]">
+            <p className="font-sans text-[14px] sm:text-[15px] font-bold leading-relaxed text-[var(--foreground)]">
               {isOp ? '영업이익 성장률' : '매출 성장률'}이 {isOp ? '매출 성장률' : '영업이익 성장률'}보다{' '}
               <span className="font-bold" style={{ color: gapColor }}>
                 {Math.abs(g.gap).toFixed(1)}%p

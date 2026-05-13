@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, memo } from 'react';
 import Link from 'next/link';
+import UserBadgeInline from './UserBadgeInline';
 import podiumStyles from './Podium.module.css';
 
 interface TopReturn {
@@ -218,7 +219,10 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
-                        <h3 className="text-lg text-heading truncate min-w-0">{item.author}</h3>
+                        <h3 className="text-lg text-heading truncate min-w-0 inline-flex items-center gap-1">
+                          <UserBadgeInline nickname={item.author} size={16} />
+                          {item.author}
+                        </h3>
                         <RankChangeIndicator change={item.rankChange} className="flex-shrink-0" />
                       </div>
                       <h4 className="text-sm text-subheading mb-2 line-clamp-2 min-h-[2.5rem]">{item.title}</h4>
