@@ -19,13 +19,13 @@ import {
   PeriodNumbersStrip,
 } from '../components/primitives';
 
-/* 현금흐름 탭 컬러 — 녹색 계열로 통일 (실적/부채와 차별화) */
+/* 현금흐름 탭 컬러 — 블루(들어옴) × 오렌지(나감) 보색 페어 + 이메랄드(잉여) */
 const CF_COLOR = {
-  ocf: '#059669',      // emerald-600 — 영업CF (들어오는 현금)
-  capex: '#475569',    // slate-600 — CapEx (나가는 지출, 중립색)
-  fcf: '#65a30d',      // lime-600 — FCF (남은 잉여)
-  dividend: '#7c3aed', // violet — 배당 (회수 정기)
-  buyback: '#F97316',  // orange — 자사주 (재량 환원)
+  ocf: '#3b50b5',      // 인디고 — 영업CF (들어오는 현금 = 본업)
+  capex: '#F97316',    // 오렌지 — CapEx (나가는 지출 = 보색)
+  fcf: '#059669',      // 이메랄드 — FCF (남은 잉여 = 결과)
+  dividend: '#3b50b5', // 인디고 — 배당 (정기 환원)
+  buyback: '#F97316',  // 오렌지 — 자사주 (재량 환원)
 };
 
 export function CashFlowTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {

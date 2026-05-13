@@ -14,7 +14,6 @@ import type {
 import { CompanyHeader } from './components/CompanyHeader';
 import { MarketTabs } from './components/MarketTabs';
 import { PerformanceTab } from './tabs/PerformanceTab';
-import { ProfitabilityTab } from './tabs/ProfitabilityTab';
 import { StabilityTab } from './tabs/StabilityTab';
 import { CashFlowTab } from './tabs/CashFlowTab';
 import { InterestTab } from './tabs/InterestTab';
@@ -42,11 +41,10 @@ function buildYears(rangeKey: YearRangeKey, mode: ViewMode): string {
 }
 
 const TABS: { key: AnalysisTab; label: string; color: string }[] = [
-  { key: 'performance', label: '실적', color: '#3b50b5' },      // blue
-  { key: 'cashflow', label: '현금흐름', color: '#059669' },     // emerald
-  { key: 'profitability', label: '수익성', color: '#7c3aed' },  // violet
-  { key: 'stability', label: '부채', color: '#d97706' },        // amber
-  { key: 'interest', label: '관심도', color: '#db2777' },       // pink
+  { key: 'performance', label: '실적', color: '#3b50b5' },      // 인디고
+  { key: 'cashflow', label: '현금흐름', color: '#059669' },     // 이메랄드
+  { key: 'stability', label: '부채', color: '#F97316' },        // 오렌지
+  { key: 'interest', label: '관심도', color: '#db2777' },       // 핑크
 ];
 
 /* ═══════════════════════════════════════════ */
@@ -445,9 +443,8 @@ export default function AnalysisClient() {
       ) : (
         <>
           {activeTab === 'performance' && <PerformanceTab data={financialData} />}
-          {activeTab === 'profitability' && <ProfitabilityTab data={financialData} />}
-          {activeTab === 'stability' && <StabilityTab data={financialData} />}
           {activeTab === 'cashflow' && <CashFlowTab data={financialData} />}
+          {activeTab === 'stability' && <StabilityTab data={financialData} />}
           {activeTab === 'interest' && (
             <InterestTab
               data={trendsData}

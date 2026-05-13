@@ -100,7 +100,7 @@ export interface DartFinancialResponse {
 export type ViewMode = 'annual' | 'quarterly';
 
 /** 분석 탭 */
-export type AnalysisTab = 'performance' | 'profitability' | 'stability' | 'cashflow' | 'interest';
+export type AnalysisTab = 'performance' | 'cashflow' | 'stability' | 'interest';
 
 /** Google Trends 데이터 포인트 */
 export interface TrendPoint {

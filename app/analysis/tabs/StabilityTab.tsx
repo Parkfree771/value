@@ -19,11 +19,13 @@ import {
   PeriodNumbersStrip,
 } from '../components/primitives';
 
-/* 부채 탭 컬러 */
+/* 부채 탭 컬러 — 브랜드 블루(안정) × 오렌지(부담) 보색 페어 */
 const DEBT_COLOR = {
-  debt: '#d97706',     // amber — 차입금
-  cash: '#0891b2',     // cyan — 현금
-  net: '#F97316',      // orange — 순차입금 (강조)
+  debt: '#F97316',     // 오렌지 — 차입금 (따뜻한 톤 = 부담)
+  cash: '#3b50b5',     // 인디고 — 현금 (시원한 톤 = 안정)
+  net: '#7c3aed',      // 바이올렛 — 순차입금 (결과 강조)
+  liabShort: '#dc2626', // 적색 — 유동부채 (즉시성)
+  liabLong: '#F97316',  // 오렌지 — 비유동부채 (장기)
 };
 
 export function StabilityTab({ data, currency = 'KRW' }: { data: FinancialMetrics[]; currency?: Currency }) {
@@ -261,11 +263,11 @@ export function StabilityTab({ data, currency = 'KRW' }: { data: FinancialMetric
             </div>
             <div className="flex items-center gap-3 sm:gap-4 text-[11px] font-bold">
               <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
-                <span className="w-2 h-2 rounded-full" style={{ background: COLOR.negative }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.liabShort }} />
                 유동부채 (1년 내)
               </span>
               <span className="inline-flex items-center gap-1.5 text-gray-700 dark:text-gray-200">
-                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.debt }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: DEBT_COLOR.liabLong }} />
                 비유동부채
               </span>
             </div>
@@ -283,8 +285,8 @@ export function StabilityTab({ data, currency = 'KRW' }: { data: FinancialMetric
                   <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                   <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={fmtAxis} width={56} />
                   <Tooltip content={<RichTooltip fmt={(_, v) => fmtMain(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
-                  <Bar dataKey="currentLiabilities" name="유동부채" stackId="d" fill={COLOR.negative} fillOpacity={0.75} maxBarSize={48} isAnimationActive={false} />
-                  <Bar dataKey="nonCurrentLiabilities" name="비유동부채" stackId="d" fill={DEBT_COLOR.debt} fillOpacity={0.7} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                  <Bar dataKey="currentLiabilities" name="유동부채" stackId="d" fill={DEBT_COLOR.liabShort} fillOpacity={0.85} maxBarSize={48} isAnimationActive={false} />
+                  <Bar dataKey="nonCurrentLiabilities" name="비유동부채" stackId="d" fill={DEBT_COLOR.liabLong} fillOpacity={0.75} maxBarSize={48} radius={[4, 4, 0, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

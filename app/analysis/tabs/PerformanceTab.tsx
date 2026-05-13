@@ -3,6 +3,8 @@
 import {
   Bar,
   BarChart,
+  Line,
+  ComposedChart,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -15,6 +17,7 @@ import type { FinancialMetrics } from '../types';
 import { COLOR, AXIS_TICK, GRID_PROPS, LEGEND_STYLE, fmtPct, getCurrencyFmt, type Currency } from '../theme';
 import { performanceHighlights } from '../insights';
 import {
+  Card,
   RichTooltip,
   KPIStat,
   KPIStrip,
@@ -106,8 +109,8 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
                     <stop offset="100%" stopColor={COLOR.primary} stopOpacity={0.65} />
                   </linearGradient>
                   <linearGradient id="grad-op" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={COLOR.series2} stopOpacity={0.95} />
-                    <stop offset="100%" stopColor={COLOR.series2} stopOpacity={0.65} />
+                    <stop offset="0%" stopColor={COLOR.accent} stopOpacity={0.95} />
+                    <stop offset="100%" stopColor={COLOR.accent} stopOpacity={0.65} />
                   </linearGradient>
                   <linearGradient id="grad-ni" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={COLOR.series3} stopOpacity={0.95} />
@@ -248,6 +251,77 @@ export function PerformanceTab({ data, currency = 'KRW' }: { data: FinancialMetr
           </div>
         );
       })()}
+
+      {/* ROE / ROA — 자본·자산 효율성 */}
+      {data.some((d) => d.roe !== null || d.roa !== null) && (
+        <Card title="ROE / ROA" sub="자기자본·총자산 수익률 추이">
+          <div style={{ height: 260 }}>
+            <ResponsiveContainer>
+              <ComposedChart data={data} margin={{ top: 10, right: 8, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="grad-roe" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={COLOR.primary} stopOpacity={0.55} />
+                    <stop offset="100%" stopColor={COLOR.primary} stopOpacity={0.18} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid {...GRID_PROPS} />
+                <XAxis dataKey="period" tick={AXIS_TICK} axisLine={false} tickLine={false} />
+                <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={(v: number) => `${v}%`} width={40} />
+                <Tooltip content={<RichTooltip fmt={(_, v) => fmtPct(v)} />} cursor={{ fill: COLOR.primaryAlpha }} />
+                <Legend wrapperStyle={LEGEND_STYLE} iconType="circle" iconSize={8} />
+                <ReferenceLine y={0} stroke={COLOR.axis} strokeWidth={1.5} />
+                <ReferenceLine
+                  y={10}
+                  stroke={COLOR.positive}
+                  strokeWidth={1.5}
+                  strokeDasharray="4 4"
+                  label={{ value: '우량 10%', position: 'right', fill: COLOR.positive, fontSize: 10, fontWeight: 700 }}
+                />
+                <Bar
+                  dataKey="roe"
+                  name="ROE"
+                  fill="url(#grad-roe)"
+                  stroke={COLOR.primary}
+                  strokeWidth={1}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={42}
+                  isAnimationActive={false}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="roa"
+                  name="ROA"
+                  stroke={COLOR.accent}
+                  strokeWidth={2.5}
+                  dot={{ r: 3.5, fill: COLOR.accent, stroke: '#fff', strokeWidth: 2 }}
+                  activeDot={{ r: 5 }}
+                  isAnimationActive={false}
+                  connectNulls
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 text-[12px] leading-relaxed">
+            <div className="rounded-lg bg-[var(--theme-bg)]/50 border border-[var(--theme-border-muted)] p-3">
+              <p className="font-bold text-[var(--foreground)] mb-1">
+                ROE <span className="font-normal text-gray-500">(자기자본이익률)</span>
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                당기순이익 ÷ 평균자본. 주주가 투자한 돈으로 얼마를 벌었는가. <b style={{ color: COLOR.positive }}>15%↑ 우량</b>
+              </p>
+            </div>
+            <div className="rounded-lg bg-[var(--theme-bg)]/50 border border-[var(--theme-border-muted)] p-3">
+              <p className="font-bold text-[var(--foreground)] mb-1">
+                ROA <span className="font-normal text-gray-500">(총자산이익률)</span>
+              </p>
+              <p className="text-gray-600 dark:text-gray-300">
+                당기순이익 ÷ 평균자산. 부채 포함 전체 자산을 얼마나 효율적으로 굴렸나. <b style={{ color: COLOR.positive }}>5%↑ 우량</b>
+              </p>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

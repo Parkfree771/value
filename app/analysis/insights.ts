@@ -122,37 +122,6 @@ export function performanceHighlights(data: FinancialMetrics[]): PerformanceHigh
   return result;
 }
 
-/* ─────── 수익성 ─────── */
-
-export function profitabilityInsights(data: FinancialMetrics[]): Insight[] {
-  if (data.length < 2) return [];
-  const out: Insight[] = [];
-  const latest = last(data)!;
-
-  // ROE 평가
-  if (latest.roe !== null) {
-    if (latest.roe >= 15) {
-      out.push({ text: `ROE ${latest.roe.toFixed(1)}% — 자기자본 수익성 우수 (10% 기준 초과)`, tone: 'positive' });
-    } else if (latest.roe >= 10) {
-      out.push({ text: `ROE ${latest.roe.toFixed(1)}% — 자기자본 수익성 양호`, tone: 'positive' });
-    } else if (latest.roe < 0) {
-      out.push({ text: `ROE ${latest.roe.toFixed(1)}% — 자본잠식 우려`, tone: 'negative' });
-    } else if (latest.roe < 5) {
-      out.push({ text: `ROE ${latest.roe.toFixed(1)}% — 자기자본 수익성 저조`, tone: 'warning' });
-    }
-  }
-
-  // 마진 갭 (영업↔순)
-  if (latest.operatingMargin !== null && latest.netMargin !== null) {
-    const gap = latest.operatingMargin - latest.netMargin;
-    if (gap >= 5) {
-      out.push({ text: `영업이익률·순이익률 격차 ${gap.toFixed(1)}%p — 이자·법인세 부담 큼`, tone: 'warning' });
-    }
-  }
-
-  return out.slice(0, 2);
-}
-
 /* ─────── 안정성 ─────── */
 
 export function stabilityInsights(data: FinancialMetrics[]): Insight[] {
