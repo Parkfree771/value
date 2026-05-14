@@ -1,113 +1,113 @@
+// GET /api/reports - posts 목록 (커서 페이지네이션)
+// posts는 Supabase, 가격은 feed.json (Storage 잔존) — returnRate는 런타임 재계산.
+
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, limit, getDocs, Timestamp, startAfter, doc, getDoc, getCountFromServer } from 'firebase/firestore';
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 import { getLatestPrices } from '@/lib/priceCache';
 import { calculateReturn } from '@/utils/calculateReturn';
 
+const SELECT_COLUMNS =
+  'id, title, ticker, exchange, category, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, created_at, author:users!posts_author_id_fkey(nickname)';
+
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const sortBy = searchParams.get('sortBy') || 'createdAt';
-    const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '10', 10), 50); // 최대 50개 제한
-    const cursor = searchParams.get('cursor'); // 커서 기반 페이지네이션
+    const sp = request.nextUrl.searchParams;
+    const sortByRaw = sp.get('sortBy') || 'created_at';
+    const pageSize = Math.min(parseInt(sp.get('pageSize') || '10', 10), 50);
+    const cursor = sp.get('cursor'); // post id (커서)
 
-    console.log(`[API Reports] Fetching reports - sortBy: ${sortBy}, pageSize: ${pageSize}, cursor: ${cursor}`);
+    // Firestore 호환: camelCase 정렬 키를 snake_case로
+    const sortBy =
+      sortByRaw === 'createdAt' ? 'created_at'
+      : sortByRaw === 'returnRate' ? 'return_rate'
+      : sortByRaw === 'likes' ? 'likes'
+      : sortByRaw === 'views' ? 'views'
+      : 'created_at';
 
-    const postsRef = collection(db, 'posts');
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    // 쿼리 구성
-    let q;
+    // 페이지네이션: cursor가 있으면 해당 post의 sortBy 값을 가져와 그 이하로 필터.
+    // 같은 값이 있을 때 안정 정렬을 위해 id로 tie-break.
+    let query = supabase.from('posts').select(SELECT_COLUMNS, { count: 'exact' }).order(sortBy, { ascending: false }).order('id', { ascending: false }).limit(pageSize);
+
     if (cursor) {
-      // 커서가 있으면 해당 문서 이후부터 가져오기
-      const cursorDoc = await getDoc(doc(db, 'posts', cursor));
-      if (cursorDoc.exists()) {
-        q = query(
-          postsRef,
-          orderBy(sortBy, 'desc'),
-          startAfter(cursorDoc),
-          limit(pageSize)
-        );
-      } else {
-        // 커서 문서가 없으면 처음부터
-        q = query(postsRef, orderBy(sortBy, 'desc'), limit(pageSize));
+      const { data: cursorRow } = await supabase
+        .from('posts')
+        .select(`${sortBy}, id`)
+        .eq('id', cursor)
+        .maybeSingle();
+
+      if (cursorRow) {
+        const cursorVal = (cursorRow as Record<string, unknown>)[sortBy];
+        // 값이 더 작거나, 같으면 id가 더 작은 행
+        query = query.or(`${sortBy}.lt.${cursorVal},and(${sortBy}.eq.${cursorVal},id.lt.${cursor})`);
       }
-    } else {
-      q = query(postsRef, orderBy(sortBy, 'desc'), limit(pageSize));
     }
 
-    // 병렬로 데이터와 총 개수 가져오기
-    const [querySnapshot, countSnapshot, latestPrices] = await Promise.all([
-      getDocs(q),
-      getCountFromServer(query(postsRef)),
-      getLatestPrices()
+    const [{ data: rows, error, count }, latestPrices] = await Promise.all([
+      query,
+      getLatestPrices(),
     ]);
 
-    console.log(`[API Reports] Found ${querySnapshot.docs.length} reports`);
+    if (error) {
+      console.error('[API Reports] supabase error:', error);
+      return NextResponse.json(
+        { success: false, error: 'Failed to fetch reports', message: error.message },
+        { status: 500 },
+      );
+    }
 
-    // 각 리포트에 가격 적용
-    const reports = querySnapshot.docs.map((docSnap) => {
-      const data = docSnap.data();
-
-      // createdAt 변환
-      let createdAtStr = '';
-      if (data.createdAt instanceof Timestamp) {
-        createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-      } else if (typeof data.createdAt === 'string') {
-        createdAtStr = data.createdAt;
-      } else {
-        createdAtStr = new Date().toISOString().split('T')[0];
-      }
-
-      // JSON에서 최신 가격 가져오기
-      const ticker = (data.ticker || '').toUpperCase();
+    const reports = (rows ?? []).map((r) => {
+      const ticker = (r.ticker || '').toUpperCase();
       const jsonPrice = latestPrices[ticker]?.currentPrice;
+      const initialPrice = Number(r.initial_price ?? 0);
+      const currentPrice = jsonPrice ?? Number(r.current_price ?? 0);
+      const positionType: 'long' | 'short' = (r.position_type as 'long' | 'short') ?? 'long';
+      const returnRate = parseFloat(
+        calculateReturn(initialPrice, currentPrice, positionType).toFixed(2),
+      );
 
-      const initialPrice = data.initialPrice || 0;
-      const currentPrice = jsonPrice || data.currentPrice || 0;
-      const positionType = data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
-
-      const returnRate = calculateReturn(initialPrice, currentPrice, positionType);
+      const author = (r as { author?: { nickname?: string } | null }).author;
 
       return {
-        id: docSnap.id,
-        title: data.title || '',
-        author: data.authorName || '익명',
-        stockName: data.stockName || '',
-        ticker: data.ticker || '',
-        opinion: data.opinion || 'hold',
-        returnRate: parseFloat(returnRate.toFixed(2)),
+        id: r.id,
+        title: r.title ?? '',
+        author: author?.nickname ?? '익명',
+        stockName: r.stock_name ?? '',
+        ticker: r.ticker ?? '',
+        opinion: r.opinion ?? 'hold',
+        returnRate,
         initialPrice,
         currentPrice,
-        createdAt: createdAtStr,
-        views: data.views || 0,
-        likes: data.likes || 0,
-        exchange: data.exchange || '',
-        category: data.category || '',
-        stockData: data.stockData || null,
-        themes: data.themes || [],
+        createdAt:
+          typeof r.created_at === 'string'
+            ? r.created_at.split('T')[0]
+            : new Date().toISOString().split('T')[0],
+        views: r.views ?? 0,
+        likes: r.likes ?? 0,
+        exchange: r.exchange ?? '',
+        category: r.category ?? '',
+        stockData: r.stock_data ?? null,
+        themes: r.themes ?? [],
       };
     });
 
-    // 다음 페이지 커서 (마지막 문서 ID)
-    const lastDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
-    const nextCursor = lastDoc ? lastDoc.id : null;
-    const hasMore = querySnapshot.docs.length === pageSize;
-
-    console.log(`[API Reports] Successfully processed ${reports.length} reports`);
+    const lastId = rows && rows.length ? rows[rows.length - 1].id : null;
+    const hasMore = rows ? rows.length === pageSize : false;
 
     const response = NextResponse.json({
       success: true,
       reports,
       count: reports.length,
-      total: countSnapshot.data().count,
-      nextCursor,
+      total: count ?? null,
+      nextCursor: lastId,
       hasMore,
       pageSize,
     });
 
-    // 캐시 헤더 추가 (1분간 캐시, stale-while-revalidate)
     response.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=120');
-
     return response;
   } catch (error) {
     console.error('[API Reports] Error:', error);
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
         error: 'Failed to fetch reports',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

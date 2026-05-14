@@ -1,5 +1,7 @@
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+// 클라이언트 측 이미지 업로드 — Supabase Storage 'media' 버킷.
+// 경로 규칙: media/{user_id}/reports/{filename} — RLS가 본인 폴더만 INSERT 허용.
+
+import { createClient } from '@/utils/supabase/client';
 
 export interface ImageUploadOptions {
   maxWidth?: number;
@@ -15,9 +17,11 @@ const DEFAULT_OPTIONS: ImageUploadOptions = {
   maxSizeMB: 2,
 };
 
+const BUCKET = 'media';
+
 export async function compressImage(
   file: File,
-  options: ImageUploadOptions = {}
+  options: ImageUploadOptions = {},
 ): Promise<Blob> {
   const { maxWidth, maxHeight, quality, maxSizeMB } = { ...DEFAULT_OPTIONS, ...options };
 
@@ -57,8 +61,8 @@ export async function compressImage(
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, width, height);
 
-        // WebP 지원 여부 확인 후 WebP로 변환 (미지원 시 JPEG 폴백)
-        const useWebP = typeof canvas.toBlob === 'function' &&
+        const useWebP =
+          typeof canvas.toBlob === 'function' &&
           document.createElement('canvas').toDataURL('image/webp').startsWith('data:image/webp');
         const outputType = useWebP ? 'image/webp' : 'image/jpeg';
 
@@ -68,7 +72,6 @@ export async function compressImage(
               reject(new Error('Image compression failed'));
               return;
             }
-
             const maxSize = maxSizeMB! * 1024 * 1024;
             if (blob.size > maxSize && quality! > 0.1) {
               compressImage(file, { ...options, quality: quality! - 0.1 })
@@ -79,78 +82,83 @@ export async function compressImage(
             }
           },
           outputType,
-          quality
+          quality,
         );
       };
 
-      img.onerror = () => {
-        reject(new Error('Failed to load image'));
-      };
+      img.onerror = () => reject(new Error('Failed to load image'));
     };
 
-    reader.onerror = () => {
-      reject(new Error('Failed to read file'));
-    };
+    reader.onerror = () => reject(new Error('Failed to read file'));
   });
 }
 
+/**
+ * Supabase Storage에 이미지 1개 업로드. publicURL 반환.
+ * pathPrefix는 user_id로 시작해야 RLS 통과. 보통 `${user.uid}/reports/${Date.now()}`.
+ */
 export async function uploadImage(
   file: File,
-  path: string,
-  options: ImageUploadOptions = {}
+  pathPrefix: string,
+  options: ImageUploadOptions = {},
 ): Promise<string> {
-  try {
-    const compressedBlob = await compressImage(file, options);
+  const compressed = await compressImage(file, options);
+  const ext =
+    compressed.type === 'image/webp'
+      ? '.webp'
+      : compressed.type === 'image/png'
+      ? '.png'
+      : '.jpg';
+  const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+  const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${baseName}${ext}`;
+  const objectPath = `${pathPrefix.replace(/\/+$/, '')}/${fileName}`;
 
-    // 확장자를 실제 변환 포맷에 맞춤
-    const ext = compressedBlob.type === 'image/webp' ? '.webp' : compressedBlob.type === 'image/png' ? '.png' : '.jpg';
-    const baseName = file.name.replace(/\.[^.]+$/, '');
-    const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${baseName}${ext}`;
-    const storageRef = ref(storage, `${path}/${fileName}`);
-
-    const metadata = {
-      contentType: compressedBlob.type,
-      customMetadata: {
-        originalName: file.name,
-        uploadedAt: new Date().toISOString(),
-      },
-    };
-
-    await uploadBytes(storageRef, compressedBlob, metadata);
-
-    const downloadURL = await getDownloadURL(storageRef);
-
-    return downloadURL;
-  } catch (error) {
-    console.error('Image upload error:', error);
-    throw error;
+  const supabase = createClient();
+  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(objectPath, compressed, {
+    contentType: compressed.type,
+    cacheControl: '3600',
+    upsert: false,
+  });
+  if (uploadError) {
+    console.error('Image upload error:', uploadError);
+    throw uploadError;
   }
+
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(objectPath);
+  return data.publicUrl;
 }
 
 export async function uploadMultipleImages(
   files: File[],
-  path: string,
+  pathPrefix: string,
   options: ImageUploadOptions = {},
-  onProgress?: (progress: number) => void
+  onProgress?: (progress: number) => void,
 ): Promise<string[]> {
   const urls: string[] = [];
-
   for (let i = 0; i < files.length; i++) {
-    const url = await uploadImage(files[i], path, options);
+    const url = await uploadImage(files[i], pathPrefix, options);
     urls.push(url);
-
-    if (onProgress) {
-      onProgress(((i + 1) / files.length) * 100);
-    }
+    if (onProgress) onProgress(((i + 1) / files.length) * 100);
   }
-
   return urls;
 }
 
+/**
+ * URL이 Supabase Storage 'media' 버킷의 것이면 삭제. Firebase URL이면 무시 (옛 이미지).
+ */
 export async function deleteImage(imageUrl: string): Promise<void> {
   try {
-    const imageRef = ref(storage, imageUrl);
-    await deleteObject(imageRef);
+    if (!imageUrl.includes('/storage/v1/object/public/' + BUCKET + '/')) {
+      // Firebase Storage URL 등 — 우리 권한 아님, 무시
+      return;
+    }
+    const supabase = createClient();
+    const marker = `/storage/v1/object/public/${BUCKET}/`;
+    const idx = imageUrl.indexOf(marker);
+    if (idx < 0) return;
+    const objectPath = decodeURIComponent(imageUrl.slice(idx + marker.length));
+    const { error } = await supabase.storage.from(BUCKET).remove([objectPath]);
+    if (error) throw error;
   } catch (error) {
     console.error('Image deletion error:', error);
     throw error;
@@ -158,18 +166,16 @@ export async function deleteImage(imageUrl: string): Promise<void> {
 }
 
 export function getOptimizedImageUrl(url: string, width?: number, height?: number): string {
+  // Firebase Storage 옛 URL은 transform 미지원 — 그대로 반환
   if (!url.includes('firebasestorage.googleapis.com')) {
     return url;
   }
-
   let optimizedUrl = url;
-
   if (width || height) {
     const params = new URLSearchParams();
     if (width) params.append('w', width.toString());
     if (height) params.append('h', height.toString());
     optimizedUrl += `&${params.toString()}`;
   }
-
   return optimizedUrl;
 }

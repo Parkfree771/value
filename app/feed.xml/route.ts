@@ -1,5 +1,7 @@
-import { getDocs, collection, query, orderBy, limit } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+// RSS feed (XML). Supabase posts에서 최신 50개.
+
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -7,35 +9,30 @@ export async function GET() {
   let items = '';
 
   try {
-    const postsQuery = query(
-      collection(db, 'posts'),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
-    const snapshot = await getDocs(postsQuery);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    items = snapshot.docs
-      .map((doc) => {
-        const data = doc.data();
-        const title = escapeXml(data.title || '무제');
-        const author = escapeXml(data.authorName || '익명');
-        const stockName = escapeXml(data.stockName || '');
-        const ticker = escapeXml(data.ticker || '');
-        const opinion = data.opinion || '';
-        const link = `${SITE_URL}/reports/${doc.id}`;
+    const { data: posts } = await supabase
+      .from('posts')
+      .select(
+        'id, title, stock_name, ticker, opinion, content, created_at, author:users!posts_author_id_fkey(nickname)',
+      )
+      .order('created_at', { ascending: false })
+      .limit(50);
 
-        // 날짜 처리
-        let pubDate = new Date().toUTCString();
-        if (data.createdAt?.toDate) {
-          pubDate = data.createdAt.toDate().toUTCString();
-        } else if (typeof data.createdAt === 'string') {
-          pubDate = new Date(data.createdAt).toUTCString();
-        }
-
-        // 설명 생성
+    items = (posts ?? [])
+      .map((p) => {
+        const author = (p as { author?: { nickname?: string } | null }).author;
+        const title = escapeXml(p.title || '무제');
+        const authorName = escapeXml(author?.nickname || '익명');
+        const stockName = escapeXml(p.stock_name || '');
+        const ticker = escapeXml(p.ticker || '');
+        const opinion = p.opinion || '';
+        const link = `${SITE_URL}/reports/${p.id}`;
+        const pubDate = p.created_at ? new Date(p.created_at).toUTCString() : new Date().toUTCString();
         const opinionText = opinion === 'buy' ? '매수' : opinion === 'sell' ? '매도' : '중립';
         const description = escapeXml(
-          `[${opinionText}] ${stockName}(${ticker}) - ${data.content?.replace(/<[^>]*>/g, '').slice(0, 200) || ''}`
+          `[${opinionText}] ${stockName}(${ticker}) - ${(p.content || '').replace(/<[^>]*>/g, '').slice(0, 200)}`,
         );
 
         return `    <item>
@@ -43,7 +40,7 @@ export async function GET() {
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
       <pubDate>${pubDate}</pubDate>
-      <dc:creator>${author}</dc:creator>
+      <dc:creator>${authorName}</dc:creator>
       <description>${description}</description>
       <category>${stockName} (${ticker})</category>
     </item>`;

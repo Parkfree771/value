@@ -1,25 +1,23 @@
-// 서버 전용 - 토큰 기반 관리자 검증
-import { verifyAuthTokenWithEmail, VerifiedUser } from '@/lib/firebase-admin';
+// 서버 전용 - 쿠키/Bearer 기반 관리자 검증
+import { getAuthUserAny, type AuthUser } from '@/lib/supabase-auth';
 import { isAdminEmail } from './adminConfig.server';
 
-export type { VerifiedUser };
+export interface VerifiedUser {
+  uid: string;
+  email: string | null;
+}
+
+function toVerified(u: AuthUser): VerifiedUser {
+  return { uid: u.id, email: u.email };
+}
 
 /**
- * Authorization 헤더에서 토큰을 검증하고 관리자 권한을 확인합니다.
- * 서버 전용 함수입니다.
- * @param authHeader Authorization 헤더 값 (Bearer <token>)
- * @returns 검증된 관리자 정보 또는 null (관리자가 아닌 경우)
+ * 쿠키 우선, Bearer fallback으로 사용자 검증 후 관리자 이메일 여부 확인.
+ * 관리자 아니면 null.
  */
 export async function verifyAdmin(authHeader: string | null): Promise<VerifiedUser | null> {
-  const user = await verifyAuthTokenWithEmail(authHeader);
-
-  if (!user) {
-    return null;
-  }
-
-  if (!isAdminEmail(user.email)) {
-    return null;
-  }
-
-  return user;
+  const user = await getAuthUserAny(authHeader);
+  if (!user) return null;
+  if (!isAdminEmail(user.email)) return null;
+  return toVerified(user);
 }

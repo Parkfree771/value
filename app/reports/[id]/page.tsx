@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 import { Report } from '@/types/report';
 import { generateReportMetadata, generateReportJsonLd } from '@/lib/metadata';
 import ReportDetailClient from '@/components/ReportDetailClient';
@@ -9,87 +9,85 @@ import RelatedReports from '@/components/RelatedReports';
 import Card from '@/components/Card';
 import Button from '@/components/Button';
 import Link from 'next/link';
-import { getFeedPost } from '@/lib/feedData';
+import { getLatestPrices } from '@/lib/priceCache';
+import { calculateReturn } from '@/utils/calculateReturn';
 
 /**
  * 리포트 데이터를 가져옵니다.
- * - feed.json: 최신 수익률, 현재가, 조회수, 좋아요
- * - Firestore: content, stockData 등 상세 정보
- * React cache()로 generateMetadata와 페이지 컴포넌트 간 중복 호출 방지
+ * - Supabase posts (트리거가 likes/views 카운트 자동 유지)
+ * - feed.json은 가격 캐시 (cron이 갱신)
+ * React cache()로 generateMetadata와 페이지 간 중복 호출 방지.
  */
 const getReportData = cache(async (id: string): Promise<Report | null> => {
   try {
-    // 1. Firestore에서 상세 정보 가져오기
-    const docRef = doc(db, 'posts', id);
-    const docSnap = await getDoc(docRef);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    if (!docSnap.exists()) {
+    const [{ data, error }, latestPrices] = await Promise.all([
+      supabase
+        .from('posts')
+        .select(
+          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, mode, content, css_content, images, files, views, likes, created_at, updated_at, author_id, author:users!posts_author_id_fkey(nickname)',
+        )
+        .eq('id', id)
+        .maybeSingle(),
+      getLatestPrices(),
+    ]);
+
+    if (error) {
+      console.error('리포트 조회 오류:', error);
       return null;
     }
+    if (!data) return null;
 
-    const data = docSnap.data();
+    const tickerUpper = (data.ticker || '').toUpperCase();
+    const initialPrice = Number(data.initial_price ?? 0);
+    const currentPrice =
+      latestPrices[tickerUpper]?.currentPrice ?? Number(data.current_price ?? 0);
+    const positionType: 'long' | 'short' = (data.position_type as 'long' | 'short') ?? 'long';
+    const returnRate =
+      initialPrice && currentPrice
+        ? parseFloat(calculateReturn(initialPrice, currentPrice, positionType).toFixed(2))
+        : Number(data.return_rate ?? 0);
 
-    // 2. feed.json에서 최신 수익률 정보 가져오기
-    const feedPost = await getFeedPost(id);
+    const createdAtStr =
+      typeof data.created_at === 'string'
+        ? data.created_at.split('T')[0]
+        : new Date().toISOString().split('T')[0];
 
-    // createdAt을 문자열로 변환
-    let createdAtStr = '';
-    if (data.createdAt instanceof Timestamp) {
-      createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-    } else if (typeof data.createdAt === 'string') {
-      createdAtStr = data.createdAt;
-    } else {
-      createdAtStr = new Date().toISOString().split('T')[0];
-    }
+    // updated_at는 timestamptz[] (스키마) — 날짜만 추출
+    const updatedAtArray: string[] = Array.isArray(data.updated_at)
+      ? data.updated_at
+          .map((d) => (typeof d === 'string' ? d.split('T')[0] : ''))
+          .filter((s) => s !== '')
+      : [];
 
-    // updatedAt을 문자열 배열로 변환
-    let updatedAtArray: string[] = [];
-    if (data.updatedAt) {
-      if (Array.isArray(data.updatedAt)) {
-        updatedAtArray = data.updatedAt.map((item: any) => {
-          if (item instanceof Timestamp) {
-            return item.toDate().toISOString().split('T')[0];
-          } else if (typeof item === 'string') {
-            return item;
-          }
-          return '';
-        }).filter((date: string) => date !== '');
-      } else if (data.updatedAt instanceof Timestamp) {
-        updatedAtArray = [data.updatedAt.toDate().toISOString().split('T')[0]];
-      } else if (typeof data.updatedAt === 'string') {
-        updatedAtArray = [data.updatedAt];
-      }
-    }
+    const author = (data as { author?: { nickname?: string } | null }).author;
 
-    // 3. 데이터 조합 (feed.json 수익률 우선, Firestore 상세 정보)
     const report: Report = {
-      id: docSnap.id,
-      title: data.title || '',
-      author: data.authorName || '익명',
-      authorId: data.authorId || '',
-      stockName: data.stockName || '',
-      ticker: data.ticker || '',
-      opinion: data.opinion || 'hold',
-      // feed.json에서 최신 수익률/현재가 사용 (없으면 Firestore 값)
-      returnRate: feedPost?.returnRate ?? data.returnRate ?? 0,
-      initialPrice: feedPost?.initialPrice ?? data.initialPrice ?? 0,
-      currentPrice: feedPost?.currentPrice ?? data.currentPrice ?? 0,
-      targetPrice: data.targetPrice || 0,
+      id: data.id,
+      title: data.title ?? '',
+      author: author?.nickname ?? '익명',
+      authorId: data.author_id,
+      stockName: data.stock_name ?? '',
+      ticker: data.ticker ?? '',
+      opinion: data.opinion ?? 'hold',
+      returnRate,
+      initialPrice,
+      currentPrice,
+      targetPrice: Number(data.target_price ?? 0),
       createdAt: createdAtStr,
       updatedAt: updatedAtArray.length > 0 ? updatedAtArray : undefined,
-      // feed.json에서 최신 조회수/좋아요 사용
-      views: feedPost?.views ?? data.views ?? 0,
-      likes: feedPost?.likes ?? data.likes ?? 0,
-      // Firestore에서만 가져오는 상세 정보
-      mode: data.mode || 'text',
-      content: data.content || '',
-      cssContent: data.cssContent || '',
-      images: data.images || [],
-      files: data.files || [],
-      positionType: data.positionType || 'long',
-      stockData: data.stockData || {},
-      // 테마 태그
-      themes: data.themes || undefined,
+      views: data.views ?? 0,
+      likes: data.likes ?? 0,
+      mode: data.mode ?? 'text',
+      content: data.content ?? '',
+      cssContent: data.css_content ?? '',
+      images: data.images ?? [],
+      files: data.files ?? [],
+      positionType,
+      stockData: data.stock_data ?? {},
+      themes: data.themes ?? undefined,
     };
 
     return report;

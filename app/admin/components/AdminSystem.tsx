@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { auth } from '@/lib/firebase';
 
 interface ActionResult {
   success: boolean;
@@ -16,13 +15,10 @@ export default function AdminSystem() {
   const executeAction = async (actionKey: string, url: string, method: string = 'POST', body?: object) => {
     setLoadingAction(actionKey);
     try {
-      const token = await auth.currentUser?.getIdToken();
       const options: RequestInit = {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
       };
       if (body) {
         options.body = JSON.stringify(body);

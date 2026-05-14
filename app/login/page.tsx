@@ -1,14 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { getOrCreateUserProfile } from '@/lib/users';
 
 export default function LoginPage() {
-  const router = useRouter();
   const { signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,24 +25,12 @@ export default function LoginPage() {
     try {
       setLoading(true);
       setError('');
-
-      const user = await signInWithGoogle();
-
-      if (!user) {
-        throw new Error('로그인에 실패했습니다');
-      }
-
-      const userProfile = await getOrCreateUserProfile(user);
-
-      if (!userProfile.onboardingCompleted) {
-        router.push('/onboarding');
-      } else {
-        router.push('/');
-      }
-    } catch (error: any) {
-      console.error('Google 로그인 오류:', error);
-      setError(error.message || 'Google 로그인에 실패했습니다. 다시 시도해주세요.');
-    } finally {
+      await signInWithGoogle();
+      // OAuth 리다이렉트로 브라우저가 Google로 이동. 콜백은 /auth/callback이 처리.
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Google 로그인에 실패했습니다.';
+      console.error('Google 로그인 오류:', err);
+      setError(msg);
       setLoading(false);
     }
   };

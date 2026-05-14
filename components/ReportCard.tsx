@@ -105,19 +105,9 @@ const ReportCard = memo(function ReportCard({
     setIsDeleting(true);
 
     try {
-      // Firebase Auth에서 ID 토큰 가져오기 (lazy import)
-      const { auth } = await import('@/lib/firebase');
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
-
       const response = await fetch(`/api/reports/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       const data = await response.json();

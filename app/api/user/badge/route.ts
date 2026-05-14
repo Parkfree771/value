@@ -1,11 +1,14 @@
+// PUT /api/user/badge
+// 본인의 장착 배지를 변경 (1개, null이면 해제).
+// users.equipped_badge_id를 갱신. feed.json도 동기화 (Storage 잔존).
+
 import { NextRequest, NextResponse } from 'next/server';
-import { adminAuth, adminDb, adminStorage } from '@/lib/firebase-admin';
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
+import { adminStorage } from '@/lib/firebase-admin';
 import { BADGES_BY_ID } from '@/lib/badges';
 import type { FeedData } from '@/types/feed';
 
-// 본인 글들의 feed.json equippedBadgeId 를 일괄 갱신.
-// 작성한 글이 없으면 no-op. 실패해도 사용자 응답에는 영향 없음 (fire-and-forget 가능하지만
-// 직후 피드 새로고침 시 즉시 반영되기 위해 await 한다).
 async function syncBadgeToFeed(uid: string, equippedBadgeId: string | null) {
   const bucket = adminStorage.bucket();
   const file = bucket.file('feed.json');
@@ -31,17 +34,16 @@ async function syncBadgeToFeed(uid: string, equippedBadgeId: string | null) {
   return { updated: changed };
 }
 
-// 본인의 장착 배지 변경 (1개만 가능, null이면 해제)
 export async function PUT(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
+
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
-
-    const idToken = authHeader.slice('Bearer '.length);
-    const decoded = await adminAuth.verifyIdToken(idToken);
-    const uid = decoded.uid;
+    const uid = authData.user.id;
 
     const body = await request.json();
     const equippedBadgeId: string | null = body.equippedBadgeId ?? null;
@@ -50,26 +52,49 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '존재하지 않는 배지입니다.' }, { status: 400 });
     }
 
-    await adminDb.collection('users').doc(uid).update({
-      equippedBadgeId,
-      updatedAt: new Date().toISOString(),
-    });
+    // 장착하려는 배지가 본인이 해금한 상태인지 확인 (해제는 통과)
+    if (equippedBadgeId !== null) {
+      const { data: owned } = await supabase
+        .from('user_badges')
+        .select('badge_id')
+        .eq('user_id', uid)
+        .eq('badge_id', equippedBadgeId)
+        .maybeSingle();
+      if (!owned) {
+        return NextResponse.json(
+          { error: '해당 배지를 아직 해금하지 않았습니다.' },
+          { status: 403 },
+        );
+      }
+    }
 
-    // feed.json 의 작성자 모든 글에 새 배지 ID 전파
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ equipped_badge_id: equippedBadgeId })
+      .eq('id', uid);
+
+    if (updateError) {
+      console.error('[badge PUT] users update error:', updateError);
+      return NextResponse.json(
+        { error: '배지 업데이트 중 오류가 발생했습니다.' },
+        { status: 500 },
+      );
+    }
+
     let feedUpdated = 0;
     try {
       const r = await syncBadgeToFeed(uid, equippedBadgeId);
       feedUpdated = r.updated;
-    } catch (e: any) {
-      console.warn('[badge PUT] feed.json sync 실패:', e?.message || e);
+    } catch (e) {
+      console.warn('[badge PUT] feed.json sync 실패:', e instanceof Error ? e.message : e);
     }
 
     return NextResponse.json({ success: true, equippedBadgeId, feedUpdated });
-  } catch (error: any) {
+  } catch (error) {
     console.error('[badge PUT] error:', error);
     return NextResponse.json(
-      { error: error?.message || '배지 업데이트 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { error: error instanceof Error ? error.message : '배지 업데이트 중 오류가 발생했습니다.' },
+      { status: 500 },
     );
   }
 }

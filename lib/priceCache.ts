@@ -1,55 +1,57 @@
 /**
- * 가격 캐시 모듈
- *
- * Firebase Storage에서 가격 데이터를 가져와 캐시
- * Dynamic import로 Firebase 모듈 지연 로드
+ * 최신 가격 캐시 — Supabase public.current_prices 테이블 기반.
+ * 이전에는 Firebase Storage의 stock-prices.json/feed.json을 읽었으나
+ * 모두 Postgres로 이전됨.
  */
 
-// 공통 가격 데이터 타입
+import { getServiceClient } from './supabase-admin';
+
 export interface CachedPriceData {
   currentPrice: number;
   exchange: string;
 }
 
-// 싱글톤 캐시 (서버 사이드에서 요청 간 공유)
+// 서버 인스턴스 내 메모리 캐시 (1분)
 let cachedPrices: Record<string, CachedPriceData> | null = null;
 let cacheTimestamp = 0;
-const CACHE_DURATION = 60 * 1000; // 1분
+const CACHE_DURATION = 60 * 1000;
 
 /**
- * Firebase Storage의 stock-prices.json에서 최신 가격을 가져옵니다.
- * 1분간 캐시하여 중복 요청을 방지합니다.
+ * 모든 티커의 최신 가격을 가져옴. 1분간 메모리 캐시.
  */
 export async function getLatestPrices(): Promise<Record<string, CachedPriceData>> {
   const now = Date.now();
-
   if (cachedPrices && now - cacheTimestamp < CACHE_DURATION) {
     return cachedPrices;
   }
 
   try {
-    // Dynamic import로 Firebase 모듈 지연 로드
-    const { getStorageLazy } = await import('./firebase-lazy');
-    const { ref, getDownloadURL } = await import('firebase/storage');
+    const supabase = getServiceClient();
+    const { data, error } = await supabase
+      .from('current_prices')
+      .select('ticker, exchange, current_price');
 
-    const storage = await getStorageLazy();
-    const storageRef = ref(storage, 'stock-prices.json');
-    const downloadURL = await getDownloadURL(storageRef);
-    const response = await fetch(downloadURL);
-    const data = await response.json();
-    cachedPrices = data.prices || {};
+    if (error) {
+      console.error('[priceCache] Supabase error:', error);
+      return cachedPrices || {};
+    }
+
+    const map: Record<string, CachedPriceData> = {};
+    for (const row of data ?? []) {
+      map[row.ticker.toUpperCase()] = {
+        currentPrice: Number(row.current_price),
+        exchange: row.exchange,
+      };
+    }
+    cachedPrices = map;
     cacheTimestamp = now;
-    console.log(`[PriceCache] Loaded ${Object.keys(cachedPrices || {}).length} prices from JSON`);
-    return cachedPrices || {};
-  } catch (error) {
-    console.error('[PriceCache] Failed to load prices JSON:', error);
+    return map;
+  } catch (err) {
+    console.error('[priceCache] error:', err);
     return cachedPrices || {};
   }
 }
 
-/**
- * 거래소 코드에서 통화를 추론합니다.
- */
 export function getCurrencyFromExchange(exchange: string): string {
   switch (exchange) {
     case 'KRX': return 'KRW';
@@ -62,9 +64,6 @@ export function getCurrencyFromExchange(exchange: string): string {
   }
 }
 
-/**
- * 특정 티커의 가격 정보를 가져옵니다.
- */
 export async function getPriceForTicker(ticker: string): Promise<{
   currentPrice: number | null;
   exchange: string | null;
@@ -81,6 +80,5 @@ export async function getPriceForTicker(ticker: string): Promise<{
       currency: getCurrencyFromExchange(priceData.exchange),
     };
   }
-
   return null;
 }

@@ -1,31 +1,28 @@
 /**
- * GitHub Actions 크론용 주식 가격 업데이트 스크립트
+ * GitHub Actions 가격 업데이트 cron — Supabase Postgres 버전
  *
- * 15분마다 실행되어:
- * 1. posts 컬렉션에서 모든 게시글 읽기 (views, likes 등 최신 정보)
- * 2. 고유 ticker 추출 후 현재가 조회
- * 3. 수익률 계산
- * 4. feed.json으로 저장 (메인 페이지용)
+ * 실행 흐름:
+ *  1. posts 테이블에서 모든 글 읽기 (MARKET_TYPE 필터)
+ *  2. 고유 ticker × exchange 추출
+ *  3. KIS / Upbit으로 현재가 조회
+ *  4. current_prices UPSERT
+ *  5. price_history UPSERT (오늘 날짜 종가로)
+ *  6. posts UPDATE (current_price, prev_return_rate, return_rate)
  *
- * 환경변수 MARKET_TYPE으로 거래소 필터링:
- * - ASIA: KRX(한국), TSE(일본), SHS/SZS(중국), HKS(홍콩)
- * - US: NAS(나스닥), NYS(뉴욕), AMS(아멕스)
- * - ALL: 모든 거래소 (기본값)
+ * 환경변수:
+ *  - NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY
+ *  - KIS_APP_KEY, KIS_APP_SECRET, KIS_BASE_URL
+ *  - MARKET_TYPE (ASIA / US / ALL)
  */
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
+import { createClient } from '@supabase/supabase-js';
 
-// 거래소 그룹 정의
+// ===== 거래소 그룹 =====
 const ASIA_EXCHANGES = ['KRX', 'TSE', 'SHS', 'SZS', 'HKS'];
 const US_EXCHANGES = ['NAS', 'NYS', 'AMS'];
-
-// 환경변수에서 마켓 타입 확인
 const MARKET_TYPE = process.env.MARKET_TYPE || 'ALL';
 
 function shouldProcessExchange(exchange: string): boolean {
-  // 암호화폐는 24시간 거래이므로 항상 처리
   if (exchange === 'CRYPTO') return true;
   if (MARKET_TYPE === 'ALL') return true;
   if (MARKET_TYPE === 'ASIA') return ASIA_EXCHANGES.includes(exchange);
@@ -33,464 +30,273 @@ function shouldProcessExchange(exchange: string): boolean {
   return true;
 }
 
-// ===== 타입 정의 =====
-interface FeedPost {
-  id: string;
-  title: string;
-  author: string;
-  authorId: string;
-  stockName: string;
-  ticker: string;
-  exchange: string;
-  opinion: 'buy' | 'sell' | 'hold';
-  positionType: 'long' | 'short';
-  initialPrice: number;
-  currentPrice: number;
-  returnRate: number;
-  createdAt: string;
-  views: number;
-  likes: number;
-  category: string;
-  themes?: string[];
+// ===== Supabase =====
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
+if (!supabaseUrl || !supabaseSecret) {
+  console.error('[CRON] NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY 누락');
+  process.exit(1);
 }
+const supabase = createClient(supabaseUrl, supabaseSecret, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
-interface FeedData {
-  lastUpdated: string;
-  totalPosts: number;
-  posts: FeedPost[];
-  prices: Record<string, {
-    currentPrice: number;
-    exchange: string;
-    lastUpdated: string;
-  }>;
-}
-
-interface KISTokenCache {
-  token: string;
-  expiresAt: Timestamp;
-}
-
-// ===== Firebase Admin 초기화 =====
-let projectId: string;
-
-if (getApps().length === 0) {
-  const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
-
-  if (!serviceAccountBase64) {
-    console.error('[ERROR] FIREBASE_SERVICE_ACCOUNT_BASE64 is not set');
-    process.exit(1);
-  }
-
-  try {
-    const serviceAccountJson = Buffer.from(serviceAccountBase64, 'base64').toString('utf-8');
-    const serviceAccount = JSON.parse(serviceAccountJson);
-    projectId = serviceAccount.project_id;
-
-    initializeApp({
-      credential: cert(serviceAccount),
-      storageBucket: `${projectId}.firebasestorage.app`,
-    });
-    console.log('[Firebase] Initialized');
-  } catch (error) {
-    console.error('[ERROR] Failed to parse service account:', error);
-    process.exit(1);
-  }
-}
-
-const db = getFirestore();
-const bucket = getStorage().bucket();
-
-// ===== KIS API 설정 =====
+// ===== KIS 토큰 (settings 테이블 캐시) =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_BETWEEN_REQUESTS = 50; // ms (초당 20회 제한)
+const DELAY_BETWEEN_REQUESTS = 50;
 
-// ===== 수익률 계산 =====
-function calculateReturn(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: 'long' | 'short'
-): number {
-  if (initialPrice <= 0 || currentPrice <= 0) return 0;
-
-  if (positionType === 'long') {
-    return ((currentPrice - initialPrice) / initialPrice) * 100;
-  } else {
-    return ((initialPrice - currentPrice) / initialPrice) * 100;
-  }
-}
-
-// ===== KIS 토큰 관리 =====
 async function getKISToken(): Promise<string> {
-  try {
-    // 1. Firebase에서 캐시된 토큰 확인
-    const tokenDoc = await db.collection('settings').doc('kis_token').get();
+  const { data: cached } = await supabase
+    .from('settings')
+    .select('value')
+    .eq('key', 'kis_token')
+    .maybeSingle();
 
-    if (tokenDoc.exists) {
-      const data = tokenDoc.data() as KISTokenCache;
-      const expiresAt = data.expiresAt?.toDate?.() || new Date(0);
-
-      // 토큰이 아직 유효하면 재사용 (5분 여유)
-      if (expiresAt.getTime() > Date.now() + 5 * 60 * 1000) {
-        console.log('[KIS] Using cached token');
-        return data.token;
+  if (cached?.value) {
+    const v = cached.value as { token?: string; expiresAt?: string };
+    if (v.token && v.expiresAt) {
+      const expiresAt = new Date(v.expiresAt).getTime();
+      if (expiresAt > Date.now() + 5 * 60 * 1000) {
+        console.log('[KIS] cached token reuse');
+        return v.token;
       }
     }
-
-    // 2. 새 토큰 발급
-    console.log('[KIS] Generating new token...');
-    const response = await fetch(`${KIS_BASE_URL}/oauth2/tokenP`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        grant_type: 'client_credentials',
-        appkey: process.env.KIS_APP_KEY,
-        appsecret: process.env.KIS_APP_SECRET,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Token request failed: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    const token = data.access_token;
-    const expiresIn = data.expires_in || 86400; // 기본 24시간
-
-    // 3. Firebase에 토큰 캐시
-    await db.collection('settings').doc('kis_token').set({
-      token,
-      expiresAt: Timestamp.fromDate(new Date(Date.now() + (expiresIn - 300) * 1000)),
-      updatedAt: Timestamp.now(),
-    });
-
-    console.log('[KIS] New token cached');
-    return token;
-  } catch (error) {
-    console.error('[KIS] Token error:', error);
-    throw error;
   }
+
+  console.log('[KIS] new token request');
+  const res = await fetch(`${KIS_BASE_URL}/oauth2/tokenP`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'client_credentials',
+      appkey: process.env.KIS_APP_KEY,
+      appsecret: process.env.KIS_APP_SECRET,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Token request failed: ${res.status} - ${text}`);
+  }
+  const data = await res.json();
+  const token = data.access_token as string;
+  const expiresIn = (data.expires_in as number) || 86400;
+  const expiresAtIso = new Date(Date.now() + (expiresIn - 300) * 1000).toISOString();
+
+  await supabase
+    .from('settings')
+    .upsert({ key: 'kis_token', value: { token, expiresAt: expiresAtIso } }, { onConflict: 'key' });
+
+  return token;
 }
 
-// ===== 국내 주식 가격 조회 =====
+// ===== 가격 조회 =====
 async function getKoreanStockPrice(token: string, ticker: string): Promise<number> {
-  const response = await fetch(
+  const res = await fetch(
     `${KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price?FID_COND_MRKT_DIV_CODE=J&FID_INPUT_ISCD=${ticker}`,
     {
       headers: {
         'Content-Type': 'application/json',
-        'authorization': `Bearer ${token}`,
-        'appkey': process.env.KIS_APP_KEY!,
-        'appsecret': process.env.KIS_APP_SECRET!,
-        'tr_id': 'FHKST01010100',
+        authorization: `Bearer ${token}`,
+        appkey: process.env.KIS_APP_KEY!,
+        appsecret: process.env.KIS_APP_SECRET!,
+        tr_id: 'FHKST01010100',
       },
-    }
+    },
   );
-
-  if (!response.ok) {
-    throw new Error(`Korean stock API failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  if (data.rt_cd !== '0') {
-    throw new Error(`KIS API error: ${data.msg1}`);
-  }
-
+  if (!res.ok) throw new Error(`Korean stock API failed: ${res.status}`);
+  const data = await res.json();
+  if (data.rt_cd !== '0') throw new Error(`KIS API error: ${data.msg1}`);
   return parseFloat(data.output.stck_prpr);
 }
 
-// ===== 해외 주식 가격 조회 =====
-async function getOverseaStockPrice(token: string, ticker: string, exchange: string): Promise<number> {
-  const exchangeMap: Record<string, string> = {
-    'NAS': 'NAS',
-    'NYS': 'NYS',
-    'AMS': 'AMS',
-    'TSE': 'TSE',
-    'HKS': 'HKS',
-    'SHS': 'SHS',
-    'SZS': 'SZS',
-  };
-
-  const excd = exchangeMap[exchange] || 'NAS';
-
-  const response = await fetch(
-    `${KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price?AUTH=&EXCD=${excd}&SYMB=${ticker}`,
+async function getOverseaStockPrice(
+  token: string,
+  ticker: string,
+  exchange: string,
+): Promise<number> {
+  const res = await fetch(
+    `${KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price?AUTH=&EXCD=${exchange}&SYMB=${ticker}`,
     {
       headers: {
         'Content-Type': 'application/json',
-        'authorization': `Bearer ${token}`,
-        'appkey': process.env.KIS_APP_KEY!,
-        'appsecret': process.env.KIS_APP_SECRET!,
-        'tr_id': 'HHDFS00000300',
+        authorization: `Bearer ${token}`,
+        appkey: process.env.KIS_APP_KEY!,
+        appsecret: process.env.KIS_APP_SECRET!,
+        tr_id: 'HHDFS00000300',
       },
-    }
+    },
   );
-
-  if (!response.ok) {
-    throw new Error(`Oversea stock API failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-
-  if (data.rt_cd !== '0') {
-    throw new Error(`KIS API error: ${data.msg1}`);
-  }
-
+  if (!res.ok) throw new Error(`Oversea stock API failed: ${res.status}`);
+  const data = await res.json();
+  if (data.rt_cd !== '0') throw new Error(`KIS API error: ${data.msg1}`);
   return parseFloat(data.output.last);
 }
 
-// ===== 암호화폐 가격 조회 (업비트 API) =====
 async function getCryptoPrice(ticker: string): Promise<number> {
   const market = `KRW-${ticker.toUpperCase()}`;
   const url = `https://api.upbit.com/v1/ticker?markets=${market}`;
-
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-  const response = await fetch(url, {
+  const res = await fetch(url, {
     signal: controller.signal,
-    headers: { 'Accept': 'application/json' },
+    headers: { Accept: 'application/json' },
   });
-
   clearTimeout(timeoutId);
-
-  if (!response.ok) {
-    throw new Error(`Upbit API failed: ${response.status}`);
-  }
-
-  const data = await response.json();
-  if (!data || data.length === 0) {
-    throw new Error(`No data for ${ticker}`);
-  }
-
+  if (!res.ok) throw new Error(`Upbit API failed: ${res.status}`);
+  const data = await res.json();
+  if (!data || data.length === 0) throw new Error(`No data for ${ticker}`);
   return data[0].trade_price;
 }
 
-// ===== 가격 조회 (국내/해외/암호화폐 자동 판별) =====
-async function getStockPrice(token: string, ticker: string, exchange: string): Promise<number> {
-  if (exchange === 'CRYPTO') {
-    return getCryptoPrice(ticker);
-  } else if (exchange === 'KRX') {
-    return getKoreanStockPrice(token, ticker);
-  } else {
-    return getOverseaStockPrice(token, ticker, exchange);
-  }
+async function getStockPrice(
+  token: string,
+  ticker: string,
+  exchange: string,
+): Promise<number> {
+  if (exchange === 'CRYPTO') return getCryptoPrice(ticker);
+  if (exchange === 'KRX') return getKoreanStockPrice(token, ticker);
+  return getOverseaStockPrice(token, ticker, exchange);
 }
 
-// ===== 기존 feed.json 읽기 =====
-async function getExistingFeed(): Promise<FeedData> {
-  try {
-    const file = bucket.file('feed.json');
-    const [exists] = await file.exists();
-
-    if (!exists) {
-      return {
-        lastUpdated: new Date().toISOString(),
-        totalPosts: 0,
-        posts: [],
-        prices: {},
-      };
-    }
-
-    const [content] = await file.download();
-    return JSON.parse(content.toString()) as FeedData;
-  } catch (error) {
-    console.error('[CRON] Error reading existing feed.json:', error);
-    return {
-      lastUpdated: new Date().toISOString(),
-      totalPosts: 0,
-      posts: [],
-      prices: {},
-    };
-  }
+// ===== 수익률 =====
+function calculateReturn(
+  initialPrice: number,
+  currentPrice: number,
+  positionType: 'long' | 'short',
+): number {
+  if (initialPrice <= 0 || currentPrice <= 0) return 0;
+  if (positionType === 'long') return ((currentPrice - initialPrice) / initialPrice) * 100;
+  return ((initialPrice - currentPrice) / initialPrice) * 100;
 }
 
-// ===== 메인 함수 =====
+// ===== 메인 =====
 async function main() {
   const startTime = Date.now();
-  console.log(`[CRON] ===== Starting feed.json update (MARKET: ${MARKET_TYPE}) =====`);
+  console.log(`[CRON] ===== Starting price update (MARKET: ${MARKET_TYPE}) =====`);
 
   try {
-    // 1. 기존 feed.json 읽기 (다른 마켓 데이터 보존용)
-    console.log('[CRON] Reading existing feed.json...');
-    const existingFeed = await getExistingFeed();
-    console.log(`[CRON] Existing feed has ${existingFeed.posts.length} posts`);
+    // 1. posts 읽기
+    const { data: posts, error: postsError } = await supabase
+      .from('posts')
+      .select('id, ticker, exchange, initial_price, position_type, return_rate, current_price');
 
-    // 2. posts 컬렉션에서 모든 게시글 읽기
-    console.log('[CRON] Reading posts collection...');
-    const postsSnapshot = await db.collection('posts')
-      .orderBy('createdAt', 'desc')
-      .get();
+    if (postsError) {
+      console.error('[CRON] posts 조회 실패:', postsError);
+      process.exit(1);
+    }
+    if (!posts || posts.length === 0) {
+      console.log('[CRON] posts 없음');
+      return;
+    }
+    console.log(`[CRON] posts: ${posts.length}`);
 
-    console.log(`[CRON] Found ${postsSnapshot.size} posts in DB`);
+    // 2. 현재 마켓에 해당하는 고유 ticker × exchange
+    const uniqueTickers = new Map<string, { ticker: string; exchange: string }>();
+    for (const p of posts) {
+      const t = (p.ticker || '').toUpperCase().trim();
+      const e = (p.exchange || '').toUpperCase().trim();
+      if (!t || !e) continue;
+      if (!shouldProcessExchange(e)) continue;
+      const key = `${t}:${e}`;
+      if (!uniqueTickers.has(key)) uniqueTickers.set(key, { ticker: t, exchange: e });
+    }
+    console.log(`[CRON] tickers to fetch: ${uniqueTickers.size}`);
 
-    if (postsSnapshot.empty) {
-      console.log('[CRON] No posts found in DB');
+    if (uniqueTickers.size === 0) {
+      console.log('[CRON] 처리할 ticker 없음 (해당 마켓 글 없음)');
       return;
     }
 
-    // 3. 게시글 데이터 수집 - 현재 마켓용 & 전체 DB 게시글
-    const currentMarketPosts: Array<{
-      id: string;
-      data: any;
-      tickerKey: string;
-    }> = [];
-
-    const allDbPosts: Array<{
-      id: string;
-      data: any;
-      exchange: string;
-    }> = [];
-
-    const uniqueTickers: Map<string, { ticker: string; exchange: string }> = new Map();
-
-    for (const docSnap of postsSnapshot.docs) {
-      const data = docSnap.data();
-      const ticker = (data.ticker || '').toUpperCase().trim();
-      const exchange = (data.exchange || '').toUpperCase().trim();
-
-      if (!ticker || !exchange) continue;
-
-      // 모든 게시글 저장 (나중에 병합용)
-      allDbPosts.push({ id: docSnap.id, data, exchange });
-
-      // 현재 마켓에 해당하는 게시글만 가격 조회 대상
-      if (!shouldProcessExchange(exchange)) continue;
-
-      const tickerKey = `${ticker}:${exchange}`;
-      currentMarketPosts.push({ id: docSnap.id, data, tickerKey });
-
-      // 고유 ticker 수집 (중복 제거)
-      if (!uniqueTickers.has(tickerKey)) {
-        uniqueTickers.set(tickerKey, { ticker, exchange });
-      }
-    }
-
-    console.log(`[CRON] Posts for current market (${MARKET_TYPE}): ${currentMarketPosts.length}`);
-    console.log(`[CRON] Unique tickers to fetch: ${uniqueTickers.size}`);
-
-    // 3. KIS 토큰 가져오기
+    // 3. KIS 토큰
     const token = await getKISToken();
 
-    // 4. 고유 ticker별 현재가 조회 (한 번만 조회)
-    const prices: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = {};
+    // 4. 현재가 조회 (rate-limited 직렬)
+    const newPrices = new Map<string, { currentPrice: number; exchange: string }>();
     let successCount = 0;
     let failCount = 0;
     const errors: string[] = [];
 
-    for (const [tickerKey, { ticker, exchange }] of uniqueTickers) {
+    for (const { ticker, exchange } of uniqueTickers.values()) {
       try {
         const price = await getStockPrice(token, ticker, exchange);
-
-        prices[ticker] = {
-          currentPrice: price,
-          exchange,
-          lastUpdated: new Date().toISOString(),
-        };
-
-        console.log(`[CRON] ✓ ${ticker} (${exchange}): $${price}`);
+        newPrices.set(ticker, { currentPrice: price, exchange });
+        console.log(`[CRON] ✓ ${ticker} (${exchange}): ${price}`);
         successCount++;
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`[CRON] ✗ ${ticker}: ${errorMsg}`);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        console.error(`[CRON] ✗ ${ticker}: ${msg}`);
         failCount++;
-        errors.push(`${ticker}: ${errorMsg}`);
+        errors.push(`${ticker}: ${msg}`);
       }
-
-      // Rate limiting
-      await new Promise(resolve => setTimeout(resolve, DELAY_BETWEEN_REQUESTS));
+      await new Promise((r) => setTimeout(r, DELAY_BETWEEN_REQUESTS));
     }
 
-    // 5. 기존 feed.json의 prices 병합 (다른 마켓 가격 보존)
-    const mergedPrices = { ...existingFeed.prices, ...prices };
+    // 5. current_prices UPSERT
+    const currentRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
+      ticker,
+      exchange: v.exchange,
+      current_price: v.currentPrice,
+    }));
+    if (currentRows.length > 0) {
+      const { error } = await supabase
+        .from('current_prices')
+        .upsert(currentRows, { onConflict: 'ticker' });
+      if (error) console.error('[CRON] current_prices upsert 실패:', error);
+      else console.log(`[CRON] current_prices: ${currentRows.length} 행 UPSERT`);
+    }
 
-    // 6. 모든 DB 게시글에 대해 FeedPost 생성 (가격은 병합된 prices 사용)
-    const feedPosts: FeedPost[] = [];
+    // 6. price_history UPSERT (오늘 날짜 종가)
+    const today = new Date().toISOString().split('T')[0];
+    const historyRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
+      ticker,
+      exchange: v.exchange,
+      date: today,
+      close: v.currentPrice,
+    }));
+    if (historyRows.length > 0) {
+      const { error } = await supabase
+        .from('price_history')
+        .upsert(historyRows, { onConflict: 'ticker,date' });
+      if (error) console.error('[CRON] price_history upsert 실패:', error);
+      else console.log(`[CRON] price_history: ${historyRows.length} 행 UPSERT (date=${today})`);
+    }
 
-    for (const { id, data, exchange } of allDbPosts) {
-      const ticker = (data.ticker || '').toUpperCase();
-      const priceData = mergedPrices[ticker];
+    // 7. posts UPDATE (현재 마켓 ticker만)
+    let postsUpdated = 0;
+    for (const p of posts) {
+      const ticker = (p.ticker || '').toUpperCase();
+      const np = newPrices.get(ticker);
+      if (!np) continue;
 
-      // 현재 마켓이면 새 가격, 아니면 기존 가격 또는 DB 가격 사용
-      const currentPrice = priceData?.currentPrice || data.currentPrice || 0;
-      const initialPrice = data.initialPrice || 0;
+      const positionType: 'long' | 'short' = (p.position_type as 'long' | 'short') ?? 'long';
+      const newReturnRate = parseFloat(
+        calculateReturn(Number(p.initial_price ?? 0), np.currentPrice, positionType).toFixed(2),
+      );
 
-      // positionType 결정 (opinion 기반)
-      const positionType: 'long' | 'short' =
-        data.positionType || (data.opinion === 'sell' ? 'short' : 'long');
-
-      // 수익률 계산
-      const returnRate = calculateReturn(initialPrice, currentPrice, positionType);
-
-      // createdAt 변환
-      let createdAtStr = '';
-      if (data.createdAt?.toDate) {
-        createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-      } else if (typeof data.createdAt === 'string') {
-        createdAtStr = data.createdAt;
+      const { error } = await supabase
+        .from('posts')
+        .update({
+          current_price: np.currentPrice,
+          prev_return_rate: p.return_rate,
+          return_rate: newReturnRate,
+        })
+        .eq('id', p.id);
+      if (error) {
+        console.warn(`[CRON] posts update 실패 (id=${p.id}):`, error.message);
       } else {
-        createdAtStr = new Date().toISOString().split('T')[0];
+        postsUpdated++;
       }
-
-      feedPosts.push({
-        id,
-        title: data.title || '',
-        author: data.authorName || '익명',
-        authorId: data.authorId || '',
-        stockName: data.stockName || '',
-        ticker: data.ticker || '',
-        exchange: data.exchange || '',
-        opinion: data.opinion || 'hold',
-        positionType,
-        initialPrice,
-        currentPrice,
-        returnRate: parseFloat(returnRate.toFixed(2)),
-        createdAt: createdAtStr,
-        views: data.views || 0,
-        likes: data.likes || 0,
-        category: data.category || '',
-        themes: data.themes || undefined,
-      });
     }
-
-    // 7. feed.json 저장 (모든 게시글 포함)
-    const feedData: FeedData = {
-      lastUpdated: new Date().toISOString(),
-      totalPosts: feedPosts.length,
-      posts: feedPosts,
-      prices: mergedPrices,
-    };
-
-    await bucket.file('feed.json').save(JSON.stringify(feedData, null, 2), {
-      contentType: 'application/json',
-      metadata: { cacheControl: 'public, max-age=60' },
-    });
+    console.log(`[CRON] posts UPDATE: ${postsUpdated} 행`);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
-    console.log(`[CRON] ===== Completed: ${successCount} tickers updated, ${feedPosts.length} total posts (${duration}s) =====`);
-    console.log(`[STORAGE] feed.json uploaded!`);
+    console.log(`[CRON] ===== Done: ${successCount}/${uniqueTickers.size} tickers, ${postsUpdated} posts, ${duration}s =====`);
 
     if (errors.length > 0) {
-      console.log(`[CRON] Errors: ${errors.slice(0, 5).join(', ')}${errors.length > 5 ? ` +${errors.length - 5} more` : ''}`);
+      console.log(`[CRON] errors: ${errors.slice(0, 5).join(', ')}${errors.length > 5 ? ` +${errors.length - 5}` : ''}`);
     }
 
-    // 8. 기존 stock-prices.json도 업데이트 (하위 호환성 - 병합된 가격)
-    const stockPricesData = {
-      lastUpdated: new Date().toISOString(),
-      marketType: MARKET_TYPE,
-      totalTickers: Object.keys(mergedPrices).length,
-      successCount,
-      failCount,
-      prices: mergedPrices,
-    };
-
-    await bucket.file('stock-prices.json').save(JSON.stringify(stockPricesData, null, 2), {
-      contentType: 'application/json',
-      metadata: { cacheControl: 'public, max-age=300' },
-    });
-    console.log('[STORAGE] stock-prices.json also updated (backward compatibility)');
-
+    process.exit(failCount > successCount ? 1 : 0);
   } catch (error) {
     console.error('[CRON] Critical error:', error);
     process.exit(1);

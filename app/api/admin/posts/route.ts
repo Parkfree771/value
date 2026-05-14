@@ -1,55 +1,73 @@
+// /api/admin/posts — 관리자 전용
+//   GET    - 게시글 목록 (최신순, 커서 페이지네이션)
+//   DELETE - 게시글 삭제 (CASCADE로 likes/comments 자동 삭제)
+
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, orderBy, query, limit, startAfter, Timestamp, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
+import { getServiceClient } from '@/lib/supabase-admin';
 import { adminStorage } from '@/lib/firebase-admin';
 import { calculateReturn } from '@/utils/calculateReturn';
 
-// 게시글 목록 조회 (관리자용)
 export async function GET(request: NextRequest) {
   try {
-    // 토큰 기반 관리자 권한 확인
-    const authHeader = request.headers.get('authorization');
-    const admin = await verifyAdmin(authHeader);
-
+    const admin = await verifyAdmin(request.headers.get('authorization'));
     if (!admin) {
-      return NextResponse.json(
-        { error: '관리자 권한이 필요합니다.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
-    const pageSize = parseInt(searchParams.get('pageSize') || '20');
+    const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '20', 10), 100);
     const lastDocId = searchParams.get('lastDocId');
 
-    const postsRef = collection(db, 'posts');
-    let q = query(postsRef, orderBy('createdAt', 'desc'), limit(pageSize));
+    const supabase = getServiceClient();
 
-    // 페이지네이션
+    let query = supabase
+      .from('posts')
+      .select(
+        'id, title, ticker, stock_name, author_id, initial_price, current_price, position_type, views, likes, created_at, author:users!posts_author_id_fkey(nickname)',
+      )
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(pageSize);
+
     if (lastDocId) {
-      const lastDocRef = doc(db, 'posts', lastDocId);
-      const lastDocSnap = await getDoc(lastDocRef);
-      if (lastDocSnap.exists()) {
-        q = query(postsRef, orderBy('createdAt', 'desc'), startAfter(lastDocSnap), limit(pageSize));
+      const { data: cursor } = await supabase
+        .from('posts')
+        .select('created_at')
+        .eq('id', lastDocId)
+        .maybeSingle();
+      if (cursor) {
+        query = query.or(
+          `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${lastDocId})`,
+        );
       }
     }
 
-    const querySnapshot = await getDocs(q);
+    const { data: rows, error } = await query;
+    if (error) {
+      console.error('[admin/posts GET]:', error);
+      return NextResponse.json({ error: '게시글 조회 실패' }, { status: 500 });
+    }
 
-    const posts = querySnapshot.docs.map((doc) => {
-      const data = doc.data();
+    const posts = (rows ?? []).map((r) => {
+      const author = (r as { author?: { nickname?: string } | null }).author;
       return {
-        id: doc.id,
-        title: data.title || '',
-        authorName: data.authorName || '익명',
-        authorId: data.authorId || '',
-        stockName: data.stockName || '',
-        ticker: data.ticker || '',
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
-        views: data.views || 0,
-        likes: data.likes || 0,
-        returnRate: parseFloat(calculateReturn(data.initialPrice || 0, data.currentPrice || 0, data.positionType || 'long').toFixed(2)),
+        id: r.id,
+        title: r.title ?? '',
+        authorName: author?.nickname ?? '익명',
+        authorId: r.author_id,
+        stockName: r.stock_name ?? '',
+        ticker: r.ticker ?? '',
+        createdAt: r.created_at,
+        views: r.views ?? 0,
+        likes: r.likes ?? 0,
+        returnRate: parseFloat(
+          calculateReturn(
+            Number(r.initial_price ?? 0),
+            Number(r.current_price ?? 0),
+            (r.position_type as 'long' | 'short') ?? 'long',
+          ).toFixed(2),
+        ),
       };
     });
 
@@ -59,52 +77,40 @@ export async function GET(request: NextRequest) {
       hasMore: posts.length === pageSize,
       lastDocId: posts.length > 0 ? posts[posts.length - 1].id : null,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('게시글 조회 오류:', error);
-    return NextResponse.json(
-      { error: '게시글 조회 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '게시글 조회 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }
 
-// 게시글 삭제 (관리자용)
 export async function DELETE(request: NextRequest) {
   try {
-    // 토큰 기반 관리자 권한 확인
-    const authHeader = request.headers.get('authorization');
-    const admin = await verifyAdmin(authHeader);
-
+    const admin = await verifyAdmin(request.headers.get('authorization'));
     if (!admin) {
-      return NextResponse.json(
-        { error: '관리자 권한이 필요합니다.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 });
     }
 
     const { postId } = await request.json();
-
     if (!postId) {
-      return NextResponse.json(
-        { error: '게시글 ID가 필요합니다.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
     }
 
-    // 게시글 삭제
-    const postRef = doc(db, 'posts', postId);
-    const postSnap = await getDoc(postRef);
+    const supabase = getServiceClient();
+    const { data, error } = await supabase
+      .from('posts')
+      .delete()
+      .eq('id', postId)
+      .select('id');
 
-    if (!postSnap.exists()) {
-      return NextResponse.json(
-        { error: '게시글을 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+    if (error) {
+      console.error('[admin/posts DELETE]:', error);
+      return NextResponse.json({ error: '게시글 삭제 실패' }, { status: 500 });
+    }
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: '게시글을 찾을 수 없습니다.' }, { status: 404 });
     }
 
-    await deleteDoc(postRef);
-
-    // feed.json에서도 제거
+    // feed.json 동기화
     try {
       const bucket = adminStorage.bucket();
       const file = bucket.file('feed.json');
@@ -127,16 +133,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     console.log(`[Admin] 게시글 삭제: ${postId} by ${admin.email}`);
-
-    return NextResponse.json({
-      success: true,
-      message: '게시글이 성공적으로 삭제되었습니다.',
-    });
-  } catch (error: unknown) {
+    return NextResponse.json({ success: true, message: '게시글이 성공적으로 삭제되었습니다.' });
+  } catch (error) {
     console.error('게시글 삭제 오류:', error);
-    return NextResponse.json(
-      { error: '게시글 삭제 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '게시글 삭제 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }

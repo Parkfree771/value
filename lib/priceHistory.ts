@@ -1,55 +1,70 @@
 /**
- * 종목별 일별 종가 히스토리 관리
+ * 종목별 일별 종가 히스토리 (Supabase Postgres)
  *
- * Storage 경로: prices-history/{TICKER}.json
+ * 저장소: public.price_history 테이블 (PK ticker+date)
  *
- * - readHistory / writeHistory: Firebase Storage I/O
- * - fetchDailyRange: KIS / Upbit 일봉 범위 조회 (페이징)
- * - upsertDailyClose: 중복 체크 후 한 줄 추가
- *
- * Firebase Admin SDK는 호출 측에서 미리 초기화되어 있어야 합니다.
- * (API 라우트는 @/lib/firebase-admin을 import하면 자동 초기화,
- *  스크립트는 자체적으로 initializeApp 후 사용)
+ * - readHistory / writeHistory: Postgres SELECT / UPSERT
+ * - fetchDailyRange: KIS / Upbit 일봉 범위 조회 (외부 API, 변경 없음)
+ * - upsertDailyClose: 한 줄 UPSERT
  */
 
-import { getStorage } from 'firebase-admin/storage';
+import { getServiceClient } from './supabase-admin';
 import { getKISTokenWithCache } from './kisTokenManager';
 import type { PriceHistoryFile, PriceHistoryPoint } from '@/types/priceHistory';
 
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const STORAGE_PATH = (ticker: string) => `prices-history/${ticker.toUpperCase()}.json`;
-
-// 해외/국내 KIS는 단일 호출 최대 100영업일
 const KIS_MAX_DAYS_PER_CALL = 100;
-// Upbit days candles 최대 200
 const UPBIT_MAX_COUNT = 200;
-
 const KOREAN_EXCHANGES = ['KRX'];
 const CRYPTO_EXCHANGE = 'CRYPTO';
 
-// ---------- Storage I/O ----------
+// ---------- DB I/O ----------
 
 export async function readHistory(ticker: string): Promise<PriceHistoryFile | null> {
-  const file = getStorage().bucket().file(STORAGE_PATH(ticker));
-  const [exists] = await file.exists();
-  if (!exists) return null;
-  const [content] = await file.download();
-  try {
-    return JSON.parse(content.toString()) as PriceHistoryFile;
-  } catch {
+  const t = ticker.toUpperCase();
+  const supabase = getServiceClient();
+  const { data, error } = await supabase
+    .from('price_history')
+    .select('ticker, exchange, date, close')
+    .eq('ticker', t)
+    .order('date', { ascending: true });
+
+  if (error) {
+    console.error('[priceHistory.read] error:', error);
     return null;
   }
+  if (!data || data.length === 0) return null;
+
+  return {
+    ticker: t,
+    exchange: data[0].exchange,
+    lastUpdated: new Date().toISOString(),
+    history: data.map((r) => ({ d: r.date as string, c: Number(r.close) })),
+  };
 }
 
 export async function writeHistory(file: PriceHistoryFile): Promise<void> {
-  await getStorage()
-    .bucket()
-    .file(STORAGE_PATH(file.ticker))
-    .save(JSON.stringify(file), {
-      contentType: 'application/json',
-      // CDN: 5분 캐시, 1시간 stale-while-revalidate
-      metadata: { cacheControl: 'public, max-age=300, stale-while-revalidate=3600' },
-    });
+  const supabase = getServiceClient();
+  const rows = file.history.map((p) => ({
+    ticker: file.ticker.toUpperCase(),
+    exchange: file.exchange.toUpperCase(),
+    date: p.d,
+    close: p.c,
+  }));
+  if (rows.length === 0) return;
+
+  // 청크 단위 UPSERT
+  const CHUNK = 1000;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    const chunk = rows.slice(i, i + CHUNK);
+    const { error } = await supabase
+      .from('price_history')
+      .upsert(chunk, { onConflict: 'ticker,date' });
+    if (error) {
+      console.error('[priceHistory.write] upsert error:', error);
+      throw error;
+    }
+  }
 }
 
 // ---------- Date utilities ----------
@@ -69,7 +84,6 @@ function fmtYYYY_MM_DD(d: Date): string {
 }
 
 function parseYYYYMMDD(s: string): Date {
-  // KIS 응답은 'YYYYMMDD' 또는 'YYYY-MM-DD'
   const compact = s.replace(/-/g, '');
   const y = parseInt(compact.slice(0, 4), 10);
   const m = parseInt(compact.slice(4, 6), 10) - 1;
@@ -91,27 +105,23 @@ function dedupeAndSort(points: PriceHistoryPoint[]): PriceHistoryPoint[] {
     .sort((a, b) => a.d.localeCompare(b.d));
 }
 
-// ---------- KIS 국내 일봉 (range) ----------
+// ---------- KIS / Upbit fetch (외부 API, 변경 없음) ----------
 
 async function fetchKoreanRange(
   stockCode: string,
   fromYYYYMMDD: string,
-  toYYYYMMDD: string
+  toYYYYMMDD: string,
 ): Promise<PriceHistoryPoint[]> {
   const token = await getKISTokenWithCache();
-
   const params = new URLSearchParams({
     fid_cond_mrkt_div_code: 'J',
     fid_input_iscd: stockCode,
     fid_input_date_1: fromYYYYMMDD,
     fid_input_date_2: toYYYYMMDD,
     fid_period_div_code: 'D',
-    fid_org_adj_prc: '0', // 0: 수정주가 미반영, 1: 수정주가 반영
+    fid_org_adj_prc: '0',
   });
-
-  // 기간별 시세 전용 엔드포인트 (단일일 inquire-daily-price 와 다름)
   const url = `${KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-daily-itemchartprice?${params}`;
-
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -121,13 +131,9 @@ async function fetchKoreanRange(
       tr_id: 'FHKST03010100',
     },
   });
-
-  if (!res.ok) {
-    throw new Error(`KIS 국내 일봉 실패 ${stockCode} ${fromYYYYMMDD}-${toYYYYMMDD}: ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`KIS 국내 일봉 실패 ${stockCode}: ${res.status}`);
   const data = await res.json();
   if (!data.output2 || !Array.isArray(data.output2)) return [];
-
   const points: PriceHistoryPoint[] = [];
   for (const row of data.output2) {
     const dateStr: string | undefined = row.stck_bsop_date;
@@ -140,15 +146,12 @@ async function fetchKoreanRange(
   return points;
 }
 
-// ---------- KIS 해외 일봉 (range, backward paginated) ----------
-
 async function fetchOverseaSlice(
   symbol: string,
   exchange: string,
-  endYYYYMMDD: string
+  endYYYYMMDD: string,
 ): Promise<PriceHistoryPoint[]> {
   const token = await getKISTokenWithCache();
-
   const params = new URLSearchParams({
     AUTH: '',
     EXCD: exchange,
@@ -157,9 +160,7 @@ async function fetchOverseaSlice(
     BYMD: endYYYYMMDD,
     MODP: '1',
   });
-
   const url = `${KIS_BASE_URL}/uapi/overseas-price/v1/quotations/dailyprice?${params}`;
-
   const res = await fetch(url, {
     headers: {
       'Content-Type': 'application/json; charset=UTF-8',
@@ -169,13 +170,9 @@ async function fetchOverseaSlice(
       tr_id: 'HHDFS76240000',
     },
   });
-
-  if (!res.ok) {
-    throw new Error(`KIS 해외 일봉 실패 ${symbol} BYMD=${endYYYYMMDD}: ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`KIS 해외 일봉 실패 ${symbol}: ${res.status}`);
   const data = await res.json();
   if (!data.output2 || !Array.isArray(data.output2)) return [];
-
   const points: PriceHistoryPoint[] = [];
   for (const row of data.output2) {
     const dateStr: string | undefined = row.xymd;
@@ -188,60 +185,46 @@ async function fetchOverseaSlice(
   return points;
 }
 
-// ---------- Crypto (Upbit days candles) ----------
-
 async function fetchCryptoRange(
   ticker: string,
   fromDate: Date,
-  toDate: Date
+  toDate: Date,
 ): Promise<PriceHistoryPoint[]> {
   const market = `KRW-${ticker.toUpperCase()}`;
   const totalDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / 86400000) + 1;
-
   const points: PriceHistoryPoint[] = [];
   let cursor = new Date(toDate);
   let remaining = totalDays;
-
   while (remaining > 0) {
     const count = Math.min(UPBIT_MAX_COUNT, remaining);
     const toISO = `${fmtYYYY_MM_DD(addDays(cursor, 1))}T00:00:00Z`;
     const url = `https://api.upbit.com/v1/candles/days?market=${market}&count=${count}&to=${toISO}`;
-
     const res = await fetch(url, { headers: { Accept: 'application/json' } });
     if (!res.ok) throw new Error(`Upbit 일봉 실패 ${ticker}: ${res.status}`);
-
     interface UpbitCandle {
       candle_date_time_kst: string;
       trade_price: number;
     }
     const data = (await res.json()) as UpbitCandle[];
     if (!Array.isArray(data) || data.length === 0) break;
-
     for (const row of data) {
       const dateStr = row.candle_date_time_kst.slice(0, 10);
       points.push({ d: dateStr, c: row.trade_price });
     }
-
-    // 다음 슬라이스: 가장 오래된 것보다 하루 전을 to로
     const oldest = data[data.length - 1];
     cursor = addDays(parseYYYYMMDD(oldest.candle_date_time_kst.slice(0, 10)), -1);
     remaining -= data.length;
-
     if (cursor < fromDate) break;
-    await new Promise((r) => setTimeout(r, 120)); // Upbit rate limit 안전 마진
+    await new Promise((r) => setTimeout(r, 120));
   }
-
-  // fromDate 이전 컷
   return points.filter((p) => p.d >= fmtYYYY_MM_DD(fromDate));
 }
-
-// ---------- Dispatcher: 거래소 자동 판별 ----------
 
 export async function fetchDailyRange(
   ticker: string,
   exchange: string,
   fromDate: Date,
-  toDate: Date
+  toDate: Date,
 ): Promise<PriceHistoryPoint[]> {
   const exchUpper = exchange.toUpperCase();
 
@@ -250,60 +233,74 @@ export async function fetchDailyRange(
   }
 
   if (KOREAN_EXCHANGES.includes(exchUpper)) {
-    // 국내: 100일씩 끊어 forward 페이징
     const points: PriceHistoryPoint[] = [];
     let chunkStart = new Date(fromDate);
-
     while (chunkStart <= toDate) {
-      const chunkEnd = new Date(Math.min(addDays(chunkStart, KIS_MAX_DAYS_PER_CALL - 1).getTime(), toDate.getTime()));
-      const chunk = await fetchKoreanRange(ticker, fmtYYYYMMDD(chunkStart), fmtYYYYMMDD(chunkEnd));
+      const chunkEnd = new Date(
+        Math.min(
+          addDays(chunkStart, KIS_MAX_DAYS_PER_CALL - 1).getTime(),
+          toDate.getTime(),
+        ),
+      );
+      const chunk = await fetchKoreanRange(
+        ticker,
+        fmtYYYYMMDD(chunkStart),
+        fmtYYYYMMDD(chunkEnd),
+      );
       points.push(...chunk);
       chunkStart = addDays(chunkEnd, 1);
-      await new Promise((r) => setTimeout(r, 200)); // KIS rate limit 안전 마진
+      await new Promise((r) => setTimeout(r, 200));
     }
-    return dedupeAndSort(points).filter((p) => p.d >= fmtYYYY_MM_DD(fromDate) && p.d <= fmtYYYY_MM_DD(toDate));
+    return dedupeAndSort(points).filter(
+      (p) => p.d >= fmtYYYY_MM_DD(fromDate) && p.d <= fmtYYYY_MM_DD(toDate),
+    );
   }
 
-  // 해외: BYMD 기준 backward 페이징
   const points: PriceHistoryPoint[] = [];
   let cursorEnd = new Date(toDate);
   while (cursorEnd >= fromDate) {
     const slice = await fetchOverseaSlice(ticker, exchUpper, fmtYYYYMMDD(cursorEnd));
     if (slice.length === 0) break;
     points.push(...slice);
-
     const sorted = slice.slice().sort((a, b) => a.d.localeCompare(b.d));
     const oldestSeen = parseYYYYMMDD(sorted[0].d);
     if (oldestSeen <= fromDate) break;
-
     cursorEnd = addDays(oldestSeen, -1);
     await new Promise((r) => setTimeout(r, 200));
   }
-  return dedupeAndSort(points).filter((p) => p.d >= fmtYYYY_MM_DD(fromDate) && p.d <= fmtYYYY_MM_DD(toDate));
+  return dedupeAndSort(points).filter(
+    (p) => p.d >= fmtYYYY_MM_DD(fromDate) && p.d <= fmtYYYY_MM_DD(toDate),
+  );
 }
 
-// ---------- Append 한 줄 ----------
+// ---------- 단일 행 UPSERT ----------
 
 export async function upsertDailyClose(
   ticker: string,
   exchange: string,
-  date: string, // YYYY-MM-DD
-  close: number
+  date: string,
+  close: number,
 ): Promise<PriceHistoryFile> {
-  const existing = await readHistory(ticker);
-  const next: PriceHistoryFile = existing ?? {
-    ticker: ticker.toUpperCase(),
-    exchange: exchange.toUpperCase(),
-    lastUpdated: new Date().toISOString(),
-    history: [],
-  };
+  const t = ticker.toUpperCase();
+  const ex = exchange.toUpperCase();
+  const supabase = getServiceClient();
 
-  const merged = dedupeAndSort([...next.history, { d: date, c: close }]);
-  next.history = merged;
-  next.lastUpdated = new Date().toISOString();
-  next.exchange = exchange.toUpperCase();
-  await writeHistory(next);
-  return next;
+  const { error } = await supabase
+    .from('price_history')
+    .upsert({ ticker: t, exchange: ex, date, close }, { onConflict: 'ticker,date' });
+  if (error) {
+    console.error('[priceHistory.upsertDailyClose] error:', error);
+    throw error;
+  }
+
+  // 호환 위해 PriceHistoryFile 반환 (전체 시계열)
+  const file = await readHistory(t);
+  return file ?? {
+    ticker: t,
+    exchange: ex,
+    lastUpdated: new Date().toISOString(),
+    history: [{ d: date, c: close }],
+  };
 }
 
 // ---------- Backfill 한 종목 ----------
@@ -311,7 +308,7 @@ export async function upsertDailyClose(
 export async function backfillTicker(
   ticker: string,
   exchange: string,
-  fromDate: Date
+  fromDate: Date,
 ): Promise<PriceHistoryFile> {
   const today = new Date();
   const points = await fetchDailyRange(ticker, exchange, fromDate, today);

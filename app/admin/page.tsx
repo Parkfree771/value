@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { auth } from '@/lib/firebase';
 import AdminDashboard from './components/AdminDashboard';
 import AdminPosts from './components/AdminPosts';
 import AdminUsers from './components/AdminUsers';
@@ -115,23 +114,18 @@ export default function AdminPage() {
     }
   }, [user, authReady, isAdmin, router]);
 
-  // ───── API 헬퍼 ─────
-
-  const getToken = useCallback(async () => {
-    return auth.currentUser?.getIdToken() || null;
-  }, []);
+  // ───── API 헬퍼 (Supabase 쿠키 세션 자동 포함) ─────
 
   const apiFetch = useCallback(async (url: string, options?: RequestInit) => {
-    const token = await getToken();
     return fetch(url, {
       ...options,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...options?.headers,
       },
     });
-  }, [getToken]);
+  }, []);
 
   // ───── 데이터 페칭 ─────
 

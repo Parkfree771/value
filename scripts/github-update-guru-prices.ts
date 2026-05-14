@@ -1,21 +1,18 @@
 /**
- * GitHub Actions 크론용 구루 포트폴리오 가격 업데이트 스크립트
+ * GitHub Actions 크론: 구루 포트폴리오 가격 — Supabase 버전
  *
- * 미국 장 마감 후(06:30 KST = 21:30 UTC) 평일 1회 실행:
- * 1. data/guru-portfolios.json에서 티커 + 공시일가 읽기 (로컬 파일)
+ * 미국 장 마감 후(06:30 KST = 21:30 UTC) 평일 1회 실행.
+ * 1. data/guru-portfolios.json에서 ticker + 공시일가 읽기 (로컬 repo 파일)
  * 2. KIS API로 현재가 일괄 조회
- * 3. 수익률 계산 후 Firebase Storage에 guru-stock-prices.json 저장
+ * 3. 수익률 계산 후 guru_prices 테이블에 UPSERT
  *
- * Firestore 읽기/쓰기: 토큰 캐시 1회만
+ * KIS 토큰 캐시: settings 테이블의 key='kis_token'
  */
 
-import { initializeApp, cert, getApps } from 'firebase-admin/app';
-import { getFirestore, Timestamp } from 'firebase-admin/firestore';
-import { getStorage } from 'firebase-admin/storage';
+import { createClient } from '@supabase/supabase-js';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// ===== 타입 =====
 interface TickerInfo {
   ticker: string;
   exchange: string;
@@ -23,85 +20,53 @@ interface TickerInfo {
 }
 
 interface PortfoliosJson {
-  meta: {
-    updated_at: string;
-    total_unique_tickers: number;
-  };
+  meta: { updated_at: string; total_unique_tickers: number };
   tickers: TickerInfo[];
 }
 
-interface KISTokenCache {
-  token: string;
-  expiresAt: Timestamp;
+// ===== Supabase =====
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
+if (!supabaseUrl || !supabaseSecret) {
+  console.error('[GURU-CRON] SUPABASE 환경변수 누락');
+  process.exit(1);
 }
+const supabase = createClient(supabaseUrl, supabaseSecret, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
 
-// ===== Firebase Admin 초기화 =====
-if (getApps().length === 0) {
-  const serviceAccountBase64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
-  if (!serviceAccountBase64) {
-    console.error('[ERROR] FIREBASE_SERVICE_ACCOUNT_BASE64 is not set');
-    process.exit(1);
-  }
-
-  const serviceAccountJson = Buffer.from(serviceAccountBase64, 'base64').toString('utf-8');
-  const serviceAccount = JSON.parse(serviceAccountJson);
-
-  initializeApp({
-    credential: cert(serviceAccount),
-    storageBucket: `${serviceAccount.project_id}.firebasestorage.app`,
-  });
-  console.log('[Firebase] Initialized');
-}
-
-const db = getFirestore();
-const bucket = getStorage().bucket();
-
-// ===== KIS API =====
+// ===== KIS =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_MS = 100; // KIS 초당 20회 제한 (여유 확보)
-const MAX_RETRIES = 2; // 실패 시 재시도
+const DELAY_MS = 100;
+const MAX_RETRIES = 2;
 
-// KIS API에서 조회 불가능한 티커 (워런트, OTC 등)
-const SKIP_TICKERS = new Set([
-  'EXE/WS', 'KRSP/WS',  // 워런트
-  'ALVOW',               // 워런트 (Alvotech Warrant)
-  'JBSAY',               // OTC ADR (장외 거래)
-]);
-
-// KIS API 티커 변환 (SEC 티커 → KIS 티커)
-const TICKER_REMAP: Record<string, string> = {
-  'FI': 'FISV',  // Fiserv: SEC는 FI, KIS는 아직 FISV
-};
-
-// KIS API 거래소 변환 (SEC 거래소 → KIS 거래소)
-const EXCHANGE_REMAP: Record<string, string> = {
-  'FI': 'NAS',  // Fiserv: SEC는 NYS, KIS FISV는 NAS
-};
+const SKIP_TICKERS = new Set(['EXE/WS', 'KRSP/WS', 'ALVOW', 'JBSAY']);
+const TICKER_REMAP: Record<string, string> = { FI: 'FISV' };
+const EXCHANGE_REMAP: Record<string, string> = { FI: 'NAS' };
 
 function toKISTicker(ticker: string): string {
-  if (TICKER_REMAP[ticker]) return TICKER_REMAP[ticker];
-  // BRK-B → BRK/B (KIS는 슬래시 사용)
-  return ticker.replace(/-/g, '/');
+  return TICKER_REMAP[ticker] || ticker;
 }
-
 function toKISExchange(ticker: string, exchange: string): string {
   return EXCHANGE_REMAP[ticker] || exchange;
 }
 
 async function getKISToken(): Promise<string> {
-  const tokenDoc = await db.collection('settings').doc('kis_token').get();
+  const { data: cached } = await supabase
+    .from('settings')
+    .select('value')
+    .eq('key', 'kis_token')
+    .maybeSingle();
 
-  if (tokenDoc.exists) {
-    const data = tokenDoc.data() as KISTokenCache;
-    const expiresAt = data.expiresAt?.toDate?.() || new Date(0);
-    if (expiresAt.getTime() > Date.now() + 5 * 60 * 1000) {
-      console.log('[KIS] Using cached token');
-      return data.token;
+  if (cached?.value) {
+    const v = cached.value as { token?: string; expiresAt?: string };
+    if (v.token && v.expiresAt) {
+      const expiresAt = new Date(v.expiresAt).getTime();
+      if (expiresAt > Date.now() + 5 * 60 * 1000) return v.token;
     }
   }
 
-  console.log('[KIS] Generating new token...');
-  const response = await fetch(`${KIS_BASE_URL}/oauth2/tokenP`, {
+  const res = await fetch(`${KIS_BASE_URL}/oauth2/tokenP`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -110,46 +75,24 @@ async function getKISToken(): Promise<string> {
       appsecret: process.env.KIS_APP_SECRET,
     }),
   });
+  if (!res.ok) throw new Error(`Token request failed: ${res.status}`);
+  const data = await res.json();
+  const token = data.access_token as string;
+  const expiresIn = (data.expires_in as number) || 86400;
+  const expiresAtIso = new Date(Date.now() + (expiresIn - 300) * 1000).toISOString();
 
-  if (!response.ok) throw new Error(`Token request failed: ${response.status}`);
-
-  const data = await response.json();
-  const token = data.access_token;
-  const expiresIn = data.expires_in || 86400;
-
-  await db.collection('settings').doc('kis_token').set({
-    token,
-    expiresAt: Timestamp.fromDate(new Date(Date.now() + (expiresIn - 300) * 1000)),
-    updatedAt: Timestamp.now(),
-  });
-
+  await supabase
+    .from('settings')
+    .upsert({ key: 'kis_token', value: { token, expiresAt: expiresAtIso } }, { onConflict: 'key' });
   return token;
 }
 
-async function getStockPrice(token: string, ticker: string, exchange: string): Promise<number> {
+async function getStockPrice(
+  token: string,
+  ticker: string,
+  exchange: string,
+): Promise<number> {
   const kisTicker = toKISTicker(ticker);
-
-  if (exchange === 'KRX') {
-    const res = await fetch(
-      `${KIS_BASE_URL}/uapi/domestic-stock/v1/quotations/inquire-price?FID_COND_MRKT_DIV_CODE=J&FID_INPUT_ISCD=${kisTicker}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          authorization: `Bearer ${token}`,
-          appkey: process.env.KIS_APP_KEY!,
-          appsecret: process.env.KIS_APP_SECRET!,
-          tr_id: 'FHKST01010100',
-        },
-      }
-    );
-    const data = await res.json();
-    if (data.rt_cd !== '0') throw new Error(data.msg1);
-    const price = parseFloat(data.output.stck_prpr);
-    if (isNaN(price) || price <= 0) throw new Error(`Invalid price: ${data.output.stck_prpr}`);
-    return price;
-  }
-
-  // 해외 주식
   const res = await fetch(
     `${KIS_BASE_URL}/uapi/overseas-price/v1/quotations/price?AUTH=&EXCD=${exchange}&SYMB=${kisTicker}`,
     {
@@ -160,113 +103,105 @@ async function getStockPrice(token: string, ticker: string, exchange: string): P
         appsecret: process.env.KIS_APP_SECRET!,
         tr_id: 'HHDFS00000300',
       },
-    }
+    },
   );
+  if (!res.ok) throw new Error(`KIS API ${res.status}`);
   const data = await res.json();
-  if (data.rt_cd !== '0') throw new Error(`${data.msg1} (EXCD=${exchange}, SYMB=${kisTicker})`);
+  if (data.rt_cd !== '0') throw new Error(`KIS error: ${data.msg1}`);
   const price = parseFloat(data.output.last);
-  if (isNaN(price) || price <= 0) throw new Error(`Invalid price: "${data.output.last}" (EXCD=${exchange}, SYMB=${kisTicker})`);
+  if (!isFinite(price) || price <= 0) throw new Error(`Invalid price: ${data.output.last}`);
   return price;
 }
 
-// 재시도 포함 가격 조회
-async function getStockPriceWithRetry(token: string, ticker: string, exchange: string): Promise<number> {
-  let lastError: Error | null = null;
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+async function getStockPriceWithRetry(
+  token: string,
+  ticker: string,
+  exchange: string,
+): Promise<number> {
+  let lastError: unknown;
+  for (let i = 0; i <= MAX_RETRIES; i++) {
     try {
       return await getStockPrice(token, ticker, exchange);
     } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err));
-      if (attempt < MAX_RETRIES) {
-        const wait = 500 * (attempt + 1); // 500ms, 1000ms 대기
-        console.log(`    ↻ ${ticker}: 재시도 ${attempt + 1}/${MAX_RETRIES} (${wait}ms 후)`);
-        await new Promise(r => setTimeout(r, wait));
-      }
+      lastError = err;
+      if (i < MAX_RETRIES) await new Promise((r) => setTimeout(r, 500));
     }
   }
   throw lastError;
 }
 
-// ===== 메인 =====
 async function main() {
   const startTime = Date.now();
-  console.log('[GURU-CRON] ===== Starting guru price update =====');
+  console.log('[GURU-CRON] ===== Starting (Postgres) =====');
 
-  // 1. data/guru-portfolios.json 읽기
-  const portfoliosPath = path.join(__dirname, '..', 'data', 'guru-portfolios.json');
-
+  const portfoliosPath = path.join(process.cwd(), 'data', 'guru-portfolios.json');
   if (!fs.existsSync(portfoliosPath)) {
-    console.error('[ERROR] data/guru-portfolios.json not found. Run fetch-13f --all first.');
+    console.error(`[GURU-CRON] 파일 없음: ${portfoliosPath}`);
     process.exit(1);
   }
 
-  const portfoliosData: PortfoliosJson = JSON.parse(fs.readFileSync(portfoliosPath, 'utf-8'));
-  console.log(`[GURU-CRON] Ticker list: ${portfoliosData.tickers.length} unique tickers (updated: ${portfoliosData.meta.updated_at})`);
+  const portfoliosData: PortfoliosJson = JSON.parse(
+    fs.readFileSync(portfoliosPath, 'utf-8'),
+  );
+  console.log(`[GURU-CRON] tickers: ${portfoliosData.tickers.length}`);
 
-  // 2. KIS 토큰 (유일한 Firestore 접근)
   const token = await getKISToken();
 
-  // 3. 전체 고유 티커 가격 조회 + 수익률 계산
-  const priceMap: Record<string, { currentPrice: number; returnRate: number }> = {};
+  const rows: { ticker: string; current_price: number; return_rate: number }[] = [];
   let success = 0;
   let fail = 0;
   let skipped = 0;
   const failedTickers: string[] = [];
 
-  // 조회 불가능한 티커 필터링
-  const fetchable = portfoliosData.tickers.filter(t => {
+  const fetchable = portfoliosData.tickers.filter((t) => {
     if (SKIP_TICKERS.has(t.ticker)) {
-      console.log(`  ⊘ ${t.ticker}: 조회 불가 (워런트/OTC) → 스킵`);
+      console.log(`  ⊘ ${t.ticker}: skip`);
       skipped++;
       return false;
     }
     return true;
   });
 
-  console.log(`\n[GURU-CRON] Fetching ${fetchable.length} prices (${skipped} skipped)...`);
-
   for (const { ticker, exchange, filingPrice } of fetchable) {
     try {
       const kisExchange = toKISExchange(ticker, exchange);
       const currentPrice = await getStockPriceWithRetry(token, ticker, kisExchange);
-      const returnRate = filingPrice > 0
-        ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
-        : 0;
-
-      priceMap[ticker] = { currentPrice, returnRate };
-      console.log(`  ✓ ${ticker} (${exchange}): $${currentPrice} (공시일가 $${filingPrice} → ${returnRate > 0 ? '+' : ''}${returnRate}%)`);
+      const returnRate =
+        filingPrice > 0
+          ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
+          : 0;
+      rows.push({ ticker, current_price: currentPrice, return_rate: returnRate });
+      console.log(`  ✓ ${ticker}: $${currentPrice} (${returnRate >= 0 ? '+' : ''}${returnRate}%)`);
       success++;
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Unknown';
-      console.error(`  ✗ ${ticker} (${exchange}): ${msg}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Unknown';
+      console.error(`  ✗ ${ticker}: ${msg}`);
       failedTickers.push(ticker);
       fail++;
     }
-    await new Promise(r => setTimeout(r, DELAY_MS));
+    await new Promise((r) => setTimeout(r, DELAY_MS));
   }
 
-  console.log(`\n[GURU-CRON] Prices fetched: ${success} ok, ${fail} failed, ${skipped} skipped`);
-  if (failedTickers.length > 0) {
-    console.log(`[GURU-CRON] Failed tickers: ${failedTickers.join(', ')}`);
+  console.log(`\n[GURU-CRON] fetched: ${success} ok, ${fail} fail, ${skipped} skip`);
+
+  // guru_prices UPSERT
+  if (rows.length > 0) {
+    const { error } = await supabase
+      .from('guru_prices')
+      .upsert(rows, { onConflict: 'ticker' });
+    if (error) {
+      console.error('[GURU-CRON] upsert 실패:', error);
+      process.exit(1);
+    }
+    console.log(`[GURU-CRON] guru_prices: ${rows.length} 행 UPSERT`);
   }
-
-  // 4. Firebase Storage에 guru-stock-prices.json 저장
-  const storageData = {
-    lastUpdated: new Date().toISOString(),
-    totalTickers: Object.keys(priceMap).length,
-    prices: priceMap,
-  };
-
-  await bucket.file('guru-stock-prices.json').save(JSON.stringify(storageData), {
-    contentType: 'application/json',
-    metadata: { cacheControl: 'public, max-age=43200' }, // 12시간 캐시
-  });
 
   const duration = ((Date.now() - startTime) / 1000).toFixed(1);
-  console.log(`\n[GURU-CRON] ===== Done in ${duration}s | ${success} prices → guru-stock-prices.json =====`);
+  console.log(`[GURU-CRON] ===== Done in ${duration}s =====`);
+  process.exit(0);
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error('[GURU-CRON] Critical error:', err);
   process.exit(1);
 });

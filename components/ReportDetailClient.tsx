@@ -29,7 +29,6 @@ import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { sanitizeHtml, sanitizeHtmlMode, sanitizeCssForHtmlMode, scopeCssSelectors, ALLOWED_IMPORT_DOMAINS } from '@/utils/sanitizeHtml';
 import { getReturnColorClass } from '@/utils/calculateReturn';
-import { auth } from '@/lib/firebase';
 import { getUserProfile } from '@/lib/users';
 import { useBookmark } from '@/contexts/BookmarkContext';
 
@@ -130,16 +129,13 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
       // 댓글 로드 (항상 실행)
       promises.push(loadComments(user?.uid));
 
-      // 좋아요 상태 확인 (로그인 시에만)
+      // 좋아요 상태 확인 (로그인 시에만, 쿠키 세션)
       if (user) {
         promises.push(
           (async () => {
             try {
-              const token = await auth.currentUser?.getIdToken();
               const res = await fetch(`/api/reports/${report.id}/like`, {
-                headers: {
-                  'Authorization': `Bearer ${token}`,
-                },
+                credentials: 'include',
               });
               const data = await res.json();
               if (data.success) {
@@ -167,13 +163,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
     }
 
     try {
-      const token = await auth.currentUser?.getIdToken();
       const response = await fetch(`/api/reports/${report.id}/like`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
       });
 
@@ -203,19 +196,9 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
     }
 
     try {
-      // Firebase Auth에서 ID 토큰 가져오기
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        router.push('/login');
-        return;
-      }
-
       const response = await fetch(`/api/reports/${report.id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -223,6 +206,9 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
       if (response.ok && data.success) {
         alert('리포트가 삭제되었습니다.');
         router.push('/');
+      } else if (response.status === 401) {
+        alert('로그인이 필요합니다.');
+        router.push('/login');
       } else {
         alert(data.error || '리포트 삭제 중 오류가 발생했습니다.');
       }
@@ -565,12 +551,9 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
 
                                   setDeletingCommentId(comment.id);
                                   try {
-                                    const token = await auth.currentUser?.getIdToken();
                                     const response = await fetch(`/api/reports/${report.id}/comments/${comment.id}`, {
                                       method: 'DELETE',
-                                      headers: {
-                                        'Authorization': `Bearer ${token}`,
-                                      },
+                                      credentials: 'include',
                                     });
                                     const data = await response.json();
                                     if (data.success) {
@@ -603,13 +586,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                                 return;
                               }
                               try {
-                                const token = await auth.currentUser?.getIdToken();
                                 const response = await fetch(`/api/reports/${report.id}/comments/${comment.id}`, {
                                   method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${token}`,
-                                  },
+                                  credentials: 'include',
+                                  headers: { 'Content-Type': 'application/json' },
                                 });
                                 const data = await response.json();
                                 if (data.success) {
@@ -663,13 +643,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                                   if (!replyText.trim() || !user) return;
                                   setIsSubmittingComment(true);
                                   try {
-                                    const token = await auth.currentUser?.getIdToken();
                                     const response = await fetch(`/api/reports/${report.id}/comments`, {
                                       method: 'POST',
-                                      headers: {
-                                        'Content-Type': 'application/json',
-                                        'Authorization': `Bearer ${token}`,
-                                      },
+                                      credentials: 'include',
+                                      headers: { 'Content-Type': 'application/json' },
                                       body: JSON.stringify({
                                         content: replyText,
                                         authorName: userNickname || '익명',
@@ -719,12 +696,9 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                                     if (!confirm('답글을 삭제하시겠습니까?')) return;
                                     setDeletingCommentId(reply.id);
                                     try {
-                                      const token = await auth.currentUser?.getIdToken();
                                       const response = await fetch(`/api/reports/${report.id}/comments/${reply.id}`, {
                                         method: 'DELETE',
-                                        headers: {
-                                          'Authorization': `Bearer ${token}`,
-                                        },
+                                        credentials: 'include',
                                       });
                                       const data = await response.json();
                                       if (data.success) {
@@ -753,13 +727,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                                 return;
                               }
                               try {
-                                const token = await auth.currentUser?.getIdToken();
                                 const response = await fetch(`/api/reports/${report.id}/comments/${reply.id}`, {
                                   method: 'POST',
-                                  headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${token}`,
-                                  },
+                                  credentials: 'include',
+                                  headers: { 'Content-Type': 'application/json' },
                                 });
                                 const data = await response.json();
                                 if (data.success) {
@@ -810,13 +781,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
 
                       setIsSubmittingComment(true);
                       try {
-                        const token = await auth.currentUser?.getIdToken();
                         const response = await fetch(`/api/reports/${report.id}/comments`, {
                           method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                          },
+                          credentials: 'include',
+                          headers: { 'Content-Type': 'application/json' },
                           body: JSON.stringify({
                             content: commentText,
                             authorName: userNickname || '익명',

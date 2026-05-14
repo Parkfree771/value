@@ -9,8 +9,7 @@ import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
 import { useUserBadgesContext } from '@/contexts/UserBadgesContext';
-import { db } from '@/lib/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { createClient as createSupabaseClient } from '@/utils/supabase/client';
 import { processUserWithdrawal } from '@/lib/users';
 import {
   BADGES,
@@ -118,17 +117,35 @@ export default function MyPage() {
     };
   }, [activeTab, user, allPosts.length]);
 
-  // 본인 프로필(닉네임·장착 배지) 로드 — 게시글이 없어도 정보 표시 필요
+  // 본인 프로필(닉네임·장착 배지·해금 배지) 로드 — 게시글 없어도 정보 표시 필요
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
       try {
-        const snap = await getDoc(doc(db, 'users', user.uid));
-        if (cancelled || !snap.exists()) return;
-        const data = snap.data();
-        setUserProfile((prev: any) => ({ ...(prev || {}), ...data }));
-        const badgeId = data.equippedBadgeId;
+        const supabase = createSupabaseClient();
+        const [{ data: profile }, { data: badges }] = await Promise.all([
+          supabase
+            .from('users')
+            .select('nickname, display_name, photo_url, equipped_badge_id')
+            .eq('id', user.uid)
+            .maybeSingle(),
+          supabase
+            .from('user_badges')
+            .select('badge_id')
+            .eq('user_id', user.uid),
+        ]);
+        if (cancelled || !profile) return;
+
+        setUserProfile((prev: any) => ({
+          ...(prev || {}),
+          nickname: profile.nickname,
+          displayName: profile.display_name,
+          photoURL: profile.photo_url,
+          equippedBadgeId: profile.equipped_badge_id,
+          unlockedBadgeIds: (badges ?? []).map((b) => b.badge_id),
+        }));
+        const badgeId = profile.equipped_badge_id;
         setEquippedBadgeId(typeof badgeId === 'string' && BADGES_BY_ID[badgeId] ? badgeId : null);
       } catch (e) {
         console.error('프로필 로드 실패:', e);
@@ -173,18 +190,10 @@ export default function MyPage() {
 
     setIsEquipping(true);
     try {
-      const { auth } = await import('@/lib/firebase');
-      const token = await auth.currentUser?.getIdToken();
-      if (!token) {
-        alert('로그인이 필요합니다.');
-        return;
-      }
       const res = await fetch('/api/user/badge', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ equippedBadgeId: badgeId }),
       });
       const data = await res.json();
@@ -236,13 +245,21 @@ export default function MyPage() {
     setIsEditModalOpen(true);
 
     try {
-      const userDocRef = doc(db, 'users', user.uid);
-      const userDocSnap = await getDoc(userDocRef);
+      const supabase = createSupabaseClient();
+      const { data: profile } = await supabase
+        .from('users')
+        .select('nickname, display_name, photo_url')
+        .eq('id', user.uid)
+        .maybeSingle();
 
-      if (userDocSnap.exists()) {
-        const profileData = userDocSnap.data();
-        setUserProfile(profileData);
-        setNewNickname(profileData.nickname || user.displayName || '');
+      if (profile) {
+        setUserProfile((prev: any) => ({
+          ...(prev || {}),
+          nickname: profile.nickname,
+          displayName: profile.display_name,
+          photoURL: profile.photo_url,
+        }));
+        setNewNickname(profile.nickname || user.displayName || '');
       } else {
         setNewNickname(userProfile?.nickname || user.displayName || '');
       }

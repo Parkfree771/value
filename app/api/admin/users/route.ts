@@ -1,78 +1,60 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, getDocs, orderBy, query, limit, Timestamp, doc, updateDoc, getDoc } from 'firebase/firestore';
-import { verifyAdmin } from '@/lib/admin/adminVerify';
+// /api/admin/users — 관리자 전용
+//   GET  - 사용자 목록 (게시글 수 포함)
+//   PUT  - 사용자 정지/해제 (users.is_suspended 토글)
 
-// 사용자 목록 조회 (관리자용)
+import { NextRequest, NextResponse } from 'next/server';
+import { verifyAdmin } from '@/lib/admin/adminVerify';
+import { getServiceClient } from '@/lib/supabase-admin';
+
 export async function GET(request: NextRequest) {
   try {
-    // 토큰 기반 관리자 권한 확인
-    const authHeader = request.headers.get('authorization');
-    const admin = await verifyAdmin(authHeader);
-
+    const admin = await verifyAdmin(request.headers.get('authorization'));
     if (!admin) {
-      return NextResponse.json(
-        { error: '관리자 권한이 필요합니다.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 });
     }
 
-    const usersRef = collection(db, 'users');
-    const q = query(usersRef, orderBy('createdAt', 'desc'), limit(100));
+    const supabase = getServiceClient();
 
-    const querySnapshot = await getDocs(q);
+    const [{ data: users, error: usersError }, { data: postCounts }] = await Promise.all([
+      supabase
+        .from('users')
+        .select('id, email, nickname, created_at, is_suspended')
+        .order('created_at', { ascending: false })
+        .limit(100),
+      supabase.from('posts').select('author_id'),
+    ]);
 
-    // N+1 쿼리 방지: 모든 게시글을 한 번에 가져와서 사용자별로 카운트
-    const postsRef = collection(db, 'posts');
-    const postsSnapshot = await getDocs(postsRef);
+    if (usersError) {
+      console.error('[admin/users GET]:', usersError);
+      return NextResponse.json({ error: '사용자 조회 실패' }, { status: 500 });
+    }
 
-    // 사용자별 게시글 수 계산
-    const postCountByUser: { [userId: string]: number } = {};
-    postsSnapshot.docs.forEach((doc) => {
-      const authorId = doc.data().authorId;
-      if (authorId) {
-        postCountByUser[authorId] = (postCountByUser[authorId] || 0) + 1;
-      }
-    });
+    const countByUser: Record<string, number> = {};
+    for (const p of postCounts ?? []) {
+      countByUser[p.author_id] = (countByUser[p.author_id] ?? 0) + 1;
+    }
 
-    const users = querySnapshot.docs.map((docSnap) => {
-      const data = docSnap.data();
+    const mapped = (users ?? []).map((u) => ({
+      id: u.id,
+      email: u.email ?? '',
+      nickname: u.nickname ?? '',
+      createdAt: u.created_at,
+      isSuspended: u.is_suspended ?? false,
+      postCount: countByUser[u.id] ?? 0,
+    }));
 
-      return {
-        id: docSnap.id,
-        email: data.email || '',
-        nickname: data.nickname || '',
-        createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate().toISOString() : data.createdAt,
-        isSuspended: data.isSuspended || false,
-        postCount: postCountByUser[docSnap.id] || 0,
-      };
-    });
-
-    return NextResponse.json({
-      success: true,
-      users,
-    });
-  } catch (error: unknown) {
+    return NextResponse.json({ success: true, users: mapped });
+  } catch (error) {
     console.error('사용자 조회 오류:', error);
-    return NextResponse.json(
-      { error: '사용자 조회 중 오류가 발생했습니다.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: '사용자 조회 중 오류가 발생했습니다.' }, { status: 500 });
   }
 }
 
-// 사용자 정지/해제 (관리자용)
 export async function PUT(request: NextRequest) {
   try {
-    // 토큰 기반 관리자 권한 확인
-    const authHeader = request.headers.get('authorization');
-    const admin = await verifyAdmin(authHeader);
-
+    const admin = await verifyAdmin(request.headers.get('authorization'));
     if (!admin) {
-      return NextResponse.json(
-        { error: '관리자 권한이 필요합니다.' },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 });
     }
 
     const { userId, isSuspended } = await request.json();
@@ -80,38 +62,35 @@ export async function PUT(request: NextRequest) {
     if (!userId || typeof isSuspended !== 'boolean') {
       return NextResponse.json(
         { error: '사용자 ID와 정지 상태가 필요합니다.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // 사용자 정지/해제
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await getDoc(userRef);
+    const supabase = getServiceClient();
+    const { data, error } = await supabase
+      .from('users')
+      .update({ is_suspended: isSuspended })
+      .eq('id', userId)
+      .select('id');
 
-    if (!userSnap.exists()) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+    if (error) {
+      console.error('[admin/users PUT]:', error);
+      return NextResponse.json({ error: '사용자 정지/해제 실패' }, { status: 500 });
     }
-
-    await updateDoc(userRef, {
-      isSuspended,
-      suspendedAt: isSuspended ? new Date().toISOString() : null,
-      suspendedBy: isSuspended ? admin.email : null,
-    });
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
+    }
 
     console.log(`[Admin] 사용자 ${isSuspended ? '정지' : '정지 해제'}: ${userId} by ${admin.email}`);
-
     return NextResponse.json({
       success: true,
       message: `사용자가 성공적으로 ${isSuspended ? '정지' : '정지 해제'}되었습니다.`,
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error('사용자 정지/해제 오류:', error);
     return NextResponse.json(
       { error: '사용자 정지/해제 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

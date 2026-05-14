@@ -1,17 +1,30 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import type { User } from 'firebase/auth';
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/client';
+
+/**
+ * 앱 내부에서 쓰는 정규화된 사용자 형태.
+ * Firebase User와 키 이름 호환 (uid, displayName, photoURL).
+ * Supabase User → AuthUser 변환은 mapSupabaseUser()에서.
+ */
+export interface AuthUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
 
 interface AuthContextType {
-  user: User | null;
+  user: AuthUser | null;
   loading: boolean;
   authReady: boolean;
   isAdmin: boolean;
-  signInWithGoogle: () => Promise<User | undefined>;
+  signInWithGoogle: () => Promise<void>;
   signOut: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
-  checkAuth: () => Promise<User | null>;
+  checkAuth: () => Promise<AuthUser | null>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,156 +32,147 @@ const AuthContext = createContext<AuthContextType>({
   loading: false,
   authReady: false,
   isAdmin: false,
-  signInWithGoogle: async () => undefined,
+  signInWithGoogle: async () => {},
   signOut: async () => {},
   getIdToken: async () => null,
   checkAuth: async () => null,
 });
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);
+
+function mapSupabaseUser(u: SupabaseUser | null): AuthUser | null {
+  if (!u) return null;
+  const meta = (u.user_metadata ?? {}) as Record<string, unknown>;
+  return {
+    uid: u.id,
+    email: u.email ?? null,
+    displayName:
+      (meta.full_name as string | undefined) ??
+      (meta.name as string | undefined) ??
+      null,
+    photoURL: (meta.avatar_url as string | undefined) ?? null,
+  };
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  // 단일 브라우저 클라이언트 인스턴스 — 매 렌더마다 새로 만들면 onAuthStateChange가 중복 구독됨
+  const supabaseRef = useRef(createClient());
+  const supabase = supabaseRef.current;
+
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [authReady, setAuthReady] = useState(false);
-  const [authInitialized, setAuthInitialized] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // 관리자 상태 확인 (서버 API 호출)
-  const checkAdminStatus = useCallback(async (firebaseUser: User | null) => {
-    if (!firebaseUser) {
+  // 관리자 상태 확인 (서버 API 호출, 쿠키 자동 포함됨)
+  const checkAdminStatus = useCallback(async (u: AuthUser | null) => {
+    if (!u) {
       setIsAdmin(false);
       return;
     }
-
     try {
-      const token = await firebaseUser.getIdToken();
-      const response = await fetch('/api/auth/admin-check', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
+      const res = await fetch('/api/auth/admin-check', { credentials: 'include' });
+      if (res.ok) {
+        const data = await res.json();
         setIsAdmin(data.isAdmin === true);
       } else {
         setIsAdmin(false);
       }
-    } catch (error) {
-      console.error('관리자 상태 확인 실패:', error);
+    } catch (err) {
+      console.error('관리자 상태 확인 실패:', err);
       setIsAdmin(false);
     }
   }, []);
 
-  // Auth 초기화 (백그라운드에서 lazy하게)
-  const initAuth = useCallback(async () => {
-    if (authInitialized) return;
-    setAuthInitialized(true);
-
-    try {
-      const { onAuthStateChangeLazy } = await import('@/lib/firebase-lazy');
-      onAuthStateChangeLazy((firebaseUser) => {
-        setUser(firebaseUser);
-        setAuthReady(true);
-        // 관리자 상태도 함께 확인
-        checkAdminStatus(firebaseUser);
-      });
-    } catch (error) {
-      console.error('Auth 초기화 실패:', error);
-      setAuthReady(true);
-    }
-  }, [authInitialized, checkAdminStatus]);
-
-  // 페이지 로드 후 백그라운드에서 Auth 확인 (지연 로드)
   useEffect(() => {
-    // 약간의 지연 후 Auth 초기화 (초기 렌더링 차단 방지)
-    const timer = setTimeout(() => {
-      initAuth();
-    }, 100);
+    let cancelled = false;
 
-    return () => clearTimeout(timer);
-  }, [initAuth]);
+    // 1) 초기 세션 한 번 읽기
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
+      const mapped = mapSupabaseUser(data.user);
+      setUser(mapped);
+      setAuthReady(true);
+      checkAdminStatus(mapped);
+    })();
 
-  // 명시적으로 Auth 체크 (권한 필요한 액션 전에 호출)
-  const checkAuth = useCallback(async (): Promise<User | null> => {
+    // 2) 이후 변화는 listener로
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return;
+      const mapped = mapSupabaseUser(session?.user ?? null);
+      setUser(mapped);
+      setAuthReady(true);
+      checkAdminStatus(mapped);
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, [supabase, checkAdminStatus]);
+
+  const checkAuth = useCallback(async (): Promise<AuthUser | null> => {
     if (user) return user;
-
     setLoading(true);
     try {
-      const { getCurrentUser } = await import('@/lib/firebase-lazy');
-      const currentUser = await getCurrentUser();
-      if (currentUser) {
-        setUser(currentUser);
-        await checkAdminStatus(currentUser);
+      const { data } = await supabase.auth.getUser();
+      const mapped = mapSupabaseUser(data.user);
+      if (mapped) {
+        setUser(mapped);
+        await checkAdminStatus(mapped);
       }
-      return currentUser;
-    } catch (error) {
-      console.error('Auth 체크 실패:', error);
-      return null;
+      return mapped;
     } finally {
       setLoading(false);
     }
-  }, [user, checkAdminStatus]);
+  }, [user, supabase, checkAdminStatus]);
 
-  const signInWithGoogle = async () => {
+  const signInWithGoogle = useCallback(async () => {
     setLoading(true);
     try {
-      const { signInWithGoogleLazy } = await import('@/lib/firebase-lazy');
-      const firebaseUser = await signInWithGoogleLazy();
-      setUser(firebaseUser);
-      // 로그인 후 관리자 상태 확인
-      await checkAdminStatus(firebaseUser);
-      return firebaseUser;
-    } catch (error) {
-      console.error('로그인 실패:', error);
-      throw error;
-    } finally {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const next = typeof window !== 'undefined' ? window.location.pathname : '/';
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) throw error;
+      // 이 시점 이후 브라우저가 Google로 리다이렉트됨. 컴포넌트는 언마운트.
+    } catch (err) {
+      console.error('로그인 실패:', err);
       setLoading(false);
+      throw err;
     }
-  };
+  }, [supabase]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     setLoading(true);
     try {
-      const { signOutLazy } = await import('@/lib/firebase-lazy');
-      await signOutLazy();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setUser(null);
       setIsAdmin(false);
-    } catch (error) {
-      console.error('로그아웃 실패:', error);
-      throw error;
+    } catch (err) {
+      console.error('로그아웃 실패:', err);
+      throw err;
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
-  const getIdToken = async (): Promise<string | null> => {
-    if (!user) return null;
-    try {
-      return await user.getIdToken();
-    } catch (error) {
-      console.error('토큰 가져오기 실패:', error);
-      return null;
-    }
-  };
+  const getIdToken = useCallback(async (): Promise<string | null> => {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token ?? null;
+  }, [supabase]);
 
-  const value = {
-    user,
-    loading,
-    authReady,
-    isAdmin,
-    signInWithGoogle,
-    signOut,
-    getIdToken,
-    checkAuth,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{ user, loading, authReady, isAdmin, signInWithGoogle, signOut, getIdToken, checkAuth }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }

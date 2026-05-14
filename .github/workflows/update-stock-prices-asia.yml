@@ -2,7 +2,7 @@ name: Update Stock Prices (Asia)
 
 on:
   schedule:
-    # 아시아 시장 백업 (로컬 스케줄러 보조)
+    # 아시아 시장 (KST → UTC)
     # 장 시작 09:00 KST = 00:00 UTC
     # 점심   12:00 KST = 03:00 UTC
     # 장 마감 16:00 KST = 07:00 UTC (평일만)
@@ -31,9 +31,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Update Asia stock prices
+      - name: Update Asia stock prices (Supabase)
         env:
-          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
           KIS_BASE_URL: https://openapi.koreainvestment.com:9443

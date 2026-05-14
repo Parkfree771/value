@@ -6,9 +6,7 @@ import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
 import { uploadMultipleImages } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
-import { db, storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, serverTimestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { createClient as createSupabaseClient } from '@/utils/supabase/client';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
 import type { StockData } from '@/types/stock';
@@ -110,51 +108,52 @@ function WritePageContent() {
 
       setIsLoading(true);
       try {
-        const reportDoc = await getDoc(doc(db, 'posts', editId));
+        const supabase = createSupabaseClient();
+        const { data: reportData, error } = await supabase
+          .from('posts')
+          .select(
+            'title, ticker, exchange, opinion, position_type, target_price, mode, content, css_content, initial_price, author_id, stock_data, themes, images, files',
+          )
+          .eq('id', editId)
+          .maybeSingle();
 
-        if (!reportDoc.exists()) {
+        if (error || !reportData) {
           alert('리포트를 찾을 수 없습니다.');
           router.push('/');
           return;
         }
 
-        const reportData = reportDoc.data();
-
-        // 작성자 확인
-        if (reportData.authorId !== user.uid) {
+        if (reportData.author_id !== user.uid) {
           alert('수정 권한이 없습니다.');
           router.push('/');
           return;
         }
 
-        // 폼에 데이터 채우기
         setIsEditMode(true);
         setTitle(reportData.title || '');
-        setStockData(reportData.stockData || null);
+        setStockData(reportData.stock_data || null);
         setOpinion(reportData.opinion || 'buy');
-        setTargetPrice(reportData.targetPrice ? Number(reportData.targetPrice).toLocaleString() : '');
+        setTargetPrice(
+          reportData.target_price ? Number(reportData.target_price).toLocaleString() : '',
+        );
         if (reportData.mode === 'html') {
           setEditorMode('html');
           setHtmlContent(reportData.content || '');
         } else {
           setContent(reportData.content || '');
         }
-        setOriginalInitialPrice(reportData.initialPrice || null);
+        setOriginalInitialPrice(reportData.initial_price ?? null);
         setSelectedThemes(reportData.themes || []);
 
-        // 기존 이미지 URL 설정
         if (reportData.images && reportData.images.length > 0) {
           setUploadedImageUrls(reportData.images);
         }
 
-        // 기존 파일 데이터 설정
         if (reportData.files && reportData.files.length > 0) {
-          // 새 형식 {name, url} 또는 구 형식 string[]
           if (typeof reportData.files[0] === 'object') {
             setUploadedFiles(reportData.files);
           }
         }
-
       } catch (error) {
         console.error('리포트 불러오기 실패:', error);
         alert('리포트를 불러오는 중 오류가 발생했습니다.');
@@ -190,12 +189,17 @@ function WritePageContent() {
 
     if (validImages.length === 0) return;
 
-    // 즉시 Firebase에 업로드
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
+    // Supabase Storage 'media' 버킷에 업로드 — 경로는 본인 uid 폴더 내
     setIsUploading(true);
     try {
       const urls = await uploadMultipleImages(
         validImages,
-        `reports/${Date.now()}`,
+        `${user.uid}/reports/${Date.now()}`,
         { maxWidth: 1920, maxHeight: 1920, quality: 0.85, maxSizeMB: 2 },
         (progress) => setUploadProgress(progress)
       );
@@ -232,19 +236,28 @@ function WritePageContent() {
 
     if (validFiles.length === 0) return;
 
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
     setIsUploading(true);
     try {
+      const supabase = createSupabaseClient();
       const newUploaded: { name: string; url: string }[] = [];
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}_${file.name}`;
-        const storageRef = ref(storage, `reports/files/${fileName}`);
-        await uploadBytes(storageRef, file, {
+        const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
+        const objectPath = `${user.uid}/reports/files/${fileName}`;
+        const { error: upError } = await supabase.storage.from('media').upload(objectPath, file, {
           contentType: file.type,
-          customMetadata: { originalName: file.name },
+          cacheControl: '3600',
+          upsert: false,
         });
-        const url = await getDownloadURL(storageRef);
-        newUploaded.push({ name: file.name, url });
+        if (upError) throw upError;
+        const { data } = supabase.storage.from('media').getPublicUrl(objectPath);
+        newUploaded.push({ name: file.name, url: data.publicUrl });
         setUploadProgress(((i + 1) / validFiles.length) * 100);
       }
       setFiles((prev) => [...prev, ...validFiles]);
@@ -277,16 +290,15 @@ function WritePageContent() {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 리포트 삭제
+  // 리포트 삭제 (서버가 쿠키 세션으로 인증)
   const handleDelete = async () => {
     if (!editId || !user) return;
     if (!confirm('정말로 이 리포트를 삭제하시겠습니까?\n\n삭제된 리포트는 복구할 수 없습니다.')) return;
 
     try {
-      const token = await (await import('@/lib/firebase')).auth.currentUser?.getIdToken();
       const response = await fetch(`/api/reports/${editId}`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` },
+        credentials: 'include',
       });
       const data = await response.json();
       if (response.ok && data.success) {
@@ -335,48 +347,35 @@ function WritePageContent() {
         ? (htmlEditorApiRef.current?.getValue() ?? htmlContent)
         : htmlContent;
 
-      // 사용자 프로필에서 닉네임 가져오기
+      const supabase = createSupabaseClient();
+
+      // 닉네임 조회 (feed.json 동기화용 — DB는 author_id로 충분, JOIN으로 표시)
       let authorName = '익명';
       try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDocSnap = await getDoc(userDocRef);
-        if (userDocSnap.exists()) {
-          authorName = userDocSnap.data().nickname || user.displayName || user.email || '익명';
-        } else {
-          authorName = user.displayName || user.email || '익명';
-        }
-      } catch (error) {
-        console.error('사용자 프로필 가져오기 실패:', error);
+        const { data: prof } = await supabase
+          .from('users')
+          .select('nickname')
+          .eq('id', user.uid)
+          .maybeSingle();
+        authorName = prof?.nickname || user.displayName || user.email || '익명';
+      } catch {
         authorName = user.displayName || user.email || '익명';
       }
 
       // 거래소 정보 기반으로 카테고리 자동 설정
       const category = getMarketCategory(stockData.exchange, stockData.symbol);
 
-      // Firebase Firestore에 저장할 리포트 데이터
-      // 필드 순서: 제목 → 티커 → 거래소 → 초기가격 → 작성자 → 나머지
-      const reportData = {
-        // 1. 제목
+      // posts 테이블에 INSERT 또는 UPDATE할 컬럼 (snake_case)
+      const postRow = {
         title,
-
-        // 2. 티커 & 거래소
         ticker: stockData.symbol,
-        exchange: stockData.exchange, // 거래소 (NAS, NYS, KRX 등)
-
-        // 3. 초기 가격 (작성 시점)
-        initialPrice: stockData.currentPrice,
-        currentPrice: stockData.currentPrice, // 크론이 업데이트
-        lastPriceUpdate: serverTimestamp(), // 마지막 가격 업데이트 시간
-
-        // 4. 작성자 정보
-        authorId: user.uid,
-        authorName: authorName,
-        authorEmail: user.email,
-
-        // 5. 종목 정보
-        stockName: stockData.name,
-        category, // 자동 설정된 카테고리
-        stockData: {
+        exchange: stockData.exchange,
+        initial_price: stockData.currentPrice,
+        current_price: stockData.currentPrice,
+        author_id: user.uid,
+        stock_name: stockData.name,
+        category,
+        stock_data: {
           symbol: stockData.symbol,
           name: stockData.name,
           currentPrice: stockData.currentPrice,
@@ -389,81 +388,88 @@ function WritePageContent() {
           industry: stockData.industry,
           sector: stockData.sector,
         },
-
-        // 6. 투자 의견
         opinion,
-        positionType,
-        targetPrice: parseFloat(targetPrice.replace(/,/g, '')) || 0,
-        themes: selectedThemes.length > 0 ? selectedThemes : [],
-
-        // 7. 콘텐츠
+        position_type: positionType,
+        target_price: parseFloat(targetPrice.replace(/,/g, '')) || 0,
+        themes: selectedThemes,
         content: editorMode === 'html' ? finalHtmlContent : finalContent,
         mode: editorMode,
         images: imageUrls,
         files: uploadedFiles,
+      };
 
-        // 8. 통계 (현재가/수익률은 실시간 조회)
-        views: 0,
-        likes: 0,
-        likedBy: [],
-
-        // 9. 타임스탬프
-        createdAt: serverTimestamp(),
+      // feed.json 동기화용 페이로드 (camelCase, 기존 /api/feed 포맷 유지)
+      const feedPayload = {
+        ...postRow,
+        authorId: user.uid,
+        authorName,
+        stockName: stockData.name,
+        initialPrice: stockData.currentPrice,
+        currentPrice: stockData.currentPrice,
+        targetPrice: parseFloat(targetPrice.replace(/,/g, '')) || 0,
+        positionType,
       };
 
       if (isEditMode && editId) {
-        // 수정 모드: 기존 리포트 업데이트
-
-        // 오늘 날짜 (YYYY-MM-DD)
+        // 수정 모드: posts UPDATE
+        // 가격·통계는 유지, updated_at 배열에 오늘 날짜 push
         const today = new Date().toISOString().split('T')[0];
+        const { data: existing } = await supabase
+          .from('posts')
+          .select('updated_at')
+          .eq('id', editId)
+          .maybeSingle();
 
-        // 기존 updatedAt 배열 가져오기
-        const reportRef = doc(db, 'posts', editId);
-        const reportSnap = await getDoc(reportRef);
-        const existingUpdatedAt = reportSnap.exists() ? (reportSnap.data().updatedAt || []) : [];
-
-        // 오늘 날짜가 배열에 없으면 추가
-        const updatedAtArray = Array.isArray(existingUpdatedAt) ? [...existingUpdatedAt] : [];
-        if (!updatedAtArray.includes(today)) {
-          updatedAtArray.push(today);
+        const existingArr = (existing?.updated_at as string[] | null) ?? [];
+        const updatedAtArr = [...existingArr];
+        const alreadyHasToday = updatedAtArr.some((d) =>
+          typeof d === 'string' && d.startsWith(today),
+        );
+        if (!alreadyHasToday) {
+          updatedAtArr.push(new Date().toISOString());
         }
 
-        // 수정 시 initialPrice, currentPrice, views, likes, createdAt 유지
-        const { initialPrice, currentPrice, lastPriceUpdate, views, likes, likedBy, createdAt, ...editableData } = reportData;
+        // INSERT 전용 필드(가격·작성자) 제외하고 편집 가능한 필드만 UPDATE
+        const editableUpdate = {
+          title: postRow.title,
+          ticker: postRow.ticker,
+          exchange: postRow.exchange,
+          stock_name: postRow.stock_name,
+          category: postRow.category,
+          stock_data: postRow.stock_data,
+          opinion: postRow.opinion,
+          position_type: postRow.position_type,
+          target_price: postRow.target_price,
+          themes: postRow.themes,
+          content: postRow.content,
+          mode: postRow.mode,
+          images: postRow.images,
+          files: postRow.files,
+          updated_at: updatedAtArr,
+        };
 
-        await updateDoc(reportRef, {
-          ...editableData,
-          updatedAt: updatedAtArray,
-        });
+        const { error: updateError } = await supabase
+          .from('posts')
+          .update(editableUpdate)
+          .eq('id', editId);
 
-        console.log('리포트가 수정되었습니다. ID:', editId);
+        if (updateError) {
+          console.error('리포트 수정 실패:', updateError);
+          throw updateError;
+        }
 
-        // feed.json 업데이트 (수정된 내용 반영)
+        // feed.json 동기화 (쿠키 세션 인증)
         try {
-          const { auth } = await import('@/lib/firebase');
-          const token = await auth.currentUser?.getIdToken();
-          if (token) {
-            await fetch('/api/feed', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                postId: editId,
-                postData: {
-                  ...reportData,
-                  authorName: authorName,
-                  themes: selectedThemes.length > 0 ? selectedThemes : [],
-                },
-              }),
-            });
-          }
+          await fetch('/api/feed', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: editId, postData: feedPayload }),
+          });
         } catch (feedError) {
           console.error('feed.json 업데이트 실패:', feedError);
         }
 
-        // 홈 페이지와 상세 페이지 캐시 즉시 무효화
         await Promise.all([
           fetch('/api/revalidate', {
             method: 'POST',
@@ -480,36 +486,30 @@ function WritePageContent() {
         alert('리포트가 성공적으로 수정되었습니다!');
         router.push(`/reports/${editId}`);
       } else {
-        // 새 글 작성 모드: 새 리포트 생성
-        const docRef = await addDoc(collection(db, 'posts'), reportData);
+        // 새 글 작성: posts INSERT
+        const { data: inserted, error: insertError } = await supabase
+          .from('posts')
+          .insert(postRow)
+          .select('id')
+          .single();
+
+        if (insertError || !inserted) {
+          console.error('리포트 작성 실패:', insertError);
+          throw insertError ?? new Error('insert failed');
+        }
 
         // feed.json에 새 게시글 추가
         try {
-          const { auth } = await import('@/lib/firebase');
-          const token = await auth.currentUser?.getIdToken();
-          if (token) {
-            await fetch('/api/feed', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                postId: docRef.id,
-                postData: {
-                  ...reportData,
-                  authorName: authorName,
-                },
-              }),
-            });
-          }
+          await fetch('/api/feed', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId: inserted.id, postData: feedPayload }),
+          });
         } catch (feedError) {
           console.error('feed.json 업데이트 실패:', feedError);
         }
 
-        console.log('리포트가 저장되었습니다. ID:', docRef.id);
-
-        // 홈 페이지 캐시 즉시 무효화
         await fetch('/api/revalidate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

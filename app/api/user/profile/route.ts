@@ -1,6 +1,12 @@
+// /api/user/profile
+//   GET ?username=<nickname>  — 공개 프로필 + 본인 작성 글 목록
+//   PUT { userId, nickname }  — 자기 닉네임 변경 (RLS가 본인만 허용)
+//
+// 닉네임이 변경돼도 posts.author_id로 user를 JOIN하므로 별도 denormalization 불필요.
+
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, updateDoc, collection, query, where, getDocs, writeBatch, orderBy, Timestamp } from 'firebase/firestore';
+import { cookies } from 'next/headers';
+import { createClient } from '@/utils/supabase/server';
 import { validateNickname } from '@/lib/validation';
 
 export async function GET(request: NextRequest) {
@@ -9,83 +15,73 @@ export async function GET(request: NextRequest) {
     const username = searchParams.get('username');
 
     if (!username) {
-      return NextResponse.json(
-        { error: '사용자 이름이 필요합니다.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '사용자 이름이 필요합니다.' }, { status: 400 });
     }
 
-    // username(nickname)으로 사용자 찾기
-    const usersRef = collection(db, 'users');
-    const userQuery = query(usersRef, where('nickname', '==', username));
-    const userSnapshot = await getDocs(userQuery);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    if (userSnapshot.empty) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+    const { data: userRow, error: userError } = await supabase
+      .from('users')
+      .select('id, nickname, created_at')
+      .eq('nickname', username)
+      .maybeSingle();
+
+    if (userError) {
+      console.error('[profile GET] user 조회 오류:', userError);
+      return NextResponse.json({ error: '사용자 조회 중 오류가 발생했습니다.' }, { status: 500 });
     }
 
-    const userDoc = userSnapshot.docs[0];
-    const userData = userDoc.data();
-    const userId = userDoc.id;
+    if (!userRow) {
+      return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
+    }
 
-    // 해당 사용자가 작성한 리포트 가져오기
-    const postsRef = collection(db, 'posts');
-    const postsQuery = query(
-      postsRef,
-      where('authorId', '==', userId),
-      orderBy('createdAt', 'desc')
-    );
-    const postsSnapshot = await getDocs(postsQuery);
+    const { data: postRows, error: postsError } = await supabase
+      .from('posts')
+      .select(
+        'id, title, stock_name, ticker, exchange, category, opinion, position_type, return_rate, initial_price, current_price, target_price, views, likes, mode, content, css_content, images, files, stock_data, created_at',
+      )
+      .eq('author_id', userRow.id)
+      .order('created_at', { ascending: false });
 
-    const reports = postsSnapshot.docs.map((doc) => {
-      const data = doc.data();
+    if (postsError) {
+      console.error('[profile GET] posts 조회 오류:', postsError);
+      return NextResponse.json({ error: '글 목록 조회 중 오류가 발생했습니다.' }, { status: 500 });
+    }
 
-      // createdAt을 문자열로 변환
-      let createdAtStr = '';
-      if (data.createdAt instanceof Timestamp) {
-        createdAtStr = data.createdAt.toDate().toISOString().split('T')[0];
-      } else if (typeof data.createdAt === 'string') {
-        createdAtStr = data.createdAt;
-      } else {
-        createdAtStr = new Date().toISOString().split('T')[0];
-      }
-
-      return {
-        id: doc.id,
-        title: data.title || '',
-        author: data.authorName || username,
-        authorId: data.authorId || userId,
-        stockName: data.stockName || '',
-        ticker: data.ticker || '',
-        category: data.category || '',
-        exchange: data.exchange || '',
-        opinion: data.opinion || 'hold',
-        returnRate: data.returnRate || 0,
-        initialPrice: data.initialPrice || 0,
-        currentPrice: data.currentPrice || 0,
-        targetPrice: data.targetPrice || 0,
-        createdAt: createdAtStr,
-        views: data.views || 0,
-        likes: data.likes || 0,
-        mode: data.mode || 'text',
-        content: data.content || '',
-        cssContent: data.cssContent || '',
-        images: data.images || [],
-        files: data.files || [],
-        positionType: data.positionType || 'long',
-        stockData: data.stockData || {},
-      };
-    });
+    const reports = (postRows ?? []).map((p) => ({
+      id: p.id,
+      title: p.title ?? '',
+      author: userRow.nickname,
+      authorId: userRow.id,
+      stockName: p.stock_name ?? '',
+      ticker: p.ticker ?? '',
+      category: p.category ?? '',
+      exchange: p.exchange ?? '',
+      opinion: p.opinion ?? 'hold',
+      positionType: p.position_type ?? 'long',
+      returnRate: Number(p.return_rate ?? 0),
+      initialPrice: Number(p.initial_price ?? 0),
+      currentPrice: Number(p.current_price ?? 0),
+      targetPrice: Number(p.target_price ?? 0),
+      createdAt:
+        typeof p.created_at === 'string' ? p.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+      views: p.views ?? 0,
+      likes: p.likes ?? 0,
+      mode: p.mode ?? 'text',
+      content: p.content ?? '',
+      cssContent: p.css_content ?? '',
+      images: p.images ?? [],
+      files: p.files ?? [],
+      stockData: p.stock_data ?? {},
+    }));
 
     return NextResponse.json({
       success: true,
       user: {
-        id: userId,
-        nickname: userData.nickname || username,
-        createdAt: userData.createdAt || '',
+        id: userRow.id,
+        nickname: userRow.nickname,
+        createdAt: userRow.created_at,
         reports,
       },
     });
@@ -93,7 +89,7 @@ export async function GET(request: NextRequest) {
     console.error('사용자 프로필 가져오기 오류:', error);
     return NextResponse.json(
       { error: '사용자 프로필을 가져오는 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -103,89 +99,50 @@ export async function PUT(request: NextRequest) {
     const { userId, nickname } = await request.json();
 
     if (!userId) {
-      return NextResponse.json(
-        { error: '사용자 ID가 필요합니다.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: '사용자 ID가 필요합니다.' }, { status: 400 });
     }
 
-    // 닉네임 유효성 검사 (강화된 검증)
     const nicknameValidation = validateNickname(nickname);
     if (!nicknameValidation.valid) {
-      return NextResponse.json(
-        { error: nicknameValidation.error },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: nicknameValidation.error }, { status: 400 });
     }
-
     const validatedNickname = nicknameValidation.sanitized!;
 
-    // 닉네임 중복 체크
-    const usersRef = collection(db, 'users');
-    const duplicateQuery = query(usersRef, where('nickname', '==', validatedNickname));
-    const duplicateSnapshot = await getDocs(duplicateQuery);
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    // 자신이 아닌 다른 사용자가 같은 닉네임을 사용 중인지 확인
-    const isDuplicate = duplicateSnapshot.docs.some(doc => doc.id !== userId);
-    if (isDuplicate) {
-      return NextResponse.json(
-        { error: '이미 사용 중인 닉네임입니다.' },
-        { status: 400 }
-      );
+    // 인증 확인 + 본인 확인 (RLS도 같은 체크지만 명시적으로 401/403 응답)
+    const { data: authData } = await supabase.auth.getUser();
+    if (!authData.user) {
+      return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
+    }
+    if (authData.user.id !== userId) {
+      return NextResponse.json({ error: '본인 프로필만 수정 가능합니다.' }, { status: 403 });
     }
 
-    // 사용자 문서 업데이트
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await getDoc(userRef);
+    // 닉네임 중복 체크 (자기 자신 제외)
+    const { data: dup, error: dupError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('nickname', validatedNickname)
+      .neq('id', userId);
 
-    if (!userSnap.exists()) {
-      return NextResponse.json(
-        { error: '사용자를 찾을 수 없습니다.' },
-        { status: 404 }
-      );
+    if (dupError) {
+      console.error('[profile PUT] 중복 체크 오류:', dupError);
+      return NextResponse.json({ error: '중복 체크 중 오류가 발생했습니다.' }, { status: 500 });
+    }
+    if (dup && dup.length > 0) {
+      return NextResponse.json({ error: '이미 사용 중인 닉네임입니다.' }, { status: 400 });
     }
 
-    const oldNickname = userSnap.data().nickname;
+    const { error: updateError } = await supabase
+      .from('users')
+      .update({ nickname: validatedNickname })
+      .eq('id', userId);
 
-    // 사용자 프로필 업데이트
-    await updateDoc(userRef, {
-      nickname: validatedNickname,
-      updatedAt: new Date().toISOString(),
-    });
-
-    // 닉네임이 변경된 경우, 해당 사용자가 작성한 모든 게시글의 authorName 업데이트
-    if (oldNickname !== validatedNickname) {
-      // posts 컬렉션 업데이트
-      const postsRef = collection(db, 'posts');
-      const postsQuery = query(postsRef, where('authorId', '==', userId));
-      const postsSnapshot = await getDocs(postsQuery);
-
-      // Firestore의 배치 업데이트 사용 (최대 500개까지 한 번에 처리)
-      const batches = [];
-      let currentBatch = writeBatch(db);
-      let batchCount = 0;
-
-      // posts 컬렉션 업데이트
-      postsSnapshot.forEach((docSnapshot) => {
-        if (batchCount === 500) {
-          batches.push(currentBatch);
-          currentBatch = writeBatch(db);
-          batchCount = 0;
-        }
-
-        const postRef = doc(db, 'posts', docSnapshot.id);
-        currentBatch.update(postRef, { authorName: validatedNickname });
-        batchCount++;
-      });
-
-      if (batchCount > 0) {
-        batches.push(currentBatch);
-      }
-
-      // 모든 배치 커밋
-      await Promise.all(batches.map((b) => b.commit()));
-
-      console.log(`[Profile Update] posts: ${postsSnapshot.size}개 작성자 이름 업데이트 완료`);
+    if (updateError) {
+      console.error('[profile PUT] 업데이트 오류:', updateError);
+      return NextResponse.json({ error: '프로필 업데이트 중 오류가 발생했습니다.' }, { status: 500 });
     }
 
     return NextResponse.json({
@@ -197,7 +154,7 @@ export async function PUT(request: NextRequest) {
     console.error('프로필 업데이트 오류:', error);
     return NextResponse.json(
       { error: '프로필 업데이트 중 오류가 발생했습니다.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

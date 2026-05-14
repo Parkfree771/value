@@ -1,70 +1,84 @@
-// 사용자 통계·배지 영속화 (서버 전용)
+// 사용자 통계·배지 영속화 (서버 전용, Supabase Postgres)
 // ─────────────────────────────────────────────────────────────────
-// 판정 SoT: feed.json
-// 저장 대상: users 컬렉션의 각 도큐먼트
-//   {
-//     stats: UserStats,
-//     unlockedBadgeIds: string[],   // sticky — 한번 해금되면 영원히 유지
-//     lastStatsUpdate: ISO string,
-//   }
-// 호출 시점: feed.json 갱신되는 모든 이벤트 (글 작성/수정/삭제, 가격 cron, TTL 갱신)
+// 데이터 소스: posts 테이블 (트리거가 likes/views/comment_count 자동 유지)
+// 배지 저장: user_badges 테이블 (PK (user_id, badge_id), sticky)
+// 통계는 매 호출 시 posts에서 재계산 — 별도 캐시 컬럼 없음.
+//
+// 호환성: 기존 호출자는 feed.json posts를 인자로 넘기지만 이제 무시.
+// Postgres가 SoT.
 
-import { adminDb } from './firebase-admin';
+import { getServiceClient } from './supabase-admin';
 import {
   calculateUserStats,
   getUnlockedBadgeIds,
   type PostForStats,
-  type UserStats,
 } from './badges';
-
-// feed.json post 형식 → calculateUserStats 입력으로 정규화
-function toPostForStats(p: any): PostForStats {
-  return {
-    returnRate: typeof p?.returnRate === 'number' ? p.returnRate : 0,
-    views: p?.views ?? 0,
-    likes: p?.likes ?? 0,
-    positionType: p?.positionType,
-    ticker: p?.ticker,
-    stockName: p?.stockName,
-    exchange: p?.exchange,
-  };
-}
 
 export interface RecomputeOptions {
   dryRun?: boolean;
-  // 특정 사용자만 재계산. 미지정 시 feed에 등장한 모든 authorId 대상.
   onlyAuthorId?: string;
 }
 
 export interface RecomputeResult {
-  scanned: number;          // feed에서 본 authorId 수
-  written: number;          // users에 실제 쓴 수
-  newlyUnlocked: number;    // 신규 해금 배지 총 개수 (사용자별 union 증가분 합)
-  skippedMissing: number;   // users 도큐먼트 없는 authorId
+  scanned: number;          // 처리한 author 수
+  written: number;          // user_badges 신규 INSERT 수행한 author 수
+  newlyUnlocked: number;    // 신규 해금 배지 총 개수
+  skippedMissing: number;   // users 없는 authorId (FK 위반)
+}
+
+interface PostRow {
+  author_id: string;
+  return_rate: number | null;
+  views: number | null;
+  likes: number | null;
+  position_type: 'long' | 'short' | null;
+  ticker: string | null;
+  stock_name: string | null;
+  exchange: string | null;
+}
+
+function toPostForStats(row: PostRow): PostForStats {
+  return {
+    returnRate: typeof row.return_rate === 'number' ? row.return_rate : Number(row.return_rate ?? 0),
+    views: row.views ?? 0,
+    likes: row.likes ?? 0,
+    positionType: row.position_type ?? undefined,
+    ticker: row.ticker ?? undefined,
+    stockName: row.stock_name ?? undefined,
+    exchange: row.exchange ?? undefined,
+  };
 }
 
 /**
- * feed.json posts 를 받아 author별로 통계+배지를 재계산하고
- * users 컬렉션에 sticky 머지로 저장한다.
- * - stats: 항상 최신값으로 덮어씀
- * - unlockedBadgeIds: 기존 ∪ 신규 (한번 해금되면 영원히 유지)
- * - 변경 없는 사용자는 skip (불필요한 쓰기 방지)
+ * 전체 사용자(또는 onlyAuthorId 한정) 통계·배지를 재계산하여 user_badges에 sticky INSERT.
+ * feedPosts 인자는 호환 위해 받지만 무시함 (Postgres가 SoT).
  */
 export async function recomputeAllUserStatsFromFeed(
-  feedPosts: any[],
+  _feedPosts: unknown[],
   options: RecomputeOptions = {},
 ): Promise<RecomputeResult> {
   const { dryRun = false, onlyAuthorId } = options;
+  const supabase = getServiceClient();
 
-  // 1. authorId 별 그룹핑
+  // 1. posts 조회 (필요한 컬럼만)
+  let q = supabase
+    .from('posts')
+    .select('author_id, return_rate, views, likes, position_type, ticker, stock_name, exchange');
+  if (onlyAuthorId) q = q.eq('author_id', onlyAuthorId);
+
+  const { data: rows, error } = await q;
+  if (error) {
+    console.error('[userStats] posts 조회 실패:', error);
+    throw error;
+  }
+
+  // 2. authorId 별 그룹핑
   const byAuthor = new Map<string, PostForStats[]>();
-  for (const p of feedPosts) {
-    const authorId = p?.authorId;
-    if (!authorId) continue;
-    if (onlyAuthorId && authorId !== onlyAuthorId) continue;
-    const arr = byAuthor.get(authorId) ?? [];
-    arr.push(toPostForStats(p));
-    byAuthor.set(authorId, arr);
+  for (const r of (rows ?? []) as PostRow[]) {
+    if (!r.author_id) continue;
+    const list = byAuthor.get(r.author_id) ?? [];
+    list.push(toPostForStats(r));
+    byAuthor.set(r.author_id, list);
   }
 
   const result: RecomputeResult = {
@@ -76,84 +90,70 @@ export async function recomputeAllUserStatsFromFeed(
 
   if (byAuthor.size === 0) return result;
 
-  // 2. 기존 users 도큐먼트 일괄 로드 (in batch · 최대 30개씩)
+  // 3. 기존 user_badges 조회 (sticky 머지용)
   const uids = Array.from(byAuthor.keys());
-  const existing = new Map<string, { unlockedBadgeIds?: string[]; statsHash?: string }>();
+  const { data: existingBadges, error: badgesError } = await supabase
+    .from('user_badges')
+    .select('user_id, badge_id')
+    .in('user_id', uids);
+  if (badgesError) {
+    console.error('[userStats] user_badges 조회 실패:', badgesError);
+    throw badgesError;
+  }
 
-  // adminDb.getAll 은 DocumentReference 가변인자, 청크 불필요
-  const refs = uids.map((uid) => adminDb.collection('users').doc(uid));
-  const snaps = refs.length > 0 ? await adminDb.getAll(...refs) : [];
+  const existingByUser = new Map<string, Set<string>>();
+  for (const row of existingBadges ?? []) {
+    const s = existingByUser.get(row.user_id) ?? new Set<string>();
+    s.add(row.badge_id);
+    existingByUser.set(row.user_id, s);
+  }
 
-  for (const snap of snaps) {
-    if (!snap.exists) {
+  // 4. users 존재 여부 확인 (FK 위반 방지)
+  const { data: existingUsers } = await supabase
+    .from('users')
+    .select('id')
+    .in('id', uids);
+  const userIdSet = new Set((existingUsers ?? []).map((u) => u.id));
+
+  // 5. 각 사용자별 신규 해금 배지 계산
+  const toInsert: { user_id: string; badge_id: string }[] = [];
+  for (const [uid, posts] of byAuthor) {
+    if (!userIdSet.has(uid)) {
       result.skippedMissing++;
       continue;
     }
-    const data = snap.data() ?? {};
-    existing.set(snap.id, {
-      unlockedBadgeIds: Array.isArray(data.unlockedBadgeIds) ? data.unlockedBadgeIds : [],
-      statsHash: data.statsHash,
-    });
-  }
+    const stats = calculateUserStats(posts);
+    const freshIds = getUnlockedBadgeIds(stats);
+    const already = existingByUser.get(uid) ?? new Set<string>();
+    const newly = freshIds.filter((bid) => !already.has(bid));
 
-  // 3. 각 사용자에 대해 새 stats + sticky union 계산 → 변경 있을 때만 쓰기
-  const now = new Date().toISOString();
-  const writeOps: { uid: string; payload: Record<string, unknown> }[] = [];
-
-  for (const [uid, posts] of byAuthor) {
-    if (!existing.has(uid)) continue; // users 에 없는 authorId
-
-    const stats: UserStats = calculateUserStats(posts);
-    const freshUnlocked = getUnlockedBadgeIds(stats);
-    const prev = existing.get(uid)!;
-    const prevSet = new Set(prev.unlockedBadgeIds ?? []);
-    const merged = Array.from(new Set([...prevSet, ...freshUnlocked])).sort();
-    const newCount = merged.length - prevSet.size;
-    if (newCount > 0) result.newlyUnlocked += newCount;
-
-    const statsHash = JSON.stringify(stats);
-    if (prev.statsHash === statsHash && newCount === 0) {
-      // 변경 없음 → skip
-      continue;
+    if (newly.length > 0) {
+      result.newlyUnlocked += newly.length;
+      result.written++;
+      for (const bid of newly) {
+        toInsert.push({ user_id: uid, badge_id: bid });
+      }
     }
-
-    writeOps.push({
-      uid,
-      payload: {
-        stats,
-        statsHash,
-        unlockedBadgeIds: merged,
-        lastStatsUpdate: now,
-      },
-    });
   }
 
-  if (dryRun || writeOps.length === 0) {
-    result.written = writeOps.length;
-    return result;
+  if (dryRun || toInsert.length === 0) return result;
+
+  // 6. user_badges INSERT (ON CONFLICT DO NOTHING for safety, but PK 중복은 위에서 제외했음)
+  const { error: insertError } = await supabase
+    .from('user_badges')
+    .upsert(toInsert, { onConflict: 'user_id,badge_id', ignoreDuplicates: true });
+
+  if (insertError) {
+    console.error('[userStats] user_badges INSERT 실패:', insertError);
+    throw insertError;
   }
 
-  // 4. 배치 쓰기 (Firestore batch 한도 500)
-  const BATCH_MAX = 400;
-  for (let i = 0; i < writeOps.length; i += BATCH_MAX) {
-    const batch = adminDb.batch();
-    const chunk = writeOps.slice(i, i + BATCH_MAX);
-    for (const op of chunk) {
-      batch.set(adminDb.collection('users').doc(op.uid), op.payload, { merge: true });
-    }
-    await batch.commit();
-  }
-  result.written = writeOps.length;
   return result;
 }
 
-/**
- * 단일 authorId 한정 재계산 (글 작성·삭제 직후 호출용)
- * feedPosts 는 전체 또는 해당 author 의 글만 들어 있어도 동작.
- */
 export async function recomputeUserStatsFromFeed(
   uid: string,
-  feedPosts: any[],
+  feedPosts: unknown[],
   options: { dryRun?: boolean } = {},
 ): Promise<RecomputeResult> {
   return recomputeAllUserStatsFromFeed(feedPosts, { ...options, onlyAuthorId: uid });

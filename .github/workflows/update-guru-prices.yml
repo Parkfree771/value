@@ -27,13 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Update guru portfolio prices
+      - name: Update guru portfolio prices (Supabase)
         env:
-          FIREBASE_SERVICE_ACCOUNT_BASE64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_BASE64 }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
           KIS_BASE_URL: https://openapi.koreainvestment.com:9443
         run: npx tsx scripts/github-update-guru-prices.ts
-
-      # 캐시 갱신: revalidate 대신 캐시키 전략 사용
-      # 06:00-07:00 KST 사이 프론트엔드가 10분 단위 캐시키로 자동 갱신
