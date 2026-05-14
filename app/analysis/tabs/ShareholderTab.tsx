@@ -128,7 +128,7 @@ export function ShareholderTab({
           return `${s.effectiveDate.slice(0, 4)}년 발행주식수 ${change}`;
         })
         .join(' · '),
-      note: 'SEC 분할 공시가 없습니다 — 유상증자·합병·자본재구조화 등 다른 사유일 수 있어 직접 확인이 필요합니다.',
+      note: '정형화된 분할 공시 데이터가 없어 자동 판별이 어렵습니다 — 액면분할·유상증자·합병·자본재구조화 등 사유일 수 있어 직접 확인이 필요합니다.',
     });
   }
 

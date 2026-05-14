@@ -40,6 +40,18 @@ function parseAmount(value: string | undefined | null): number | null {
   return Math.round(num / 100000000);
 }
 
+/** DART 원 단위 그대로 파싱 (EPS·주식수처럼 1억으로 나누면 안 되는 값) */
+function parseRaw(value: string | undefined | null): number | null {
+  if (!value || value === '') return null;
+  const num = parseInt(value.replace(/,/g, ''), 10);
+  return isNaN(num) ? null : num;
+}
+
+/** CF의 차감 항목 (배당금지급·자사주매입)은 보통 음수로 보고 → 양수(절대값)으로 통일 (SEC와 일관성) */
+function absAmount(v: number | null): number | null {
+  return v === null ? null : Math.abs(v);
+}
+
 /** reprt_code → 분기 번호 */
 function reprtToQuarter(reprtCode: string): number | undefined {
   switch (reprtCode) {
@@ -48,6 +60,48 @@ function reprtToQuarter(reprtCode: string): number | undefined {
     case '11014': return 3;
     case '11011': return 4;
     default: return undefined;
+  }
+}
+
+/**
+ * 주식의 총수 현황 (stockTotqySttus) — 발행주식수.
+ * 응답의 list 안에서 보통주(stock_knd='보통주') 합계의 distb_stock_co(유통주식수) 또는
+ * istc_totqy(발행주식의 총수)에서 자기주식수 차감한 값을 사용.
+ */
+async function fetchSharesOutstanding(corpCode: string, year: number, reprtCode: string): Promise<number | null> {
+  const isPastYear = year < new Date().getFullYear();
+  const url = `${DART_BASE}/stockTotqySttus.json?crtfc_key=${DART_API_KEY}&corp_code=${corpCode}&bsns_year=${year}&reprt_code=${reprtCode}`;
+  try {
+    const resp = await fetch(url, {
+      next: {
+        revalidate: isPastYear ? false : 3600,
+        tags: [`dart-shares-${corpCode}`, `dart-shares-${corpCode}-${year}`],
+      },
+    });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (data.status !== '000' || !Array.isArray(data.list)) return null;
+
+    // 보통주 합계 행 우선. 없으면 보통주 행 첫번째.
+    const list = data.list as any[];
+    const isCommon = (r: any) => typeof r.stock_knd === 'string' && r.stock_knd.includes('보통주');
+    // "합계"가 stock_knd 또는 se 에 포함된 경우 우선
+    let target = list.find((r) => isCommon(r) && (r.stock_knd?.includes('합계') || r.se?.includes('합계')));
+    if (!target) target = list.find(isCommon);
+    if (!target) target = list[0];
+    if (!target) return null;
+
+    // distb_stock_co (유통주식수) 우선. 없으면 istc_totqy (발행총수) - tesstk_co (자기주식)
+    const distb = parseRaw(target.distb_stock_co);
+    if (distb && distb > 0) return distb;
+
+    const issued = parseRaw(target.istc_totqy);
+    const treasury = parseRaw(target.tesstk_co) ?? 0;
+    if (issued && issued > 0) return issued - treasury;
+
+    return null;
+  } catch {
+    return null;
   }
 }
 
@@ -74,6 +128,14 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
   let operatingCashFlow: number | null = null;
   let investingCashFlow: number | null = null;
   let financingCashFlow: number | null = null;
+  // SEC 주주환원 탭과 동등한 필드 (KR)
+  let epsBasic: number | null = null;
+  let epsDiluted: number | null = null;
+  let cashBalance: number | null = null;
+  let longTermDebt: number | null = null;
+  let dividendsPaid: number | null = null;
+  let stockBuyback: number | null = null;
+  let shareBasedComp: number | null = null;
 
   for (const item of filtered) {
     const name = item.account_nm;
@@ -81,7 +143,13 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
 
     // 손익계산서 (IS / CIS)
     if (item.sj_div === 'IS' || item.sj_div === 'CIS') {
-      if (matchAccount(name, ['매출액', '수익(매출액)', '영업수익']) && !name.includes('원가') && !name.includes('총이익')) {
+      // 매출 매칭 — '매출' 단독('매출액' 라인 없이 보고하는 회사 대응, 예: 한화에어로스페이스)
+      // 금융지주는 '매출'/'매출액' 라인 자체가 없어 null 유지 (정책: 영업이익/순이익만 표시)
+      if (
+        matchAccount(name, ['매출액', '수익(매출액)', '영업수익', '매출'])
+        && !name.includes('원가') && !name.includes('총이익') && !name.includes('원가율')
+        && !name.includes('채권') && !name.includes('계약')
+      ) {
         if (revenue === null) revenue = amount;
       }
       if (matchAccount(name, ['영업이익']) && !name.includes('금융')) {
@@ -89,6 +157,21 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
       }
       if (matchAccount(name, ['당기순이익', '당기순이익(손실)', '당기순손익'])) {
         if (netIncome === null) netIncome = amount;
+      }
+      // EPS — 원/주 단위, 1억 나누면 안 됨
+      if (
+        matchAccount(name, ['희석주당', '희석 주당'])
+        || (matchAccount(name, ['희석']) && name.includes('주당'))
+      ) {
+        if (epsDiluted === null) epsDiluted = parseRaw(item.thstrm_amount);
+      } else if (
+        matchAccount(name, ['기본주당', '기본 주당', '주당이익', '주당손익', '주당순이익'])
+      ) {
+        if (epsBasic === null) epsBasic = parseRaw(item.thstrm_amount);
+      }
+      // 주식기준보상비용 — IS 안의 비용 라인 (드물게 잡힘)
+      if (matchAccount(name, ['주식기준보상', '주식보상비용'])) {
+        if (shareBasedComp === null) shareBasedComp = amount;
       }
     }
 
@@ -109,6 +192,19 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
       if (matchAccount(name, ['유동부채']) && !name.includes('비유동')) {
         if (currentLiabilities === null) currentLiabilities = amount;
       }
+      // 현금잔액 — "현금및현금성자산"
+      if (matchAccount(name, ['현금및현금성자산', '현금 및 현금성자산'])) {
+        if (cashBalance === null) cashBalance = amount;
+      }
+      // 장기차입금 — 비유동 차입금 + 사채. 가장 큰 단일 라인 우선.
+      if (
+        matchAccount(name, ['장기차입금'])
+        || (matchAccount(name, ['사채']) && !name.includes('단기'))
+        || matchAccount(name, ['비유동차입금', '비유동 차입금'])
+      ) {
+        // 첫 매칭만 사용 (보통 종합 합계가 먼저 옴)
+        if (longTermDebt === null) longTermDebt = amount;
+      }
     }
 
     // 현금흐름표 (CF)
@@ -121,6 +217,30 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
       }
       if (matchAccount(name, ['재무활동현금흐름', '재무활동 현금흐름', '재무활동으로인한현금흐름', '재무활동으로 인한 현금흐름'])) {
         if (financingCashFlow === null) financingCashFlow = amount;
+      }
+      // 배당금지급 — 음수로 보고. SEC와 일관성 위해 절대값.
+      // 표기 변형 많음: 공백, 괄호, "의" 삽입 등. 공백 제거 후 매칭.
+      const compact = name.replace(/\s+/g, '');
+      if (
+        compact.includes('배당금지급')
+        || compact.includes('배당금의지급')
+        || compact.includes('현금배당금지급')
+        || compact.includes('현금배당지급')
+      ) {
+        if (dividendsPaid === null) dividendsPaid = absAmount(amount);
+      }
+      // 자기주식 취득 — 양수/음수 둘 다 가능. 절대값.
+      if (
+        compact.includes('자기주식취득')
+        || compact.includes('자기주식의취득')
+        || compact.includes('자사주매입')
+        || compact.includes('자사주취득')
+      ) {
+        if (stockBuyback === null) stockBuyback = absAmount(amount);
+      }
+      // 주식기준보상 (현금흐름 비현금 가산 — IS에서 못 잡혔으면 여기서)
+      if (shareBasedComp === null && matchAccount(name, ['주식기준보상', '주식보상비용'])) {
+        shareBasedComp = amount;
       }
     }
   }
@@ -147,10 +267,12 @@ function extractMetrics(items: DartFinancialRaw[], year: number, reprtCode: stri
     currentAssets, currentLiabilities,
     debtRatio, currentRatio, roe, roa,
     operatingCashFlow, investingCashFlow, financingCashFlow, freeCashFlow,
-    // 주주환원/현금잔액/차입금 — DART 파서 미지원, US/SEC 전용
-    dividendsPaid: null, stockBuyback: null, cashBalance: null, longTermDebt: null,
-    // SBC·주식수·EPS — US/SEC 전용
-    shareBasedComp: null, sharesOutstanding: null, epsBasic: null, epsDiluted: null,
+    // 주주환원 (SEC와 동등)
+    dividendsPaid, stockBuyback, cashBalance, longTermDebt,
+    shareBasedComp,
+    // 주식수는 별도 API (stockTotqySttus) 호출로 후처리에서 채움
+    sharesOutstanding: null,
+    epsBasic, epsDiluted,
   };
 }
 
@@ -223,15 +345,24 @@ export async function GET(request: NextRequest) {
 
     const requests = years.flatMap(year =>
       reprtCodes.map(async (reprtCode) => {
-        const list = await fetchDartReport(corpCode, year, reprtCode);
+        // 재무제표 + 발행주식수 병렬 fetch
+        const [list, shares] = await Promise.all([
+          fetchDartReport(corpCode, year, reprtCode),
+          fetchSharesOutstanding(corpCode, year, reprtCode),
+        ]);
         if (!list) return null;
-        return extractMetrics(list, year, reprtCode);
+        const m = extractMetrics(list, year, reprtCode);
+        m.sharesOutstanding = shares;
+        return m;
       })
     );
 
     const results = await Promise.all(requests);
+    // 매출이 null이라도 영업이익·순이익이 있으면 유효 기간으로 인정 (금융지주 등 매출 개념 없는 회사)
     const sorted = results
-      .filter((m): m is FinancialMetrics => m !== null && m.revenue !== null)
+      .filter((m): m is FinancialMetrics =>
+        m !== null && (m.revenue !== null || m.operatingProfit !== null || m.netIncome !== null),
+      )
       .sort((a, b) => {
         if (a.year !== b.year) return a.year - b.year;
         return (a.quarter || 4) - (b.quarter || 4);

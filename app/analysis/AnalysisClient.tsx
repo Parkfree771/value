@@ -10,12 +10,14 @@ import type {
   ViewMode,
   AnalysisTab,
   TrendsResponse,
+  SplitEvent,
 } from './types';
 import { CompanyHeader } from './components/CompanyHeader';
 import { MarketTabs } from './components/MarketTabs';
 import { PerformanceTab } from './tabs/PerformanceTab';
 import { StabilityTab } from './tabs/StabilityTab';
 import { CashFlowTab } from './tabs/CashFlowTab';
+import { ShareholderTab } from './tabs/ShareholderTab';
 import { InterestTab } from './tabs/InterestTab';
 
 /* ─── 기간 선택 ─── */
@@ -44,6 +46,7 @@ const TABS: { key: AnalysisTab; label: string; color: string }[] = [
   { key: 'performance', label: '실적', color: '#3b50b5' },      // 인디고
   { key: 'cashflow', label: '현금흐름', color: '#059669' },     // 이메랄드
   { key: 'stability', label: '부채', color: '#F97316' },        // 오렌지
+  { key: 'shareholder', label: '주주환원', color: '#7c3aed' },  // 바이올렛
   { key: 'interest', label: '관심도', color: '#db2777' },       // 핑크
 ];
 
@@ -63,6 +66,30 @@ export default function AnalysisClient() {
   const [companyInfo, setCompanyInfo] = useState<DartCompanyInfo | null>(null);
   const [stockProfile, setStockProfile] = useState<StockProfile | null>(null);
   const [financialData, setFinancialData] = useState<FinancialMetrics[]>([]);
+
+  // 발행주식수 시계열에서 비정상적 점프(±2배 이상) 검출 → 사용자에게 "직접 확인" 안내만 표시.
+  // 데이터 보정(곱하기)은 절대 안 함 — 액면분할 아닌 신주발행·자본재구조화 등이 섞여 있어 false positive 위험.
+  // DART에 정형 액면분할 공시 데이터가 없어 자동 판별 불가.
+  const unverifiedSplits = useMemo<SplitEvent[]>(() => {
+    if (financialData.length < 2) return [];
+    const out: SplitEvent[] = [];
+    for (let i = 1; i < financialData.length; i++) {
+      const prev = financialData[i - 1].sharesOutstanding;
+      const curr = financialData[i].sharesOutstanding;
+      if (prev === null || curr === null || prev === 0 || curr === 0) continue;
+      const ratio = curr / prev;
+      if (!Number.isFinite(ratio) || ratio <= 0) continue;
+      // ±2배 미만 변동은 정상 (자사주매입·증자·소각 등) → 알림 안 함
+      if (ratio < 1.8 && ratio > 0.55) continue;
+      out.push({
+        effectiveDate: `${financialData[i].year}-01-01`,
+        ratio,
+        appliedAtPeriod: financialData[i].period,
+        source: 'unverified',
+      });
+    }
+    return out;
+  }, [financialData]);
 
   const [viewMode, setViewMode] = useState<ViewMode>('annual');
   const [yearRange, setYearRange] = useState<YearRangeKey>('5Y');
@@ -445,6 +472,9 @@ export default function AnalysisClient() {
           {activeTab === 'performance' && <PerformanceTab data={financialData} />}
           {activeTab === 'cashflow' && <CashFlowTab data={financialData} />}
           {activeTab === 'stability' && <StabilityTab data={financialData} />}
+          {activeTab === 'shareholder' && (
+            <ShareholderTab data={financialData} currency="KRW" splits={unverifiedSplits} />
+          )}
           {activeTab === 'interest' && (
             <InterestTab
               data={trendsData}
