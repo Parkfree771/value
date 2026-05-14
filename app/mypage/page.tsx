@@ -16,8 +16,6 @@ import {
   BADGES,
   BADGES_BY_ID,
   CATEGORY_LABEL,
-  calculateUserStats,
-  getUnlockedBadgeIds,
   type BadgeCategory,
 } from '@/lib/badges';
 import BadgeIcon from '@/components/BadgeIcon';
@@ -54,29 +52,17 @@ export default function MyPage() {
     }
   }, [user, authReady, router]);
 
-  // 사용자 리포트 가져오기
+  // 본인 작성 리포트 — Firestore where 쿼리(by-author API). feed.json 전체 받지 않음.
   useEffect(() => {
     if (!user) return;
 
-    const fetchUserData = async () => {
+    const fetchMyReports = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/feed/public');
-        const feedData = await response.json();
-        const posts = feedData.posts || [];
-
-        // 전체 게시물 저장 (북마크 필터링용)
-        setAllPosts(posts);
-
-        const myPosts = posts
-          .filter((post: any) => post.authorId === user.uid)
-          .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-        if (myPosts.length > 0) {
-          setUserProfile({ nickname: myPosts[0].author });
-        }
-
-        const fetchedReports: Report[] = myPosts.map((data: any) => ({
+        const res = await fetch(`/api/reports/by-author?uid=${encodeURIComponent(user.uid)}`);
+        if (!res.ok) throw new Error('fetch failed');
+        const { reports } = await res.json();
+        const fetchedReports: Report[] = (reports || []).map((data: any) => ({
           id: data.id,
           title: data.title || '',
           author: data.author || '익명',
@@ -101,17 +87,36 @@ export default function MyPage() {
           positionType: data.positionType || 'long',
           stockData: {},
         }));
-
         setMyReports(fetchedReports);
       } catch (error) {
-        console.error('사용자 데이터 가져오기 실패:', error);
+        console.error('내 리포트 가져오기 실패:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserData();
+    fetchMyReports();
   }, [user]);
+
+  // 북마크 탭 활성화 시점에만 feed.json lazy fetch (북마크는 본인 글 외 다양한 작가 글)
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab !== 'bookmarks') return;
+    if (allPosts.length > 0) return; // 이미 받은 경우 재요청 안 함
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/feed/public');
+        const data = await res.json();
+        if (!cancelled) setAllPosts(data.posts || []);
+      } catch (e) {
+        console.error('북마크용 피드 로드 실패:', e);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, user, allPosts.length]);
 
   // 본인 프로필(닉네임·장착 배지) 로드 — 게시글이 없어도 정보 표시 필요
   useEffect(() => {
@@ -134,27 +139,29 @@ export default function MyPage() {
     };
   }, [user]);
 
-  // 통계 계산
-  const totalReports = myReports.length;
-  const avgReturnRate = totalReports > 0
-    ? (myReports.reduce((sum, r) => sum + r.returnRate, 0) / totalReports).toFixed(2)
-    : '0.00';
-  const maxReturnRate = totalReports > 0
-    ? Math.max(...myReports.map((r) => r.returnRate)).toFixed(2)
-    : '0.00';
-  const minReturnRate = totalReports > 0
-    ? Math.min(...myReports.map((r) => r.returnRate)).toFixed(2)
-    : '0.00';
-  const winRate = totalReports > 0
-    ? ((myReports.filter((r) => r.returnRate > 0).length / totalReports) * 100).toFixed(0)
-    : '0';
-  const totalViews = myReports.reduce((sum, r) => sum + r.views, 0);
-  const totalLikes = myReports.reduce((sum, r) => sum + r.likes, 0);
+  // 통계 — users 컬렉션 stats 우선. 첫 글 작성 직후처럼 stats가 아직 없으면 myReports 즉석 계산으로 fallback.
+  const savedStats = userProfile?.stats;
+  const totalReports = savedStats?.totalReports ?? myReports.length;
+  const avgReturnRate = (savedStats?.avgReturnRate ?? (
+    myReports.length > 0 ? myReports.reduce((sum, r) => sum + r.returnRate, 0) / myReports.length : 0
+  )).toFixed(2);
+  const maxReturnRate = (savedStats?.maxReturnRate ?? (
+    myReports.length > 0 ? Math.max(...myReports.map((r) => r.returnRate)) : 0
+  )).toFixed(2);
+  const minReturnRate = (savedStats?.minReturnRate ?? (
+    myReports.length > 0 ? Math.min(...myReports.map((r) => r.returnRate)) : 0
+  )).toFixed(2);
+  const winRate = (savedStats?.winRate ?? (
+    myReports.length > 0 ? (myReports.filter((r) => r.returnRate > 0).length / myReports.length) * 100 : 0
+  )).toFixed(0);
+  const totalViews = savedStats?.totalViews ?? myReports.reduce((sum, r) => sum + r.views, 0);
+  const totalLikes = savedStats?.totalLikes ?? myReports.reduce((sum, r) => sum + r.likes, 0);
 
-  // 배지 통계·해금 — 매 렌더마다 새 객체가 되지 않도록 useMemo
-  const badgeStats = useMemo(() => calculateUserStats(myReports), [myReports]);
-  const unlockedIds = useMemo(() => getUnlockedBadgeIds(badgeStats), [badgeStats]);
-  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds]);
+  // 해금 배지 — users.unlockedBadgeIds (sticky, 서버에서 누적 저장됨)
+  const unlockedIds: string[] = Array.isArray(userProfile?.unlockedBadgeIds)
+    ? userProfile.unlockedBadgeIds.filter((id: any) => typeof id === 'string' && BADGES_BY_ID[id])
+    : [];
+  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds.join(',')]);
 
   // 장착 배지 변경
   const handleEquipBadge = async (badgeId: string | null) => {

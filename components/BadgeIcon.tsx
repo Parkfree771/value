@@ -14,6 +14,24 @@ type SvgRender = () => React.ReactNode;
 
 const RENDERERS: Record<string, SvgRender> = {
   // ─── 활동 ───
+  'posts-1': () => (
+    // 발자국 (첫걸음)
+    <>
+      <rect x="3" y="3" width="58" height="58" rx="12" fill="#1A2860" stroke="#0F1B3D" strokeWidth="2" />
+      {/* 뒤쪽 발자국 (작고 연하게) */}
+      <ellipse cx="22" cy="42" rx="6" ry="8" fill="#3B50B5" stroke="#0F1B3D" strokeWidth="1.5" />
+      <circle cx="19" cy="32" r="2" fill="#3B50B5" stroke="#0F1B3D" strokeWidth="1" />
+      <circle cx="23" cy="30" r="2" fill="#3B50B5" stroke="#0F1B3D" strokeWidth="1" />
+      <circle cx="27" cy="32" r="2" fill="#3B50B5" stroke="#0F1B3D" strokeWidth="1" />
+      {/* 앞쪽 발자국 (크고 진하게) */}
+      <ellipse cx="40" cy="32" rx="7" ry="9" fill="#FFFFFF" stroke="#0F1B3D" strokeWidth="2" />
+      <circle cx="36" cy="20" r="2.5" fill="#FFFFFF" stroke="#0F1B3D" strokeWidth="1.5" />
+      <circle cx="41" cy="17" r="2.5" fill="#FFFFFF" stroke="#0F1B3D" strokeWidth="1.5" />
+      <circle cx="46" cy="20" r="2.5" fill="#FFFFFF" stroke="#0F1B3D" strokeWidth="1.5" />
+      <circle cx="49" cy="25" r="2" fill="#FFFFFF" stroke="#0F1B3D" strokeWidth="1.5" />
+    </>
+  ),
+
   'posts-5': () => (
     // 두루마리
     <>
@@ -167,6 +185,22 @@ const RENDERERS: Record<string, SvgRender> = {
   ),
 
   // ─── 인버스 ───
+  'bear-shy': () => (
+    // 하방 화살표 (역방향 시도자, 가벼운 톤)
+    <>
+      <rect x="3" y="3" width="58" height="58" rx="12" fill="#2563EB" stroke="#1E3A8A" strokeWidth="2" />
+      <path
+        d="M 24 14 L 40 14 L 40 36 L 50 36 L 32 52 L 14 36 L 24 36 Z"
+        fill="#FFFFFF"
+        stroke="#1E3A8A"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <line x1="28" y1="20" x2="36" y2="20" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" />
+      <line x1="28" y1="26" x2="36" y2="26" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+
   'short-master': () => (
     // 닻
     <>
@@ -215,6 +249,30 @@ const RENDERERS: Record<string, SvgRender> = {
   ),
 
   // ─── 특수 ───
+  'crypto-pioneer': () => (
+    // ₿ 코인 (크립토 작가)
+    <>
+      <rect x="3" y="3" width="58" height="58" rx="12" fill="#F97316" stroke="#9A3412" strokeWidth="2" />
+      <circle cx="32" cy="32" r="18" fill="#FFFFFF" stroke="#0F1B3D" strokeWidth="2.5" />
+      <circle cx="32" cy="32" r="13" fill="#F59E0B" stroke="#0F1B3D" strokeWidth="1.5" />
+      <text
+        x="32"
+        y="40"
+        fontSize="20"
+        fontWeight="900"
+        textAnchor="middle"
+        fill="#FFFFFF"
+        fontFamily="Arial Black, Arial, sans-serif"
+        stroke="#0F1B3D"
+        strokeWidth="0.6"
+      >
+        ₿
+      </text>
+      <line x1="32" y1="12" x2="32" y2="16" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+      <line x1="32" y1="48" x2="32" y2="52" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+    </>
+  ),
+
   'views-10k': () => (
     // 태양
     <>

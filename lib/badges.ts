@@ -13,9 +13,34 @@ export interface UserStats {
   winRate: number;              // 0-100
   totalViews: number;
   totalLikes: number;
-  shortPositions: number;
+  shortPositions: number;       // positionType='short' + 인버스 ETF 매수 (effective short)
   shortAvgReturnRate: number;
   uniqueTickers: number;
+  cryptoCount: number;          // exchange='CRYPTO' 글 수
+}
+
+// 인버스 ETF: 매수해도 사실상 시장 하락에 베팅하는 종목.
+// 일반 종목 매도(positionType='short')와 의미적으로 동치 → 통계에서 합산.
+const INVERSE_ETF_TICKERS = new Set<string>([
+  // 미국
+  'SQQQ', 'PSQ', 'QID',          // 나스닥 인버스
+  'SH', 'SDS', 'SPXU', 'SPXS',   // S&P500 인버스
+  'DOG', 'DXD',                  // 다우 인버스
+  'TZA', 'TWM',                  // 러셀2000 인버스
+  'SOXS',                        // 반도체 인버스
+  'FAZ',                         // 금융 인버스
+  'SCO',                         // 원유 인버스
+  'TBT', 'TMV',                  // 채권 인버스
+  // 한국
+  '252670',                      // KODEX 200선물 인버스 2X
+  '233160',                      // TIGER 코스닥150 선물 인버스
+  '114800',                      // KODEX 인버스
+  '139660',                      // KODEX 200선물 인버스
+]);
+
+export function isInverseEtf(ticker?: string | null): boolean {
+  if (!ticker) return false;
+  return INVERSE_ETF_TICKERS.has(ticker.toUpperCase().trim());
 }
 
 export interface BadgeDef {
@@ -29,6 +54,13 @@ export interface BadgeDef {
 // 모든 배지 정의. 추가는 여기서만.
 export const BADGES: BadgeDef[] = [
   // ─── 활동 (글 수) ───
+  {
+    id: 'posts-1',
+    name: '첫걸음',
+    description: '첫 리포트 작성',
+    category: 'activity',
+    condition: (s) => s.totalReports >= 1,
+  },
   {
     id: 'posts-5',
     name: '입문 분석가',
@@ -83,16 +115,23 @@ export const BADGES: BadgeDef[] = [
 
   // ─── 인버스 (숏 포지션·역방향) ───
   {
+    id: 'bear-shy',
+    name: '역방향 시도자',
+    description: '숏·인버스 글 1개+',
+    category: 'inverse',
+    condition: (s) => s.shortPositions >= 1,
+  },
+  {
     id: 'short-master',
     name: '인버스 마스터',
-    description: '숏 포지션 글 5개+',
+    description: '숏·인버스 글 5개+',
     category: 'inverse',
     condition: (s) => s.shortPositions >= 5,
   },
   {
     id: 'bear-alpha',
     name: '베어 알파',
-    description: '숏 평균 수익률 +20% (숏 3개+)',
+    description: '숏·인버스 평균 수익률 +20% (3개+)',
     category: 'inverse',
     condition: (s) => s.shortAvgReturnRate >= 20 && s.shortPositions >= 3,
   },
@@ -105,6 +144,13 @@ export const BADGES: BadgeDef[] = [
   },
 
   // ─── 특수 ───
+  {
+    id: 'crypto-pioneer',
+    name: '크립토 작가',
+    description: '크립토 리포트 1개+',
+    category: 'special',
+    condition: (s) => s.cryptoCount >= 1,
+  },
   {
     id: 'views-10k',
     name: '화제의 작가',
@@ -139,6 +185,7 @@ export interface PostForStats {
   positionType?: 'long' | 'short' | string;
   ticker?: string;
   stockName?: string;
+  exchange?: string;
 }
 
 export function calculateUserStats(posts: PostForStats[]): UserStats {
@@ -155,16 +202,22 @@ export function calculateUserStats(posts: PostForStats[]): UserStats {
       shortPositions: 0,
       shortAvgReturnRate: 0,
       uniqueTickers: 0,
+      cryptoCount: 0,
     };
   }
 
   const returns = posts.map((p) => p.returnRate ?? 0);
-  const shorts = posts.filter((p) => p.positionType === 'short');
+  // effective short: positionType='short' 이거나 인버스 ETF 매수.
+  // 인버스 ETF는 long으로 박혀있어도 의미적으로는 하락 베팅이므로 합산.
+  const shorts = posts.filter(
+    (p) => p.positionType === 'short' || isInverseEtf(p.ticker)
+  );
   const shortReturns = shorts.map((p) => p.returnRate ?? 0);
   const wins = returns.filter((r) => r > 0).length;
   const tickers = new Set(
     posts.map((p) => (p.ticker || p.stockName || '').toUpperCase().trim()).filter(Boolean)
   );
+  const cryptoCount = posts.filter((p) => (p.exchange || '').toUpperCase() === 'CRYPTO').length;
 
   return {
     totalReports: total,
@@ -178,6 +231,7 @@ export function calculateUserStats(posts: PostForStats[]): UserStats {
     shortAvgReturnRate:
       shorts.length > 0 ? shortReturns.reduce((a, b) => a + b, 0) / shorts.length : 0,
     uniqueTickers: tickers.size,
+    cryptoCount,
   };
 }
 

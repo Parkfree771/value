@@ -10,6 +10,7 @@ interface Investor {
   name: string;
   avgReturnRate: number;
   linkPath?: string;
+  equippedBadgeId?: string | null;
 }
 
 interface PodiumProps {
@@ -40,7 +41,7 @@ const Podium = memo(function Podium({ topThree }: PodiumProps) {
       >
         <div className={rankClass}>{rank}</div>
         <div className={nameClass}>
-          <UserBadgeInline nickname={data.name} size={rank === 1 ? 18 : 14} className="mr-1" />
+          <UserBadgeInline badgeId={data.equippedBadgeId} nickname={data.name} size={rank === 1 ? 18 : 14} className="mr-1" />
           {data.name}
         </div>
         <div className={returnClass}>

@@ -149,6 +149,16 @@ async function refreshPricesIfStale(feedData: FeedData): Promise<FeedData> {
       // 저장 실패해도 사용자에게는 갱신된 데이터 반환
     }
 
+    // 사용자 통계·해금배지 재계산 (fire-and-forget)
+    try {
+      const { recomputeAllUserStatsFromFeed } = await import('@/lib/userStats');
+      recomputeAllUserStatsFromFeed(updatedFeed.posts).catch((err) =>
+        console.warn('[Feed TTL] user stats recompute 실패:', err?.message || err),
+      );
+    } catch (err) {
+      console.warn('[Feed TTL] user stats import 실패:', err);
+    }
+
     console.log(`[Feed TTL] Refreshed ${successCount}/${uniqueTickers.size} tickers`);
     return updatedFeed;
 

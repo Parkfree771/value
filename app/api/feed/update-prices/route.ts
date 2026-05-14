@@ -15,6 +15,7 @@ import { getKISTokenWithCache } from '@/lib/kisTokenManager';
 import { calculateReturn } from '@/utils/calculateReturn';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
+import { recomputeAllUserStatsFromFeed } from '@/lib/userStats';
 import type { FeedPost, FeedData } from '@/types/feed';
 
 // KIS API 설정
@@ -254,6 +255,16 @@ export async function POST(request: NextRequest) {
       contentType: 'application/json',
       metadata: { cacheControl: 'public, max-age=60' },
     });
+
+    // 8. 사용자 통계·해금배지 재계산
+    try {
+      const r = await recomputeAllUserStatsFromFeed(feedData.posts);
+      console.log(
+        `[Update Prices] user stats: scanned=${r.scanned} written=${r.written} newlyUnlocked=${r.newlyUnlocked}`,
+      );
+    } catch (err) {
+      console.warn('[Update Prices] user stats recompute 실패:', err);
+    }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`[Update Prices] ===== Completed: ${successCount}/${uniqueTickers.size} tickers (${duration}s) =====`);

@@ -13,6 +13,7 @@ import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
 import { calculateReturn } from '@/utils/calculateReturn';
 import { pingIndexNow } from '@/lib/indexnow';
+import { recomputeAllUserStatsFromFeed } from '@/lib/userStats';
 import type { FeedPost, FeedData } from '@/types/feed';
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr').replace(/\/$/, '');
@@ -107,8 +108,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 현재 feed.json 읽기
-    const feed = await getFeed();
+    // 현재 feed.json 읽기 + 작성자 장착 배지 1회 조회 (병렬)
+    const { BADGES_BY_ID } = await import('@/lib/badges');
+    const [feed, authorSnap] = await Promise.all([
+      getFeed(),
+      adminDb.collection('users').doc(userId).get(),
+    ]);
+    const authorEquipped = (() => {
+      const v = authorSnap.exists ? (authorSnap.data() as any)?.equippedBadgeId : null;
+      return typeof v === 'string' && BADGES_BY_ID[v] ? v : null;
+    })();
 
     // 수익률 계산 (작성 시점에는 initialPrice = currentPrice)
     const positionType: 'long' | 'short' =
@@ -125,6 +134,8 @@ export async function POST(request: NextRequest) {
       id: postId,
       title: postData.title || '',
       author: postData.authorName || '익명',
+      authorId: userId,
+      equippedBadgeId: authorEquipped,
       stockName: postData.stockName || '',
       ticker: postData.ticker || '',
       exchange: postData.exchange || '',
@@ -178,6 +189,11 @@ export async function POST(request: NextRequest) {
     await saveFeed(feed);
 
     console.log(`[Feed API] Post ${postId} added to feed.json`);
+
+    // 사용자 통계·해금배지 재계산 (실패해도 응답에는 영향 없음)
+    recomputeAllUserStatsFromFeed(feed.posts).catch((err) =>
+      console.warn('[Feed API] user stats recompute 실패:', err?.message || err),
+    );
 
     // IndexNow: Bing/네이버/Yandex에 새 글/수정 즉시 통보
     // 새 글이면 sitemap·홈도 함께 통보하여 신규 발견 가속
@@ -278,6 +294,11 @@ export async function DELETE(request: NextRequest) {
     await saveFeed(feed);
 
     console.log(`[Feed API] Post ${postId} removed from feed.json`);
+
+    // 사용자 통계·해금배지 재계산
+    recomputeAllUserStatsFromFeed(feed.posts).catch((err) =>
+      console.warn('[Feed API] user stats recompute 실패:', err?.message || err),
+    );
 
     // IndexNow: 삭제된 페이지(404)와 sitemap을 통보하여 색인 정리 유도
     pingIndexNow([

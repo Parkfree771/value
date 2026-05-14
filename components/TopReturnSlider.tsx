@@ -14,6 +14,7 @@ interface TopReturn {
   ticker: string;
   returnRate: number;
   author: string;
+  equippedBadgeId?: string | null;
   createdAt: string;
 }
 
@@ -26,6 +27,7 @@ interface TopReturnSliderProps {
     returnRate: number;
     prevReturnRate?: number;
     author: string;
+    equippedBadgeId?: string | null;
     createdAt: string;
   }>;
 }
@@ -220,7 +222,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <h3 className="text-lg text-heading truncate min-w-0 inline-flex items-center gap-1">
-                          <UserBadgeInline nickname={item.author} size={16} />
+                          <UserBadgeInline badgeId={item.equippedBadgeId} nickname={item.author} size={16} />
                           {item.author}
                         </h3>
                         <RankChangeIndicator change={item.rankChange} className="flex-shrink-0" />

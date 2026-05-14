@@ -11,9 +11,8 @@ import {
   BADGES,
   BADGES_BY_ID,
   CATEGORY_LABEL,
-  calculateUserStats,
-  getUnlockedBadgeIds,
   type BadgeCategory,
+  type UserStats,
 } from '@/lib/badges';
 
 interface FeedPost {
@@ -35,74 +34,81 @@ interface FeedPost {
   authorId?: string;
 }
 
+interface UserInfo {
+  uid: string;
+  nickname: string;
+  bio: string;
+  equippedBadgeId: string | null;
+  stats: UserStats | null;
+  unlockedBadgeIds: string[];
+  lastStatsUpdate: string | null;
+}
+
 export default function UserPage() {
   const params = useParams();
   const router = useRouter();
   const username = decodeURIComponent(params.username as string);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [userReports, setUserReports] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    const fetchUserReports = async () => {
+    let cancelled = false;
+    (async () => {
       try {
-        // feed.json API에서 데이터 가져오기
-        const response = await fetch('/api/feed/public');
-        const data = await response.json();
+        // 1. 닉네임 → 사용자 정보·통계·해금배지
+        const userRes = await fetch(`/api/users/by-nickname/${encodeURIComponent(username)}`);
+        if (userRes.status === 404) {
+          if (!cancelled) setNotFound(true);
+          return;
+        }
+        if (!userRes.ok) throw new Error('user fetch failed');
+        const { user } = await userRes.json();
+        if (cancelled) return;
+        setUserInfo(user);
 
-        if (data.posts) {
-          // 해당 사용자의 리포트만 필터링
-          const filtered = data.posts.filter(
-            (post: FeedPost) => post.author === username
-          );
-
-          if (filtered.length === 0) {
-            setNotFound(true);
-          } else {
-            // 최신순 정렬
-            filtered.sort((a: FeedPost, b: FeedPost) =>
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-            setUserReports(filtered);
-          }
-        } else {
-          setNotFound(true);
+        // 2. uid → 해당 사용자가 작성한 글 (Firestore where 쿼리)
+        const reportsRes = await fetch(`/api/reports/by-author?uid=${encodeURIComponent(user.uid)}`);
+        if (reportsRes.ok) {
+          const { reports } = await reportsRes.json();
+          if (!cancelled) setUserReports(reports || []);
         }
       } catch (error) {
-        console.error('사용자 리포트 가져오기 실패:', error);
-        setNotFound(true);
+        console.error('사용자 데이터 가져오기 실패:', error);
+        if (!cancelled) setNotFound(true);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
+    })();
+    return () => {
+      cancelled = true;
     };
-
-    fetchUserReports();
   }, [username]);
 
-  // 통계 계산
-  const totalReports = userReports.length;
-  const avgReturnRate =
-    totalReports > 0
-      ? (userReports.reduce((sum, r) => sum + r.returnRate, 0) / totalReports).toFixed(2)
-      : '0.00';
-  const maxReturnRate =
-    totalReports > 0
-      ? Math.max(...userReports.map((r) => r.returnRate)).toFixed(2)
-      : '0.00';
-  const winRate =
-    totalReports > 0
-      ? ((userReports.filter((r) => r.returnRate > 0).length / totalReports) * 100).toFixed(0)
-      : '0';
-  const totalViews = userReports.reduce((sum, r) => sum + r.views, 0);
-  const totalLikes = userReports.reduce((sum, r) => sum + r.likes, 0);
+  // 통계 — users 컬렉션 stats 우선 (없으면 글 목록에서 즉석 계산)
+  const totalReports = userInfo?.stats?.totalReports ?? userReports.length;
+  const avgReturnRate = (userInfo?.stats?.avgReturnRate ?? (
+    userReports.length > 0
+      ? userReports.reduce((sum, r) => sum + r.returnRate, 0) / userReports.length
+      : 0
+  )).toFixed(2);
+  const maxReturnRate = (userInfo?.stats?.maxReturnRate ?? (
+    userReports.length > 0 ? Math.max(...userReports.map((r) => r.returnRate)) : 0
+  )).toFixed(2);
+  const winRate = (userInfo?.stats?.winRate ?? (
+    userReports.length > 0
+      ? (userReports.filter((r) => r.returnRate > 0).length / userReports.length) * 100
+      : 0
+  )).toFixed(0);
+  const totalViews = userInfo?.stats?.totalViews ?? userReports.reduce((sum, r) => sum + r.views, 0);
+  const totalLikes = userInfo?.stats?.totalLikes ?? userReports.reduce((sum, r) => sum + r.likes, 0);
 
-  // 배지 통계·해금 — 게시글 통계 기반 매번 계산 (저장 안 함)
-  const badgeStats = useMemo(() => calculateUserStats(userReports), [userReports]);
-  const unlockedIds = useMemo(() => getUnlockedBadgeIds(badgeStats), [badgeStats]);
+  // 해금된 배지 (sticky, users 컬렉션 저장값)
+  const unlockedIds = userInfo?.unlockedBadgeIds ?? [];
   const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds]);
 
-  // 장착 배지는 닉네임으로 조회 (UserBadgesContext)
-  const equippedBadgeId = useUserBadge(notFound ? null : username);
+  const equippedBadgeId = userInfo?.equippedBadgeId ?? null;
   const equippedDef = equippedBadgeId ? BADGES_BY_ID[equippedBadgeId] : null;
 
   if (loading) {
