@@ -247,7 +247,11 @@ function WritePageContent() {
       const newUploaded: { name: string; url: string }[] = [];
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
-        const safeName = file.name.replace(/[^a-zA-Z0-9가-힣._-]/g, '_');
+        // Supabase Storage 키는 ASCII만 허용 — 한글/특수문자 _ 치환
+        const safeName = file.name
+          .replace(/[^a-zA-Z0-9._-]/g, '_')
+          .replace(/_+/g, '_')
+          .slice(0, 60) || 'file';
         const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
         const objectPath = `${user.uid}/reports/files/${fileName}`;
         const { error: upError } = await supabase.storage.from('media').upload(objectPath, file, {

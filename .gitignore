@@ -18,6 +18,9 @@
 
 # misc
 .DS_Store
+
+# Phase 3 마이그레이션 산출물 (UID 매핑, 이메일 등 민감)
+/scripts/output/
 *.pem
 
 # debug

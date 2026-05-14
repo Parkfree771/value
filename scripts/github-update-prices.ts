@@ -23,6 +23,8 @@ const US_EXCHANGES = ['NAS', 'NYS', 'AMS'];
 const MARKET_TYPE = process.env.MARKET_TYPE || 'ALL';
 
 function shouldProcessExchange(exchange: string): boolean {
+  if (MARKET_TYPE === 'CRYPTO') return exchange === 'CRYPTO';
+  // 코인은 어느 마켓 cron이든 항상 통과 (24시간 거래)
   if (exchange === 'CRYPTO') return true;
   if (MARKET_TYPE === 'ALL') return true;
   if (MARKET_TYPE === 'ASIA') return ASIA_EXCHANGES.includes(exchange);
@@ -43,7 +45,9 @@ const supabase = createClient(supabaseUrl, supabaseSecret, {
 
 // ===== KIS 토큰 (settings 테이블 캐시) =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_BETWEEN_REQUESTS = 50;
+// KIS 공식 한도 = 초당 20회. 안전마진 크게 잡아 초당 4회(250ms).
+// 75 ticker 기준 약 19초 — 15분 cron 안에 매우 여유.
+const DELAY_BETWEEN_REQUESTS = 250;
 
 async function getKISToken(): Promise<string> {
   const { data: cached } = await supabase
@@ -294,6 +298,29 @@ async function main() {
 
     if (errors.length > 0) {
       console.log(`[CRON] errors: ${errors.slice(0, 5).join(', ')}${errors.length > 5 ? ` +${errors.length - 5}` : ''}`);
+    }
+
+    // 사이트 ISR 캐시 무효화 — 새 가격을 즉시 노출하기 위함
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    const revalidateSecret = process.env.REVALIDATE_SECRET;
+    if (siteUrl && revalidateSecret) {
+      for (const target of ['/', '/ranking', '/search']) {
+        try {
+          const res = await fetch(`${siteUrl.replace(/\/$/, '')}/api/revalidate`, {
+            method: 'POST',
+            headers: {
+              'content-type': 'application/json',
+              'x-revalidate-secret': revalidateSecret,
+            },
+            body: JSON.stringify({ path: target }),
+          });
+          console.log(`[CRON] revalidate ${target}: ${res.status}`);
+        } catch (err) {
+          console.warn(`[CRON] revalidate ${target} 실패:`, err instanceof Error ? err.message : err);
+        }
+      }
+    } else {
+      console.log('[CRON] NEXT_PUBLIC_SITE_URL/REVALIDATE_SECRET 미설정 — revalidate 스킵');
     }
 
     process.exit(failCount > successCount ? 1 : 0);

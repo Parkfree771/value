@@ -40,6 +40,8 @@ interface ReportCardProps {
   createdAt: string;
   views: number;
   likes: number;
+  commentCount?: number;
+  authorIsVirtual?: boolean;
   showActions?: boolean;
   onDelete?: () => void;
   category?: string;
@@ -66,6 +68,8 @@ const ReportCard = memo(function ReportCard({
   createdAt,
   views,
   likes,
+  commentCount = 0,
+  authorIsVirtual = false,
   showActions = false,
   onDelete,
   category,
@@ -193,6 +197,8 @@ const ReportCard = memo(function ReportCard({
                 <span>조회 {views}</span>
                 <span>·</span>
                 <span>좋아요 {likes}</span>
+                <span>·</span>
+                <span>댓글 {commentCount}</span>
                 <button
                   onClick={handleBookmarkClick}
                   className="card-footer-action group/bm p-0.5 sm:p-1 -m-0.5 ml-0.5 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"

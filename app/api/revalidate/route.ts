@@ -5,10 +5,15 @@ import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
-  // 관리자 인증 필수
-  const admin = await verifyAdmin(request.headers.get('authorization'));
-  if (!admin) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // 인증: x-revalidate-secret (cron용) 또는 admin (대시보드용) 중 하나
+  const secret = request.headers.get('x-revalidate-secret');
+  const isSecretValid = !!secret && !!process.env.REVALIDATE_SECRET && secret === process.env.REVALIDATE_SECRET;
+
+  if (!isSecretValid) {
+    const admin = await verifyAdmin(request.headers.get('authorization'));
+    if (!admin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
   }
 
   // 레이트 리밋: 분당 10회

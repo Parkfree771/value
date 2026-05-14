@@ -20,7 +20,7 @@ export async function GET() {
       supabase
         .from('posts')
         .select(
-          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id)',
+          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
         )
         .order('created_at', { ascending: false }),
       getLatestPrices(),
@@ -32,7 +32,7 @@ export async function GET() {
     }
 
     const posts = (rows ?? []).map((r) => {
-      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null } | null }).author;
+      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price ?? 0);
       const currentPrice = prices[ticker]?.currentPrice ?? Number(r.current_price ?? 0);
@@ -47,6 +47,7 @@ export async function GET() {
         title: r.title ?? '',
         author: author?.nickname ?? '익명',
         authorId: r.author_id,
+        authorIsVirtual: author?.is_virtual ?? false,
         equippedBadgeId: author?.equipped_badge_id ?? null,
         stockName: r.stock_name ?? '',
         ticker: r.ticker ?? '',
@@ -61,6 +62,7 @@ export async function GET() {
           typeof r.created_at === 'string' ? r.created_at.split('T')[0] : '',
         views: r.views ?? 0,
         likes: r.likes ?? 0,
+        commentCount: (r as { comment_count?: number }).comment_count ?? 0,
         category: r.category ?? '',
         stockData: r.stock_data ?? null,
         themes: r.themes ?? undefined,

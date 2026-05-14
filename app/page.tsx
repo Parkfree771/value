@@ -1,8 +1,16 @@
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import HomeClient from '@/components/HomeClient';
 import type { FeedData } from '@/types/feed';
+import { createClient } from '@/utils/supabase/server';
+import { getLatestPrices } from '@/lib/priceCache';
+import { calculateReturn } from '@/utils/calculateReturn';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
+
+// ISR — 1시간 캐시 (그러나 실제로는 가격 cron 완료 / 글 작성/삭제 시 /api/revalidate · revalidatePath('/')로 즉시 무효화)
+// 가격 cron이 하루 6번 (아시아 3 + 미국 3) 트리거하므로 그 외엔 캐시 유지 → egress 최소
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: {
@@ -56,20 +64,81 @@ const homeJsonLd = {
   ],
 };
 
-// 서버에서 초기 피드 데이터 fetch
+// 서버에서 초기 피드 데이터 fetch — /api/feed/public 과 동일 형상으로 Postgres 합성
 async function getInitialFeed(): Promise<FeedData | null> {
   try {
-    const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-    const res = await fetch(FEED_URL, {
-      next: { revalidate: 60 }, // 1분 캐시
-    });
+    const [{ data: rows, error }, prices] = await Promise.all([
+      supabase
+        .from('posts')
+        .select(
+          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
+        )
+        .order('created_at', { ascending: false }),
+      getLatestPrices(),
+    ]);
 
-    if (!res.ok) {
+    if (error) {
+      console.error('[getInitialFeed] posts query error:', error);
       return null;
     }
 
-    return res.json();
+    const posts = (rows ?? []).map((r) => {
+      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
+      const ticker = (r.ticker || '').toUpperCase();
+      const initialPrice = Number(r.initial_price ?? 0);
+      const currentPrice = prices[ticker]?.currentPrice ?? Number(r.current_price ?? 0);
+      const positionType: 'long' | 'short' = (r.position_type as 'long' | 'short') ?? 'long';
+      const returnRate =
+        initialPrice && currentPrice
+          ? parseFloat(calculateReturn(initialPrice, currentPrice, positionType).toFixed(2))
+          : Number(r.return_rate ?? 0);
+
+      return {
+        id: r.id,
+        title: r.title ?? '',
+        author: author?.nickname ?? '익명',
+        authorId: r.author_id,
+        authorIsVirtual: author?.is_virtual ?? false,
+        equippedBadgeId: author?.equipped_badge_id ?? null,
+        stockName: r.stock_name ?? '',
+        ticker: r.ticker ?? '',
+        exchange: r.exchange ?? '',
+        opinion: (r.opinion ?? 'hold') as 'buy' | 'sell' | 'hold',
+        positionType,
+        initialPrice,
+        currentPrice,
+        returnRate,
+        targetPrice: Number(r.target_price ?? 0),
+        createdAt:
+          typeof r.created_at === 'string' ? r.created_at.split('T')[0] : '',
+        views: r.views ?? 0,
+        likes: r.likes ?? 0,
+        commentCount: (r as { comment_count?: number }).comment_count ?? 0,
+        category: r.category ?? '',
+        stockData: r.stock_data ?? null,
+        themes: r.themes ?? undefined,
+      };
+    });
+
+    const nowIso = new Date().toISOString();
+    const pricesOut: Record<string, { currentPrice: number; exchange: string; lastUpdated: string }> = {};
+    for (const [t, v] of Object.entries(prices)) {
+      pricesOut[t] = {
+        currentPrice: v.currentPrice,
+        exchange: v.exchange,
+        lastUpdated: nowIso,
+      };
+    }
+
+    return {
+      lastUpdated: new Date().toISOString(),
+      totalPosts: posts.length,
+      posts: posts as FeedData['posts'],
+      prices: pricesOut,
+    };
   } catch (error) {
     console.error('Failed to fetch initial feed:', error);
     return null;

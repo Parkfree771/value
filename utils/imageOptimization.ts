@@ -109,7 +109,12 @@ export async function uploadImage(
       : compressed.type === 'image/png'
       ? '.png'
       : '.jpg';
-  const baseName = file.name.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9가-힣_-]/g, '_');
+  // Supabase Storage 키는 ASCII만 허용 — 한글/특수문자 모두 _ 로 치환
+  const baseName = file.name
+    .replace(/\.[^.]+$/, '')
+    .replace(/[^a-zA-Z0-9_-]/g, '_')
+    .replace(/_+/g, '_')
+    .slice(0, 40) || 'image';
   const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${baseName}${ext}`;
   const objectPath = `${pathPrefix.replace(/\/+$/, '')}/${fileName}`;
 

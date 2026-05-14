@@ -55,7 +55,14 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
           .eq('user_id', user.uid);
 
         if (error) {
-          console.error('북마크 로드 실패:', error);
+          console.error('북마크 로드 실패:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint,
+            name: (error as { name?: string }).name,
+            raw: JSON.stringify(error),
+          });
           setBookmarkedIds([]);
         } else {
           setBookmarkedIds((data ?? []).map((b) => b.post_id as string));

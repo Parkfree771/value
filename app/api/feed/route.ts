@@ -11,6 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { getServiceClient } from '@/lib/supabase-admin';
@@ -78,6 +79,11 @@ export async function POST(request: NextRequest) {
     pingIndexNow([reportUrl, `${SITE_URL}/`, `${SITE_URL}/sitemap.xml`, `${SITE_URL}/feed.xml`]).catch(
       (err) => console.warn('[Feed API] IndexNow 핑 실패:', err instanceof Error ? err.message : err),
     );
+
+    // ISR 즉시 무효화 — 메인 페이지 SSR 캐시 및 작성자 페이지
+    revalidatePath('/');
+    revalidatePath('/ranking');
+    revalidatePath('/search');
 
     return NextResponse.json({ success: true, message: '후처리 완료' });
   } catch (error) {

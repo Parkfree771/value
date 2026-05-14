@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
 import dynamic from "next/dynamic";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
@@ -176,12 +177,18 @@ export default function RootLayout({
         {/* Naver Search Advisor 인증 */}
         <meta name="naver-site-verification" content="5a34f98d930b030eafe37723bc938f7e0c2909a4" />
 
-        {/* 테마 초기화 (FOUC 방지) */}
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* 테마 초기화 (FOUC 방지) — beforeInteractive로 SSR/CSR 순서 고정 */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeInitScript }}
+        />
 
         {/* JSON-LD 구조화 데이터 */}
-        <script
+        <Script
+          id="json-ld"
           type="application/ld+json"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
 
@@ -194,13 +201,6 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-
-        {/* Google AdSense */}
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6944494802169618"
-          crossOrigin="anonymous"
-        />
 
         <GoogleAnalytics />
       </head>
@@ -219,6 +219,15 @@ export default function RootLayout({
             </BookmarkProvider>
           </AuthProvider>
         </ThemeProvider>
+
+        {/* Google AdSense — afterInteractive: 하이드레이션 끝난 뒤 로드돼 mismatch 안 남 */}
+        <Script
+          id="adsense"
+          async
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6944494802169618"
+          crossOrigin="anonymous"
+        />
       </body>
     </html>
   );

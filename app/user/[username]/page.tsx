@@ -30,6 +30,8 @@ interface FeedPost {
   createdAt: string;
   views: number;
   likes: number;
+  commentCount?: number;
+  authorIsVirtual?: boolean;
   category: string;
   authorId?: string;
 }
@@ -294,6 +296,8 @@ export default function UserPage() {
             createdAt={report.createdAt}
             views={report.views}
             likes={report.likes}
+            commentCount={report.commentCount ?? 0}
+            authorIsVirtual={report.authorIsVirtual ?? false}
             category={report.category}
             exchange={report.exchange}
             showActions={false}

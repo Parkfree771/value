@@ -22,6 +22,8 @@ export interface ReportSummary {
   createdAt: string;
   views: number;
   likes: number;
+  commentCount?: number;
+  authorIsVirtual?: boolean;
   positionType?: 'long' | 'short';
   stockData?: {
     currency?: string;

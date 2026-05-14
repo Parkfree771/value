@@ -8,7 +8,7 @@ import { getLatestPrices } from '@/lib/priceCache';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 const SELECT_COLUMNS =
-  'id, title, ticker, exchange, category, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, created_at, author:users!posts_author_id_fkey(nickname, equipped_badge_id)';
+  'id, title, ticker, exchange, category, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, created_at, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
           ? parseFloat(calculateReturn(initialPrice, currentPrice, positionType).toFixed(2))
           : 0;
 
-      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null } | null }).author;
+      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
       if (equippedBadgeId === null && author?.equipped_badge_id !== undefined) {
         equippedBadgeId = author.equipped_badge_id;
       }
@@ -58,6 +58,7 @@ export async function GET(request: NextRequest) {
         title: r.title ?? '',
         author: author?.nickname ?? '',
         authorId: uid,
+        authorIsVirtual: author?.is_virtual ?? false,
         equippedBadgeId: author?.equipped_badge_id ?? null,
         stockName: r.stock_name ?? '',
         ticker: r.ticker ?? '',
@@ -74,6 +75,7 @@ export async function GET(request: NextRequest) {
             : '',
         views: r.views ?? 0,
         likes: r.likes ?? 0,
+        commentCount: (r as { comment_count?: number }).comment_count ?? 0,
         category: r.category ?? '',
         stockData: r.stock_data ?? null,
         themes: r.themes ?? [],

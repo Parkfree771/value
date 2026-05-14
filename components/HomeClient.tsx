@@ -71,6 +71,8 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     createdAt: post.createdAt,
     views: post.views,
     likes: post.likes,
+    commentCount: post.commentCount ?? 0,
+    authorIsVirtual: post.authorIsVirtual ?? false,
     exchange: post.exchange,
     category: post.category,
     positionType: post.positionType,
