@@ -22,24 +22,17 @@ function shouldProcessExchange(exchange: string, marketType: string): boolean {
   return true;
 }
 
-function calculateReturn(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: "long" | "short",
-): number {
-  if (initialPrice <= 0 || currentPrice <= 0) return 0;
-  if (positionType === "long") return ((currentPrice - initialPrice) / initialPrice) * 100;
-  return ((initialPrice - currentPrice) / initialPrice) * 100;
-}
-
 Deno.serve(async (req) => {
   const unauthorized = requireServiceRole(req);
   if (unauthorized) return unauthorized;
 
   const url = new URL(req.url);
   const marketType = (url.searchParams.get("market") ?? "ALL").toUpperCase();
+  // finalize=true일 때만 price_history에 종가 UPSERT (장 마감 cron 전용).
+  // 그 외 장중 cron은 current_prices와 posts return_rate만 갱신 → 차트는 종가 1행/일 보장.
+  const finalize = url.searchParams.get("finalize") === "true";
   const startTime = Date.now();
-  console.log(`[CRON] ===== update-stock-prices (MARKET: ${marketType}) =====`);
+  console.log(`[CRON] ===== update-stock-prices (MARKET: ${marketType}, finalize: ${finalize}) =====`);
 
   try {
     const supabase = makeSupabaseAdmin();
@@ -114,41 +107,51 @@ Deno.serve(async (req) => {
       else console.log(`[CRON] current_prices: ${currentRows.length} 행`);
     }
 
-    const today = new Date().toISOString().split("T")[0];
-    const historyRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
-      ticker,
-      exchange: v.exchange,
-      date: today,
-      close: v.currentPrice,
-    }));
-    if (historyRows.length > 0) {
-      const { error } = await supabase
-        .from("price_history")
-        .upsert(historyRows, { onConflict: "ticker,date" });
-      if (error) console.error("[CRON] price_history upsert:", error);
-      else console.log(`[CRON] price_history: ${historyRows.length} 행`);
+    // price_history는 장 마감 cron(finalize=true)에서만 종가 1회 UPSERT.
+    // 장중 cron은 current_prices만 실시간 갱신, price_history는 종가만 보존.
+    if (finalize) {
+      const today = new Date().toISOString().split("T")[0];
+      const historyRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
+        ticker,
+        exchange: v.exchange,
+        date: today,
+        close: v.currentPrice,
+      }));
+      if (historyRows.length > 0) {
+        const { error } = await supabase
+          .from("price_history")
+          .upsert(historyRows, { onConflict: "ticker,date" });
+        if (error) console.error("[CRON] price_history upsert:", error);
+        else console.log(`[CRON] price_history (finalize): ${historyRows.length} 행`);
+      }
+    } else {
+      console.log("[CRON] price_history skip (장중 cron — finalize=false)");
     }
 
-    let postsUpdated = 0;
-    for (const p of posts) {
-      const ticker = (p.ticker ?? "").toString().toUpperCase();
-      const np = newPrices.get(ticker);
-      if (!np) continue;
-      const positionType = (p.position_type as "long" | "short") ?? "long";
-      const newReturnRate = parseFloat(
-        calculateReturn(Number(p.initial_price ?? 0), np.currentPrice, positionType).toFixed(2),
-      );
-      const { error } = await supabase
-        .from("posts")
-        .update({
-          current_price: np.currentPrice,
-          prev_return_rate: p.return_rate,
-          return_rate: newReturnRate,
-        })
-        .eq("id", p.id);
-      if (!error) postsUpdated++;
+    // ticker → 현재가 맵을 RPC로 한 번에 전달.
+    // 같은 ticker의 모든 글이 SQL 안에서 각자의 initial_price로 return_rate를 계산하므로
+    // "삼성전자 글 10개"여도 cron에서 10번 UPDATE할 필요 없이 ticker 수만큼만 호출.
+    const priceMap: Record<string, number> = {};
+    for (const [ticker, v] of newPrices.entries()) {
+      priceMap[ticker] = v.currentPrice;
     }
-    console.log(`[CRON] posts updated: ${postsUpdated}`);
+    let postsUpdated = 0;
+    if (Object.keys(priceMap).length > 0) {
+      const { error: rpcError } = await supabase.rpc("update_posts_prices_batch", {
+        p_prices: priceMap,
+      });
+      if (rpcError) {
+        console.error("[CRON] update_posts_prices_batch error:", rpcError);
+      } else {
+        // 영향 받은 posts 수는 RPC가 void라 측정 안 됨.
+        // 매핑된 ticker에 해당하는 posts.id 수로 추정 (로깅용).
+        for (const p of posts) {
+          const t = (p.ticker ?? "").toString().toUpperCase();
+          if (priceMap[t] !== undefined && Number(p.initial_price ?? 0) > 0) postsUpdated++;
+        }
+      }
+    }
+    console.log(`[CRON] posts updated (batched): ${postsUpdated}`);
 
     const revalidated = await revalidateSite(["/", "/ranking", "/search"]);
 
@@ -156,6 +159,7 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({
         market: marketType,
+        finalize,
         tickers_total: uniqueTickers.size,
         success: successCount,
         fail: failCount,
