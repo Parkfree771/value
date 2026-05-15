@@ -3,9 +3,9 @@
 //   DELETE - 게시글 삭제 (CASCADE로 likes/comments 자동 삭제)
 
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { getServiceClient } from '@/lib/supabase-admin';
-import { adminStorage } from '@/lib/firebase-admin';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 export async function GET(request: NextRequest) {
@@ -110,27 +110,9 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '게시글을 찾을 수 없습니다.' }, { status: 404 });
     }
 
-    // feed.json 동기화
-    try {
-      const bucket = adminStorage.bucket();
-      const file = bucket.file('feed.json');
-      const [exists] = await file.exists();
-      if (exists) {
-        const [content] = await file.download();
-        const feed = JSON.parse(content.toString());
-        if (feed.posts) {
-          feed.posts = feed.posts.filter((p: { id: string }) => p.id !== postId);
-          feed.totalPosts = feed.posts.length;
-          feed.lastUpdated = new Date().toISOString();
-          await file.save(JSON.stringify(feed, null, 2), {
-            contentType: 'application/json',
-            metadata: { cacheControl: 'public, max-age=60' },
-          });
-        }
-      }
-    } catch (feedError) {
-      console.error('[Admin] feed.json 동기화 실패:', feedError);
-    }
+    revalidatePath('/');
+    revalidatePath('/ranking');
+    revalidatePath('/search');
 
     console.log(`[Admin] 게시글 삭제: ${postId} by ${admin.email}`);
     return NextResponse.json({ success: true, message: '게시글이 성공적으로 삭제되었습니다.' });

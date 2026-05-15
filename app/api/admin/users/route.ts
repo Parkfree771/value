@@ -15,23 +15,29 @@ export async function GET(request: NextRequest) {
 
     const supabase = getServiceClient();
 
-    const [{ data: users, error: usersError }, { data: postCounts }] = await Promise.all([
-      supabase
-        .from('users')
-        .select('id, email, nickname, created_at, is_suspended')
-        .order('created_at', { ascending: false })
-        .limit(100),
-      supabase.from('posts').select('author_id'),
-    ]);
+    const { data: users, error: usersError } = await supabase
+      .from('users')
+      .select('id, email, nickname, created_at, is_suspended')
+      .order('created_at', { ascending: false })
+      .limit(100);
 
     if (usersError) {
       console.error('[admin/users GET]:', usersError);
       return NextResponse.json({ error: '사용자 조회 실패' }, { status: 500 });
     }
 
+    const userIds = (users ?? []).map((u) => u.id);
+    // user_post_counts view로 SQL group by 결과만 가져옴 (posts 풀스캔 안 함)
+    const { data: counts } = userIds.length
+      ? await supabase
+          .from('user_post_counts')
+          .select('author_id, post_count')
+          .in('author_id', userIds)
+      : { data: [] as { author_id: string; post_count: number }[] };
+
     const countByUser: Record<string, number> = {};
-    for (const p of postCounts ?? []) {
-      countByUser[p.author_id] = (countByUser[p.author_id] ?? 0) + 1;
+    for (const row of counts ?? []) {
+      countByUser[(row as { author_id: string }).author_id] = (row as { post_count: number }).post_count;
     }
 
     const mapped = (users ?? []).map((u) => ({
