@@ -68,25 +68,26 @@ function buildKeywords(report: Report): string[] {
   const baseKeywords = [
     report.stockName,
     ...tickers,
+    // 종목명 + 의도 (한국 개미가 실제로 치는 패턴)
     `${report.stockName} 주가`,
     `${report.stockName} 분석`,
     `${report.stockName} 전망`,
     `${report.stockName} 리포트`,
     `${report.stockName} ${op}`,
+    `${report.stockName} ${op} 의견`,
     `${report.stockName} 목표주가`,
+    `${report.stockName} 매수 매도`,
+    `${report.stockName} 투자`,
+    // 티커 + 의도
     report.ticker ? `${report.ticker} 종목분석` : '',
+    report.ticker ? `${report.ticker} 분석` : '',
+    report.ticker ? `${report.ticker} 차트` : '',
+    // 일반
     `${op} 의견`,
     `${pos} 포지션`,
-    '주식 리포트',
-    '투자 분석',
-    '종목 분석',
-    '투자 의견',
-    '수익률 인증',
-    '실시간 수익률',
-    SITE_NAME,
-    '앤트스트릿',
-    '개미투자자',
-    '가치투자',
+    '주식 리포트', '투자 분석', '종목 분석', '투자 의견',
+    '수익률 인증', '실시간 수익률', '수익률 검증',
+    SITE_NAME, '앤트스트릿', '개미투자자',
   ];
 
   return [...baseKeywords, ...themes].filter(Boolean) as string[];
@@ -140,8 +141,8 @@ export function generateReportMetadata(
   const pos = positionLabel(report.positionType);
   const timeAgo = relativeTimeLabel(report.createdAt);
 
-  // 제목: layout template "AntStreet | %s" 가 브랜드를 붙이므로 여기선 본문만
-  // 종목코드와 수익률을 포함하여 검색 매칭 강화
+  // 제목: layout template "%s | AntStreet" 가 브랜드를 뒤에 붙이므로 여기선 본문만
+  // 종목코드와 수익률을 포함하여 검색 매칭 강화 (한국 검색결과는 페이지명이 앞이어야 CTR↑)
   const titleCore = `${report.title}`;
   const titleSuffix =
     report.stockName && !report.title.includes(report.stockName)

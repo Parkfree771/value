@@ -3,19 +3,30 @@ import type { Metadata } from 'next';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
 export const metadata: Metadata = {
-  title: '13F 공시 포트폴리오 추적 - 워렌 버핏, 빌 애크먼, 하워드 막스',
-  description: 'SEC 13F 공시(일삼에프) 기반 투자 대가 포트폴리오 실시간 추적. 워렌 버핏(Warren Buffett), 빌 애크먼(Bill Ackman), 하워드 막스(Howard Marks), 스탠리 드러켄밀러(Stanley Druckenmiller), 세스 클라만(Seth Klarman), 리 루(Li Lu)의 13F 보유 종목, 신규매수, 전량매도, 비중 변화를 한눈에 확인하세요.',
+  title: '13F 공시 포트폴리오 한국어 추적 · 워렌 버핏 · 빌 애크먼 · 리 루 · 하워드 막스',
+  description: 'SEC 13F 공시(일삼에프) 기반 투자 대가 9명의 분기별 포트폴리오를 한국어로 추적. 워렌 버핏(버크셔 해서웨이), 빌 애크먼(퍼싱 스퀘어), 리 루(히말라야 캐피털, 멍거의 파트너), 하워드 막스(오크트리), 세스 클라만(바우포스트), 드러켄밀러(듀케인), 칼 아이칸, 데이비드 테퍼, 토마스 게이너의 신규매수·전량매도·비중 변화를 한눈에.',
   keywords: [
+    // 13F 카테고리
     '13F', '13F 공시', '일삼에프', 'SEC 13F', '13F filing', '13F 포트폴리오',
-    '워렌 버핏', 'Warren Buffett', '버핏 포트폴리오', '빌 애크먼', 'Bill Ackman',
-    '하워드 막스', 'Howard Marks', '스탠리 드러켄밀러', 'Stanley Druckenmiller',
-    '세스 클라만', 'Seth Klarman', '리 루', 'Li Lu',
-    '구루 포트폴리오', 'guru portfolio', '투자 대가', '헤지펀드 포트폴리오',
-    'hedge fund 13F', '포트폴리오 추적', '13F tracker',
+    '13F 한국어', '13F tracker', '포트폴리오 추적',
+    // 구루 한·영 풀세트
+    '워렌 버핏', 'Warren Buffett', '버크셔 해서웨이', 'Berkshire Hathaway',
+    '찰리 멍거', 'Charlie Munger',
+    '빌 애크먼', 'Bill Ackman', '퍼싱 스퀘어', 'Pershing Square',
+    '하워드 막스', 'Howard Marks', '오크트리', 'Oaktree',
+    '스탠리 드러켄밀러', 'Stanley Druckenmiller', '듀케인',
+    '세스 클라만', 'Seth Klarman', '바우포스트', 'Baupost',
+    '리 루', 'Li Lu', '히말라야 캐피털', 'Himalaya Capital',
+    '칼 아이칸', 'Carl Icahn', 'Icahn Enterprises',
+    '데이비드 테퍼', 'David Tepper', '아팔루사', 'Appaloosa',
+    '토마스 게이너', 'Thomas Gayner', '마켈', 'Markel',
+    // 일반
+    '구루 포트폴리오', '투자 대가 포트폴리오', '헤지펀드 포트폴리오',
+    'guru portfolio', 'hedge fund 13F', '가치투자',
   ],
   openGraph: {
-    title: '13F 공시 포트폴리오 추적 - 워렌 버핏, 빌 애크먼, 하워드 막스',
-    description: 'SEC 13F 공시 기반 투자 대가 포트폴리오 실시간 분석. 워렌 버핏, 빌 애크먼, 하워드 막스, 드러켄밀러, 세스 클라만, 리 루의 신규매수·전량매도·비중 변화를 한눈에.',
+    title: '13F 공시 포트폴리오 한국어 추적 · 9명의 투자 대가',
+    description: '워렌 버핏(버크셔), 빌 애크먼(퍼싱 스퀘어), 리 루(멍거의 파트너), 하워드 막스, 세스 클라만, 드러켄밀러, 칼 아이칸, 데이비드 테퍼, 토마스 게이너의 분기별 SEC 13F 포트폴리오를 한국어로.',
     url: `${SITE_URL}/guru-tracker`,
     images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet' }],
   },

@@ -2,11 +2,11 @@
 
 import { memo } from 'react';
 import BadgeIcon from './BadgeIcon';
-import { useUserBadge } from '@/contexts/UserBadgesContext';
+import { useUserBadge, useUserBadgesContext } from '@/contexts/UserBadgesContext';
 import { BADGES_BY_ID } from '@/lib/badges';
 
 interface Props {
-  // badgeId 가 직접 주어지면 그 값으로 렌더 (feed.json post.equippedBadgeId).
+  // badgeId 가 직접 주어지면 그 값으로 렌더 (feed.json post.equippedBadgeId 스냅샷).
   // 없으면 nickname 기반 batch 조회 (fallback — 점진적 마이그레이션용).
   badgeId?: string | null;
   nickname?: string | null;
@@ -14,16 +14,27 @@ interface Props {
   className?: string;
 }
 
-// 닉네임 옆 작은 인라인 배지. 장착 배지 없거나 로딩 중이면 아무것도 렌더하지 않음.
+// 우선순위:
+//   1. context cache (본인 배지 변경 직후 setBadge 로 즉시 갱신됨 → live update)
+//   2. props badgeId (SSR/피드 스냅샷 — 첫 페인트 FOUC 없음)
+//   3. nickname 기반 fetch fallback (props 없는 레거시 경로)
 const UserBadgeInline = memo(function UserBadgeInline({
   badgeId,
   nickname,
   size = 16,
   className = '',
 }: Props) {
-  // badgeId 가 명시되면 (undefined 아님) 그걸 우선. null 도 명시적 미장착으로 인정 → 조회 skip.
-  const fallbackBadgeId = useUserBadge(badgeId === undefined ? nickname : null);
-  const finalId = badgeId !== undefined ? badgeId : fallbackBadgeId;
+  const ctx = useUserBadgesContext();
+  // 캐시에 명시적으로 들어있으면(setBadge로 쓰여졌으면) 그게 truth — props 스냅샷보다 최신.
+  const cached = nickname ? ctx.badges[nickname] : undefined;
+  // props 가 명시돼 있으면 fetch 트리거 안 함 (불필요한 네트워크 콜 방지).
+  const fetchedBadgeId = useUserBadge(badgeId === undefined ? nickname : null);
+
+  const finalId =
+    cached !== undefined ? cached :
+    badgeId !== undefined ? badgeId :
+    fetchedBadgeId;
+
   if (!finalId) return null;
   const def = BADGES_BY_ID[finalId];
   if (!def) return null;

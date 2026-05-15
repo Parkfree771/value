@@ -19,6 +19,7 @@ interface FeedPost {
   id: string;
   title: string;
   author: string;
+  equippedBadgeId?: string | null;
   stockName: string;
   ticker: string;
   exchange: string;
@@ -287,6 +288,7 @@ export default function UserPage() {
             id={report.id}
             title={report.title}
             author={report.author}
+            equippedBadgeId={report.equippedBadgeId ?? null}
             stockName={report.stockName}
             ticker={report.ticker}
             opinion={report.opinion}

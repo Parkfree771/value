@@ -10,6 +10,7 @@ export interface ReportSummary {
   title: string;
   author: string;
   authorId?: string;
+  equippedBadgeId?: string | null;
   stockName: string;
   ticker: string;
   category?: string;

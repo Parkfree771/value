@@ -21,22 +21,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
   }
 
-  const title = `${guru.name_kr}(${guru.name_en}) 13F 포트폴리오 - ${guru.filing_name}`;
+  const title = `${guru.name_kr}(${guru.name_en}) 포트폴리오 · ${guru.filing_name} 13F 보유 종목`;
   const description = `${guru.name_kr}(${guru.name_en}) ${guru.filing_name}의 SEC 13F 공시 기반 최신 포트폴리오 한국어 추적. 보유 종목, 신규 매수, 전량 매도, 비중 변화를 분기마다 자동 업데이트. 투자 스타일: ${guru.style}. ${guru.catchphrase}`;
 
   return {
     title,
     description,
     keywords: [
+      // 구루 정체성 (한·영·법인명)
       guru.name_kr, guru.name_en, guru.filing_name,
+      // 구루 + 의도 키워드 조합 (long-tail 핵심)
       `${guru.name_kr} 포트폴리오`, `${guru.name_kr} 보유 종목`, `${guru.name_kr} 13F`,
+      `${guru.name_kr} 최근 매수`, `${guru.name_kr} 매도`, `${guru.name_kr} 비중`,
       `${guru.name_en} portfolio`, `${guru.name_en} 13F`, `${guru.name_en} holdings`,
       `${guru.filing_name} 13F`, `${guru.filing_name} portfolio`,
+      // 구루 고유 검색어 (관련 회사·동료·대표종목 — 각 구루별로 types.ts에 정의)
+      ...(guru.seo_keywords ?? []),
+      // 카테고리·일반
       '13F', 'SEC 13F', '일삼에프', '13F 공시', '13F 한국어',
-      '구루 포트폴리오', '구루 미러링', '투자 대가 포트폴리오',
-      '헤지펀드 포트폴리오', 'guru portfolio', 'hedge fund 13F',
-      guru.style, '가치투자', '글로벌 투자',
-      'AntStreet', '앤트스트릿',
+      '구루 포트폴리오', '투자 대가 포트폴리오', '헤지펀드 포트폴리오',
+      guru.style, '가치투자', 'AntStreet', '앤트스트릿',
     ],
     openGraph: {
       type: 'profile',

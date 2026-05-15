@@ -218,6 +218,7 @@ export default function MyPage() {
       title: data.title || '',
       author: data.author || '익명',
       authorId: data.authorId || '',
+      equippedBadgeId: data.equippedBadgeId ?? null,
       stockName: data.stockName || '',
       ticker: data.ticker || '',
       category: data.category || '',

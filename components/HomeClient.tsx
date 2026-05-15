@@ -61,6 +61,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     id: post.id,
     title: post.title,
     author: post.author,
+    equippedBadgeId: post.equippedBadgeId ?? null,
     stockName: post.stockName,
     ticker: post.ticker,
     opinion: post.opinion,

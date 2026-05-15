@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { LEGACY_POST_ID_MAP } from "./lib/legacyPostIds";
 
 const nextConfig: NextConfig = {
   // trailing slash 통일 → /page와 /page/ 중복 방지
@@ -43,6 +44,14 @@ const nextConfig: NextConfig = {
 
   // 리다이렉트 설정
   async redirects() {
+    // Firebase → Supabase 마이그레이션(2026-05) 이전에 외부(블로그, 검색엔진)에 노출된
+    // Firebase postId 링크를 새 UUID로 영구 이전. 308(=301) 로 SEO 가치 이관.
+    const legacyPostRedirects = Object.entries(LEGACY_POST_ID_MAP).map(([fbId, uuid]) => ({
+      source: `/reports/${fbId}`,
+      destination: `/reports/${uuid}`,
+      permanent: true,
+    }));
+
     return [
       // www → non-www 301 리다이렉트 (중복 도메인 방지)
       {
@@ -62,6 +71,8 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: true,
       },
+      // Legacy Firebase postId → Supabase UUID
+      ...legacyPostRedirects,
     ];
   },
 
