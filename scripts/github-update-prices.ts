@@ -162,16 +162,7 @@ async function getStockPrice(
   return getOverseaStockPrice(token, ticker, exchange);
 }
 
-// ===== 수익률 =====
-function calculateReturn(
-  initialPrice: number,
-  currentPrice: number,
-  positionType: 'long' | 'short',
-): number {
-  if (initialPrice <= 0 || currentPrice <= 0) return 0;
-  if (positionType === 'long') return ((currentPrice - initialPrice) / initialPrice) * 100;
-  return ((initialPrice - currentPrice) / initialPrice) * 100;
-}
+// 수익률은 SQL의 update_posts_prices_batch RPC가 각 row의 initial_price·position_type으로 계산.
 
 // ===== 메인 =====
 async function main() {
@@ -182,7 +173,7 @@ async function main() {
     // 1. posts 읽기
     const { data: posts, error: postsError } = await supabase
       .from('posts')
-      .select('id, ticker, exchange, initial_price, position_type, return_rate, current_price');
+      .select('ticker, exchange, initial_price');
 
     if (postsError) {
       console.error('[CRON] posts 조회 실패:', postsError);
@@ -249,49 +240,29 @@ async function main() {
       else console.log(`[CRON] current_prices: ${currentRows.length} 행 UPSERT`);
     }
 
-    // 6. price_history UPSERT (오늘 날짜 종가)
-    const today = new Date().toISOString().split('T')[0];
-    const historyRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
-      ticker,
-      exchange: v.exchange,
-      date: today,
-      close: v.currentPrice,
-    }));
-    if (historyRows.length > 0) {
-      const { error } = await supabase
-        .from('price_history')
-        .upsert(historyRows, { onConflict: 'ticker,date' });
-      if (error) console.error('[CRON] price_history upsert 실패:', error);
-      else console.log(`[CRON] price_history: ${historyRows.length} 행 UPSERT (date=${today})`);
-    }
+    // ❗ price_history는 의도적으로 건드리지 않음.
+    // 이 스크립트는 PC .bat이 매 15분 호출하는 휘발성 가격 갱신용.
+    // 종가 기록(price_history에 ticker당 1행/일)은 Supabase 장 마감 cron만 담당.
+    // 여기서 UPSERT하면 장중 가격이 종가 자리에 덮어써져 차트가 왜곡됨.
 
-    // 7. posts UPDATE (현재 마켓 ticker만)
+    // 6. posts UPDATE — 같은 ticker의 모든 글을 RPC 1쿼리로 batch 갱신
     let postsUpdated = 0;
-    for (const p of posts) {
-      const ticker = (p.ticker || '').toUpperCase();
-      const np = newPrices.get(ticker);
-      if (!np) continue;
-
-      const positionType: 'long' | 'short' = (p.position_type as 'long' | 'short') ?? 'long';
-      const newReturnRate = parseFloat(
-        calculateReturn(Number(p.initial_price ?? 0), np.currentPrice, positionType).toFixed(2),
-      );
-
-      const { error } = await supabase
-        .from('posts')
-        .update({
-          current_price: np.currentPrice,
-          prev_return_rate: p.return_rate,
-          return_rate: newReturnRate,
-        })
-        .eq('id', p.id);
-      if (error) {
-        console.warn(`[CRON] posts update 실패 (id=${p.id}):`, error.message);
+    const priceMap: Record<string, number> = {};
+    for (const [ticker, v] of newPrices.entries()) priceMap[ticker] = v.currentPrice;
+    if (Object.keys(priceMap).length > 0) {
+      const { error: rpcError } = await supabase.rpc('update_posts_prices_batch', {
+        p_prices: priceMap,
+      });
+      if (rpcError) {
+        console.error('[CRON] update_posts_prices_batch error:', rpcError);
       } else {
-        postsUpdated++;
+        for (const p of posts) {
+          const t = (p.ticker || '').toUpperCase();
+          if (priceMap[t] !== undefined && Number(p.initial_price ?? 0) > 0) postsUpdated++;
+        }
       }
     }
-    console.log(`[CRON] posts UPDATE: ${postsUpdated} 행`);
+    console.log(`[CRON] posts UPDATE (batched): ${postsUpdated} 행`);
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
     console.log(`[CRON] ===== Done: ${successCount}/${uniqueTickers.size} tickers, ${postsUpdated} posts, ${duration}s =====`);
