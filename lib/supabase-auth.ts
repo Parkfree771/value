@@ -1,9 +1,9 @@
-// 서버 사이드 인증 헬퍼 (firebase-admin.ts의 verifyAuthToken 대체)
-// API Route / Server Component / Server Action에서 사용
+// 서버 사이드 인증 헬퍼.
+// API Route / Server Component / Server Action에서 사용.
 //
-// 두 가지 사용 패턴 모두 지원:
+// 두 가지 사용 패턴 지원:
 //   1. 쿠키 기반 (권장, @supabase/ssr 표준): getAuthUser()
-//   2. Authorization Bearer 토큰 (레거시 호환): getAuthUserFromBearer(authHeader)
+//   2. Authorization Bearer 토큰: getAuthUserFromBearer(authHeader)
 
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';

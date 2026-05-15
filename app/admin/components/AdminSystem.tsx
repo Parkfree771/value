@@ -51,14 +51,6 @@ export default function AdminSystem() {
 
   const actions = [
     {
-      key: 'feed-init',
-      category: '피드 관리',
-      title: '피드 초기화',
-      description: 'Firestore의 모든 게시글을 기반으로 feed.json을 재생성합니다.',
-      url: '/api/feed/init',
-      confirmMessage: '피드를 초기화하시겠습니까? 기존 feed.json이 덮어써집니다.',
-    },
-    {
       key: 'feed-update',
       category: '피드 관리',
       title: '가격 업데이트',
@@ -71,14 +63,6 @@ export default function AdminSystem() {
       title: '캐시 무효화',
       description: 'Next.js 페이지 캐시와 메모리 캐시를 초기화합니다.',
       url: '/api/revalidate',
-    },
-    {
-      key: 'cleanup',
-      category: '데이터 정리',
-      title: '레거시 데이터 정리',
-      description: '사용하지 않는 stock-prices.json, tickers 컬렉션 등을 정리합니다.',
-      url: '/api/cleanup',
-      confirmMessage: '레거시 데이터를 정리하시겠습니까?',
     },
   ];
 
@@ -113,10 +97,7 @@ export default function AdminSystem() {
                       )}
                     </div>
                     <button
-                      onClick={() => {
-                        if (action.confirmMessage && !window.confirm(action.confirmMessage)) return;
-                        executeAction(action.key, action.url);
-                      }}
+                      onClick={() => executeAction(action.key, action.url)}
                       disabled={isLoading}
                       className="btn-secondary !text-xs !py-2 !px-4 flex-shrink-0 disabled:opacity-50"
                     >

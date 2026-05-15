@@ -6,19 +6,20 @@
  * 직접 호출되어 HTTP 왕복 없이 재사용된다.
  *
  * 반환 항목 (9개, 표시 순서 고정):
- *   0. AntStreet 유저 평균 수익률 (feed.json 기반)
+ *   0. AntStreet 유저 평균 수익률 (Postgres posts AVG)
  *   1. KOSPI                     (한투 국내업종 API)
  *   2. KOSDAQ                    (한투 국내업종 API)
  *   3. KOSPI200                  (한투 국내업종 API)
- *   4. USD/KRW                   (market.json forex)
- *   5. S&P 500                   (market.json)
- *   6. NASDAQ                    (market.json)
- *   7. DOW                       (market.json)
+ *   4. USD/KRW                   (briefing/market.json forex)
+ *   5. S&P 500                   (briefing/market.json)
+ *   6. NASDAQ                    (briefing/market.json)
+ *   7. DOW                       (briefing/market.json)
  *   8. BTC/KRW                   (Upbit 공개 API)
  */
 
 import { getKISDomesticIndex } from '@/lib/kis';
 import { getUpbitPrice } from '@/lib/upbit';
+import { getServiceClient } from '@/lib/supabase-admin';
 
 export type TickerCategory = 'site' | 'kr_index' | 'us_index' | 'forex' | 'crypto';
 
@@ -72,19 +73,16 @@ export function getKRXMarketStatus(now: Date = new Date()): MarketStatusPayload 
 
 async function fetchAntStreetAverage(): Promise<number | null> {
   try {
-    const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-    if (!bucket) return null;
-    const url = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/feed.json?alt=media`;
-    const res = await fetch(url, { next: { revalidate: 900 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const posts: { returnRate?: number }[] = data?.posts ?? [];
-    if (posts.length === 0) return null;
-    const sum = posts.reduce(
-      (acc, p) => acc + (Number.isFinite(p.returnRate) ? (p.returnRate as number) : 0),
-      0
+    const supabase = getServiceClient();
+    const { data, error } = await supabase
+      .from('posts')
+      .select('return_rate');
+    if (error || !data || data.length === 0) return null;
+    const sum = data.reduce(
+      (acc, p) => acc + (Number.isFinite(p.return_rate) ? Number(p.return_rate) : 0),
+      0,
     );
-    return sum / posts.length;
+    return sum / data.length;
   } catch (err) {
     console.error('[Ticker] AntStreet avg fetch failed:', err);
     return null;
@@ -118,9 +116,9 @@ interface MarketJson {
 
 async function fetchMarketJson(): Promise<MarketJson | null> {
   try {
-    const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-    if (!bucket) return null;
-    const url = `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/market.json?alt=media`;
+    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
+    if (!supabaseUrl) return null;
+    const url = `${supabaseUrl}/storage/v1/object/public/briefing/market.json`;
     const res = await fetch(url, { next: { revalidate: 900 } });
     if (!res.ok) return null;
     return (await res.json()) as MarketJson;

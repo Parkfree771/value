@@ -1,8 +1,7 @@
 /**
- * 종목별 일별 종가 시계열 (Firebase Storage: prices-history/{TICKER}.json)
+ * 종목별 일별 종가 시계열 (Postgres: public.price_history)
  *
  * 키는 짧게: d=date(YYYY-MM-DD), c=close
- * 1년치 ~250 entries × ~30bytes = ~7.5KB / 종목
  */
 
 export interface PriceHistoryPoint {

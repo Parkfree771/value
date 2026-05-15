@@ -1,7 +1,6 @@
 /**
  * 최신 가격 캐시 — Supabase public.current_prices 테이블 기반.
- * 이전에는 Firebase Storage의 stock-prices.json/feed.json을 읽었으나
- * 모두 Postgres로 이전됨.
+ * 가격 cron(Edge Function)이 UPSERT, 페이지·라우트가 이 헬퍼로 읽음.
  */
 
 import { getServiceClient } from './supabase-admin';
