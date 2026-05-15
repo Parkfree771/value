@@ -64,11 +64,12 @@ const briefingJsonLd = {
   ],
 };
 
-const STORAGE_BASE = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o`;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/$/, '') ?? '';
+const STORAGE_BASE = `${SUPABASE_URL}/storage/v1/object/public/briefing`;
 
 async function fetchJSON(filename: string, tag: string) {
   try {
-    const res = await fetch(`${STORAGE_BASE}/${filename}?alt=media`, {
+    const res = await fetch(`${STORAGE_BASE}/${filename}`, {
       next: { revalidate: false, tags: [tag, 'briefing-all'] },
     });
     if (!res.ok) return null;
