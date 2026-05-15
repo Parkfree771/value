@@ -106,7 +106,7 @@ const nextConfig: NextConfig = {
           "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
           "img-src 'self' data: blob: https: http:",
           "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://firebasestorage.googleapis.com https://api.upbit.com https://api.binance.com https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://cdn.jsdelivr.net blob:",
-          "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com",
+          "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",

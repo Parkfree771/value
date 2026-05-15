@@ -220,14 +220,16 @@ export default function RootLayout({
           </AuthProvider>
         </ThemeProvider>
 
-        {/* Google AdSense — afterInteractive: 하이드레이션 끝난 뒤 로드돼 mismatch 안 남 */}
-        <Script
-          id="adsense"
-          async
-          strategy="afterInteractive"
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6944494802169618"
-          crossOrigin="anonymous"
-        />
+        {/* Google AdSense — production에서만 로드 (localhost는 AdSense가 403, 콘솔 노이즈 차단) */}
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            id="adsense"
+            async
+            strategy="afterInteractive"
+            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6944494802169618"
+            crossOrigin="anonymous"
+          />
+        )}
       </body>
     </html>
   );

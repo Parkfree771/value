@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Props {
   url: string;
@@ -13,6 +13,11 @@ const ICON_SIZE = 'w-4 h-4 sm:w-5 sm:h-5';
 export default function ShareButtons({ url, title, hashTags = [] }: Props) {
   const [copied, setCopied] = useState(false);
   const [kakaoNotice, setKakaoNotice] = useState(false);
+  // navigator.share 존재 여부는 client-only — 마운트 후에만 평가해서 hydration mismatch 방지
+  const [hasNativeShare, setHasNativeShare] = useState(false);
+  useEffect(() => {
+    setHasNativeShare(typeof navigator !== 'undefined' && typeof navigator.share === 'function');
+  }, []);
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
@@ -155,7 +160,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
       </div>
 
       {/* 모바일 네이티브 공유 (iOS/Android에서 카톡 등 가능) */}
-      {typeof navigator !== 'undefined' && typeof navigator.share === 'function' && (
+      {hasNativeShare && (
         <button
           type="button"
           onClick={handleNativeShare}
