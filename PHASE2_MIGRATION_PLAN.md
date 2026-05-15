@@ -62,32 +62,38 @@
 - 매시간 cron은 CRYPTO 전용으로 변경
 - Windows `spawn EINVAL` 수정 (`shell: process.platform === 'win32'`)
 
+## ✅ Phase 4 — 가격 cron을 Supabase 네이티브로 이전 (2026-05-15)
+GitHub Actions runner 매번 부팅 + Node 버전 충돌 + Repo Secrets 관리 비효율 → Supabase Edge Functions + pg_cron으로 일원화.
+
+| 항목 | 결과 |
+|---|---|
+| Edge Functions | `update-stock-prices`(market 인자) / `update-guru-prices` 둘 다 ACTIVE |
+| 인증 | `verify_jwt=false` + 함수 안에서 service_role 키 검증 (anon 차단) |
+| 스케줄 | `pg_cron` 7개 (ASIA 3 / US 3 / GURU 1) — UTC 기준, 기존 KST 시각 그대로 |
+| service_role 키 보관 | Supabase Vault (`vault.decrypted_secrets.service_role_key`) |
+| Edge Function secrets | `KIS_APP_KEY`, `KIS_APP_SECRET`, `REVALIDATE_SECRET`, `SITE_URL` (Functions Secrets 페이지) |
+| Guru ticker 데이터 | `settings.guru_tickers` jsonb (310 ticker — `data/guru-portfolios.json`에서 sync) |
+| 삭제 | `.github/workflows/update-*.yml` 3개 — 더 이상 사용 안 함 |
+
+### 검증 결과 (2026-05-15 KST 10:42)
+- ASIA 수동 호출: 27/27 success, 40 posts updated, revalidate `/` `/ranking` `/search` 모두 200
+- KIS 토큰 캐시 (`settings.kis_token`) 정상 재사용
+- pg_cron → pg_net → Edge Function 체인 정상
+
 ## ❌ 남은 작업
 
-### A. 배포 환경변수
-- ✅ **Vercel env 완료** (2026-05-15)
-- **GitHub Actions Repo Secrets** — `Settings > Secrets and variables > Actions`에서 추가:
-  | 키 | 비고 |
-  |---|---|
-  | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
-  | `SUPABASE_SECRET_KEY` | service_role 시크릿 |
-  | `KIS_APP_KEY` / `KIS_APP_SECRET` | KIS 한국투자 |
-  | `SITE_URL` | `https://www.antstreet.kr` 같은 prod URL (trailing slash 없이) |
-  | `REVALIDATE_SECRET` | Vercel과 동일한 값 |
+### A. PC `.bat` 처리 (사장님 결정)
+Supabase cron이 자동으로 도니까 PC `.bat`(scripts/local-price-updater.ts) 더 이상 필요 없음. 옵션:
+- (A1) `.bat` 폐기 + `scripts/github-update-*.ts` 삭제 — 가장 깔끔
+- (A2) `.bat` 유지 — 더 잦은 업데이트(15분마다) 원하면. 단 Supabase cron과 동시 실행 시 race condition 가능성 (UPSERT라 무해하지만 KIS 호출 중복)
 
-### B. GitHub Actions 워크플로우 (2026-05-15 수정 완료)
-- 깨져있던 `Revalidate pages` curl 스텝 제거 — secret 헤더 없어서 401나던 것
-- `github-update-prices.ts` 안에서 revalidate 호출하도록 일원화. 환경변수 `NEXT_PUBLIC_SITE_URL` + `REVALIDATE_SECRET` 추가
-- guru 워크플로우는 무변경 (CDN cache 24h + 일 1회 cron이라 revalidate 불필요)
-- **검증 방법**: Secrets 입력 후 Actions 탭에서 `workflow_dispatch` 수동 트리거 → 로그에서 `[CRON] revalidate /: 200` 확인
-
-### C. 보안 권장
-- **Supabase DB 비밀번호 재발급** — 채팅으로 connection string 노출됐음
+### B. 보안 권장 (작업 후 권장)
+- **KIS 키 재발급** — 채팅으로 노출됨
+- **Supabase DB 비밀번호 재발급** — 이전에 노출됨
 - Firebase Auth Provider 비활성화 (더 이상 안 씀)
 
-### D. 점검 필요 (별건)
+### C. 점검 필요 (별건)
 - **미들웨어**: 온보딩 미완료 사용자가 강제 redirect 안 되고 통과하는 점
-- 필요 시 별도 개선
 
 ## 핵심 파일 포인터
 | 카테고리 | 파일 |
@@ -95,6 +101,7 @@
 | Supabase 클라이언트 | `utils/supabase/{client,server,middleware}.ts` |
 | 인증 | `lib/supabase-auth.ts`, `lib/supabase-admin.ts`, `middleware.ts` |
 | 컨텍스트 | `contexts/AuthContext.tsx`, `contexts/BookmarkContext.tsx` |
-| 가격 cron | `scripts/local-price-updater.ts` (배경화면 .bat → 이거 호출), `scripts/github-update-prices.ts` |
+| 가격 cron (Supabase) | `supabase/functions/update-stock-prices/`, `supabase/functions/update-guru-prices/`, `supabase/functions/_shared/kis.ts`, `supabase/migrations/0013_price_cron_schedules.sql` |
+| 가격 cron (PC, A2 선택 시) | `scripts/local-price-updater.ts`, `scripts/github-update-prices.ts`, `scripts/github-update-guru-prices.ts` |
 | 캐시 무효화 | `/api/revalidate`, `/api/feed` POST, `/api/reports/[id]` DELETE |
 | Phase 3 | `scripts/phase3-migrate.ts` |
