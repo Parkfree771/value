@@ -37,6 +37,7 @@ export interface Report {
   title: string;
   author: string;
   authorId: string;
+  equippedBadgeId?: string | null;
   stockName: string;
   ticker: string;
   category?: MarketCategory;

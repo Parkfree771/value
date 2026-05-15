@@ -27,7 +27,7 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       supabase
         .from('posts')
         .select(
-          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, mode, content, css_content, images, files, views, likes, created_at, updated_at, author_id, author:users!posts_author_id_fkey(nickname)',
+          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, mode, content, css_content, images, files, views, likes, created_at, updated_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id)',
         )
         .eq('id', id)
         .maybeSingle(),
@@ -62,13 +62,14 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
           .filter((s) => s !== '')
       : [];
 
-    const author = (data as { author?: { nickname?: string } | null }).author;
+    const author = (data as { author?: { nickname?: string; equipped_badge_id?: string | null } | null }).author;
 
     const report: Report = {
       id: data.id,
       title: data.title ?? '',
       author: author?.nickname ?? '익명',
       authorId: data.author_id,
+      equippedBadgeId: author?.equipped_badge_id ?? null,
       stockName: data.stock_name ?? '',
       ticker: data.ticker ?? '',
       opinion: data.opinion ?? 'hold',

@@ -4,6 +4,7 @@
 // posts ↔ users JOIN으로 즉시 반영되므로 별도 동기화 불필요.
 
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { BADGES_BY_ID } from '@/lib/badges';
@@ -54,6 +55,12 @@ export async function PUT(request: NextRequest) {
         { status: 500 },
       );
     }
+
+    // 피드 카드(메인·랭킹·검색)와 글 상세 모두 작성자 배지를 JOIN해서 SSR 렌더링하므로
+    // 배지 변경 후 ISR 캐시를 즉시 무효화해야 새 배지가 반영됨.
+    revalidatePath('/');
+    revalidatePath('/ranking');
+    revalidatePath('/search');
 
     return NextResponse.json({ success: true, equippedBadgeId });
   } catch (error) {

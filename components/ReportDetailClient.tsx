@@ -230,7 +230,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
         </h1>
         <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-wrap">
           <span className="font-medium text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
-            <UserBadgeInline nickname={report.author} size={16} />
+            <UserBadgeInline badgeId={report.equippedBadgeId} nickname={report.author} size={16} />
             {report.author}
           </span>
           <span>{report.createdAt}</span>
