@@ -8,7 +8,6 @@
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
-import type { User } from '@supabase/supabase-js';
 
 export interface AuthUser {
   id: string;
@@ -70,9 +69,3 @@ export async function getAuthUserAny(
   return getAuthUserFromBearer(authHeader);
 }
 
-/**
- * Supabase 사용자 → 앱 내부 AuthUser 매핑 (필요 시 사용)
- */
-export function toAuthUser(user: User): AuthUser {
-  return { id: user.id, email: user.email ?? null };
-}
