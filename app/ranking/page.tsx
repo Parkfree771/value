@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getCachedFeed } from '@/lib/jsonCache';
+import { getFeedData } from '@/lib/feedData';
 import RankingClient from './RankingClient';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
@@ -62,7 +62,7 @@ const faqJsonLd = {
 // 1분마다 재검증
 export const revalidate = 60;
 
-interface FeedPost {
+type FeedPost = {
   id: string;
   title: string;
   author: string;
@@ -77,37 +77,11 @@ interface FeedPost {
   views: number;
   likes: number;
   priceHistory?: Array<{ date: string; price: number; returnRate: number }>;
-}
-
-interface FeedData {
-  lastUpdated: string;
-  totalPosts: number;
-  posts: FeedPost[];
-}
-
-const FEED_URL = `https://firebasestorage.googleapis.com/v0/b/${process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET}/o/feed.json?alt=media`;
-
-async function fetchFeedFromStorage(): Promise<FeedData> {
-  const res = await fetch(FEED_URL, {
-    next: { revalidate: 60 },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Feed fetch failed: ${res.status}`);
-  }
-
-  return res.json();
-}
+};
 
 export default async function RankingPage() {
-  let posts: FeedPost[] = [];
-
-  try {
-    const data = await getCachedFeed(fetchFeedFromStorage);
-    posts = (data as FeedData).posts || [];
-  } catch (error) {
-    console.error('랭킹 데이터 가져오기 실패:', error);
-  }
+  const data = await getFeedData();
+  const posts: FeedPost[] = (data?.posts ?? []) as unknown as FeedPost[];
 
   // 데이터 전처리 (서버에서 수행)
   const today = new Date();

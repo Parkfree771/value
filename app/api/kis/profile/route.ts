@@ -1,54 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
-import { adminDb } from '@/lib/firebase-admin';
+import { getKISTokenWithCache } from '@/lib/kisTokenManager';
 
 // 서버 메모리 캐시 (5분)
 const cache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_TTL = 5 * 60 * 1000;
 
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-
-/** Admin SDK로 Firestore에서 KIS 토큰 가져오기 */
-async function getKISTokenFromAdmin(): Promise<string> {
-  const doc = await adminDb.collection('settings').doc('kis_token').get();
-
-  if (doc.exists) {
-    const data = doc.data()!;
-    const expiresAt = data.expiresAt?._seconds
-      ? data.expiresAt._seconds * 1000
-      : data.expiresAt;
-    const now = Date.now();
-
-    if (now < expiresAt - 5 * 60 * 1000) {
-      return data.token;
-    }
-  }
-
-  // 토큰 만료 또는 없음 → 새로 발급
-  const response = await fetch(`${KIS_BASE_URL}/oauth2/tokenP`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      grant_type: 'client_credentials',
-      appkey: process.env.KIS_APP_KEY,
-      appsecret: process.env.KIS_APP_SECRET,
-    }),
-  });
-
-  if (!response.ok) throw new Error(`Token request failed: ${response.status}`);
-
-  const tokenData = await response.json();
-  const token = tokenData.access_token;
-
-  // Firestore에 캐시
-  await adminDb.collection('settings').doc('kis_token').set({
-    token,
-    expiresAt: Date.now() + 23 * 60 * 60 * 1000,
-    updatedAt: new Date(),
-  });
-
-  return token;
-}
 
 /** KIS API로 한국 주식 프로필 조회 */
 async function fetchKoreanProfile(token: string, stockCode: string) {
@@ -104,7 +62,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const token = await getKISTokenFromAdmin();
+    const token = await getKISTokenWithCache();
     const result = await fetchKoreanProfile(token, stockCode);
 
     cache.set(cacheKey, { data: result, timestamp: Date.now() });

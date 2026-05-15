@@ -1,72 +1,67 @@
-// KIS API 토큰 관리 (Firestore 캐싱 via Admin SDK)
-//
-// Client SDK (firebase/firestore) 는 보안 규칙에 따라 인증 컨텍스트가 있어야만
-// 읽기/쓰기가 허용되는데, 서버 사이드(API 라우트, SSR)에서는 인증 컨텍스트가
-// 없어 permission-denied 가 발생한다. Admin SDK 는 보안 규칙을 우회하므로
-// 서버 사이드에서 안전하게 토큰 캐시 도큐먼트를 읽고 쓸 수 있다.
+// KIS API 토큰 관리 — Supabase public.settings.kis_token 공유.
+// Edge Functions(update-stock-prices, update-guru-prices)와 같은 row를 본다.
+// 같은 jsonb 구조 { token, expiresAt: ISO } 유지로 토큰 단일 출처 보장.
 
-import { adminDb, Timestamp } from './firebase-admin';
+import { getServiceClient } from './supabase-admin';
 import { getKISToken } from './kis';
 
-const TOKEN_COLLECTION = 'settings';
-const TOKEN_DOC = 'kis_token';
-const EXPIRY_BUFFER = 5 * 60 * 1000; // 5분 버퍼
+const SETTINGS_KEY = 'kis_token';
+const EXPIRY_BUFFER_MS = 5 * 60 * 1000;
 
-interface KISTokenCache {
-  token: string;
-  expiresAt: number;
-  lastUpdated: FirebaseFirestore.Timestamp;
+interface KISTokenValue {
+  token?: string;
+  expiresAt?: string;
 }
 
 /**
- * Firestore 에 캐시된 KIS 토큰을 가져온다.
- * 캐시가 없거나 만료되면 새로 발급 후 Firestore 에 저장한다.
- * Firestore 접근이 완전히 실패하면 getKISToken() 메모리 캐시로 폴백.
+ * Supabase에 캐시된 KIS 토큰을 가져온다. 만료/없음이면 새로 발급해 UPSERT.
+ * Supabase 접근이 완전히 실패하면 메모리 캐시(getKISToken)로 폴백.
  */
 export async function getKISTokenWithCache(): Promise<string> {
   try {
-    const docRef = adminDb.collection(TOKEN_COLLECTION).doc(TOKEN_DOC);
-    const docSnap = await docRef.get();
+    const supabase = getServiceClient();
+    const { data: row, error } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', SETTINGS_KEY)
+      .maybeSingle();
 
-    if (docSnap.exists) {
-      const data = docSnap.data() as KISTokenCache | undefined;
-      const now = Date.now();
-
-      if (data && now < data.expiresAt - EXPIRY_BUFFER) {
-        return data.token;
+    if (!error && row?.value) {
+      const v = row.value as KISTokenValue;
+      if (v.token && v.expiresAt) {
+        const expiresAtMs = new Date(v.expiresAt).getTime();
+        if (Date.now() < expiresAtMs - EXPIRY_BUFFER_MS) {
+          return v.token;
+        }
       }
     }
 
-    // 토큰이 없거나 만료됨 - 새로 발급
     return await refreshKISToken();
   } catch (error) {
-    console.error('[KIS Token] Firestore cache unavailable, using in-memory cache:', error);
+    console.error('[KIS Token] Supabase cache unavailable, using in-memory cache:', error);
     return await getKISToken();
   }
 }
 
 /**
- * 토큰 강제 갱신 및 Firestore 저장 (Admin SDK)
+ * 토큰 강제 갱신 + Supabase UPSERT. expiresAt은 ISO string으로 저장.
  */
 export async function refreshKISToken(): Promise<string> {
   const token = await getKISToken();
 
   try {
-    const docRef = adminDb.collection(TOKEN_COLLECTION).doc(TOKEN_DOC);
-
-    // KIS 토큰은 24시간 유효 (86400초). 안전하게 23시간 55분으로 설정.
-    const expiresAt = Date.now() + 24 * 60 * 60 * 1000 - EXPIRY_BUFFER;
-
-    await docRef.set({
-      token,
-      expiresAt,
-      lastUpdated: Timestamp.now(),
-    });
-
-    console.log('[KIS Token] Token cached in Firestore (Admin SDK)');
+    const supabase = getServiceClient();
+    // KIS 토큰은 24시간 유효. 안전마진 5분.
+    const expiresAtIso = new Date(Date.now() + 24 * 60 * 60 * 1000 - EXPIRY_BUFFER_MS).toISOString();
+    await supabase
+      .from('settings')
+      .upsert(
+        { key: SETTINGS_KEY, value: { token, expiresAt: expiresAtIso } },
+        { onConflict: 'key' },
+      );
+    console.log('[KIS Token] cached in Supabase settings');
   } catch (error) {
-    console.error('[KIS Token] Failed to cache token in Firestore:', error);
-    // 토큰 자체는 유효하므로 계속 진행
+    console.error('[KIS Token] Supabase upsert 실패:', error);
   }
 
   return token;
