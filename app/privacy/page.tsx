@@ -154,9 +154,14 @@ export default function PrivacyPage() {
               개인정보가 안전하게 관리될 수 있도록 필요한 사항을 규정하고 있습니다:
             </p>
             <ul className="list-disc list-inside ml-6 space-y-1">
-              <li>클라우드 서비스 제공: Vercel, AWS 등</li>
+              <li>웹 호스팅·서버리스 실행: <strong>Vercel Inc. (미국)</strong> — 위탁 업무: 웹사이트 호스팅·서버 함수 실행</li>
+              <li>데이터베이스·인증·스토리지: <strong>Supabase Inc. (미국, 데이터센터 일본 도쿄)</strong> — 위탁 업무: 회원 정보·게시물 저장, Google OAuth 인증 처리, 이미지 보관</li>
+              <li>Google OAuth 인증 제공: <strong>Google LLC</strong> — 위탁 업무: 소셜 로그인 인증 정보(이메일, 프로필) 제공</li>
               <li>이메일 발송 서비스: (추후 업데이트)</li>
             </ul>
+            <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-500">
+              * 이용자의 개인정보(이메일, 닉네임, 게시물, 동의 기록)는 Supabase 일본 도쿄 리전 데이터센터에 저장되며, 별도 국외 이전 동의가 필요한 경우 사전에 고지합니다.
+            </p>
           </section>
 
           <section>

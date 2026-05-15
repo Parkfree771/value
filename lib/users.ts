@@ -127,7 +127,7 @@ interface OnboardingInput {
   termsAgreed: boolean;
   privacyAgreed: boolean;
   investmentDisclaimerAgreed: boolean;
-  marketingAgreed?: boolean; // 스키마에 컬럼 없음 — 동의 기록에만 남김
+  marketingAgreed?: boolean;
 }
 
 export async function completeOnboarding(uid: string, data: OnboardingInput): Promise<void> {
@@ -139,8 +139,10 @@ export async function completeOnboarding(uid: string, data: OnboardingInput): Pr
       terms_agreed: data.termsAgreed,
       privacy_agreed: data.privacyAgreed,
       investment_disclaimer_agreed: data.investmentDisclaimerAgreed,
+      marketing_agreed: data.marketingAgreed ?? false,
       terms_version: TERMS_VERSION,
       privacy_version: PRIVACY_VERSION,
+      disclaimer_version: DISCLAIMER_VERSION,
       agreed_at: nowIso,
       onboarding_completed: true,
     })
@@ -181,34 +183,42 @@ interface ConsentAgreements {
   termsAgreed: boolean;
   privacyAgreed: boolean;
   investmentDisclaimerAgreed: boolean;
-  marketingAgreed: boolean; // 스키마에 컬럼 없으므로 무시
+  marketingAgreed: boolean;
 }
 
+/**
+ * 동의 기록을 서버 라우트로 전송. 서버에서 IP·User-Agent를 추출해 user_consents에 저장한다
+ * (클라이언트가 위조할 수 없도록 법적 증빙 신뢰성 확보).
+ */
 export async function saveConsentRecord(
-  uid: string,
-  _email: string, // 호환 위해 인자 유지 (user_consents 테이블엔 user_id 외래키만)
+  _uid: string,
+  _email: string, // 호환 위해 인자 유지
   agreements: ConsentAgreements,
   consentType: 'onboarding' | 'terms_update' | 'marketing_change' = 'onboarding',
 ): Promise<string> {
-  const { data, error } = await supabase
-    .from('user_consents')
-    .insert({
-      user_id: uid,
-      consent_type: consentType,
-      terms_version: TERMS_VERSION,
-      privacy_version: PRIVACY_VERSION,
-      terms_agreed: agreements.termsAgreed,
-      privacy_agreed: agreements.privacyAgreed,
-      investment_disclaimer_agreed: agreements.investmentDisclaimerAgreed,
-    })
-    .select('id')
-    .single();
+  const res = await fetch('/api/user/consent', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      consentType,
+      termsVersion: TERMS_VERSION,
+      privacyVersion: PRIVACY_VERSION,
+      disclaimerVersion: DISCLAIMER_VERSION,
+      termsAgreed: agreements.termsAgreed,
+      privacyAgreed: agreements.privacyAgreed,
+      investmentDisclaimerAgreed: agreements.investmentDisclaimerAgreed,
+      marketingAgreed: agreements.marketingAgreed,
+    }),
+  });
 
-  if (error) {
-    console.error('동의 기록 저장 오류:', error);
-    throw error;
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    console.error('동의 기록 저장 오류:', body);
+    throw new Error(body?.error ?? '동의 기록 저장 실패');
   }
-  return data.id as string;
+  const data = await res.json();
+  return data.consentId as string;
 }
 
 // ─── 회원 탈퇴 ───────────────────────────────────────────
