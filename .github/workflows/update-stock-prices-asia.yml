@@ -39,12 +39,6 @@ jobs:
           KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
           KIS_BASE_URL: https://openapi.koreainvestment.com:9443
           MARKET_TYPE: ASIA
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.SITE_URL }}
+          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: npx tsx scripts/github-update-prices.ts
-
-      - name: Revalidate pages
-        if: success()
-        run: |
-          curl -X POST "${{ secrets.SITE_URL }}/api/revalidate" \
-            -H "Content-Type: application/json" \
-            -d '{"path": "/"}' \
-            --fail --silent --show-error || echo "Revalidate failed, but continuing..."

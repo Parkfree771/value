@@ -65,18 +65,27 @@
 ## ❌ 남은 작업
 
 ### A. 배포 환경변수
-- **Vercel/Netlify**에 다음 추가 필요:
-  - `NEXT_PUBLIC_SUPABASE_URL`
-  - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-  - `SUPABASE_SECRET_KEY`
-  - `REVALIDATE_SECRET` (이미 있다면 OK)
-- GitHub Secrets는 .bat 메인이라 안 해도 무관 (사장님 판단)
+- ✅ **Vercel env 완료** (2026-05-15)
+- **GitHub Actions Repo Secrets** — `Settings > Secrets and variables > Actions`에서 추가:
+  | 키 | 비고 |
+  |---|---|
+  | `NEXT_PUBLIC_SUPABASE_URL` | Supabase 프로젝트 URL |
+  | `SUPABASE_SECRET_KEY` | service_role 시크릿 |
+  | `KIS_APP_KEY` / `KIS_APP_SECRET` | KIS 한국투자 |
+  | `SITE_URL` | `https://www.antstreet.kr` 같은 prod URL (trailing slash 없이) |
+  | `REVALIDATE_SECRET` | Vercel과 동일한 값 |
 
-### B. 보안 권장
+### B. GitHub Actions 워크플로우 (2026-05-15 수정 완료)
+- 깨져있던 `Revalidate pages` curl 스텝 제거 — secret 헤더 없어서 401나던 것
+- `github-update-prices.ts` 안에서 revalidate 호출하도록 일원화. 환경변수 `NEXT_PUBLIC_SITE_URL` + `REVALIDATE_SECRET` 추가
+- guru 워크플로우는 무변경 (CDN cache 24h + 일 1회 cron이라 revalidate 불필요)
+- **검증 방법**: Secrets 입력 후 Actions 탭에서 `workflow_dispatch` 수동 트리거 → 로그에서 `[CRON] revalidate /: 200` 확인
+
+### C. 보안 권장
 - **Supabase DB 비밀번호 재발급** — 채팅으로 connection string 노출됐음
 - Firebase Auth Provider 비활성화 (더 이상 안 씀)
 
-### C. 점검 필요 (별건)
+### D. 점검 필요 (별건)
 - **미들웨어**: 온보딩 미완료 사용자가 강제 redirect 안 되고 통과하는 점
 - 필요 시 별도 개선
 
