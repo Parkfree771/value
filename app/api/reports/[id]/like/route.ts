@@ -5,9 +5,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
+import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
+import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
+
+const LIKE_RATE_LIMIT = 30;
+const LIKE_RATE_WINDOW = 60 * 1000;
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
@@ -23,6 +28,22 @@ export async function POST(
       );
     }
     const userId = authData.user.id;
+
+    // Rate limit: 사용자별 분당 30회 토글 (봇 토글 공격 방지)
+    const clientIP = getClientIP(request);
+    const rateLimitResult = await checkRateLimitRedis(
+      `like:${userId}:${clientIP}`,
+      LIKE_RATE_LIMIT,
+      LIKE_RATE_WINDOW,
+    );
+    if (!rateLimitResult.success) {
+      const res = NextResponse.json(
+        { success: false, error: '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.' },
+        { status: 429 },
+      );
+      setRateLimitHeaders(res.headers, rateLimitResult, LIKE_RATE_LIMIT);
+      return res;
+    }
 
     // 게시물 존재 확인
     const { data: post } = await supabase

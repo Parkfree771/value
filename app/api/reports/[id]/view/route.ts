@@ -10,47 +10,30 @@ export async function POST(
   try {
     const { id } = await params;
 
-    const viewedCookie = request.cookies.get(`viewed_${id}`);
-    if (viewedCookie) {
+    // 24시간 내 같은 글 조회는 cookies로 차단
+    if (request.cookies.get(`viewed_${id}`)) {
       return NextResponse.json({ success: true, alreadyViewed: true });
     }
 
     const supabase = getServiceClient();
 
-    const { data: post, error: selectError } = await supabase
-      .from('posts')
-      .select('id, views')
-      .eq('id', id)
-      .maybeSingle();
-
-    if (selectError) {
-      console.error('[view] select 실패:', selectError);
+    // atomic +1 — race condition 없음. 없는 글이면 0 row 영향.
+    const { data, error } = await supabase.rpc('increment_post_views', { p_post_id: id });
+    if (error) {
+      console.error('[view] rpc 실패:', error);
       return NextResponse.json(
-        { success: false, error: '조회 중 오류가 발생했습니다.' },
+        { success: false, error: '조회수 증가 중 오류가 발생했습니다.' },
         { status: 500 },
       );
     }
-    if (!post) {
+    if (data === null) {
       return NextResponse.json(
         { success: false, error: '리포트를 찾을 수 없습니다.' },
         { status: 404 },
       );
     }
 
-    const { error: updateError } = await supabase
-      .from('posts')
-      .update({ views: (post.views ?? 0) + 1 })
-      .eq('id', id);
-
-    if (updateError) {
-      console.error('[view] update 실패:', updateError);
-      return NextResponse.json(
-        { success: false, error: '조회수 증가 중 오류가 발생했습니다.' },
-        { status: 500 },
-      );
-    }
-
-    const response = NextResponse.json({ success: true });
+    const response = NextResponse.json({ success: true, views: data });
     response.cookies.set(`viewed_${id}`, 'true', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
