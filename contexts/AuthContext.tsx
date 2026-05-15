@@ -132,7 +132,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(true);
     try {
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const next = typeof window !== 'undefined' ? window.location.pathname : '/';
+      const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+      // /login, /auth/* 페이지에서 로그인하면 next에 같은 페이지가 들어가
+      // 로그인 후에도 그 페이지에 머무는 문제 발생 → 메인(/)으로 보낸다.
+      const next = pathname === '/login' || pathname.startsWith('/auth/') ? '/' : pathname;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

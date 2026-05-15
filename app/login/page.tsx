@@ -3,12 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
-  const { signInWithGoogle } = useAuth();
+  const router = useRouter();
+  const { signInWithGoogle, user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // 이미 로그인된 상태로 /login 진입 시 메인으로 — OAuth callback이 next=/login으로 보낸 케이스 방어망.
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace('/');
+    }
+  }, [authLoading, user, router]);
 
   // 걷는 애니메이션: 4프레임 스프라이트 순환
   const spriteFrames = ['/sprite/logo.webp', '/sprite/1.webp', '/sprite/2.webp', '/sprite/3.webp', '/sprite/4.webp'];
