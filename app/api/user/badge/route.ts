@@ -1,38 +1,12 @@
 // PUT /api/user/badge
 // 본인의 장착 배지를 변경 (1개, null이면 해제).
-// users.equipped_badge_id를 갱신. feed.json도 동기화 (Storage 잔존).
+// users.equipped_badge_id를 갱신. 메인/ranking/RelatedReports의 피드 카드 배지는
+// posts ↔ users JOIN으로 즉시 반영되므로 별도 동기화 불필요.
 
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
-import { adminStorage } from '@/lib/firebase-admin';
 import { BADGES_BY_ID } from '@/lib/badges';
-import type { FeedData } from '@/types/feed';
-
-async function syncBadgeToFeed(uid: string, equippedBadgeId: string | null) {
-  const bucket = adminStorage.bucket();
-  const file = bucket.file('feed.json');
-  const [exists] = await file.exists();
-  if (!exists) return { updated: 0 };
-
-  const [content] = await file.download();
-  const feed = JSON.parse(content.toString()) as FeedData;
-  let changed = 0;
-  for (const post of feed.posts) {
-    if (post.authorId === uid && post.equippedBadgeId !== equippedBadgeId) {
-      post.equippedBadgeId = equippedBadgeId;
-      changed++;
-    }
-  }
-  if (changed === 0) return { updated: 0 };
-
-  feed.lastUpdated = new Date().toISOString();
-  await file.save(JSON.stringify(feed, null, 2), {
-    contentType: 'application/json',
-    metadata: { cacheControl: 'public, max-age=60' },
-  });
-  return { updated: changed };
-}
 
 export async function PUT(request: NextRequest) {
   try {
@@ -81,15 +55,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    let feedUpdated = 0;
-    try {
-      const r = await syncBadgeToFeed(uid, equippedBadgeId);
-      feedUpdated = r.updated;
-    } catch (e) {
-      console.warn('[badge PUT] feed.json sync 실패:', e instanceof Error ? e.message : e);
-    }
-
-    return NextResponse.json({ success: true, equippedBadgeId, feedUpdated });
+    return NextResponse.json({ success: true, equippedBadgeId });
   } catch (error) {
     console.error('[badge PUT] error:', error);
     return NextResponse.json(

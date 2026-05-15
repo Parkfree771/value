@@ -27,7 +27,7 @@ export interface HistoricalPrice {
 }
 
 /**
- * Firebase Storage의 JSON에서 주가를 가져옵니다.
+ * Supabase current_prices 캐시(priceCache)에서 주가를 가져옵니다.
  */
 async function getPriceFromJSON(ticker: string): Promise<StockQuote | null> {
   try {
@@ -160,66 +160,6 @@ export async function getCurrentStockPrice(
  * @deprecated utils/calculateReturn.ts의 calculateReturn 사용 권장
  */
 export const calculateReturnRate = calculateReturnUtil;
-
-/**
- * 리포트의 수익률을 업데이트합니다.
- * @param ticker 주식 티커
- * @param initialPrice 작성 시점 주가
- * @param positionType 포지션 타입
- * @param collectionName Firestore 컬렉션 이름 ('post_prices', 'marketcall_prices', 'stock_data')
- * @returns 업데이트된 주가 및 수익률 정보
- */
-export async function updateReportReturnRate(
-  ticker: string,
-  initialPrice: number,
-  positionType: 'long' | 'short' = 'long',
-  collectionName: string = 'post_prices'
-): Promise<{
-  currentPrice: number;
-  returnRate: number;
-  currency: string;
-  stockData: any;
-} | null> {
-  console.log(`[UpdateReturnRate] 수익률 업데이트 시작:`, {
-    ticker,
-    initialPrice,
-    positionType,
-    collectionName
-  });
-
-  // initialPrice 유효성 검증
-  if (!initialPrice || initialPrice <= 0) {
-    console.error(`[UpdateReturnRate] 유효하지 않은 initialPrice: ${initialPrice}`);
-    return null;
-  }
-
-  const stockQuote = await getCurrentStockPrice(ticker, undefined, collectionName);
-
-  if (!stockQuote) {
-    console.error(`[UpdateReturnRate] 주가 조회 실패 - ticker: ${ticker}`);
-    return null;
-  }
-
-  const returnRate = calculateReturnRate(
-    initialPrice,
-    stockQuote.price,
-    positionType
-  );
-
-  const result = {
-    currentPrice: stockQuote.price,
-    returnRate: parseFloat(returnRate.toFixed(2)),
-    currency: stockQuote.currency,
-    stockData: {
-      currency: stockQuote.currency,
-      marketCap: stockQuote.marketCap,
-      regularMarketChangePercent: stockQuote.regularMarketChangePercent,
-    },
-  };
-
-  console.log(`[UpdateReturnRate] 수익률 계산 완료:`, result);
-  return result;
-}
 
 /**
  * @deprecated utils/calculateReturn.ts의 getReturnColorClass 사용 권장
