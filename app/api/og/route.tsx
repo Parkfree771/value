@@ -80,17 +80,29 @@ export async function GET(req: NextRequest) {
   const returnRate = parseFloat(searchParams.get('returnRate') || '0');
   const author = (searchParams.get('author') || '익명').slice(0, 16);
   const date = formatDate(searchParams.get('date') || '');
-  const positionType = searchParams.get('positionType') || 'long'; // long | short
+  // positionType: 매수(long) 시 +녹/−빨, 숏(short) 시 그대로 (수익 관점은 동일)
+  void searchParams.get('positionType');
 
   const isPositive = returnRate >= 0;
-  // 매수(long): +녹 / -빨, 숏(short): +빨 / -녹 (수익 관점은 같음 → 녹/빨)
   const goodColor = '#059669'; // emerald-600
   const badColor = '#dc2626';  // red-600
   const rateColor = isPositive ? goodColor : badColor;
-  const rateBg = isPositive ? 'rgba(5, 150, 105, 0.10)' : 'rgba(220, 38, 38, 0.10)';
   const rateSign = isPositive ? '+' : '';
   const rateText = `${rateSign}${returnRate.toFixed(1)}%`;
-  const arrow = isPositive ? '▲' : '▼';
+
+  // 로고 이미지 — 동일 오리진에서 가져와 base64로 임베드 (satori가 절대 URL을 안정적으로
+  // 처리하지 못하는 경우가 있어 인라인이 가장 robust).
+  const origin = new URL(req.url).origin;
+  let logoDataUrl = '';
+  try {
+    const buf = await fetch(`${origin}/og-antstreet-logo.png`, {
+      next: { revalidate: 60 * 60 * 24 * 30, tags: ['og-logo'] },
+    }).then((r) => r.arrayBuffer());
+    logoDataUrl = `data:image/png;base64,${Buffer.from(buf).toString('base64')}`;
+  } catch {
+    // 폴백: 텍스트 로고 (이미지 로드 실패 시)
+    logoDataUrl = '';
+  }
 
   // 폰트 로드 — Google Fonts CSS API로 최신 woff2 URL 동적 조회
   // (정적 fonts.gstatic.com 직접 URL은 hash 변경 시 404)
@@ -115,7 +127,7 @@ export async function GET(req: NextRequest) {
           position: 'relative',
         }}
       >
-        {/* ─── 헤더: 작성자 + 날짜 ─── */}
+        {/* ─── 헤더: AntStreet 로고 + 날짜 ─── */}
         <div
           style={{
             display: 'flex',
@@ -123,40 +135,33 @@ export async function GET(req: NextRequest) {
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          {logoDataUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={logoDataUrl}
+              alt="AntStreet"
+              width={260}
+              height={71}
+              style={{ display: 'flex' }}
+            />
+          ) : (
             <div
               style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '50%',
-                background: 'linear-gradient(135deg, #3b50b5 0%, #6378d1 100%)',
-                color: '#fff',
-                fontSize: '16px',
+                fontSize: '40px',
                 fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontFamily: 'NotoSansKR',
-              }}
-            >
-              {(author[0] || '?').toUpperCase()}
-            </div>
-            <div
-              style={{
-                fontSize: '20px',
-                fontWeight: 700,
-                color: '#334155',
-                fontFamily: 'NotoSansKR',
+                color: '#1e293b',
+                fontFamily: 'Barlow',
+                letterSpacing: '-0.02em',
                 display: 'flex',
               }}
             >
-              @{author}
+              AntStreet
             </div>
-          </div>
+          )}
           {date && (
             <div
               style={{
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: 700,
                 color: '#94a3b8',
                 fontFamily: 'Barlow',
@@ -244,7 +249,7 @@ export async function GET(req: NextRequest) {
             />
           </div>
 
-          {/* 하단 메트릭: 수익률 뱃지 + 작성가→현재가 */}
+          {/* 하단 메트릭: (좌) 작성가→현재가  /  (우) 수익률 텍스트만 */}
           <div
             style={{
               display: 'flex',
@@ -253,75 +258,48 @@ export async function GET(req: NextRequest) {
               gap: '24px',
             }}
           >
-            {/* 수익률 뱃지 */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '14px 22px',
-                borderRadius: '14px',
-                background: rateBg,
-                border: `2px solid ${rateColor}`,
-              }}
-            >
-              <span
-                style={{
-                  fontSize: '32px',
-                  color: rateColor,
-                  fontFamily: 'Barlow',
-                  fontWeight: 700,
-                  display: 'flex',
-                }}
-              >
-                {arrow}
-              </span>
-              <span
-                style={{
-                  fontSize: '40px',
-                  color: rateColor,
-                  fontFamily: 'Barlow',
-                  fontWeight: 700,
-                  letterSpacing: '-0.01em',
-                  display: 'flex',
-                }}
-              >
-                {rateText}
-              </span>
-            </div>
-
-            {/* 작성가 → 현재가 */}
-            {initialPrice > 0 && currentPrice > 0 && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '14px',
-                }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <div style={{ fontSize: '14px', color: '#94a3b8', fontFamily: 'NotoSansKR', fontWeight: 700, display: 'flex' }}>
+            {/* 작성가 → 현재가 (좌측) */}
+            {initialPrice > 0 && currentPrice > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '16px', color: '#94a3b8', fontFamily: 'NotoSansKR', fontWeight: 700, display: 'flex' }}>
                     작성가
                   </div>
-                  <div style={{ fontSize: '24px', color: '#475569', fontFamily: 'Barlow', fontWeight: 700, display: 'flex' }}>
+                  <div style={{ fontSize: '32px', color: '#475569', fontFamily: 'Barlow', fontWeight: 700, display: 'flex' }}>
                     {formatPrice(initialPrice, currency)}
                   </div>
                 </div>
-                <div style={{ fontSize: '24px', color: '#cbd5e1', fontFamily: 'Barlow', display: 'flex' }}>→</div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <div style={{ fontSize: '14px', color: '#94a3b8', fontFamily: 'NotoSansKR', fontWeight: 700, display: 'flex' }}>
+                <div style={{ fontSize: '32px', color: '#cbd5e1', fontFamily: 'Barlow', display: 'flex' }}>→</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '16px', color: '#94a3b8', fontFamily: 'NotoSansKR', fontWeight: 700, display: 'flex' }}>
                     현재가
                   </div>
-                  <div style={{ fontSize: '24px', color: '#0f172a', fontFamily: 'Barlow', fontWeight: 700, display: 'flex' }}>
+                  <div style={{ fontSize: '32px', color: '#0f172a', fontFamily: 'Barlow', fontWeight: 700, display: 'flex' }}>
                     {formatPrice(currentPrice, currency)}
                   </div>
                 </div>
               </div>
+            ) : (
+              <div style={{ display: 'flex' }} />
             )}
+
+            {/* 수익률 (우측) — 뱃지/화살표 제거, 숫자만 큰 폰트로 */}
+            <div
+              style={{
+                fontSize: '64px',
+                color: rateColor,
+                fontFamily: 'Barlow',
+                fontWeight: 700,
+                letterSpacing: '-0.02em',
+                display: 'flex',
+              }}
+            >
+              {rateText}
+            </div>
           </div>
         </div>
 
-        {/* ─── 푸터: 브랜드 + 도메인 ─── */}
+        {/* ─── 푸터: (좌) 작성자  /  (우) 도메인 ─── */}
         <div
           style={{
             display: 'flex',
@@ -332,24 +310,20 @@ export async function GET(req: NextRequest) {
             borderTop: '1px solid #e2e8f0',
           }}
         >
-          {/* AntStreet 로고 */}
           <div
             style={{
-              fontSize: '22px',
+              fontSize: '20px',
               fontWeight: 700,
-              fontFamily: 'Barlow',
-              letterSpacing: '-0.02em',
-              background: 'linear-gradient(110deg, #3b50b5 0%, #6378d1 50%, #F97316 100%)',
-              backgroundClip: 'text',
-              color: 'transparent',
+              color: '#475569',
+              fontFamily: 'NotoSansKR',
               display: 'flex',
             }}
           >
-            AntStreet
+            작성자: {author}
           </div>
           <div
             style={{
-              fontSize: '16px',
+              fontSize: '18px',
               fontWeight: 700,
               color: '#94a3b8',
               fontFamily: 'Barlow',

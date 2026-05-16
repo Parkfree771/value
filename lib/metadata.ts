@@ -43,7 +43,8 @@ function tickerVariants(ticker: string): string[] {
  */
 // OG 이미지 레이아웃 버전. 레이아웃을 바꿔서 옛 캐시(네이버/카톡/페북)를 강제로 무효화해야 할 때 증가.
 // v2: 좌우 safe-zone 132px 확보 (2026-05-16)
-const OG_IMAGE_VERSION = 'v2';
+// v3: 헤더 AntStreet 로고 이미지 / 작성가→현재가 좌측·수익률 우측 텍스트 / 푸터 작성자 라벨 (2026-05-16)
+const OG_IMAGE_VERSION = 'v3';
 
 function buildOgImageUrl(report: Report, returnRate: number): string {
   const currency = report.stockData?.currency || (report.exchange === 'KRX' ? 'KRW' : 'USD');
