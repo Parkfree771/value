@@ -5,9 +5,10 @@ import * as path from 'path';
 const PORTFOLIOS_PATH = path.join(process.cwd(), 'data', 'guru-portfolios.json');
 
 // 서버 프로세스 내 메모리 캐시
+// 13F 데이터는 분기 1회만 변경되고, 갱신 시 git push로 새 배포가 트리거되므로 길게 잡아도 안전.
 let cachedData: any = null;
 let cacheTime = 0;
-const CACHE_TTL = 60 * 60 * 1000; // 1시간
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24시간
 
 function getPortfoliosData() {
   const now = Date.now();
@@ -44,8 +45,9 @@ export async function GET(
       portfolio: data.gurus[slug],
     });
 
-    // 로컬 JSON은 분기 1회 변경 → 긴 캐시
-    response.headers.set('Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=172800');
+    // 로컬 JSON은 분기 1회만 변경되며 갱신 시 git push로 빌드가 새로 돌아 자동 무효화됨.
+    // → CDN 캐시를 30일로 길게 잡고, 그 사이엔 stale 응답 허용 (다음 분기까지 거의 영원).
+    response.headers.set('Cache-Control', 'public, s-maxage=2592000, stale-while-revalidate=2592000');
 
     return response;
   } catch (error) {
