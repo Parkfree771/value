@@ -30,8 +30,9 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '00724F101': { ticker: 'AXP', exchange: 'NYS' },
   '949746101': { ticker: 'WFC', exchange: 'NYS' },
   '02005N100': { ticker: 'ALLY', exchange: 'NYS' },
-  '14913Q104': { ticker: 'COF', exchange: 'NYS' },
-  '896522109': { ticker: 'TFC', exchange: 'NYS' },
+  // 14913Q104: invalid CUSIP (체크섬 불일치, 2026-05-16 매핑 제거). 진짜 COF는 14040H105.
+  // 896522109: 옛 매핑이 TFC였으나 OpenFIGI 검증 결과 Trinity Industries (TRN)임. 정정.
+  '896522109': { ticker: 'TRN', exchange: 'NYS' },   // Trinity Industries (옛 매핑 TFC 오류 정정 2026-05-16)
   '808513105': { ticker: 'SCHW', exchange: 'NYS' },
 
   // 헬스케어/제약
@@ -62,13 +63,15 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '79466L302': { ticker: 'CRM', exchange: 'NYS' },
   '00206R102': { ticker: 'T', exchange: 'NYS' },
   '92343V104': { ticker: 'VZ', exchange: 'NYS' },
-  '11135F101': { ticker: 'BMY', exchange: 'NYS' },
+  '11135F101': { ticker: 'AVGO', exchange: 'NAS' }, // Broadcom Inc (옛 매핑 BMY 오류 정정 2026-05-16)
+  '110122108': { ticker: 'BMY', exchange: 'NYS' },  // Bristol-Myers Squibb (실제 CUSIP)
   '09247X101': { ticker: 'BLK', exchange: 'NYS' },
 
   // 기술 (추가)
   '035420505': { ticker: 'ANSS', exchange: 'NAS' },
   '22160K105': { ticker: 'COST', exchange: 'NAS' },
-  '29786A106': { ticker: 'EQIX', exchange: 'NAS' },
+  // 29786A106: 옛 매핑이 EQIX였으나 OpenFIGI 검증 결과 Etsy (ETSY)임. 정정. 진짜 EQIX는 29444U700.
+  '29786A106': { ticker: 'ETSY', exchange: 'NAS' },  // Etsy Inc (옛 매핑 EQIX 오류 정정 2026-05-16)
   '040413106': { ticker: 'ANET', exchange: 'NYS' },
 
   // 에너지/자원
@@ -93,7 +96,7 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '500754106': { ticker: 'KHC', exchange: 'NAS' },  // Kraft Heinz
   '256135203': { ticker: 'DVA', exchange: 'NYS' },  // DaVita
   '171340102': { ticker: 'CHTR', exchange: 'NAS' }, // Charter Communications
-  '549271106': { ticker: 'LOW', exchange: 'NYS' },  // Lowe's
+  // '549271106' 제거됨: invalid CUSIP (체크섬 불일치). 진짜 LOW는 548661107로 매핑.
   // Liberty Live Holdings (2024년 스핀오프)
   '530909100': { ticker: 'LLYVA', exchange: 'NAS' },  // Liberty Live Holdings Class A
   '530909308': { ticker: 'LLYVK', exchange: 'NAS' },  // Liberty Live Holdings Class C
@@ -125,8 +128,10 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '449489103': { ticker: 'HHH', exchange: 'NYS' },   // Howard Hughes
   '86959K105': { ticker: 'SWVL', exchange: 'NAS' },
   '74762E102': { ticker: 'QSR', exchange: 'NYS' },   // Restaurant Brands
-  '075887109': { ticker: 'BN', exchange: 'NYS' },    // Brookfield
-  '11271J107': { ticker: 'BN', exchange: 'NYS' },    // Brookfield Corp (NOT Blackstone)
+  // 075887109: 옛 매핑이 BN(Brookfield)였으나 OpenFIGI 검증 결과 Becton Dickinson (BDX)임. 정정.
+  '075887109': { ticker: 'BDX', exchange: 'NYS' },   // Becton Dickinson (옛 매핑 BN 오류 정정 2026-05-16)
+  '11271J107': { ticker: 'BN', exchange: 'NYS' },    // Brookfield Corporation (현재 진짜 CUSIP)
+  '113004105': { ticker: 'BAM', exchange: 'NYS', name: 'Brookfield Asset Management Ltd' }, // BAM (게이너 13F가 "BROOKFIELD CORPORATION"으로 잘못 라벨링한 것 정정)
   '579780206': { ticker: 'MCD', exchange: 'NYS' },   // McDonald's
   'N7749L103': { ticker: 'NKE', exchange: 'NYS' },   // Nike
   '617446448': { ticker: 'MSCI', exchange: 'NYS' },  // MSCI
@@ -143,8 +148,8 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   // 세스 클라만 (Baupost)
   '345370860': { ticker: 'FOXA', exchange: 'NAS' },  // Fox Corp A
   '345370878': { ticker: 'FOX', exchange: 'NAS' },   // Fox Corp B
-  '526057104': { ticker: 'LEN', exchange: 'NYS' },   // Lennar Corp (NOT Liberty Global)
-  '526057302': { ticker: 'LEN', exchange: 'NYS' },   // Lennar Corp Class B
+  '526057104': { ticker: 'LEN', exchange: 'NYS' },    // Lennar Corp Class A (의결권)
+  '526057302': { ticker: 'LEN-B', exchange: 'NYS' },  // Lennar Corp Class B (무의결권) — 별도 티커 (KIS는 LEN/B로 조회)
   'G5785G107': { ticker: 'LNG', exchange: 'NYS' },   // Liberty TripAdvisor
   '92536U106': { ticker: 'VRSN', exchange: 'NAS' },  // VeriSign
   '651639106': { ticker: 'NWSA', exchange: 'NAS' },  // News Corp A
@@ -247,7 +252,8 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '89832Q109': { ticker: 'TFC', exchange: 'NYS' },   // Truist Financial
 
   // 토마스 게이너 (Markel) 미매핑 해결
-  '548661107': { ticker: 'LOW', exchange: 'NYS' },   // Lowe's
+  // 549271106: invalid CUSIP (체크섬 불일치, 2026-05-16 매핑 제거). 진짜 LOW는 548661107.
+  '548661107': { ticker: 'LOW', exchange: 'NYS' },   // Lowe's Companies Inc
   '670100205': { ticker: 'NVO', exchange: 'NYS' },   // Novo Nordisk (ADR)
   '571748102': { ticker: 'MRSH', exchange: 'NYS' },  // Marsh McLennan (2026-01-14 MMC → MRSH 티커 변경)
   '882508104': { ticker: 'TXN', exchange: 'NAS' },   // Texas Instruments
@@ -271,6 +277,23 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '136375102': { ticker: 'CNI', exchange: 'NYS' },   // Canadian National Railway (ADR)
   '084423102': { ticker: 'WRB', exchange: 'NYS' },   // W.R. Berkley
   '13646K108': { ticker: 'CP', exchange: 'NYS' },    // Canadian Pacific Kansas City (ADR)
+
+  // 자동매핑 오류 정정 (OpenFIGI 검증, 2026-05-16)
+  '093671105': { ticker: 'HRB', exchange: 'NYS' },     // H&R Block (자동매핑이 "BLOCK INC" 이름으로 XYZ/Block Inc로 잘못 매칭) - 리 루
+  '46138G508': { ticker: 'BKLN', exchange: 'AMS' },    // Invesco Senior Loan ETF (자동매핑이 VVR/Invesco Senior Income Trust로 잘못 매칭) - 막스
+  '459506101': { ticker: 'IFF', exchange: 'NYS', name: 'International Flavors & Fragrances Inc' }, // IFF (자동매핑이 "INTER"로 INTR/Inter & Co로 잘못 매칭) - 아이칸
+  '500767306': { ticker: 'KWEB', exchange: 'AMS', name: 'KraneShares CSI China Internet ETF' },    // KWEB (자동매핑이 KraneShares 패밀리 다른 ETF로 잘못 매칭) - 테퍼
+  '422806208': { ticker: 'HEI-A', exchange: 'NYS' },   // HEICO Class A (HEI 보통주 CUSIP 422806109과 별개. KIS는 HEI/A로 조회) - 게이너
+
+  // Q1 2026 미매핑 해결 (2026-05-16 추가)
+  '55616P104': { ticker: 'M', exchange: 'NYS' },     // Macy's (Buffett)
+  '07782B104': { ticker: 'BLTE', exchange: 'NAS' },  // Belite Bio (ADR, Druckenmiller)
+  '23306J309': { ticker: 'DBVT', exchange: 'NAS' },  // DBV Technologies (ADR, Druckenmiller)
+  '83443Q103': { ticker: 'SOLS', exchange: 'NAS' },  // Solstice Advanced Materials (Honeywell 스핀오프, Druckenmiller)
+  '88034P109': { ticker: 'TME', exchange: 'NYS' },   // Tencent Music Entertainment (ADR, Li Lu)
+  '984245100': { ticker: 'YPF', exchange: 'NYS' },   // YPF Sociedad Anónima (ADR, Marks/Druckenmiller)
+  'D18190898': { ticker: 'DB', exchange: 'NYS' },    // Deutsche Bank AG (CINS=독일 보통주, US ADR 가격 추적용, Tepper)
+  '866966104': { ticker: 'SUNB', exchange: 'NYS' },  // Sunbelt Rentals Holdings (2026 IPO, Gayner)
 };
 
 // global-stocks.json 로드 (이름 매칭용)

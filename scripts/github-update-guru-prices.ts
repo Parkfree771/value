@@ -45,7 +45,9 @@ const TICKER_REMAP: Record<string, string> = { FI: 'FISV' };
 const EXCHANGE_REMAP: Record<string, string> = { FI: 'NAS' };
 
 function toKISTicker(ticker: string): string {
-  return TICKER_REMAP[ticker] || ticker;
+  if (TICKER_REMAP[ticker]) return TICKER_REMAP[ticker];
+  // 클래스 주식: LEN-B, BF-A, BF-B, BRK-B, HEI-A 등은 KIS에서 "/" 표기 사용
+  return ticker.replace(/-/g, '/');
 }
 function toKISExchange(ticker: string, exchange: string): string {
   return EXCHANGE_REMAP[ticker] || exchange;

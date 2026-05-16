@@ -9,7 +9,7 @@ import { resolveCusip, GENERIC_ISSUER_BLACKLIST, normalizeCompanyName } from './
  * 2. 포괄적 발행자명이면 titleOfClass (SEC 원본 대체)
  * 3. SEC 원본 nameOfIssuer
  */
-function getDisplayName(nameOfIssuer: string, titleOfClass: string, mappingName?: string): string {
+export function getDisplayName(nameOfIssuer: string, titleOfClass: string, mappingName?: string): string {
   // 수동 매핑에서 이름이 지정된 경우 (ETF 등)
   if (mappingName && mappingName !== nameOfIssuer) {
     return mappingName;
