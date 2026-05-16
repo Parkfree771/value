@@ -30,7 +30,9 @@ export async function GET(request: NextRequest) {
 
     // 페이지네이션: cursor가 있으면 해당 post의 sortBy 값을 가져와 그 이하로 필터.
     // 같은 값이 있을 때 안정 정렬을 위해 id로 tie-break.
-    let query = supabase.from('posts').select(SELECT_COLUMNS, { count: 'exact' }).order(sortBy, { ascending: false }).order('id', { ascending: false }).limit(pageSize);
+    // count: 'estimated' — Postgres planner의 estimated row count 사용. 매 페이지마다 full COUNT(*)
+    // 회피해서 큰 테이블에서 응답 시간 ↓. 페이징 UI에 정확한 카운트가 필요하면 'planned'로 조정 가능.
+    let query = supabase.from('posts').select(SELECT_COLUMNS, { count: 'estimated' }).order(sortBy, { ascending: false }).order('id', { ascending: false }).limit(pageSize);
 
     if (cursor) {
       const { data: cursorRow } = await supabase

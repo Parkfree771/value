@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
         .from('posts')
         .select(SELECT_COLUMNS)
         .eq('author_id', uid)
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(200),
       getLatestPrices(),
     ]);
 

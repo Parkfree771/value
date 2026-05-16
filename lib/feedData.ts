@@ -18,7 +18,8 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
         .select(
           'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
         )
-        .order('created_at', { ascending: false }),
+        .order('created_at', { ascending: false })
+        .limit(500), // ranking/related SSR용 — 글 수 늘어나면 페이징으로
       getLatestPrices(),
     ]);
 

@@ -45,41 +45,34 @@ export async function POST(
       return res;
     }
 
-    // 게시물 존재 확인
-    const { data: post } = await supabase
-      .from('posts')
-      .select('id')
-      .eq('id', id)
-      .maybeSingle();
-    if (!post) {
-      return NextResponse.json(
-        { success: false, error: '리포트를 찾을 수 없습니다.' },
-        { status: 404 },
-      );
-    }
-
-    // 현재 좋아요 상태 확인
-    const { data: existing } = await supabase
-      .from('post_likes')
-      .select('post_id')
-      .eq('post_id', id)
-      .eq('user_id', userId)
-      .maybeSingle();
-
+    // 토글: INSERT 시도, unique constraint 위반(23505)이면 이미 좋아요 → DELETE.
+    // 옛 코드는 4 round-trips (post 존재 / existing / insert or delete / 재읽기).
+    // 신: 2 round-trips (insert-or-delete / 카운트 읽기). post FK는 INSERT가 자동 검증.
     let isLiked: boolean;
-    if (existing) {
-      const { error: delError } = await supabase
-        .from('post_likes')
-        .delete()
-        .eq('post_id', id)
-        .eq('user_id', userId);
-      if (delError) throw delError;
-      isLiked = false;
+    const { error: insErr } = await supabase
+      .from('post_likes')
+      .insert({ post_id: id, user_id: userId });
+
+    if (insErr) {
+      if (insErr.code === '23505') {
+        // 이미 좋아요 했었음 → DELETE
+        const { error: delErr } = await supabase
+          .from('post_likes')
+          .delete()
+          .eq('post_id', id)
+          .eq('user_id', userId);
+        if (delErr) throw delErr;
+        isLiked = false;
+      } else if (insErr.code === '23503') {
+        // FK 위반 = 게시물 없음
+        return NextResponse.json(
+          { success: false, error: '리포트를 찾을 수 없습니다.' },
+          { status: 404 },
+        );
+      } else {
+        throw insErr;
+      }
     } else {
-      const { error: insError } = await supabase
-        .from('post_likes')
-        .insert({ post_id: id, user_id: userId });
-      if (insError) throw insError;
       isLiked = true;
     }
 

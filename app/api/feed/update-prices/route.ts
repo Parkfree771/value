@@ -13,7 +13,6 @@ import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 import { getKISTokenWithCache } from '@/lib/kisTokenManager';
 import { getServiceClient } from '@/lib/supabase-admin';
-import { calculateReturn } from '@/utils/calculateReturn';
 
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
 const BATCH_SIZE = 5;
@@ -105,10 +104,11 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = getServiceClient();
 
-    // 1. posts에서 모든 ticker × exchange 추출
+    // 1. posts에서 유니크한 ticker × exchange만 추출 (DISTINCT). post row 전체는 불필요 —
+    //    배치 RPC가 ticker 매칭으로 일괄 UPDATE.
     const { data: postsRows, error: postsError } = await supabase
       .from('posts')
-      .select('id, ticker, exchange, initial_price, position_type, return_rate');
+      .select('ticker, exchange');
 
     if (postsError) {
       console.error('[Update Prices] posts 조회 실패:', postsError);
@@ -126,7 +126,6 @@ export async function POST(request: NextRequest) {
       const key = `${t}:${e}`;
       if (!uniqueTickers.has(key)) uniqueTickers.set(key, { ticker: t, exchange: e });
     }
-    console.log(`[Update Prices] Unique tickers: ${uniqueTickers.size}`);
 
     // 2. KIS 토큰
     const token = await getKISTokenWithCache();
@@ -178,31 +177,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 5. posts 각 행의 current_price/return_rate/prev_return_rate 갱신
-    //    (각 ticker마다 UPDATE — 글 수 많지 않으므로 OK)
-    for (const post of postsRows) {
-      const ticker = (post.ticker || '').toUpperCase();
-      const priceData = newPrices.get(ticker);
-      if (!priceData) continue;
-
-      const positionType: 'long' | 'short' = (post.position_type as 'long' | 'short') ?? 'long';
-      const newReturnRate = parseFloat(
-        calculateReturn(
-          Number(post.initial_price ?? 0),
-          priceData.currentPrice,
-          positionType,
-        ).toFixed(2),
-      );
-      const { error: updError } = await supabase
-        .from('posts')
-        .update({
-          current_price: priceData.currentPrice,
-          prev_return_rate: post.return_rate,
-          return_rate: newReturnRate,
-        })
-        .eq('id', post.id);
-      if (updError) {
-        console.warn(`[Update Prices] posts update 실패 (id=${post.id}):`, updError.message);
+    // 5. posts.current_price/return_rate/prev_return_rate를 배치 RPC 1콜로 일괄 갱신.
+    //    옛 코드: posts 행 N개에 각각 UPDATE (50글 → 50 UPDATE)
+    //    신: ticker → 가격 jsonb 맵을 한 번에 보내고 SQL aggregate 1쿼리로 같은 ticker 모두 갱신.
+    //    update_posts_prices_batch가 long/short 분기 + ROUND까지 SQL 내부에서 처리 (migrations/0018).
+    const priceMap: Record<string, number> = {};
+    for (const [ticker, v] of newPrices) {
+      priceMap[ticker] = v.currentPrice;
+    }
+    if (Object.keys(priceMap).length > 0) {
+      const { error: rpcError } = await supabase.rpc('update_posts_prices_batch', {
+        p_prices: priceMap,
+      });
+      if (rpcError) {
+        console.error('[Update Prices] update_posts_prices_batch 실패:', rpcError.message);
       }
     }
 

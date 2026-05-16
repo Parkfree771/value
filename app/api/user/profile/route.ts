@@ -36,13 +36,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
     }
 
+    // 프로필 페이지 글 카드는 메타데이터만 사용 — content/css_content/images/files/stock_data 같은
+    // heavy 컬럼은 글 상세(/reports/[id])에서 로드. 여기서 빼면 응답 크기 대폭 축소.
     const { data: postRows, error: postsError } = await supabase
       .from('posts')
       .select(
-        'id, title, stock_name, ticker, exchange, category, opinion, position_type, return_rate, initial_price, current_price, target_price, views, likes, mode, content, css_content, images, files, stock_data, created_at',
+        'id, title, stock_name, ticker, exchange, category, opinion, position_type, return_rate, initial_price, current_price, target_price, views, likes, created_at',
       )
       .eq('author_id', userRow.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(200);
 
     if (postsError) {
       console.error('[profile GET] posts 조회 오류:', postsError);
@@ -68,12 +71,7 @@ export async function GET(request: NextRequest) {
         typeof p.created_at === 'string' ? p.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
       views: p.views ?? 0,
       likes: p.likes ?? 0,
-      mode: p.mode ?? 'text',
-      content: p.content ?? '',
-      cssContent: p.css_content ?? '',
-      images: p.images ?? [],
-      files: p.files ?? [],
-      stockData: p.stock_data ?? {},
+      // mode/content/cssContent/images/files/stockData — 글 상세에서만 사용 (이 라우트에서 미반환)
     }));
 
     return NextResponse.json({
