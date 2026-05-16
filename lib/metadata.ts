@@ -41,6 +41,10 @@ function tickerVariants(ticker: string): string[] {
  * 동적 OG 이미지 URL 빌더
  * /api/og가 ImageResponse로 1200x630 PNG 렌더 (Edge Runtime, ~200ms 콜드 / SNS 캐시 7일)
  */
+// OG 이미지 레이아웃 버전. 레이아웃을 바꿔서 옛 캐시(네이버/카톡/페북)를 강제로 무효화해야 할 때 증가.
+// v2: 좌우 safe-zone 132px 확보 (2026-05-16)
+const OG_IMAGE_VERSION = 'v2';
+
 function buildOgImageUrl(report: Report, returnRate: number): string {
   const currency = report.stockData?.currency || (report.exchange === 'KRX' ? 'KRW' : 'USD');
   const params = new URLSearchParams({
@@ -55,6 +59,7 @@ function buildOgImageUrl(report: Report, returnRate: number): string {
     author: report.author || '익명',
     date: report.createdAt || '',
     positionType: report.positionType || 'long',
+    v: OG_IMAGE_VERSION,
   });
   return `${SITE_URL}/api/og?${params.toString()}`;
 }

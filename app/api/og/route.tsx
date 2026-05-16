@@ -108,7 +108,9 @@ export async function GET(req: NextRequest) {
           display: 'flex',
           flexDirection: 'column',
           backgroundColor: '#ffffff',
-          padding: '52px 64px',
+          // 네이버 블로그/카톡 등은 1200x630 OG 이미지를 ~1.5:1 비율로 가운데 crop하여 표시.
+          // 좌우 132px(11%) 마진을 확보해 가장자리 콘텐츠(아바타, 가격, 푸터)가 잘리지 않도록 함.
+          padding: '56px 132px',
           fontFamily: 'NotoSansKR',
           position: 'relative',
         }}
@@ -213,10 +215,10 @@ export async function GET(req: NextRequest) {
               )}
             </div>
 
-            {/* 제목 (메인) */}
+            {/* 제목 (메인) — 패딩 늘어난 만큼 폰트 약간 다운스케일 */}
             <div
               style={{
-                fontSize: title.length > 30 ? '52px' : '60px',
+                fontSize: title.length > 30 ? '46px' : '54px',
                 fontWeight: 700,
                 color: '#0f172a',
                 lineHeight: 1.25,
