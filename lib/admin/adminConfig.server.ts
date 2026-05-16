@@ -47,9 +47,3 @@ export function isAdminEmail(email: string | null | undefined): boolean {
   return adminEmails.includes(email.toLowerCase());
 }
 
-/**
- * 환경변수 캐시 초기화 (테스트용)
- */
-export function clearAdminCache(): void {
-  cachedAdminEmails = null;
-}

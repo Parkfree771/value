@@ -99,34 +99,3 @@ export async function checkRateLimitRedis(
   }
 }
 
-/**
- * Rate Limit with 다양한 제한 (IP + 사용자 ID 조합)
- */
-export async function checkRateLimitAdvanced(
-  ip: string,
-  userId?: string,
-  config: {
-    ipLimit?: number;
-    userLimit?: number;
-    windowMs?: number;
-  } = {}
-): Promise<RateLimitResult> {
-  const { ipLimit = 100, userLimit = 50, windowMs = 60 * 1000 } = config;
-
-  // IP 기반 체크
-  const ipResult = await checkRateLimitRedis(`ip:${ip}`, ipLimit, windowMs);
-  if (!ipResult.success) {
-    return ipResult;
-  }
-
-  // 로그인 사용자는 추가 제한
-  if (userId) {
-    const userResult = await checkRateLimitRedis(`user:${userId}`, userLimit, windowMs);
-    if (!userResult.success) {
-      return userResult;
-    }
-    return userResult;
-  }
-
-  return ipResult;
-}

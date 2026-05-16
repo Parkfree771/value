@@ -34,10 +34,6 @@ const nextConfig: NextConfig = {
     optimizePackageImports: [
       'react-icons',
       'date-fns',
-      'firebase/app',
-      'firebase/auth',
-      'firebase/firestore',
-      'firebase/storage',
       'recharts',
     ],
   },

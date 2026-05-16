@@ -113,9 +113,3 @@ export async function searchUsStocks(query: string, limit = 15): Promise<SecSear
   return result;
 }
 
-/** ticker로 단건 조회 */
-export async function getUsStockByTicker(ticker: string): Promise<SecSearchResult | null> {
-  const index = await getIndex();
-  const t = ticker.toUpperCase().trim();
-  return index.find((s) => s.ticker === t) || null;
-}

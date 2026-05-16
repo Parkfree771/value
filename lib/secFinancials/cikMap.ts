@@ -78,19 +78,3 @@ export async function getCikByTicker(ticker: string): Promise<string | null> {
   return null;
 }
 
-/** ticker로 회사 메타 (영문명 등) */
-export async function getCompanyMetaByTicker(
-  ticker: string,
-): Promise<{ cik: string; nameEn: string } | null> {
-  const map = await getMap();
-  for (const cand of normalizeCandidates(ticker)) {
-    const entry = map.get(cand);
-    if (entry) {
-      return {
-        cik: String(entry.cik_str).padStart(10, '0'),
-        nameEn: entry.title,
-      };
-    }
-  }
-  return null;
-}

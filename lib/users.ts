@@ -4,7 +4,6 @@
 // 호환성: 기존 콜러가 camelCase로 접근하므로 DB row(snake_case)는 모두 매핑.
 
 import { createClient } from '@/utils/supabase/client';
-import type { AuthUser } from '@/contexts/AuthContext';
 
 const supabase = createClient();
 
@@ -72,9 +71,9 @@ function fromRow(row: UserRow): UserProfile {
 }
 
 // ─── 약관 버전 상수 ──────────────────────────────────────
-export const TERMS_VERSION = '2026.02.01';
-export const PRIVACY_VERSION = '2026.02.01';
-export const DISCLAIMER_VERSION = '2026.02.01';
+const TERMS_VERSION = '2026.02.01';
+const PRIVACY_VERSION = '2026.02.01';
+const DISCLAIMER_VERSION = '2026.02.01';
 
 // ─── 조회 ────────────────────────────────────────────────
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
@@ -89,16 +88,6 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     throw error;
   }
   return data ? fromRow(data as UserRow) : null;
-}
-
-/**
- * Supabase Auth는 가입 시 트리거(handle_new_auth_user)가 public.users를 자동 생성하므로
- * 별도 createUserFromAuth가 필요 없음. 하지만 호환 위해 fetch만 시도하고 없으면 에러.
- */
-export async function getOrCreateUserProfile(authUser: AuthUser): Promise<UserProfile> {
-  const profile = await getUserProfile(authUser.uid);
-  if (profile) return profile;
-  throw new Error('user row이 존재하지 않습니다 (Auth 트리거 미발동?). uid=' + authUser.uid);
 }
 
 // ─── 닉네임 중복 체크 ─────────────────────────────────────

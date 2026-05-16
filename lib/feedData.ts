@@ -86,11 +86,6 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
   }
 });
 
-export async function getFeedPost(id: string): Promise<FeedPost | null> {
-  const data = await getFeedData();
-  return data?.posts.find((p) => p.id === id) || null;
-}
-
 export interface RelatedSets {
   sameTicker: FeedPost[];
   sameAuthor: FeedPost[];

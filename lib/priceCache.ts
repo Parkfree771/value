@@ -63,21 +63,3 @@ export function getCurrencyFromExchange(exchange: string): string {
   }
 }
 
-export async function getPriceForTicker(ticker: string): Promise<{
-  currentPrice: number | null;
-  exchange: string | null;
-  currency: string;
-} | null> {
-  const prices = await getLatestPrices();
-  const tickerUpper = ticker.toUpperCase();
-  const priceData = prices[tickerUpper];
-
-  if (priceData && priceData.currentPrice) {
-    return {
-      currentPrice: priceData.currentPrice,
-      exchange: priceData.exchange,
-      currency: getCurrencyFromExchange(priceData.exchange),
-    };
-  }
-  return null;
-}
