@@ -8,7 +8,7 @@
  * - Stat: 작은 통계 한 줄
  */
 
-import { Fragment, ReactNode } from 'react';
+import { Fragment, ReactNode, useId } from 'react';
 import { COLOR, toneColor, type Tone } from '../theme';
 import type { Insight } from '../insights';
 
@@ -162,7 +162,8 @@ export function Sparkline({
     ? `${linePath} L${width},${height} L0,${height} Z`
     : '';
 
-  const id = `spark-${Math.random().toString(36).slice(2, 8)}`;
+  // useId로 SSR/CSR 일관된 id 생성 (옛 Math.random은 hydration mismatch 유발)
+  const id = `spark-${useId().replace(/:/g, '')}`;
 
   return (
     <svg width={width} height={height} className="overflow-visible">

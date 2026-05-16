@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title,
       description,
       url: `${SITE_URL}/portfolio/${slug}`,
-      images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: `${guru.name_kr} 포트폴리오` }],
+      images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: `${guru.name_kr} 포트폴리오` }],
     },
     alternates: {
       canonical: `${SITE_URL}/portfolio/${slug}`,

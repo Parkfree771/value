@@ -1,10 +1,8 @@
-'use client';
-
 import Link from 'next/link';
 import { GURU_LIST } from './types';
 
+// RSC — 정적 콘텐츠 + 9개 GURU_LIST 카드. 클라이언트 JS 0KB.
 export default function GuruTrackerPage() {
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 페이지 소개 섹션 */}

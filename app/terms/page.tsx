@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import Card from '@/components/Card';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '이용약관',
     description: 'AntStreet 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
     url: `${SITE_URL}/terms`,
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/terms`,

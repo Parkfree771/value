@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     title: '13F 공시 포트폴리오 한국어 추적 · 9명의 투자 대가',
     description: '워렌 버핏(버크셔), 빌 애크먼(퍼싱 스퀘어), 리 루(멍거의 파트너), 하워드 막스, 세스 클라만, 드러켄밀러, 칼 아이칸, 데이비드 테퍼, 토마스 게이너의 분기별 SEC 13F 포트폴리오를 한국어로.',
     url: `${SITE_URL}/guru-tracker`,
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/guru-tracker`,

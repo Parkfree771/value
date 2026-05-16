@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import HomeClient from '@/components/HomeClient';
 import type { FeedData } from '@/types/feed';
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     description:
       '한·미·일·중·홍콩 주식 분석을 공유하고, 작성가 대비 현재가로 수익률이 자동 검증되는 투자 커뮤니티. 결과로 증명된 개미 투자자의 분석을 한곳에서.',
     url: SITE_URL,
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: SITE_URL,

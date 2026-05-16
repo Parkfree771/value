@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import BriefingClient from './BriefingClient';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       '매일 아침 WSJ·블룸버그·CNBC 기반 미국 시장 압축 정리. 지수·원자재·환율·금리·핵심 이슈를 한국어로.',
     url: `${SITE_URL}/briefing`,
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet 모닝 브리핑' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet 모닝 브리핑' }],
   },
   alternates: {
     canonical: `${SITE_URL}/briefing`,

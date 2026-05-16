@@ -1,4 +1,4 @@
-import { Metadata } from 'next';
+﻿import { Metadata } from 'next';
 import { Report } from '@/types/report';
 import { formatReturnRate } from './stockPrice';
 
@@ -268,7 +268,7 @@ export function generateReportJsonLd(
   const returnRate = currentReturnRate ?? report.returnRate;
   const op = opinionLabel(report.opinion);
   const themeTags = (report.themes || []).map((t) => THEME_NAMES[t] || t);
-  const ogImageUrl = `${SITE_URL}/og-v2.png`;
+  const ogImageUrl = `${SITE_URL}/og-v2.jpg`;
   const cleanContent = buildContentPreview(report.content, 5000);
   const lastModified =
     report.updatedAt && report.updatedAt.length > 0
@@ -292,7 +292,7 @@ export function generateReportJsonLd(
         name: SITE_NAME,
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE_URL}/og-v2.png`,
+          url: `${SITE_URL}/og-v2.jpg`,
           width: 1731,
           height: 909,
         },

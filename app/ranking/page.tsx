@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { getFeedData } from '@/lib/feedData';
 import RankingClient from './RankingClient';
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       '작성가 vs 현재가로 자동 검증되는 리포트·투자자 랭킹. 결과로 증명된 개미 투자자를 한눈에.',
     url: `${SITE_URL}/ranking`,
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: 'AntStreet' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/ranking`,

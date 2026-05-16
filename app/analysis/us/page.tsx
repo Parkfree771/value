@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import AnalysisUsClient from './AnalysisUsClient';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
       'SEC EDGAR 공식 데이터로 미국 상장사 매출·영업이익·현금흐름을 5년 시계열로. 엔비디아, 애플, 테슬라 한글로 즉시 검색.',
     url: `${SITE_URL}/analysis/us`,
     siteName: 'AntStreet',
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: '미국주식 기업분석 - AntStreet' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: '미국주식 기업분석 - AntStreet' }],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '미국주식 기업분석 — SEC EDGAR 공식 5년 차트',
     description: '엔비디아·애플·테슬라 한글 검색, 매출·영업이익·현금흐름 시계열',
-    images: ['/og-v2.png'],
+    images: ['/og-v2.jpg'],
   },
   alternates: {
     canonical: `${SITE_URL}/analysis/us`,

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import AnalysisClient from './AnalysisClient';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
       '삼성전자·SK하이닉스·네이버 등 매출·영업이익·ROE·현금흐름을 DART 공식 데이터로 시각화. 사업보고서 안 뒤지고 핵심만.',
     url: `${SITE_URL}/analysis`,
     siteName: 'AntStreet',
-    images: [{ url: '/og-v2.png', width: 1731, height: 909, alt: '한국 기업분석 - AntStreet' }],
+    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: '한국 기업분석 - AntStreet' }],
     locale: 'ko_KR',
     type: 'website',
   },
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: '한국 기업분석 — 코스피·코스닥 5년 재무 차트',
     description: '삼성전자·SK하이닉스·네이버 등 DART 공식 데이터 기반 재무 시각화',
-    images: ['/og-v2.png'],
+    images: ['/og-v2.jpg'],
   },
   alternates: {
     canonical: `${SITE_URL}/analysis`,
