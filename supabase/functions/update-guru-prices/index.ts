@@ -14,7 +14,8 @@ interface TickerInfo {
   filingPrice: number;
 }
 
-const DELAY_MS = 100;
+const BATCH_SIZE = 5;          // KIS 20 req/s 한도 안에서 안전
+const BATCH_DELAY_MS = 100;
 const MAX_RETRIES = 2;
 
 const SKIP_TICKERS = new Set(["EXE/WS", "KRSP/WS", "ALVOW", "JBSAY"]);
@@ -78,25 +79,47 @@ Deno.serve(async (req) => {
     let skipped = 0;
     const failedTickers: string[] = [];
 
-    for (const { ticker, exchange, filingPrice } of tickers) {
-      if (SKIP_TICKERS.has(ticker)) {
+    // SKIP_TICKERS는 미리 필터해서 배치 분할 효율 ↑
+    const fetchable = tickers.filter((t) => {
+      if (SKIP_TICKERS.has(t.ticker)) {
         skipped++;
-        continue;
+        return false;
       }
-      try {
-        const currentPrice = await getPriceWithRetry(token, ticker, exchange);
-        const returnRate = filingPrice > 0
-          ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
-          : 0;
-        rows.push({ ticker, current_price: currentPrice, return_rate: returnRate });
-        success++;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Unknown";
-        console.error(`[GURU-CRON] ✗ ${ticker}: ${msg}`);
-        failedTickers.push(ticker);
-        fail++;
+      return true;
+    });
+
+    // 배치 병렬 — 310 ticker × 100ms serial = 31s → batch5 × 100ms = ~6s
+    for (let i = 0; i < fetchable.length; i += BATCH_SIZE) {
+      const batch = fetchable.slice(i, i + BATCH_SIZE);
+      const results = await Promise.allSettled(
+        batch.map(async ({ ticker, exchange, filingPrice }) => {
+          const currentPrice = await getPriceWithRetry(token, ticker, exchange);
+          const returnRate = filingPrice > 0
+            ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
+            : 0;
+          return { ticker, currentPrice, returnRate };
+        }),
+      );
+      for (let j = 0; j < results.length; j++) {
+        const r = results[j];
+        const { ticker } = batch[j];
+        if (r.status === "fulfilled") {
+          rows.push({
+            ticker: r.value.ticker,
+            current_price: r.value.currentPrice,
+            return_rate: r.value.returnRate,
+          });
+          success++;
+        } else {
+          const msg = r.reason instanceof Error ? r.reason.message : "Unknown";
+          console.error(`[GURU-CRON] ✗ ${ticker}: ${msg}`);
+          failedTickers.push(ticker);
+          fail++;
+        }
       }
-      await new Promise((r) => setTimeout(r, DELAY_MS));
+      if (i + BATCH_SIZE < fetchable.length) {
+        await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
+      }
     }
 
     console.log(`[GURU-CRON] fetched: ${success} ok, ${fail} fail, ${skipped} skip`);

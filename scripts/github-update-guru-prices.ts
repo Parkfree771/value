@@ -37,7 +37,8 @@ const supabase = createClient(supabaseUrl, supabaseSecret, {
 
 // ===== KIS =====
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
-const DELAY_MS = 100;
+const BATCH_SIZE = 5;       // KIS는 secs당 20req 허용. 5 동시 × 100ms 간격이면 안전.
+const BATCH_DELAY_MS = 100; // 배치 사이 간격
 const MAX_RETRIES = 2;
 
 const SKIP_TICKERS = new Set(['EXE/WS', 'KRSP/WS', 'ALVOW', 'JBSAY']);
@@ -164,24 +165,36 @@ async function main() {
     return true;
   });
 
-  for (const { ticker, exchange, filingPrice } of fetchable) {
-    try {
-      const kisExchange = toKISExchange(ticker, exchange);
-      const currentPrice = await getStockPriceWithRetry(token, ticker, kisExchange);
-      const returnRate =
-        filingPrice > 0
-          ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
-          : 0;
-      rows.push({ ticker, current_price: currentPrice, return_rate: returnRate });
-      console.log(`  ✓ ${ticker}: $${currentPrice} (${returnRate >= 0 ? '+' : ''}${returnRate}%)`);
-      success++;
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Unknown';
-      console.error(`  ✗ ${ticker}: ${msg}`);
-      failedTickers.push(ticker);
-      fail++;
+  // 배치 병렬 처리 — 300+ ticker × 100ms serial = 30s+ → batch5 × 100ms = ~6s
+  for (let i = 0; i < fetchable.length; i += BATCH_SIZE) {
+    const batch = fetchable.slice(i, i + BATCH_SIZE);
+    const results = await Promise.allSettled(
+      batch.map(async ({ ticker, exchange, filingPrice }) => {
+        const kisExchange = toKISExchange(ticker, exchange);
+        const currentPrice = await getStockPriceWithRetry(token, ticker, kisExchange);
+        const returnRate =
+          filingPrice > 0
+            ? Math.round(((currentPrice - filingPrice) / filingPrice) * 10000) / 100
+            : 0;
+        return { ticker, currentPrice, returnRate };
+      }),
+    );
+    for (let j = 0; j < results.length; j++) {
+      const r = results[j];
+      const { ticker } = batch[j];
+      if (r.status === 'fulfilled') {
+        rows.push({ ticker: r.value.ticker, current_price: r.value.currentPrice, return_rate: r.value.returnRate });
+        success++;
+      } else {
+        const msg = r.reason instanceof Error ? r.reason.message : 'Unknown';
+        console.error(`  ✗ ${ticker}: ${msg}`);
+        failedTickers.push(ticker);
+        fail++;
+      }
     }
-    await new Promise((r) => setTimeout(r, DELAY_MS));
+    if (i + BATCH_SIZE < fetchable.length) {
+      await new Promise((r) => setTimeout(r, BATCH_DELAY_MS));
+    }
   }
 
   console.log(`\n[GURU-CRON] fetched: ${success} ok, ${fail} fail, ${skipped} skip`);

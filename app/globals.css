@@ -233,13 +233,6 @@ body {
     text-wrap: balance;
   }
 
-  /* 테마 보더 유틸리티 */
-  .pixel-border {
-    border: 2px solid var(--theme-border);
-    box-shadow: var(--shadow-md);
-    border-radius: 12px;
-  }
-
   /* 텍스트 글로우 */
   .text-glow-red {
     text-shadow: 0 0 10px rgba(220, 38, 38, 0.6), 0 0 20px rgba(220, 38, 38, 0.3);

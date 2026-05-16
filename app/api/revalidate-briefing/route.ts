@@ -22,6 +22,8 @@ async function handle(request: NextRequest) {
     return NextResponse.json({ error: `Unknown key: ${key}. Use us|kr|jp|all` }, { status: 400 });
   }
 
+  // Next 16의 revalidateTag(tag, profile)는 profile 인자가 필수.
+  // 'max' = 가장 적극적인 무효화 (immediate purge).
   tags.forEach((t) => revalidateTag(t, 'max'));
 
   return NextResponse.json({ revalidated: true, key, tags, now: Date.now() });
