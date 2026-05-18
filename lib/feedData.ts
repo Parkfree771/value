@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import type { FeedData, FeedPost } from '@/types/feed';
 import { createClient } from '@/utils/supabase/server';
 import { getLatestPrices } from '@/lib/priceCache';
+import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 // 피드 데이터를 Supabase에서 조립한다. app/page.tsx의 getInitialFeed와 동일 패턴.
@@ -12,7 +13,7 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const [{ data: rows, error }, prices] = await Promise.all([
+    const [{ data: rows, error }, prices, lookback] = await Promise.all([
       supabase
         .from('posts')
         .select(
@@ -21,6 +22,7 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
         .order('created_at', { ascending: false })
         .limit(500), // ranking/related SSR용 — 글 수 늘어나면 페이징으로
       getLatestPrices(),
+      getLookbackPrices(),
     ]);
 
     if (error) {
@@ -39,6 +41,11 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
           ? parseFloat(calculateReturn(initialPrice, currentPrice, positionType).toFixed(2))
           : Number(r.return_rate ?? 0);
 
+      const lb = lookback[ticker];
+      const returnRate1D = calcPeriodReturn(currentPrice, lb?.close1d, positionType);
+      const returnRate1W = calcPeriodReturn(currentPrice, lb?.close7d, positionType);
+      const returnRate1M = calcPeriodReturn(currentPrice, lb?.close30d, positionType);
+
       return {
         id: r.id,
         title: r.title ?? '',
@@ -54,6 +61,9 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
         initialPrice,
         currentPrice,
         returnRate,
+        returnRate1D,
+        returnRate1W,
+        returnRate1M,
         targetPrice: Number(r.target_price ?? 0),
         createdAt:
           typeof r.created_at === 'string' ? r.created_at.split('T')[0] : '',

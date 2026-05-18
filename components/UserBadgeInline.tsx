@@ -36,6 +36,22 @@ const UserBadgeInline = memo(function UserBadgeInline({
     fetchedBadgeId;
 
   if (!finalId) return null;
+
+  // 새 PNG 배지 체계 (single-*, avg-*, activity-*, special-*)
+  if (/^(single|avg|activity|special)-/.test(finalId)) {
+    return (
+      <img
+        src={`/badges/${finalId}.png`}
+        alt={finalId}
+        width={size}
+        height={size}
+        className={`inline-block flex-shrink-0 align-middle ${className}`}
+        style={{ width: size, height: size, objectFit: 'contain' }}
+      />
+    );
+  }
+
+  // 기존 SVG 배지
   const def = BADGES_BY_ID[finalId];
   if (!def) return null;
   return (

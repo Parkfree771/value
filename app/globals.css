@@ -452,23 +452,23 @@ body {
 
   .badge-buy {
     @apply badge-base;
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    border-color: #ef4444;
+    background: #dc2626;
+    color: #ffffff;
+    border-color: transparent;
   }
 
   .badge-sell {
     @apply badge-base;
-    background: rgba(59, 130, 246, 0.1);
-    color: #3b82f6;
-    border-color: #3b82f6;
+    background: #2563eb;
+    color: #ffffff;
+    border-color: transparent;
   }
 
   .badge-hold {
     @apply badge-base;
-    background: rgba(107, 114, 128, 0.1);
-    color: #6b7280;
-    border-color: #6b7280;
+    background: #6b7280;
+    color: #ffffff;
+    border-color: transparent;
   }
 
   /* 위험 버튼 - 삭제/탈퇴 등 */
@@ -503,15 +503,17 @@ body {
     @apply px-3 py-2 text-sm;
     background: var(--theme-bg-card);
     color: var(--foreground);
-    border: 2px solid var(--theme-border-muted);
+    border: 2px solid #94a3b8;
     border-radius: 10px;
-    box-shadow: var(--shadow-sm);
     transition: all 0.15s ease;
+  }
+  .dark .pixel-input {
+    border-color: #64748b;
   }
   .pixel-input:focus {
     outline: none;
     border-color: var(--theme-accent);
-    box-shadow: 0 0 0 3px rgba(59, 80, 181, 0.15), var(--shadow-sm);
+    box-shadow: 0 0 0 3px rgba(59, 80, 181, 0.15);
   }
   .pixel-input:disabled {
     opacity: 0.5;

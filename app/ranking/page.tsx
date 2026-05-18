@@ -66,16 +66,24 @@ type FeedPost = {
   id: string;
   title: string;
   author: string;
+  authorId?: string;
+  equippedBadgeId?: string | null;
   stockName: string;
   ticker: string;
+  exchange?: string;
   opinion: 'buy' | 'sell' | 'hold';
+  positionType?: 'long' | 'short';
   returnRate: number;
   prevReturnRate?: number;
+  returnRate1D?: number | null;
+  returnRate1W?: number | null;
+  returnRate1M?: number | null;
   initialPrice: number;
   currentPrice: number;
   createdAt: string;
   views: number;
   likes: number;
+  themes?: string[];
   priceHistory?: Array<{ date: string; price: number; returnRate: number }>;
 };
 

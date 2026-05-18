@@ -170,7 +170,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                   {/* 변동률 */}
                   <td className="px-3 py-3 text-right">
                     {h.status === 'NEW BUY' ? (
-                      <span className="text-sm font-bold text-red-500">NEW</span>
+                      <span className="inline-flex items-center justify-center bg-ant-red-600 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md whitespace-nowrap">NEW</span>
                     ) : h.status === 'SOLD OUT' ? (
                       <span className="text-sm font-bold text-blue-500">-100%</span>
                     ) : h.shares_change_pct !== null && h.shares_change_pct !== 0 ? (

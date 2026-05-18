@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, memo, useEffect, useRef } from 'react';
+import { useState, useMemo, memo, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
 import type { FeedPost, FeedData } from '@/types/feed';
@@ -67,6 +67,9 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     opinion: post.opinion,
     returnRate: post.returnRate,
     prevReturnRate: post.prevReturnRate,
+    returnRate1D: post.returnRate1D,
+    returnRate1W: post.returnRate1W,
+    returnRate1M: post.returnRate1M,
     initialPrice: post.initialPrice,
     currentPrice: post.currentPrice,
     createdAt: post.createdAt,
@@ -92,6 +95,24 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
   const [isLoading, setIsLoading] = useState(!initialData);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<FeedTab>('all');
+  // 수익률순 3단 사이클: 비활성 → desc(높은순) → asc(낮은순) → 비활성(기본)
+  const [returnDir, setReturnDir] = useState<'desc' | 'asc'>('desc');
+
+  const handleTabClick = useCallback((tab: FeedTab) => {
+    if (tab !== 'return') {
+      setActiveTab(tab);
+      return;
+    }
+    if (activeTab !== 'return') {
+      setActiveTab('return');
+      setReturnDir('desc');
+    } else if (returnDir === 'desc') {
+      setReturnDir('asc');
+    } else {
+      setActiveTab('all');
+      setReturnDir('desc');
+    }
+  }, [activeTab, returnDir]);
   const [allThemes, setAllThemes] = useState<Theme[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
@@ -165,7 +186,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         sorted.sort((a, b) => b.views - a.views);
         break;
       case 'return':
-        sorted.sort((a, b) => b.returnRate - a.returnRate);
+        sorted.sort((a, b) => returnDir === 'desc' ? b.returnRate - a.returnRate : a.returnRate - b.returnRate);
         break;
       case 'all':
       default:
@@ -175,7 +196,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
     }
 
     return sorted;
-  }, [reports, activeTab]);
+  }, [reports, activeTab, returnDir]);
 
   // 검색 및 필터링
   const filteredReports = useMemo(() => {
@@ -276,15 +297,19 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
           ))}
         </div>
         <div className="flex gap-0 sm:gap-1 flex-nowrap sm:ml-2 items-center">
-          {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={activeTab === tab ? FILTER_ACTIVE : FILTER_INACTIVE}
-            >
-              {{ all: '전체', following: '북마크', popular: '인기순', return: '수익률순' }[tab]}
-            </button>
-          ))}
+          {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => {
+            const label = { all: '전체', following: '북마크', popular: '인기순', return: '수익률순' }[tab];
+            const showArrow = tab === 'return' && activeTab === 'return';
+            return (
+              <button
+                key={tab}
+                onClick={() => handleTabClick(tab)}
+                className={activeTab === tab ? FILTER_ACTIVE : FILTER_INACTIVE}
+              >
+                {label}{showArrow && (returnDir === 'desc' ? ' ↓' : ' ↑')}
+              </button>
+            );
+          })}
         </div>
       </div>
 

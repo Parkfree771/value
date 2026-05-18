@@ -142,9 +142,9 @@ const ReportCard = memo(function ReportCard({
         {/* Header */}
         <div className="flex justify-between items-start mb-2 sm:mb-4 gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm sm:text-base font-semibold text-gray-800 dark:text-gray-200 truncate mb-1 sm:mb-2">{title}</h2>
+            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate mb-1 sm:mb-2">{title}</h2>
             <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
-              <h3 className="text-xs sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{stockName}</h3>
+              <h3 className="text-xs sm:text-base font-semibold text-gray-700 dark:text-gray-300 font-heading tracking-wide truncate">{stockName}</h3>
               <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>
               {themes && themes.length > 0 && themes.slice(0, 2).map(themeId => (
                 <span key={themeId} className="text-[10px] px-1 sm:px-1.5 py-0.5 border border-[var(--theme-border-muted)] rounded text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">

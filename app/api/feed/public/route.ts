@@ -9,6 +9,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { getLatestPrices } from '@/lib/priceCache';
+import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 export async function GET() {
@@ -16,7 +17,7 @@ export async function GET() {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const [{ data: rows, error }, prices] = await Promise.all([
+    const [{ data: rows, error }, prices, lookback] = await Promise.all([
       supabase
         .from('posts')
         .select(
@@ -25,6 +26,7 @@ export async function GET() {
         .order('created_at', { ascending: false })
         .limit(500), // 북마크/검색 필터링용 — 최신 500건이면 사실상 전체. 글 수 늘어나면 페이징으로 전환
       getLatestPrices(),
+      getLookbackPrices(),
     ]);
 
     if (error) {
@@ -43,6 +45,12 @@ export async function GET() {
           ? parseFloat(calculateReturn(initialPrice, currentPrice, positionType).toFixed(2))
           : Number(r.return_rate ?? 0);
 
+      const lb = lookback[ticker];
+      const createdAtIso = typeof r.created_at === 'string' ? r.created_at : '';
+      const returnRate1D = calcPeriodReturn(currentPrice, lb?.close1d, positionType);
+      const returnRate1W = calcPeriodReturn(currentPrice, lb?.close7d, positionType);
+      const returnRate1M = calcPeriodReturn(currentPrice, lb?.close30d, positionType);
+
       return {
         id: r.id,
         title: r.title ?? '',
@@ -58,9 +66,11 @@ export async function GET() {
         initialPrice,
         currentPrice,
         returnRate,
+        returnRate1D,
+        returnRate1W,
+        returnRate1M,
         targetPrice: Number(r.target_price ?? 0),
-        createdAt:
-          typeof r.created_at === 'string' ? r.created_at.split('T')[0] : '',
+        createdAt: createdAtIso ? createdAtIso.split('T')[0] : '',
         views: r.views ?? 0,
         likes: r.likes ?? 0,
         commentCount: (r as { comment_count?: number }).comment_count ?? 0,

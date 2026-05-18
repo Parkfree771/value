@@ -14,6 +14,9 @@ export interface FeedPost {
   currentPrice: number;
   returnRate: number;
   prevReturnRate?: number;
+  returnRate1D?: number | null;
+  returnRate1W?: number | null;
+  returnRate1M?: number | null;
   createdAt: string;
   views: number;
   likes: number;

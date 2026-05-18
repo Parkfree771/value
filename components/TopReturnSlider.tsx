@@ -18,6 +18,16 @@ interface TopReturn {
   createdAt: string;
 }
 
+type Period = 'all' | '1d' | '1w' | '1m';
+
+const PERIOD_LABELS: Record<Period, string> = {
+  all: '전체',
+  '1d': '1일',
+  '1w': '7일',
+  '1m': '한달',
+};
+const PERIOD_KEYS: Period[] = ['all', '1d', '1w', '1m'];
+
 interface TopReturnSliderProps {
   reports?: Array<{
     id: string;
@@ -26,6 +36,9 @@ interface TopReturnSliderProps {
     ticker: string;
     returnRate: number;
     prevReturnRate?: number;
+    returnRate1D?: number | null;
+    returnRate1W?: number | null;
+    returnRate1M?: number | null;
     author: string;
     equippedBadgeId?: string | null;
     createdAt: string;
@@ -71,16 +84,36 @@ function RankChangeIndicator({ change, className = '' }: { change: number; class
 
 const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopReturnSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [period, setPeriod] = useState<Period>('1m');
 
-  // 수익률 상위 10개 리포트 추출 (직전 업데이트 대비 ▲▼ 포함)
+  // 선택 기간 기준 수익률 상위 10개 (직전 업데이트 대비 ▲▼는 전체 탭에서만)
   const topReturns = useMemo(() => {
     if (reports.length === 0) return [];
 
-    const top10 = [...reports]
-      .sort((a, b) => b.returnRate - a.returnRate)
+    const pickRate = (r: NonNullable<TopReturnSliderProps['reports']>[number]): number | null => {
+      if (period === 'all') return r.returnRate;
+      if (period === '1d') return r.returnRate1D ?? null;
+      if (period === '1w') return r.returnRate1W ?? null;
+      return r.returnRate1M ?? null;
+    };
+
+    const enriched = reports
+      .map((r) => ({ ...r, displayRate: pickRate(r) }))
+      .filter((r): r is typeof r & { displayRate: number } => r.displayRate !== null && Number.isFinite(r.displayRate));
+
+    const top10 = enriched
+      .sort((a, b) => b.displayRate - a.displayRate)
       .slice(0, 10);
 
-    // 같은 top10 내에서 prevReturnRate 기준 순위 (필터 없는 단일 뷰)
+    // 전체 탭에서만 직전 대비 순위 변동 계산 (기간 탭엔 prev 데이터 없음)
+    if (period !== 'all') {
+      return top10.map((report, index) => ({
+        ...report,
+        rank: index + 1,
+        rankChange: 0,
+      }));
+    }
+
     const prevRankMap = new Map<string, number>();
     [...top10]
       .sort((a, b) => (b.prevReturnRate ?? b.returnRate) - (a.prevReturnRate ?? a.returnRate))
@@ -95,7 +128,11 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
         rankChange: prevRank - currentRank,
       };
     });
-  }, [reports]);
+  }, [reports, period]);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [period]);
 
   useEffect(() => {
     if (topReturns.length === 0) return;
@@ -107,10 +144,8 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
     return () => clearInterval(interval);
   }, [topReturns.length]);
 
-  // 리포트가 없으면 표시하지 않음
-  if (topReturns.length === 0) {
-    return null;
-  }
+  // 토글 버튼은 데이터가 없을 때도 보여서 다른 기간으로 전환 가능하게
+  const hasAnyData = reports.length > 0;
 
   const getRankNumber = (rank: number) => {
     if (rank <= 3) {
@@ -160,17 +195,71 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
     return 'return-neutral';
   };
 
+  if (!hasAnyData) return null;
+
+  const periodHint: Record<Period, string> = {
+    all: '가장 높은 수익률을 기록한 리포트',
+    '1d': '최근 1거래일 동안 가장 많이 오른 종목',
+    '1w': '최근 7일 동안 가장 많이 오른 종목',
+    '1m': '최근 30일 동안 가장 많이 오른 종목',
+  };
+
+  const periodButtonClass = (active: boolean) =>
+    `flex-shrink-0 font-heading tracking-tight sm:tracking-wide text-xs sm:text-sm px-1.5 py-0.5 sm:px-3 sm:py-1.5 transition-all ${
+      active
+        ? 'font-black text-[var(--theme-accent)] underline decoration-2 decoration-[var(--theme-accent)] underline-offset-4'
+        : 'font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)]'
+    }`;
+
   return (
     <div className="mb-4 sm:mb-8">
-      {/* Header */}
-      <div className="mb-3 sm:mb-5">
-        <h2 className="text-lg sm:text-xl text-heading">수익률 TOP 10</h2>
-        <p className="text-xs sm:text-sm text-muted mt-1 hidden sm:block">가장 높은 수익률을 기록한 리포트</p>
+      {/* Header — 모바일 */}
+      <div className="sm:hidden mb-1.5 flex items-baseline justify-between gap-2">
+        <h2 className="text-lg text-heading">수익률 TOP 10</h2>
+        <div className="flex gap-1 flex-nowrap items-baseline flex-shrink-0">
+          {PERIOD_KEYS.map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={periodButtonClass(period === p)}
+              aria-pressed={period === p}
+            >
+              {PERIOD_LABELS[p]}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {/* Header — 데스크탑 */}
+      <div className="hidden sm:block mb-5">
+        <h2 className="text-xl text-heading leading-tight">수익률 TOP 10</h2>
+        <div className="flex items-baseline justify-between gap-4">
+          <p className="text-sm text-muted">{periodHint[period]}</p>
+          <div className="flex gap-1 flex-nowrap items-center flex-shrink-0">
+            {PERIOD_KEYS.map((p) => (
+              <button
+                key={p}
+                onClick={() => setPeriod(p)}
+                className={periodButtonClass(period === p)}
+                aria-pressed={period === p}
+              >
+                {PERIOD_LABELS[p]}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {topReturns.length === 0 && (
+        <div className="card-base py-8 text-center">
+          <p className="text-sm text-muted">해당 기간 수익률 데이터가 충분하지 않습니다.</p>
+        </div>
+      )}
+
       {/* 모바일: 세로 리스트 (박스 안에서 터치 스크롤, 스크롤바는 숨김) */}
-      <div className="sm:hidden border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] rounded-lg overflow-hidden">
-        <div className="max-h-[176px] overflow-y-auto scrollbar-hide divide-y divide-gray-100 dark:divide-gray-700/60">
+      {topReturns.length > 0 && (
+      <div className="sm:hidden card-base overflow-hidden">
+        <div className="max-h-[176px] overflow-y-auto scrollbar-hide divide-y-2 divide-[var(--theme-border-muted)]">
           {topReturns.map((item) => {
             const rankColor =
               item.rank === 1 ? 'text-[var(--theme-accent)]' :
@@ -187,8 +276,8 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                   </div>
                   <span className="flex-1 min-w-0 text-sm font-semibold text-gray-900 dark:text-white truncate">{item.stockName} <span className="font-normal text-xs text-gray-400 font-mono">{item.ticker}</span></span>
                   <RankChangeIndicator change={item.rankChange} className="flex-shrink-0" />
-                  <span className={`text-sm font-bold font-mono tabular-nums flex-shrink-0 ${getReturnColorClass(item.returnRate)}`}>
-                    {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
+                  <span className={`text-sm font-bold font-mono tabular-nums flex-shrink-0 ${getReturnColorClass(item.displayRate)}`}>
+                    {item.displayRate >= 0 ? '+' : ''}{item.displayRate.toFixed(2)}%
                   </span>
                 </div>
               </Link>
@@ -196,8 +285,10 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
           })}
         </div>
       </div>
+      )}
 
       {/* 데스크탑: 가로 슬라이더 */}
+      {topReturns.length > 0 && (
       <div className="hidden sm:block">
         <div className="relative -mx-4 px-4">
           <div className="scroll-container flex gap-4 px-[6px]">
@@ -233,8 +324,8 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
 
                   {/* Return Rate */}
                   <div className="mb-2 h-[40px] flex items-center">
-                    <div className={`text-3xl font-black font-heading font-mono ${getReturnColorClass(item.returnRate)}`}>
-                      {item.returnRate >= 0 ? '+' : ''}{item.returnRate.toFixed(2)}%
+                    <div className={`text-3xl font-black font-heading font-mono ${getReturnColorClass(item.displayRate)}`}>
+                      {item.displayRate >= 0 ? '+' : ''}{item.displayRate.toFixed(2)}%
                     </div>
                   </div>
 
@@ -250,6 +341,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 });

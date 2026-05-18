@@ -18,6 +18,9 @@ export interface ReportSummary {
   opinion: Opinion;
   returnRate: number;
   prevReturnRate?: number;
+  returnRate1D?: number | null;
+  returnRate1W?: number | null;
+  returnRate1M?: number | null;
   initialPrice: number;
   currentPrice: number;
   createdAt: string;

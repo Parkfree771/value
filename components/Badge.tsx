@@ -8,9 +8,9 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  buy: 'bg-red-500/15 text-red-400 border-2 border-red-500',
-  sell: 'bg-blue-500/15 text-blue-400 border-2 border-blue-500',
-  hold: 'bg-gray-500/15 text-gray-400 border-2 border-gray-500',
+  buy: 'bg-ant-red-600 text-white',
+  sell: 'bg-blue-600 text-white',
+  hold: 'bg-gray-500 text-white',
   default: 'bg-gray-500/15 text-gray-400 border-2 border-gray-600',
   success: 'bg-green-500/15 text-green-400 border-2 border-green-500',
   warning: 'bg-yellow-500/15 text-yellow-400 border-2 border-yellow-500',
@@ -18,9 +18,9 @@ const variantStyles = {
 } as const;
 
 const sizeStyles = {
-  sm: 'px-2 py-0.5 text-xs',
-  md: 'px-2 py-1 text-xs',
-  lg: 'px-3 py-1.5 text-sm',
+  sm: 'px-2 py-0.5 text-xs rounded-md',
+  md: 'px-2 py-1 text-xs rounded-md',
+  lg: 'px-3 py-1.5 text-sm rounded-md',
 } as const;
 
 const Badge = memo(function Badge({

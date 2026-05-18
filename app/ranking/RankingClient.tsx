@@ -40,8 +40,12 @@ interface RankedReport {
   stockName: string;
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
+  positionType?: 'long' | 'short';
   returnRate: number;
   prevReturnRate?: number;
+  returnRate1D?: number | null;
+  returnRate1W?: number | null;
+  returnRate1M?: number | null;
   initialPrice: number;
   currentPrice: number;
   createdAt: string;
@@ -49,6 +53,7 @@ interface RankedReport {
   likes: number;
   daysElapsed: number;
   exchange?: string;
+  themes?: string[];
   priceHistory: Array<{ date: string; price: number; returnRate: number }>;
 }
 
@@ -66,16 +71,60 @@ interface RankingClientProps {
   initialTrending: RankedReport[];
 }
 
+type SortKey = 'cum' | '1d' | '1w' | '1m' | 'views' | 'likes';
+type SortDir = 'desc' | 'asc';
+type OpinionFilter = 'all' | 'buy' | 'sell' | 'hold';
+type PositionFilter = 'all' | 'long' | 'short';
+
+const SORT_LABELS: Record<SortKey, string> = {
+  cum: '누적',
+  '1d': '1일',
+  '1w': '7일',
+  '1m': '한달',
+  views: '조회',
+  likes: '좋아요',
+};
+const SORT_KEYS: SortKey[] = ['cum', '1d', '1w', '1m', 'views', 'likes'];
+
 export default function RankingClient({ initialReports, initialInvestors, initialTrending }: RankingClientProps) {
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('all');
   const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
   const [activeTab, setActiveTab] = useState<'reports' | 'investors' | 'trending'>('reports');
+  const [sortKey, setSortKey] = useState<SortKey>('cum');
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
+  const [opinionFilter, setOpinionFilter] = useState<OpinionFilter>('all');
+  const [positionFilter, setPositionFilter] = useState<PositionFilter>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
   const reports = initialReports;
   const investors = initialInvestors;
   const trending = initialTrending;
+
+  const pickRate = useCallback((r: RankedReport): number | null => {
+    switch (sortKey) {
+      case 'cum': return r.returnRate;
+      case '1d':  return r.returnRate1D ?? null;
+      case '1w':  return r.returnRate1W ?? null;
+      case '1m':  return r.returnRate1M ?? null;
+      case 'views': return r.views;
+      case 'likes': return r.likes;
+    }
+  }, [sortKey]);
+
+  // 정렬 키 클릭 — 같은 키 두 번째 클릭 시 역순, 세 번째 클릭 시 cum/desc 기본으로
+  const handleSortClick = useCallback((key: SortKey) => {
+    if (sortKey !== key) {
+      setSortKey(key);
+      setSortDir('desc');
+    } else if (sortDir === 'desc') {
+      setSortDir('asc');
+    } else {
+      setSortKey('cum');
+      setSortDir('desc');
+    }
+    setCurrentPage(1);
+  }, [sortKey, sortDir]);
 
   // Reset to page 1 when tab or period changes
   const handleTabChange = useCallback((tab: 'reports' | 'investors' | 'trending') => {
@@ -111,7 +160,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
 
   const getPeriodLabel = useCallback((period: TimePeriod) => periodLabels[period], [periodLabels]);
 
-  // 기간 + 시장에 따라 필터링된 리포트 (memoized)
+  // 기간 + 시장 + 의견 + 포지션 필터링 + 정렬 (memoized)
   const filteredReports = useMemo(() => {
     let filtered = reports;
 
@@ -124,7 +173,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
       });
     }
 
-    // 기간 필터
+    // 기간 필터 (작성일 기준)
     if (selectedPeriod !== 'all') {
       const today = new Date();
       const maxDays = periodDays[selectedPeriod];
@@ -136,8 +185,23 @@ export default function RankingClient({ initialReports, initialInvestors, initia
       });
     }
 
-    return filtered;
-  }, [reports, selectedPeriod, marketFilter, periodDays]);
+    // 의견 필터
+    if (opinionFilter !== 'all') {
+      filtered = filtered.filter((r) => r.opinion === opinionFilter);
+    }
+
+    // 포지션 필터
+    if (positionFilter !== 'all') {
+      filtered = filtered.filter((r) => (r.positionType ?? 'long') === positionFilter);
+    }
+
+    // 정렬 — 선택된 키 기준, null은 정렬에서 뒤로
+    const sorted = [...filtered]
+      .map((r) => ({ r, val: pickRate(r) }))
+      .filter((x) => x.val !== null && Number.isFinite(x.val));
+    sorted.sort((a, b) => sortDir === 'desc' ? (b.val as number) - (a.val as number) : (a.val as number) - (b.val as number));
+    return sorted.map((x) => x.r);
+  }, [reports, selectedPeriod, marketFilter, periodDays, opinionFilter, positionFilter, pickRate, sortDir]);
 
   // 기간 + 시장에 따라 필터링된 인기글 (memoized)
   const filteredTrending = useMemo(() => {
@@ -238,7 +302,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
           }))} />
 
           {/* Market + Period Filter */}
-          <div className="mt-6 sm:mt-8 mb-4 sm:mb-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
+          <div className="mt-6 sm:mt-8 mb-3 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
             <div className="flex gap-0.5 sm:gap-1 items-center">
               {marketKeys.map((market) => (
                 <button
@@ -258,6 +322,46 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                   className={selectedPeriod === period ? PERIOD_ACTIVE : PERIOD_INACTIVE}
                 >
                   {getPeriodLabel(period)}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 정렬 + 의견/포지션 필터 */}
+          <div className="mb-4 sm:mb-6 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
+            <div className="flex gap-0.5 sm:gap-1 items-center flex-nowrap">
+              <span className="text-[10px] sm:text-xs text-muted font-medium mr-1">정렬</span>
+              {SORT_KEYS.map((k) => {
+                const active = sortKey === k;
+                return (
+                  <button
+                    key={k}
+                    onClick={() => handleSortClick(k)}
+                    className={active ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                  >
+                    {SORT_LABELS[k]}{active && (sortDir === 'desc' ? ' ↓' : ' ↑')}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="flex gap-0.5 sm:gap-1 items-center flex-nowrap">
+              {(['all', 'buy', 'sell', 'hold'] as OpinionFilter[]).map((o) => (
+                <button
+                  key={o}
+                  onClick={() => { setOpinionFilter(o); setCurrentPage(1); }}
+                  className={opinionFilter === o ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {{ all: '전체', buy: '매수', sell: '매도', hold: '보유' }[o]}
+                </button>
+              ))}
+              <span className="w-px h-3 bg-gray-300 dark:bg-gray-600 mx-1" />
+              {(['all', 'long', 'short'] as PositionFilter[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => { setPositionFilter(p); setCurrentPage(1); }}
+                  className={positionFilter === p ? PERIOD_ACTIVE : PERIOD_INACTIVE}
+                >
+                  {{ all: '롱숏', long: '롱', short: '숏' }[p]}
                 </button>
               ))}
             </div>
