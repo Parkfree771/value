@@ -41,7 +41,7 @@ const Podium = memo(function Podium({ topThree }: PodiumProps) {
       >
         <div className={rankClass}>{rank}</div>
         <div className={nameClass}>
-          <UserBadgeInline badgeId={data.equippedBadgeId} nickname={data.name} size={rank === 1 ? 18 : 14} className="mr-1" />
+          <UserBadgeInline badgeId={data.equippedBadgeId} nickname={data.name} size={rank === 1 ? 26 : 20} className="mr-1" />
           {data.name}
         </div>
         <div className={returnClass}>

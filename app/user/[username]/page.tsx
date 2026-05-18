@@ -238,14 +238,14 @@ export default function UserPage() {
             </span>
           </div>
           <div className="space-y-4">
-            {(['activity', 'profit', 'inverse', 'special'] as BadgeCategory[]).map((cat) => {
+            {(['single', 'avg', 'activity'] as BadgeCategory[]).map((cat) => {
               const inCat = BADGES.filter((b) => b.category === cat);
               return (
                 <div key={cat}>
                   <div className="font-sans text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">
                     {CATEGORY_LABEL[cat]} · {inCat.filter((b) => unlockedSet.has(b.id)).length}/{inCat.length}
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     {inCat.map((b) => {
                       const unlocked = unlockedSet.has(b.id);
                       return (
@@ -258,7 +258,7 @@ export default function UserPage() {
                           }`}
                           title={`${b.name} — ${b.description}`}
                         >
-                          <BadgeIcon id={b.id} size={40} />
+                          <BadgeIcon id={b.id} size={72} />
                           <div className="font-sans text-[10px] font-bold mt-1.5 text-center leading-tight">{b.name}</div>
                         </div>
                       );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, memo } from 'react';
+import { useState, useEffect, useMemo, useRef, memo } from 'react';
 import Link from 'next/link';
 import UserBadgeInline from './UserBadgeInline';
 import podiumStyles from './Podium.module.css';
@@ -84,7 +84,9 @@ function RankChangeIndicator({ change, className = '' }: { change: number; class
 
 const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopReturnSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [period, setPeriod] = useState<Period>('1m');
+  const [period, setPeriod] = useState<Period>('all');
+  const mobileScrollRef = useRef<HTMLDivElement | null>(null);
+  const desktopScrollRef = useRef<HTMLDivElement | null>(null);
 
   // 선택 기간 기준 수익률 상위 10개 (직전 업데이트 대비 ▲▼는 전체 탭에서만)
   const topReturns = useMemo(() => {
@@ -130,8 +132,11 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
     });
   }, [reports, period]);
 
+  // 기간 토글 시: 현재 인덱스 + 스크롤 위치 모두 처음으로 초기화
   useEffect(() => {
     setCurrentIndex(0);
+    if (mobileScrollRef.current) mobileScrollRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    if (desktopScrollRef.current) desktopScrollRef.current.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   }, [period]);
 
   useEffect(() => {
@@ -259,7 +264,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
       {/* 모바일: 세로 리스트 (박스 안에서 터치 스크롤, 스크롤바는 숨김) */}
       {topReturns.length > 0 && (
       <div className="sm:hidden card-base overflow-hidden">
-        <div className="max-h-[176px] overflow-y-auto scrollbar-hide divide-y-2 divide-[var(--theme-border-muted)]">
+        <div ref={mobileScrollRef} className="max-h-[176px] overflow-y-auto scrollbar-hide divide-y-2 divide-[var(--theme-border-muted)]">
           {topReturns.map((item) => {
             const rankColor =
               item.rank === 1 ? 'text-[var(--theme-accent)]' :
@@ -291,7 +296,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
       {topReturns.length > 0 && (
       <div className="hidden sm:block">
         <div className="relative -mx-4 px-4">
-          <div className="scroll-container flex gap-4 px-[6px]">
+          <div ref={desktopScrollRef} className="scroll-container flex gap-4 px-[6px]">
             {topReturns.map((item, index) => {
               const isActive = currentIndex === index;
               const info = getCardInfo(item.rank, isActive);
@@ -313,7 +318,7 @@ const TopReturnSlider = memo(function TopReturnSlider({ reports = [] }: TopRetur
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <h3 className="text-lg text-heading truncate min-w-0 inline-flex items-center gap-1">
-                          <UserBadgeInline badgeId={item.equippedBadgeId} nickname={item.author} size={16} />
+                          <UserBadgeInline badgeId={item.equippedBadgeId} nickname={item.author} size={30} />
                           {item.author}
                         </h3>
                         <RankChangeIndicator change={item.rankChange} className="flex-shrink-0" />

@@ -161,7 +161,7 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank, rankCh
 
             {/* Footer */}
             <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-1.5 sm:pt-3 gap-1 overflow-hidden whitespace-nowrap">
-              <UserBadgeInline badgeId={report.equippedBadgeId} nickname={report.author} size={14} className="mr-0.5" />
+              <UserBadgeInline badgeId={report.equippedBadgeId} nickname={report.author} size={28} className="-mr-1" />
               <span
                 className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(report.author)}`; }}

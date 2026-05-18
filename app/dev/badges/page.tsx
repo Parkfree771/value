@@ -1,28 +1,39 @@
 'use client';
 
 import { useState, memo } from 'react';
+import {
+  BADGES_BY_CATEGORY,
+  CATEGORY_LABEL,
+  CATEGORY_DESC,
+  type BadgeDef,
+  type BadgeCategory,
+} from '@/lib/badges';
 
 // ────────────────────────────────────────────────
-// 배지 PNG 슬롯
-// public/badges/<filename> 위치에 PNG가 있으면 보여주고, 없으면 placeholder
+// 배지 미리보기 페이지
+// ────────────────────────────────────────────────
+// public/badges/<id>.png 파일이 있으면 placeholder가 자동으로 실제 이미지로 바뀜.
+// special 카테고리는 PNG 미제작 — 텍스트 placeholder만 표시.
+
+const CATEGORIES: BadgeCategory[] = ['single', 'avg', 'activity'];
+
+// ────────────────────────────────────────────────
+// 큰 사이즈 슬롯 (갤러리용)
 // ────────────────────────────────────────────────
 
-interface BadgeSlotProps {
-  filename: string;
-  title: string;
-  desc?: string;
+interface BigSlotProps {
+  badge: BadgeDef;
 }
 
-const BadgeSlot = memo(function BadgeSlot({ filename, title, desc }: BadgeSlotProps) {
+const BigSlot = memo(function BigSlot({ badge }: BigSlotProps) {
   const [error, setError] = useState(false);
-
   return (
     <div className="flex flex-col items-center gap-2 w-[128px]">
       <div className="relative w-24 h-24 bg-[var(--theme-bg-card)] border-2 border-dashed border-slate-400 dark:border-slate-500 rounded-lg overflow-hidden flex items-center justify-center">
         {!error ? (
           <img
-            src={`/badges/${filename}`}
-            alt={title}
+            src={`/badges/${badge.id}.png`}
+            alt={badge.id}
             className="w-full h-full object-contain"
             onError={() => setError(true)}
           />
@@ -31,143 +42,92 @@ const BadgeSlot = memo(function BadgeSlot({ filename, title, desc }: BadgeSlotPr
         )}
       </div>
       <div className="text-center w-full">
-        <div className="text-xs font-bold text-foreground">{title}</div>
-        {desc && <div className="text-[10px] text-muted leading-tight mt-0.5">{desc}</div>}
-        <div className="text-[9px] font-mono text-gray-400 mt-1 break-all">{filename}</div>
+        <div className="text-xs font-bold text-foreground">{badge.name}</div>
+        <div className="text-[10px] text-muted leading-tight mt-0.5">{badge.description}</div>
+        <div className="text-[9px] font-mono text-gray-400 mt-1 break-all">{badge.id}.png</div>
       </div>
     </div>
   );
 });
 
 // ────────────────────────────────────────────────
-// 만들어야 할 목록
+// 인라인 사이즈 행 (실제 카드 작성자 영역 시뮬레이션)
 // ────────────────────────────────────────────────
 
-const SINGLE_PROFIT = [
-  { lv: 1, pct: '10%', tier: 'Stone' },
-  { lv: 2, pct: '30%', tier: 'Bronze' },
-  { lv: 3, pct: '50%', tier: 'Silver' },
-  { lv: 4, pct: '100%', tier: 'Gold' },
-  { lv: 5, pct: '300%', tier: 'Platinum' },
-  { lv: 6, pct: '500%', tier: 'Diamond' },
-  { lv: 7, pct: '700%', tier: 'Master' },
-  { lv: 8, pct: '1000%', tier: 'Grandmaster' },
-];
+interface InlineRowProps {
+  badge: BadgeDef;
+  size: number;
+}
 
-const AVG_PROFIT = SINGLE_PROFIT; // 동일 등급/% 기준
+const InlineRow = memo(function InlineRow({ badge, size }: InlineRowProps) {
+  return (
+    <div className="flex items-center gap-1 border-2 border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-[var(--theme-bg-card)]">
+      <img
+        src={`/badges/${badge.id}.png`}
+        alt={badge.id}
+        width={size}
+        height={size}
+        style={{ width: size, height: size, objectFit: 'contain' }}
+        className="-mr-1"
+      />
+      <span className="font-bold text-sm text-foreground">Boltzmann</span>
+      <span className="text-[10px] font-mono text-gray-400 ml-1">{badge.id}</span>
+    </div>
+  );
+});
 
-const ACTIVITY = [
-  { lv: 1, tier: 'Stone' },
-  { lv: 2, tier: 'Bronze' },
-  { lv: 3, tier: 'Silver' },
-  { lv: 4, tier: 'Gold' },
-  { lv: 5, tier: 'Diamond' },
-];
+// ────────────────────────────────────────────────
+// 카테고리 섹션
+// ────────────────────────────────────────────────
 
-const SPECIAL = [
-  { file: 'special-week-win', title: '주간 수익률 1위', desc: '주간 단일 1위 누적' },
-  { file: 'special-month-win', title: '월간 수익률 1위', desc: '월간 단일 1위 누적' },
-  { file: 'special-month-activity', title: '월간 활동 1위', desc: '월간 활동점수 1위' },
-  { file: 'special-likes-50', title: '좋아요 50', desc: '단일 리포트 50 도달' },
-  { file: 'special-likes-100', title: '좋아요 100', desc: '단일 리포트 100 도달' },
-  { file: 'special-likes-500', title: '좋아요 500', desc: '단일 리포트 500 도달' },
-  { file: 'special-views-1k', title: '조회 1K', desc: '단일 리포트 1,000 조회' },
-  { file: 'special-views-10k', title: '조회 10K', desc: '단일 리포트 10,000 조회' },
-  { file: 'special-anniv-1y', title: '가입 1주년', desc: '가입 후 1년 도달' },
-  { file: 'special-beta', title: '베타테스터', desc: '서비스 초창기 가입자' },
-  { file: 'special-streak-100', title: '연속 100일', desc: '출석 streak 100일' },
-  { file: 'special-streak-365', title: '연속 365일', desc: '출석 streak 365일' },
-  { file: 'special-top10-7d', title: 'TOP10 7일', desc: '수익률 TOP10 7일 연속' },
-  { file: 'special-top10-30d', title: 'TOP10 30일', desc: '수익률 TOP10 30일 연속' },
-];
+function CategorySection({ category }: { category: BadgeCategory }) {
+  const badges = BADGES_BY_CATEGORY[category];
+  const label = CATEGORY_LABEL[category];
+  const desc = CATEGORY_DESC[category];
+
+  return (
+    <section className="mb-12">
+      <h2 className="text-xl font-bold text-foreground">{label} <span className="text-sm font-normal text-muted">({badges.length}장)</span></h2>
+      <p className="text-sm text-muted mb-5">{desc}</p>
+
+      {/* 큰 사이즈 갤러리 */}
+      <div className="flex flex-wrap gap-4 items-start mb-6">
+        {badges.map((b) => <BigSlot key={b.id} badge={b} />)}
+      </div>
+
+      {/* 인라인 사이즈 미리보기 */}
+      {true && (
+        <div>
+          <div className="text-xs font-bold text-muted mb-2">인라인 사이즈 (피드 카드 28px / TOP10 30px)</div>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {badges.map((b) => <InlineRow key={`${b.id}-28`} badge={b} size={28} />)}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 // ────────────────────────────────────────────────
 // 페이지
 // ────────────────────────────────────────────────
 
-interface SectionProps {
-  title: string;
-  desc: string;
-  children: React.ReactNode;
-}
-
-function Section({ title, desc, children }: SectionProps) {
-  return (
-    <section className="mb-10">
-      <h2 className="text-xl font-bold text-foreground">{title}</h2>
-      <p className="text-sm text-muted mb-5">{desc}</p>
-      <div className="flex flex-wrap gap-4 items-start">{children}</div>
-    </section>
-  );
-}
-
 export default function BadgesDevPage() {
+  const total = CATEGORIES.reduce((sum, c) => sum + BADGES_BY_CATEGORY[c].length, 0);
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-      <h1 className="text-2xl font-bold mb-2">배지 PNG 만들 목록</h1>
+      <h1 className="text-2xl font-bold mb-2">배지 시스템 (임시 미리보기)</h1>
       <div className="text-sm text-muted mb-2 space-y-1">
-        <div>• 위치: <code className="font-mono text-foreground">public/badges/&lt;파일명&gt;.png</code></div>
-        <div>• 사이즈: 1024×1024 (정사각형) · 배경 투명 PNG</div>
-        <div>• 텍스트는 PNG 안에 넣지 말고 비워두기 (코드에서 텍스트 오버레이 예정)</div>
-        <div>• 총 <strong className="text-foreground">35장</strong>: 단일 수익률 8 + 평균 수익률 8 + 활동 5 + 특별 업적 14</div>
+        <div>• 위치: <code className="font-mono text-foreground">public/badges/&lt;id&gt;.png</code></div>
+        <div>• 사이즈: 1024×1024 정사각형 · 투명 PNG (마젠타 배경은 <code className="font-mono text-foreground">scripts/strip-badge-magenta.js</code>로 자동 제거)</div>
+        <div>• 텍스트는 PNG 안에 넣지 말 것 (코드에서 메타데이터로 표시)</div>
+        <div>• 총 <strong className="text-foreground">{total}장</strong>: 단일 8 + 평균 8 + 활동 5 + 특별 14</div>
+        <div>• 실제 사이트(피드/랭킹/글 상세)는 아직 <strong className="text-foreground">옛 배지 시스템</strong> 사용 중 — 이 페이지가 임시 적용 자리</div>
       </div>
-      <div className="text-xs text-muted mb-8 italic">파일을 만들 때마다 새로고침하면 placeholder 자리에 실제 이미지가 들어옵니다.</div>
+      <div className="text-xs text-muted mb-8 italic">파일을 추가/교체하면 새로고침 시 placeholder 자리에 자동 반영됩니다.</div>
 
-      <Section
-        title="① 단일 수익률 (8장)"
-        desc="원형 메달. 한 리포트라도 해당 수익률 달성 시 획득. 레벨업할수록 색·장식 화려해짐."
-      >
-        {SINGLE_PROFIT.map((it) => (
-          <BadgeSlot
-            key={it.lv}
-            filename={`single-${it.lv}.png`}
-            title={`Lv${it.lv} · ${it.pct}`}
-            desc={it.tier}
-          />
-        ))}
-      </Section>
-
-      <Section
-        title="② 평균 수익률 (8장)"
-        desc="원형 또는 다이아몬드형 — 단일과 구분되는 외곽 형태 추천. 평균 기준이라 더 어려움."
-      >
-        {AVG_PROFIT.map((it) => (
-          <BadgeSlot
-            key={it.lv}
-            filename={`avg-${it.lv}.png`}
-            title={`Lv${it.lv} · ${it.pct}`}
-            desc={it.tier}
-          />
-        ))}
-      </Section>
-
-      <Section
-        title="③ 활동 (5장)"
-        desc="육각형 등 다른 외곽 추천. 리포트·출석·댓글·좋아요·좋아요받음 합산 점수."
-      >
-        {ACTIVITY.map((it) => (
-          <BadgeSlot
-            key={it.lv}
-            filename={`activity-${it.lv}.png`}
-            title={`Lv${it.lv}`}
-            desc={it.tier}
-          />
-        ))}
-      </Section>
-
-      <Section
-        title="④ 특별 업적 (14장)"
-        desc="별형 등 다른 외곽 추천. 카테고리별 등급 색은 자유."
-      >
-        {SPECIAL.map((it) => (
-          <BadgeSlot
-            key={it.file}
-            filename={`${it.file}.png`}
-            title={it.title}
-            desc={it.desc}
-          />
-        ))}
-      </Section>
+      {CATEGORIES.map((cat) => <CategorySection key={cat} category={cat} />)}
     </div>
   );
 }

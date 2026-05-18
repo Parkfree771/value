@@ -570,7 +570,7 @@ export default function MyPage() {
             <div className="p-5 flex items-center gap-4">
               {equippedBadgeId && BADGES_BY_ID[equippedBadgeId] ? (
                 <>
-                  <BadgeIcon id={equippedBadgeId} size={64} />
+                  <BadgeIcon id={equippedBadgeId} size={96} />
                   <div className="flex-1">
                     <div className="font-sans font-bold text-base">{BADGES_BY_ID[equippedBadgeId].name}</div>
                     <div className="font-sans text-xs text-gray-600 dark:text-gray-300 mt-1">{BADGES_BY_ID[equippedBadgeId].description}</div>
@@ -590,7 +590,7 @@ export default function MyPage() {
           </div>
 
           {/* 카테고리별 그리드 */}
-          {(['activity', 'profit', 'inverse', 'special'] as BadgeCategory[]).map((cat) => {
+          {(['single', 'avg', 'activity'] as BadgeCategory[]).map((cat) => {
             const inCat = BADGES.filter((b) => b.category === cat);
             return (
               <div key={cat} className="card-base overflow-hidden">
@@ -600,7 +600,7 @@ export default function MyPage() {
                     {inCat.filter((b) => unlockedSet.has(b.id)).length}/{inCat.length} 해금
                   </span>
                 </div>
-                <div className="p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {inCat.map((b) => {
                     const unlocked = unlockedSet.has(b.id);
                     const equipped = equippedBadgeId === b.id;
@@ -619,7 +619,7 @@ export default function MyPage() {
                         `}
                         title={unlocked ? (equipped ? '클릭하여 장착 해제' : '클릭하여 장착') : '잠금'}
                       >
-                        <BadgeIcon id={b.id} size={56} />
+                        <BadgeIcon id={b.id} size={96} />
                         <div className="font-sans text-xs font-bold mt-2 text-center">{b.name}</div>
                         <div className="font-sans text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center leading-tight">
                           {b.description}
