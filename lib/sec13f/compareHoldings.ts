@@ -1,4 +1,4 @@
-// Q3 vs Q4 보유 종목 비교 모듈
+// 이전 분기 vs 현재 분기 보유 종목 비교 모듈
 
 import { Raw13FHolding, PortfolioHolding } from './types';
 import { resolveCusip, GENERIC_ISSUER_BLACKLIST, normalizeCompanyName } from './cusipMap';
@@ -26,11 +26,11 @@ export function getDisplayName(nameOfIssuer: string, titleOfClass: string, mappi
 }
 
 /**
- * Q3(이전)과 Q4(현재) 보유 종목을 비교하여 상태 판별
+ * 이전 분기와 현재 분기 보유 종목을 비교하여 상태 판별
  */
 export function compareHoldings(
-  prevHoldings: Raw13FHolding[], // Q3
-  currHoldings: Raw13FHolding[]  // Q4
+  prevHoldings: Raw13FHolding[], // 이전 분기
+  currHoldings: Raw13FHolding[]  // 현재 분기
 ): PortfolioHolding[] {
   // CUSIP 기준 Map 생성
   const prevMap = new Map<string, Raw13FHolding>();

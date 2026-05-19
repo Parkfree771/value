@@ -13,6 +13,18 @@ function formatDate(dateStr: string): string {
   return `${year}.${month}.${day}`;
 }
 
+function dateToQuarter(dateStr: string): string {
+  const [yStr, mStr] = dateStr.split('-');
+  const q = Math.floor((Number(mStr) - 1) / 3) + 1;
+  return `${yStr} Q${q}`;
+}
+
+function dateToQuarterKr(dateStr: string): string {
+  const [yStr, mStr] = dateStr.split('-');
+  const q = Math.floor((Number(mStr) - 1) / 3) + 1;
+  return `${yStr}년 ${q}분기`;
+}
+
 interface PortfolioSummaryProps {
   portfolio: GuruPortfolioDoc;
 }
@@ -38,7 +50,7 @@ export default function PortfolioSummary({ portfolio }: PortfolioSummaryProps) {
             {formatValue(portfolio.total_value_curr)}
           </p>
           <p className={`text-xs font-bold font-mono ${valueChange >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-            {valueChange >= 0 ? '+' : ''}{valueChangePct.toFixed(1)}% vs Q3
+            {valueChange >= 0 ? '+' : ''}{valueChangePct.toFixed(1)}% vs {dateToQuarter(portfolio.report_date_prev)}
           </p>
         </div>
 
@@ -76,7 +88,7 @@ export default function PortfolioSummary({ portfolio }: PortfolioSummaryProps) {
             보고 기간
           </p>
           <p className="text-sm sm:text-base font-bold text-foreground">
-            2025년 4분기
+            {dateToQuarterKr(portfolio.report_date_curr)}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             기준일 {formatDate(portfolio.report_date_curr)}

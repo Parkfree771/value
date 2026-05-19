@@ -12,7 +12,7 @@ export interface Raw13FHolding {
   investmentDiscretion: string;
 }
 
-// Q3 vs Q4 비교 후 최종 보유 종목
+// 이전 분기 vs 현재 분기 비교 후 최종 보유 종목
 export interface PortfolioHolding {
   cusip: string;
   ticker: string | null;
@@ -20,12 +20,12 @@ export interface PortfolioHolding {
   title_of_class: string;
   exchange: string;
 
-  // Q4 (현재 분기) 데이터
+  // 현재 분기 데이터
   value_curr: number; // 실제 USD (x1000 변환 후)
   shares_curr: number;
   weight_curr: number; // 포트폴리오 비중 % (0-100)
 
-  // Q3 (이전 분기) 데이터
+  // 이전 분기 데이터
   value_prev: number | null; // NEW BUY일 경우 null
   shares_prev: number | null;
   weight_prev: number | null;
@@ -49,11 +49,11 @@ export interface GuruPortfolioDoc {
   guru_name_kr: string;
   cik: string;
   filing_name: string;
-  report_date_prev: string; // "2025-09-30" (Q3 말)
-  report_date_curr: string; // "2025-12-31" (Q4 말)
-  filing_date_curr: string; // SEC 제출일 (예: "2025-02-14")
-  total_value_prev: number; // Q3 총 포트폴리오 가치 (USD)
-  total_value_curr: number; // Q4 총 포트폴리오 가치 (USD)
+  report_date_prev: string; // 이전 분기 말 (예: "2025-12-31")
+  report_date_curr: string; // 현재 분기 말 (예: "2026-03-31")
+  filing_date_curr: string; // SEC 제출일 (예: "2026-05-15")
+  total_value_prev: number; // 이전 분기 총 포트폴리오 가치 (USD)
+  total_value_curr: number; // 현재 분기 총 포트폴리오 가치 (USD)
   holdings_count: number; // 현재 보유 종목 수
   updated_at: string; // ISO 타임스탬프
   holdings: PortfolioHolding[];
