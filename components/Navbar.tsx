@@ -111,26 +111,6 @@ const Navbar = memo(function Navbar() {
             >
               경제지표
             </Link>
-            <Link
-              href="/analysis/us"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                pathname.startsWith('/analysis')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              기업분석
-            </Link>
-            <Link
-              href="/briefing"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/briefing')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              브리핑
-            </Link>
             <span className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></span>
             <Link
               href="/write"
@@ -354,28 +334,6 @@ const Navbar = memo(function Navbar() {
                 }`}
               >
                 경제지표
-              </Link>
-              <Link
-                href="/analysis/us"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  pathname.startsWith('/analysis')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                기업분석
-              </Link>
-              <Link
-                href="/briefing"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/briefing')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                브리핑
               </Link>
               <Link
                 href="/write"
