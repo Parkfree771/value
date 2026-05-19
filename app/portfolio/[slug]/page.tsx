@@ -4,9 +4,13 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { createClient } from '@/utils/supabase/server';
 import { GURU_LIST } from '@/app/guru-tracker/types';
-import { GuruPortfolioDoc } from '@/lib/sec13f/types';
-import PortfolioSummary from './components/PortfolioSummary';
-import PortfolioTable from './components/PortfolioTable';
+import {
+  GuruPortfolioDoc,
+  PortfolioHolding,
+  Raw13FHolding,
+} from '@/lib/sec13f/types';
+import { compareHoldings } from '@/lib/sec13f/compareHoldings';
+import PortfolioView, { QuarterView } from './components/PortfolioView';
 import BackButton from './BackButton';
 
 const PORTFOLIOS_PATH = path.join(process.cwd(), 'data', 'guru-portfolios.json');
@@ -15,11 +19,38 @@ const PORTFOLIOS_PATH = path.join(process.cwd(), 'data', 'guru-portfolios.json')
 // 새 분기 데이터 갱신 시 git push로 새 빌드가 캐시 무효화.
 export const revalidate = 86400;
 
-interface PortfoliosJson {
-  gurus: Record<string, GuruPortfolioDoc>;
+// 누적 스냅샷 스키마 (scripts/fetch-13f.ts와 동일)
+interface QuarterHolding {
+  cusip: string;
+  ticker: string | null;
+  exchange: string;
+  name_of_issuer: string;
+  title_of_class: string;
+  value: number; // USD (천달러 변환 후)
+  shares: number;
+  weight: number;
+  ticker_source: 'manual' | 'auto' | 'unmapped';
 }
 
-function getPortfolio(slug: string): GuruPortfolioDoc | null {
+interface QuarterSnapshot {
+  report_date: string;
+  filing_date: string;
+  accession_number: string;
+  form: string;
+  total_value: number;
+  holdings_count: number;
+  holdings: QuarterHolding[];
+}
+
+interface ExtendedGuruDoc extends GuruPortfolioDoc {
+  quarters?: Record<string, QuarterSnapshot>;
+}
+
+interface PortfoliosJson {
+  gurus: Record<string, ExtendedGuruDoc>;
+}
+
+function getPortfolio(slug: string): ExtendedGuruDoc | null {
   try {
     if (!fs.existsSync(PORTFOLIOS_PATH)) return null;
     const data = JSON.parse(fs.readFileSync(PORTFOLIOS_PATH, 'utf-8')) as PortfoliosJson;
@@ -52,6 +83,65 @@ async function getPrices(): Promise<Record<string, { currentPrice: number; retur
   }
 }
 
+// QuarterSnapshot → Raw13FHolding[] (compareHoldings 입력용)
+// value는 USD로 저장돼 있으므로 천달러 단위로 환원 후 비교 함수에 전달.
+function snapshotToRaw(snap: QuarterSnapshot): Raw13FHolding[] {
+  return snap.holdings
+    .filter((h) => h.shares > 0)
+    .map((h) => ({
+      nameOfIssuer: h.name_of_issuer,
+      titleOfClass: h.title_of_class,
+      cusip: h.cusip,
+      value: Math.round(h.value / 1000),
+      shares: h.shares,
+      sharesType: 'SH' as const,
+      investmentDiscretion: '',
+    }));
+}
+
+// 인접 분기쌍마다 compareHoldings 호출 → QuarterView[] (오름차순).
+// 최신 분기쌍은 doc.holdings 그대로 사용 — price_at_filing 등 가격 메타 보존.
+// 옛 분기쌍은 compareHoldings로 재계산되지만 historical filing 가격은 없어서 수익률은 "—".
+// 가장 오래된 분기는 prev가 없으므로 비교 뷰에서 제외됨.
+function buildQuarterViews(doc: ExtendedGuruDoc): QuarterView[] {
+  if (!doc.quarters) {
+    return [
+      {
+        report_date_curr: doc.report_date_curr,
+        report_date_prev: doc.report_date_prev,
+        filing_date_curr: doc.filing_date_curr,
+        total_value_curr: doc.total_value_curr,
+        total_value_prev: doc.total_value_prev,
+        holdings_count: doc.holdings_count,
+        holdings: doc.holdings,
+      },
+    ];
+  }
+  const dates = Object.keys(doc.quarters).sort();
+  const views: QuarterView[] = [];
+  for (let i = 1; i < dates.length; i++) {
+    const prevSnap = doc.quarters[dates[i - 1]];
+    const currSnap = doc.quarters[dates[i]];
+    const isLatest = i === dates.length - 1;
+
+    // 최신 분기는 doc.holdings 그대로 — price_at_filing 보존.
+    const holdings: PortfolioHolding[] = isLatest
+      ? doc.holdings
+      : compareHoldings(snapshotToRaw(prevSnap), snapshotToRaw(currSnap));
+
+    views.push({
+      report_date_curr: currSnap.report_date,
+      report_date_prev: prevSnap.report_date,
+      filing_date_curr: currSnap.filing_date,
+      total_value_curr: currSnap.total_value,
+      total_value_prev: prevSnap.total_value,
+      holdings_count: currSnap.holdings_count,
+      holdings,
+    });
+  }
+  return views;
+}
+
 export default async function PortfolioPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const guruNameEn = slug
@@ -77,11 +167,12 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
     );
   }
 
-  // 포트폴리오는 정적 JSON (분기 1회), 가격은 Supabase (매일 cron). 병렬 fetch.
   const [portfolio, prices] = await Promise.all([
     Promise.resolve(getPortfolio(slug)),
     getPrices(),
   ]);
+
+  const quarterViews = portfolio ? buildQuarterViews(portfolio) : [];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -127,7 +218,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
           13F PORTFOLIO
         </h2>
 
-        {!portfolio ? (
+        {!portfolio || quarterViews.length === 0 ? (
           <div className="card-base p-6 sm:p-12 text-center">
             <div className="text-4xl font-bold text-gray-300 dark:text-gray-600 mb-4">13F</div>
             <h3 className="text-lg font-semibold text-foreground mb-2">포트폴리오 데이터 준비중</h3>
@@ -136,14 +227,12 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
             </p>
           </div>
         ) : (
-          <>
-            <PortfolioSummary portfolio={portfolio} />
-            <PortfolioTable
-              holdings={portfolio.holdings}
-              filingDate={portfolio.filing_date_curr}
-              prices={prices}
-            />
-          </>
+          <PortfolioView
+            quarterViews={quarterViews}
+            prices={prices}
+            guruNameKr={guruInfo.name_kr}
+            filingName={guruInfo.filing_name}
+          />
         )}
       </section>
 

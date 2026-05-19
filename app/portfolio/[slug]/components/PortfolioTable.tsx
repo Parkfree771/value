@@ -33,6 +33,7 @@ interface PortfolioTableProps {
   holdings: PortfolioHolding[];
   filingDate?: string; // "2026-02-17" 형식
   prices?: PriceData; // Storage JSON에서 가져온 가격 데이터
+  showPrices?: boolean; // false면 공시일 가격/현재가/수익률 컬럼 숨김 (과거 분기용)
 }
 
 const sortLabels: Record<SortType, string> = {
@@ -45,7 +46,7 @@ const SORT_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-
 const SORT_ACTIVE = `${SORT_BASE} font-bold text-ant-red-600 dark:text-ant-red-400 border-b-2 border-ant-red-600 dark:border-ant-red-400`;
 const SORT_INACTIVE = `${SORT_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
 
-export default function PortfolioTable({ holdings, filingDate, prices = {} }: PortfolioTableProps) {
+export default function PortfolioTable({ holdings, filingDate, prices = {}, showPrices = true }: PortfolioTableProps) {
   const [filter, setFilter] = useState<FilterStatus>('ALL');
   const [sortType, setSortType] = useState<SortType>('default');
 
@@ -127,9 +128,9 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                 <th className={`${thClass} text-right hidden md:table-cell`}>주식수</th>
                 <th className={`${thClass} text-right`}>평가액</th>
                 <th className={`${thClass} text-right`}>비중</th>
-                <th className={`${thClass} text-right hidden sm:table-cell`}>공시일 가격</th>
-                <th className={`${thClass} text-right hidden sm:table-cell`}>현재가</th>
-                <th className={`${thClass} text-right hidden sm:table-cell`}>수익률</th>
+                {showPrices && <th className={`${thClass} text-right hidden sm:table-cell`}>공시일 가격</th>}
+                {showPrices && <th className={`${thClass} text-right hidden sm:table-cell`}>현재가</th>}
+                {showPrices && <th className={`${thClass} text-right hidden sm:table-cell`}>수익률</th>}
               </tr>
             </thead>
             <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
@@ -205,42 +206,46 @@ export default function PortfolioTable({ holdings, filingDate, prices = {} }: Po
                     </span>
                   </td>
 
-                  {/* 공시일 가격 (KIS API 과거 종가) */}
-                  <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    <span className="text-sm text-foreground font-mono">
-                      {h.price_at_filing != null
-                        ? `$${h.price_at_filing.toFixed(2)}`
-                        : h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
-                    </span>
-                  </td>
-
-                  {/* 현재가 (Storage JSON) */}
-                  <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    <span className="text-sm text-foreground font-bold font-mono">
-                      {h.ticker && prices[h.ticker]?.currentPrice != null
-                        ? `$${prices[h.ticker].currentPrice.toFixed(2)}`
-                        : '—'}
-                    </span>
-                  </td>
-
-                  {/* 수익률 (공시일 가격 대비 현재가) */}
-                  <td className="px-3 py-3 text-right hidden sm:table-cell">
-                    {(() => {
-                      const filingPrice = h.price_at_filing;
-                      const currentPrice = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
-                      if (filingPrice == null || currentPrice == null || filingPrice <= 0) {
-                        return <span className="text-sm text-gray-400">—</span>;
-                      }
-                      const rate = Math.round(((currentPrice - filingPrice) / filingPrice) * 1000) / 10;
-                      return (
-                        <span className={`text-sm font-bold ${
-                          rate > 0 ? 'text-red-500' : rate < 0 ? 'text-blue-500' : 'text-gray-400'
-                        } font-mono`}>
-                          {rate > 0 ? '+' : ''}{rate.toFixed(1)}%
+                  {showPrices && (
+                    <>
+                      {/* 공시일 가격 (KIS API 과거 종가) */}
+                      <td className="px-3 py-3 text-right hidden sm:table-cell">
+                        <span className="text-sm text-foreground font-mono">
+                          {h.price_at_filing != null
+                            ? `$${h.price_at_filing.toFixed(2)}`
+                            : h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
                         </span>
-                      );
-                    })()}
-                  </td>
+                      </td>
+
+                      {/* 현재가 (Storage JSON) */}
+                      <td className="px-3 py-3 text-right hidden sm:table-cell">
+                        <span className="text-sm text-foreground font-bold font-mono">
+                          {h.ticker && prices[h.ticker]?.currentPrice != null
+                            ? `$${prices[h.ticker].currentPrice.toFixed(2)}`
+                            : '—'}
+                        </span>
+                      </td>
+
+                      {/* 수익률 (공시일 가격 대비 현재가) */}
+                      <td className="px-3 py-3 text-right hidden sm:table-cell">
+                        {(() => {
+                          const filingPrice = h.price_at_filing;
+                          const currentPrice = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
+                          if (filingPrice == null || currentPrice == null || filingPrice <= 0) {
+                            return <span className="text-sm text-gray-400">—</span>;
+                          }
+                          const rate = Math.round(((currentPrice - filingPrice) / filingPrice) * 1000) / 10;
+                          return (
+                            <span className={`text-sm font-bold ${
+                              rate > 0 ? 'text-red-500' : rate < 0 ? 'text-blue-500' : 'text-gray-400'
+                            } font-mono`}>
+                              {rate > 0 ? '+' : ''}{rate.toFixed(1)}%
+                            </span>
+                          );
+                        })()}
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>
