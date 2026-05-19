@@ -8,7 +8,9 @@ import { createClient } from '@/utils/supabase/server';
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/';
+  // open redirect 방지: 내부 경로(/foo)만 허용. //evil.com, https://... 같은 외부 URL은 '/'로 폴백.
+  const rawNext = searchParams.get('next') ?? '/';
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/';
 
   if (!code) {
     return NextResponse.redirect(`${origin}/?auth_error=missing_code`);
