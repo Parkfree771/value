@@ -63,9 +63,9 @@ export async function GET(request: NextRequest) {
 
     const reports = (rows ?? []).map((r) => {
       const ticker = (r.ticker || '').toUpperCase();
-      const jsonPrice = latestPrices[ticker]?.currentPrice;
       const initialPrice = Number(r.initial_price ?? 0);
-      const currentPrice = jsonPrice ?? Number(r.current_price ?? 0);
+      // 글 row의 current_price 우선. cache는 row가 0/null인 비정상 케이스의 backup.
+      const currentPrice = Number(r.current_price) || latestPrices[ticker]?.currentPrice || 0;
       const positionType: 'long' | 'short' = (r.position_type as 'long' | 'short') ?? 'long';
       const returnRate = parseFloat(
         calculateReturn(initialPrice, currentPrice, positionType).toFixed(2),

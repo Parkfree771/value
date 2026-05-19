@@ -42,8 +42,8 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
 
     const tickerUpper = (data.ticker || '').toUpperCase();
     const initialPrice = Number(data.initial_price ?? 0);
-    const currentPrice =
-      latestPrices[tickerUpper]?.currentPrice ?? Number(data.current_price ?? 0);
+    // 글 row의 current_price 우선. cache는 row가 0/null인 비정상 케이스의 backup.
+    const currentPrice = Number(data.current_price) || latestPrices[tickerUpper]?.currentPrice || 0;
     const positionType: 'long' | 'short' = (data.position_type as 'long' | 'short') ?? 'long';
     const returnRate =
       initialPrice && currentPrice

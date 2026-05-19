@@ -96,7 +96,10 @@ async function getInitialFeed(): Promise<FeedData | null> {
       const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price ?? 0);
-      const currentPrice = prices[ticker]?.currentPrice ?? Number(r.current_price ?? 0);
+      // 글 row의 current_price를 우선 — 가격 갱신 배치/cron이 글마다 직접 UPDATE함.
+      // ticker별 cache(current_prices)는 row가 비어있을 때만 fallback. (작성 직후
+      // row=작성가, cache는 옛 시장가일 수 있어 cache가 row를 덮으면 "방금 썼는데 ±%" 버그 발생)
+      const currentPrice = Number(r.current_price) || prices[ticker]?.currentPrice || 0;
       const positionType: 'long' | 'short' = (r.position_type as 'long' | 'short') ?? 'long';
       const returnRate =
         initialPrice && currentPrice
