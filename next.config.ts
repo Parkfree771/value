@@ -31,10 +31,12 @@ const nextConfig: NextConfig = {
 
   experimental: {
     // 패키지 최적화 - tree shaking 강화
+    // react-icons / date-fns 는 현재 실제 import 0건이라 제거.
+    // @supabase/* 는 거의 모든 페이지에서 import 되는 barrel 이라 추가.
     optimizePackageImports: [
-      'react-icons',
-      'date-fns',
       'recharts',
+      '@supabase/supabase-js',
+      '@supabase/ssr',
     ],
   },
 

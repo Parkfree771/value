@@ -13,22 +13,28 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const [{ data: rows, error }, prices, lookback] = await Promise.all([
-      supabase
-        .from('posts')
-        .select(
-          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
-        )
-        .order('created_at', { ascending: false })
-        .limit(500), // ranking/related SSR용 — 글 수 늘어나면 페이징으로
-      getLatestPrices(),
-      getLookbackPrices(),
-    ]);
+    // ranking / related SSR 용 — 최신 500건. posts 조회를 먼저 끝낸 뒤 ticker 만
+    // 골라 lookback 필터로 넘긴다 (무필터 조회 회피).
+    const { data: rows, error } = await supabase
+      .from('posts')
+      .select(
+        'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
+      )
+      .order('created_at', { ascending: false })
+      .limit(500);
 
     if (error) {
       console.error('[feedData] posts query error:', error);
       return null;
     }
+
+    const tickers = Array.from(
+      new Set((rows ?? []).map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
+    );
+    const [prices, lookback] = await Promise.all([
+      getLatestPrices(),
+      getLookbackPrices(tickers),
+    ]);
 
     const posts: FeedPost[] = (rows ?? []).map((r) => {
       const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;

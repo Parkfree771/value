@@ -20,9 +20,21 @@ function ymd(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function getLookbackPrices(): Promise<Record<string, LookbackPrice>> {
+/**
+ * Lookback 가격 조회.
+ *
+ * @param tickers 조회할 ticker 목록(대소문자 무관). 비우면 전체 조회 + 1h 글로벌 캐시.
+ *                목록을 주면 .in('ticker',...) 으로 필터 → SSR TTFB 단축.
+ *                필터드 조회는 글로벌 캐시를 쓰지 않음 (캐시키가 ticker 집합마다 달라지므로).
+ */
+export async function getLookbackPrices(
+  tickers?: string[],
+): Promise<Record<string, LookbackPrice>> {
+  const filtered = tickers && tickers.length > 0;
   const now = Date.now();
-  if (cached && now - cachedAt < TTL) return cached;
+
+  // 글로벌 캐시는 "전체" 호출만 사용
+  if (!filtered && cached && now - cachedAt < TTL) return cached;
 
   try {
     const supabase = getServiceClient();
@@ -33,11 +45,18 @@ export async function getLookbackPrices(): Promise<Record<string, LookbackPrice>
     // 60일치만 가져옴 — 30일 cutoff 이전 거래일 fallback 여유분 포함
     const fromDate = new Date(today); fromDate.setUTCDate(fromDate.getUTCDate() - 60);
 
-    const { data, error } = await supabase
+    let query = supabase
       .from('price_history')
       .select('ticker, date, close')
-      .gte('date', ymd(fromDate))
-      .order('date', { ascending: false });
+      .gte('date', ymd(fromDate));
+
+    if (filtered) {
+      // Supabase 측에서 정규화된 ticker 비교를 위해 대문자 통일
+      const uniq = Array.from(new Set(tickers!.map((t) => t.toUpperCase()).filter(Boolean)));
+      query = query.in('ticker', uniq);
+    }
+
+    const { data, error } = await query.order('date', { ascending: false });
 
     if (error || !data) {
       console.error('[priceLookback] error:', error);
@@ -69,8 +88,11 @@ export async function getLookbackPrices(): Promise<Record<string, LookbackPrice>
       };
     }
 
-    cached = map;
-    cachedAt = now;
+    // 글로벌 캐시 갱신은 "전체" 호출만 (필터드 조회 결과를 캐시에 박으면 다음 전체 요청이 결손됨)
+    if (!filtered) {
+      cached = map;
+      cachedAt = now;
+    }
     return map;
   } catch (err) {
     console.error('[priceLookback] exception:', err);

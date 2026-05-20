@@ -17,22 +17,30 @@ export async function GET() {
     const cookieStore = await cookies();
     const supabase = createClient(cookieStore);
 
-    const [{ data: rows, error }, prices, lookback] = await Promise.all([
-      supabase
-        .from('posts')
-        .select(
-          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
-        )
-        .order('created_at', { ascending: false })
-        .limit(500), // 북마크/검색 필터링용 — 최신 500건이면 사실상 전체. 글 수 늘어나면 페이징으로 전환
-      getLatestPrices(),
-      getLookbackPrices(),
-    ]);
+    // 북마크/검색 필터링용 — 최신 500건. posts 조회를 먼저 끝낸 뒤 ticker 목록을
+    // 만들어 lookback에 .in() 필터로 넘김 → 60일×전 종목 무필터 조회 회피.
+    // stock_data 제외 — 이 API 호출 consumer (HomeClient, mypage, search)
+    // 모두 stockData를 사용하지 않거나 {} 로 덮어쓴다. 페이로드 절감.
+    const { data: rows, error } = await supabase
+      .from('posts')
+      .select(
+        'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
+      )
+      .order('created_at', { ascending: false })
+      .limit(500);
 
     if (error) {
       console.error('[feed/public] error:', error);
       return NextResponse.json({ posts: [], prices: {}, totalPosts: 0 }, { status: 500 });
     }
+
+    const tickers = Array.from(
+      new Set((rows ?? []).map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
+    );
+    const [prices, lookback] = await Promise.all([
+      getLatestPrices(),
+      getLookbackPrices(tickers),
+    ]);
 
     const posts = (rows ?? []).map((r) => {
       const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
@@ -76,7 +84,6 @@ export async function GET() {
         likes: r.likes ?? 0,
         commentCount: (r as { comment_count?: number }).comment_count ?? 0,
         category: r.category ?? '',
-        stockData: r.stock_data ?? null,
         themes: r.themes ?? undefined,
       };
     });

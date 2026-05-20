@@ -51,11 +51,13 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // body와 동일한 스택 — `font-sans`/`font-heading`/`font-body` 클래스를 붙여도 인라인 인접 텍스트(클래스 없는 부분)와 한글이 동일 폰트로 렌더링되게 함.
-        // NumFont(Barlow)는 unicode-range로 숫자/%만 매칭되고, 한글은 Noto Sans KR로 일관 렌더링.
-        sans: ['NumFont', 'var(--font-noto)', 'var(--font-inter)', 'Noto Sans KR', 'Inter', 'sans-serif'],
-        heading: ['NumFont', 'var(--font-noto)', 'var(--font-inter)', 'Noto Sans KR', 'Inter', 'sans-serif'],
-        body: ['NumFont', 'var(--font-noto)', 'var(--font-inter)', 'Noto Sans KR', 'Inter', 'sans-serif'],
+        // body와 동일한 스택. NumFont(Barlow)는 unicode-range로 숫자/%만 매칭되고,
+        // 한글은 OS 시스템 폰트(Apple SD Gothic Neo / Malgun Gothic / Pretendard 등)로 렌더링.
+        // 이전엔 var(--font-noto)로 Noto Sans KR을 next/font에서 다운받았는데
+        // woff2 ~150KB preload가 LCP 지연 → 시스템 폰트로 대체.
+        sans: ['NumFont', 'var(--font-inter)', 'system-ui', '-apple-system', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', 'sans-serif'],
+        heading: ['NumFont', 'var(--font-inter)', 'system-ui', '-apple-system', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', 'sans-serif'],
+        body: ['NumFont', 'var(--font-inter)', 'system-ui', '-apple-system', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', 'sans-serif'],
         mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },
       boxShadow: {

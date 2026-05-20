@@ -1,8 +1,7 @@
 ﻿import { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import HomeClient from '@/components/HomeClient';
 import type { FeedData } from '@/types/feed';
-import { createClient } from '@/utils/supabase/server';
+import { getServiceClient } from '@/lib/supabase-admin';
 import { getLatestPrices } from '@/lib/priceCache';
 import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
@@ -10,7 +9,9 @@ import { calculateReturn } from '@/utils/calculateReturn';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
 // ISR — 1시간 캐시 (그러나 실제로는 가격 cron 완료 / 글 작성/삭제 시 /api/revalidate · revalidatePath('/')로 즉시 무효화)
-// 가격 cron이 하루 6번 (아시아 3 + 미국 3) 트리거하므로 그 외엔 캐시 유지 → egress 최소
+// 가격 cron이 하루 6번 (아시아 3 + 미국 3) 트리거하므로 그 외엔 캐시 유지 → egress 최소.
+// ※ cookies() 호출이 있으면 페이지가 자동으로 dynamic 으로 강제됨 → revalidate 무의미.
+//   그래서 service client (RLS 우회) 로 공개 데이터만 읽어 진짜 ISR 가능하도록 유지한다.
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
@@ -72,25 +73,52 @@ const homeJsonLd = {
 // 서버에서 초기 피드 데이터 fetch — /api/feed/public 과 동일 형상으로 Postgres 합성
 async function getInitialFeed(): Promise<FeedData | null> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    // 공개 posts 조회만 함 — cookies() 호출하면 ISR이 깨지므로
+    // service client (server-only) 사용. RLS 우회하지만 SELECT만 하므로 안전.
+    const supabase = getServiceClient();
 
-    const [{ data: rows, error }, prices, lookback] = await Promise.all([
-      supabase
-        .from('posts')
-        .select(
-          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
-        )
-        .order('created_at', { ascending: false })
-        .limit(500), // 홈 초기 LCP 보호 — 글 수 늘어나면 페이징으로 전환
-      getLatestPrices(),
-      getLookbackPrices(),
+    // [LCP 최적화]
+    // ① 최신 50건 (홈 피드 LCP)
+    // ② 수익률 상위 30건 (TopReturnSlider가 정확한 top10 즉시 렌더할 수 있도록)
+    //    — ②가 없으면 슬라이더가 "최신 50건 중 top10" 만 보여 → 백그라운드 fetch 들어올
+    //    때까지 부정확. ②는 작은 쿼리(30 row)라 ①과 병렬 실행해도 LCP에 거의 영향 없음.
+    // 클라이언트가 hydration 후 /api/feed/public 호출해서 풀세트(500)로 교체한다.
+    // stock_data 제외 — HomeClient에서 어차피 undefined로 폐기되는 컬럼이라
+    // SSR HTML 페이로드를 크게 줄여줌(글당 stock_data JSON 수 KB).
+    const SELECT_COLS =
+      'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)';
+
+    const [{ data: latestRows, error }, { data: topRows }] = await Promise.all([
+      supabase.from('posts').select(SELECT_COLS).order('created_at', { ascending: false }).limit(50),
+      supabase.from('posts').select(SELECT_COLS).order('return_rate', { ascending: false }).limit(30),
     ]);
 
     if (error) {
       console.error('[getInitialFeed] posts query error:', error);
       return null;
     }
+
+    // 두 결과 dedup by id (최신 50건 우선 — 이미 createdAt desc 정렬됨)
+    const seenIds = new Set<string>();
+    const rows: NonNullable<typeof latestRows> = [];
+    for (const r of latestRows ?? []) {
+      if (seenIds.has(r.id)) continue;
+      seenIds.add(r.id);
+      rows.push(r);
+    }
+    for (const r of topRows ?? []) {
+      if (seenIds.has(r.id)) continue;
+      seenIds.add(r.id);
+      rows.push(r);
+    }
+
+    const tickers = Array.from(
+      new Set(rows.map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
+    );
+    const [prices, lookback] = await Promise.all([
+      getLatestPrices(),
+      getLookbackPrices(tickers),
+    ]);
 
     const posts = (rows ?? []).map((r) => {
       const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
@@ -136,7 +164,6 @@ async function getInitialFeed(): Promise<FeedData | null> {
         likes: r.likes ?? 0,
         commentCount: (r as { comment_count?: number }).comment_count ?? 0,
         category: r.category ?? '',
-        stockData: r.stock_data ?? null,
         themes: r.themes ?? undefined,
       };
     });

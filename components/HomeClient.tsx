@@ -152,19 +152,16 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
 
   const totalThemes = themeItems.length;
 
-  // 서버에서 데이터를 받지 못했을 경우에만 클라이언트에서 fetch
+  // [LCP 최적화] SSR은 최신 50건만 제공해서 첫 페인트가 빠르다.
+  // 하이드레이션 직후 백그라운드로 /api/feed/public(500건) 호출해
+  // 검색/북마크/필터가 풀세트 위에서 작동하도록 한다.
+  // initialData가 없는 경우(SSR 실패 fallback)에도 동일 경로로 채운다.
   useEffect(() => {
-    // 이미 초기 데이터가 있으면 스킵
-    if (initialData) return;
-
     const fetchFeed = async () => {
       try {
         const res = await fetch(FEED_API);
-
         if (!res.ok) throw new Error('Feed fetch failed');
-
         const feedData: FeedData = await res.json();
-
         setReports(mapPostsToReports(feedData.posts));
         setTotal(feedData.totalPosts);
       } catch (error) {
@@ -173,7 +170,12 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         setIsLoading(false);
       }
     };
-
+    // SSR 초기값이 있으면 첫 페인트/하이드레이션 끝난 뒤로 미룬다.
+    // (initialData가 없으면 즉시 fetch — 빈 상태 회피)
+    if (initialData) {
+      const id = setTimeout(fetchFeed, 0);
+      return () => clearTimeout(id);
+    }
     fetchFeed();
   }, [initialData]);
 

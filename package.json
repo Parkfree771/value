@@ -44,7 +44,6 @@
     "google-trends-api": "^4.9.2",
     "next": "^16.0.7",
     "node-cron": "^4.2.1",
-    "puppeteer": "^24.40.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "recharts": "^3.8.0",
@@ -64,6 +63,7 @@
     "eslint": "^8",
     "eslint-config-next": "^15.0.0",
     "postcss": "^8.4.47",
+    "puppeteer": "^24.40.0",
     "tailwindcss": "^3.4.14",
     "ts-node": "^10.9.2",
     "typescript": "^5"

@@ -1,5 +1,5 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_KR, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import "./globals.css";
@@ -9,10 +9,12 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
 import { UserBadgesProvider } from "@/contexts/UserBadgesContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
-import CookieConsent from "@/components/CookieConsent";
 
 // Footer는 viewport 밖에 있으므로 lazy load
 const Footer = dynamic(() => import("@/components/Footer"), { ssr: true });
+// CookieConsent도 lazy — 동의 끝나면 null 렌더라 초기 페인트에 필요 없음.
+// 별도 청크로 빠져서 홈 초기 JS 미세하게 줄어듦.
+const CookieConsent = dynamic(() => import("@/components/CookieConsent"), { ssr: true });
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -94,11 +96,9 @@ const inter = Inter({
   display: "swap",
 });
 
-const notoSansKR = Noto_Sans_KR({
-  subsets: ["latin"],
-  variable: "--font-noto",
-  display: "swap",
-});
+// Noto Sans KR 제거: ~150KB woff2 preload 비용이 LCP 지연의 주범이었다.
+// 한글은 시스템 폰트(Apple SD Gothic Neo / Malgun Gothic / Pretendard 등)로 대체.
+// 시각적 차이 거의 없고 첫 페인트는 명확히 빨라짐.
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
@@ -164,7 +164,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${inter.variable} ${notoSansKR.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html lang="ko" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
       <head>
         {/* Google Search Console 인증 */}
         <meta name="google-site-verification" content="thbsZW7iVjN1ZXSUejzzm9S_b-3uTv-Qv0S-tGiqGII" />
@@ -196,6 +196,30 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Supabase preconnect — HomeClient가 hydration 후 /api/feed/public 호출하고
+            그 안에서 Postgres로 가는 connection 미리 열어둠 (~50-150ms 절약) */}
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <>
+            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
+            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
+          </>
+        )}
+        {/* NumFont(Barlow) 핵심 weight preload — globals.css의 @font-face 보다 빨리 fetch 시작.
+            수익률 숫자 렌더가 살짝 빨라짐 (FOIT 짧아짐) */}
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="https://fonts.gstatic.com/s/barlow/v13/7cHpv4kjgoGqM7E_DMs5.woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          as="font"
+          type="font/woff2"
+          href="https://fonts.gstatic.com/s/barlow/v13/7cHqv4kjgoGqM7E3t-4s51os.woff2"
+          crossOrigin="anonymous"
+        />
 
         <GoogleAnalytics />
       </head>

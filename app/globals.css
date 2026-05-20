@@ -188,7 +188,9 @@ html {
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'NumFont', var(--font-noto), var(--font-inter), 'Noto Sans KR', 'Inter', sans-serif;
+  /* NumFont (숫자/% 한정 unicode-range)가 먼저, 그 다음 Inter, 한글은 시스템 폰트(Apple SD Gothic Neo / Malgun Gothic 등)로 폴백.
+     'Noto Sans KR' 리터럴은 사용자가 로컬에 설치돼 있으면 그대로 쓰도록 남겨둠 (다운로드 X). */
+  font-family: 'NumFont', var(--font-inter), system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Noto Sans KR', 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
