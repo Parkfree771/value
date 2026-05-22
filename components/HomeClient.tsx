@@ -152,31 +152,22 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
 
   const totalThemes = themeItems.length;
 
-  // [LCP 최적화] SSR은 최신 50건만 제공해서 첫 페인트가 빠르다.
-  // 하이드레이션 직후 백그라운드로 /api/feed/public(500건) 호출해
-  // 검색/북마크/필터가 풀세트 위에서 작동하도록 한다.
-  // initialData가 없는 경우(SSR 실패 fallback)에도 동일 경로로 채운다.
+  // SSR initialData(최신 50 + 수익률 top30)가 첫 페인트부터 피드를 채운다.
+  // 평상시엔 클라이언트 피드 fetch를 하지 않는다 — 매 진입 500건 재요청 제거.
+  // SSR이 실패해 initialData가 없을 때만 /api/feed/public 으로 보충한다.
   useEffect(() => {
-    const fetchFeed = async () => {
-      try {
-        const res = await fetch(FEED_API);
+    if (initialData) return;
+    fetch(FEED_API)
+      .then((res) => {
         if (!res.ok) throw new Error('Feed fetch failed');
-        const feedData: FeedData = await res.json();
+        return res.json();
+      })
+      .then((feedData: FeedData) => {
         setReports(mapPostsToReports(feedData.posts));
         setTotal(feedData.totalPosts);
-      } catch (error) {
-        console.error('Failed to fetch feed:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    // SSR 초기값이 있으면 첫 페인트/하이드레이션 끝난 뒤로 미룬다.
-    // (initialData가 없으면 즉시 fetch — 빈 상태 회피)
-    if (initialData) {
-      const id = setTimeout(fetchFeed, 0);
-      return () => clearTimeout(id);
-    }
-    fetchFeed();
+      })
+      .catch((error) => console.error('Failed to fetch feed:', error))
+      .finally(() => setIsLoading(false));
   }, [initialData]);
 
   // 클라이언트에서 정렬 처리

@@ -238,17 +238,6 @@ export default function RootLayout({
             </BookmarkProvider>
           </AuthProvider>
         </ThemeProvider>
-
-        {/* Google AdSense — production에서만 로드 (localhost는 AdSense가 403, 콘솔 노이즈 차단) */}
-        {process.env.NODE_ENV === 'production' && (
-          <Script
-            id="adsense"
-            async
-            strategy="afterInteractive"
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6944494802169618"
-            crossOrigin="anonymous"
-          />
-        )}
       </body>
     </html>
   );
