@@ -50,16 +50,16 @@ function fallbackTwoPoint(
   createdAt: string
 ): PricePoint[] {
   const start = createdAt.slice(0, 10);
-  const today = new Date().toISOString().slice(0, 10);
-  if (start === today) {
-    return [
-      { date: start, close: initialPrice },
-      { date: today, close: currentPrice },
-    ];
+  const todayUtc = new Date().toISOString().slice(0, 10);
+  let endLabel = todayUtc;
+  if (endLabel <= start) {
+    const next = new Date(`${start}T00:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + 1);
+    endLabel = next.toISOString().slice(0, 10);
   }
   return [
     { date: start, close: initialPrice },
-    { date: today, close: currentPrice },
+    { date: endLabel, close: currentPrice },
   ];
 }
 
@@ -192,9 +192,16 @@ export default function PriceChart({
           .map((p) => ({ date: p.d, close: p.c }));
 
         points.unshift({ date: from, close: initialPrice });
-        if (today > from) {
-          points.push({ date: today, close: currentPrice });
+        // 두 번째 앵커는 항상 추가 — UTC today가 작성일과 같아도(한국시간 새벽~오전대)
+        // 1점만 남아 무한 로딩에 갇히지 않도록. 라벨이 from과 같으면 from+1일 가짜
+        // 라벨로 분리해 차트가 한 점에 뭉쳐 보이지 않게 한다.
+        let endLabel = today;
+        if (endLabel <= from) {
+          const next = new Date(`${from}T00:00:00Z`);
+          next.setUTCDate(next.getUTCDate() + 1);
+          endLabel = next.toISOString().slice(0, 10);
         }
+        points.push({ date: endLabel, close: currentPrice });
         // 거래일만 들어있는 sparse 배열을 달력 기준으로 forward-fill
         setHistory(forwardFillCalendar(points));
       })
