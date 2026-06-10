@@ -34,9 +34,7 @@ const NEW_USERS: Array<{
   display_name?: string;
   bio?: string;
 }> = [
-  // 예시:
-  // { nickname: 'morryvale' },
-  // { nickname: '거시매크로', email: 'macro.kr@gmail.com', bio: '거시·매크로 관점' },
+  { nickname: 'MarketMaven' },
 ];
 // ============================================================
 

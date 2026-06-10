@@ -32,8 +32,8 @@ dotenv.config();
 // 여기서 편집하세요 — titleContains는 게시글 제목의 일부 문자열
 // ============================================================
 const POST_AUTHOR_MAP: { titleContains: string; authorName: string }[] = [
-  { titleContains: '드러켄 밀러 + 막스 YPF 동시 매수', authorName: 'gururu' },
-  { titleContains: '알리바바 실적 발표 영업이익 적자 전환', authorName: '만리경' },
+  { titleContains: '차익실현', authorName: '전문가 추적' },
+  { titleContains: '쏟아지는 IPO', authorName: 'MarketMaven' },
 ];
 // ============================================================
 
