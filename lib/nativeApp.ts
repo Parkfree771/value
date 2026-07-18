@@ -135,6 +135,28 @@ export async function nativeAppleSignIn(): Promise<string> {
   return idToken;
 }
 
+/**
+ * 시스템바(상태바) 아이콘 색을 사이트 테마에 맞춤.
+ * edge-to-edge라 상태바가 투명하게 사이트 헤더 위에 겹치므로,
+ * 라이트 테마 → 어두운 아이콘 / 다크 테마 → 밝은 아이콘.
+ * (플러그인 명명: style LIGHT = "밝은 배경"이라는 뜻 → 아이콘은 어두워짐)
+ */
+export async function syncNativeSystemBars(theme: 'light' | 'dark'): Promise<void> {
+  const cap = getCapacitor();
+  if (!cap?.isNativePlatform?.()) return;
+  const style = theme === 'dark' ? 'DARK' : 'LIGHT';
+  type StyleSetter = { setStyle(o: { style: string }): Promise<void> };
+  // Android: Capacitor 8 코어 SystemBars / iOS: StatusBar 플러그인
+  for (const name of ['SystemBars', 'StatusBar']) {
+    try {
+      const plugin = cap.Plugins?.[name] as StyleSetter | undefined;
+      if (plugin) await plugin.setStyle({ style });
+    } catch {
+      // 플랫폼에 없는 플러그인은 무시
+    }
+  }
+}
+
 /** 네이티브 소셜 세션도 함께 정리 (Supabase signOut과 별개) */
 export async function nativeSocialSignOut(): Promise<void> {
   for (const provider of ['google', 'apple'] as const) {

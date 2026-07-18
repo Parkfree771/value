@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
+import { syncNativeSystemBars } from '@/lib/nativeApp';
 
 type Theme = 'light' | 'dark';
 
@@ -35,13 +36,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // 클라이언트에서만 실행 - 초기 테마 동기화
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
+    let initial: Theme;
     if (savedTheme) {
-      setTheme(savedTheme);
+      initial = savedTheme;
     } else {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light');
+      initial = prefersDark ? 'dark' : 'light';
     }
+    setTheme(initial);
     setMounted(true);
+    // 네이티브 앱: 상태바 아이콘 색을 테마에 맞춤 (웹 브라우저에선 no-op)
+    syncNativeSystemBars(initial);
   }, []);
 
   const toggleTheme = () => {
@@ -49,6 +54,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
+    syncNativeSystemBars(newTheme);
   };
 
   // children을 항상 렌더링 - 빈 화면 방지
