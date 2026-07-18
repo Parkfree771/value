@@ -108,9 +108,11 @@ export async function nativeGoogleSignIn(): Promise<string> {
     );
   }
   const plugin = await getSocialLogin();
+  // scopes를 명시하면 Android 플러그인이 MainActivity 수정을 요구함.
+  // 기본 scopes에 email/profile/openid가 이미 포함되므로 생략.
   const res = await plugin.login({
     provider: 'google',
-    options: { scopes: ['email', 'profile'] },
+    options: {},
   });
   const idToken = res.result?.idToken;
   if (!idToken) {
