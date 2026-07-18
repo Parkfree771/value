@@ -88,9 +88,11 @@ async function getSocialLogin(): Promise<SocialLoginPlugin> {
       // iOS Sign in with Apple: 시스템 API 사용. clientId는 OS 레벨에서는 쓰이지 않고
       // 플러그인 초기화 식별용. idToken의 audience는 앱 번들 ID(kr.antstreet.app)가 되므로
       // Supabase > Auth > Providers > Apple의 Authorized Client IDs에 번들 ID를 등록해야 한다.
-      apple: {
-        clientId: 'kr.antstreet.app',
-      },
+      // ⚠️ iOS에서만 전달 — Android 플러그인은 apple 설정에 redirectUrl을 요구하며 없으면
+      //    initialize 전체가 거부됨 (Android 애플 로그인은 플러그인이 아니라 Supabase 웹 OAuth 사용).
+      ...(getNativePlatform() === 'ios'
+        ? { apple: { clientId: 'kr.antstreet.app' } }
+        : {}),
     });
     initialized = true;
   }
