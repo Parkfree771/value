@@ -13,6 +13,9 @@
 interface CapacitorGlobal {
   isNativePlatform?: () => boolean;
   getPlatform?: () => string;
+  // 앱이 원격 URL(antstreet.kr)을 로드할 때 주입되는 브릿지에는 registerPlugin이 없고,
+  // 네이티브에 등록된 플러그인들이 Plugins.<이름> 프록시로 노출된다.
+  Plugins?: Record<string, unknown>;
   registerPlugin?: (name: string) => unknown;
 }
 
@@ -59,10 +62,12 @@ let initialized = false;
 
 async function getSocialLogin(): Promise<SocialLoginPlugin> {
   const cap = getCapacitor();
-  if (!cap?.registerPlugin) {
-    throw new Error('네이티브 앱 환경이 아닙니다 (Capacitor 브릿지 없음)');
+  // 원격 로드 앱: Plugins 프록시 사용. (registerPlugin은 로컬 번들 앱에서만 존재하는 폴백)
+  const plugin = (cap?.Plugins?.SocialLogin ??
+    (cap?.registerPlugin ? cap.registerPlugin('SocialLogin') : null)) as SocialLoginPlugin | null;
+  if (!plugin) {
+    throw new Error('네이티브 앱 환경이 아닙니다 (Capacitor SocialLogin 플러그인 없음)');
   }
-  const plugin = cap.registerPlugin('SocialLogin') as SocialLoginPlugin;
 
   if (!initialized) {
     const webClientId = process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID;
