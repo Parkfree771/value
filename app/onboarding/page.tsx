@@ -254,7 +254,7 @@ export default function OnboardingPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-sans text-sm font-bold truncate">{user.email}</p>
-                  <p className="font-sans text-xs text-gray-500 dark:text-gray-400">Google 계정</p>
+                  <p className="font-sans text-xs text-gray-500 dark:text-gray-400">소셜 로그인 계정</p>
                 </div>
               </div>
             </div>

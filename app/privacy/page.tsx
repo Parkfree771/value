@@ -29,6 +29,10 @@ export default function PrivacyPage() {
               AntStreet(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, &ldquo;개인정보 보호법&rdquo;, &ldquo;정보통신망 이용촉진 및
               정보보호 등에 관한 법률&rdquo; 등 관련 법령을 준수하고 있습니다.
             </p>
+            <p className="mb-4">
+              본 개인정보처리방침은 웹사이트(antstreet.kr)와 iOS/Android 모바일 애플리케이션(AntStreet 앱)에
+              동일하게 적용됩니다.
+            </p>
             <p>
               회사는 개인정보처리방침을 통하여 이용자가 제공하는 개인정보가 어떠한 용도와 방식으로 이용되고 있으며,
               개인정보보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.
@@ -49,9 +53,13 @@ export default function PrivacyPage() {
             <h3 className="text-xs font-bold mb-2 mt-4">나. 개인정보 수집 방법</h3>
             <ul className="list-disc list-inside ml-6 space-y-1">
               <li>회원가입 및 서비스 이용 과정에서 이용자가 직접 입력</li>
-              <li>소셜 로그인 (Google) 연동</li>
+              <li>소셜 로그인 (Google, Apple) 연동</li>
               <li>자동 수집 도구를 통한 생성정보 수집</li>
             </ul>
+            <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
+              * Apple 로그인 시 &ldquo;이메일 가리기&rdquo;를 선택한 경우, 실제 이메일 대신 Apple이 제공하는
+              중계(릴레이) 이메일 주소가 수집됩니다.
+            </p>
           </section>
 
           <section>
@@ -155,8 +163,9 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside ml-6 space-y-1">
               <li>웹 호스팅·서버리스 실행: <strong>Vercel Inc. (미국)</strong> — 위탁 업무: 웹사이트 호스팅·서버 함수 실행</li>
-              <li>데이터베이스·인증·스토리지: <strong>Supabase Inc. (미국, 데이터센터 일본 도쿄)</strong> — 위탁 업무: 회원 정보·게시물 저장, Google OAuth 인증 처리, 이미지 보관</li>
+              <li>데이터베이스·인증·스토리지: <strong>Supabase Inc. (미국, 데이터센터 일본 도쿄)</strong> — 위탁 업무: 회원 정보·게시물 저장, Google/Apple OAuth 인증 처리, 이미지 보관</li>
               <li>Google OAuth 인증 제공: <strong>Google LLC</strong> — 위탁 업무: 소셜 로그인 인증 정보(이메일, 프로필) 제공</li>
+              <li>Apple 로그인 인증 제공: <strong>Apple Inc.</strong> — 위탁 업무: 소셜 로그인 인증 정보(이메일, 이름) 제공</li>
               <li>이메일 발송 서비스: (추후 업데이트)</li>
             </ul>
             <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-500">
@@ -219,6 +228,9 @@ export default function PrivacyPage() {
           <section className="pt-6 border-t-[3px] border-[var(--theme-border-muted)]">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               <strong>시행일:</strong> 2026년 2월 1일
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              <strong>최종 개정일:</strong> 2026년 7월 25일 (Apple 로그인 도입, 모바일 앱 적용 범위 명시)
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               본 개인정보처리방침은 위 시행일부터 적용됩니다.

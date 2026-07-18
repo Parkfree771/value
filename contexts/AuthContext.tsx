@@ -3,6 +3,13 @@
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
+import {
+  isNativeApp,
+  getNativePlatform,
+  nativeGoogleSignIn,
+  nativeAppleSignIn,
+  nativeSocialSignOut,
+} from '@/lib/nativeApp';
 
 /**
  * 앱 내부에서 쓰는 정규화된 사용자 형태.
@@ -22,6 +29,7 @@ interface AuthContextType {
   authReady: boolean;
   isAdmin: boolean;
   signInWithGoogle: () => Promise<void>;
+  signInWithApple: () => Promise<void>;
   signOut: () => Promise<void>;
   getIdToken: () => Promise<string | null>;
   checkAuth: () => Promise<AuthUser | null>;
@@ -33,6 +41,7 @@ const AuthContext = createContext<AuthContextType>({
   authReady: false,
   isAdmin: false,
   signInWithGoogle: async () => {},
+  signInWithApple: async () => {},
   signOut: async () => {},
   getIdToken: async () => null,
   checkAuth: async () => null,
@@ -136,6 +145,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // /login, /auth/* 페이지에서 로그인하면 next에 같은 페이지가 들어가
       // 로그인 후에도 그 페이지에 머무는 문제 발생 → 메인(/)으로 보낸다.
       const next = pathname === '/login' || pathname.startsWith('/auth/') ? '/' : pathname;
+
+      // 네이티브 앱(iOS/Android): 웹뷰에서 구글 OAuth 페이지가 차단되므로
+      // 네이티브 SDK로 idToken을 받아 세션을 만든다. 이후 서버 라우트에서
+      // 온보딩 체크 + 풀 리로드로 SSR에도 세션 반영.
+      if (isNativeApp()) {
+        const idToken = await nativeGoogleSignIn();
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: 'google',
+          token: idToken,
+        });
+        if (error) throw error;
+        window.location.href = `/auth/native-callback?next=${encodeURIComponent(next)}`;
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -151,11 +175,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase]);
 
+  const signInWithApple = useCallback(async () => {
+    setLoading(true);
+    try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
+      const next = pathname === '/login' || pathname.startsWith('/auth/') ? '/' : pathname;
+
+      // iOS 앱: 시스템 네이티브 Sign in with Apple (App Store 심사 4.8 필수 경로).
+      // Android 앱/웹: Supabase OAuth 웹 플로우 — 애플은 웹뷰 OAuth를 차단하지 않아 그대로 동작.
+      if (isNativeApp() && getNativePlatform() === 'ios') {
+        const idToken = await nativeAppleSignIn();
+        const { error } = await supabase.auth.signInWithIdToken({
+          provider: 'apple',
+          token: idToken,
+        });
+        if (error) throw error;
+        window.location.href = `/auth/native-callback?next=${encodeURIComponent(next)}`;
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'apple',
+        options: {
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
+      });
+      if (error) throw error;
+    } catch (err) {
+      console.error('애플 로그인 실패:', err);
+      setLoading(false);
+      throw err;
+    }
+  }, [supabase]);
+
   const signOut = useCallback(async () => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      if (isNativeApp()) await nativeSocialSignOut();
       setUser(null);
       setIsAdmin(false);
     } catch (err) {
@@ -173,7 +232,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, loading, authReady, isAdmin, signInWithGoogle, signOut, getIdToken, checkAuth }}
+      value={{ user, loading, authReady, isAdmin, signInWithGoogle, signInWithApple, signOut, getIdToken, checkAuth }}
     >
       {children}
     </AuthContext.Provider>
