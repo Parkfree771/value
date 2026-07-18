@@ -19,6 +19,9 @@ const CookieConsent = dynamic(() => import("@/components/CookieConsent"), { ssr:
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  // 노치/펀치홀 기기 + 네이티브 앱(edge-to-edge)에서 화면 전체 사용.
+  // 안전영역 확보는 globals.css의 --sat/--sab 변수로 처리.
+  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
     { media: '(prefers-color-scheme: dark)', color: '#1c1714' },

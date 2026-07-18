@@ -1340,3 +1340,14 @@ body {
     overflow-x: hidden;
   }
 }
+
+/* ============================================
+   Safe Area (노치·펀치홀·제스처바) 대응
+   - 브라우저(iPhone 등): env(safe-area-inset-*)
+   - Capacitor 앱(구형 WebView): 네이티브가 --safe-area-inset-* 변수 주입
+   viewport-fit=cover(layout.tsx)와 세트. 일반 데스크톱에서는 전부 0px.
+   ============================================ */
+:root {
+  --sat: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --sab: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+}

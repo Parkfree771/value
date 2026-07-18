@@ -1326,7 +1326,7 @@ function WritePageContent() {
 
       {/* 모바일: 하단 고정 제출 버튼 (새 글 작성 시) */}
       {!isEditMode && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 bg-[var(--theme-bg)] border-t-[3px] border-[var(--theme-border-muted)] z-40">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+var(--sab,0px))] bg-[var(--theme-bg)] border-t-[3px] border-[var(--theme-border-muted)] z-40">
           <div className="flex gap-3 max-w-5xl mx-auto">
             <button
               type="submit"

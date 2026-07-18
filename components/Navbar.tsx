@@ -48,7 +48,7 @@ const Navbar = memo(function Navbar() {
         />
       )}
 
-      <nav className="bg-[var(--theme-bg)] border-b-2 border-[var(--theme-border-muted)] shadow-md sticky top-0 z-50 transition-colors">
+      <nav className="bg-[var(--theme-bg)] border-b-2 border-[var(--theme-border-muted)] shadow-md sticky top-0 z-50 transition-colors pt-[var(--sat,0px)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-12 sm:h-14">
           {/* Logo + Navigation Links */}
@@ -258,7 +258,7 @@ const Navbar = memo(function Navbar() {
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full pt-[var(--sat,0px)] pb-[var(--sab,0px)]">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-4 border-b-2 border-[var(--theme-border-muted)]">
             <Link href="/" onClick={closeMobileMenu} className="flex items-center">

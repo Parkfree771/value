@@ -34,7 +34,7 @@ export default function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-[var(--theme-bg-card)] border-t-[3px] border-[var(--theme-border-muted)] shadow-md">
+    <div className="fixed bottom-0 left-0 right-0 z-50 p-4 pb-[calc(1rem+var(--sab,0px))] bg-[var(--theme-bg-card)] border-t-[3px] border-[var(--theme-border-muted)] shadow-md">
       <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center gap-4">
         <div className="flex-1 font-sans text-xs">
           <p>
