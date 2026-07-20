@@ -23,17 +23,6 @@ dotenvConfig({ path: resolve(process.cwd(), '.env.local') });
 
 type MarketType = 'ASIA' | 'US' | 'ALL' | 'CRYPTO';
 
-function pickMarketForNow(): MarketType {
-  // KST 시간 기준 — process.env.TZ가 다를 수 있어 직접 계산
-  const nowKst = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const hour = nowKst.getUTCHours(); // KST hour
-  const day = nowKst.getUTCDay(); // 0=Sun, 6=Sat
-  const isWeekday = day >= 1 && day <= 5;
-  if (isWeekday && hour >= 9 && hour < 17) return 'ASIA';
-  if (isWeekday && (hour >= 22 || hour < 7)) return 'US';
-  return 'CRYPTO'; // 장 마감 시간대 — 코인만
-}
-
 function runUpdate(marketType: MarketType): Promise<void> {
   return new Promise((resolveP, rejectP) => {
     const startTime = Date.now();
@@ -92,9 +81,8 @@ function startScheduler() {
   console.log('  - 암호화폐:  매시간 0분 (24시간)\n');
 }
 
-// 시작 시 1회 즉시 실행 — 현재 KST 시간대에 맞는 마켓만
-const initialMarket = pickMarketForNow();
-console.log(`[scheduler] 시작 시 즉시 실행: ${initialMarket} (현재 KST 시간대 기준)`);
-runUpdate(initialMarket)
+// 시작 시 1회 즉시 실행 — 시간대 무관 전체 마켓(ASIA + US + CRYPTO) 조회
+console.log(`[scheduler] 시작 시 즉시 실행: ALL (한국+미국+코인 전체)`);
+runUpdate('ALL')
   .catch((e) => console.error('[scheduler] 초기 실행 실패:', e))
   .finally(() => startScheduler());
