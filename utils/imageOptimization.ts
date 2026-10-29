@@ -1,7 +1,5 @@
-// 클라이언트 측 이미지 업로드 — Supabase Storage 'media' 버킷.
-// 경로 규칙: media/{user_id}/reports/{filename} — RLS가 본인 폴더만 INSERT 허용.
-
-import { createClient } from '@/utils/supabase/client';
+// 클라이언트 측 이미지 압축 + 업로드 — /api/upload 경유로 Neon Object Storage 'media' 버킷.
+// 경로 규칙: {user_id}/reports/{filename} — 폴더는 서버가 세션 기준으로 정함.
 
 export interface ImageUploadOptions {
   maxWidth?: number;
@@ -16,8 +14,6 @@ const DEFAULT_OPTIONS: ImageUploadOptions = {
   quality: 1.0,
   maxSizeMB: 2,
 };
-
-const BUCKET = 'media';
 
 export async function compressImage(
   file: File,
@@ -94,43 +90,49 @@ export async function compressImage(
 }
 
 /**
- * Supabase Storage에 이미지 1개 업로드. publicURL 반환.
- * pathPrefix는 user_id로 시작해야 RLS 통과. 보통 `${user.uid}/reports/${Date.now()}`.
+ * Blob 1개를 media 버킷에 업로드하고 공개 URL 반환.
+ * 서버(/api/upload)에서 presigned URL을 받아 브라우저가 직접 PUT — Vercel 본문 한도 회피.
+ */
+export async function uploadToStorage(
+  blob: Blob,
+  fileName: string,
+  kind: 'image' | 'file',
+): Promise<string> {
+  const res = await fetch('/api/upload', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ kind, fileName, contentType: blob.type, size: blob.size }),
+  });
+  const body = await res.json().catch(() => null);
+  if (!res.ok || !body?.uploadUrl) {
+    console.error('Upload presign error:', body);
+    throw new Error(body?.error ?? '업로드 준비 실패');
+  }
+
+  const put = await fetch(body.uploadUrl, {
+    method: 'PUT',
+    headers: body.headers,
+    body: blob,
+  });
+  if (!put.ok) {
+    console.error('Upload PUT error:', put.status);
+    throw new Error('업로드 실패');
+  }
+  return body.url as string;
+}
+
+/**
+ * 이미지 1개 압축 후 업로드. 공개 URL 반환.
+ * pathPrefix는 기존 콜러 호환용 — 실제 폴더는 서버가 세션 사용자 기준으로 정함.
  */
 export async function uploadImage(
   file: File,
-  pathPrefix: string,
+  _pathPrefix: string,
   options: ImageUploadOptions = {},
 ): Promise<string> {
   const compressed = await compressImage(file, options);
-  const ext =
-    compressed.type === 'image/webp'
-      ? '.webp'
-      : compressed.type === 'image/png'
-      ? '.png'
-      : '.jpg';
-  // Supabase Storage 키는 ASCII만 허용 — 한글/특수문자 모두 _ 로 치환
-  const baseName = file.name
-    .replace(/\.[^.]+$/, '')
-    .replace(/[^a-zA-Z0-9_-]/g, '_')
-    .replace(/_+/g, '_')
-    .slice(0, 40) || 'image';
-  const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${baseName}${ext}`;
-  const objectPath = `${pathPrefix.replace(/\/+$/, '')}/${fileName}`;
-
-  const supabase = createClient();
-  const { error: uploadError } = await supabase.storage.from(BUCKET).upload(objectPath, compressed, {
-    contentType: compressed.type,
-    cacheControl: '3600',
-    upsert: false,
-  });
-  if (uploadError) {
-    console.error('Image upload error:', uploadError);
-    throw uploadError;
-  }
-
-  const { data } = supabase.storage.from(BUCKET).getPublicUrl(objectPath);
-  return data.publicUrl;
+  return uploadToStorage(compressed, file.name, 'image');
 }
 
 export async function uploadMultipleImages(
@@ -149,24 +151,17 @@ export async function uploadMultipleImages(
 }
 
 /**
- * URL이 Supabase Storage 'media' 버킷의 것이면 삭제. Firebase URL이면 무시 (옛 이미지).
+ * 우리 media 버킷 이미지면 삭제. 옛 Supabase/Firebase URL은 서버가 무시.
  */
 export async function deleteImage(imageUrl: string): Promise<void> {
-  try {
-    if (!imageUrl.includes('/storage/v1/object/public/' + BUCKET + '/')) {
-      // Firebase Storage URL 등 — 우리 권한 아님, 무시
-      return;
-    }
-    const supabase = createClient();
-    const marker = `/storage/v1/object/public/${BUCKET}/`;
-    const idx = imageUrl.indexOf(marker);
-    if (idx < 0) return;
-    const objectPath = decodeURIComponent(imageUrl.slice(idx + marker.length));
-    const { error } = await supabase.storage.from(BUCKET).remove([objectPath]);
-    if (error) throw error;
-  } catch (error) {
-    console.error('Image deletion error:', error);
-    throw error;
+  const res = await fetch(`/api/upload?url=${encodeURIComponent(imageUrl)}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => null);
+    console.error('Image deletion error:', body);
+    throw new Error(body?.error ?? '이미지 삭제 실패');
   }
 }
 

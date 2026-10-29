@@ -4,10 +4,10 @@
 //
 // 구글 로그인: 웹뷰 안에서는 구글 OAuth 페이지가 차단됨(disallowed_useragent).
 // → 네이티브 SDK(@capgo/capacitor-social-login)로 로그인해 idToken을 받고
-//   supabase.auth.signInWithIdToken으로 세션을 만든다.
+//   Neon Auth(Better Auth) signIn.social({ idToken })으로 세션을 만든다.
 //
 // 애플 로그인: iOS 앱에서는 시스템 네이티브 Sign in with Apple(App Store 심사 4.8 필수)로
-// idToken을 받아 같은 방식으로 세션을 만든다. 웹/Android는 Supabase OAuth 웹 플로우 사용
+// idToken을 받아 같은 방식으로 세션을 만든다. 웹/Android는 Neon Auth OAuth 웹 플로우 사용
 // (애플은 구글과 달리 웹뷰 OAuth를 차단하지 않음).
 
 interface CapacitorGlobal {
@@ -78,7 +78,8 @@ async function getSocialLogin(): Promise<SocialLoginPlugin> {
             google: {
               webClientId,
               // iOS는 iOS 전용 클라이언트 ID로 로그인하고,
-              // idToken의 audience는 webClientId(iOSServerClientId)로 맞춰 Supabase가 검증 가능하게 한다.
+              // idToken의 audience는 webClientId(iOSServerClientId)로 맞춰 Neon Auth가 검증 가능하게 한다
+              // (Neon Auth 콘솔 > Google 프로바이더에 같은 웹 클라이언트 ID가 등록돼 있어야 함).
               iOSClientId: process.env.NEXT_PUBLIC_GOOGLE_IOS_CLIENT_ID,
               iOSServerClientId: webClientId,
               mode: 'online' as const,
@@ -87,9 +88,9 @@ async function getSocialLogin(): Promise<SocialLoginPlugin> {
         : {}),
       // iOS Sign in with Apple: 시스템 API 사용. clientId는 OS 레벨에서는 쓰이지 않고
       // 플러그인 초기화 식별용. idToken의 audience는 앱 번들 ID(kr.antstreet.app)가 되므로
-      // Supabase > Auth > Providers > Apple의 Authorized Client IDs에 번들 ID를 등록해야 한다.
+      // Neon Auth 콘솔 > Apple 프로바이더 설정에 번들 ID를 허용 client ID로 등록해야 한다.
       // ⚠️ iOS에서만 전달 — Android 플러그인은 apple 설정에 redirectUrl을 요구하며 없으면
-      //    initialize 전체가 거부됨 (Android 애플 로그인은 플러그인이 아니라 Supabase 웹 OAuth 사용).
+      //    initialize 전체가 거부됨 (Android 애플 로그인은 플러그인이 아니라 Neon Auth 웹 OAuth 사용).
       ...(getNativePlatform() === 'ios'
         ? { apple: { clientId: 'kr.antstreet.app' } }
         : {}),
@@ -104,7 +105,7 @@ export async function nativeGoogleSignIn(): Promise<string> {
   if (!process.env.NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID) {
     throw new Error(
       'NEXT_PUBLIC_GOOGLE_WEB_CLIENT_ID가 설정되지 않았습니다. ' +
-        'Supabase 대시보드 > Auth > Providers > Google의 Client ID를 환경변수로 넣어주세요.',
+        'Neon Auth 콘솔 > Google 프로바이더에 등록한 웹 Client ID를 환경변수로 넣어주세요.',
     );
   }
   const plugin = await getSocialLogin();
@@ -157,14 +158,14 @@ export async function syncNativeSystemBars(theme: 'light' | 'dark'): Promise<voi
   }
 }
 
-/** 네이티브 소셜 세션도 함께 정리 (Supabase signOut과 별개) */
+/** 네이티브 소셜 세션도 함께 정리 (Neon Auth signOut과 별개) */
 export async function nativeSocialSignOut(): Promise<void> {
   for (const provider of ['google', 'apple'] as const) {
     try {
       const plugin = await getSocialLogin();
       await plugin.logout({ provider });
     } catch {
-      // 네이티브 로그아웃 실패는 치명적이지 않음 — Supabase 세션만 끊겨도 로그아웃 상태
+      // 네이티브 로그아웃 실패는 치명적이지 않음 — Neon Auth 세션만 끊겨도 로그아웃 상태
     }
   }
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
 
 const VIEW_EXPIRY_HOURS = 24;
 
@@ -15,11 +15,12 @@ export async function POST(
       return NextResponse.json({ success: true, alreadyViewed: true });
     }
 
-    const supabase = getServiceClient();
-
-    // atomic +1 — race condition 없음. 없는 글이면 0 row 영향.
-    const { data, error } = await supabase.rpc('increment_post_views', { p_post_id: id });
-    if (error) {
+    // atomic +1 — race condition 없음. 없는 글이면 0 row 영향 → null.
+    let data: number | null;
+    try {
+      const rows = await sql`select increment_post_views(${id}) as views`;
+      data = rows[0]?.views ?? null;
+    } catch (error) {
       console.error('[view] rpc 실패:', error);
       return NextResponse.json(
         { success: false, error: '조회수 증가 중 오류가 발생했습니다.' },

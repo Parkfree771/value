@@ -1,9 +1,12 @@
 import { MetadataRoute } from 'next';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
 import { GURU_LIST } from './guru-tracker/types';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
+
+// sitemap은 Dynamic API(cookies 등) 없으면 빌드 시 정적 생성됨 → 새 글이 반영되도록 요청마다 생성.
+// (Supabase 시절엔 cookies() 호출 때문에 자동으로 dynamic이었음)
+export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
@@ -22,20 +25,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let userPages: MetadataRoute.Sitemap = [];
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: posts } = await supabase
-      .from('posts')
-      .select('id, created_at, updated_at, author:users!posts_author_id_fkey(nickname)');
+    const posts = await sql`
+      select p.id, p.created_at, p.updated_at, u.nickname as author_nickname
+      from posts p
+      left join users u on u.id = p.author_id
+    `;
 
     const nicknames = new Set<string>();
-    reportPages = (posts ?? []).map((p) => {
-      const updatedArr = (p.updated_at as string[] | null) ?? [];
+    reportPages = posts.map((p) => {
+      // updated_at은 timestamptz[] — 마지막 원소가 최종 수정 시각
+      const updatedArr = (p.updated_at as (string | Date)[] | null) ?? [];
       const lastIso =
         updatedArr.length > 0 ? updatedArr[updatedArr.length - 1] : p.created_at;
-      const author = (p as { author?: { nickname?: string } | null }).author;
-      if (author?.nickname) nicknames.add(author.nickname);
+      if (p.author_nickname) nicknames.add(p.author_nickname);
 
       return {
         url: `${SITE_URL}/reports/${p.id}`,

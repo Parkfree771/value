@@ -5,20 +5,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
+import { getAuthUser } from '@/lib/auth/session';
 import { BADGES_BY_ID } from '@/lib/badges';
 
 export async function PUT(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
-    const uid = authData.user.id;
+    const uid = authUser.id;
 
     const body = await request.json();
     const equippedBadgeId: string | null = body.equippedBadgeId ?? null;
@@ -29,13 +26,12 @@ export async function PUT(request: NextRequest) {
 
     // 장착하려는 배지가 본인이 해금한 상태인지 확인 (해제는 통과)
     if (equippedBadgeId !== null) {
-      const { data: owned } = await supabase
-        .from('user_badges')
-        .select('badge_id')
-        .eq('user_id', uid)
-        .eq('badge_id', equippedBadgeId)
-        .maybeSingle();
-      if (!owned) {
+      const owned = await sql`
+        select badge_id from user_badges
+        where user_id = ${uid} and badge_id = ${equippedBadgeId}
+        limit 1
+      `;
+      if (owned.length === 0) {
         return NextResponse.json(
           { error: '해당 배지를 아직 해금하지 않았습니다.' },
           { status: 403 },
@@ -43,12 +39,10 @@ export async function PUT(request: NextRequest) {
       }
     }
 
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({ equipped_badge_id: equippedBadgeId })
-      .eq('id', uid);
-
-    if (updateError) {
+    // 본인 row만 갱신 (id = 세션 uid로 고정 — RLS 대신 코드에서 소유권 보장)
+    try {
+      await sql`update users set equipped_badge_id = ${equippedBadgeId} where id = ${uid}`;
+    } catch (updateError) {
       console.error('[badge PUT] users update error:', updateError);
       return NextResponse.json(
         { error: '배지 업데이트 중 오류가 발생했습니다.' },

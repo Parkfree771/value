@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
 import { BADGES_BY_ID } from '@/lib/badges';
 
 // 닉네임 목록 → {nickname: equippedBadgeId|null} 매핑
@@ -26,21 +25,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ badges: {} });
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: rows, error } = await supabase
-      .from('users')
-      .select('nickname, equipped_badge_id')
-      .in('nickname', unique);
-
-    if (error) {
-      console.error('[users/badges POST] supabase error:', error);
+    let rows: Record<string, any>[];
+    try {
+      rows = await sql`
+        select nickname, equipped_badge_id from users where nickname = any(${unique}::text[])
+      `;
+    } catch (error) {
+      console.error('[users/badges POST] db error:', error);
       return NextResponse.json({ badges: {} }, { status: 200 });
     }
 
     const result: Record<string, string | null> = {};
-    for (const row of rows ?? []) {
+    for (const row of rows) {
       const nickname = (row as { nickname?: string }).nickname;
       if (!nickname) continue;
       const badgeId = (row as { equipped_badge_id?: string | null }).equipped_badge_id;

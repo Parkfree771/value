@@ -199,12 +199,11 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://firebasestorage.googleapis.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Supabase preconnect — HomeClient가 hydration 후 /api/feed/public 호출하고
-            그 안에서 Postgres로 가는 connection 미리 열어둠 (~50-150ms 절약) */}
-        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+        {/* Neon Object Storage preconnect — 글 이미지가 이 호스트에서 바로 로드됨 */}
+        {process.env.AWS_ENDPOINT_URL_S3 && (
           <>
-            <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL} />
-            <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
+            <link rel="dns-prefetch" href={process.env.AWS_ENDPOINT_URL_S3} />
+            <link rel="preconnect" href={process.env.AWS_ENDPOINT_URL_S3} />
           </>
         )}
         {/* NumFont(Barlow) 핵심 weight preload — globals.css의 @font-face 보다 빨리 fetch 시작.

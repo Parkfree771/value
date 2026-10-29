@@ -12,9 +12,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { getAuthUser } from '@/lib/auth/session';
+import { sql } from '@/lib/db';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
 import { pingIndexNow } from '@/lib/indexnow';
@@ -26,14 +25,11 @@ const POST_RATE_WINDOW = 60 * 60 * 1000;
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) {
+    const user = await getAuthUser();
+    if (!user) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
-    const userId = authData.user.id;
+    const userId = user.id;
 
     const clientIP = getClientIP(request);
     const rateLimitResult = await checkRateLimitRedis(
@@ -56,18 +52,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'postId와 postData가 필요합니다.' }, { status: 400 });
     }
 
-    // 새 ticker면 current_prices에 시드
+    // 새 ticker면 current_prices에 시드 (이미 있으면 그대로 둠)
     const ticker = (postData.ticker || '').toUpperCase();
     const exchange = (postData.exchange || '').toUpperCase();
     const currentPrice = Number(postData.currentPrice ?? postData.initialPrice ?? 0);
     if (ticker && exchange && currentPrice > 0) {
-      const admin = getServiceClient();
-      await admin
-        .from('current_prices')
-        .upsert(
-          { ticker, exchange, current_price: currentPrice },
-          { onConflict: 'ticker', ignoreDuplicates: true },
-        );
+      try {
+        await sql`
+          insert into current_prices (ticker, exchange, current_price)
+          values (${ticker}, ${exchange}, ${currentPrice})
+          on conflict (ticker) do nothing
+        `;
+      } catch (err) {
+        console.warn('[Feed API] current_prices 시드 실패:', err instanceof Error ? err.message : err);
+      }
     }
 
     // 비동기 후처리

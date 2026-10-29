@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { connection } from 'next/server';
+import { sql } from '@/lib/db';
 import { Report } from '@/types/report';
 import { generateReportMetadata, generateReportJsonLd } from '@/lib/metadata';
 import ReportDetailClient from '@/components/ReportDetailClient';
@@ -14,30 +14,42 @@ import { calculateReturn } from '@/utils/calculateReturn';
 
 /**
  * 리포트 데이터를 가져옵니다.
- * - Supabase posts (트리거가 likes/views 카운트 자동 유지)
+ * - Postgres posts (트리거가 likes/views 카운트 자동 유지)
  * - feed.json은 가격 캐시 (cron이 갱신)
  * React cache()로 generateMetadata와 페이지 간 중복 호출 방지.
  */
 const getReportData = cache(async (id: string): Promise<Report | null> => {
+  // 요청 시점 렌더링 유지 — 옛 코드는 cookies() 호출로 동적 렌더링이었음.
+  // 이게 없으면 revalidate=3600 ISR로 바뀌어 삭제/수정된 글이 최대 1시간 캐시됨.
+  // (try 밖에서 호출 — Next의 dynamic 신호 에러를 catch가 삼키지 않도록)
+  await connection();
+
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    // 옛 Firestore id 등 uuid가 아닌 값은 조회 없이 not found (Postgres 22P02 방지)
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
 
-    const [{ data, error }, latestPrices] = await Promise.all([
-      supabase
-        .from('posts')
-        .select(
-          'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, mode, content, css_content, images, files, views, likes, created_at, updated_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id)',
-        )
-        .eq('id', id)
-        .maybeSingle(),
-      getLatestPrices(),
-    ]);
-
-    if (error) {
+    // updated_at(timestamptz[])은 드라이버가 Date[]로 파싱 → to_json으로 ISO 문자열 배열 유지
+    let rows: Record<string, any>[];
+    let latestPrices: Awaited<ReturnType<typeof getLatestPrices>>;
+    try {
+      [rows, latestPrices] = await Promise.all([
+        sql`
+          select p.id, p.title, p.ticker, p.exchange, p.opinion, p.position_type, p.initial_price,
+                 p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.stock_data,
+                 p.mode, p.content, p.css_content, p.images, p.files, p.views, p.likes, p.created_at,
+                 to_json(p.updated_at) as updated_at, p.author_id,
+                 u.nickname as author_nickname, u.equipped_badge_id as author_equipped_badge_id
+          from posts p
+          left join users u on u.id = p.author_id
+          where p.id = ${id}
+        `,
+        getLatestPrices(),
+      ]);
+    } catch (error) {
       console.error('리포트 조회 오류:', error);
       return null;
     }
+    const data = rows[0];
     if (!data) return null;
 
     const tickerUpper = (data.ticker || '').toUpperCase();
@@ -58,18 +70,16 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
     // updated_at는 timestamptz[] (스키마) — 날짜만 추출
     const updatedAtArray: string[] = Array.isArray(data.updated_at)
       ? data.updated_at
-          .map((d) => (typeof d === 'string' ? d.split('T')[0] : ''))
+          .map((d: unknown) => (typeof d === 'string' ? d.split('T')[0] : ''))
           .filter((s) => s !== '')
       : [];
-
-    const author = (data as { author?: { nickname?: string; equipped_badge_id?: string | null } | null }).author;
 
     const report: Report = {
       id: data.id,
       title: data.title ?? '',
-      author: author?.nickname ?? '익명',
+      author: data.author_nickname ?? '익명',
       authorId: data.author_id,
-      equippedBadgeId: author?.equipped_badge_id ?? null,
+      equippedBadgeId: data.author_equipped_badge_id ?? null,
       stockName: data.stock_name ?? '',
       ticker: data.ticker ?? '',
       opinion: data.opinion ?? 'hold',

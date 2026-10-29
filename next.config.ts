@@ -32,11 +32,8 @@ const nextConfig: NextConfig = {
   experimental: {
     // 패키지 최적화 - tree shaking 강화
     // react-icons / date-fns 는 현재 실제 import 0건이라 제거.
-    // @supabase/* 는 거의 모든 페이지에서 import 되는 barrel 이라 추가.
     optimizePackageImports: [
       'recharts',
-      '@supabase/supabase-js',
-      '@supabase/ssr',
     ],
   },
 
@@ -114,7 +111,7 @@ const nextConfig: NextConfig = {
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
           "img-src 'self' data: blob: https: http:",
-          "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://firebasestorage.googleapis.com https://api.upbit.com https://api.binance.com https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://cdn.jsdelivr.net blob:",
+          "connect-src 'self' https://*.aws.neon.tech https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://firebasestorage.googleapis.com https://api.upbit.com https://api.binance.com https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://cdn.jsdelivr.net blob:",
           "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google",
           "object-src 'none'",
           "base-uri 'self'",

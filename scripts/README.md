@@ -8,9 +8,9 @@
 | `update-filing-prices.ts` | `guru-portfolios.json`의 각 보유 종목에 공시일 종가(`price_at_filing`) 추가 (KIS API 사용, 로컬 dev 서버 필요) | 로컬 (분기 1회) |
 | `resolve-cusips.ts` | `guru-portfolios.json`의 미매핑 CUSIP을 OpenFIGI API로 자동 해결 → `cusipMap.ts`에 붙여넣을 코드 출력 | 로컬 (신규 종목/그루 추가 시) |
 | `add-us-namekr.ts` | 미국 종목 한글명 보강 | 로컬 (필요 시) |
-| `local-price-updater.ts` | 로컬 PC 상주형 가격 업데이트 스케줄러. 사장님 `.bat`에서 호출 (Supabase Edge Function cron과 중복 — 폐기 검토 중) | 로컬 (선택) |
-| `github-update-prices.ts` | `local-price-updater.ts`가 spawn하는 가격 갱신 본체 (Supabase) | 로컬 (자동) |
-| `github-update-guru-prices.ts` | 구루 포트폴리오 가격 갱신 (Supabase) | 로컬 (자동) |
+| `local-price-updater.ts` | 로컬 PC 상주형 가격 업데이트 스케줄러. 사장님 `.bat`에서 호출 (GitHub Actions price-cron과 중복 — 폐기 검토 중) | 로컬 (선택) |
+| `cron/update-stock-prices.mjs` | 게시글 종목 가격 갱신 (`--market=ASIA\|US\|CRYPTO\|ALL [--finalize]`, Neon) | GitHub Actions `price-cron` |
+| `cron/update-guru-prices.mjs` | 구루 포트폴리오 가격 갱신 (Neon) | GitHub Actions `price-cron` |
 | `recolor-favicon.js`, `recolor-favicons.js`, `recolor-logo.js` | 아이콘 색상 일괄 변경 | 로컬 (디자인 변경 시) |
 | `test-font.js` | 폰트 렌더링 검증 | 로컬 (디자인) |
 | `video-maker/` | 영상 생성 도구 | 로컬 |
@@ -19,7 +19,7 @@
 
 ## 공통 환경변수
 
-- `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SECRET_KEY` — Supabase service_role 접근
+- `DATABASE_URL` — Neon Postgres 접속 문자열
 - `KIS_APP_KEY`, `KIS_APP_SECRET`, `KIS_BASE_URL` — 한국투자 OpenAPI
 - `NEXT_PUBLIC_SITE_URL`, `REVALIDATE_SECRET` — ISR 캐시 무효화 호출용
 
@@ -33,5 +33,6 @@ npx tsx scripts/<파일명>.ts
 
 ## 가격 cron 인프라
 
-상시 가격 갱신은 **Supabase Edge Functions + pg_cron**이 담당 (`supabase/functions/update-stock-prices`, `update-guru-prices`).
-`local-price-updater.ts` 계열은 PC `.bat` 호환용 백업 경로. Supabase 측만으로 충분.
+상시 가격 갱신은 **GitHub Actions `price-cron`**(`.github/workflows/price-cron.yml`)이 `scripts/cron/*.mjs`를 실행해 담당.
+스케줄은 예전 Supabase pg_cron과 동일 (ASIA/US 장중 2회 + 장 마감 finalize 1회, 구루 06:30 KST, keep-warm 20분).
+`local-price-updater.ts` 계열은 PC `.bat` 호환용 백업 경로. GitHub Actions `price-cron`만으로 충분.

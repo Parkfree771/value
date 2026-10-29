@@ -1,5 +1,5 @@
 /**
- * 종목별 일별 종가 히스토리 (Supabase Postgres)
+ * 종목별 일별 종가 히스토리 (Neon Postgres)
  *
  * 저장소: public.price_history 테이블 (PK ticker+date)
  *
@@ -8,7 +8,7 @@
  * - upsertDailyClose: 한 줄 UPSERT
  */
 
-import { getServiceClient } from './supabase-admin';
+import { sql } from './db';
 import { getKISTokenWithCache } from './kisTokenManager';
 import type { PriceHistoryFile, PriceHistoryPoint } from '@/types/priceHistory';
 
@@ -22,18 +22,18 @@ const CRYPTO_EXCHANGE = 'CRYPTO';
 
 export async function readHistory(ticker: string): Promise<PriceHistoryFile | null> {
   const t = ticker.toUpperCase();
-  const supabase = getServiceClient();
-  const { data, error } = await supabase
-    .from('price_history')
-    .select('ticker, exchange, date, close')
-    .eq('ticker', t)
-    .order('date', { ascending: true });
-
-  if (error) {
+  let data: Record<string, any>[];
+  try {
+    data = await sql`
+      select ticker, exchange, date, close from price_history
+      where ticker = ${t}
+      order by date asc
+    `;
+  } catch (error) {
     console.error('[priceHistory.read] error:', error);
     return null;
   }
-  if (!data || data.length === 0) return null;
+  if (data.length === 0) return null;
 
   return {
     ticker: t,
@@ -44,7 +44,6 @@ export async function readHistory(ticker: string): Promise<PriceHistoryFile | nu
 }
 
 export async function writeHistory(file: PriceHistoryFile): Promise<void> {
-  const supabase = getServiceClient();
   const rows = file.history.map((p) => ({
     ticker: file.ticker.toUpperCase(),
     exchange: file.exchange.toUpperCase(),
@@ -57,10 +56,19 @@ export async function writeHistory(file: PriceHistoryFile): Promise<void> {
   const CHUNK = 1000;
   for (let i = 0; i < rows.length; i += CHUNK) {
     const chunk = rows.slice(i, i + CHUNK);
-    const { error } = await supabase
-      .from('price_history')
-      .upsert(chunk, { onConflict: 'ticker,date' });
-    if (error) {
+    try {
+      await sql`
+        insert into price_history (ticker, exchange, date, close)
+        select * from unnest(
+          ${chunk.map((r) => r.ticker)}::text[],
+          ${chunk.map((r) => r.exchange)}::text[],
+          ${chunk.map((r) => r.date)}::date[],
+          ${chunk.map((r) => r.close)}::numeric[]
+        )
+        on conflict (ticker, date) do update
+          set exchange = excluded.exchange, close = excluded.close
+      `;
+    } catch (error) {
       console.error('[priceHistory.write] upsert error:', error);
       throw error;
     }
@@ -283,12 +291,15 @@ export async function upsertDailyClose(
 ): Promise<PriceHistoryFile> {
   const t = ticker.toUpperCase();
   const ex = exchange.toUpperCase();
-  const supabase = getServiceClient();
 
-  const { error } = await supabase
-    .from('price_history')
-    .upsert({ ticker: t, exchange: ex, date, close }, { onConflict: 'ticker,date' });
-  if (error) {
+  try {
+    await sql`
+      insert into price_history (ticker, exchange, date, close)
+      values (${t}, ${ex}, ${date}, ${close})
+      on conflict (ticker, date) do update
+        set exchange = excluded.exchange, close = excluded.close
+    `;
+  } catch (error) {
     console.error('[priceHistory.upsertDailyClose] error:', error);
     throw error;
   }

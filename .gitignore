@@ -48,3 +48,4 @@ nul
 # 로컬 전용 스크립트 설정 (실행 시마다 값을 채워 넣음 — 추적 제외, skip-worktree 병행)
 /scripts/change-author.ts
 /scripts/create-virtual-user.ts
+.neon

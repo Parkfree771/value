@@ -1,9 +1,9 @@
 /**
- * 최신 가격 캐시 — Supabase public.current_prices 테이블 기반.
- * 가격 cron(Edge Function)이 UPSERT, 페이지·라우트가 이 헬퍼로 읽음.
+ * 최신 가격 캐시 — Postgres public.current_prices 테이블 기반.
+ * 가격 cron이 UPSERT, 페이지·라우트가 이 헬퍼로 읽음.
  */
 
-import { getServiceClient } from './supabase-admin';
+import { sql } from './db';
 
 export interface CachedPriceData {
   currentPrice: number;
@@ -25,18 +25,16 @@ export async function getLatestPrices(): Promise<Record<string, CachedPriceData>
   }
 
   try {
-    const supabase = getServiceClient();
-    const { data, error } = await supabase
-      .from('current_prices')
-      .select('ticker, exchange, current_price');
-
-    if (error) {
-      console.error('[priceCache] Supabase error:', error);
+    let data: Record<string, any>[];
+    try {
+      data = await sql`select ticker, exchange, current_price from current_prices`;
+    } catch (error) {
+      console.error('[priceCache] DB error:', error);
       return cachedPrices || {};
     }
 
     const map: Record<string, CachedPriceData> = {};
-    for (const row of data ?? []) {
+    for (const row of data) {
       map[row.ticker.toUpperCase()] = {
         currentPrice: Number(row.current_price),
         exchange: row.exchange,

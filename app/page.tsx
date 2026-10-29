@@ -1,7 +1,7 @@
 ﻿import { Metadata } from 'next';
 import HomeClient from '@/components/HomeClient';
 import type { FeedData } from '@/types/feed';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
 import { getLatestPrices } from '@/lib/priceCache';
 import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
@@ -11,7 +11,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 // ISR — 1시간 캐시 (그러나 실제로는 가격 cron 완료 / 글 작성/삭제 시 /api/revalidate · revalidatePath('/')로 즉시 무효화)
 // 가격 cron이 하루 6번 (아시아 3 + 미국 3) 트리거하므로 그 외엔 캐시 유지 → egress 최소.
 // ※ cookies() 호출이 있으면 페이지가 자동으로 dynamic 으로 강제됨 → revalidate 무의미.
-//   그래서 service client (RLS 우회) 로 공개 데이터만 읽어 진짜 ISR 가능하도록 유지한다.
+//   그래서 세션 없이 서버 DB 클라이언트(lib/db)로 공개 데이터만 읽어 진짜 ISR 가능하도록 유지한다.
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
@@ -74,8 +74,7 @@ const homeJsonLd = {
 async function getInitialFeed(): Promise<FeedData | null> {
   try {
     // 공개 posts 조회만 함 — cookies() 호출하면 ISR이 깨지므로
-    // service client (server-only) 사용. RLS 우회하지만 SELECT만 하므로 안전.
-    const supabase = getServiceClient();
+    // 세션 없이 서버 전용 sql 클라이언트 사용. SELECT만 하므로 안전.
 
     // [LCP 최적화]
     // ① 최신 50건 (홈 피드 LCP)
@@ -85,28 +84,36 @@ async function getInitialFeed(): Promise<FeedData | null> {
     // 클라이언트가 hydration 후 /api/feed/public 호출해서 풀세트(500)로 교체한다.
     // stock_data 제외 — HomeClient에서 어차피 undefined로 폐기되는 컬럼이라
     // SSR HTML 페이로드를 크게 줄여줌(글당 stock_data JSON 수 KB).
-    const SELECT_COLS =
-      'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)';
+    // (고정 문자열 — 사용자 입력 없음)
+    const SELECT_FROM = `
+      select p.id, p.title, p.ticker, p.exchange, p.opinion, p.position_type, p.initial_price,
+             p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.views,
+             p.likes, p.comment_count, p.category, p.created_at, p.author_id,
+             json_build_object('nickname', u.nickname, 'equipped_badge_id', u.equipped_badge_id,
+                               'is_virtual', u.is_virtual) as author
+      from posts p
+      left join users u on u.id = p.author_id`;
 
-    const [{ data: latestRows, error }, { data: topRows }] = await Promise.all([
-      supabase.from('posts').select(SELECT_COLS).order('created_at', { ascending: false }).limit(50),
-      supabase.from('posts').select(SELECT_COLS).order('return_rate', { ascending: false }).limit(30),
+    const [latestRows, topRows] = await Promise.all([
+      sql.query(`${SELECT_FROM} order by p.created_at desc limit 50`).catch((error) => {
+        console.error('[getInitialFeed] posts query error:', error);
+        return null;
+      }),
+      // 수익률 상위는 보조 데이터 — 실패해도 최신 50건만으로 렌더
+      sql.query(`${SELECT_FROM} order by p.return_rate desc limit 30`).catch(() => []),
     ]);
 
-    if (error) {
-      console.error('[getInitialFeed] posts query error:', error);
-      return null;
-    }
+    if (!latestRows) return null;
 
     // 두 결과 dedup by id (최신 50건 우선 — 이미 createdAt desc 정렬됨)
     const seenIds = new Set<string>();
-    const rows: NonNullable<typeof latestRows> = [];
-    for (const r of latestRows ?? []) {
+    const rows: typeof latestRows = [];
+    for (const r of latestRows) {
       if (seenIds.has(r.id)) continue;
       seenIds.add(r.id);
       rows.push(r);
     }
-    for (const r of topRows ?? []) {
+    for (const r of topRows) {
       if (seenIds.has(r.id)) continue;
       seenIds.add(r.id);
       rows.push(r);
@@ -120,7 +127,7 @@ async function getInitialFeed(): Promise<FeedData | null> {
       getLookbackPrices(tickers),
     ]);
 
-    const posts = (rows ?? []).map((r) => {
+    const posts = rows.map((r) => {
       const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price ?? 0);

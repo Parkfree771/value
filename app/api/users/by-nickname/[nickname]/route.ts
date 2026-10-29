@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
 import { BADGES_BY_ID } from '@/lib/badges';
 
 export async function GET(
@@ -24,17 +24,19 @@ export async function GET(
       return NextResponse.json({ error: 'nickname 필요' }, { status: 400 });
     }
 
-    const supabase = getServiceClient();
-
-    const { data: user, error: userErr } = await supabase
-      .from('users')
-      .select('id, nickname, bio, equipped_badge_id, is_suspended, updated_at')
-      .eq('nickname', nickname)
-      .maybeSingle();
-
-    if (userErr) {
+    let user: Record<string, any> | null;
+    try {
+      const rows = await sql`
+        select id, nickname, bio, equipped_badge_id, is_suspended, updated_at
+        from users where nickname = ${nickname} limit 1
+      `;
+      user = rows[0] ?? null;
+    } catch (userErr) {
       console.error('[users/by-nickname] users select error:', userErr);
-      return NextResponse.json({ error: userErr.message }, { status: 500 });
+      return NextResponse.json(
+        { error: userErr instanceof Error ? userErr.message : '조회 실패' },
+        { status: 500 },
+      );
     }
     if (!user || user.is_suspended) {
       return NextResponse.json({ error: '존재하지 않습니다.' }, { status: 404 });
@@ -45,20 +47,24 @@ export async function GET(
         ? user.equipped_badge_id
         : null;
 
-    // 통계 (VIEW)
-    const { data: stats } = await supabase
-      .from('user_stats')
-      .select('total_reports, avg_return_rate, max_return_rate, min_return_rate, win_rate, total_likes, total_views, short_positions, short_avg_return_rate, unique_tickers, crypto_count')
-      .eq('author_id', user.id)
-      .maybeSingle();
+    // 통계 (VIEW) + 해금 배지(user_badges) — 실패해도 프로필은 반환 (기존 동작 유지)
+    const [statsRows, badgeRows] = await Promise.all([
+      sql`
+        select total_reports, avg_return_rate, max_return_rate, min_return_rate, win_rate,
+               total_likes, total_views, short_positions, short_avg_return_rate, unique_tickers, crypto_count
+        from user_stats where author_id = ${user.id}
+      `.catch((e) => {
+        console.error('[users/by-nickname] user_stats select error:', e);
+        return [] as Record<string, any>[];
+      }),
+      sql`select badge_id from user_badges where user_id = ${user.id}`.catch((e) => {
+        console.error('[users/by-nickname] user_badges select error:', e);
+        return [] as Record<string, any>[];
+      }),
+    ]);
+    const stats = statsRows[0] ?? null;
 
-    // 해금 배지 — user_badges에서
-    const { data: badgeRows } = await supabase
-      .from('user_badges')
-      .select('badge_id')
-      .eq('user_id', user.id);
-
-    const unlockedBadgeIds = (badgeRows ?? [])
+    const unlockedBadgeIds = badgeRows
       .map((r) => r.badge_id as string)
       .filter((id) => typeof id === 'string' && BADGES_BY_ID[id]);
 

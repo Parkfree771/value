@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 import { getKISTokenWithCache } from '@/lib/kisTokenManager';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
 
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
 const BATCH_SIZE = 5;
@@ -102,19 +102,16 @@ export async function POST(request: NextRequest) {
   console.log('[Update Prices] ===== Starting (Postgres) =====');
 
   try {
-    const supabase = getServiceClient();
-
-    // 1. posts에서 유니크한 ticker × exchange만 추출 (DISTINCT). post row 전체는 불필요 —
-    //    배치 RPC가 ticker 매칭으로 일괄 UPDATE.
-    const { data: postsRows, error: postsError } = await supabase
-      .from('posts')
-      .select('ticker, exchange');
-
-    if (postsError) {
+    // 1. posts에서 ticker × exchange만 추출. post row 전체는 불필요 —
+    //    배치 함수가 ticker 매칭으로 일괄 UPDATE.
+    let postsRows: { ticker: string | null; exchange: string | null }[];
+    try {
+      postsRows = (await sql`select ticker, exchange from posts`) as typeof postsRows;
+    } catch (postsError) {
       console.error('[Update Prices] posts 조회 실패:', postsError);
       return NextResponse.json({ error: 'posts 조회 실패' }, { status: 500 });
     }
-    if (!postsRows || postsRows.length === 0) {
+    if (postsRows.length === 0) {
       return NextResponse.json({ success: true, message: 'No posts to update', updated: 0 });
     }
 
@@ -162,22 +159,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 4. current_prices UPSERT
-    const currentPricesRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
-      ticker,
-      exchange: v.exchange,
-      current_price: v.currentPrice,
-    }));
-    if (currentPricesRows.length > 0) {
-      const { error: upsertError } = await supabase
-        .from('current_prices')
-        .upsert(currentPricesRows, { onConflict: 'ticker' });
-      if (upsertError) {
+    // 4. current_prices UPSERT — unnest로 다건을 한 쿼리에
+    const cpTickers = Array.from(newPrices.keys());
+    const cpExchanges = cpTickers.map((t) => newPrices.get(t)!.exchange);
+    const cpPrices = cpTickers.map((t) => newPrices.get(t)!.currentPrice);
+    if (cpTickers.length > 0) {
+      try {
+        await sql`
+          insert into current_prices (ticker, exchange, current_price)
+          select * from unnest(${cpTickers}::text[], ${cpExchanges}::text[], ${cpPrices}::numeric[])
+          on conflict (ticker) do update
+            set exchange = excluded.exchange, current_price = excluded.current_price
+        `;
+      } catch (upsertError) {
         console.error('[Update Prices] current_prices upsert error:', upsertError);
       }
     }
 
-    // 5. posts.current_price/return_rate/prev_return_rate를 배치 RPC 1콜로 일괄 갱신.
+    // 5. posts.current_price/return_rate/prev_return_rate를 배치 함수 1콜로 일괄 갱신.
     //    옛 코드: posts 행 N개에 각각 UPDATE (50글 → 50 UPDATE)
     //    신: ticker → 가격 jsonb 맵을 한 번에 보내고 SQL aggregate 1쿼리로 같은 ticker 모두 갱신.
     //    update_posts_prices_batch가 long/short 분기 + ROUND까지 SQL 내부에서 처리 (migrations/0018).
@@ -186,28 +185,32 @@ export async function POST(request: NextRequest) {
       priceMap[ticker] = v.currentPrice;
     }
     if (Object.keys(priceMap).length > 0) {
-      const { error: rpcError } = await supabase.rpc('update_posts_prices_batch', {
-        p_prices: priceMap,
-      });
-      if (rpcError) {
-        console.error('[Update Prices] update_posts_prices_batch 실패:', rpcError.message);
+      try {
+        await sql`select update_posts_prices_batch(${JSON.stringify(priceMap)}::jsonb)`;
+      } catch (rpcError) {
+        console.error(
+          '[Update Prices] update_posts_prices_batch 실패:',
+          rpcError instanceof Error ? rpcError.message : rpcError,
+        );
       }
     }
 
     // 6. price_history에 오늘 날짜 종가 UPSERT (장 마감 후 호출 가정)
     const today = new Date().toISOString().split('T')[0];
-    const historyRows = Array.from(newPrices.entries()).map(([ticker, v]) => ({
-      ticker,
-      exchange: v.exchange,
-      date: today,
-      close: v.currentPrice,
-    }));
-    if (historyRows.length > 0) {
-      const { error: histError } = await supabase
-        .from('price_history')
-        .upsert(historyRows, { onConflict: 'ticker,date' });
-      if (histError) {
-        console.warn('[Update Prices] price_history upsert 실패:', histError.message);
+    if (cpTickers.length > 0) {
+      try {
+        await sql`
+          insert into price_history (ticker, exchange, date, close)
+          select t, e, ${today}::date, c
+          from unnest(${cpTickers}::text[], ${cpExchanges}::text[], ${cpPrices}::numeric[]) as x(t, e, c)
+          on conflict (ticker, date) do update
+            set exchange = excluded.exchange, close = excluded.close
+        `;
+      } catch (histError) {
+        console.warn(
+          '[Update Prices] price_history upsert 실패:',
+          histError instanceof Error ? histError.message : histError,
+        );
       }
     }
 

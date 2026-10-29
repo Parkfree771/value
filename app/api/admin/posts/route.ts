@@ -5,8 +5,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
 import { calculateReturn } from '@/utils/calculateReturn';
+
+interface AdminPostRow {
+  id: string;
+  title: string | null;
+  ticker: string | null;
+  stock_name: string | null;
+  author_id: string;
+  initial_price: number | null;
+  current_price: number | null;
+  position_type: string | null;
+  views: number | null;
+  likes: number | null;
+  created_at: string;
+  author_nickname: string | null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,42 +34,38 @@ export async function GET(request: NextRequest) {
     const pageSize = Math.min(parseInt(searchParams.get('pageSize') || '20', 10), 100);
     const lastDocId = searchParams.get('lastDocId');
 
-    const supabase = getServiceClient();
-
-    let query = supabase
-      .from('posts')
-      .select(
-        'id, title, ticker, stock_name, author_id, initial_price, current_price, position_type, views, likes, created_at, author:users!posts_author_id_fkey(nickname)',
-      )
-      .order('created_at', { ascending: false })
-      .order('id', { ascending: false })
-      .limit(pageSize);
-
-    if (lastDocId) {
-      const { data: cursor } = await supabase
-        .from('posts')
-        .select('created_at')
-        .eq('id', lastDocId)
-        .maybeSingle();
-      if (cursor) {
-        query = query.or(
-          `created_at.lt.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.lt.${lastDocId})`,
-        );
-      }
-    }
-
-    const { data: rows, error } = await query;
-    if (error) {
+    // 커서: lastDocId 글의 (created_at, id)보다 뒤. 커서 글이 없으면 필터 없이 첫 페이지.
+    let rows: AdminPostRow[];
+    try {
+      rows = (lastDocId
+        ? await sql`
+            select p.id, p.title, p.ticker, p.stock_name, p.author_id, p.initial_price, p.current_price,
+                   p.position_type, p.views, p.likes, p.created_at, u.nickname as author_nickname
+            from posts p
+            left join users u on u.id = p.author_id
+            where not exists (select 1 from posts c where c.id = ${lastDocId})
+               or (p.created_at, p.id) < (select c.created_at, c.id from posts c where c.id = ${lastDocId})
+            order by p.created_at desc, p.id desc
+            limit ${pageSize}
+          `
+        : await sql`
+            select p.id, p.title, p.ticker, p.stock_name, p.author_id, p.initial_price, p.current_price,
+                   p.position_type, p.views, p.likes, p.created_at, u.nickname as author_nickname
+            from posts p
+            left join users u on u.id = p.author_id
+            order by p.created_at desc, p.id desc
+            limit ${pageSize}
+          `) as AdminPostRow[];
+    } catch (error) {
       console.error('[admin/posts GET]:', error);
       return NextResponse.json({ error: '게시글 조회 실패' }, { status: 500 });
     }
 
-    const posts = (rows ?? []).map((r) => {
-      const author = (r as { author?: { nickname?: string } | null }).author;
+    const posts = rows.map((r) => {
       return {
         id: r.id,
         title: r.title ?? '',
-        authorName: author?.nickname ?? '익명',
+        authorName: r.author_nickname ?? '익명',
         authorId: r.author_id,
         stockName: r.stock_name ?? '',
         ticker: r.ticker ?? '',
@@ -95,18 +106,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '게시글 ID가 필요합니다.' }, { status: 400 });
     }
 
-    const supabase = getServiceClient();
-    const { data, error } = await supabase
-      .from('posts')
-      .delete()
-      .eq('id', postId)
-      .select('id');
-
-    if (error) {
+    let data: Record<string, unknown>[];
+    try {
+      data = await sql`delete from posts where id = ${postId} returning id`;
+    } catch (error) {
       console.error('[admin/posts DELETE]:', error);
       return NextResponse.json({ error: '게시글 삭제 실패' }, { status: 500 });
     }
-    if (!data || data.length === 0) {
+    if (data.length === 0) {
       return NextResponse.json({ error: '게시글을 찾을 수 없습니다.' }, { status: 404 });
     }
 

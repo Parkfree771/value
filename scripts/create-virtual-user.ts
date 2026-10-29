@@ -1,9 +1,10 @@
 /**
- * 가상 사용자 생성 스크립트 (Supabase 버전)
+ * 가상 사용자 생성 스크립트 (Neon Postgres 버전)
  *
  * 일반 회원가입 흐름을 거치지 않고 백엔드에서 가상 사용자를 만든다.
- * - auth.users 에 createUser (이메일은 가짜, 영구 ban 으로 로그인 차단)
- * - public.users 보정 (트리거 기본값 → 우리가 원하는 닉네임/플래그)
+ * - public.users 에 직접 INSERT (id = gen_random_uuid(), 이메일은 가짜)
+ * - 인증 계정(Neon Auth)은 만들지 않음 — 가상 사용자는 로그인하지 않으므로 불필요하고,
+ *   neon_auth 스키마는 관리형이라 직접 쓰면 안 됨. 인증 계정이 없으니 로그인 자체가 불가.
  * - is_virtual=true 로 표시되어 UI 에서 가상 작성자임이 구분 가능
  *
  * 사용법:
@@ -14,11 +15,10 @@
  *        npx ts-node --compiler-options "{\"module\":\"CommonJS\"}" scripts/create-virtual-user.ts --apply
  *
  * 환경변수 (.env or .env.local):
- *   NEXT_PUBLIC_SUPABASE_URL
- *   SUPABASE_SECRET_KEY    (service-role)
+ *   DATABASE_URL           (Neon Postgres 접속 문자열)
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
@@ -38,49 +38,33 @@ const NEW_USERS: Array<{
 ];
 // ============================================================
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SECRET = process.env.SUPABASE_SECRET_KEY;
-if (!SUPABASE_URL || !SUPABASE_SECRET) {
-  console.error('환경변수 NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY 누락');
+const DATABASE_URL = process.env.DATABASE_URL;
+if (!DATABASE_URL) {
+  console.error('환경변수 DATABASE_URL 누락');
   process.exit(1);
 }
 
-const sb = createClient(SUPABASE_URL, SUPABASE_SECRET, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const sql = neon(DATABASE_URL);
 
 const APPLY = process.argv.includes('--apply');
 
-function genPassword(): string {
-  return (
-    'V!' +
-    Math.random().toString(36).slice(2) +
-    Math.random().toString(36).slice(2).toUpperCase() +
-    Date.now()
-  );
-}
-
 async function findByNickname(nickname: string): Promise<{ id: string; email: string | null } | null> {
-  const { data, error } = await sb
-    .from('users')
-    .select('id, email')
-    .eq('nickname', nickname)
-    .maybeSingle();
-  if (error) {
-    console.error(`  ✗ 닉네임 조회 실패 (${nickname}):`, error.message);
+  try {
+    const rows = await sql`select id, email from users where nickname = ${nickname} limit 1`;
+    return (rows[0] as { id: string; email: string | null } | undefined) ?? null;
+  } catch (error) {
+    console.error(`  ✗ 닉네임 조회 실패 (${nickname}):`, (error as Error).message);
     return null;
   }
-  return data ?? null;
 }
 
 async function findByEmail(email: string): Promise<{ id: string; nickname: string | null } | null> {
-  const { data, error } = await sb
-    .from('users')
-    .select('id, nickname')
-    .eq('email', email)
-    .maybeSingle();
-  if (error) return null;
-  return data ?? null;
+  try {
+    const rows = await sql`select id, nickname from users where email = ${email} limit 1`;
+    return (rows[0] as { id: string; nickname: string | null } | undefined) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function createOne(spec: { nickname: string; email?: string; display_name?: string; bio?: string }) {
@@ -103,42 +87,27 @@ async function createOne(spec: { nickname: string; email?: string; display_name?
     return { id: null, status: 'dry' as const };
   }
 
-  // auth.users 생성
-  const { data: created, error: cErr } = await sb.auth.admin.createUser({
-    email,
-    password: genPassword(),
-    email_confirm: true,
-    user_metadata: { virtual: true },
-  });
-  if (cErr || !created?.user) {
-    console.error(`  ✗ createUser 실패 (${spec.nickname}):`, cErr?.message);
+  // public.users 직접 INSERT — 인증 계정 없이 프로필 행만 생성 (가상 사용자는 로그인 안 함).
+  // ⚠ 모든 컬럼은 schema에 존재하는 것만! 없는 컬럼 한 개라도 끼면 INSERT 전체가 실패함.
+  let uid: string;
+  try {
+    const rows = await sql`
+      insert into users (
+        id, email, nickname, display_name, bio,
+        onboarding_completed, terms_agreed, privacy_agreed, investment_disclaimer_agreed,
+        is_virtual, is_admin
+      ) values (
+        gen_random_uuid(), ${email}, ${spec.nickname}, ${spec.display_name ?? spec.nickname}, ${spec.bio ?? null},
+        true, true, true, true,
+        true, false
+      )
+      returning id
+    `;
+    uid = rows[0].id as string;
+  } catch (error) {
+    console.error(`  ✗ public.users INSERT 실패 (${spec.nickname}):`, (error as Error).message);
     return { id: null, status: 'fail' as const };
   }
-  const uid = created.user.id;
-
-  // 영구 ban — 가상 사용자는 로그인 차단
-  const { error: bErr } = await sb.auth.admin.updateUserById(uid, {
-    ban_duration: '876000h',
-  });
-  if (bErr) console.warn(`     ban 실패 (${uid}):`, bErr.message);
-
-  // public.users 보정 — handle_new_user 트리거 기본값 정리.
-  // ⚠ 모든 컬럼은 schema에 존재하는 것만! 없는 컬럼 한 개라도 끼면 UPDATE 전체가 실패함.
-  const { error: uErr } = await sb
-    .from('users')
-    .update({
-      nickname: spec.nickname,
-      display_name: spec.display_name ?? spec.nickname,
-      bio: spec.bio ?? null,
-      onboarding_completed: true,
-      terms_agreed: true,
-      privacy_agreed: true,
-      investment_disclaimer_agreed: true,
-      is_virtual: true,
-      is_admin: false,
-    })
-    .eq('id', uid);
-  if (uErr) console.warn(`     public.users 보정 실패 (${uid}):`, uErr.message);
 
   console.log(`  + 생성: ${spec.nickname} → ${uid} (${email})`);
   return { id: uid, status: 'created' as const };

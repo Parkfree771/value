@@ -3,21 +3,17 @@
 // 법적 증빙(개인정보보호법 제22조)을 위해 서버 사이드에서 처리.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
+import { getAuthUser } from '@/lib/auth/session';
 import { getClientIP } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) {
+    const authUser = await getAuthUser();
+    if (!authUser) {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
-    const uid = authData.user.id;
+    const uid = authUser.id;
 
     const body = await request.json();
     const {
@@ -54,32 +50,28 @@ export async function POST(request: NextRequest) {
     const ipAddress = getClientIP(request);
     const userAgent = request.headers.get('user-agent') ?? null;
 
-    // service_role로 INSERT (ip_address INET 타입 RLS와 무관하게 신뢰성 있게 기록)
-    const admin = getServiceClient();
-    const { data, error } = await admin
-      .from('user_consents')
-      .insert({
-        user_id: uid,
-        consent_type: finalConsentType,
-        terms_version: termsVersion,
-        privacy_version: privacyVersion,
-        disclaimer_version: disclaimerVersion,
-        terms_agreed: termsAgreed,
-        privacy_agreed: privacyAgreed,
-        investment_disclaimer_agreed: investmentDisclaimerAgreed,
-        marketing_agreed: marketingAgreed,
-        ip_address: ipAddress && ipAddress !== 'unknown' ? ipAddress : null,
-        user_agent: userAgent,
-      })
-      .select('id')
-      .single();
-
-    if (error) {
+    // user_id는 세션 uid로 고정 — 본인 명의로만 기록 (옛 RLS user_consents_insert_own과 동일 보장)
+    let consentId: string;
+    try {
+      const rows = await sql`
+        insert into user_consents (
+          user_id, consent_type, terms_version, privacy_version, disclaimer_version,
+          terms_agreed, privacy_agreed, investment_disclaimer_agreed, marketing_agreed,
+          ip_address, user_agent
+        ) values (
+          ${uid}, ${finalConsentType}, ${termsVersion}, ${privacyVersion}, ${disclaimerVersion},
+          ${termsAgreed}, ${privacyAgreed}, ${investmentDisclaimerAgreed}, ${marketingAgreed},
+          ${ipAddress && ipAddress !== 'unknown' ? ipAddress : null}::inet, ${userAgent}
+        )
+        returning id
+      `;
+      consentId = rows[0].id as string;
+    } catch (error) {
       console.error('[user/consent] insert error:', error);
       return NextResponse.json({ error: '동의 기록 저장 실패' }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, consentId: data.id });
+    return NextResponse.json({ success: true, consentId });
   } catch (error) {
     console.error('[user/consent] error:', error);
     return NextResponse.json({ error: '동의 기록 저장 중 오류가 발생했습니다.' }, { status: 500 });

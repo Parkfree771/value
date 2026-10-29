@@ -2,7 +2,7 @@
  * 차트 히스토리 업데이트 (PC 메인, 일 1회 수동 실행)
  *
  * 사장님 의도:
- *   - PC 배치파일이 메인, Supabase 장 마감 cron은 보조 fallback
+ *   - PC 배치파일이 메인, 서버 장 마감 cron(GitHub Actions price-cron)은 보조 fallback
  *   - 매일 한 번 .bat 더블클릭 → 그 시점까지 모든 ticker의 종가가 price_history에 1행/일 보장
  *
  * 흐름:
@@ -18,7 +18,7 @@
  * 실행: 차트업데이트.bat → npx tsx scripts/local-history-updater.ts
  *
  * 환경변수:
- *   - NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY
+ *   - DATABASE_URL (Neon Postgres)
  *   - KIS_APP_KEY, KIS_APP_SECRET, KIS_BASE_URL
  */
 
@@ -30,26 +30,23 @@ console.log('──────────────────────�
 import 'dotenv/config';
 import { config as dotenvConfig } from 'dotenv';
 import { resolve } from 'path';
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 
 // .env.local도 시도 (Next.js 관례). 둘 다 있으면 dotenv/config가 먼저 .env를 읽고, .env.local이 덮어씀.
 dotenvConfig({ path: resolve(process.cwd(), '.env.local') });
 
-// lib/priceHistory는 dynamic import — getServiceClient가 env 읽는 시점이 호출 시점이라
-// 정적 import해도 동작하지만 명시적으로 늦추는 게 향후 유지보수에 안전.
+// lib/priceHistory는 dynamic import — lib/db가 import 시점에 DATABASE_URL을 읽으므로
+// (없으면 throw) 위 dotenv 로드가 끝난 뒤에 불러와야 .env.local 값까지 확실히 반영됨.
 type PriceHistoryModule = typeof import('../lib/priceHistory');
 
-// ===== Supabase Admin =====
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseSecret = process.env.SUPABASE_SECRET_KEY;
-if (!supabaseUrl || !supabaseSecret) {
-  console.error('  [ERROR] NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY 누락');
+// ===== Neon Postgres =====
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  console.error('  [ERROR] DATABASE_URL 누락');
   process.exit(1);
 }
-const supabase = createClient(supabaseUrl, supabaseSecret, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
-console.log('  ✓ Supabase admin 클라이언트 준비');
+const sql = neon(databaseUrl);
+console.log('  ✓ Neon Postgres 클라이언트 준비');
 
 // ===== 날짜 유틸 =====
 
@@ -103,15 +100,15 @@ async function main() {
   console.log('  ✓ 로드 완료');
   console.log('');
 
-  // 1. posts 조회
-  const { data: posts, error: postsError } = await supabase
-    .from('posts')
-    .select('ticker, exchange, created_at');
-  if (postsError) {
+  // 1. posts 조회 (PostgREST 1000행 제한 없음 — 단일 쿼리로 전체)
+  let posts: Record<string, any>[];
+  try {
+    posts = await sql`select ticker, exchange, created_at from posts`;
+  } catch (postsError) {
     console.error('  [ERROR] posts 조회 실패:', postsError);
     process.exit(1);
   }
-  if (!posts || posts.length === 0) {
+  if (posts.length === 0) {
     console.log('  posts 없음 - 종료');
     return;
   }
@@ -123,7 +120,8 @@ async function main() {
     const t = (p.ticker || '').toUpperCase().trim();
     const e = (p.exchange || '').toUpperCase().trim();
     if (!t || !e) continue;
-    const created = new Date(p.created_at as string);
+    // created_at: 타입 파서 유무에 따라 Date 또는 ISO 문자열 — 둘 다 new Date()로 처리됨
+    const created = new Date(p.created_at as string | Date);
     if (Number.isNaN(created.getTime())) continue;
     const key = `${t}:${e}`;
     const existing = tickerMap.get(key);

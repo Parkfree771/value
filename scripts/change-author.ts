@@ -1,5 +1,5 @@
 /**
- * 게시글 작성자 변경 스크립트 (Supabase 버전)
+ * 게시글 작성자 변경 스크립트 (Neon Postgres 버전)
  *
  * 제목 부분일치(ILIKE)로 게시글을 찾아 작성자를 변경한다.
  * 적용 후 사이트 캐시(/, /ranking, 해당 리포트 페이지)를 자동 revalidate.
@@ -16,13 +16,12 @@
  *        npx ts-node --compiler-options "{\"module\":\"CommonJS\"}" scripts/change-author.ts --apply
  *
  * 환경변수 (.env or .env.local):
- *   NEXT_PUBLIC_SUPABASE_URL
- *   SUPABASE_SECRET_KEY    (service-role)
+ *   DATABASE_URL           (Neon Postgres 접속 문자열)
  *   NEXT_PUBLIC_SITE_URL   (revalidate 호출용; 기본 https://antstreet.kr)
  *   REVALIDATE_SECRET      (사이트 캐시 무효화용)
  */
 
-import { createClient } from '@supabase/supabase-js';
+import { neon } from '@neondatabase/serverless';
 import * as dotenv from 'dotenv';
 
 dotenv.config({ path: '.env.local' });
@@ -37,33 +36,27 @@ const POST_AUTHOR_MAP: { titleContains: string; authorName: string }[] = [
 ];
 // ============================================================
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_SECRET = process.env.SUPABASE_SECRET_KEY;
+const DATABASE_URL = process.env.DATABASE_URL;
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET;
 
-if (!SUPABASE_URL || !SUPABASE_SECRET) {
-  console.error('환경변수 NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SECRET_KEY 누락');
+if (!DATABASE_URL) {
+  console.error('환경변수 DATABASE_URL 누락');
   process.exit(1);
 }
 
-const sb = createClient(SUPABASE_URL, SUPABASE_SECRET, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const sql = neon(DATABASE_URL);
 
 const APPLY = process.argv.includes('--apply');
 
 async function findUidByNickname(nickname: string): Promise<string | null> {
-  const { data, error } = await sb
-    .from('users')
-    .select('id')
-    .eq('nickname', nickname)
-    .maybeSingle();
-  if (error) {
-    console.error(`  ✗ 닉네임 조회 실패 (${nickname}):`, error.message);
+  try {
+    const rows = await sql`select id from users where nickname = ${nickname} limit 1`;
+    return (rows[0]?.id as string | undefined) ?? null;
+  } catch (error) {
+    console.error(`  ✗ 닉네임 조회 실패 (${nickname}):`, (error as Error).message);
     return null;
   }
-  return data?.id ?? null;
 }
 
 async function revalidate(path: string): Promise<boolean> {
@@ -128,15 +121,18 @@ async function main() {
   const matched: Matched[] = [];
 
   for (const m of POST_AUTHOR_MAP) {
-    const { data, error } = await sb
-      .from('posts')
-      .select('id, title, author_id')
-      .ilike('title', `%${m.titleContains}%`);
-    if (error) {
-      console.error(`  ✗ 검색 실패 ("${m.titleContains}"):`, error.message);
+    let data: Record<string, any>[];
+    try {
+      // ILIKE 부분일치 — 패턴은 파라미터로 바인딩 (PostgREST .ilike 와 동일하게 %, _ 는 와일드카드)
+      data = await sql`
+        select id, title, author_id from posts
+        where title ilike ${`%${m.titleContains}%`}
+      `;
+    } catch (error) {
+      console.error(`  ✗ 검색 실패 ("${m.titleContains}"):`, (error as Error).message);
       continue;
     }
-    if (!data || data.length === 0) {
+    if (data.length === 0) {
       console.warn(`  - 매칭 없음: "${m.titleContains}"`);
       continue;
     }
@@ -171,9 +167,10 @@ async function main() {
   console.log('\n[3/3] posts.author_id 업데이트 중...');
   let okCount = 0;
   for (const m of matched) {
-    const { error } = await sb.from('posts').update({ author_id: m.newAuthorId }).eq('id', m.id);
-    if (error) {
-      console.error(`  ✗ 실패 (${m.id}): ${error.message}`);
+    try {
+      await sql`update posts set author_id = ${m.newAuthorId} where id = ${m.id}`;
+    } catch (error) {
+      console.error(`  ✗ 실패 (${m.id}): ${(error as Error).message}`);
       continue;
     }
     console.log(`  ✓ ${m.id} → ${m.newAuthorName}`);

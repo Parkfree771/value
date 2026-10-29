@@ -1,16 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getAuthUserAny } from '@/lib/supabase-auth';
+import { NextResponse } from 'next/server';
+import { getAuthUser } from '@/lib/auth/session';
 import { isAdminEmail } from '@/lib/admin/adminConfig.server';
 
 /**
  * GET /api/auth/admin-check
- * 현재 로그인 사용자가 관리자 이메일에 포함되는지 확인.
- * 쿠키 기반 인증 우선, Bearer 토큰 fallback (점진 마이그레이션 호환).
+ * 현재 로그인 사용자가 관리자 이메일에 포함되는지 확인. (Neon Auth 세션 쿠키 기반)
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const authHeader = request.headers.get('authorization');
-    const user = await getAuthUserAny(authHeader);
+    const user = await getAuthUser();
 
     if (!user || !user.email) {
       return NextResponse.json({ isAdmin: false });

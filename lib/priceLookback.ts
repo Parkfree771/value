@@ -4,7 +4,7 @@
  * price_history(ticker, exchange, date, close) 기반.
  */
 
-import { getServiceClient } from './supabase-admin';
+import { sql } from './db';
 
 export interface LookbackPrice {
   close1d: number | null;
@@ -24,7 +24,7 @@ function ymd(d: Date): string {
  * Lookback 가격 조회.
  *
  * @param tickers 조회할 ticker 목록(대소문자 무관). 비우면 전체 조회 + 1h 글로벌 캐시.
- *                목록을 주면 .in('ticker',...) 으로 필터 → SSR TTFB 단축.
+ *                목록을 주면 ticker = any(...) 로 필터 → SSR TTFB 단축.
  *                필터드 조회는 글로벌 캐시를 쓰지 않음 (캐시키가 ticker 집합마다 달라지므로).
  */
 export async function getLookbackPrices(
@@ -37,7 +37,6 @@ export async function getLookbackPrices(
   if (!filtered && cached && now - cachedAt < TTL) return cached;
 
   try {
-    const supabase = getServiceClient();
     const today = new Date();
     const cutoff1d = new Date(today); cutoff1d.setUTCDate(cutoff1d.getUTCDate() - 1);
     const cutoff7d = new Date(today); cutoff7d.setUTCDate(cutoff7d.getUTCDate() - 7);
@@ -45,20 +44,24 @@ export async function getLookbackPrices(
     // 60일치만 가져옴 — 30일 cutoff 이전 거래일 fallback 여유분 포함
     const fromDate = new Date(today); fromDate.setUTCDate(fromDate.getUTCDate() - 60);
 
-    let query = supabase
-      .from('price_history')
-      .select('ticker, date, close')
-      .gte('date', ymd(fromDate));
-
-    if (filtered) {
-      // Supabase 측에서 정규화된 ticker 비교를 위해 대문자 통일
-      const uniq = Array.from(new Set(tickers!.map((t) => t.toUpperCase()).filter(Boolean)));
-      query = query.in('ticker', uniq);
-    }
-
-    const { data, error } = await query.order('date', { ascending: false });
-
-    if (error || !data) {
+    let data: Record<string, any>[];
+    try {
+      if (filtered) {
+        // DB 측에서 정규화된 ticker 비교를 위해 대문자 통일
+        const uniq = Array.from(new Set(tickers!.map((t) => t.toUpperCase()).filter(Boolean)));
+        data = await sql`
+          select ticker, date, close from price_history
+          where date >= ${ymd(fromDate)} and ticker = any(${uniq}::text[])
+          order by date desc
+        `;
+      } else {
+        data = await sql`
+          select ticker, date, close from price_history
+          where date >= ${ymd(fromDate)}
+          order by date desc
+        `;
+      }
+    } catch (error) {
       console.error('[priceLookback] error:', error);
       return cached || {};
     }

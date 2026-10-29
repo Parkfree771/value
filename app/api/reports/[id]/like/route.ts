@@ -3,13 +3,16 @@
 //   GET  - 현재 사용자의 좋아요 상태 (쿠키 기반)
 
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
+import { getAuthUser } from '@/lib/auth/session';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
 
 const LIKE_RATE_LIMIT = 30;
 const LIKE_RATE_WINDOW = 60 * 1000;
+
+// uuid 형식이 아니면 Postgres가 22P02를 던지므로 쿼리 전에 걸러냄 (옛 동작: 0행 처리)
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(
   request: NextRequest,
@@ -17,17 +20,15 @@ export async function POST(
 ) {
   try {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
 
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) {
+    const user = await getAuthUser();
+    if (!user) {
       return NextResponse.json(
         { success: false, error: '로그인이 필요합니다.' },
         { status: 401 },
       );
     }
-    const userId = authData.user.id;
+    const userId = user.id;
 
     // Rate limit: 사용자별 분당 30회 토글 (봇 토글 공격 방지)
     const clientIP = getClientIP(request);
@@ -48,20 +49,19 @@ export async function POST(
     // 토글: INSERT 시도, unique constraint 위반(23505)이면 이미 좋아요 → DELETE.
     // 옛 코드는 4 round-trips (post 존재 / existing / insert or delete / 재읽기).
     // 신: 2 round-trips (insert-or-delete / 카운트 읽기). post FK는 INSERT가 자동 검증.
+    // user_id는 항상 세션 사용자 — 본인 좋아요만 추가/삭제 (옛 post_likes_*_own RLS 대체)
     let isLiked: boolean;
-    const { error: insErr } = await supabase
-      .from('post_likes')
-      .insert({ post_id: id, user_id: userId });
+    let insErr: { code?: string } | null = null;
+    try {
+      await sql`insert into post_likes (post_id, user_id) values (${id}, ${userId})`;
+    } catch (err) {
+      insErr = err as { code?: string };
+    }
 
     if (insErr) {
       if (insErr.code === '23505') {
         // 이미 좋아요 했었음 → DELETE
-        const { error: delErr } = await supabase
-          .from('post_likes')
-          .delete()
-          .eq('post_id', id)
-          .eq('user_id', userId);
-        if (delErr) throw delErr;
+        await sql`delete from post_likes where post_id = ${id} and user_id = ${userId}`;
         isLiked = false;
       } else if (insErr.code === '23503') {
         // FK 위반 = 게시물 없음
@@ -77,16 +77,12 @@ export async function POST(
     }
 
     // 트리거가 갱신한 likes 카운트 다시 읽기
-    const { data: updated } = await supabase
-      .from('posts')
-      .select('likes')
-      .eq('id', id)
-      .maybeSingle();
+    const updated = await sql`select likes from posts where id = ${id}`;
 
     return NextResponse.json({
       success: true,
       isLiked,
-      likes: updated?.likes ?? 0,
+      likes: updated[0]?.likes ?? 0,
     });
   } catch (error) {
     console.error('좋아요 처리 실패:', error);
@@ -103,22 +99,17 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
 
-    const { data: authData } = await supabase.auth.getUser();
-    if (!authData.user) {
+    const user = await getAuthUser();
+    if (!user || !UUID_RE.test(id)) {
       return NextResponse.json({ success: true, isLiked: false });
     }
 
-    const { data } = await supabase
-      .from('post_likes')
-      .select('post_id')
-      .eq('post_id', id)
-      .eq('user_id', authData.user.id)
-      .maybeSingle();
+    const rows = await sql`
+      select post_id from post_likes where post_id = ${id} and user_id = ${user.id}
+    `;
 
-    return NextResponse.json({ success: true, isLiked: !!data });
+    return NextResponse.json({ success: true, isLiked: rows.length > 0 });
   } catch (error) {
     console.error('좋아요 상태 확인 실패:', error);
     return NextResponse.json(

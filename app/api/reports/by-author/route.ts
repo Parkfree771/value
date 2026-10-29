@@ -2,13 +2,9 @@
 // 특정 사용자가 쓴 글만 조회. 가격은 feed.json, 그 외는 Postgres.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
 import { getLatestPrices } from '@/lib/priceCache';
 import { calculateReturn } from '@/utils/calculateReturn';
-
-const SELECT_COLUMNS =
-  'id, title, ticker, exchange, category, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, stock_data, views, likes, comment_count, created_at, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -19,27 +15,29 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const [{ data: rows, error }, prices] = await Promise.all([
-      supabase
-        .from('posts')
-        .select(SELECT_COLUMNS)
-        .eq('author_id', uid)
-        .order('created_at', { ascending: false })
-        .limit(200),
+    // 작성자 정보는 author 객체로 중첩 (옛 PostgREST embed 형태 유지)
+    const [rows, prices] = await Promise.all([
+      sql`
+        select p.id, p.title, p.ticker, p.exchange, p.category, p.opinion, p.position_type,
+               p.initial_price, p.current_price, p.target_price, p.return_rate, p.themes,
+               p.stock_name, p.stock_data, p.views, p.likes, p.comment_count, p.created_at,
+               case when u.id is null then null else json_build_object(
+                 'nickname', u.nickname,
+                 'equipped_badge_id', u.equipped_badge_id,
+                 'is_virtual', u.is_virtual
+               ) end as author
+        from posts p
+        left join users u on u.id = p.author_id
+        where p.author_id = ${uid}
+        order by p.created_at desc
+        limit 200
+      `,
       getLatestPrices(),
     ]);
 
-    if (error) {
-      console.error('[by-author] supabase error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
     let equippedBadgeId: string | null = null;
 
-    const reports = (rows ?? []).map((r) => {
+    const reports = rows.map((r) => {
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price) || 0;
       // 글 row의 current_price 우선. cache는 row가 0/null인 비정상 케이스의 backup.

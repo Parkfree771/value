@@ -19,7 +19,8 @@
 
 import { getKISDomesticIndex } from '@/lib/kis';
 import { getUpbitPrice } from '@/lib/upbit';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
+import { publicUrl } from '@/lib/storage';
 
 export type TickerCategory = 'site' | 'kr_index' | 'us_index' | 'forex' | 'crypto';
 
@@ -73,16 +74,12 @@ export function getKRXMarketStatus(now: Date = new Date()): MarketStatusPayload 
 
 async function fetchAntStreetAverage(): Promise<number | null> {
   try {
-    const supabase = getServiceClient();
-    const { data, error } = await supabase
-      .from('posts')
-      .select('return_rate');
-    if (error || !data || data.length === 0) return null;
-    const sum = data.reduce(
-      (acc, p) => acc + (Number.isFinite(p.return_rate) ? Number(p.return_rate) : 0),
-      0,
-    );
-    return sum / data.length;
+    // return_rate가 null인 글은 0%로 계산 (분모에는 포함)
+    const rows = await sql`
+      select count(*)::int as n, avg(coalesce(return_rate, 0))::float8 as avg from posts
+    `;
+    if (!rows[0] || rows[0].n === 0) return null;
+    return Number(rows[0].avg);
   } catch (err) {
     console.error('[Ticker] AntStreet avg fetch failed:', err);
     return null;
@@ -116,9 +113,8 @@ interface MarketJson {
 
 async function fetchMarketJson(): Promise<MarketJson | null> {
   try {
-    const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/$/, '');
-    if (!supabaseUrl) return null;
-    const url = `${supabaseUrl}/storage/v1/object/public/briefing/market.json`;
+    if (!process.env.AWS_ENDPOINT_URL_S3) return null;
+    const url = publicUrl('briefing/market.json');
     const res = await fetch(url, { next: { revalidate: 900 } });
     if (!res.ok) return null;
     return (await res.json()) as MarketJson;

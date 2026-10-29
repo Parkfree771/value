@@ -9,8 +9,7 @@ import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
 import { useUserBadgesContext } from '@/contexts/UserBadgesContext';
-import { createClient as createSupabaseClient } from '@/utils/supabase/client';
-import { processUserWithdrawal } from '@/lib/users';
+import { getUserProfile, processUserWithdrawal } from '@/lib/users';
 import {
   BADGES,
   BADGES_BY_ID,
@@ -123,29 +122,21 @@ export default function MyPage() {
     let cancelled = false;
     (async () => {
       try {
-        const supabase = createSupabaseClient();
-        const [{ data: profile }, { data: badges }] = await Promise.all([
-          supabase
-            .from('users')
-            .select('nickname, display_name, photo_url, equipped_badge_id')
-            .eq('id', user.uid)
-            .maybeSingle(),
-          supabase
-            .from('user_badges')
-            .select('badge_id')
-            .eq('user_id', user.uid),
-        ]);
+        // /api/me/profile — 세션 uid 기준 본인 프로필 + 해금 배지 목록
+        const res = await fetch('/api/me/profile', { credentials: 'include', cache: 'no-store' });
+        if (!res.ok) throw new Error(`프로필 조회 실패 (${res.status})`);
+        const { profile, unlockedBadgeIds } = await res.json();
         if (cancelled || !profile) return;
 
         setUserProfile((prev: any) => ({
           ...(prev || {}),
           nickname: profile.nickname,
-          displayName: profile.display_name,
-          photoURL: profile.photo_url,
-          equippedBadgeId: profile.equipped_badge_id,
-          unlockedBadgeIds: (badges ?? []).map((b) => b.badge_id),
+          displayName: profile.displayName,
+          photoURL: profile.photoURL,
+          equippedBadgeId: profile.equippedBadgeId,
+          unlockedBadgeIds: (unlockedBadgeIds ?? []) as string[],
         }));
-        const badgeId = profile.equipped_badge_id;
+        const badgeId = profile.equippedBadgeId;
         setEquippedBadgeId(typeof badgeId === 'string' && BADGES_BY_ID[badgeId] ? badgeId : null);
       } catch (e) {
         console.error('프로필 로드 실패:', e);
@@ -246,19 +237,14 @@ export default function MyPage() {
     setIsEditModalOpen(true);
 
     try {
-      const supabase = createSupabaseClient();
-      const { data: profile } = await supabase
-        .from('users')
-        .select('nickname, display_name, photo_url')
-        .eq('id', user.uid)
-        .maybeSingle();
+      const profile = await getUserProfile(user.uid);
 
       if (profile) {
         setUserProfile((prev: any) => ({
           ...(prev || {}),
           nickname: profile.nickname,
-          displayName: profile.display_name,
-          photoURL: profile.photo_url,
+          displayName: profile.displayName,
+          photoURL: profile.photoURL,
         }));
         setNewNickname(profile.nickname || user.displayName || '');
       } else {

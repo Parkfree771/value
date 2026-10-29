@@ -1,8 +1,8 @@
 /**
  * 로컬 주식 가격 업데이트 스케줄러
  *
- * PC에서 상시 실행. 장 시간에 맞춰 scripts/github-update-prices.ts를 spawn하여
- * Supabase Postgres에 가격을 갱신.
+ * PC에서 상시 실행. 장 시간에 맞춰 scripts/cron/update-stock-prices.mjs를 spawn하여
+ * Neon Postgres에 가격을 갱신. (GitHub Actions price-cron과 같은 스크립트 — 백업 경로)
  *
  * 실행:
  *   npx tsx scripts/local-price-updater.ts
@@ -28,14 +28,9 @@ function runUpdate(marketType: MarketType): Promise<void> {
     const startTime = Date.now();
     console.log(`\n[scheduler] === ${marketType} 가격 업데이트 시작 ===`);
     const proc = spawn(
-      process.platform === 'win32' ? 'npx.cmd' : 'npx',
-      ['tsx', 'scripts/github-update-prices.ts'],
-      {
-        env: { ...process.env, MARKET_TYPE: marketType },
-        stdio: 'inherit',
-        // Windows .cmd/.bat은 shell 경유 필수 — false면 EINVAL
-        shell: process.platform === 'win32',
-      },
+      process.execPath,
+      ['scripts/cron/update-stock-prices.mjs', `--market=${marketType}`],
+      { env: process.env, stdio: 'inherit' },
     );
     proc.on('close', (code) => {
       const sec = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -54,7 +49,7 @@ function runUpdate(marketType: MarketType): Promise<void> {
 function startScheduler() {
   console.log('╔══════════════════════════════════════════════╗');
   console.log('║  AntStreet — 로컬 가격 업데이트 스케줄러     ║');
-  console.log('║  (Supabase Postgres)                         ║');
+  console.log('║  (Neon Postgres)                             ║');
   console.log('╚══════════════════════════════════════════════╝\n');
 
   // 아시아 장: 평일 09:00~16:59 KST, 15분마다

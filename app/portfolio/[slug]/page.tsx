@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
 import { GURU_LIST } from '@/app/guru-tracker/types';
 import {
   GuruPortfolioDoc,
@@ -15,9 +14,9 @@ import BackButton from './BackButton';
 
 const PORTFOLIOS_PATH = path.join(process.cwd(), 'data', 'guru-portfolios.json');
 
-// 빌드 시점에 정적 prerender — guru-portfolios.json은 분기 1회 변경.
-// 새 분기 데이터 갱신 시 git push로 새 빌드가 캐시 무효화.
-export const revalidate = 86400;
+// ISR — guru-portfolios.json은 분기 1회 변경(git push로 새 빌드), guru_prices는 매일 06:30 KST cron 갱신.
+// 1시간 주기면 cron 직후 최대 1시간 안에 새 가격 반영. (예전엔 cookies() 호출 때문에 매 요청 동적 렌더였음)
+export const revalidate = 3600;
 
 // 누적 스냅샷 스키마 (scripts/fetch-13f.ts와 동일)
 interface QuarterHolding {
@@ -63,12 +62,7 @@ function getPortfolio(slug: string): ExtendedGuruDoc | null {
 
 async function getPrices(): Promise<Record<string, { currentPrice: number; returnRate: number }>> {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-    const { data: rows } = await supabase
-      .from('guru_prices')
-      .select('ticker, current_price, return_rate');
-    if (!rows) return {};
+    const rows = await sql`select ticker, current_price, return_rate from guru_prices`;
     const prices: Record<string, { currentPrice: number; returnRate: number }> = {};
     for (const r of rows) {
       prices[r.ticker] = {

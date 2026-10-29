@@ -1,4 +1,4 @@
-// 사용자 통계·배지 영속화 (서버 전용, Supabase Postgres)
+// 사용자 통계·배지 영속화 (서버 전용, Neon Postgres)
 // ─────────────────────────────────────────────────────────────────
 // 데이터 소스: posts 테이블 (트리거가 likes/views/comment_count 자동 유지)
 // 배지 저장: user_badges 테이블 (PK (user_id, badge_id), sticky)
@@ -7,7 +7,7 @@
 // 호환성: 기존 호출자는 feed.json posts를 인자로 넘기지만 이제 무시.
 // Postgres가 SoT.
 
-import { getServiceClient } from './supabase-admin';
+import { sql } from './db';
 import {
   calculateUserStats,
   getUnlockedBadgeIds,
@@ -58,23 +58,27 @@ export async function recomputeAllUserStatsFromFeed(
   options: RecomputeOptions = {},
 ): Promise<RecomputeResult> {
   const { dryRun = false, onlyAuthorId } = options;
-  const supabase = getServiceClient();
 
   // 1. posts 조회 (필요한 컬럼만)
-  let q = supabase
-    .from('posts')
-    .select('author_id, return_rate, views, likes, position_type, ticker, stock_name, exchange');
-  if (onlyAuthorId) q = q.eq('author_id', onlyAuthorId);
-
-  const { data: rows, error } = await q;
-  if (error) {
+  let rows: PostRow[];
+  try {
+    rows = (onlyAuthorId
+      ? await sql`
+          select author_id, return_rate, views, likes, position_type, ticker, stock_name, exchange
+          from posts where author_id = ${onlyAuthorId}
+        `
+      : await sql`
+          select author_id, return_rate, views, likes, position_type, ticker, stock_name, exchange
+          from posts
+        `) as PostRow[];
+  } catch (error) {
     console.error('[userStats] posts 조회 실패:', error);
     throw error;
   }
 
   // 2. authorId 별 그룹핑
   const byAuthor = new Map<string, PostForStats[]>();
-  for (const r of (rows ?? []) as PostRow[]) {
+  for (const r of rows) {
     if (!r.author_id) continue;
     const list = byAuthor.get(r.author_id) ?? [];
     list.push(toPostForStats(r));
@@ -92,28 +96,29 @@ export async function recomputeAllUserStatsFromFeed(
 
   // 3. 기존 user_badges 조회 (sticky 머지용)
   const uids = Array.from(byAuthor.keys());
-  const { data: existingBadges, error: badgesError } = await supabase
-    .from('user_badges')
-    .select('user_id, badge_id')
-    .in('user_id', uids);
-  if (badgesError) {
+  let existingBadges: Record<string, any>[];
+  try {
+    existingBadges = await sql`
+      select user_id, badge_id from user_badges where user_id = any(${uids}::uuid[])
+    `;
+  } catch (badgesError) {
     console.error('[userStats] user_badges 조회 실패:', badgesError);
     throw badgesError;
   }
 
   const existingByUser = new Map<string, Set<string>>();
-  for (const row of existingBadges ?? []) {
+  for (const row of existingBadges) {
     const s = existingByUser.get(row.user_id) ?? new Set<string>();
     s.add(row.badge_id);
     existingByUser.set(row.user_id, s);
   }
 
   // 4. users 존재 여부 확인 (FK 위반 방지)
-  const { data: existingUsers } = await supabase
-    .from('users')
-    .select('id')
-    .in('id', uids);
-  const userIdSet = new Set((existingUsers ?? []).map((u) => u.id));
+  // (기존 동작 유지: 조회 실패 시 빈 집합 → 전원 skippedMissing)
+  const existingUsers = await sql`select id from users where id = any(${uids}::uuid[])`.catch(
+    () => [] as Record<string, any>[],
+  );
+  const userIdSet = new Set(existingUsers.map((u) => u.id as string));
 
   // 5. 각 사용자별 신규 해금 배지 계산
   const toInsert: { user_id: string; badge_id: string }[] = [];
@@ -139,11 +144,16 @@ export async function recomputeAllUserStatsFromFeed(
   if (dryRun || toInsert.length === 0) return result;
 
   // 6. user_badges INSERT (ON CONFLICT DO NOTHING for safety, but PK 중복은 위에서 제외했음)
-  const { error: insertError } = await supabase
-    .from('user_badges')
-    .upsert(toInsert, { onConflict: 'user_id,badge_id', ignoreDuplicates: true });
-
-  if (insertError) {
+  try {
+    await sql`
+      insert into user_badges (user_id, badge_id)
+      select * from unnest(
+        ${toInsert.map((r) => r.user_id)}::uuid[],
+        ${toInsert.map((r) => r.badge_id)}::text[]
+      )
+      on conflict (user_id, badge_id) do nothing
+    `;
+  } catch (insertError) {
     console.error('[userStats] user_badges INSERT 실패:', insertError);
     throw insertError;
   }

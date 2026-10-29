@@ -1,48 +1,49 @@
 /**
  * /api/feed/public
  *
- * 이전에는 feed.json 그대로 반환. 이제 Supabase posts에서 동일 형상으로 합성.
+ * 이전에는 feed.json 그대로 반환. 이제 Postgres posts에서 동일 형상으로 합성.
  * 클라이언트(예: 마이페이지 북마크 탭)가 전체 글 목록을 받아서 필터링.
  */
 
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
 import { getLatestPrices } from '@/lib/priceCache';
 import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
     // 북마크/검색 필터링용 — 최신 500건. posts 조회를 먼저 끝낸 뒤 ticker 목록을
-    // 만들어 lookback에 .in() 필터로 넘김 → 60일×전 종목 무필터 조회 회피.
+    // 만들어 lookback에 ticker 필터로 넘김 → 60일×전 종목 무필터 조회 회피.
     // stock_data 제외 — 이 API 호출 consumer (HomeClient, mypage, search)
     // 모두 stockData를 사용하지 않거나 {} 로 덮어쓴다. 페이로드 절감.
-    const { data: rows, error } = await supabase
-      .from('posts')
-      .select(
-        'id, title, ticker, exchange, opinion, position_type, initial_price, current_price, target_price, return_rate, themes, stock_name, views, likes, comment_count, category, created_at, author_id, author:users!posts_author_id_fkey(nickname, equipped_badge_id, is_virtual)',
-      )
-      .order('created_at', { ascending: false })
-      .limit(500);
-
-    if (error) {
+    let rows: Record<string, any>[];
+    try {
+      rows = await sql`
+        select p.id, p.title, p.ticker, p.exchange, p.opinion, p.position_type, p.initial_price,
+               p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.views,
+               p.likes, p.comment_count, p.category, p.created_at, p.author_id,
+               json_build_object('nickname', u.nickname, 'equipped_badge_id', u.equipped_badge_id,
+                                 'is_virtual', u.is_virtual) as author
+        from posts p
+        left join users u on u.id = p.author_id
+        order by p.created_at desc
+        limit 500
+      `;
+    } catch (error) {
       console.error('[feed/public] error:', error);
       return NextResponse.json({ posts: [], prices: {}, totalPosts: 0 }, { status: 500 });
     }
 
     const tickers = Array.from(
-      new Set((rows ?? []).map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
+      new Set(rows.map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
     );
     const [prices, lookback] = await Promise.all([
       getLatestPrices(),
       getLookbackPrices(tickers),
     ]);
 
-    const posts = (rows ?? []).map((r) => {
+    const posts = rows.map((r) => {
       const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price ?? 0);

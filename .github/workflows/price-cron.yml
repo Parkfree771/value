@@ -1,0 +1,86 @@
+# 가격 업데이트 + ISR keep-warm cron — Supabase pg_cron(0019/0020/0023) 스케줄을 그대로 옮김.
+# 시간은 UTC (KST = UTC+9). GitHub 스케줄은 몇 분 늦게 시작될 수 있음.
+#
+# 필요한 Repository secrets:
+#   DATABASE_URL, KIS_APP_KEY, KIS_APP_SECRET, REVALIDATE_SECRET
+# 선택: KIS_BASE_URL (기본 실전 서버), SITE_URL (기본 https://antstreet.kr)
+
+name: price-cron
+
+on:
+  schedule:
+    - cron: '0 0 * * 1-5'    # ASIA 장중 09:00 KST
+    - cron: '0 3 * * 1-5'    # ASIA 장중 12:00 KST
+    - cron: '0 7 * * 1-5'    # ASIA 장 마감 16:00 KST (finalize)
+    - cron: '30 13 * * 1-5'  # US 장중 22:30 KST
+    - cron: '0 16 * * 1-5'   # US 장중 01:00 KST
+    - cron: '15 21 * * 1-5'  # US 장 마감 06:15 KST (finalize)
+    - cron: '30 21 * * 1-5'  # 구루 포트폴리오 06:30 KST
+    - cron: '*/20 * * * *'   # ISR keep-warm (홈/랭킹)
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'stock | guru | keepwarm'
+        required: true
+        default: stock
+      market:
+        description: 'stock 전용: ASIA | US | CRYPTO | ALL'
+        default: ALL
+      finalize:
+        description: 'stock 전용: 종가를 price_history에 기록'
+        type: boolean
+        default: false
+
+concurrency:
+  group: price-cron-${{ github.event.schedule || inputs.job }}
+  cancel-in-progress: false
+
+env:
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  KIS_APP_KEY: ${{ secrets.KIS_APP_KEY }}
+  KIS_APP_SECRET: ${{ secrets.KIS_APP_SECRET }}
+  KIS_BASE_URL: ${{ secrets.KIS_BASE_URL }}
+  REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
+  SITE_URL: ${{ secrets.SITE_URL || 'https://antstreet.kr' }}
+
+jobs:
+  keepwarm:
+    if: github.event.schedule == '*/20 * * * *' || inputs.job == 'keepwarm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: |
+          curl -s -o /dev/null -w "/ %{http_code} %{time_total}s\n" --max-time 15 "$SITE_URL/" || true
+          curl -s -o /dev/null -w "/ranking %{http_code} %{time_total}s\n" --max-time 15 "$SITE_URL/ranking" || true
+
+  prices:
+    if: github.event.schedule != '*/20 * * * *' && inputs.job != 'keepwarm'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      # 스크립트는 @neondatabase/serverless 하나만 씀 — 전체 npm ci 대신 그것만 설치
+      - run: npm install --no-save --no-package-lock @neondatabase/serverless@1
+      - name: Run
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          JOB: ${{ inputs.job }}
+          MARKET: ${{ inputs.market }}
+          FINALIZE: ${{ inputs.finalize }}
+        run: |
+          case "$SCHEDULE" in
+            '0 0 * * 1-5'|'0 3 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=ASIA ;;
+            '0 7 * * 1-5')               node scripts/cron/update-stock-prices.mjs --market=ASIA --finalize ;;
+            '30 13 * * 1-5'|'0 16 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=US ;;
+            '15 21 * * 1-5')             node scripts/cron/update-stock-prices.mjs --market=US --finalize ;;
+            '30 21 * * 1-5')             node scripts/cron/update-guru-prices.mjs ;;
+            '')
+              if [ "$JOB" = guru ]; then
+                node scripts/cron/update-guru-prices.mjs
+              else
+                node scripts/cron/update-stock-prices.mjs --market="$MARKET" $([ "$FINALIZE" = true ] && echo --finalize)
+              fi ;;
+          esac

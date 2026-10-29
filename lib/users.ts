@@ -1,11 +1,8 @@
-// 사용자 프로필·동의 기록 (Supabase Postgres)
-// 클라이언트 컴포넌트에서 호출. RLS가 자기 자신만 UPDATE 허용.
+// 사용자 프로필·동의 기록 — 클라이언트 컴포넌트에서 호출.
+// DB 직접 접근 없이 /api/me/*, /api/users/nickname-available 서버 라우트로 위임
+// (서버가 세션 uid로 본인 row만 조회/수정, 수정 가능 컬럼은 화이트리스트).
 //
-// 호환성: 기존 콜러가 camelCase로 접근하므로 DB row(snake_case)는 모두 매핑.
-
-import { createClient } from '@/utils/supabase/client';
-
-const supabase = createClient();
+// 호환성: 기존 콜러 시그니처(uid 인자 등)는 유지 — uid는 서버 세션으로 대체되어 무시됨.
 
 // ─── 타입 ────────────────────────────────────────────────
 export interface UserProfile {
@@ -28,86 +25,46 @@ export interface UserProfile {
   updatedAt: string;
 }
 
-interface UserRow {
-  id: string;
-  email: string;
-  nickname: string;
-  display_name: string | null;
-  photo_url: string | null;
-  is_admin: boolean;
-  is_suspended: boolean;
-  onboarding_completed: boolean;
-  terms_agreed: boolean;
-  privacy_agreed: boolean;
-  investment_disclaimer_agreed: boolean;
-  terms_version: string | null;
-  privacy_version: string | null;
-  agreed_at: string | null;
-  equipped_badge_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
-
-function fromRow(row: UserRow): UserProfile {
-  return {
-    uid: row.id,
-    email: row.email,
-    nickname: row.nickname,
-    displayName: row.display_name,
-    photoURL: row.photo_url,
-    isAdmin: row.is_admin,
-    isSuspended: row.is_suspended,
-    onboardingCompleted: row.onboarding_completed,
-    termsAgreed: row.terms_agreed,
-    privacyAgreed: row.privacy_agreed,
-    investmentDisclaimerAgreed: row.investment_disclaimer_agreed,
-    termsVersion: row.terms_version,
-    privacyVersion: row.privacy_version,
-    agreedAt: row.agreed_at,
-    equippedBadgeId: row.equipped_badge_id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
 // ─── 약관 버전 상수 ──────────────────────────────────────
-const TERMS_VERSION = '2026.02.01';
-const PRIVACY_VERSION = '2026.02.01';
-const DISCLAIMER_VERSION = '2026.02.01';
+// /api/me/onboarding 서버 라우트도 이 상수를 import해서 기록 (클라이언트 값 불신)
+export const TERMS_VERSION = '2026.02.01';
+export const PRIVACY_VERSION = '2026.02.01';
+export const DISCLAIMER_VERSION = '2026.02.01';
+
+// 서버 라우트 에러 응답({ error })을 Error로 변환
+async function throwResponseError(res: Response, label: string): Promise<never> {
+  const body = await res.json().catch(() => null);
+  console.error(`${label}:`, body ?? res.status);
+  throw new Error(body?.error ?? label);
+}
 
 // ─── 조회 ────────────────────────────────────────────────
+// 본인 프로필만 조회 가능 (email·동의 정보 포함이라 타인 조회 API는 두지 않음).
+// 비로그인이거나 uid가 세션 사용자와 다르면 null.
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
-  const { data, error } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', uid)
-    .maybeSingle();
+  const res = await fetch('/api/me/profile', { credentials: 'include', cache: 'no-store' });
+  if (res.status === 401) return null;
+  if (!res.ok) await throwResponseError(res, '사용자 프로필 조회 오류');
 
-  if (error) {
-    console.error('사용자 프로필 조회 오류:', error);
-    throw error;
-  }
-  return data ? fromRow(data as UserRow) : null;
+  const data = await res.json();
+  const profile = (data.profile ?? null) as UserProfile | null;
+  if (!profile || profile.uid !== uid) return null;
+  return profile;
 }
 
 // ─── 닉네임 중복 체크 ─────────────────────────────────────
+// 본인이 이미 쓰는 닉네임은 서버가 사용 가능으로 처리 (currentUid는 세션 uid로 대체).
 export async function checkNicknameAvailable(
   nickname: string,
-  currentUid?: string,
+  _currentUid?: string,
 ): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('users')
-    .select('id')
-    .eq('nickname', nickname);
-
-  if (error) {
-    console.error('닉네임 중복 확인 오류:', error);
-    throw error;
-  }
-
-  if (!data || data.length === 0) return true;
-  if (currentUid && data.length === 1 && data[0].id === currentUid) return true;
-  return false;
+  const res = await fetch(
+    `/api/users/nickname-available?nickname=${encodeURIComponent(nickname)}`,
+    { credentials: 'include', cache: 'no-store' },
+  );
+  if (!res.ok) await throwResponseError(res, '닉네임 중복 확인 오류');
+  const data = await res.json();
+  return data.available === true;
 }
 
 // ─── 온보딩 완료 ─────────────────────────────────────────
@@ -119,28 +76,20 @@ interface OnboardingInput {
   marketingAgreed?: boolean;
 }
 
-export async function completeOnboarding(uid: string, data: OnboardingInput): Promise<void> {
-  const nowIso = new Date().toISOString();
-  const { error } = await supabase
-    .from('users')
-    .update({
+export async function completeOnboarding(_uid: string, data: OnboardingInput): Promise<void> {
+  const res = await fetch('/api/me/onboarding', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
       nickname: data.nickname,
-      terms_agreed: data.termsAgreed,
-      privacy_agreed: data.privacyAgreed,
-      investment_disclaimer_agreed: data.investmentDisclaimerAgreed,
-      marketing_agreed: data.marketingAgreed ?? false,
-      terms_version: TERMS_VERSION,
-      privacy_version: PRIVACY_VERSION,
-      disclaimer_version: DISCLAIMER_VERSION,
-      agreed_at: nowIso,
-      onboarding_completed: true,
-    })
-    .eq('id', uid);
-
-  if (error) {
-    console.error('온보딩 완료 오류:', error);
-    throw error;
-  }
+      termsAgreed: data.termsAgreed,
+      privacyAgreed: data.privacyAgreed,
+      investmentDisclaimerAgreed: data.investmentDisclaimerAgreed,
+      marketingAgreed: data.marketingAgreed ?? false,
+    }),
+  });
+  if (!res.ok) await throwResponseError(res, '온보딩 완료 오류');
 }
 
 // ─── 프로필 업데이트 ─────────────────────────────────────
@@ -151,20 +100,22 @@ type ProfileUpdate = Partial<{
   equippedBadgeId: string | null;
 }>;
 
-export async function updateUserProfile(uid: string, updates: ProfileUpdate): Promise<void> {
-  const row: Record<string, unknown> = {};
-  if (updates.nickname !== undefined) row.nickname = updates.nickname;
-  if (updates.displayName !== undefined) row.display_name = updates.displayName;
-  if (updates.photoURL !== undefined) row.photo_url = updates.photoURL;
-  if (updates.equippedBadgeId !== undefined) row.equipped_badge_id = updates.equippedBadgeId;
+export async function updateUserProfile(_uid: string, updates: ProfileUpdate): Promise<void> {
+  const payload: ProfileUpdate = {};
+  if (updates.nickname !== undefined) payload.nickname = updates.nickname;
+  if (updates.displayName !== undefined) payload.displayName = updates.displayName;
+  if (updates.photoURL !== undefined) payload.photoURL = updates.photoURL;
+  if (updates.equippedBadgeId !== undefined) payload.equippedBadgeId = updates.equippedBadgeId;
 
-  if (Object.keys(row).length === 0) return;
+  if (Object.keys(payload).length === 0) return;
 
-  const { error } = await supabase.from('users').update(row).eq('id', uid);
-  if (error) {
-    console.error('사용자 프로필 업데이트 오류:', error);
-    throw error;
-  }
+  const res = await fetch('/api/me/profile', {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) await throwResponseError(res, '사용자 프로필 업데이트 오류');
 }
 
 // ─── 동의 기록 ───────────────────────────────────────────
@@ -211,28 +162,14 @@ export async function saveConsentRecord(
 }
 
 // ─── 회원 탈퇴 ───────────────────────────────────────────
-// 사용자 row의 식별 정보를 익명화. email/nickname UNIQUE 제약 회피 위해 uid 접미사.
-// auth.users 삭제는 service_role로 별도 처리 (이 함수는 클라이언트에서 호출되므로 미지원).
+// 서버가 본인 users row의 식별 정보를 익명화 + 정지 처리 (/api/me/withdraw 참고).
+// Neon Auth 계정 삭제는 하지 않음 — 호출 후 클라이언트가 signOut.
 export async function processUserWithdrawal(
-  uid: string,
+  _uid: string,
   _email: string,
   _nickname: string,
   _consentRecordIds: string[] = [],
 ): Promise<void> {
-  const shortUid = uid.slice(0, 8);
-  const { error } = await supabase
-    .from('users')
-    .update({
-      email: `withdrawn-${uid}@withdrawn.local`,
-      display_name: '[탈퇴회원]',
-      nickname: `withdrawn-${shortUid}`,
-      photo_url: null,
-      is_suspended: true,
-    })
-    .eq('id', uid);
-
-  if (error) {
-    console.error('회원 탈퇴 처리 오류:', error);
-    throw error;
-  }
+  const res = await fetch('/api/me/withdraw', { method: 'POST', credentials: 'include' });
+  if (!res.ok) await throwResponseError(res, '회원 탈퇴 처리 오류');
 }

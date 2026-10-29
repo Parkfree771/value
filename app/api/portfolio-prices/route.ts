@@ -1,25 +1,29 @@
 // GET /api/portfolio-prices
-// 구루 포트폴리오 티커별 현재가 + 수익률. Supabase guru_prices 테이블.
+// 구루 포트폴리오 티커별 현재가 + 수익률. Postgres guru_prices 테이블.
 
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
+
+interface GuruPriceRow {
+  ticker: string;
+  current_price: number;
+  return_rate: number;
+  updated_at: string | null;
+}
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const { data: rows, error } = await supabase
-      .from('guru_prices')
-      .select('ticker, current_price, return_rate, updated_at');
-
-    if (error) {
-      console.error('[Portfolio Prices] Supabase error:', error);
+    let rows: GuruPriceRow[];
+    try {
+      rows = (await sql`
+        select ticker, current_price, return_rate, updated_at from guru_prices
+      `) as GuruPriceRow[];
+    } catch (error) {
+      console.error('[Portfolio Prices] DB error:', error);
       return NextResponse.json({ error: 'Failed to fetch prices' }, { status: 500 });
     }
 
-    if (!rows || rows.length === 0) {
+    if (rows.length === 0) {
       return NextResponse.json(
         { error: 'Price data not available', message: 'Cron job이 아직 실행되지 않았습니다.' },
         { status: 503 },

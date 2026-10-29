@@ -4,7 +4,17 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
-import { getServiceClient } from '@/lib/supabase-admin';
+import { sql } from '@/lib/db';
+
+interface CommentRow {
+  id: string;
+  content: string | null;
+  post_id: string;
+  author_id: string;
+  likes: number | null;
+  created_at: string;
+  author_nickname: string | null;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,32 +23,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: '관리자 권한이 필요합니다.' }, { status: 403 });
     }
 
-    const supabase = getServiceClient();
-    const { data: rows, error } = await supabase
-      .from('comments')
-      .select(
-        'id, content, post_id, author_id, likes, created_at, author:users!comments_author_id_fkey(nickname)',
-      )
-      .order('created_at', { ascending: false })
-      .limit(100);
-
-    if (error) {
+    let rows: CommentRow[];
+    try {
+      rows = (await sql`
+        select c.id, c.content, c.post_id, c.author_id, c.likes, c.created_at, u.nickname as author_nickname
+        from comments c
+        left join users u on u.id = c.author_id
+        order by c.created_at desc
+        limit 100
+      `) as CommentRow[];
+    } catch (error) {
       console.error('[admin/comments GET]:', error);
       return NextResponse.json({ error: '댓글 조회 실패' }, { status: 500 });
     }
 
-    const comments = (rows ?? []).map((r) => {
-      const author = (r as { author?: { nickname?: string } | null }).author;
-      return {
-        id: r.id,
-        content: r.content ?? '',
-        authorName: author?.nickname ?? '익명',
-        authorId: r.author_id,
-        postId: r.post_id,
-        likes: r.likes ?? 0,
-        createdAt: r.created_at,
-      };
-    });
+    const comments = rows.map((r) => ({
+      id: r.id,
+      content: r.content ?? '',
+      authorName: r.author_nickname ?? '익명',
+      authorId: r.author_id,
+      postId: r.post_id,
+      likes: r.likes ?? 0,
+      createdAt: r.created_at,
+    }));
 
     return NextResponse.json({ success: true, comments });
   } catch (error) {
@@ -60,18 +67,14 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '댓글 ID가 필요합니다.' }, { status: 400 });
     }
 
-    const supabase = getServiceClient();
-    const { data, error } = await supabase
-      .from('comments')
-      .delete()
-      .eq('id', commentId)
-      .select('id, post_id');
-
-    if (error) {
+    let data: Record<string, unknown>[];
+    try {
+      data = await sql`delete from comments where id = ${commentId} returning id, post_id`;
+    } catch (error) {
       console.error('[admin/comments DELETE]:', error);
       return NextResponse.json({ error: '댓글 삭제 실패' }, { status: 500 });
     }
-    if (!data || data.length === 0) {
+    if (data.length === 0) {
       return NextResponse.json({ error: '댓글을 찾을 수 없습니다.' }, { status: 404 });
     }
 

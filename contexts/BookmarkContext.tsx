@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
-import { createClient } from '@/utils/supabase/client';
 
 interface BookmarkContextType {
   bookmarkedIds: string[];
@@ -28,13 +27,11 @@ export const useBookmark = () => {
 
 export function BookmarkProvider({ children }: { children: React.ReactNode }) {
   const { user, authReady } = useAuth();
-  const supabaseRef = useRef(createClient());
-  const supabase = supabaseRef.current;
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const fetchedRef = useRef(false);
 
-  // 로그인 시 1회 Supabase에서 북마크 목록 가져오기
+  // 로그인 시 1회 /api/me/bookmarks에서 북마크 목록 가져오기 (서버가 세션 uid로 본인 것만 반환)
   useEffect(() => {
     if (!authReady) return;
 
@@ -49,32 +46,26 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
     const fetchBookmarks = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('bookmarks')
-          .select('post_id')
-          .eq('user_id', user.uid);
+        const res = await fetch('/api/me/bookmarks', { credentials: 'include', cache: 'no-store' });
+        const data = await res.json().catch(() => null);
 
-        if (error) {
-          console.error('북마크 로드 실패:', {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint,
-            name: (error as { name?: string }).name,
-            raw: JSON.stringify(error),
-          });
+        if (!res.ok) {
+          console.error('북마크 로드 실패:', res.status, data);
           setBookmarkedIds([]);
         } else {
-          setBookmarkedIds((data ?? []).map((b) => b.post_id as string));
+          setBookmarkedIds((data?.postIds ?? []) as string[]);
         }
         fetchedRef.current = true;
+      } catch (error) {
+        console.error('북마크 로드 실패:', error);
+        setBookmarkedIds([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchBookmarks();
-  }, [user, authReady, supabase]);
+  }, [user, authReady]);
 
   const isBookmarked = useCallback(
     (postId: string) => bookmarkedIds.includes(postId),
@@ -92,18 +83,20 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
 
       try {
         if (isCurrentlyBookmarked) {
-          const { error } = await supabase
-            .from('bookmarks')
-            .delete()
-            .eq('user_id', user.uid)
-            .eq('post_id', postId);
-          if (error) throw error;
+          const res = await fetch(`/api/me/bookmarks?postId=${encodeURIComponent(postId)}`, {
+            method: 'DELETE',
+            credentials: 'include',
+          });
+          if (!res.ok) throw new Error(`북마크 해제 실패 (${res.status})`);
           setBookmarkedIds((prev) => prev.filter((id) => id !== postId));
         } else {
-          const { error } = await supabase
-            .from('bookmarks')
-            .insert({ user_id: user.uid, post_id: postId });
-          if (error) throw error;
+          const res = await fetch('/api/me/bookmarks', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ postId }),
+          });
+          if (!res.ok) throw new Error(`북마크 추가 실패 (${res.status})`);
           setBookmarkedIds((prev) => [...prev, postId]);
         }
       } catch (error) {
@@ -111,7 +104,7 @@ export function BookmarkProvider({ children }: { children: React.ReactNode }) {
         alert('북마크 처리 중 오류가 발생했습니다.');
       }
     },
-    [user, bookmarkedIds, supabase],
+    [user, bookmarkedIds],
   );
 
   return (

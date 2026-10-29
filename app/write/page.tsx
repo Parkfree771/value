@@ -4,9 +4,9 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
-import { uploadMultipleImages } from '@/utils/imageOptimization';
+import { uploadMultipleImages, uploadToStorage } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
-import { createClient as createSupabaseClient } from '@/utils/supabase/client';
+import { getUserProfile } from '@/lib/users';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
 import type { StockData } from '@/types/stock';
@@ -108,16 +108,20 @@ function WritePageContent() {
 
       setIsLoading(true);
       try {
-        const supabase = createSupabaseClient();
-        const { data: reportData, error } = await supabase
-          .from('posts')
-          .select(
-            'title, ticker, exchange, opinion, position_type, target_price, mode, content, css_content, initial_price, author_id, stock_data, themes, images, files',
-          )
-          .eq('id', editId)
-          .maybeSingle();
+        // 서버가 작성자/관리자 여부 확인 (403), 없으면 404
+        const res = await fetch(`/api/me/posts/${encodeURIComponent(editId)}`, {
+          credentials: 'include',
+          cache: 'no-store',
+        });
+        const reportData = res.ok ? (await res.json()).post : null;
 
-        if (error || !reportData) {
+        if (res.status === 403) {
+          alert('수정 권한이 없습니다.');
+          router.push('/');
+          return;
+        }
+
+        if (!reportData) {
           alert('리포트를 찾을 수 없습니다.');
           router.push('/');
           return;
@@ -194,7 +198,7 @@ function WritePageContent() {
       return;
     }
 
-    // Supabase Storage 'media' 버킷에 업로드 — 경로는 본인 uid 폴더 내
+    // /api/upload 경유 Object Storage 업로드 — 경로는 서버가 본인 uid 폴더로 지정
     setIsUploading(true);
     try {
       const urls = await uploadMultipleImages(
@@ -243,25 +247,12 @@ function WritePageContent() {
 
     setIsUploading(true);
     try {
-      const supabase = createSupabaseClient();
       const newUploaded: { name: string; url: string }[] = [];
       for (let i = 0; i < validFiles.length; i++) {
         const file = validFiles[i];
-        // Supabase Storage 키는 ASCII만 허용 — 한글/특수문자 _ 치환
-        const safeName = file.name
-          .replace(/[^a-zA-Z0-9._-]/g, '_')
-          .replace(/_+/g, '_')
-          .slice(0, 60) || 'file';
-        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${safeName}`;
-        const objectPath = `${user.uid}/reports/files/${fileName}`;
-        const { error: upError } = await supabase.storage.from('media').upload(objectPath, file, {
-          contentType: file.type,
-          cacheControl: '3600',
-          upsert: false,
-        });
-        if (upError) throw upError;
-        const { data } = supabase.storage.from('media').getPublicUrl(objectPath);
-        newUploaded.push({ name: file.name, url: data.publicUrl });
+        // /api/upload가 오브젝트 키(사용자별 경로·안전한 파일명) 생성 후 presigned URL 발급
+        const url = await uploadToStorage(file, file.name, 'file');
+        newUploaded.push({ name: file.name, url });
         setUploadProgress(((i + 1) / validFiles.length) * 100);
       }
       setFiles((prev) => [...prev, ...validFiles]);
@@ -351,16 +342,10 @@ function WritePageContent() {
         ? (htmlEditorApiRef.current?.getValue() ?? htmlContent)
         : htmlContent;
 
-      const supabase = createSupabaseClient();
-
       // 닉네임 조회 (feed.json 동기화용 — DB는 author_id로 충분, JOIN으로 표시)
       let authorName = '익명';
       try {
-        const { data: prof } = await supabase
-          .from('users')
-          .select('nickname')
-          .eq('id', user.uid)
-          .maybeSingle();
+        const prof = await getUserProfile(user.uid);
         authorName = prof?.nickname || user.displayName || user.email || '익명';
       } catch {
         authorName = user.displayName || user.email || '익명';
@@ -369,7 +354,7 @@ function WritePageContent() {
       // 거래소 정보 기반으로 카테고리 자동 설정
       const category = getMarketCategory(stockData.exchange, stockData.symbol);
 
-      // posts 테이블에 INSERT 또는 UPDATE할 컬럼 (snake_case)
+      // posts 컬럼(snake_case) — /api/me/posts가 편집 가능 컬럼만 골라 저장, author_id는 서버가 세션 uid로 고정
       const postRow = {
         title,
         ticker: stockData.symbol,
@@ -415,51 +400,19 @@ function WritePageContent() {
       };
 
       if (isEditMode && editId) {
-        // 수정 모드: posts UPDATE
-        // 가격·통계는 유지, updated_at 배열에 오늘 날짜 push
-        const today = new Date().toISOString().split('T')[0];
-        const { data: existing } = await supabase
-          .from('posts')
-          .select('updated_at')
-          .eq('id', editId)
-          .maybeSingle();
+        // 수정 모드: PUT /api/me/posts/[id]
+        // 서버가 편집 가능한 필드만 UPDATE (가격·작성자·통계 유지), updated_at 배열에 오늘 날짜 push
+        const updateRes = await fetch(`/api/me/posts/${encodeURIComponent(editId)}`, {
+          method: 'PUT',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postRow),
+        });
 
-        const existingArr = (existing?.updated_at as string[] | null) ?? [];
-        const updatedAtArr = [...existingArr];
-        const alreadyHasToday = updatedAtArr.some((d) =>
-          typeof d === 'string' && d.startsWith(today),
-        );
-        if (!alreadyHasToday) {
-          updatedAtArr.push(new Date().toISOString());
-        }
-
-        // INSERT 전용 필드(가격·작성자) 제외하고 편집 가능한 필드만 UPDATE
-        const editableUpdate = {
-          title: postRow.title,
-          ticker: postRow.ticker,
-          exchange: postRow.exchange,
-          stock_name: postRow.stock_name,
-          category: postRow.category,
-          stock_data: postRow.stock_data,
-          opinion: postRow.opinion,
-          position_type: postRow.position_type,
-          target_price: postRow.target_price,
-          themes: postRow.themes,
-          content: postRow.content,
-          mode: postRow.mode,
-          images: postRow.images,
-          files: postRow.files,
-          updated_at: updatedAtArr,
-        };
-
-        const { error: updateError } = await supabase
-          .from('posts')
-          .update(editableUpdate)
-          .eq('id', editId);
-
-        if (updateError) {
-          console.error('리포트 수정 실패:', updateError);
-          throw updateError;
+        if (!updateRes.ok) {
+          const errBody = await updateRes.json().catch(() => null);
+          console.error('리포트 수정 실패:', errBody);
+          throw new Error(errBody?.error ?? 'update failed');
         }
 
         // feed.json 동기화 (쿠키 세션 인증)
@@ -490,16 +443,18 @@ function WritePageContent() {
         alert('리포트가 성공적으로 수정되었습니다!');
         router.push(`/reports/${editId}`);
       } else {
-        // 새 글 작성: posts INSERT
-        const { data: inserted, error: insertError } = await supabase
-          .from('posts')
-          .insert(postRow)
-          .select('id')
-          .single();
+        // 새 글 작성: POST /api/me/posts
+        const insertRes = await fetch('/api/me/posts', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postRow),
+        });
+        const inserted: { id?: string; error?: string } | null = await insertRes.json().catch(() => null);
 
-        if (insertError || !inserted) {
-          console.error('리포트 작성 실패:', insertError);
-          throw insertError ?? new Error('insert failed');
+        if (!insertRes.ok || !inserted?.id) {
+          console.error('리포트 작성 실패:', inserted);
+          throw new Error(inserted?.error ?? 'insert failed');
         }
 
         // feed.json에 새 게시글 추가

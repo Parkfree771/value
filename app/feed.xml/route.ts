@@ -1,7 +1,6 @@
-// RSS feed (XML). Supabase posts에서 최신 50개.
+// RSS feed (XML). Postgres posts에서 최신 50개.
 
-import { cookies } from 'next/headers';
-import { createClient } from '@/utils/supabase/server';
+import { sql } from '@/lib/db';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -9,22 +8,19 @@ export async function GET() {
   let items = '';
 
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const posts = await sql`
+      select p.id, p.title, p.stock_name, p.ticker, p.opinion, p.content, p.created_at,
+             u.nickname as author_nickname
+      from posts p
+      left join users u on u.id = p.author_id
+      order by p.created_at desc
+      limit 50
+    `;
 
-    const { data: posts } = await supabase
-      .from('posts')
-      .select(
-        'id, title, stock_name, ticker, opinion, content, created_at, author:users!posts_author_id_fkey(nickname)',
-      )
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    items = (posts ?? [])
+    items = posts
       .map((p) => {
-        const author = (p as { author?: { nickname?: string } | null }).author;
         const title = escapeXml(p.title || '무제');
-        const authorName = escapeXml(author?.nickname || '익명');
+        const authorName = escapeXml(p.author_nickname || '익명');
         const stockName = escapeXml(p.stock_name || '');
         const ticker = escapeXml(p.ticker || '');
         const opinion = p.opinion || '';
