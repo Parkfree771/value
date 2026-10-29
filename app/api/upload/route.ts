@@ -69,7 +69,7 @@ export async function DELETE(request: NextRequest) {
   }
 
   const key = keyFromPublicUrl(request.nextUrl.searchParams.get('url') ?? '');
-  // 옛 Supabase/Firebase URL 등 우리 버킷이 아니면 할 일 없음
+  // 우리 버킷이 아닌 외부 URL이면 할 일 없음
   if (!key) return NextResponse.json({ success: true, skipped: true });
 
   if (!key.startsWith(`${user.id}/`) && !isAdminEmail(user.email)) {

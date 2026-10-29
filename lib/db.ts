@@ -5,7 +5,7 @@
 //   const rows = await sql.query('select ... where id = $1', [id]);   // 동적 쿼리
 //   await sql.transaction([sql`...`, sql`...`]);
 //
-// 타입 파서는 Supabase(PostgREST) 응답 형태에 맞춤 — 기존 코드가 number/ISO string을 기대:
+// 타입 파서 — 앱 코드는 number/ISO string을 기대:
 //   numeric·int8 → number, timestamptz/timestamp → ISO string, date → 'YYYY-MM-DD' string.
 
 import { neon, types } from '@neondatabase/serverless';

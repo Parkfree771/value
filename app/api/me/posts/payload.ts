@@ -1,6 +1,5 @@
 // /api/me/posts 공용 — 글쓰기 페이지 요청 바디(snake_case, posts 컬럼명) 검증.
-// Supabase 시절엔 RLS가 author_id만 확인하고 나머지 컬럼은 무엇이든 쓸 수 있었음
-// (likes/views/return_rate 등 조작 가능) → 편집 가능한 컬럼만 화이트리스트로 받는다.
+// 편집 가능한 컬럼만 화이트리스트로 받는다 (likes/views/return_rate 등 조작 방지).
 
 export interface EditablePostFields {
   title: string;

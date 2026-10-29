@@ -1,11 +1,11 @@
 /**
- * Firebase Firestore postId → Supabase UUID 매핑.
+ * Firebase Firestore postId → 현재 UUID 매핑.
  *
- * 2026-05 Firestore → Supabase 마이그레이션 시 postId가 변경됨.
+ * 2026-05 Firestore 이관 시 postId가 변경됨.
  * 이미 외부(검색엔진, 블로그)에 노출된 Firebase ID 링크를 보존하기 위해
- * 의 redirects()에서 이 매핑으로 영구(308) 리다이렉트한다.
+ * next.config.ts의 redirects()에서 이 매핑으로 영구(308) 리다이렉트한다.
  *
- * 추가하지 말 것 — 마이그레이션 1회성 데이터. 새 글은 Supabase UUID로 직접 생성됨.
+ * 추가하지 말 것 — 마이그레이션 1회성 데이터. 새 글은 UUID로 직접 생성됨.
  */
 export const LEGACY_POST_ID_MAP: Record<string, string> = {
   '2HZIebS6xC1j3eTbQxpQ': '065f3789-e591-45d6-819d-a2ba0f9c67da',

@@ -34,5 +34,5 @@ npx tsx scripts/<파일명>.ts
 ## 가격 cron 인프라
 
 상시 가격 갱신은 **GitHub Actions `price-cron`**(`.github/workflows/price-cron.yml`)이 `scripts/cron/*.mjs`를 실행해 담당.
-스케줄은 예전 Supabase pg_cron과 동일 (ASIA/US 장중 2회 + 장 마감 finalize 1회, 구루 06:30 KST, keep-warm 20분).
+스케줄: ASIA/US 장중 2회 + 장 마감 finalize 1회, 구루 06:30 KST, keep-warm 20분.
 `local-price-updater.ts` 계열은 PC `.bat` 호환용 백업 경로. GitHub Actions `price-cron`만으로 충분.

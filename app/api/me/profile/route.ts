@@ -2,7 +2,6 @@
 //   GET    — 본인 users row 전체(camelCase) + 해금 배지 id 목록
 //   PATCH  { nickname?, displayName?, photoURL?, equippedBadgeId? } — 본인 프로필 일부 수정
 //
-// Supabase 시절 RLS(users_update_own)는 행 단위만 막고 컬럼은 무제한이었음 → 여기서는
 // 수정 가능한 컬럼을 화이트리스트로 고정 (is_admin/is_suspended/email/동의 컬럼 등은 절대 불가).
 
 import { NextRequest, NextResponse } from 'next/server';

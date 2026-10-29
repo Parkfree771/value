@@ -151,7 +151,7 @@ export async function uploadMultipleImages(
 }
 
 /**
- * 우리 media 버킷 이미지면 삭제. 옛 Supabase/Firebase URL은 서버가 무시.
+ * 우리 media 버킷 이미지면 삭제. 외부 URL은 서버가 무시.
  */
 export async function deleteImage(imageUrl: string): Promise<void> {
   const res = await fetch(`/api/upload?url=${encodeURIComponent(imageUrl)}`, {

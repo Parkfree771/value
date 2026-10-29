@@ -1,4 +1,4 @@
-// /portfolio/[slug] — guru-portfolios.json read + Supabase guru_prices fetch.
+// /portfolio/[slug] — guru-portfolios.json read + DB guru_prices fetch.
 // SSR 첫 LCP 보호.
 export default function PortfolioLoading() {
   return (

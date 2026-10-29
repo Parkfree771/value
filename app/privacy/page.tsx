@@ -53,13 +53,9 @@ export default function PrivacyPage() {
             <h3 className="text-xs font-bold mb-2 mt-4">나. 개인정보 수집 방법</h3>
             <ul className="list-disc list-inside ml-6 space-y-1">
               <li>회원가입 및 서비스 이용 과정에서 이용자가 직접 입력</li>
-              <li>소셜 로그인 (Google, Apple) 연동</li>
+              <li>소셜 로그인 (Google) 연동</li>
               <li>자동 수집 도구를 통한 생성정보 수집</li>
             </ul>
-            <p className="mt-2 text-[11px] text-gray-500 dark:text-gray-500">
-              * Apple 로그인 시 &ldquo;이메일 가리기&rdquo;를 선택한 경우, 실제 이메일 대신 Apple이 제공하는
-              중계(릴레이) 이메일 주소가 수집됩니다.
-            </p>
           </section>
 
           <section>
@@ -163,13 +159,12 @@ export default function PrivacyPage() {
             </p>
             <ul className="list-disc list-inside ml-6 space-y-1">
               <li>웹 호스팅·서버리스 실행: <strong>Vercel Inc. (미국)</strong> — 위탁 업무: 웹사이트 호스팅·서버 함수 실행</li>
-              <li>데이터베이스·인증·스토리지: <strong>Supabase Inc. (미국, 데이터센터 일본 도쿄)</strong> — 위탁 업무: 회원 정보·게시물 저장, Google/Apple OAuth 인증 처리, 이미지 보관</li>
+              <li>데이터베이스·인증·스토리지: <strong>Neon (미국, 데이터센터 싱가포르)</strong> — 위탁 업무: 회원 정보·게시물 저장, Google OAuth 인증 처리, 이미지 보관</li>
               <li>Google OAuth 인증 제공: <strong>Google LLC</strong> — 위탁 업무: 소셜 로그인 인증 정보(이메일, 프로필) 제공</li>
-              <li>Apple 로그인 인증 제공: <strong>Apple Inc.</strong> — 위탁 업무: 소셜 로그인 인증 정보(이메일, 이름) 제공</li>
               <li>이메일 발송 서비스: (추후 업데이트)</li>
             </ul>
             <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-500">
-              * 이용자의 개인정보(이메일, 닉네임, 게시물, 동의 기록)는 Supabase 일본 도쿄 리전 데이터센터에 저장되며, 별도 국외 이전 동의가 필요한 경우 사전에 고지합니다.
+              * 이용자의 개인정보(이메일, 닉네임, 게시물, 동의 기록)는 Neon 싱가포르 리전(AWS ap-southeast-1) 데이터센터에 저장되며, 별도 국외 이전 동의가 필요한 경우 사전에 고지합니다.
             </p>
           </section>
 
@@ -230,7 +225,7 @@ export default function PrivacyPage() {
               <strong>시행일:</strong> 2026년 2월 1일
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              <strong>최종 개정일:</strong> 2026년 7월 25일 (Apple 로그인 도입, 모바일 앱 적용 범위 명시)
+              <strong>최종 개정일:</strong> 2026년 10월 29일 (데이터 보관 위탁사 Neon·싱가포르 리전으로 변경, Apple 로그인 중단)
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
               본 개인정보처리방침은 위 시행일부터 적용됩니다.

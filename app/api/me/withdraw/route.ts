@@ -1,7 +1,7 @@
 // POST /api/me/withdraw
 // 본인 회원 탈퇴 — users row의 식별 정보를 익명화하고 정지 상태로 전환.
 // email/nickname UNIQUE 제약 회피 위해 uid 접미사 사용.
-// Neon Auth 계정 자체 삭제는 하지 않음 (기존 Supabase 시절과 동일 — 클라이언트가 signOut만 수행).
+// Neon Auth 계정 자체 삭제는 하지 않음 (클라이언트가 signOut만 수행).
 
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';

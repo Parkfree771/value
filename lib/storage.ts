@@ -35,7 +35,7 @@ export function publicUrl(key: string): string {
   return mediaBaseUrl() + key.split('/').map(encodeURIComponent).join('/');
 }
 
-/** 우리 media 버킷 공개 URL이면 key, 아니면(옛 Supabase/Firebase URL 등) null */
+/** 우리 media 버킷 공개 URL이면 key, 아니면(외부 URL) null */
 export function keyFromPublicUrl(url: string): string | null {
   const base = mediaBaseUrl();
   if (!url.startsWith(base)) return null;

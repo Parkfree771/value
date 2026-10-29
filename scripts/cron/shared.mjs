@@ -1,5 +1,4 @@
 // GitHub Actions 가격 cron 공통 — KIS / Upbit 가격 조회 + Neon DB + KIS 토큰 캐시 + revalidate.
-// (Supabase Edge Function supabase/functions/_shared/kis.ts 의 Node 이식본)
 //
 // 환경변수: DATABASE_URL, KIS_APP_KEY, KIS_APP_SECRET, [KIS_BASE_URL], [SITE_URL, REVALIDATE_SECRET]
 

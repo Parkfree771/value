@@ -1,5 +1,5 @@
 // posts 테이블의 ticker × exchange 조합을 KIS/Upbit으로 조회 → current_prices/price_history/posts 갱신 → revalidate.
-// (Supabase Edge Function update-stock-prices 의 Node 이식본 — GitHub Actions에서 실행)
+// (GitHub Actions에서 실행)
 //
 //   node scripts/cron/update-stock-prices.mjs --market=ASIA|US|CRYPTO|ALL [--finalize]
 //

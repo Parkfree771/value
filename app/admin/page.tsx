@@ -114,7 +114,7 @@ export default function AdminPage() {
     }
   }, [user, authReady, isAdmin, router]);
 
-  // ───── API 헬퍼 (Supabase 쿠키 세션 자동 포함) ─────
+  // ───── API 헬퍼 (Neon Auth 쿠키 세션 자동 포함) ─────
 
   const apiFetch = useCallback(async (url: string, options?: RequestInit) => {
     return fetch(url, {

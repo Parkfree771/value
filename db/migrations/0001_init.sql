@@ -1,12 +1,12 @@
--- Neon 초기 스키마 — Supabase public 스키마(2026-10-29 기준 라이브 상태)에서 이관.
+-- Neon 초기 스키마 (2026-10-29).
 --
--- Supabase 대비 달라진 점:
---   * users.id → auth.users FK 제거. 인증은 Neon Auth(neon_auth."user", uuid)이고
---     프로필 행 생성은 앱(lib/db/users.ts ensureUserProfile)이 담당 — handle_new_auth_user 트리거 대체.
+-- 설계 메모:
+--   * users.id = Neon Auth(neon_auth."user") id (uuid). 프로필 행 생성은 로그인 콜백이
+--     ensure_user_profile()(0002)로 담당.
 --   * users(id)를 참조하는 FK 전부 ON UPDATE CASCADE — 기존 프로필을 새 Neon Auth id로
 --     넘겨받을 때(같은 이메일 첫 로그인) 게시글/댓글/좋아요가 같이 따라오도록.
 --   * RLS 정책/grant 없음 — 모든 DB 접근은 서버에서 세션 검증 후 수행.
---   * rls_auto_enable / supabase_function_url / pg_cron 스케줄 제거 (크론은 GitHub Actions).
+--   * DB 안 크론 없음 — 가격 갱신은 GitHub Actions(.github/workflows/price-cron.yml).
 
 create extension if not exists pgcrypto;
 

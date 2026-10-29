@@ -1,5 +1,5 @@
 // 서버 사이드 인증 헬퍼 — API Route / Server Component에서 사용.
-// Neon Auth 세션 쿠키 기반. (Supabase 시절 Bearer 토큰 패턴은 제거 — 모든 클라이언트가 쿠키 사용)
+// Neon Auth 세션 쿠키 기반 — 모든 클라이언트가 쿠키 사용.
 
 import { auth } from '@/lib/auth/server';
 import { sql } from '@/lib/db';

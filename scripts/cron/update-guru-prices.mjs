@@ -1,5 +1,5 @@
 // settings.guru_tickers의 ticker를 KIS로 조회 → guru_prices UPSERT.
-// (Supabase Edge Function update-guru-prices 의 Node 이식본 — GitHub Actions에서 실행)
+// (GitHub Actions에서 실행)
 //
 //   node scripts/cron/update-guru-prices.mjs
 //

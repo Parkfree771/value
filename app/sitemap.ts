@@ -5,7 +5,6 @@ import { GURU_LIST } from './guru-tracker/types';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
 // sitemap은 Dynamic API(cookies 등) 없으면 빌드 시 정적 생성됨 → 새 글이 반영되도록 요청마다 생성.
-// (Supabase 시절엔 cookies() 호출 때문에 자동으로 dynamic이었음)
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

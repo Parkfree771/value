@@ -43,7 +43,7 @@ const sql = neon(process.env.DATABASE_URL);
 const round2 = (n: number) => Math.round(n * 100) / 100;
 // 부동소수점 곱셈 찌꺼기 방지 (42.8*10 = 428.00000000000006)
 const round6 = (n: number) => Math.round(n * 1e6) / 1e6;
-// posts.created_at 비교 기준 — D 00:00 UTC (기존 Supabase 세션 타임존 UTC와 동일하게 명시)
+// posts.created_at 비교 기준 — D 00:00 UTC
 const D_UTC = `${D}T00:00:00Z`;
 
 (async () => {
