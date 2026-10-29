@@ -6,6 +6,9 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Neon Auth는 Apple 프로바이더 미지원 (google/github/vercel만) — 지원되면 true로
+const APPLE_LOGIN_ENABLED = false;
+
 export default function LoginPage() {
   const router = useRouter();
   const { signInWithGoogle, signInWithApple, user, loading: authLoading } = useAuth();
@@ -137,6 +140,7 @@ export default function LoginPage() {
           </button>
 
           {/* Apple Sign-In Button — Apple HIG 준수 (검정 배경, 공식 로고) */}
+          {APPLE_LOGIN_ENABLED && (
           <button
             onClick={handleAppleLogin}
             disabled={loading}
@@ -153,6 +157,7 @@ export default function LoginPage() {
               {loading ? '로그인 중...' : 'Apple로 로그인'}
             </span>
           </button>
+          )}
 
           {/* Coming Soon Section */}
           <div className="mt-6 pt-6 border-t-2 border-[var(--theme-border-muted)]">
