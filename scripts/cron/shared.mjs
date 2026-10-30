@@ -131,3 +131,55 @@ export async function revalidateSite(paths) {
   }
   return out;
 }
+
+// ─── 거래일 (종가 날짜) ─────────────────────────────────────────
+// price_history.date 는 "그 종가가 나온 거래일"이어야 한다. 실행 시각(UTC)으로 찍으면
+// GitHub 예약 실행이 몇 시간 늦어질 때 미국 종가가 다음 날 날짜로 들어간다 (2026-10-29 → 10-30 사고).
+// 거래소 현지 시각 기준: 장 마감 전이면 직전 평일, 주말이면 금요일. (공휴일은 모름 — KIS 가 직전 종가를 돌려줌)
+const MARKET_CLOCK = {
+  NAS: { tz: 'America/New_York', open: 9 * 60 + 30, close: 16 * 60 },
+  NYS: { tz: 'America/New_York', open: 9 * 60 + 30, close: 16 * 60 },
+  AMS: { tz: 'America/New_York', open: 9 * 60 + 30, close: 16 * 60 },
+  KRX: { tz: 'Asia/Seoul', open: 9 * 60, close: 15 * 60 + 30 },
+  TSE: { tz: 'Asia/Tokyo', open: 9 * 60, close: 15 * 60 + 30 },
+  HKS: { tz: 'Asia/Hong_Kong', open: 9 * 60 + 30, close: 16 * 60 + 10 },
+  SHS: { tz: 'Asia/Shanghai', open: 9 * 60 + 30, close: 15 * 60 },
+  SZS: { tz: 'Asia/Shanghai', open: 9 * 60 + 30, close: 15 * 60 },
+};
+
+function localParts(now, tz) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', weekday: 'short',
+    }).formatToParts(now).map((x) => [x.type, x.value]),
+  );
+  return { ymd: `${p.year}-${p.month}-${p.day}`, minutes: Number(p.hour) * 60 + Number(p.minute), weekday: p.weekday };
+}
+
+function prevWeekday(ymd) {
+  const d = new Date(`${ymd}T00:00:00Z`);
+  do d.setUTCDate(d.getUTCDate() - 1); while (d.getUTCDay() === 0 || d.getUTCDay() === 6);
+  return d.toISOString().slice(0, 10);
+}
+
+/** 지금 시점에 "마지막으로 마감된 거래일" (YYYY-MM-DD, 거래소 현지 날짜) */
+export function lastSessionDate(exchange, now = new Date()) {
+  const clock = MARKET_CLOCK[exchange] ?? MARKET_CLOCK.NYS;
+  const { ymd, minutes, weekday } = localParts(now, clock.tz);
+  if (weekday === 'Sat' || weekday === 'Sun' || minutes < clock.close) {
+    // 주말이면 금요일까지, 평일 장 마감 전이면 직전 평일
+    const d = new Date(`${ymd}T00:00:00Z`);
+    if (weekday === 'Sat') d.setUTCDate(d.getUTCDate() - 1);
+    else if (weekday === 'Sun') d.setUTCDate(d.getUTCDate() - 2);
+    else return prevWeekday(ymd);
+    return d.toISOString().slice(0, 10);
+  }
+  return ymd;
+}
+
+/** 지금 장중인가 — 장중엔 KIS 가 주는 값이 종가가 아니므로 price_history 에 쓰지 않는다 */
+export function isMarketOpen(exchange, now = new Date()) {
+  const clock = MARKET_CLOCK[exchange] ?? MARKET_CLOCK.NYS;
+  const { minutes, weekday } = localParts(now, clock.tz);
+  return weekday !== 'Sat' && weekday !== 'Sun' && minutes >= clock.open && minutes < clock.close;
+}

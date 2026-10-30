@@ -12,12 +12,14 @@ const BATCH_DELAY_MS = 100;
 const MAX_RETRIES = 2;
 
 const SKIP_TICKERS = new Set(['EXE/WS', 'KRSP/WS', 'ALVOW', 'JBSAY']);
+// KIS 표기: 클래스주는 '-' 대신 '/' (BRK-B → BRK/B). 13F 매핑 거래소가 틀린 종목은 바로잡는다.
 const TICKER_REMAP = { FI: 'FISV' };
-const EXCHANGE_REMAP = { FI: 'NAS' };
+const EXCHANGE_REMAP = { FI: 'NAS', KHC: 'NYS' };
+const toKisTicker = (t) => TICKER_REMAP[t] ?? (/^[A-Z]+-[A-Z]$/.test(t) ? t.replace('-', '/') : t);
 
 async function getPriceWithRetry(token, ticker, exchange) {
   let lastError;
-  const kisTicker = TICKER_REMAP[ticker] ?? ticker;
+  const kisTicker = toKisTicker(ticker);
   const kisExchange = EXCHANGE_REMAP[ticker] ?? exchange;
   for (let i = 0; i <= MAX_RETRIES; i++) {
     try {

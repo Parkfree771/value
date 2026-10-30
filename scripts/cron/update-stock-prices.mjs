@@ -4,9 +4,11 @@
 //   node scripts/cron/update-stock-prices.mjs --market=ASIA|US|CRYPTO|ALL [--finalize]
 //
 // --finalize: 장 마감 cron 전용. 이때만 price_history에 종가 UPSERT → 차트는 종가 1행/일 보장.
+//   날짜 = 거래소 현지 기준 "마지막으로 마감된 거래일" (실행이 몇 시간 늦어도 같은 날짜) — shared.mjs lastSessionDate
+//   장중이면 그 거래소는 쓰지 않음. 코인은 여기서 쓰지 않고 update-crypto-history.mjs 가 일봉으로 기록.
 // 실패 ticker가 성공보다 많으면 exit 1 (Actions에서 실패로 표시).
 
-import { getKISToken, getStockPrice, makeDb, revalidateSite, sleep } from './shared.mjs';
+import { getKISToken, getStockPrice, isMarketOpen, lastSessionDate, makeDb, revalidateSite, sleep } from './shared.mjs';
 
 const ASIA_EXCHANGES = ['KRX', 'TSE', 'SHS', 'SZS', 'HKS'];
 const US_EXCHANGES = ['NAS', 'NYS', 'AMS'];
@@ -87,12 +89,22 @@ if (tickers.length > 0) {
 
   // price_history는 장 마감 cron(--finalize)에서만 종가 1회 UPSERT.
   if (finalize) {
-    const today = new Date().toISOString().split('T')[0];
-    await sql`
-      insert into price_history (ticker, exchange, date, close)
-      select t, e, ${today}::date, p from unnest(${tickers}::text[], ${exchanges}::text[], ${prices}::numeric[]) as x(t, e, p)
-      on conflict (ticker, date) do update set exchange = excluded.exchange, close = excluded.close`;
-    console.log(`[CRON] price_history (finalize): ${tickers.length} 행`);
+    const now = new Date();
+    const rows = tickers
+      .map((t, i) => ({ t, e: exchanges[i], p: prices[i] }))
+      .filter((r) => r.e !== 'CRYPTO' && !isMarketOpen(r.e, now))
+      .map((r) => ({ ...r, d: lastSessionDate(r.e, now) }));
+    const skippedOpen = tickers.filter((t, i) => exchanges[i] !== 'CRYPTO' && isMarketOpen(exchanges[i], now));
+    if (rows.length > 0) {
+      await sql`
+        insert into price_history (ticker, exchange, date, close)
+        select t, e, d::date, p from unnest(
+          ${rows.map((r) => r.t)}::text[], ${rows.map((r) => r.e)}::text[], ${rows.map((r) => r.d)}::text[], ${rows.map((r) => r.p)}::numeric[]
+        ) as x(t, e, d, p)
+        on conflict (ticker, date) do update set exchange = excluded.exchange, close = excluded.close`;
+    }
+    const dates = [...new Set(rows.map((r) => `${r.e}:${r.d}`))].join(', ');
+    console.log(`[CRON] price_history (finalize): ${rows.length} 행 [${dates}]${skippedOpen.length ? ` · 장중이라 건너뜀 ${skippedOpen.length}개` : ''}`);
   } else {
     console.log('[CRON] price_history skip (장중 cron — finalize 아님)');
   }
