@@ -117,6 +117,8 @@ const nextConfig: NextConfig = {
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
           "img-src 'self' data: blob: https: http:",
+          // 모닝 브리핑 릴스(mp4) — Neon Object Storage
+          "media-src 'self' blob: https://*.aws.neon.tech",
           "connect-src 'self' https://*.aws.neon.tech https://*.googleapis.com https://*.firebaseio.com https://*.cloudfunctions.net wss://*.firebaseio.com https://firebasestorage.googleapis.com https://api.binance.com https://query1.finance.yahoo.com https://query2.finance.yahoo.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://adservice.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google https://cdn.jsdelivr.net blob:",
           "frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com https://ep1.adtrafficquality.google https://ep2.adtrafficquality.google",
           "object-src 'none'",

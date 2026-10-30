@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import InstagramKit from '@/components/briefing/InstagramKit';
 import { getBriefing } from '@/lib/briefing';
 
 // 모닝 브리핑 — 매일 새벽 scripts/news 배치가 해외 매체 RSS 를 모아 경제 이슈 10개로 새로 쓴 결과.
@@ -32,6 +33,8 @@ export default async function BriefingPage() {
         ) : null}
       </header>
 
+      <InstagramKit />
+
       {briefing ? (
         <ol>
           {briefing.issues.map((issue, i) => (
@@ -44,7 +47,7 @@ export default async function BriefingPage() {
                   <p className="kicker">{issue.tags.join(' · ')}</p>
                 )}
                 <h2 className="headline text-xl sm:text-2xl leading-snug break-keep mt-0.5">{issue.headline}</h2>
-                <p className="mt-2.5 text-[15px] sm:text-base leading-relaxed text-[var(--theme-ink)] break-keep">{issue.summary}</p>
+                <p className="mt-2.5 text-[15px] sm:text-base leading-relaxed break-keep">{issue.summary}</p>
                 {issue.covered_by && issue.covered_by.length > 0 && (
                   <p className="mt-2.5 text-xs text-[var(--theme-ink-soft)]">
                     {issue.covered_by.length}개 매체 보도 · {issue.covered_by.slice(0, 6).join(', ')}
