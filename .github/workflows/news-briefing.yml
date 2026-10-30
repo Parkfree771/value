@@ -26,6 +26,10 @@ on:
         description: '사이트 브리핑만 (인스타 파일 생략)'
         type: boolean
         default: false
+      dry_run:
+        description: '시험 실행 — 업로드·사이트 갱신 없이 결과물만 (Artifacts 로 받기)'
+        type: boolean
+        default: false
 
 concurrency:
   group: news-briefing
@@ -56,7 +60,7 @@ jobs:
         run: |
           node scripts/news/run.mjs \
             $([ "${{ inputs.force }}" = true ] && echo --force) \
-            $([ "${{ inputs.skip_insta }}" = true ] && echo --skip-insta)
+            $([ "${{ inputs.skip_insta }}" = true ] && echo --skip-insta)             $([ "${{ inputs.dry_run }}" = true ] && echo --dry-run)
       # 카드·릴스·캡션을 Actions 화면에서도 바로 받을 수 있게
       - uses: actions/upload-artifact@v4
         if: always()
