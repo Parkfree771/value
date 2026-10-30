@@ -14,15 +14,13 @@
  *   5. S&P 500                   (briefing/market.json)
  *   6. NASDAQ                    (briefing/market.json)
  *   7. DOW                       (briefing/market.json)
- *   8. BTC/KRW                   (Upbit 공개 API)
  */
 
 import { getKISDomesticIndex } from '@/lib/kis';
-import { getUpbitPrice } from '@/lib/upbit';
 import { sql } from '@/lib/db';
 import { publicUrl } from '@/lib/storage';
 
-export type TickerCategory = 'site' | 'kr_index' | 'us_index' | 'forex' | 'crypto';
+export type TickerCategory = 'site' | 'kr_index' | 'us_index' | 'forex';
 
 export interface TickerItem {
   id: string;
@@ -156,13 +154,12 @@ function pickMarketItem(
 export async function getTickerData(): Promise<TickerResponse> {
   const status = getKRXMarketStatus();
 
-  const [antAvg, marketJson, kospi, kosdaq, kospi200, btc] = await Promise.all([
+  const [antAvg, marketJson, kospi, kosdaq, kospi200] = await Promise.all([
     fetchAntStreetAverage(),
     fetchMarketJson(),
     getKISDomesticIndex('0001').catch(() => null),
     getKISDomesticIndex('1001').catch(() => null),
     getKISDomesticIndex('2001').catch(() => null),
-    getUpbitPrice('BTC').catch(() => null),
   ]);
 
   const sp500 = pickMarketItem(marketJson, 'S&P 500');
@@ -237,15 +234,6 @@ export async function getTickerData(): Promise<TickerResponse> {
       changePercent: dow?.changePercent ?? null,
       category: 'us_index',
       decimals: 2,
-    },
-    {
-      id: 'btc',
-      label: 'BTC/KRW',
-      price: btc?.price ?? null,
-      changePercent: btc?.changePercent ?? null,
-      category: 'crypto',
-      decimals: 0,
-      suffix: '원',
     },
   ];
 

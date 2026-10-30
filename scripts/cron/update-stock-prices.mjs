@@ -1,11 +1,11 @@
-// posts 테이블의 ticker × exchange 조합을 KIS/Upbit으로 조회 → current_prices/price_history/posts 갱신 → revalidate.
+// posts 테이블의 ticker × exchange 조합을 KIS로 조회 → current_prices/price_history/posts 갱신 → revalidate.
 // (GitHub Actions에서 실행)
 //
-//   node scripts/cron/update-stock-prices.mjs --market=ASIA|US|CRYPTO|ALL [--finalize]
+//   node scripts/cron/update-stock-prices.mjs --market=ASIA|US|ALL [--finalize]
 //
 // --finalize: 장 마감 cron 전용. 이때만 price_history에 종가 UPSERT → 차트는 종가 1행/일 보장.
 //   날짜 = 거래소 현지 기준 "마지막으로 마감된 거래일" (실행이 몇 시간 늦어도 같은 날짜) — shared.mjs lastSessionDate
-//   장중이면 그 거래소는 쓰지 않음. 코인은 여기서 쓰지 않고 update-crypto-history.mjs 가 일봉으로 기록.
+//   장중이면 그 거래소는 쓰지 않음.
 // 실패 ticker가 성공보다 많으면 exit 1 (Actions에서 실패로 표시).
 
 import { getKISToken, getStockPrice, isMarketOpen, lastSessionDate, makeDb, revalidateSite, sleep } from './shared.mjs';
@@ -19,8 +19,6 @@ const marketType = (arg('market') ?? 'ALL').toUpperCase();
 const finalize = process.argv.includes('--finalize');
 
 function shouldProcessExchange(exchange) {
-  if (marketType === 'CRYPTO') return exchange === 'CRYPTO';
-  if (exchange === 'CRYPTO') return true;
   if (marketType === 'ALL') return true;
   if (marketType === 'ASIA') return ASIA_EXCHANGES.includes(exchange);
   if (marketType === 'US') return US_EXCHANGES.includes(exchange);
@@ -92,9 +90,9 @@ if (tickers.length > 0) {
     const now = new Date();
     const rows = tickers
       .map((t, i) => ({ t, e: exchanges[i], p: prices[i] }))
-      .filter((r) => r.e !== 'CRYPTO' && !isMarketOpen(r.e, now))
+      .filter((r) => !isMarketOpen(r.e, now))
       .map((r) => ({ ...r, d: lastSessionDate(r.e, now) }));
-    const skippedOpen = tickers.filter((t, i) => exchanges[i] !== 'CRYPTO' && isMarketOpen(exchanges[i], now));
+    const skippedOpen = tickers.filter((t, i) => isMarketOpen(exchanges[i], now));
     if (rows.length > 0) {
       await sql`
         insert into price_history (ticker, exchange, date, close)

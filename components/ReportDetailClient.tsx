@@ -251,8 +251,8 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                 <span className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">{shortStockName(report.stockName, report.ticker)}</span>
                 <span className="font-mono text-[10px] sm:text-xs text-gray-400">{report.ticker}</span>
                 {report.stockData?.exchange && (
-                  <span className={report.stockData.exchange === 'CRYPTO' ? 'text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-[10px] sm:text-xs text-gray-400'}>
-                    {report.stockData.exchange === 'CRYPTO' ? '코인' : report.stockData.exchange}
+                  <span className="text-[10px] sm:text-xs text-gray-400">
+                    {report.stockData.exchange}
                   </span>
                 )}
                 <OpinionBadge opinion={report.opinion} />
@@ -297,8 +297,8 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                 <div className="text-xs sm:text-base font-bold font-mono tabular-nums text-gray-800 dark:text-gray-100 mt-0.5">{report.targetPrice?.toLocaleString() || '-'}</div>
               </div>
             </div>
-            {/* 3행: PER · PBR · EPS (코인이면 숨김) */}
-            {report.stockData?.exchange !== 'CRYPTO' && (
+            {/* 3행: PER · PBR · EPS */}
+            {report.stockData && (
               <div className="flex border-t border-[var(--theme-border-muted)] bg-gray-50/50 dark:bg-gray-800/30">
                 <div className="flex-1 px-3 py-2.5 sm:px-4 sm:py-3 border-r border-[var(--theme-border-muted)]">
                   <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">PER</div>

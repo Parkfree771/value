@@ -20,16 +20,15 @@ on:
     - cron: '15 21 * * 1-5'  # US 장 마감 06:15 KST (finalize)
     - cron: '45 23 * * 1-5'  # US finalize 예비 08:45 KST
     - cron: '30 21 * * 1-5'  # 구루 포트폴리오 06:30 KST
-    - cron: '20 0 * * *'     # 코인 일봉 09:20 KST (주말 포함, Upbit 일봉 종가)
     - cron: '*/20 * * * *'   # ISR keep-warm (홈/랭킹)
   workflow_dispatch:
     inputs:
       job:
-        description: 'stock | guru | crypto | keepwarm  (crypto + finalize=true → 빠진 날 채우기)'
+        description: 'stock | guru | keepwarm'
         required: true
         default: stock
       market:
-        description: 'stock 전용: ASIA | US | CRYPTO | ALL'
+        description: 'stock 전용: ASIA | US | ALL'
         default: ALL
       finalize:
         description: 'stock 전용: 종가를 price_history에 기록'
@@ -81,13 +80,10 @@ jobs:
             '40 8 * * 1-5'|'40 10 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=ASIA --finalize ;;
             '30 13 * * 1-5'|'0 16 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=US ;;
             '15 21 * * 1-5'|'45 23 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=US --finalize ;;
-            '20 0 * * *')                node scripts/cron/update-crypto-history.mjs ;;
             '30 21 * * 1-5')             node scripts/cron/update-guru-prices.mjs ;;
             '')
               if [ "$JOB" = guru ]; then
                 node scripts/cron/update-guru-prices.mjs
-              elif [ "$JOB" = crypto ]; then
-                node scripts/cron/update-crypto-history.mjs $([ "$FINALIZE" = true ] && echo --backfill)
               else
                 node scripts/cron/update-stock-prices.mjs --market="$MARKET" $([ "$FINALIZE" = true ] && echo --finalize)
               fi ;;

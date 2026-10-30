@@ -8,7 +8,6 @@ export type MarketCategory =
   | 'NYSE'       // 뉴욕증권거래소 (S&P500, 다우 포함)
   | 'NIKKEI'     // 니케이
   | 'HANGSENG'   // 항셍
-  | 'CRYPTO'     // 암호화폐
   | 'OTHER';     // 기타
 
 /**
@@ -22,11 +21,6 @@ export function getMarketCategory(exchange?: string, ticker?: string): MarketCat
 
   const exchangeUpper = (exchange || '').toUpperCase();
   const tickerUpper = (ticker || '').toUpperCase();
-
-  // 암호화폐 (CRYPTO)
-  if (exchangeUpper === 'CRYPTO') {
-    return 'CRYPTO';
-  }
 
   // 코스피 (KRX, Korean Stock Exchange)
   if (
@@ -97,7 +91,6 @@ export const CATEGORY_LABELS: Record<MarketCategory, string> = {
   NYSE: 'NYSE',
   NIKKEI: '니케이',
   HANGSENG: '항셍',
-  CRYPTO: '코인',
   OTHER: '기타',
 };
 
@@ -111,7 +104,6 @@ export const CATEGORY_DESCRIPTIONS: Record<MarketCategory, string> = {
   NYSE: '미국 뉴욕증권거래소',
   NIKKEI: '일본 도쿄증권거래소',
   HANGSENG: '홍콩증권거래소',
-  CRYPTO: '암호화폐',
   OTHER: '기타 시장',
 };
 
@@ -125,6 +117,5 @@ export const ALL_CATEGORIES: MarketCategory[] = [
   'NYSE',
   'NIKKEI',
   'HANGSENG',
-  'CRYPTO',
   'OTHER',
 ];

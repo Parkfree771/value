@@ -46,7 +46,7 @@ export async function GET(
     const [statsRows, levelRows] = await Promise.all([
       sql`
         select total_reports, avg_return_rate, max_return_rate, min_return_rate, win_rate,
-               total_likes, total_views, short_positions, short_avg_return_rate, unique_tickers, crypto_count
+               total_likes, total_views, short_positions, short_avg_return_rate, unique_tickers
         from user_stats where author_id = ${user.id}
       `.catch((e) => {
         console.error('[users/by-nickname] user_stats select error:', e);
@@ -82,7 +82,6 @@ export async function GET(
                 shortPositions: stats.short_positions ?? 0,
                 shortAvgReturnRate: Number(stats.short_avg_return_rate ?? 0),
                 uniqueTickers: stats.unique_tickers ?? 0,
-                cryptoCount: stats.crypto_count ?? 0,
               }
             : null,
           lastStatsUpdate: user.updated_at ?? null,

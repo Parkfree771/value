@@ -76,7 +76,6 @@ const EXCHANGE_LABEL: Record<string, string> = {
   HKS: '홍콩',
   SHS: '상하이',
   SZS: '선전',
-  CRYPTO: '코인',
 };
 
 export function exchangeLabel(code?: string | null): string | null {

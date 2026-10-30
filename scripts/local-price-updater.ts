@@ -21,7 +21,7 @@ import { spawn } from 'child_process';
 
 dotenvConfig({ path: resolve(process.cwd(), '.env.local') });
 
-type MarketType = 'ASIA' | 'US' | 'ALL' | 'CRYPTO';
+type MarketType = 'ASIA' | 'US' | 'ALL';
 
 function runUpdate(marketType: MarketType): Promise<void> {
   return new Promise((resolveP, rejectP) => {
@@ -65,19 +65,14 @@ function startScheduler() {
     runUpdate('US').catch((e) => console.error('[scheduler] US error:', e));
   });
 
-  // 암호화폐 전용: 매시간 0분 (장중 시간대는 ASIA/US cron이 이미 코인도 같이 갱신)
-  cron.schedule('0 * * * *', () => {
-    runUpdate('CRYPTO').catch((e) => console.error('[scheduler] CRYPTO error:', e));
-  });
 
   console.log('스케줄러 동작 중. 종료: Ctrl+C\n');
   console.log('  - 아시아 장: 평일 09:00~16:45 KST (15분 간격)');
   console.log('  - 미국 장:   평일 22:30~06:45 KST (15분 간격)');
-  console.log('  - 암호화폐:  매시간 0분 (24시간)\n');
 }
 
-// 시작 시 1회 즉시 실행 — 시간대 무관 전체 마켓(ASIA + US + CRYPTO) 조회
-console.log(`[scheduler] 시작 시 즉시 실행: ALL (한국+미국+코인 전체)`);
+// 시작 시 1회 즉시 실행 — 시간대 무관 전체 마켓(ASIA + US) 조회
+console.log(`[scheduler] 시작 시 즉시 실행: ALL (한국+미국 전체)`);
 runUpdate('ALL')
   .catch((e) => console.error('[scheduler] 초기 실행 실패:', e))
   .finally(() => startScheduler());

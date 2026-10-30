@@ -258,7 +258,6 @@ export function getCurrencyByExchange(exchange: string): string {
     'TSE': 'JPY',
     'HNX': 'VND',
     'HSX': 'VND',
-    'CRYPTO': 'KRW',
   };
   return currencyMap[exchange] || 'USD';
 }
@@ -333,11 +332,6 @@ export function detectExchange(symbol: string): string {
     return tickerExchangeMap[upperSymbol];
   }
 
-  // 암호화폐 심볼 체크
-  const { CRYPTO_SYMBOLS } = require('./cryptoCoins');
-  if (CRYPTO_SYMBOLS.has(upperSymbol)) {
-    return 'CRYPTO';
-  }
 
   // 기본값: 미국 주식 (NASDAQ)
   return 'NAS';
@@ -852,11 +846,6 @@ export async function getCompanyProfile(ticker: string, exchange?: string): Prom
   // 거래소 자동 감지
   const detectedExchange = exchange || detectExchange(stockCode);
 
-  // 암호화폐
-  if (detectedExchange === 'CRYPTO') {
-    const { getUpbitCryptoProfile } = await import('./upbit');
-    return getUpbitCryptoProfile(stockCode);
-  }
 
   // 한국 주식 (6자리 숫자)
   if (/^\d{6}$/.test(stockCode)) {

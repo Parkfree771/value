@@ -4,16 +4,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { getCryptoStocksForIndex } from '@/lib/cryptoCoins';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
 import { stockSearchIndex, type GlobalStock } from '@/lib/stockSearchIndex';
 
-/** 인스턴스당 한 번 — global-stocks.json(약 3만 종목) + 코인으로 인덱스 빌드 */
+/** 인스턴스당 한 번 — global-stocks.json(약 3만 종목)으로 인덱스 빌드 */
 function ensureIndex() {
   if (stockSearchIndex.ready) return;
   const filePath = path.join(process.cwd(), 'public', 'data', 'global-stocks.json');
   const data = JSON.parse(fs.readFileSync(filePath, 'utf-8')) as { stocks: GlobalStock[] };
-  stockSearchIndex.build([...getCryptoStocksForIndex(), ...data.stocks]);
+  stockSearchIndex.build(data.stocks);
 }
 
 export async function GET(request: NextRequest) {

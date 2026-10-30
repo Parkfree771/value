@@ -5,7 +5,7 @@
 ## 주요 기능
 
 - **홈 1면** — 수익률 1·2·3위 + 4~15위(더보기 30위), 모닝 브리핑, 구루 포트폴리오, 최신 리포트, 전체 피드
-- **리포트** — 종목 검색(한·미·일·중·홍콩·코인), 작성가 자동 기록, 수익률 추적, 댓글·좋아요·북마크
+- **리포트** — 종목 검색(한·미·일·중·홍콩), 작성가 자동 기록, 수익률 추적, 댓글·좋아요·북마크
 - **랭킹** — 누적·기간(1일/7일/한달) 수익률, 투자자 순위
 - **레벨** — 리포트 수·보유 기간·수익률로 쌓이는 점수 (`lib/levels.ts`, `db/migrations/0003_user_levels.sql`)
 - **구루 포트폴리오** — SEC 13F 분기 보유 종목
@@ -15,7 +15,7 @@
 
 - Next.js 16 (App Router) · TypeScript · Tailwind CSS
 - Neon — Postgres · Neon Auth · Object Storage
-- 가격: 한국투자증권 OpenAPI, Upbit
+- 가격: 한국투자증권 OpenAPI
 - 배포: Vercel (`sin1`) · 가격 갱신: GitHub Actions `price-cron`
 
 ## 개발

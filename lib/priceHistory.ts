@@ -4,7 +4,7 @@
  * 저장소: public.price_history 테이블 (PK ticker+date)
  *
  * - readHistory / writeHistory: Postgres SELECT / UPSERT
- * - fetchDailyRange: KIS / Upbit 일봉 범위 조회 (외부 API, 변경 없음)
+ * - fetchDailyRange: KIS 일봉 범위 조회 (외부 API)
  * - upsertDailyClose: 한 줄 UPSERT
  */
 
@@ -14,9 +14,7 @@ import type { PriceHistoryFile, PriceHistoryPoint } from '@/types/priceHistory';
 
 const KIS_BASE_URL = process.env.KIS_BASE_URL || 'https://openapi.koreainvestment.com:9443';
 const KIS_MAX_DAYS_PER_CALL = 100;
-const UPBIT_MAX_COUNT = 200;
 const KOREAN_EXCHANGES = ['KRX'];
-const CRYPTO_EXCHANGE = 'CRYPTO';
 
 // ---------- DB I/O ----------
 
@@ -113,7 +111,7 @@ function dedupeAndSort(points: PriceHistoryPoint[]): PriceHistoryPoint[] {
     .sort((a, b) => a.d.localeCompare(b.d));
 }
 
-// ---------- KIS / Upbit fetch (외부 API, 변경 없음) ----------
+// ---------- KIS fetch (외부 API) ----------
 
 async function fetchKoreanRange(
   stockCode: string,
@@ -193,40 +191,6 @@ async function fetchOverseaSlice(
   return points;
 }
 
-async function fetchCryptoRange(
-  ticker: string,
-  fromDate: Date,
-  toDate: Date,
-): Promise<PriceHistoryPoint[]> {
-  const market = `KRW-${ticker.toUpperCase()}`;
-  const totalDays = Math.ceil((toDate.getTime() - fromDate.getTime()) / 86400000) + 1;
-  const points: PriceHistoryPoint[] = [];
-  let cursor = new Date(toDate);
-  let remaining = totalDays;
-  while (remaining > 0) {
-    const count = Math.min(UPBIT_MAX_COUNT, remaining);
-    const toISO = `${fmtYYYY_MM_DD(addDays(cursor, 1))}T00:00:00Z`;
-    const url = `https://api.upbit.com/v1/candles/days?market=${market}&count=${count}&to=${toISO}`;
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (!res.ok) throw new Error(`Upbit 일봉 실패 ${ticker}: ${res.status}`);
-    interface UpbitCandle {
-      candle_date_time_kst: string;
-      trade_price: number;
-    }
-    const data = (await res.json()) as UpbitCandle[];
-    if (!Array.isArray(data) || data.length === 0) break;
-    for (const row of data) {
-      const dateStr = row.candle_date_time_kst.slice(0, 10);
-      points.push({ d: dateStr, c: row.trade_price });
-    }
-    const oldest = data[data.length - 1];
-    cursor = addDays(parseYYYYMMDD(oldest.candle_date_time_kst.slice(0, 10)), -1);
-    remaining -= data.length;
-    if (cursor < fromDate) break;
-    await new Promise((r) => setTimeout(r, 120));
-  }
-  return points.filter((p) => p.d >= fmtYYYY_MM_DD(fromDate));
-}
 
 export async function fetchDailyRange(
   ticker: string,
@@ -235,10 +199,6 @@ export async function fetchDailyRange(
   toDate: Date,
 ): Promise<PriceHistoryPoint[]> {
   const exchUpper = exchange.toUpperCase();
-
-  if (exchUpper === CRYPTO_EXCHANGE) {
-    return fetchCryptoRange(ticker, fromDate, toDate);
-  }
 
   if (KOREAN_EXCHANGES.includes(exchUpper)) {
     const points: PriceHistoryPoint[] = [];

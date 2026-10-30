@@ -13,7 +13,6 @@ import { getUserProfile } from '@/lib/users';
 import { getMarketCategory, CATEGORY_LABELS } from '@/utils/categoryMapping';
 import type { MarketCategory } from '@/types/report';
 import type { StockData } from '@/types/stock';
-import { getCryptoImageUrl } from '@/lib/cryptoCoins';
 import { loadThemes, getThemesForSymbol } from '@/lib/themeStocks';
 import type { Theme } from '@/types/theme';
 import dynamic from 'next/dynamic';

@@ -17,12 +17,12 @@ import { shortStockName, exchangeLabel } from '@/utils/reportDisplay';
 // - 아무것도 안 쳤을 때: 리포트가 많은 종목 바로가기 + 전체 리포트
 
 type SortType = 'latest' | 'returnDesc' | 'returnAsc' | 'popular';
-type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK' | 'CRYPTO';
+type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK';
 
 const SORT_LABELS: Record<SortType, string> = { latest: '최신순', returnDesc: '수익률 높은순', returnAsc: '수익률 낮은순', popular: '조회순' };
-const MARKET_LABELS: Record<MarketFilter, string> = { all: '전체', KR: '한국', US: '미국', JP: '일본', CN: '중국', HK: '홍콩', CRYPTO: '코인' };
+const MARKET_LABELS: Record<MarketFilter, string> = { all: '전체', KR: '한국', US: '미국', JP: '일본', CN: '중국', HK: '홍콩' };
 const MARKET_EXCHANGES: Record<string, string[]> = {
-  KR: ['KRX'], US: ['NAS', 'NYS', 'AMS'], JP: ['TSE'], CN: ['SHS', 'SZS'], HK: ['HKS'], CRYPTO: ['CRYPTO'],
+  KR: ['KRX'], US: ['NAS', 'NYS', 'AMS'], JP: ['TSE'], CN: ['SHS', 'SZS'], HK: ['HKS'],
 };
 const PAGE = 20;
 

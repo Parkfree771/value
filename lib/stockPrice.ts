@@ -39,10 +39,6 @@ export async function getHistoricalPrice(
       stockCode = ticker.split('.')[0];
     }
 
-    if (detectedExchange === 'CRYPTO') {
-      console.log(`[HistoricalPrice] 암호화폐 과거 시세 미지원: ${ticker}`);
-      return null;
-    }
 
     if (/^\d{6}$/.test(stockCode)) {
       const data = await getKISHistoricalStockPrice(stockCode, date);

@@ -63,7 +63,6 @@ function exchangeLabel(ex: string): string {
   if (e === 'NAS') return 'NASDAQ';
   if (e === 'NYS') return 'NYSE';
   if (e === 'KRX') return 'KOSPI';
-  if (e === 'CRYPTO') return 'CRYPTO';
   if (e === 'TSE') return 'TSE';
   if (e === 'HKS') return 'HKEX';
   return e || '';

@@ -1,4 +1,4 @@
-// GitHub Actions 가격 cron 공통 — KIS / Upbit 가격 조회 + Neon DB + KIS 토큰 캐시 + revalidate.
+// GitHub Actions 가격 cron 공통 — KIS 가격 조회 + Neon DB + KIS 토큰 캐시 + revalidate.
 //
 // 환경변수: DATABASE_URL, KIS_APP_KEY, KIS_APP_SECRET, [KIS_BASE_URL], [SITE_URL, REVALIDATE_SECRET]
 
@@ -90,20 +90,7 @@ export async function getOverseaStockPrice(token, ticker, exchange) {
   return price;
 }
 
-export async function getCryptoPrice(ticker) {
-  const market = `KRW-${ticker.toUpperCase()}`;
-  const res = await fetch(`https://api.upbit.com/v1/ticker?markets=${market}`, {
-    signal: AbortSignal.timeout(5000),
-    headers: { Accept: 'application/json' },
-  });
-  if (!res.ok) throw new Error(`Upbit API failed: ${res.status}`);
-  const data = await res.json();
-  if (!data || data.length === 0) throw new Error(`No data for ${ticker}`);
-  return data[0].trade_price;
-}
-
 export async function getStockPrice(token, ticker, exchange) {
-  if (exchange === 'CRYPTO') return getCryptoPrice(ticker);
   if (exchange === 'KRX') return getKoreanStockPrice(token, ticker);
   return getOverseaStockPrice(token, ticker, exchange);
 }

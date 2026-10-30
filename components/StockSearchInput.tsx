@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, memo } from 'react';
 import { stockSearchIndex, type GlobalStock, type Stock } from '@/lib/stockSearchIndex';
-import { getCryptoStocksForIndex, getCryptoImageUrl } from '@/lib/cryptoCoins';
 import type { StockData } from '@/types/stock';
 import { shortStockName, exchangeLabel } from '@/utils/reportDisplay';
 
@@ -27,9 +26,7 @@ async function loadGlobalStocks(): Promise<GlobalStock[]> {
   loadPromise = fetch('/data/global-stocks.json')
     .then(res => res.json())
     .then((data: GlobalStocksData) => {
-      // 코인 데이터를 주식 앞에 추가
-      const cryptoStocks = getCryptoStocksForIndex();
-      const allStocks = [...cryptoStocks, ...data.stocks];
+      const allStocks = data.stocks;
       cachedStocksData = allStocks;
       // 인덱스 빌드
       stockSearchIndex.build(allStocks);
@@ -155,8 +152,8 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
         return;
       }
       setQuery('');
-      // 한국 종목·코인은 한글명, 해외 종목은 원문(영문) — 카드에서 shortStockName 으로 한글 약칭 표시
-      const name = (stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr ? stock.nameKr : stock.name;
+      // 한국 종목은 한글명, 해외 종목은 원문(영문) — 카드에서 shortStockName 으로 한글 약칭 표시
+      const name = stock.exchange === 'KRX' && stock.nameKr ? stock.nameKr : stock.name;
       onStockSelect({ ...stockData, name });
     } catch (err) {
       console.error('Failed to fetch stock data:', err);
@@ -222,15 +219,6 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
         // 선택된 종목 — 이름 · 티커·거래소 · 지금 가격(= 작성가로 박제) · 지표
         <div className="border-y-2 border-[var(--theme-border)] py-3 sm:py-4">
           <div className="flex items-start gap-3">
-            {selectedStock.exchange === 'CRYPTO' && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={getCryptoImageUrl(selectedStock.symbol)}
-                alt=""
-                className="w-10 h-10 rounded-full flex-shrink-0"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-              />
-            )}
             <div className="flex-1 min-w-0">
               <p className="headline text-xl sm:text-2xl leading-tight break-keep">{shortStockName(selectedStock.name, selectedStock.symbol)}</p>
               <p className="mt-0.5 text-xs text-[var(--theme-ink-soft)]">
@@ -256,29 +244,18 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
                 {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}
               </p>
             </div>
-            {selectedStock.exchange === 'CRYPTO' ? (
-              selectedStock.changePercent24h !== undefined && (
-                <p className="text-xs text-[var(--theme-ink-soft)] tabular-nums">
-                  24시간{' '}
-                  <span className={`font-bold ${selectedStock.changePercent24h >= 0 ? 'text-[var(--color-up)]' : 'text-[var(--color-down)]'}`}>
-                    {selectedStock.changePercent24h >= 0 ? '+' : ''}{selectedStock.changePercent24h.toFixed(2)}%
-                  </span>
-                </p>
-              )
-            ) : (
-              <dl className="flex gap-4 text-xs tabular-nums">
-                {[
-                  ['PER', selectedStock.per && selectedStock.per > 0 ? selectedStock.per.toFixed(2) : null],
-                  ['PBR', selectedStock.pbr && selectedStock.pbr > 0 ? selectedStock.pbr.toFixed(2) : null],
-                  ['EPS', selectedStock.eps && selectedStock.eps !== 0 ? selectedStock.eps.toFixed(2) : null],
-                ].map(([k, v]) => (
-                  <div key={k as string}>
-                    <dt className="text-[var(--theme-ink-soft)]">{k}</dt>
-                    <dd className="font-bold">{v ?? '—'}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
+            <dl className="flex gap-4 text-xs tabular-nums">
+              {[
+                ['PER', selectedStock.per && selectedStock.per > 0 ? selectedStock.per.toFixed(2) : null],
+                ['PBR', selectedStock.pbr && selectedStock.pbr > 0 ? selectedStock.pbr.toFixed(2) : null],
+                ['EPS', selectedStock.eps && selectedStock.eps !== 0 ? selectedStock.eps.toFixed(2) : null],
+              ].map(([k, v]) => (
+                <div key={k as string}>
+                  <dt className="text-[var(--theme-ink-soft)]">{k}</dt>
+                  <dd className="font-bold">{v ?? '—'}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
       ) : (
@@ -323,7 +300,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
               {results.map((stock, index) => {
                 const primary = displayName(stock);
                 // 해외 종목만 원문 영문명 병기 (한국 종목 name 필드는 "SK" 처럼 잘려 있음)
-                const isDomestic = stock.exchange === 'KRX' || stock.exchange === 'CRYPTO';
+                const isDomestic = stock.exchange === 'KRX';
                 const secondary = !isDomestic && stock.nameKr ? shortStockName(stock.name, '') : null;
                 return (
                   <button
@@ -336,15 +313,6 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      {stock.exchange === 'CRYPTO' && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={getCryptoImageUrl(stock.symbol)}
-                          alt=""
-                          className="w-6 h-6 rounded-full flex-shrink-0"
-                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                        />
-                      )}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm sm:text-[15px] font-bold truncate">{highlight(primary, query)}</p>
                         <p className="text-xs text-[var(--theme-ink-soft)] truncate">

@@ -10,9 +10,9 @@
  *   2. ticker × exchange 별 oldest created_at 추출 (그 종목이 처음 등장한 날)
  *   3. 각 ticker마다:
  *      - 기존 price_history dates 조회
- *      - oldest ~ yesterday 기대 거래일(주식=평일 / 코인=전체) 계산
+ *      - oldest ~ yesterday 기대 거래일(평일) 계산
  *      - 빠진 일자 0개 → 스킵
- *      - 빠진 일자 있음 → oldest~yesterday 전체 KIS/Upbit fetch (UPSERT라 중복 무해)
+ *      - 빠진 일자 있음 → oldest~yesterday 전체 KIS fetch (UPSERT라 중복 무해)
  *      - 머지 → price_history UPSERT (onConflict ticker,date)
  *
  * 실행: 차트업데이트.bat → npx tsx scripts/local-history-updater.ts
@@ -66,17 +66,15 @@ function yesterday(): Date {
 
 /**
  * fromDate ~ toDate 범위의 기대 거래일 리스트.
- *  - 주식: 평일 (주말 제외, 한국·미국 공휴일은 별도 처리 안 함 → 휴장일이면 API가 빈 응답 = 자연 스킵)
- *  - 코인: 전체 일자 (24/7)
+ *  평일 (주말 제외, 한국·미국 공휴일은 별도 처리 안 함 → 휴장일이면 API가 빈 응답 = 자연 스킵)
  */
-function expectedTradingDates(exchange: string, fromDate: Date, toDate: Date): string[] {
-  const isCrypto = exchange.toUpperCase() === 'CRYPTO';
+function expectedTradingDates(fromDate: Date, toDate: Date): string[] {
   const dates: string[] = [];
   const cur = new Date(fromDate);
   cur.setHours(0, 0, 0, 0);
   while (cur <= toDate) {
     const day = cur.getDay(); // 0=Sun, 6=Sat
-    if (isCrypto || (day !== 0 && day !== 6)) {
+    if (day !== 0 && day !== 6) {
       dates.push(fmtDate(cur));
     }
     cur.setDate(cur.getDate() + 1);
@@ -139,7 +137,7 @@ async function main() {
   for (const { ticker, exchange, oldest } of tickerMap.values()) {
     try {
       const existing = await ph.readHistory(ticker);
-      const expected = expectedTradingDates(exchange, oldest, yest);
+      const expected = expectedTradingDates(oldest, yest);
 
       if (expected.length === 0) {
         // oldest가 어제보다 미래 — 게시물이 오늘 작성된 경우 등. 차트 없어도 OK.

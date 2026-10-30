@@ -74,7 +74,6 @@ export const POPULAR_BOOST: Record<string, number> = {
   'SOXL:AMS': 55, 'SCHD:AMS': 55, 'JEPI:AMS': 45, 'O:NYS': 40,
   '7203:TSE': 60, '6758:TSE': 55, '7974:TSE': 55, '9984:TSE': 50, '00700:HKS': 60, '09988:HKS': 45,
   '01810:HKS': 50, '600519:SHS': 45, '300750:SZS': 45,
-  'BTC:CRYPTO': 90, 'ETH:CRYPTO': 80, 'XRP:CRYPTO': 70, 'SOL:CRYPTO': 70, 'DOGE:CRYPTO': 60,
 };
 
 /**

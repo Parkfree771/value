@@ -10,8 +10,4 @@ export interface StockData {
   exchange: string;
   industry?: string;
   sector?: string;
-  change24h?: number;
-  changePercent24h?: number;
-  volume24h?: number;
-  tradeValue24h?: number;
 }

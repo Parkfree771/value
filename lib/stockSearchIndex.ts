@@ -147,7 +147,7 @@ class StockSearchIndex {
       name: e.stock.name,
       nameKr: e.stock.nameKr || null,
       exchange: e.stock.exchange,
-      type: e.stock.exchange === 'CRYPTO' ? 'CRYPTO' : 'EQUITY',
+      type: 'EQUITY',
     }));
   }
 
