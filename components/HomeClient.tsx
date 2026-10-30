@@ -7,6 +7,7 @@ import type { FeedPost, FeedData } from '@/types/feed';
 import ReportCard from '@/components/ReportCard';
 import WriteCtaCard from '@/components/WriteCtaCard';
 import { HomeSkeleton } from '@/components/loading/Loading';
+import { matchesReport } from '@/utils/reportSearch';
 import FrontPage from '@/components/front/FrontPage';
 import MarketStrip from '@/components/front/MarketStrip';
 import FeedSidebar from '@/components/front/FeedSidebar';
@@ -169,6 +170,31 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
 
   const totalThemes = themeItems.length;
 
+  // 검색·필터를 쓰기 시작하면 전체 글(최대 500)을 한 번 받아온다 — SSR 은 최신 50 + 상위 일부만 싣기 때문에
+  // 그대로 두면 "총 N개" 중 일부만 검색된다. 첫 화면만 보는 방문자는 추가 요청 없음.
+  const fullLoadedRef = useRef(false);
+  const wantsFullFeed = searchQuery.trim() !== '' || marketFilter !== 'all' || selectedTheme !== null || activeTab !== 'all';
+  useEffect(() => {
+    if (!wantsFullFeed || fullLoadedRef.current || reports.length >= total) return;
+    fullLoadedRef.current = true;
+    fetch(FEED_API)
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error('Feed fetch failed'))))
+      .then((feedData: FeedData) => {
+        // SSR 글에만 있는 요약·썸네일은 유지
+        const extra = new Map(reports.map((r) => [r.id, r]));
+        setReports(
+          mapPostsToReports(feedData.posts).map((r) => {
+            const prev = extra.get(r.id);
+            return prev ? { ...r, excerpt: prev.excerpt, thumbnail: prev.thumbnail, levelPoints: prev.levelPoints ?? r.levelPoints } : r;
+          }),
+        );
+      })
+      .catch((error) => {
+        fullLoadedRef.current = false;
+        console.error('Failed to fetch full feed:', error);
+      });
+  }, [wantsFullFeed, reports, total]);
+
   // SSR initialData(최신 50 + 수익률 top30)가 첫 페인트부터 피드를 채운다.
   // 평상시엔 클라이언트 피드 fetch를 하지 않는다 — 매 진입 500건 재요청 제거.
   // SSR이 실패해 initialData가 없을 때만 /api/feed/public 으로 보충한다.
@@ -229,17 +255,8 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
         if (!exchanges || !report.exchange || !exchanges.includes(report.exchange.toUpperCase())) return false;
       }
 
-      // 검색어 필터링
-      if (searchQuery.trim()) {
-        const query = searchQuery.toLowerCase();
-        const matchesSearch = (
-          (report.stockName || '').toLowerCase().includes(query) ||
-          (report.ticker || '').toLowerCase().includes(query) ||
-          (report.author || '').toLowerCase().includes(query) ||
-          (report.title || '').toLowerCase().includes(query)
-        );
-        if (!matchesSearch) return false;
-      }
+      // 검색어 — 공백 무시, 한글 약칭(마이크론 → MU)까지 (utils/reportSearch)
+      if (searchQuery.trim() && !matchesReport(report, searchQuery)) return false;
 
       return true;
     });
@@ -376,7 +393,7 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
                 className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-sm transition-all ${
                   safePage === page
                     ? 'border pixel-chip-active'
-                    : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                    : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
                 }`}
               >
                 {page}

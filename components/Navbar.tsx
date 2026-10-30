@@ -106,7 +106,7 @@ const Navbar = memo(function Navbar() {
           <div className="absolute right-4 sm:right-6 lg:right-8 top-4 flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-1.5 border border-[var(--theme-border-muted)] hover:border-[var(--theme-border)] rounded-sm transition-colors text-[var(--foreground)]"
+              className="p-1.5 border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] rounded-sm transition-colors text-[var(--foreground)]"
               aria-label="테마 전환"
             >
               <ThemeIcon theme={theme} mounted={mounted} />

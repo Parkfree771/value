@@ -405,7 +405,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                     className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-sm transition-all ${
                       currentPage === page
                         ? 'border pixel-chip-active'
-                        : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
                     }`}
                   >
                     {page}
@@ -522,7 +522,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                     className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-sm transition-all ${
                       currentPage === page
                         ? 'border pixel-chip-active'
-                        : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
                     }`}
                   >
                     {page}
@@ -607,7 +607,7 @@ export default function RankingClient({ initialReports, initialInvestors, initia
                     className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-sm transition-all ${
                       currentPage === page
                         ? 'border pixel-chip-active'
-                        : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
                     }`}
                   >
                     {page}

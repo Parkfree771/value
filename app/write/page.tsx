@@ -555,7 +555,7 @@ function WritePageContent() {
             <button
               type="button"
               onClick={() => setEditorMode('text')}
-              className="px-3 py-1 text-xs font-bold border bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
+              className="px-3 py-1 text-xs font-bold border bg-[var(--theme-bg-card)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] transition-all"
             >
               텍스트 모드
             </button>
@@ -648,7 +648,7 @@ function WritePageContent() {
                       )}
                     </span>
                     <label
-                      className={`text-[10px] px-2 py-0.5 border border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] bg-[var(--theme-bg-card)] transition-all ${
+                      className={`text-[10px] px-2 py-0.5 border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] bg-[var(--theme-bg-card)] transition-all ${
                         isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                       }`}
                     >
@@ -832,7 +832,7 @@ function WritePageContent() {
                 <button
                   type="button"
                   onClick={() => setEditorMode('html')}
-                  className="px-3 py-1 text-xs font-bold border rounded-sm border-[var(--theme-border-muted)] hover:border-[var(--theme-border)] transition-colors"
+                  className="px-3 py-1 text-xs font-bold border rounded-sm border-[var(--theme-border-control)] hover:border-[var(--theme-border)] transition-colors"
                 >
                   HTML
                 </button>
@@ -1023,7 +1023,7 @@ function WritePageContent() {
                     className={`font-sans px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border rounded-sm transition-all ${
                       selectedThemes.includes(theme.id)
                         ? 'pixel-chip-active font-bold'
-                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                        : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
                     }`}
                     title={theme.description}
                   >

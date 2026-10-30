@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, memo } from 'react';
+import { shortStockName, exchangeLabel } from '@/utils/reportDisplay';
 
 export interface StockSuggestion {
   symbol: string;
@@ -16,6 +17,8 @@ interface SearchBarProps {
   placeholder?: string;
   showStockSuggestions?: boolean;
   onSelectStock?: (stock: StockSuggestion) => void;
+  /** 자동완성 결과가 바뀔 때 — 리포트 검색에 종목 별칭·초성 매칭을 보태는 데 쓴다 */
+  onSuggestions?: (stocks: StockSuggestion[]) => void;
   /** 바깥 래퍼 클래스 (기본: 아래 여백) */
   className?: string;
 }
@@ -26,6 +29,7 @@ const SearchBar = memo(function SearchBar({
   placeholder = '검색어를 입력하세요...',
   showStockSuggestions = true,
   onSelectStock,
+  onSuggestions,
   className = 'mb-4 sm:mb-6',
 }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -34,6 +38,9 @@ const SearchBar = memo(function SearchBar({
   const [isLoading, setIsLoading] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // 콜백은 ref 로 — 부모가 매 렌더 새 함수를 넘겨도 검색이 다시 돌지 않게
+  const onSuggestionsRef = useRef(onSuggestions);
+  onSuggestionsRef.current = onSuggestions;
 
   // 실시간 종목 검색 API 호출 (showStockSuggestions가 true일 때만)
   useEffect(() => {
@@ -48,6 +55,7 @@ const SearchBar = memo(function SearchBar({
 
       if (!query || query.length < 1) {
         setSuggestions([]);
+        onSuggestionsRef.current?.([]);
         return;
       }
 
@@ -71,11 +79,9 @@ const SearchBar = memo(function SearchBar({
 
         const data = await response.json();
 
-        if (data.success && Array.isArray(data.stocks)) {
-          setSuggestions(data.stocks);
-        } else {
-          setSuggestions([]);
-        }
+        const stocks: StockSuggestion[] = data.success && Array.isArray(data.stocks) ? data.stocks : [];
+        setSuggestions(stocks);
+        onSuggestionsRef.current?.(stocks);
       } catch (error: any) {
         if (error.name !== 'AbortError') {
           console.error('Stock search error:', error);
@@ -87,7 +93,7 @@ const SearchBar = memo(function SearchBar({
     };
 
     // 디바운싱
-    const timeoutId = setTimeout(fetchSuggestions, 300);
+    const timeoutId = setTimeout(fetchSuggestions, 200);
 
     return () => {
       clearTimeout(timeoutId);
@@ -133,11 +139,10 @@ const SearchBar = memo(function SearchBar({
     if (onSelectStock) {
       onSelectStock(stock);
     }
-    setSearchQuery(stock.symbol);
     setShowSuggestions(false);
     setFocusedIndex(-1);
     setSuggestions([]);
-  }, [setSearchQuery, onSelectStock]);
+  }, [onSelectStock]);
 
   const highlightMatch = useCallback((text: string, query: string) => {
     const index = text.toLowerCase().indexOf(query.toLowerCase());
@@ -146,7 +151,7 @@ const SearchBar = memo(function SearchBar({
     return (
       <>
         {text.substring(0, index)}
-        <span className="font-bold text-[var(--theme-accent)] dark:text-[var(--theme-accent-light)]">
+        <span className="font-bold text-[var(--theme-orange)]">
           {text.substring(index, index + query.length)}
         </span>
         {text.substring(index + query.length)}
@@ -154,23 +159,12 @@ const SearchBar = memo(function SearchBar({
     );
   }, []);
 
-  const getExchangeBadgeColor = (exchange: string) => {
-    if (exchange === 'KRX') return 'bg-red-500/15 text-red-500 border-red-500';
-    if (exchange === 'NAS' || exchange === 'NYS') return 'bg-green-500/15 text-green-500 border-green-500';
-    return 'bg-gray-500/15 text-gray-500 border-gray-500';
-  };
 
-  const getExchangeLabel = (exchange: string) => {
-    if (exchange === 'KRX') return '한국';
-    if (exchange === 'NAS') return 'NASDAQ';
-    if (exchange === 'NYS') return 'NYSE';
-    return exchange;
-  };
 
   return (
     <div className={className} ref={searchRef}>
       {/* 검색 — 버튼 없이 입력창 하나: 왼쪽 돋보기, 아래 괘선(포커스 시 잉크색 굵게), 오른쪽 지우기 */}
-      <div className="w-full sm:max-w-md">
+      <div className="w-full">
         <div className="relative">
           <svg
             className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--theme-ink-soft)]"
@@ -196,7 +190,7 @@ const SearchBar = memo(function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             aria-label="검색어 입력"
-            className="w-full h-11 bg-transparent pl-7 pr-8 text-[15px] text-[var(--foreground)] placeholder:text-[var(--theme-ink-soft)] border-0 border-b border-[var(--theme-border-muted)] rounded-none outline-none focus:border-b-2 focus:border-[var(--theme-border)] transition-colors"
+            className="w-full h-11 bg-transparent pl-7 pr-8 text-[15px] text-[var(--foreground)] placeholder:text-[var(--theme-ink-soft)] border-0 border-b-2 border-[var(--theme-border-control)] rounded-none outline-none focus:border-b-2 focus:border-[var(--theme-border)] transition-colors"
           />
           {searchQuery && (
             <button
@@ -219,7 +213,8 @@ const SearchBar = memo(function SearchBar({
 
           {/* 자동완성 드롭다운 */}
           {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
-            <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm max-h-[50vh] sm:max-h-80 overflow-y-auto">
+            <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm max-h-[50vh] sm:max-h-80 overflow-y-auto shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+              <p className="px-3 sm:px-4 pt-2 pb-1 text-[11px] font-bold text-[var(--theme-ink-soft)]">종목으로 보기</p>
               {isLoading ? (
                 <div className="px-4 py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
                   검색 중...
@@ -228,26 +223,21 @@ const SearchBar = memo(function SearchBar({
                 suggestions.map((stock, index) => (
                   <button
                     key={`${stock.exchange}-${stock.symbol}`}
+                    type="button"
                     onClick={() => handleSelectSuggestion(stock)}
                     onMouseEnter={() => setFocusedIndex(index)}
-                    className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-all border-b border-[var(--theme-border-muted)] last:border-b-0 ${
-                      focusedIndex === index ? 'bg-blue-50 dark:bg-blue-900/10 border-l-2 border-l-[var(--theme-accent)]' : ''
+                    className={`w-full px-3 sm:px-4 py-2.5 text-left border-b border-[var(--theme-border-muted)] last:border-b-0 transition-colors ${
+                      focusedIndex === index ? 'bg-[var(--theme-bg)]' : ''
                     }`}
                   >
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <span className={`px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold border rounded-sm flex-shrink-0 ${getExchangeBadgeColor(stock.exchange)}`}>
-                        {getExchangeLabel(stock.exchange)}
-                      </span>
+                    <div className="flex items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 sm:gap-2">
-                          <span className="font-mono font-bold text-xs sm:text-sm text-gray-900 dark:text-white">
-                            {highlightMatch(stock.symbol, searchQuery)}
-                          </span>
-                          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 truncate">
-                            {highlightMatch(stock.nameKr || stock.name, searchQuery)}
-                          </span>
-                        </div>
+                        <p className="text-sm font-bold truncate">
+                          {highlightMatch(stock.nameKr || shortStockName(stock.name, stock.symbol), searchQuery)}
+                        </p>
+                        <p className="text-xs text-[var(--theme-ink-soft)] truncate font-mono">{stock.symbol}</p>
                       </div>
+                      <span className="flex-shrink-0 text-[11px] font-bold text-[var(--theme-ink-soft)]">{exchangeLabel(stock.exchange)}</span>
                     </div>
                   </button>
                 ))
@@ -258,11 +248,6 @@ const SearchBar = memo(function SearchBar({
 
       </div>
 
-      {showStockSuggestions && searchQuery && !showSuggestions && (
-        <div className="mt-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold">&ldquo;{searchQuery}&rdquo;</span> 검색 중...
-        </div>
-      )}
     </div>
   );
 });

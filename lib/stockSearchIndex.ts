@@ -1,11 +1,21 @@
 /**
- * 주식 검색 인덱스
+ * 종목 검색 인덱스 — 글쓰기 종목 검색(클라이언트)과 /api/stocks/search(서버)가 같은 규칙을 쓴다.
  *
- * 프리픽스 맵 기반 O(1) 조회로 검색 성능 최적화
- * - 심볼 프리픽스 인덱스
- * - 한글 이름 프리픽스 인덱스
- * - 영문 이름 프리픽스 인덱스
+ * 찾는 방법
+ * - 공백·대소문자·기호 무시: "삼성 전자" = "삼성전자", "SK 하이닉스" = "sk하이닉스", "brk.b" = "BRK/B"
+ * - 한글명·영문명·티커의 앞부분·단어 시작·중간 포함
+ * - 초성: "ㅅㅅㅈㅈ" → 삼성전자
+ * - 별칭·다른 표기 (lib/stockAliases.ts): "하닉", "현대자동차", "도요타", "코덱스200"
+ *
+ * 순위
+ * - 정확히 일치 > 앞부분 일치 > 단어 시작 > 중간 포함 순의 점수
+ * - 같은 점수대에서는 대형주·인기 종목 가산(POPULAR_BOOST), 우선주·레버리지/인버스·테마 ETF 감점
+ *   (질의에 그 단어가 있으면 감점하지 않음)
+ *
+ * 3만 종목을 미리 정규화해 두고 매번 훑는다 — 한 번에 수 ms.
  */
+
+import { STOCK_ALIASES, POPULAR_BOOST, QUERY_REWRITES } from './stockAliases';
 
 export interface GlobalStock {
   symbol: string;
@@ -23,240 +33,147 @@ export interface Stock {
   type: string;
 }
 
-/**
- * 프리픽스 인덱스 클래스
- *
- * Trie 대신 Map 기반으로 구현하여 메모리 효율성과 조회 속도 균형
- */
-class PrefixIndex {
-  // prefix -> Set of stock indices
-  private symbolIndex: Map<string, Set<number>> = new Map();
-  private nameKrIndex: Map<string, Set<number>> = new Map();
-  private nameEnIndex: Map<string, Set<number>> = new Map();
+interface Entry {
+  stock: GlobalStock;
+  key: string;
+  sym: string;
+  kr: string;
+  en: string;
+  enWords: string[];
+  cho: string;
+  aliases: string[];
+  boost: number;
+  isPreferred: boolean;
+  isLeveraged: boolean;
+  isFund: boolean;
+}
 
-  private stocks: GlobalStock[] = [];
-  private isBuilt = false;
+/** 소문자 + 공백·기호 제거 (한글·영문·숫자만 남김) */
+export function normalizeQuery(s: string): string {
+  return s.toLowerCase().replace(/[^0-9a-z가-힣ㄱ-ㅎ]/g, '');
+}
 
-  /**
-   * 인덱스 빌드
-   */
+const CHO = ['ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ', 'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ'];
+
+/** 한글 음절 → 초성, 그 외 문자는 그대로 */
+function toChosung(s: string): string {
+  let out = '';
+  for (const ch of s) {
+    const code = ch.charCodeAt(0) - 0xac00;
+    out += code >= 0 && code < 11172 ? CHO[Math.floor(code / 588)] : ch;
+  }
+  return out;
+}
+
+const PREFERRED = /우[b-c]?$|[0-9]우[b-c]?$/; // 삼성전자우, 현대차2우B (정규화 후 소문자)
+const LEVERAGED = /레버리지|인버스|선물|2x|3x|bull|bear|ultra|채권혼합|커버드콜/;
+const FUND_BRAND = /^(kodex|tiger|ace|rise|sol|kiwoom|plus|arirang|hanaro|kbstar|koact|timefolio|heroes|unicorn|1q|bnk|woori|itf|마이다스|에셋플러스|파워|trex|direxion|proshares|ishares|spdr|invesco|vanguard|granite|kurv|defiance|tradr|leverage)/;
+
+class StockSearchIndex {
+  private entries: Entry[] = [];
+  private builtFor = 0;
+
   build(stocks: GlobalStock[]): void {
-    if (this.isBuilt && this.stocks.length === stocks.length) {
-      return;
-    }
-
-    console.log('[StockSearchIndex] Building index for', stocks.length, 'stocks');
-    const startTime = performance.now();
-
-    this.stocks = stocks;
-    this.symbolIndex.clear();
-    this.nameKrIndex.clear();
-    this.nameEnIndex.clear();
-
-    for (let i = 0; i < stocks.length; i++) {
-      const stock = stocks[i];
-
-      // 심볼 인덱싱 (모든 프리픽스)
-      const symbol = stock.symbol.toLowerCase();
-      this.addToIndex(this.symbolIndex, symbol, i, 4); // 최대 4글자 프리픽스
-
-      // 한글 이름 인덱싱 (전체 + 개별 단어)
-      if (stock.nameKr) {
-        const nameKr = stock.nameKr.toLowerCase();
-        this.addToIndex(this.nameKrIndex, nameKr, i, 4);
-        for (const word of nameKr.split(/\s+/)) {
-          if (word.length > 0) this.addToIndex(this.nameKrIndex, word, i, 4);
-        }
-      }
-
-      // 영문 이름 인덱싱 (전체 + 개별 단어)
-      const name = stock.name.toLowerCase();
-      this.addToIndex(this.nameEnIndex, name, i, 4);
-      for (const word of name.split(/\s+/)) {
-        if (word.length > 0) this.addToIndex(this.nameEnIndex, word, i, 4);
-      }
-    }
-
-    this.isBuilt = true;
-    const elapsed = performance.now() - startTime;
-    console.log(`[StockSearchIndex] Index built in ${elapsed.toFixed(2)}ms`);
-    console.log(`[StockSearchIndex] Symbol prefixes: ${this.symbolIndex.size}`);
-    console.log(`[StockSearchIndex] Korean name prefixes: ${this.nameKrIndex.size}`);
-    console.log(`[StockSearchIndex] English name prefixes: ${this.nameEnIndex.size}`);
-  }
-
-  /**
-   * 프리픽스 인덱스에 추가
-   */
-  private addToIndex(index: Map<string, Set<number>>, text: string, stockIndex: number, maxPrefixLen: number): void {
-    const len = Math.min(text.length, maxPrefixLen);
-    for (let i = 1; i <= len; i++) {
-      const prefix = text.slice(0, i);
-      let set = index.get(prefix);
-      if (!set) {
-        set = new Set();
-        index.set(prefix, set);
-      }
-      set.add(stockIndex);
-    }
-  }
-
-  /**
-   * 검색 실행
-   */
-  search(query: string, limit: number = 20): Stock[] {
-    if (!this.isBuilt || !query || query.length === 0) {
-      return [];
-    }
-
-    const searchLower = query.toLowerCase().trim();
-    if (searchLower.length === 0) {
-      return [];
-    }
-
-    // 검색 프리픽스 (최대 4글자)
-    const prefix = searchLower.slice(0, 4);
-
-    // 후보 수집
-    const candidates = new Set<number>();
-
-    // 심볼 매치
-    const symbolMatches = this.symbolIndex.get(prefix);
-    if (symbolMatches) {
-      symbolMatches.forEach(i => candidates.add(i));
-    }
-
-    // 한글 이름 매치
-    const nameKrMatches = this.nameKrIndex.get(prefix);
-    if (nameKrMatches) {
-      nameKrMatches.forEach(i => candidates.add(i));
-    }
-
-    // 영문 이름 매치
-    const nameEnMatches = this.nameEnIndex.get(prefix);
-    if (nameEnMatches) {
-      nameEnMatches.forEach(i => candidates.add(i));
-    }
-
-    // includes() 폴백: 프리픽스로 찾을 수 없는 복합어 내 부분 문자열 매치
-    // (예: "인버스" in "코스닥150선물인버스", "레버리지" in "코스닥150레버리지")
-    if (searchLower.length >= 2) {
-      for (let i = 0; i < this.stocks.length; i++) {
-        if (candidates.has(i)) continue;
-        const stock = this.stocks[i];
-        const nameKr = stock.nameKr?.toLowerCase() || '';
-        const name = stock.name.toLowerCase();
-        if (nameKr.includes(searchLower) || name.includes(searchLower)) {
-          candidates.add(i);
-        }
-      }
-    }
-
-    // 후보가 없으면 빈 결과
-    if (candidates.size === 0) {
-      return [];
-    }
-
-    // 후보 필터링 및 정렬
-    const results: { stock: GlobalStock; score: number }[] = [];
-    const seenKeys = new Set<string>();
-
-    for (const idx of candidates) {
-      const stock = this.stocks[idx];
+    if (this.builtFor === stocks.length && this.entries.length > 0) return;
+    const seen = new Set<string>();
+    this.entries = [];
+    for (const stock of stocks) {
       const key = `${stock.symbol}:${stock.exchange}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const kr = normalizeQuery(stock.nameKr || '');
+      const enRaw = stock.name.toLowerCase();
+      const en = normalizeQuery(enRaw);
+      const display = kr || en;
+      this.entries.push({
+        stock,
+        key,
+        sym: normalizeQuery(stock.symbol),
+        kr,
+        en,
+        enWords: enRaw.split(/[^0-9a-z]+/).filter(Boolean),
+        cho: toChosung(kr),
+        aliases: (STOCK_ALIASES[key] ?? []).map(normalizeQuery),
+        boost: POPULAR_BOOST[key] ?? 0,
+        isPreferred: stock.country === 'KR' && PREFERRED.test(kr),
+        isLeveraged: LEVERAGED.test(display) || LEVERAGED.test(enRaw),
+        isFund: FUND_BRAND.test(display),
+      });
+    }
+    this.builtFor = stocks.length;
+  }
 
-      if (seenKeys.has(key)) continue;
-      seenKeys.add(key);
+  get ready(): boolean {
+    return this.entries.length > 0;
+  }
 
-      // 상세 매칭 점수 계산
-      const score = this.calculateScore(stock, searchLower);
-      if (score > 0) {
-        results.push({ stock, score });
-      }
+  get size(): number {
+    return this.entries.length;
+  }
+
+  search(query: string, limit = 20): Stock[] {
+    const q = normalizeQuery(query);
+    if (!q || !this.ready) return [];
+
+    // 질의 변형 — 한글 ETF 브랜드 등을 영문 표기로
+    const variants = [q];
+    for (const [ko, en] of QUERY_REWRITES) {
+      if (q.startsWith(ko)) variants.push(en + q.slice(ko.length));
+    }
+    const isChosung = /^[ㄱ-ㅎ]+$/.test(q);
+    // 질의 자체에 들어 있으면 감점하지 않는다 ("삼성전자우", "kodex 레버리지")
+    const wantsPreferred = /우[b-c]?$/.test(q);
+    const wantsLeveraged = LEVERAGED.test(q);
+    const wantsFund = variants.some((v) => FUND_BRAND.test(v));
+
+    const scored: { e: Entry; score: number }[] = [];
+    for (const e of this.entries) {
+      let base = 0;
+      for (const v of variants) base = Math.max(base, this.matchScore(e, v, isChosung));
+      if (base === 0) continue;
+
+      let score = base + e.boost;
+      if (e.isPreferred && !wantsPreferred) score -= 40;
+      if (e.isLeveraged && !wantsLeveraged) score -= 35;
+      if (e.isFund && !wantsFund) score -= 25;
+      // 이름이 질의에 가까울수록(짧을수록) 조금 위로
+      score -= Math.min(20, Math.max(0, (e.kr || e.en).length - q.length));
+      scored.push({ e, score });
     }
 
-    // 점수순 정렬
-    results.sort((a, b) => b.score - a.score);
-
-    // 결과 변환
-    return results.slice(0, limit).map(({ stock }) => ({
-      symbol: stock.symbol,
-      name: stock.name,
-      nameKr: stock.nameKr || null,
-      exchange: stock.exchange,
-      type: stock.exchange === 'CRYPTO' ? 'CRYPTO' : 'EQUITY',
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, limit).map(({ e }) => ({
+      symbol: e.stock.symbol,
+      name: e.stock.name,
+      nameKr: e.stock.nameKr || null,
+      exchange: e.stock.exchange,
+      type: e.stock.exchange === 'CRYPTO' ? 'CRYPTO' : 'EQUITY',
     }));
   }
 
-  /**
-   * 매칭 점수 계산
-   */
-  private calculateScore(stock: GlobalStock, searchLower: string): number {
-    const symbolLower = stock.symbol.toLowerCase();
-    const nameLower = stock.name.toLowerCase();
-    const nameKrLower = stock.nameKr?.toLowerCase() || '';
-
-    let score = 0;
-
-    // 심볼 정확 매치 (최고 점수)
-    if (symbolLower === searchLower) {
-      return 1000;
+  /** 일치 정도 점수 (0 = 불일치). 점수대 사이 간격(100)이 가산·감점보다 커서 단계가 뒤집히지 않는다 */
+  private matchScore(e: Entry, q: string, isChosung: boolean): number {
+    if (isChosung) {
+      if (!e.cho) return 0;
+      if (e.cho === q) return 700;
+      if (e.cho.startsWith(q)) return 600;
+      return e.cho.includes(q) ? 400 : 0;
     }
-
-    // 한글 이름 정확 매치
-    if (nameKrLower && nameKrLower === searchLower) {
-      return 900;
-    }
-
-    // 심볼 시작 매치
-    if (symbolLower.startsWith(searchLower)) {
-      score = 800 - searchLower.length; // 짧은 매치가 더 정확
-    }
-
-    // 한글 이름 시작 매치
-    if (nameKrLower && nameKrLower.startsWith(searchLower)) {
-      score = Math.max(score, 700 - searchLower.length);
-    }
-
-    // 한글 이름 포함
-    if (nameKrLower && nameKrLower.includes(searchLower)) {
-      score = Math.max(score, 500);
-    }
-
-    // 영문 이름 시작 매치
-    if (nameLower.startsWith(searchLower)) {
-      score = Math.max(score, 600);
-    }
-
-    // 영문 이름 포함
-    if (nameLower.includes(searchLower)) {
-      score = Math.max(score, 400);
-    }
-
-    // 심볼 포함
-    if (symbolLower.includes(searchLower)) {
-      score = Math.max(score, 300);
-    }
-
-    return score;
-  }
-
-  /**
-   * 인덱스가 빌드되었는지 확인
-   */
-  get ready(): boolean {
-    return this.isBuilt;
-  }
-
-  /**
-   * 인덱스된 종목 수
-   */
-  get size(): number {
-    return this.stocks.length;
+    if (e.sym === q) return 1000;
+    if (e.kr === q || e.aliases.includes(q)) return 950;
+    if (e.en === q) return 900;
+    if (e.kr.startsWith(q)) return 800;
+    if (e.aliases.some((a) => a.startsWith(q))) return 780;
+    if (e.sym.startsWith(q)) return 760;
+    if (e.en.startsWith(q)) return 700;
+    if (q.length >= 2 && e.enWords.some((w) => w.startsWith(q))) return 600;
+    if (q.length >= 2 && e.kr.includes(q)) return 550;
+    if (q.length >= 3 && e.en.includes(q)) return 400;
+    if (q.length >= 2 && e.aliases.some((a) => a.includes(q))) return 380;
+    return 0;
   }
 }
 
-// 싱글톤 인스턴스
-export const stockSearchIndex = new PrefixIndex();
+export const stockSearchIndex = new StockSearchIndex();
 
 export default stockSearchIndex;

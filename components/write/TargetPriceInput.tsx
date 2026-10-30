@@ -124,7 +124,7 @@ export default function TargetPriceInput({ value, onChange, currentPrice, curren
             className={`border rounded-[2px] tabular-nums font-bold transition-colors disabled:opacity-40 ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} ${
               activeStep === p
                 ? 'bg-[var(--theme-border)] border-[var(--theme-border)] text-[var(--background)]'
-                : 'border-[var(--theme-border-muted)] hover:border-[var(--theme-border)]'
+                : 'border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
             }`}
           >
             {p > 0 ? '+' : ''}
@@ -135,7 +135,7 @@ export default function TargetPriceInput({ value, onChange, currentPrice, curren
           type="button"
           disabled={!cur}
           onClick={() => apply(0)}
-          className={`border rounded-[2px] border-[var(--theme-border-muted)] hover:border-[var(--theme-border)] text-[var(--theme-ink-soft)] transition-colors disabled:opacity-40 ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
+          className={`border rounded-[2px] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] text-[var(--theme-ink-soft)] transition-colors disabled:opacity-40 ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
         >
           현재가
         </button>

@@ -52,6 +52,26 @@ function searchStocksLocal(query: string, limit: number = 20): Stock[] {
   return stockSearchIndex.search(query, limit);
 }
 
+/** 목록에 보일 이름 — 한글명이 있으면 한글, 없으면 영문 약칭 */
+function displayName(stock: Stock): string {
+  return stock.nameKr || shortStockName(stock.name, stock.symbol);
+}
+
+/** 질의와 같은 부분 굵게 (공백 무시 비교는 생략 — 연속 일치만) */
+function highlight(text: string, query: string) {
+  const q = query.trim();
+  if (!q) return text;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return text;
+  return (
+    <>
+      {text.slice(0, i)}
+      <mark className="bg-transparent text-[var(--theme-orange)]">{text.slice(i, i + q.length)}</mark>
+      {text.slice(i + q.length)}
+    </>
+  );
+}
+
 interface StockSearchInputProps {
   onStockSelect: (stockData: StockData) => void;
   selectedStock?: StockData | null;
@@ -65,6 +85,9 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  // 고른 종목의 가격을 불러오는 중 / 실패 메시지 (alert 대신 입력창 아래에 표시)
+  const [pending, setPending] = useState<Stock | null>(null);
+  const [error, setError] = useState('');
   const searchRef = useRef<HTMLDivElement>(null);
 
   // 검색 결과 외부 클릭 시 닫기
@@ -114,44 +137,32 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
     return () => clearTimeout(debounceTimer);
   }, [query]);
 
-  // 주식 선택 시 상세 데이터 가져오기
+  // 종목 선택 → 현재가·지표 조회
   const handleStockSelect = async (stock: Stock) => {
-    setQuery('');
     setShowResults(false);
-    setIsLoading(true);
+    setPending(stock);
+    setError('');
 
     try {
-      // API 호출해서 정확한 정보 가져오기
-      const url = `/api/stocks/${stock.symbol}?exchange=${encodeURIComponent(stock.exchange)}`;
-      console.log(`[StockSearchInput] API 호출: ${url}`);
-      const response = await fetch(url);
+      const response = await fetch(`/api/stocks/${encodeURIComponent(stock.symbol)}?exchange=${encodeURIComponent(stock.exchange)}`);
       const stockData = await response.json();
-
-      // API 응답 에러 체크
       if (!response.ok) {
-        alert(stockData.error || `${stock.symbol} 주가 데이터를 가져올 수 없습니다.`);
+        setError(stockData.error || `${displayName(stock)} 가격을 가져오지 못했어요. 잠시 후 다시 시도해 주세요.`);
         return;
       }
-
-      // 주가 데이터 유효성 체크
-      if (!stockData.currentPrice || stockData.currentPrice === 0) {
-        alert(`${stock.symbol}의 주가 정보가 없습니다. 다른 종목을 선택해주세요.`);
+      if (!stockData.currentPrice) {
+        setError(`${displayName(stock)}은(는) 지금 가격 정보가 없어요. 다른 종목을 골라 주세요.`);
         return;
       }
-
-      // 자동완성에서 표시된 기업명 그대로 사용 (한글명이 있으면 한글, 없으면 영어)
-      const displayName = ((stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr) ? stock.nameKr : stock.name;
-
-      console.log('Stock data loaded:', { ...stockData, name: displayName });
-      onStockSelect({
-        ...stockData,
-        name: displayName,
-      });
-    } catch (error) {
-      console.error('Failed to fetch stock data:', error);
-      alert(`주가 조회 중 오류가 발생했습니다: ${stock.symbol}`);
+      setQuery('');
+      // 한국 종목·코인은 한글명, 해외 종목은 원문(영문) — 카드에서 shortStockName 으로 한글 약칭 표시
+      const name = (stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr ? stock.nameKr : stock.name;
+      onStockSelect({ ...stockData, name });
+    } catch (err) {
+      console.error('Failed to fetch stock data:', err);
+      setError('가격 조회 중 문제가 생겼어요. 네트워크를 확인하고 다시 시도해 주세요.');
     } finally {
-      setIsLoading(false);
+      setPending(null);
     }
   };
 
@@ -172,9 +183,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0) {
-          handleStockSelect(results[selectedIndex]);
-        }
+        handleStockSelect(results[selectedIndex >= 0 ? selectedIndex : 0]);
         break;
       case 'Escape':
         setShowResults(false);
@@ -278,64 +287,76 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setError('');
+              }}
+              onFocus={() => {
+                // 첫 글자 입력 전에 종목 목록(약 4MB)을 미리 받아 둔다
+                loadGlobalStocks().catch(() => {});
+                if (query) setShowResults(true);
+              }}
               onKeyDown={handleKeyDown}
-              placeholder="기업명 또는 티커 입력 (예: 삼성전자, 나이키, AAPL)"
+              placeholder="기업명 · 티커 · 초성 (예: 삼성전자, 하닉, NVDA, ㅅㅅㅈㅈ)"
               aria-label="종목 검색"
-              className="pixel-input !py-3"
+              autoComplete="off"
+              disabled={!!pending}
+              className="pixel-input !py-3 !text-base"
             />
-            {isLoading && (
+            {(isLoading || pending) && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-border)]"></div>
               </div>
             )}
           </div>
 
+          {pending && (
+            <p className="mt-2 text-xs text-[var(--theme-ink-soft)]">{displayName(pending)} 가격을 불러오는 중…</p>
+          )}
+          {error && <p className="mt-2 text-xs font-bold text-[var(--color-error)]">{error}</p>}
+
           {/* 검색 결과 드롭다운 */}
           {showResults && results.length > 0 && (
             <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
                           border border-[var(--theme-border-muted)] rounded-sm
-                          max-h-[50vh] sm:max-h-96 overflow-y-auto">
-              {results.map((stock, index) => (
-                <button
-                  key={`${stock.symbol}-${stock.exchange}-${index}`}
-                  onClick={() => handleStockSelect(stock)}
-                  className={`w-full px-3 sm:px-4 py-2.5 sm:py-3 text-left hover:bg-red-50 dark:hover:bg-red-900/10
-                            transition-colors border-b border-[var(--theme-border-muted)] last:border-b-0
-                            ${index === selectedIndex ? 'bg-red-50 dark:bg-red-900/10' : ''}`}
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                          max-h-[50vh] sm:max-h-96 overflow-y-auto shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
+              {results.map((stock, index) => {
+                const primary = displayName(stock);
+                // 해외 종목만 원문 영문명 병기 (한국 종목 name 필드는 "SK" 처럼 잘려 있음)
+                const isDomestic = stock.exchange === 'KRX' || stock.exchange === 'CRYPTO';
+                const secondary = !isDomestic && stock.nameKr ? shortStockName(stock.name, '') : null;
+                return (
+                  <button
+                    key={`${stock.symbol}-${stock.exchange}-${index}`}
+                    type="button"
+                    onClick={() => handleStockSelect(stock)}
+                    onMouseEnter={() => setSelectedIndex(index)}
+                    className={`w-full px-3 sm:px-4 py-2.5 text-left border-b border-[var(--theme-border-muted)] last:border-b-0 transition-colors ${
+                      index === selectedIndex ? 'bg-[var(--theme-bg)]' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
                       {stock.exchange === 'CRYPTO' && (
+                        // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={getCryptoImageUrl(stock.symbol)}
-                          alt={stock.symbol}
-                          className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex-shrink-0"
+                          alt=""
+                          className="w-6 h-6 rounded-full flex-shrink-0"
                           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                         />
                       )}
                       <div className="flex-1 min-w-0">
-                        <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
-                          {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr ? stock.nameKr : stock.name}
-                        </div>
-                        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
-                          {stock.symbol}
-                          {(stock.exchange === 'KRX' || stock.exchange === 'CRYPTO') && stock.nameKr && <span className="ml-1.5 sm:ml-2 text-gray-400">· {stock.name}</span>}
-                        </div>
+                        <p className="text-sm sm:text-[15px] font-bold truncate">{highlight(primary, query)}</p>
+                        <p className="text-xs text-[var(--theme-ink-soft)] truncate">
+                          <span className="font-mono">{stock.symbol}</span>
+                          {secondary && <span className="ml-1.5">· {secondary}</span>}
+                        </p>
                       </div>
+                      <span className="flex-shrink-0 text-[11px] font-bold text-[var(--theme-ink-soft)]">{exchangeLabel(stock.exchange)}</span>
                     </div>
-                    {stock.exchange === 'CRYPTO' ? (
-                      <span className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium flex-shrink-0 ml-2">
-                        코인
-                      </span>
-                    ) : (
-                      <div className="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500 flex-shrink-0 ml-2">
-                        {stock.exchange}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           )}
 
@@ -343,9 +364,8 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
           {showResults && !isLoading && query.length > 0 && results.length === 0 && (
             <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
                           border border-[var(--theme-border-muted)] rounded-sm p-4">
-              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
-                검색 결과가 없습니다
-              </p>
+              <p className="text-sm text-center">&lsquo;{query}&rsquo;에 맞는 종목이 없어요</p>
+              <p className="mt-1 text-xs text-[var(--theme-ink-soft)] text-center">영문 이름이나 티커(예: TSLA, 005930)로도 찾아보세요</p>
             </div>
           )}
         </>

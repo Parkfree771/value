@@ -1,285 +1,285 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import Link from 'next/link';
 import ReportCard from '@/components/ReportCard';
-import SearchBar, { StockSuggestion } from '@/components/SearchBar';
+import SearchBar, { type StockSuggestion } from '@/components/SearchBar';
 import Container from '@/components/Container';
+import { InlineLoading } from '@/components/loading/Loading';
 import { loadThemes, getSymbolsForThemes } from '@/lib/themeStocks';
 import type { Theme } from '@/types/theme';
+import { matchesReport } from '@/utils/reportSearch';
+import { shortStockName, exchangeLabel } from '@/utils/reportDisplay';
+
+// 종목 · 리포트 검색
+// - 검색창: 종목 자동완성(별칭·초성 포함) + 제목·작성자·종목명 텍스트 검색
+// - 종목을 고르면 그 종목 리포트만 + 의견 분포·평균 수익률 요약
+// - 아무것도 안 쳤을 때: 리포트가 많은 종목 바로가기 + 전체 리포트
 
 type SortType = 'latest' | 'returnDesc' | 'returnAsc' | 'popular';
-type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK';
+type MarketFilter = 'all' | 'KR' | 'US' | 'JP' | 'CN' | 'HK' | 'CRYPTO';
 
-const sortLabels: Record<SortType, string> = {
-  latest: '최신순',
-  returnDesc: '수익률↑',
-  returnAsc: '수익률↓',
-  popular: '인기순',
-};
-
-const marketLabels: Record<MarketFilter, string> = {
-  all: '전체',
-  KR: '한국',
-  US: '미국',
-  JP: '일본',
-  CN: '중국',
-  HK: '홍콩',
-};
-
+const SORT_LABELS: Record<SortType, string> = { latest: '최신순', returnDesc: '수익률 높은순', returnAsc: '수익률 낮은순', popular: '조회순' };
+const MARKET_LABELS: Record<MarketFilter, string> = { all: '전체', KR: '한국', US: '미국', JP: '일본', CN: '중국', HK: '홍콩', CRYPTO: '코인' };
 const MARKET_EXCHANGES: Record<string, string[]> = {
-  KR: ['KRX'],
-  US: ['NAS', 'NYS', 'AMS'],
-  JP: ['TSE'],
-  CN: ['SHS', 'SZS'],
-  HK: ['HKS'],
+  KR: ['KRX'], US: ['NAS', 'NYS', 'AMS'], JP: ['TSE'], CN: ['SHS', 'SZS'], HK: ['HKS'], CRYPTO: ['CRYPTO'],
 };
+const PAGE = 20;
 
-// 테마 칩 (라운드 테마)
-const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border rounded-sm transition-colors';
-const THEME_ACTIVE = `${THEME_CHIP} bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400`;
-const THEME_INACTIVE = `${THEME_CHIP} bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]`;
-const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--theme-accent)] border-[var(--theme-accent)]`;
+const TAB = (active: boolean) =>
+  `flex-shrink-0 px-2 py-1 text-[13px] border-b-2 transition-colors ${
+    active ? 'font-bold border-[var(--theme-border)]' : 'border-transparent text-[var(--theme-ink-soft)] hover:text-[var(--foreground)]'
+  }`;
+const CHIP = (active: boolean) =>
+  `flex-shrink-0 px-2.5 py-1 text-xs border rounded-[2px] transition-colors ${
+    active ? 'pixel-chip-active font-bold' : 'border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
+  }`;
 
-// 필터 (텍스트 스타일 - 상장사 & 정렬 공통)
-const FILTER_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
-const FILTER_ACTIVE = `${FILTER_BASE} font-bold text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
-const FILTER_INACTIVE = `${FILTER_BASE} font-medium text-gray-500 dark:text-gray-400 hover:text-[var(--foreground)]`;
+interface FeedReport {
+  id: string;
+  title: string;
+  author: string;
+  ticker: string;
+  stockName: string;
+  exchange: string;
+  opinion: 'buy' | 'sell' | 'hold';
+  returnRate: number;
+  views: number;
+  createdAt: string;
+  themes?: string[];
+  [key: string]: unknown;
+}
 
-/** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
-function measureFirstRow(container: HTMLElement | null): number {
-  if (!container) return Infinity;
-  const children = Array.from(container.children) as HTMLElement[];
-  if (children.length <= 1) return Infinity;
-  const firstTop = children[0].offsetTop;
-  let count = 0;
-  for (const child of children) {
-    if (child.offsetTop !== firstTop) break;
-    count++;
-  }
-  return count >= children.length ? Infinity : Math.max(count - 1, 1);
+interface PickedStock {
+  symbol: string;
+  name: string;
+  exchange: string;
 }
 
 export default function SearchPage() {
-  const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [reports, setReports] = useState<any[]>([]);
+  const [query, setQuery] = useState('');
+  const [suggestedTickers, setSuggestedTickers] = useState<Set<string>>(new Set());
+  const [picked, setPicked] = useState<PickedStock | null>(null);
+  const [reports, setReports] = useState<FeedReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [allThemes, setAllThemes] = useState<Theme[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [sortType, setSortType] = useState<SortType>('latest');
-  const [marketFilter, setMarketFilter] = useState<MarketFilter>('all');
-
-  // 테마 칩 더보기
-  const [themeExpanded, setThemeExpanded] = useState(false);
-  const [themeVisible, setThemeVisible] = useState(Infinity);
-  const themeMeasureRef = useRef<HTMLDivElement>(null);
+  const [market, setMarket] = useState<MarketFilter>('all');
+  const [visible, setVisible] = useState(PAGE);
 
   useEffect(() => {
-    const measure = () => {
-      if (!themeExpanded) setThemeVisible(measureFirstRow(themeMeasureRef.current));
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, [allThemes, themeExpanded]);
-
-  useEffect(() => {
-    const fetchReports = async () => {
-      try {
-        const response = await fetch('/api/feed/public');
-        const data = await response.json();
-        if (data.posts) setReports(data.posts);
-      } catch (error) {
-        console.error('리포트 가져오기 실패:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReports();
+    fetch('/api/feed/public')
+      .then((r) => r.json())
+      .then((data) => setReports(data.posts || []))
+      .catch((e) => console.error('리포트 가져오기 실패:', e))
+      .finally(() => setLoading(false));
     loadThemes().then(setAllThemes).catch(console.error);
   }, []);
 
-  const handleSelectStock = (stock: StockSuggestion) => {};
+  // 필터가 바뀌면 처음 20개부터
+  useEffect(() => setVisible(PAGE), [query, picked, selectedTheme, market, sortType]);
 
-  const themeSymbols = useMemo(() => {
-    if (!selectedTheme || allThemes.length === 0) return null;
-    return getSymbolsForThemes(allThemes, [selectedTheme]);
-  }, [selectedTheme, allThemes]);
+  const handleSuggestions = useCallback((stocks: StockSuggestion[]) => {
+    // 자동완성 상위 5개 종목의 리포트도 텍스트 검색에 포함 ("하닉" → SK하이닉스 리포트)
+    setSuggestedTickers(new Set(stocks.slice(0, 5).map((s) => s.symbol.toUpperCase())));
+  }, []);
 
-  const filteredReports = useMemo(() => {
-    const filtered = reports.filter((report) => {
-      if (themeSymbols) {
-        const hasTagMatch = report.themes?.some((t: string) => t === selectedTheme);
-        const hasSymbolMatch = themeSymbols.has(report.ticker.toUpperCase());
-        if (!hasTagMatch && !hasSymbolMatch) return false;
-      }
-      if (marketFilter !== 'all') {
-        const exchanges = MARKET_EXCHANGES[marketFilter];
-        if (!exchanges || !exchanges.includes(report.exchange?.toUpperCase())) return false;
-      }
-      if (!searchQuery.trim()) return true;
-      const query = searchQuery.toLowerCase();
-      return (
-        (report.title || '').toLowerCase().includes(query) ||
-        (report.stockName || '').toLowerCase().includes(query) ||
-        (report.ticker || '').toLowerCase().includes(query) ||
-        (report.author || '').toLowerCase().includes(query)
-      );
+  const handlePick = useCallback((stock: StockSuggestion) => {
+    setPicked({ symbol: stock.symbol.toUpperCase(), name: stock.nameKr || shortStockName(stock.name, stock.symbol), exchange: stock.exchange });
+    setQuery('');
+    setSuggestedTickers(new Set());
+  }, []);
+
+  const pickFromReports = (ticker: string, name: string, exchange: string) => {
+    setPicked({ symbol: ticker.toUpperCase(), name, exchange });
+    setQuery('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const themeSymbols = useMemo(
+    () => (selectedTheme && allThemes.length ? getSymbolsForThemes(allThemes, [selectedTheme]) : null),
+    [selectedTheme, allThemes],
+  );
+
+  const filtered = useMemo(() => {
+    const list = reports.filter((r) => {
+      const ticker = (r.ticker || '').toUpperCase();
+      if (picked && ticker !== picked.symbol) return false;
+      if (themeSymbols && !r.themes?.includes(selectedTheme as string) && !themeSymbols.has(ticker)) return false;
+      if (market !== 'all' && !MARKET_EXCHANGES[market]?.includes((r.exchange || '').toUpperCase())) return false;
+      return matchesReport(r, query, suggestedTickers);
     });
-
-    return filtered.sort((a, b) => {
+    return list.sort((a, b) => {
       switch (sortType) {
         case 'returnDesc': return (b.returnRate ?? 0) - (a.returnRate ?? 0);
         case 'returnAsc': return (a.returnRate ?? 0) - (b.returnRate ?? 0);
-        case 'popular': return (b.likes ?? 0) - (a.likes ?? 0);
+        case 'popular': return (b.views ?? 0) - (a.views ?? 0);
         default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
     });
-  }, [reports, themeSymbols, selectedTheme, marketFilter, searchQuery, sortType]);
+  }, [reports, picked, themeSymbols, selectedTheme, market, query, suggestedTickers, sortType]);
 
-  const selectedThemeName = selectedTheme
-    ? allThemes.find(t => t.id === selectedTheme)?.name
-    : null;
+  // 고른 종목 요약 — 리포트 수 · 의견 분포 · 평균 수익률
+  const pickedSummary = useMemo(() => {
+    if (!picked) return null;
+    const rs = reports.filter((r) => (r.ticker || '').toUpperCase() === picked.symbol);
+    const count = (o: string) => rs.filter((r) => r.opinion === o).length;
+    const avg = rs.length ? rs.reduce((s, r) => s + (r.returnRate ?? 0), 0) / rs.length : null;
+    return { total: rs.length, buy: count('buy'), sell: count('sell'), hold: count('hold'), avg };
+  }, [picked, reports]);
 
-  const themeItems = useMemo(() => [
-    { id: null, name: '전체' },
-    ...allThemes.map(t => ({ id: t.id as string | null, name: t.name })),
-  ], [allThemes]);
+  // 리포트가 많은 종목 — 검색 전 둘러보기
+  const topStocks = useMemo(() => {
+    const m = new Map<string, { ticker: string; name: string; exchange: string; n: number }>();
+    for (const r of reports) {
+      const t = (r.ticker || '').toUpperCase();
+      if (!t) continue;
+      const cur = m.get(t) ?? { ticker: t, name: shortStockName(r.stockName, t), exchange: r.exchange, n: 0 };
+      cur.n++;
+      m.set(t, cur);
+    }
+    return [...m.values()].sort((a, b) => b.n - a.n).slice(0, 12);
+  }, [reports]);
 
-  const sortKeys = Object.keys(sortLabels) as SortType[];
-  const marketKeys = Object.keys(marketLabels) as MarketFilter[];
-  const totalThemes = themeItems.length;
+  const isFiltering = !!(query.trim() || picked || selectedTheme || market !== 'all');
 
   return (
     <Container>
-      {/* 1. Header + Search Bar */}
-      <h1 className="headline text-xl sm:text-2xl font-bold mb-2">검색</h1>
+      <div className="border-b-2 border-[var(--theme-border)] pb-3 mb-5">
+        <p className="kicker">종목 · 리포트 검색</p>
+        <h1 className="headline text-2xl sm:text-3xl font-bold">어떤 종목이 궁금하세요?</h1>
+      </div>
+
       <SearchBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        placeholder=""
-        showStockSuggestions={false}
-        onSelectStock={handleSelectStock}
+        searchQuery={query}
+        setSearchQuery={(v) => {
+          setQuery(v);
+          if (v) setPicked(null);
+        }}
+        placeholder="종목·티커·초성·제목·작성자 (예: 하닉, NVDA, ㅅㅅㅈㅈ)"
+        showStockSuggestions
+        onSelectStock={handlePick}
+        onSuggestions={handleSuggestions}
+        className="mb-5 sm:max-w-2xl"
       />
 
-      {/* 2. 테마 칩 (더보기 방식) */}
+      {/* 고른 종목 요약 */}
+      {picked && pickedSummary && (
+        <section className="mb-6 border-y-2 border-[var(--theme-border)] py-4 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="kicker">{exchangeLabel(picked.exchange)} · {picked.symbol}</p>
+            <h2 className="headline text-2xl sm:text-3xl leading-tight">{picked.name}</h2>
+          </div>
+          <dl className="flex flex-wrap gap-6 text-sm tabular-nums">
+            <div><dt className="text-xs text-[var(--theme-ink-soft)]">리포트</dt><dd className="font-black text-lg">{pickedSummary.total}편</dd></div>
+            <div>
+              <dt className="text-xs text-[var(--theme-ink-soft)]">의견</dt>
+              <dd className="font-bold text-lg">
+                <span className="text-[var(--color-up)]">매수 {pickedSummary.buy}</span>
+                <span className="mx-1.5 text-[var(--theme-border-muted)]">/</span>
+                <span className="text-[var(--color-down)]">매도 {pickedSummary.sell}</span>
+                {pickedSummary.hold > 0 && <span className="ml-1.5 text-[var(--theme-ink-soft)]">/ 보유 {pickedSummary.hold}</span>}
+              </dd>
+            </div>
+            {pickedSummary.avg !== null && (
+              <div>
+                <dt className="text-xs text-[var(--theme-ink-soft)]">평균 수익률</dt>
+                <dd className={`font-black text-lg ${pickedSummary.avg > 0 ? 'text-[var(--color-up)]' : pickedSummary.avg < 0 ? 'text-[var(--color-down)]' : ''}`}>
+                  {pickedSummary.avg > 0 ? '+' : ''}{pickedSummary.avg.toFixed(2)}%
+                </dd>
+              </div>
+            )}
+          </dl>
+          <button type="button" onClick={() => setPicked(null)} className="text-sm font-bold underline underline-offset-4">
+            종목 선택 해제 ✕
+          </button>
+        </section>
+      )}
+
+      {/* 검색 전 — 리포트가 많은 종목 */}
+      {!isFiltering && topStocks.length > 0 && (
+        <section className="mb-6">
+          <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">리포트가 많은 종목</p>
+          <div className="flex flex-wrap gap-1.5">
+            {topStocks.map((s) => (
+              <button key={s.ticker} type="button" onClick={() => pickFromReports(s.ticker, s.name, s.exchange)} className={CHIP(false)}>
+                <span className="font-bold">{s.name}</span>
+                <span className="ml-1 text-[var(--theme-ink-soft)]">{s.n}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 필터 — 시장 · 정렬 · 테마 */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-y-1 border-b border-[var(--theme-border-muted)]">
+        <div className="flex overflow-x-auto scrollbar-hide">
+          {(Object.keys(MARKET_LABELS) as MarketFilter[]).map((m) => (
+            <button key={m} onClick={() => setMarket(m)} className={TAB(market === m)}>{MARKET_LABELS[m]}</button>
+          ))}
+        </div>
+        <div className="flex overflow-x-auto scrollbar-hide">
+          {(Object.keys(SORT_LABELS) as SortType[]).map((t) => (
+            <button key={t} onClick={() => setSortType(t)} className={TAB(sortType === t)}>{SORT_LABELS[t]}</button>
+          ))}
+        </div>
+      </div>
       {allThemes.length > 0 && (
-        <div className="mb-3 sm:mb-4 relative">
-          {/* 숨겨진 측정용 */}
-          <div
-            ref={themeMeasureRef}
-            className="flex flex-wrap gap-1.5 sm:gap-2 invisible absolute inset-x-0 top-0 pointer-events-none"
-            aria-hidden="true"
-          >
-            {themeItems.map((t, i) => (
-              <span key={i} className={THEME_INACTIVE}>{t.name}</span>
-            ))}
-          </div>
-
-          <div className={`flex gap-1.5 sm:gap-2 ${themeExpanded ? 'flex-wrap' : 'flex-nowrap overflow-x-auto scrollbar-hide'}`}>
-            {(themeExpanded ? themeItems : themeItems.slice(0, themeVisible)).map((t) => (
-              <button
-                key={t.id ?? 'all'}
-                onClick={() => setSelectedTheme(t.id === selectedTheme ? null : t.id)}
-                className={selectedTheme === t.id || (t.id === null && selectedTheme === null) ? THEME_ACTIVE : THEME_INACTIVE}
-                style={{ boxShadow: (selectedTheme === t.id || (t.id === null && selectedTheme === null)) ? 'var(--shadow-sm)' : 'none' }}
-              >
-                {t.name}
-              </button>
-            ))}
-            {!themeExpanded && themeVisible < totalThemes && (
-              <button onClick={() => setThemeExpanded(true)} className={THEME_MORE}>
-                +{totalThemes - themeVisible}
-              </button>
-            )}
-            {themeExpanded && themeVisible < totalThemes && (
-              <button onClick={() => setThemeExpanded(false)} className={THEME_MORE}>
-                접기
-              </button>
-            )}
-          </div>
+        <div className="mb-4 flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
+          <button onClick={() => setSelectedTheme(null)} className={CHIP(selectedTheme === null)}>모든 테마</button>
+          {allThemes.map((t) => (
+            <button key={t.id} onClick={() => setSelectedTheme(t.id === selectedTheme ? null : t.id)} className={CHIP(selectedTheme === t.id)} title={t.description}>
+              {t.name}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* 3. 필터: 왼쪽 상장사 | 오른쪽 정렬 */}
-      <div className="mb-3 sm:mb-4 flex flex-wrap sm:flex-nowrap justify-between items-center gap-y-2 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-0.5 sm:gap-1 flex-nowrap items-center">
-          {marketKeys.map((m) => (
-            <button
-              key={m}
-              onClick={() => setMarketFilter(m)}
-              className={marketFilter === m ? FILTER_ACTIVE : FILTER_INACTIVE}
-            >
-              {marketLabels[m]}
-            </button>
-          ))}
-        </div>
-        <div className="flex gap-0.5 sm:gap-1 flex-nowrap ml-2 items-center">
-          {sortKeys.map((type) => (
-            <button
-              key={type}
-              onClick={() => setSortType(type)}
-              className={sortType === type ? FILTER_ACTIVE : FILTER_INACTIVE}
-            >
-              {sortLabels[type]}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Results Summary */}
-      {(searchQuery || selectedTheme) && (
-        <div className="mb-4 px-2">
-          <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
-            {selectedThemeName && (
-              <span className="text-[var(--theme-accent)] font-bold">[{selectedThemeName}] </span>
+      {/* 결과 */}
+      {loading ? (
+        <InlineLoading label="리포트를 모으는 중" />
+      ) : (
+        <>
+          <p className="text-xs text-[var(--theme-ink-soft)] mb-1">
+            {isFiltering ? (
+              <>
+                {query.trim() && <>&lsquo;<span className="font-bold text-[var(--foreground)]">{query.trim()}</span>&rsquo; </>}
+                리포트 <span className="font-bold text-[var(--foreground)]">{filtered.length}</span>편
+              </>
+            ) : (
+              <>전체 리포트 {filtered.length}편</>
             )}
-            {searchQuery && (
-              <>검색: <span className="font-bold">&ldquo;{searchQuery}&rdquo;</span></>
-            )}
-            {' '}결과 {filteredReports.length}개
           </p>
-        </div>
-      )}
 
-      {/* Reports */}
-      <div className="space-y-3 sm:space-y-6">
-        {loading ? (
-          <div className="pixel-empty-state">
-            <p className="font-sans text-sm">로딩 중...</p>
-          </div>
-        ) : filteredReports.length > 0 ? (
-          filteredReports.map((report) => (
-            <ReportCard key={report.id} {...report} />
-          ))
-        ) : (searchQuery || selectedTheme || marketFilter !== 'all') ? (
-          <div className="pixel-empty-state">
-            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--theme-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <p className="font-sans text-sm mb-1 sm:mb-2">검색 결과가 없습니다</p>
-            <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
-              다른 검색어를 입력하거나 필터를 변경해보세요
-            </p>
-          </div>
-        ) : (
-          <div className="pixel-empty-state">
-            <svg className="w-10 h-10 sm:w-16 sm:h-16 mx-auto text-[var(--theme-border-muted)] mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-            <p className="font-sans text-sm mb-1 sm:mb-2">검색어를 입력해주세요</p>
-            <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
-              테마를 선택하거나 검색어를 입력하세요
-            </p>
-          </div>
-        )}
-      </div>
+          {filtered.length > 0 ? (
+            <div className="border-t border-[var(--theme-border-muted)]">
+              {filtered.slice(0, visible).map((r) => (
+                <ReportCard key={r.id} {...(r as unknown as React.ComponentProps<typeof ReportCard>)} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-14 text-center border-t border-[var(--theme-border-muted)]">
+              <p className="headline text-lg">
+                {picked ? `${picked.name} 리포트가 아직 없어요` : '맞는 리포트가 없어요'}
+              </p>
+              <p className="mt-1 text-sm text-[var(--theme-ink-soft)]">
+                {picked ? '첫 리포트를 남기면 시장이 채점을 시작합니다.' : '다른 이름·티커로 찾거나 필터를 풀어 보세요.'}
+              </p>
+              {picked && (
+                <Link href="/write" className="btn-primary inline-block mt-4 text-sm">리포트 쓰기 →</Link>
+              )}
+            </div>
+          )}
 
-      {filteredReports.length > 0 && (
-        <div className="text-center mt-6 sm:mt-8">
-          <button className="w-full sm:w-auto btn-primary font-sans">더 보기</button>
-        </div>
+          {filtered.length > visible && (
+            <div className="text-center mt-6">
+              <button type="button" onClick={() => setVisible((v) => v + PAGE)} className="btn-secondary text-sm">
+                더 보기 ({filtered.length - visible}편 남음)
+              </button>
+            </div>
+          )}
+        </>
       )}
     </Container>
   );

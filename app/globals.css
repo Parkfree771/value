@@ -126,7 +126,9 @@
   --theme-bg: #f4f4f4;        /* 회색 띠 (보조 면) */
   --theme-bg-card: #ffffff;
   --theme-border: #111111;    /* 굵은 괘선 (잉크) */
-  --theme-border-muted: #dedede; /* 얇은 회색 괘선 */
+  --theme-border-muted: #dedede; /* 얇은 회색 괘선 (구획) */
+  --theme-border-control: #b5b5b5; /* 입력창·칩·선택 버튼 테두리 — 괘선보다 진하게 (배경에 묻히지 않게) */
+  --theme-bg-input: #f8f8f8;    /* 입력창 바탕 — 흰 지면과 구분 */
   --theme-accent: #111111;
   --theme-accent-dark: #000000;
   --theme-accent-light: #444444;
@@ -168,10 +170,12 @@
   --brand-primary: #ececec;
   --brand-secondary: #fb923c;
 
-  --theme-bg: #1b1b1b;
-  --theme-bg-card: #121212;
+  --theme-bg: #222222;
+  --theme-bg-card: #1a1a1a;   /* 지면(#121212)보다 한 단계 밝게 — 카드가 배경에 묻히지 않게 */
   --theme-border: #ececec;
-  --theme-border-muted: #2f2f2f;
+  --theme-border-muted: #333333;
+  --theme-border-control: #5a5a5a;
+  --theme-bg-input: #1c1c1c;
   --theme-accent: #ececec;
   --theme-accent-dark: #ffffff;
   --theme-accent-light: #bdbdbd;
@@ -434,16 +438,23 @@ body {
   .pixel-input {
     width: 100%;
     @apply px-3 py-2 text-sm;
-    background: var(--theme-bg-card);
+    background: var(--theme-bg-input);
     color: var(--foreground);
-    border: 1px solid var(--theme-border-muted);
+    border: 1px solid var(--theme-border-control);
     border-radius: 3px;
-    transition: border-color 0.15s ease;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .pixel-input:hover {
+    border-color: var(--theme-ink-soft);
   }
   .pixel-input:focus {
     outline: none;
+    background: var(--theme-bg-card);
     border-color: var(--theme-border);
-    box-shadow: none;
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
+  }
+  .dark .pixel-input:focus {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
   }
   .pixel-input:disabled {
     opacity: 0.5;
@@ -474,9 +485,9 @@ body {
   .pixel-select {
     width: 100%;
     @apply px-3 py-2 text-sm;
-    background: var(--theme-bg-card);
+    background: var(--theme-bg-input);
     color: var(--foreground);
-    border: 1px solid var(--theme-border-muted);
+    border: 1px solid var(--theme-border-control);
     border-radius: 3px;
     transition: border-color 0.15s ease;
   }
@@ -584,7 +595,7 @@ body {
   }
   .pixel-modal-close {
     @apply p-1.5;
-    border: 1px solid var(--theme-border-muted);
+    border: 1px solid var(--theme-border-control);
     border-radius: 3px;
     background: transparent;
     cursor: pointer;

@@ -623,7 +623,7 @@ const IndicatorCard = memo(function IndicatorCard({
                 ${
                   timeRange === range.key
                     ? 'bg-[var(--theme-accent)] text-white'
-                    : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--foreground)]'
+                    : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-control)] hover:border-[var(--theme-border)] hover:text-[var(--foreground)]'
                 }
                 ${loading ? 'opacity-50 cursor-wait' : ''}`}
             >
@@ -637,7 +637,7 @@ const IndicatorCard = memo(function IndicatorCard({
               ${
                 measureEnabled
                   ? 'bg-[var(--theme-accent)] text-white'
-                  : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] hover:text-[var(--foreground)]'
+                  : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-control)] hover:border-[var(--theme-border)] hover:text-[var(--foreground)]'
               }`}
           >
             측정
