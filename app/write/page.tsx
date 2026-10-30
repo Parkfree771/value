@@ -4,6 +4,9 @@ import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import StockSearchInput from '@/components/StockSearchInput';
+import TargetPriceInput, { OpinionPicker, formatPriceInput, parsePriceInput } from '@/components/write/TargetPriceInput';
+import { WriteStep, WriteSummary } from '@/components/write/WriteParts';
+import { shortStockName } from '@/utils/reportDisplay';
 import { uploadMultipleImages, uploadToStorage } from '@/utils/imageOptimization';
 import { useAuth } from '@/contexts/AuthContext';
 import { getUserProfile } from '@/lib/users';
@@ -139,7 +142,7 @@ function WritePageContent() {
         setStockData(reportData.stock_data || null);
         setOpinion(reportData.opinion || 'buy');
         setTargetPrice(
-          reportData.target_price ? Number(reportData.target_price).toLocaleString() : '',
+          reportData.target_price ? formatPriceInput(Number(reportData.target_price), reportData.stock_data?.currency) : '',
         );
         if (reportData.mode === 'html') {
           setEditorMode('html');
@@ -172,12 +175,15 @@ function WritePageContent() {
   }, [editId, user, router]);
 
   // 주식 선택 시
-  const handleStockSelect = (data: StockData) => {
+  const handleStockSelect = (data: StockData | null) => {
     setStockData(data);
+    if (!data) return; // "변경" — 다시 검색
 
-    // 자동으로 제목 업데이트 (비어있을 경우만)
+    // 목표가는 현재가로 채워 두고, +10% 같은 버튼으로 바로 조정
+    setTargetPrice(formatPriceInput(data.currentPrice, data.currency));
+    // 제목이 비어 있으면 기본 제목
     if (!title) {
-      setTitle(`${data.name} 투자 리포트`);
+      setTitle(`${shortStockName(data.name, data.symbol)} 투자 리포트`);
     }
   };
 
@@ -380,7 +386,7 @@ function WritePageContent() {
         },
         opinion,
         position_type: positionType,
-        target_price: parseFloat(targetPrice.replace(/,/g, '')) || 0,
+        target_price: parsePriceInput(targetPrice),
         themes: selectedThemes,
         content: editorMode === 'html' ? finalHtmlContent : finalContent,
         mode: editorMode,
@@ -396,7 +402,7 @@ function WritePageContent() {
         stockName: stockData.name,
         initialPrice: stockData.currentPrice,
         currentPrice: stockData.currentPrice,
-        targetPrice: parseFloat(targetPrice.replace(/,/g, '')) || 0,
+        targetPrice: parsePriceInput(targetPrice),
         positionType,
       };
 
@@ -593,26 +599,14 @@ function WritePageContent() {
                     onStockSelect={handleStockSelect}
                     selectedStock={stockData}
                   />
-                  <select
-                    value={opinion}
-                    onChange={(e) => setOpinion(e.target.value as Opinion)}
-                    className="pixel-input !py-1 !text-xs w-full"
-                  >
-                    <option value="buy">매수 (롱)</option>
-                    <option value="sell">매도 (숏)</option>
-                    <option value="hold">보유</option>
-                  </select>
-                  <input
-                    type="text"
-                    inputMode="numeric"
+                  <OpinionPicker value={opinion} onChange={setOpinion} compact />
+                  <TargetPriceInput
                     value={targetPrice}
-                    onChange={(e) => {
-                      const raw = e.target.value.replace(/[^0-9]/g, '');
-                      setTargetPrice(raw === '' ? '' : Number(raw).toLocaleString());
-                    }}
-                    required
-                    className="pixel-input !py-1 !text-xs w-full"
-                    placeholder="목표가격"
+                    onChange={setTargetPrice}
+                    currentPrice={stockData?.currentPrice}
+                    currency={stockData?.currency}
+                    opinion={opinion}
+                    compact
                   />
                   {/* 테마 태그 (컴팩트) */}
                   {allThemes.length > 0 && (
@@ -754,9 +748,12 @@ function WritePageContent() {
   // ═══════════════════════════════════════════════════
   return (
     <div className="write-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      <h1 className="headline text-xl sm:text-2xl font-bold mb-4 sm:mb-6">
-        {isEditMode ? '투자 리포트 수정' : '투자 리포트 작성'}
-      </h1>
+      <div className="mb-6 sm:mb-8 border-b-2 border-[var(--theme-border)] pb-3">
+        <p className="kicker">개인 투자자 리포트</p>
+        <h1 className="headline text-2xl sm:text-3xl font-bold">
+          {isEditMode ? '리포트 수정' : '리포트 쓰기'}
+        </h1>
+      </div>
 
       <div className="lg:flex lg:gap-8">
         {/* 왼쪽: 폼 영역 */}
@@ -789,181 +786,228 @@ function WritePageContent() {
             </div>
           )}
 
-        <form id="write-form" onSubmit={handleSubmit} className="space-y-6">
-          <div className="card-base p-5 sm:p-8 space-y-6">
-          {/* 기본 정보 */}
-          <div className="space-y-4">
-            <div>
-              <label className="pixel-label mb-2">
-                제목
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-                className="pixel-input"
-                placeholder="리포트 제목을 입력하세요"
+        <form id="write-form" onSubmit={handleSubmit} className="space-y-10 pb-24 lg:pb-0">
+          {/* ① 종목 */}
+          <WriteStep n={1} title="어떤 종목인가요?" hint="기업명이나 티커로 찾으세요. 고르는 순간의 가격이 작성가로 기록됩니다.">
+            <StockSearchInput onStockSelect={handleStockSelect} selectedStock={stockData} hideLabel />
+          </WriteStep>
+
+          {/* ② 의견 · 목표가 */}
+          <WriteStep n={2} title="어떻게 보시나요?" hint="의견을 고르고 목표가를 정하세요. 버튼을 누르면 현재가 기준으로 바로 계산돼요.">
+            <OpinionPicker value={opinion} onChange={setOpinion} />
+            <div className="mt-5">
+              <p className="pixel-label mb-1.5">목표 가격</p>
+              <TargetPriceInput
+                value={targetPrice}
+                onChange={setTargetPrice}
+                currentPrice={stockData?.currentPrice}
+                currency={stockData?.currency}
+                opinion={opinion}
               />
             </div>
+          </WriteStep>
 
-            {/* 종목 검색 (StockSearchInput 컴포넌트 사용) */}
-            <StockSearchInput
-              onStockSelect={handleStockSelect}
-              selectedStock={stockData}
+          {/* ③ 제목 */}
+          <WriteStep n={3} title="제목">
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className="pixel-input !py-3 !text-base font-semibold"
+              placeholder="한 줄로 핵심을 — 예: 실적은 늘었는데 주가는 반토막, 지금이 기회"
             />
+          </WriteStep>
 
-            {/* 종목 프로필 카드 (코인이면 숨김) */}
-            <div className={`mt-4 p-6 card-base border-[var(--theme-accent)]/30 ${stockData?.exchange === 'CRYPTO' ? 'hidden' : ''}`}>
-              <h3 className="text-base font-bold mb-4">
-                종목 프로필
-              </h3>
-
-              {stockData ? (
-                stockData.exchange === 'CRYPTO' ? (
-                  <div className="flex items-center gap-5">
-                    <img
-                      src={getCryptoImageUrl(stockData.symbol)}
-                      alt={stockData.symbol}
-                      className="w-16 h-16 rounded-full"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                    <div>
-                      <div className="text-xl font-bold text-gray-900 dark:text-white">
-                        {stockData.name}
-                      </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                        {stockData.symbol}
-                      </div>
-                      <div className="text-2xl font-bold text-orange-500 dark:text-orange-400 mt-2">
-                        {stockData.currency === 'KRW' ? '₩' : stockData.currency} {stockData.currentPrice.toLocaleString()}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
-                      <div className="text-lg font-bold text-[var(--theme-accent)]">
-                        {stockData.currency} {stockData.currentPrice.toLocaleString()}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PER</div>
-                      <div className="text-lg font-bold text-[var(--theme-accent)]">
-                        {stockData.per ? stockData.per.toFixed(2) : 'N/A'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">PBR</div>
-                      <div className="text-lg font-bold text-[var(--theme-accent)]">
-                        {stockData.pbr ? stockData.pbr.toFixed(2) : 'N/A'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">EPS</div>
-                      <div className="text-lg font-bold text-[var(--theme-accent)]">
-                        {stockData.eps ? stockData.eps.toFixed(2) : 'N/A'}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">거래소</div>
-                      <div className="text-lg font-bold text-[var(--theme-accent)]">
-                        {stockData.exchange}
-                      </div>
-                    </div>
-                    {stockData.sector && (
-                      <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">섹터</div>
-                        <div className="text-lg font-bold text-[var(--theme-accent)]">
-                          {stockData.sector}
-                        </div>
-                      </div>
-                    )}
-                    {stockData.industry && (
-                      <div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">산업</div>
-                        <div className="text-lg font-bold text-[var(--theme-accent)]">
-                          {stockData.industry}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="p-4 border border-dashed border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">현재 주가</div>
-                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
-                  </div>
-                  <div className="p-4 border border-dashed border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PER</div>
-                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
-                  </div>
-                  <div className="p-4 border border-dashed border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">PBR</div>
-                    <div className="text-xl font-bold text-gray-300 dark:text-gray-600">-</div>
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="pixel-label mb-2">
-                  투자 의견 *
-                </label>
-                <select
-                  value={opinion}
-                  onChange={(e) => setOpinion(e.target.value as Opinion)}
-                  className="pixel-input"
+          {/* ④ 매수 이유 */}
+          <WriteStep
+            n={4}
+            title={opinion === 'sell' ? '왜 팔아야 하나요?' : '왜 샀나요?'}
+            hint="근거를 남겨두면 몇 달 뒤 시장이 채점합니다. 숫자·출처가 있으면 더 좋아요."
+            right={
+              <div className="hidden md:flex items-center gap-1">
+                <button type="button" className="px-3 py-1 text-xs font-bold border rounded-sm pixel-chip-active" disabled>
+                  텍스트
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditorMode('html')}
+                  className="px-3 py-1 text-xs font-bold border rounded-sm border-[var(--theme-border-muted)] hover:border-[var(--theme-border)] transition-colors"
                 >
-                  <option value="buy">매수 (롱 포지션 - 상승 예상)</option>
-                  <option value="sell">매도 (숏 포지션 - 하락 예상)</option>
-                  <option value="hold">보유</option>
-                </select>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  {opinion === 'buy' && '매수: 가격 상승 시 수익률 증가'}
-                  {opinion === 'sell' && '매도: 가격 하락 시 수익률 증가'}
-                  {opinion === 'hold' && '보유: 현재 포지션 유지'}
-                </p>
+                  HTML
+                </button>
               </div>
+            }
+          >
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              placeholder="예) 영업이익이 3분기 연속 늘었는데 주가는 고점 대비 -40%. PER 8배로 업종 평균의 절반…"
+              onEditorReady={setTiptapEditor}
+            />
+            <p className="mt-2 text-xs text-[var(--theme-ink-soft)]">
+              굵게·색상·정렬은 툴바로. 다른 곳에서 복사해 붙여넣어도 서식이 유지돼요.
+            </p>
 
-              <div>
-                <label className="pixel-label mb-2">
-                  목표 가격
+            <div className="mt-6 grid gap-6 md:grid-cols-2">
+            {/* 이미지 첨부 */}
+            <div>
+              <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">이미지 첨부 <span className="font-normal">· 올린 뒤 &lsquo;이미지 삽입&rsquo;을 누르면 본문에 들어가요</span></p>
+              <div className="space-y-3">
+                <label className="inline-flex items-center gap-2 px-4 py-2 border border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)]">
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm">이미지 선택</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">(PNG, JPG, GIF - 최대 10MB)</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageUpload}
+                  />
                 </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={targetPrice}
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/[^0-9]/g, '');
-                    if (raw === '') {
-                      setTargetPrice('');
-                    } else {
-                      setTargetPrice(Number(raw).toLocaleString());
-                    }
-                  }}
-                  required
-                  className="pixel-input"
-                  placeholder="예: 85,000"
-                />
+
+                {/* 업로드된 이미지 미리보기 */}
+                {images.length > 0 && (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {images.map((image, index) => (
+                        <div key={index} className="relative group border border-[var(--theme-border-muted)] p-3 bg-[var(--theme-bg-card)]">
+                          <div className="flex gap-3">
+                            <div className="w-20 h-20 relative border border-[var(--theme-border-muted)] overflow-hidden flex-shrink-0">
+                              <Image
+                                src={uploadedImageUrls[index] || URL.createObjectURL(image)}
+                                alt={`preview-${index}`}
+                                fill
+                                className="object-cover"
+                                sizes="80px"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-bold truncate">
+                                {image.name}
+                              </div>
+                              {uploadedImageUrls[index] ? (
+                                <>
+                                  <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                    업로드 완료
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => insertImageToEditor(uploadedImageUrls[index])}
+                                    className="mt-2 text-xs px-3 py-1 btn-primary !py-1 !px-3 !text-xs"
+                                  >
+                                    이미지 삽입
+                                  </button>
+                                </>
+                              ) : (
+                                <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                  업로드 중...
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-          </div>
-
-          {/* 테마 태그 */}
-          {allThemes.length > 0 && (
+            {/* PDF 첨부 */}
             <div>
-              <label className="pixel-label mb-2">
-                테마 태그
-              </label>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                관련 투자 테마를 선택하세요 (선택사항)
-              </p>
+              <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">PDF 첨부</p>
+              <div className="space-y-3">
+                <label className="inline-flex items-center gap-2 px-4 py-2 border border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)]">
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span className="text-sm">PDF 첨부</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">(최대 20MB)</span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    multiple
+                    accept="application/pdf"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+
+                {/* 업로드된 파일 목록 */}
+                {files.length > 0 && (
+                  <div className="space-y-2">
+                    {files.map((file, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <svg className="w-8 h-8 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            />
+                          </svg>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold truncate">
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="ml-3 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 업로드 진행 상태 */}
+            {isUploading && (
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                  <span>이미지 업로드 중...</span>
+                  <span>{Math.round(uploadProgress)}%</span>
+                </div>
+                <div className="w-full bg-[var(--theme-border-muted)] h-3 border border-[var(--theme-border-muted)]">
+                  <div
+                    className="bg-[var(--theme-accent)] h-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+            </div>
+          </WriteStep>
+
+          {/* ⑤ 테마 (선택) */}
+          {allThemes.length > 0 && (
+            <WriteStep n={5} title="테마" optional hint="관련 투자 테마가 있으면 골라 주세요. 테마별 피드에 함께 나와요.">
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {allThemes.map((theme) => (
                   <button
@@ -987,216 +1031,8 @@ function WritePageContent() {
                   </button>
                 ))}
               </div>
-              {selectedThemes.length > 0 && (
-                <p className="mt-2 text-xs text-[var(--theme-accent)]">
-                  {selectedThemes.length}개 테마 선택됨
-                </p>
-              )}
-            </div>
+            </WriteStep>
           )}
-
-          {/* 에디터 */}
-          <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="pixel-label">
-                  내용
-                </label>
-                {/* 모드 선택 — 모바일에서는 숨김 */}
-                <div className="hidden md:flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="px-3 py-1 text-xs font-bold border rounded-sm pixel-chip-active"
-                    disabled
-                  >
-                    텍스트
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setEditorMode('html')}
-                    className="px-3 py-1 text-xs font-bold border rounded-sm bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
-                  >
-                    HTML
-                  </button>
-                </div>
-              </div>
-
-              <RichTextEditor
-                value={content}
-                onChange={setContent}
-                placeholder="리포트 본문을 입력하세요..."
-                onEditorReady={setTiptapEditor}
-              />
-
-              <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                툴바를 사용하여 굵게, 색상, 정렬 등 서식을 적용할 수 있습니다. 다른 곳에서 복사/붙여넣기하면 서식이 유지됩니다.
-              </p>
-            </div>
-
-          {/* 이미지 첨부 */}
-          <div>
-            <label className="pixel-label mb-2">
-              이미지 첨부
-            </label>
-            <div className="space-y-3">
-              <label className="inline-flex items-center gap-2 px-4 py-2 border border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)]">
-                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span className="text-sm">이미지 선택</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">(PNG, JPG, GIF - 최대 10MB)</span>
-                <input
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                />
-              </label>
-
-              {/* 업로드된 이미지 미리보기 */}
-              {images.length > 0 && (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {images.map((image, index) => (
-                      <div key={index} className="relative group border border-[var(--theme-border-muted)] p-3 bg-[var(--theme-bg-card)]">
-                        <div className="flex gap-3">
-                          <div className="w-20 h-20 relative border border-[var(--theme-border-muted)] overflow-hidden flex-shrink-0">
-                            <Image
-                              src={uploadedImageUrls[index] || URL.createObjectURL(image)}
-                              alt={`preview-${index}`}
-                              fill
-                              className="object-cover"
-                              sizes="80px"
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold truncate">
-                              {image.name}
-                            </div>
-                            {uploadedImageUrls[index] ? (
-                              <>
-                                <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                                  업로드 완료
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={() => insertImageToEditor(uploadedImageUrls[index])}
-                                  className="mt-2 text-xs px-3 py-1 btn-primary !py-1 !px-3 !text-xs"
-                                >
-                                  이미지 삽입
-                                </button>
-                              </>
-                            ) : (
-                              <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                                업로드 중...
-                              </div>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {uploadedImageUrls.length > 0 && (
-                    <div className="border border-[var(--theme-accent)] bg-red-500/10 p-3">
-                      <p className="text-xs text-red-900 dark:text-red-100">
-                        <strong>사용법:</strong> 각 이미지의 &quot;이미지 삽입&quot; 버튼을 클릭하면 본문에 이미지가 추가됩니다.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* PDF 첨부 */}
-          <div>
-            <label className="pixel-label mb-2">
-              PDF 첨부
-            </label>
-            <div className="space-y-3">
-              <label className="inline-flex items-center gap-2 px-4 py-2 border border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)]">
-                <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                <span className="text-sm">PDF 첨부</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">(최대 20MB)</span>
-                <input
-                  type="file"
-                  className="hidden"
-                  multiple
-                  accept="application/pdf"
-                  onChange={handleFileUpload}
-                />
-              </label>
-
-              {/* 업로드된 파일 목록 */}
-              {files.length > 0 && (
-                <div className="space-y-2">
-                  {files.map((file, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <svg className="w-8 h-8 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                          />
-                        </svg>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-bold truncate">
-                            {file.name}
-                          </p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="ml-3 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* 업로드 진행 상태 */}
-          {isUploading && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
-                <span>이미지 업로드 중...</span>
-                <span>{Math.round(uploadProgress)}%</span>
-              </div>
-              <div className="w-full bg-[var(--theme-border-muted)] h-3 border border-[var(--theme-border-muted)]">
-                <div
-                  className="bg-[var(--theme-accent)] h-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          </div>
         </form>
         </div>
 
@@ -1204,7 +1040,7 @@ function WritePageContent() {
         <div className="hidden lg:block lg:w-72 lg:flex-shrink-0">
           <div className="sticky top-20 space-y-4">
             {/* 제출 + 취소 */}
-            <div className="card-base p-4 space-y-2">
+            <div className="space-y-2">
               <button
                 type="submit"
                 form="write-form"
@@ -1227,7 +1063,7 @@ function WritePageContent() {
             {isEditMode && editId && (
               <>
                 {/* 삭제 */}
-                <div className="card-base p-4 space-y-2">
+                <div className="space-y-2">
                   <button
                     type="button"
                     onClick={handleDelete}
@@ -1237,62 +1073,24 @@ function WritePageContent() {
                   </button>
                 </div>
 
-                {/* 종목 정보 요약 */}
-                {stockData && (
-                  <div className="card-base p-4">
-                    <h3 className="font-sans text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">종목</span>
-                        <span className="font-bold">{stockData.name}</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">현재가</span>
-                        <span className="font-bold tabular-nums">{stockData.currentPrice.toLocaleString()}</span>
-                      </div>
-                      {originalInitialPrice && (
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">작성가</span>
-                          <span className="font-bold tabular-nums">{originalInitialPrice.toLocaleString()}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">거래소</span>
-                        <span className="font-bold">{stockData.exchange}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </>
             )}
 
-            {/* 새 글 작성 모드 + 종목 선택됨 */}
-            {!isEditMode && stockData && (
-              <div className="card-base p-4">
-                <h3 className="font-sans text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">종목 정보</h3>
-                <div className="space-y-1.5">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">종목</span>
-                    <span className="font-bold">{stockData.name}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">현재가</span>
-                    <span className="font-bold tabular-nums">{stockData.currentPrice.toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-500 dark:text-gray-400">거래소</span>
-                    <span className="font-bold">{stockData.exchange}</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* 작성 요약 — 제출 전에 한눈에 확인 */}
+            <WriteSummary
+              stock={stockData}
+              opinion={opinion}
+              targetPrice={parsePriceInput(targetPrice)}
+              initialPrice={isEditMode ? originalInitialPrice : stockData?.currentPrice ?? null}
+              isEditMode={isEditMode}
+            />
           </div>
         </div>
       </div>
 
       {/* 모바일: 하단 고정 제출 버튼 (새 글 작성 시) */}
       {!isEditMode && (
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+var(--sab,0px))] bg-[var(--theme-bg)] border-t-[3px] border-[var(--theme-border-muted)] z-40">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 p-3 pb-[calc(0.75rem+var(--sab,0px))] bg-[var(--background)] border-t border-[var(--theme-border)] z-40">
           <div className="flex gap-3 max-w-5xl mx-auto">
             <button
               type="submit"

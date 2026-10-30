@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, memo } from 'react';
 import { stockSearchIndex, type GlobalStock, type Stock } from '@/lib/stockSearchIndex';
 import { getCryptoStocksForIndex, getCryptoImageUrl } from '@/lib/cryptoCoins';
 import type { StockData } from '@/types/stock';
+import { shortStockName, exchangeLabel } from '@/utils/reportDisplay';
 
 interface GlobalStocksData {
   stocks: GlobalStock[];
@@ -54,9 +55,11 @@ function searchStocksLocal(query: string, limit: number = 20): Stock[] {
 interface StockSearchInputProps {
   onStockSelect: (stockData: StockData) => void;
   selectedStock?: StockData | null;
+  /** 바깥에서 단계 제목을 붙이면 기본 라벨을 숨긴다 */
+  hideLabel?: boolean;
 }
 
-const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selectedStock }: StockSearchInputProps) {
+const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selectedStock, hideLabel = false }: StockSearchInputProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Stock[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -200,54 +203,74 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
 
   return (
     <div ref={searchRef} className="relative w-full">
-      <label className="pixel-label mb-2">
-        종목 검색 *
-      </label>
+      {!hideLabel && (
+        <label className="pixel-label mb-2">
+          종목 검색 *
+        </label>
+      )}
 
       {selectedStock ? (
-        <div className={`flex items-center justify-between p-3 sm:p-4 rounded-sm border ${
-          selectedStock.exchange === 'CRYPTO'
-            ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
-            : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700'
-        }`}>
-          <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        // 선택된 종목 — 이름 · 티커·거래소 · 지금 가격(= 작성가로 박제) · 지표
+        <div className="border-y-2 border-[var(--theme-border)] py-3 sm:py-4">
+          <div className="flex items-start gap-3">
             {selectedStock.exchange === 'CRYPTO' && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={getCryptoImageUrl(selectedStock.symbol)}
-                alt={selectedStock.symbol}
-                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex-shrink-0"
+                alt=""
+                className="w-10 h-10 rounded-full flex-shrink-0"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
               />
             )}
             <div className="flex-1 min-w-0">
-              <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">
-                {selectedStock.name}
-              </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
-                {selectedStock.symbol} · {selectedStock.exchange === 'CRYPTO' ? '코인' : selectedStock.exchange}
-              </div>
-              {selectedStock.exchange !== 'CRYPTO' && (
-                <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-1.5 sm:mt-2 grid grid-cols-2 gap-1 sm:gap-2 font-mono">
-                  <div>현재가: {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}</div>
-                  {selectedStock.per && selectedStock.per > 0 && <div>PER: {selectedStock.per.toFixed(2)}</div>}
-                  {selectedStock.pbr && selectedStock.pbr > 0 && <div>PBR: {selectedStock.pbr.toFixed(2)}</div>}
-                  {selectedStock.eps && selectedStock.eps !== 0 && <div>EPS: {getCurrencySymbol(selectedStock.currency)}{selectedStock.eps.toFixed(2)}</div>}
-                </div>
-              )}
-              {selectedStock.exchange === 'CRYPTO' && (
-                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5 sm:mt-1">
-                  {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}
-                </div>
-              )}
+              <p className="headline text-xl sm:text-2xl leading-tight break-keep">{shortStockName(selectedStock.name, selectedStock.symbol)}</p>
+              <p className="mt-0.5 text-xs text-[var(--theme-ink-soft)]">
+                <span className="font-mono">{selectedStock.symbol}</span>
+                {' · '}
+                {exchangeLabel(selectedStock.exchange)}
+                {selectedStock.sector && <> · {selectedStock.sector}</>}
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={() => onStockSelect(null as any)}
+              className="flex-shrink-0 text-sm font-bold underline underline-offset-4 hover:text-[var(--theme-ink-soft)]"
+            >
+              변경
+            </button>
           </div>
-          <button
-            onClick={() => onStockSelect(null as any)}
-            className="ml-2 sm:ml-4 text-sm sm:text-base text-red-600 hover:text-red-700 dark:text-red-400
-                     dark:hover:text-red-300 font-medium flex-shrink-0"
-          >
-            변경
-          </button>
+
+          <div className="mt-3 flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+            <div>
+              <p className="text-[11px] text-[var(--theme-ink-soft)]">지금 가격 · 이 가격이 작성가로 기록돼요</p>
+              <p className="font-mono text-2xl sm:text-3xl font-black tabular-nums leading-tight">
+                {getCurrencySymbol(selectedStock.currency)}{formatNumber(selectedStock.currentPrice)}
+              </p>
+            </div>
+            {selectedStock.exchange === 'CRYPTO' ? (
+              selectedStock.changePercent24h !== undefined && (
+                <p className="text-xs text-[var(--theme-ink-soft)] tabular-nums">
+                  24시간{' '}
+                  <span className={`font-bold ${selectedStock.changePercent24h >= 0 ? 'text-[var(--color-up)]' : 'text-[var(--color-down)]'}`}>
+                    {selectedStock.changePercent24h >= 0 ? '+' : ''}{selectedStock.changePercent24h.toFixed(2)}%
+                  </span>
+                </p>
+              )
+            ) : (
+              <dl className="flex gap-4 text-xs tabular-nums">
+                {[
+                  ['PER', selectedStock.per && selectedStock.per > 0 ? selectedStock.per.toFixed(2) : null],
+                  ['PBR', selectedStock.pbr && selectedStock.pbr > 0 ? selectedStock.pbr.toFixed(2) : null],
+                  ['EPS', selectedStock.eps && selectedStock.eps !== 0 ? selectedStock.eps.toFixed(2) : null],
+                ].map(([k, v]) => (
+                  <div key={k as string}>
+                    <dt className="text-[var(--theme-ink-soft)]">{k}</dt>
+                    <dd className="font-bold">{v ?? '—'}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </div>
         </div>
       ) : (
         <>
