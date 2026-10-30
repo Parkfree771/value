@@ -1,5 +1,5 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { Inter, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Noto_Serif_KR, Noto_Serif_Display } from "next/font/google";
 import dynamic from "next/dynamic";
 import Script from "next/script";
 import "./globals.css";
@@ -7,7 +7,6 @@ import Navbar from "@/components/Navbar";
 import { ThemeProvider, themeInitScript } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BookmarkProvider } from "@/contexts/BookmarkContext";
-import { UserBadgesProvider } from "@/contexts/UserBadgesContext";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 // Footer는 viewport 밖에 있으므로 lazy load
@@ -59,9 +58,9 @@ export const metadata: Metadata = {
     siteName: 'AntStreet',
     images: [
       {
-        url: '/og-v2.jpg',
-        width: 1731,
-        height: 909,
+        url: '/api/og/site',
+        width: 1200,
+        height: 630,
         alt: 'AntStreet',
       },
     ],
@@ -70,7 +69,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
     description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
-    images: ['/og-v2.jpg'],
+    images: ['/api/og/site'],
   },
   robots: {
     index: true,
@@ -82,11 +81,6 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  icons: {
-    icon: '/favicon.png',
-    shortcut: '/favicon.png',
-    apple: '/favicon.png',
   },
   alternates: {
     canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr',
@@ -109,6 +103,23 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// 에디토리얼 테마 (2026-10): 제목은 한글 명조, 제호(AntStreet)는 신문 마스트헤드풍 세리프.
+// 한글 명조는 글자 범위가 커서 preload 하지 않는다(LCP 보호) — unicode-range 조각을 필요한 만큼만 받는다.
+const notoSerifKr = Noto_Serif_KR({
+  weight: ["700", "900"],
+  variable: "--font-serif",
+  display: "swap",
+  preload: false,
+});
+
+// 제호 — 좁은 폭(wdth)의 굵은 세리프 (신문 마스트헤드 느낌). 가변 폰트라 font-stretch 로 폭 조절
+const mastheadSerif = Noto_Serif_Display({
+  subsets: ["latin"],
+  axes: ["wdth"],
+  variable: "--font-masthead",
+  display: "swap",
+});
+
 // JSON-LD 구조화 데이터 (Organization + WebSite)
 const jsonLd = {
   "@context": "https://schema.org",
@@ -121,9 +132,9 @@ const jsonLd = {
       url: process.env.NEXT_PUBLIC_SITE_URL || "https://antstreet.kr",
       logo: {
         "@type": "ImageObject",
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/og-v2.jpg`,
-        width: 1731,
-        height: 909,
+        url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr'}/icon-512.png`,
+        width: 512,
+        height: 512,
       },
       contactPoint: {
         "@type": "ContactPoint",
@@ -167,7 +178,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={`${inter.variable} ${jetbrainsMono.variable}`} suppressHydrationWarning>
+    <html lang="ko" className={`${inter.variable} ${jetbrainsMono.variable} ${notoSerifKr.variable} ${mastheadSerif.variable}`} suppressHydrationWarning>
       <head>
         {/* Google Search Console 인증 */}
         <meta name="google-site-verification" content="thbsZW7iVjN1ZXSUejzzm9S_b-3uTv-Qv0S-tGiqGII" />
@@ -229,14 +240,12 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <BookmarkProvider>
-              <UserBadgesProvider>
-                <Navbar />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-                <CookieConsent />
-              </UserBadgesProvider>
+              <Navbar />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+              <CookieConsent />
             </BookmarkProvider>
           </AuthProvider>
         </ThemeProvider>

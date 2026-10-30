@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
                p.stock_name, p.stock_data, p.views, p.likes, p.comment_count, p.created_at,
                case when u.id is null then null else json_build_object(
                  'nickname', u.nickname,
-                 'equipped_badge_id', u.equipped_badge_id,
+                 'level_points', u.level_points,
                  'is_virtual', u.is_virtual
                ) end as author
         from posts p
@@ -34,8 +34,6 @@ export async function GET(request: NextRequest) {
       `,
       getLatestPrices(),
     ]);
-
-    let equippedBadgeId: string | null = null;
 
     const reports = rows.map((r) => {
       const ticker = (r.ticker || '').toUpperCase();
@@ -48,10 +46,7 @@ export async function GET(request: NextRequest) {
           ? parseFloat(calculateReturn(initialPrice, currentPrice, positionType).toFixed(2))
           : 0;
 
-      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
-      if (equippedBadgeId === null && author?.equipped_badge_id !== undefined) {
-        equippedBadgeId = author.equipped_badge_id;
-      }
+      const author = (r as { author?: { nickname?: string; level_points?: number; is_virtual?: boolean } | null }).author;
 
       return {
         id: r.id,
@@ -59,7 +54,7 @@ export async function GET(request: NextRequest) {
         author: author?.nickname ?? '',
         authorId: uid,
         authorIsVirtual: author?.is_virtual ?? false,
-        equippedBadgeId: author?.equipped_badge_id ?? null,
+        levelPoints: author?.level_points ?? 0,
         stockName: r.stock_name ?? '',
         ticker: r.ticker ?? '',
         exchange: r.exchange ?? '',

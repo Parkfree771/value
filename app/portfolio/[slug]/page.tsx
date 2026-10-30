@@ -176,12 +176,12 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
 
       {/* 구루 헤더 섹션 */}
       <section
-        className="mb-6 sm:mb-8 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden"
+        className="mb-6 sm:mb-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm p-6 sm:p-8 relative overflow-hidden"
         style={{ boxShadow: 'var(--shadow-lg)' }}
       >
         <div className="relative z-10">
           <div className="text-center sm:text-left">
-            <div className="inline-block mb-3 px-4 py-1.5 rounded-xl border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
+            <div className="inline-block mb-3 px-4 py-1.5 rounded-sm border border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30">
               <span className="text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">
                 {guruInfo.style}
               </span>
@@ -196,7 +196,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
               {guruInfo.catchphrase}
             </p>
             <div
-              className="inline-block px-4 py-2 rounded-xl border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
+              className="inline-block px-4 py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               style={{ boxShadow: 'var(--shadow-sm)' }}
             >
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">운용사</p>
@@ -232,7 +232,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
 
       {/* 면책 조항 */}
       <section
-        className="mt-12 p-6 sm:p-8 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] border-l-4 sm:border-l-[6px] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-2xl"
+        className="mt-12 p-6 sm:p-8 bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] border-l-4 sm:border-l-[6px] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-sm"
         style={{ boxShadow: 'var(--shadow-md)' }}
       >
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-4 tracking-wide uppercase">

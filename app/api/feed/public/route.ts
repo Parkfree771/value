@@ -8,7 +8,7 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getLatestPrices } from '@/lib/priceCache';
-import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
+import { getLookbackPrices, calcReportPeriodReturns } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 export async function GET() {
@@ -23,7 +23,7 @@ export async function GET() {
         select p.id, p.title, p.ticker, p.exchange, p.opinion, p.position_type, p.initial_price,
                p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.views,
                p.likes, p.comment_count, p.category, p.created_at, p.author_id,
-               json_build_object('nickname', u.nickname, 'equipped_badge_id', u.equipped_badge_id,
+               json_build_object('nickname', u.nickname, 'level_points', u.level_points,
                                  'is_virtual', u.is_virtual) as author
         from posts p
         left join users u on u.id = p.author_id
@@ -44,7 +44,7 @@ export async function GET() {
     ]);
 
     const posts = rows.map((r) => {
-      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
+      const author = (r as { author?: { nickname?: string; level_points?: number; is_virtual?: boolean } | null }).author;
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price ?? 0);
       // 글 row의 current_price 우선. cache는 row가 0/null인 비정상 케이스의 backup.
@@ -57,9 +57,10 @@ export async function GET() {
 
       const lb = lookback[ticker];
       const createdAtIso = typeof r.created_at === 'string' ? r.created_at : '';
-      const returnRate1D = calcPeriodReturn(currentPrice, lb?.close1d, positionType);
-      const returnRate1W = calcPeriodReturn(currentPrice, lb?.close7d, positionType);
-      const returnRate1M = calcPeriodReturn(currentPrice, lb?.close30d, positionType);
+      const { returnRate1D, returnRate1W, returnRate1M } = calcReportPeriodReturns(
+        { currentPrice, initialPrice, createdAt: createdAtIso, positionType },
+        lb,
+      );
 
       return {
         id: r.id,
@@ -67,7 +68,7 @@ export async function GET() {
         author: author?.nickname ?? '익명',
         authorId: r.author_id,
         authorIsVirtual: author?.is_virtual ?? false,
-        equippedBadgeId: author?.equipped_badge_id ?? null,
+        levelPoints: author?.level_points ?? 0,
         stockName: r.stock_name ?? '',
         ticker: r.ticker ?? '',
         exchange: r.exchange ?? '',

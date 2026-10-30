@@ -1,15 +1,15 @@
 'use client';
 
-import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState, memo, useCallback } from 'react';
-import Card from './Card';
 import Badge, { OpinionBadge } from './Badge';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { inferCurrency, formatPrice } from '@/utils/currency';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
-import UserBadgeInline from './UserBadgeInline';
+import UserLevelInline from './UserLevelInline';
+import { heldDaysLabel, shortStockName, usableThumbnail, exchangeLabel } from '@/utils/reportDisplay';
 
 // 테마 ID → 이름 정적 맵 (theme-stocks.json과 동기화)
 const THEME_NAMES: Record<string, string> = {
@@ -30,7 +30,7 @@ interface ReportCardProps {
   title: string;
   author: string;
   authorId?: string;
-  equippedBadgeId?: string | null;  // feed.json 의 작성자 장착 배지 스냅샷
+  levelPoints?: number;             // 작성자 레벨 점수
   stockName: string;
   ticker: string;
   opinion: 'buy' | 'sell' | 'hold';
@@ -51,6 +51,8 @@ interface ReportCardProps {
     [key: string]: any;
   };
   themes?: string[];
+  excerpt?: string;           // 본문 앞부분 (매수 이유 미리보기)
+  thumbnail?: string | null;  // 첫 첨부 이미지
 }
 
 const ReportCard = memo(function ReportCard({
@@ -58,7 +60,7 @@ const ReportCard = memo(function ReportCard({
   title,
   author,
   authorId,
-  equippedBadgeId,
+  levelPoints,
   stockName,
   ticker,
   opinion,
@@ -76,6 +78,8 @@ const ReportCard = memo(function ReportCard({
   exchange,
   stockData,
   themes,
+  excerpt,
+  thumbnail,
 }: ReportCardProps) {
   const router = useRouter();
   const { user } = useAuth();
@@ -83,6 +87,8 @@ const ReportCard = memo(function ReportCard({
   const [isDeleting, setIsDeleting] = useState(false);
 
   const bookmarked = isBookmarked(id);
+  const held = heldDaysLabel(createdAt);
+  const thumbSrc = usableThumbnail(thumbnail);
 
   const handleBookmarkClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -137,15 +143,16 @@ const ReportCard = memo(function ReportCard({
   };
 
   return (
-    <div onClick={handleCardClick} className="block cursor-pointer">
-      <Card variant="glass" padding="md">
+    <div onClick={handleCardClick} className="group block cursor-pointer py-4 sm:py-5 border-b border-[var(--theme-border-muted)]">
+      <div>
         {/* Header */}
         <div className="flex justify-between items-start mb-2 sm:mb-4 gap-2 sm:gap-3">
           <div className="flex-1 min-w-0">
-            <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white truncate mb-1 sm:mb-2">{title}</h2>
+            <h2 className="headline text-[18px] sm:text-[22px] leading-snug line-clamp-2 break-keep mb-1 sm:mb-1.5 group-hover:underline underline-offset-4 decoration-1">{title}</h2>
             <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
-              <h3 className="text-xs sm:text-base font-semibold text-gray-700 dark:text-gray-300 font-heading tracking-wide truncate">{stockName}</h3>
-              <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>
+              <h3 className="text-xs sm:text-base font-semibold text-gray-700 dark:text-gray-300 font-heading tracking-wide truncate">{shortStockName(stockName, ticker)}</h3>
+              {shortStockName(stockName, ticker).toUpperCase() !== ticker.toUpperCase() && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>}
+              {exchangeLabel(exchange) && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">· {exchangeLabel(exchange)}</span>}
               {themes && themes.length > 0 && themes.slice(0, 2).map(themeId => (
                 <span key={themeId} className="text-[10px] px-1 sm:px-1.5 py-0.5 border border-[var(--theme-border-muted)] rounded text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">
                   #{THEME_NAMES[themeId] || themeId}
@@ -160,11 +167,37 @@ const ReportCard = memo(function ReportCard({
             <div className="text-base sm:text-2xl font-black font-heading font-mono tracking-tight">
               {formatReturn(returnRate)}
             </div>
-            <div className="mt-1">
+            <div className="mt-1 flex items-center justify-end gap-1">
+              {held && (
+                <span
+                  suppressHydrationWarning
+                  title={`작성 후 ${held.replace('D+', '')}일`}
+                  className="rounded-sm border border-[var(--theme-border-muted)] px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300"
+                >
+                  {held}
+                </span>
+              )}
               <OpinionBadge opinion={opinion} />
             </div>
           </div>
         </div>
+
+        {/* 매수 이유 미리보기 + 썸네일 — "왜 샀는지"가 이 사이트의 본론 */}
+        {(excerpt || thumbSrc) && (
+          // 모바일: 이미지를 카드 폭 전체로 위에 / 데스크탑: 본문 오른쪽에 큼직하게
+          <div className="mb-2 sm:mb-3 flex flex-col-reverse gap-2 sm:flex-row sm:items-start sm:gap-4">
+            {excerpt && (
+              <p className={`flex-1 min-w-0 text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-400 ${thumbSrc ? 'line-clamp-2 sm:line-clamp-5' : 'line-clamp-2'}`}>
+                {excerpt}
+              </p>
+            )}
+            {thumbSrc && (
+              <div className="relative w-full aspect-[2/1] sm:w-56 sm:aspect-[16/10] flex-shrink-0 overflow-hidden rounded-sm border border-[var(--theme-border-muted)] bg-gray-100 dark:bg-gray-800">
+                <Image src={thumbSrc} alt="" fill sizes="(max-width: 640px) 100vw, 224px" className="object-cover" />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Price Info - 한 줄 */}
         <div className="mb-1 sm:mb-2 text-[11px] sm:text-sm flex items-center gap-1.5 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
@@ -180,13 +213,13 @@ const ReportCard = memo(function ReportCard({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
-          <UserBadgeInline badgeId={equippedBadgeId} nickname={author} size={28} className="-mr-1" />
+        <div className="flex items-center text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(author)}`; }}
           >
             {author}
           </span>
+          <UserLevelInline points={levelPoints} />
           <span className="flex-shrink-0">·</span>
           <span className="flex-shrink-0 hidden sm:inline">{createdAt}</span>
           <span className="flex-shrink-0 sm:hidden">{createdAt.slice(5)}</span>
@@ -201,15 +234,15 @@ const ReportCard = memo(function ReportCard({
                 <span>댓글 {commentCount}</span>
                 <button
                   onClick={handleBookmarkClick}
-                  className="card-footer-action group/bm p-0.5 sm:p-1 -m-0.5 ml-0.5 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+                  className="card-footer-action group/bm p-0.5 sm:p-1 -m-0.5 ml-0.5 transition-colors"
                   aria-label={bookmarked ? '북마크 해제' : '북마크'}
                 >
                   {bookmarked ? (
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neon-green-500" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--theme-orange)]" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   ) : (
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-300 dark:text-gray-500 group-hover/bm:text-neon-green-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-300 dark:text-gray-500 group-hover/bm:text-[var(--theme-orange)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   )}
@@ -236,7 +269,7 @@ const ReportCard = memo(function ReportCard({
             )}
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 });

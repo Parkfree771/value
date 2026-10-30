@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getRelatedReports } from '@/lib/feedData';
 import Card from '@/components/Card';
 import type { FeedPost } from '@/types/feed';
+import { shortStockName } from '@/utils/reportDisplay';
 
 const THEME_NAMES: Record<string, string> = {
   'physical-ai': '피지컬AI',
@@ -48,7 +49,7 @@ function ReportLinkRow({ post, anchorPrefix }: { post: FeedPost; anchorPrefix?: 
         <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
           {post.stockName && (
             <>
-              <span className="truncate">{post.stockName}</span>
+              <span className="truncate">{shortStockName(post.stockName, post.ticker)}</span>
               {post.ticker && <span className="font-mono text-gray-400">{post.ticker}</span>}
               <span className="text-gray-400">·</span>
             </>

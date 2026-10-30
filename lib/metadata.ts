@@ -44,7 +44,14 @@ function tickerVariants(ticker: string): string[] {
 // OG 이미지 레이아웃 버전. 레이아웃을 바꿔서 옛 캐시(네이버/카톡/페북)를 강제로 무효화해야 할 때 증가.
 // v2: 좌우 safe-zone 132px 확보 (2026-05-16)
 // v3: 헤더 AntStreet 로고 이미지 / 작성가→현재가 좌측·수익률 우측 텍스트 / 푸터 작성자 라벨 (2026-05-16)
-const OG_IMAGE_VERSION = 'v3';
+// v4: 한국식 색상(상승 빨강/하락 파랑) / 투자 근거 한 줄 / 기준일·작성 후 N일 / 푸터 개미 (2026-10-30)
+// v5: 새 디자인 — 세리프 제호 텍스트 · 명조 제목 · 개미 이미지 제거 (2026-10-30)
+const OG_IMAGE_VERSION = 'v5';
+
+// 현재가 기준일 (KST) — URL에 들어가므로 하루 단위로 바뀌어 SNS 캐시도 하루마다 새 이미지
+function todayKst(): string {
+  return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
+}
 
 function buildOgImageUrl(report: Report, returnRate: number): string {
   const currency = report.stockData?.currency || (report.exchange === 'KRX' ? 'KRW' : 'USD');
@@ -60,6 +67,8 @@ function buildOgImageUrl(report: Report, returnRate: number): string {
     author: report.author || '익명',
     date: report.createdAt || '',
     positionType: report.positionType || 'long',
+    excerpt: buildContentPreview(report.content || '', 80),
+    asOf: todayKst(),
     v: OG_IMAGE_VERSION,
   });
   return `${SITE_URL}/api/og?${params.toString()}`;
@@ -101,6 +110,7 @@ function buildKeywords(report: Report): string[] {
 
 function buildContentPreview(content: string, maxLen = 90): string {
   return content
+    .replace(/<head[\s\S]*?<\/head>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<[^>]+>/g, ' ')
@@ -268,7 +278,7 @@ export function generateReportJsonLd(
   const returnRate = currentReturnRate ?? report.returnRate;
   const op = opinionLabel(report.opinion);
   const themeTags = (report.themes || []).map((t) => THEME_NAMES[t] || t);
-  const ogImageUrl = `${SITE_URL}/og-v2.jpg`;
+  const ogImageUrl = `${SITE_URL}/api/og/site`;
   const cleanContent = buildContentPreview(report.content, 5000);
   const lastModified =
     report.updatedAt && report.updatedAt.length > 0
@@ -292,9 +302,9 @@ export function generateReportJsonLd(
         name: SITE_NAME,
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE_URL}/og-v2.jpg`,
-          width: 1731,
-          height: 909,
+          url: `${SITE_URL}/icon-512.png`,
+          width: 512,
+          height: 512,
         },
       },
       datePublished: new Date(report.createdAt).toISOString(),

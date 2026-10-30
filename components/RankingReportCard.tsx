@@ -7,7 +7,8 @@ import Card from './Card';
 import { OpinionBadge } from './Badge';
 import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { inferCurrency, formatPrice } from '@/utils/currency';
-import UserBadgeInline from './UserBadgeInline';
+import UserLevelInline from './UserLevelInline';
+import { shortStockName } from '@/utils/reportDisplay';
 import styles from './RankingReportCard.module.css';
 
 interface RankingReportCardProps {
@@ -31,7 +32,7 @@ interface RankingReportCardProps {
       currency?: string;
       [key: string]: any;
     };
-    equippedBadgeId?: string | null;
+    levelPoints?: number;
   };
   rank: number;
   rankChange?: number;
@@ -132,7 +133,7 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank, rankCh
             <div className="flex justify-between items-start mb-1.5 sm:mb-3 gap-2 sm:gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1.5 overflow-hidden whitespace-nowrap">
-                  <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{report.stockName}</h3>
+                  <h3 className="text-sm sm:text-lg font-bold text-gray-900 dark:text-white font-heading tracking-wide truncate">{shortStockName(report.stockName, report.ticker)}</h3>
                   <span className="text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{report.ticker}</span>
                   <span className="flex-shrink-0"><OpinionBadge opinion={report.opinion} /></span>
                 </div>
@@ -161,13 +162,13 @@ const RankingReportCard = memo(function RankingReportCard({ report, rank, rankCh
 
             {/* Footer */}
             <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 border-t dark:border-gray-700 pt-1.5 sm:pt-3 gap-1 overflow-hidden whitespace-nowrap">
-              <UserBadgeInline badgeId={report.equippedBadgeId} nickname={report.author} size={28} className="-mr-1" />
               <span
                 className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(report.author)}`; }}
               >
                 {report.author}
               </span>
+              <UserLevelInline points={report.levelPoints} />
               <span className="flex-shrink-0">·</span>
               <span className="flex-shrink-0 hidden sm:inline">{report.createdAt}</span>
               <span className="flex-shrink-0 sm:hidden">{report.createdAt.slice(5)}</span>

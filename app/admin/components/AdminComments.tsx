@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { InlineLoading } from '@/components/loading/Loading';
 
 interface Comment {
   id: string;
@@ -41,9 +42,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
 
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
-      </div>
+      <InlineLoading />
     );
   }
 

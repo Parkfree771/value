@@ -6,6 +6,49 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 
+// 제호 아래 날짜 — "2026년 10월 30일 금요일" (한국 시간)
+const DATELINE = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long',
+});
+
+// 섹션 바 — 콘텐츠 섹션만. 글쓰기·마이페이지 같은 내 계정 기능은 오른쪽 위(로그인 시)로 분리 (WSJ 방식)
+const SECTIONS: { href: string; label: string; match?: string[] }[] = [
+  { href: '/', label: '홈' },
+  { href: '/ranking', label: '랭킹' },
+  { href: '/search', label: '종목 검색' },
+  { href: '/guru-tracker', label: '구루 포트폴리오', match: ['/portfolio'] },
+  { href: '/indicators', label: '경제지표' },
+];
+
+function ThemeIcon({ theme, mounted }: { theme: string; mounted: boolean }) {
+  if (!mounted) return <div className="w-4 h-4" />;
+  return theme === 'light' ? (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  ) : (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  );
+}
+
+function Avatar({ photoURL, name, size }: { photoURL?: string | null; name: string; size: number }) {
+  const style = { width: size, height: size };
+  return photoURL ? (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={photoURL} alt="" style={style} className="rounded-full border border-[var(--theme-border-muted)]" referrerPolicy="no-referrer" />
+  ) : (
+    <span style={style} className="rounded-full bg-[var(--theme-accent)] flex items-center justify-center text-white font-serif text-sm font-bold">
+      {name[0]}
+    </span>
+  );
+}
+
 const Navbar = memo(function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
@@ -13,9 +56,13 @@ const Navbar = memo(function Navbar() {
   const { user, signOut, isAdmin } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isActive = useCallback((path: string) => {
-    return pathname === path;
-  }, [pathname]);
+  const isActive = useCallback(
+    (section: (typeof SECTIONS)[number]) =>
+      section.href === '/'
+        ? pathname === '/'
+        : pathname.startsWith(section.href) || (section.match ?? []).some((m) => pathname.startsWith(m)),
+    [pathname],
+  );
 
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
@@ -33,395 +80,197 @@ const Navbar = memo(function Navbar() {
   const handleWriteClick = useCallback((e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
-      alert('로그인이 필요한 서비스입니다.');
-      router.push('/login');
+      router.push('/login?next=/write');
     }
-  }, [user, router]);
+    closeMobileMenu();
+  }, [user, router, closeMobileMenu]);
+
+  const userName = user ? user.displayName || user.email || '?' : '';
+  const accountLink = (href: string) =>
+    `text-[13px] transition-colors hover:text-[var(--foreground)] ${pathname.startsWith(href) ? 'font-bold text-[var(--foreground)]' : 'text-[var(--theme-ink-soft)]'}`;
 
   return (
     <>
       {/* Overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity"
+          className="fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity"
           onClick={closeMobileMenu}
         />
       )}
 
-      <nav className="bg-[var(--theme-bg)] border-b-2 border-[var(--theme-border-muted)] shadow-md sticky top-0 z-50 transition-colors pt-[var(--sat,0px)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-12 sm:h-14">
-          {/* Logo + Navigation Links */}
-          <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center" onClick={closeMobileMenu}>
-            <span className="brand-title text-2xl sm:text-3xl leading-none" data-text="AntStreet">
-              AntStreet
-            </span>
-          </Link>
-
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link
-              href="/"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              피드
-            </Link>
-            <Link
-              href="/search"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/search')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              검색
-            </Link>
-            <Link
-              href="/ranking"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/ranking')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              랭킹
-            </Link>
-            <Link
-              href="/guru-tracker"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/guru-tracker')
-                  ? 'text-white bg-neon-orange border-2 border-neon-orange-700 shadow-sm'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              GURU
-            </Link>
-            <Link
-              href="/indicators"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/indicators')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              경제지표
-            </Link>
-            <span className="w-px h-5 bg-gray-300 dark:bg-gray-600 mx-1"></span>
-            <Link
-              href="/write"
-              onClick={handleWriteClick}
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/write')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              글쓰기
-            </Link>
-            <Link
-              href="/mypage"
-              className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                isActive('/mypage')
-                  ? 'pixel-nav-active'
-                  : 'pixel-nav-inactive'
-              }`}
-            >
-              마이페이지
-            </Link>
-            {user && isAdmin && (
-              <Link
-                href="/admin"
-                className={`font-heading tracking-wide px-3 py-1.5 text-sm font-bold transition-all ${
-                  isActive('/admin')
-                    ? 'pixel-nav-active'
-                    : 'pixel-nav-inactive'
-                }`}
-              >
-                관리자
-              </Link>
-            )}
-          </div>
-          </div>
-
-          {/* Auth Buttons + Theme Toggle */}
-          <div className="hidden md:flex items-center space-x-3">
-            {/* Theme Toggle Button */}
+      {/* 제호 (데스크탑) — 가운데 큰 워드마크 + 날짜 줄. 스크롤하면 지나가고 아래 섹션 바만 붙어 있다 */}
+      <header className="hidden md:block bg-[var(--background)] pt-[var(--sat,0px)]">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-2 text-center">
+          {/* 내 계정 — 오른쪽 위 */}
+          <div className="absolute right-4 sm:right-6 lg:right-8 top-4 flex items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-1.5 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] rounded-lg transition-all"
-              aria-label="Toggle theme"
+              className="p-1.5 border border-[var(--theme-border-muted)] hover:border-[var(--theme-border)] rounded-sm transition-colors text-[var(--foreground)]"
+              aria-label="테마 전환"
             >
-              {!mounted ? (
-                <div className="w-4 h-4" />
-              ) : theme === 'light' ? (
-                <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              )}
+              <ThemeIcon theme={theme} mounted={mounted} />
             </button>
-
             {user ? (
               <>
-                <Link href="/mypage" className="flex-shrink-0">
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="프로필"
-                      className="w-8 h-8 rounded-full border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] transition-all"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-8 h-8 rounded-full border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] bg-[var(--theme-accent)] flex items-center justify-center text-white font-semibold text-xs font-bold transition-all">
-                      {(user.displayName || user.email || '?')[0]}
-                    </div>
-                  )}
+                <Link href="/write" onClick={handleWriteClick} className="btn-primary !py-1.5 !px-3 !text-sm">
+                  리포트 쓰기
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors"
-                >
+                <Link href="/mypage" className={`flex items-center gap-1.5 ${accountLink('/mypage')}`}>
+                  <Avatar photoURL={user.photoURL} name={userName} size={26} />
+                  마이페이지
+                </Link>
+                {isAdmin && (
+                  <Link href="/admin" className={accountLink('/admin')}>
+                    관리자
+                  </Link>
+                )}
+                <button onClick={handleSignOut} className="text-[13px] text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors">
                   로그아웃
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors"
-                >
+                <Link href="/login" className={accountLink('/login')}>
                   로그인
                 </Link>
-                <Link
-                  href="/signup"
-                  className="btn-primary !py-1.5 !px-3 !text-sm"
-                >
+                <Link href="/signup" className="btn-primary !py-1.5 !px-3 !text-sm">
                   회원가입
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile Menu Button + Theme Toggle */}
-          <div className="md:hidden flex items-center gap-2">
-            {/* Theme Toggle for Mobile */}
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] rounded-lg transition-all"
-              aria-label="Toggle theme"
-            >
-              {!mounted ? (
-                <div className="w-4 h-4" />
-              ) : theme === 'light' ? (
-                <svg className="w-4 h-4 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              )}
-            </button>
+          <Link href="/" className="inline-block">
+            <span className="brand-title text-[64px] leading-[0.95]">AntStreet</span>
+          </Link>
+          <p suppressHydrationWarning className="mt-1.5 text-xs text-[var(--theme-ink-soft)]">
+            {DATELINE.format(new Date())}
+            <span className="mx-2 text-[var(--theme-border-muted)]">|</span>
+            개인 투자자가 쓰고, 시장이 채점한다
+          </p>
+        </div>
+      </header>
 
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400"
-              aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
-            >
-              {mobileMenuOpen ? (
+      {/* 섹션 바 — 데스크탑은 가운데 정렬 섹션, 모바일은 작은 제호 + 햄버거 */}
+      <nav className="bg-[var(--background)] border-y border-[var(--theme-border-muted)] sticky top-0 z-50 transition-colors pt-[var(--sat,0px)] md:pt-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between md:justify-center items-center h-12 md:h-11">
+            <Link href="/" className="flex items-center md:hidden" onClick={closeMobileMenu}>
+              <span className="brand-title text-[30px] leading-none">AntStreet</span>
+            </Link>
+
+            <div className="hidden md:flex items-center gap-1">
+              {SECTIONS.map((s) => (
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  className={`px-3 py-2.5 text-[15px] font-medium transition-colors ${isActive(s) ? 'pixel-nav-active' : 'pixel-nav-inactive'}`}
+                >
+                  {s.label}
+                </Link>
+              ))}
+            </div>
+
+            {/* 모바일: 테마 + 메뉴 */}
+            <div className="md:hidden flex items-center gap-2">
+              <button
+                onClick={toggleTheme}
+                className="p-1.5 border border-[var(--theme-border-muted)] rounded-sm text-[var(--foreground)]"
+                aria-label="테마 전환"
+              >
+                <ThemeIcon theme={theme} mounted={mounted} />
+              </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1 text-[var(--foreground)]"
+                aria-label={mobileMenuOpen ? '메뉴 닫기' : '메뉴 열기'}
+              >
                 <svg className="h-5 w-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                  <path d="M6 18L18 6M6 6l12 12"></path>
+                  {mobileMenuOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 6h16M4 12h16M4 18h16" />}
                 </svg>
-              ) : (
-                <svg className="h-5 w-5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                  <path d="M4 6h16M4 12h16M4 18h16"></path>
-                </svg>
-              )}
-            </button>
+              </button>
+            </div>
           </div>
         </div>
+      </nav>
 
-      </div>
-    </nav>
-
-      {/* Mobile Sidebar Menu */}
+      {/* 모바일 메뉴 — 위: 섹션 / 아래: 내 계정 */}
       <div
-        className={`fixed top-0 right-0 h-full w-64 sm:w-72 bg-[var(--theme-bg)] border-l-2 border-[var(--theme-border)] shadow-lg z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 right-0 h-full w-72 bg-[var(--background)] border-l border-[var(--theme-border)] z-50 md:hidden transform transition-transform duration-300 ease-in-out ${
           mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full pt-[var(--sat,0px)] pb-[var(--sab,0px)]">
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between p-4 border-b-2 border-[var(--theme-border-muted)]">
-            <Link href="/" onClick={closeMobileMenu} className="flex items-center">
-              <span className="brand-title text-lg leading-none" data-text="AntStreet">
-                AntStreet
-              </span>
+          <div className="flex items-center justify-between px-4 h-14 border-b-[3px] border-double border-[var(--theme-border)]">
+            <Link href="/" onClick={closeMobileMenu}>
+              <span className="brand-title text-[26px] leading-none">AntStreet</span>
             </Link>
-            <button
-              onClick={closeMobileMenu}
-              className="p-2 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
-              aria-label="메뉴 닫기"
-            >
-              <svg className="w-6 h-6 text-gray-700 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button onClick={closeMobileMenu} className="p-2 text-[var(--foreground)]" aria-label="메뉴 닫기">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
 
-          {/* Menu Items */}
-          <div className="flex-1 overflow-y-auto py-4 px-3">
-            <div className="flex flex-col space-y-1">
-              <Link
-                href="/"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                피드
-              </Link>
-              <Link
-                href="/search"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/search')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                검색
-              </Link>
-              <Link
-                href="/ranking"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/ranking')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                랭킹
-              </Link>
-              <Link
-                href="/guru-tracker"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/guru-tracker')
-                    ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-l-2 border-orange-500'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                GURU
-              </Link>
-              <Link
-                href="/indicators"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/indicators')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                경제지표
-              </Link>
-              <Link
-                href="/write"
-                onClick={(e) => {
-                  handleWriteClick(e);
-                  if (user) closeMobileMenu();
-                }}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/write')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                글쓰기
-              </Link>
-              <Link
-                href="/mypage"
-                onClick={closeMobileMenu}
-                className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                  isActive('/mypage')
-                    ? 'pixel-nav-mobile-active'
-                    : 'pixel-nav-mobile-inactive'
-                }`}
-              >
-                마이페이지
-              </Link>
-              {user && isAdmin && (
+          <div className="flex-1 overflow-y-auto px-3 py-4">
+            <p className="kicker px-4 mb-1 !text-[var(--theme-ink-soft)]">섹션</p>
+            <div className="flex flex-col">
+              {SECTIONS.map((s) => (
                 <Link
-                  href="/admin"
+                  key={s.href}
+                  href={s.href}
                   onClick={closeMobileMenu}
-                  className={`font-heading tracking-wide px-4 py-3 text-sm font-bold transition-all ${
-                    isActive('/admin')
-                      ? 'pixel-nav-mobile-active'
-                      : 'pixel-nav-mobile-inactive'
-                  }`}
+                  className={`px-4 py-3 text-[15px] font-semibold ${isActive(s) ? 'pixel-nav-mobile-active' : 'pixel-nav-mobile-inactive'}`}
                 >
-                  관리자
+                  {s.label}
                 </Link>
-              )}
+              ))}
             </div>
-          </div>
 
-          {/* Sidebar Footer */}
-          <div className="border-t-2 border-[var(--theme-border-muted)] p-3">
+            <p className="kicker px-4 mt-6 mb-1 !text-[var(--theme-ink-soft)]">내 계정</p>
             {user ? (
-              <div className="flex flex-col space-y-2">
-                <Link href="/mypage" onClick={closeMobileMenu} className="flex items-center gap-3 px-4 py-2.5">
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="프로필"
-                      className="w-9 h-9 rounded-full border-2 border-[var(--theme-border-muted)]"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-9 h-9 rounded-full border-2 border-[var(--theme-border-muted)] bg-[var(--theme-accent)] flex items-center justify-center text-white font-semibold text-sm font-bold">
-                      {(user.displayName || user.email || '?')[0]}
-                    </div>
-                  )}
-                  <span className="font-semibold text-sm font-bold text-gray-700 dark:text-gray-300">
-                    {user.displayName || user.email}
-                  </span>
+              <div className="flex flex-col">
+                <Link href="/mypage" onClick={closeMobileMenu} className="flex items-center gap-3 px-4 py-3">
+                  <Avatar photoURL={user.photoURL} name={userName} size={32} />
+                  <span className="text-sm font-bold text-[var(--foreground)] truncate">{userName}</span>
                 </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="px-4 py-2.5 font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors text-center w-full"
+                <Link
+                  href="/mypage"
+                  onClick={closeMobileMenu}
+                  className={`px-4 py-3 text-[15px] font-semibold ${pathname.startsWith('/mypage') ? 'pixel-nav-mobile-active' : 'pixel-nav-mobile-inactive'}`}
                 >
+                  마이페이지
+                </Link>
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={closeMobileMenu}
+                    className={`px-4 py-3 text-[15px] font-semibold ${pathname.startsWith('/admin') ? 'pixel-nav-mobile-active' : 'pixel-nav-mobile-inactive'}`}
+                  >
+                    관리자
+                  </Link>
+                )}
+                <button onClick={handleSignOut} className="px-4 py-3 text-left text-[15px] font-semibold pixel-nav-mobile-inactive">
                   로그아웃
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col space-y-2">
-                <Link
-                  href="/login"
-                  onClick={closeMobileMenu}
-                  className="px-4 py-2.5 font-semibold text-xs font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)] transition-colors text-center block"
-                >
+              <div className="flex flex-col">
+                <Link href="/login" onClick={closeMobileMenu} className="px-4 py-3 text-[15px] font-semibold pixel-nav-mobile-inactive">
                   로그인
                 </Link>
-                <Link
-                  href="/signup"
-                  onClick={closeMobileMenu}
-                  className="btn-primary !py-2 !text-sm text-center block"
-                >
+                <Link href="/signup" onClick={closeMobileMenu} className="px-4 py-3 text-[15px] font-semibold pixel-nav-mobile-inactive">
                   회원가입
                 </Link>
               </div>
             )}
+          </div>
+
+          <div className="border-t border-[var(--theme-border-muted)] p-3">
+            <Link href="/write" onClick={handleWriteClick} className="btn-primary block text-center !py-2.5 !text-sm">
+              리포트 쓰기
+            </Link>
           </div>
         </div>
       </div>

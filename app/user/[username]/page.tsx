@@ -1,25 +1,19 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import ReportCard from '@/components/ReportCard';
 import Link from 'next/link';
 import Card from '@/components/Card';
-import BadgeIcon from '@/components/BadgeIcon';
-import { useUserBadge } from '@/contexts/UserBadgesContext';
-import {
-  BADGES,
-  BADGES_BY_ID,
-  CATEGORY_LABEL,
-  type BadgeCategory,
-  type UserStats,
-} from '@/lib/badges';
+import UserLevelInline from '@/components/UserLevelInline';
+import LevelCard, { type LevelBreakdown } from '@/components/LevelCard';
+import { PageLoading } from '@/components/loading/Loading';
 
 interface FeedPost {
   id: string;
   title: string;
   author: string;
-  equippedBadgeId?: string | null;
+  levelPoints?: number;
   stockName: string;
   ticker: string;
   exchange: string;
@@ -37,13 +31,23 @@ interface FeedPost {
   authorId?: string;
 }
 
+// /api/users/by-nickname 의 stats (user_stats 뷰)
+interface UserStats {
+  totalReports: number;
+  avgReturnRate: number;
+  maxReturnRate: number;
+  minReturnRate: number;
+  winRate: number;
+  totalViews: number;
+  totalLikes: number;
+}
+
 interface UserInfo {
   uid: string;
   nickname: string;
   bio: string;
-  equippedBadgeId: string | null;
+  level?: { points: number; breakdown: LevelBreakdown | null };
   stats: UserStats | null;
-  unlockedBadgeIds: string[];
   lastStatsUpdate: string | null;
 }
 
@@ -60,7 +64,7 @@ export default function UserPage() {
     let cancelled = false;
     (async () => {
       try {
-        // 1. 닉네임 → 사용자 정보·통계·해금배지
+        // 1. 닉네임 → 사용자 정보·통계·레벨
         const userRes = await fetch(`/api/users/by-nickname/${encodeURIComponent(username)}`);
         if (userRes.status === 404) {
           if (!cancelled) setNotFound(true);
@@ -107,21 +111,11 @@ export default function UserPage() {
   const totalViews = userInfo?.stats?.totalViews ?? userReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = userInfo?.stats?.totalLikes ?? userReports.reduce((sum, r) => sum + r.likes, 0);
 
-  // 해금된 배지 (sticky, users 컬렉션 저장값)
-  const unlockedIds = userInfo?.unlockedBadgeIds ?? [];
-  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds]);
-
-  const equippedBadgeId = userInfo?.equippedBadgeId ?? null;
-  const equippedDef = equippedBadgeId ? BADGES_BY_ID[equippedBadgeId] : null;
+  const levelPoints = userInfo?.level?.points ?? 0;
 
   if (loading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-ant-red-600 border-t-transparent mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">로딩 중...</p>
-        </div>
-      </div>
+      <PageLoading label="투자자 기록을 불러오는 중" />
     );
   }
 
@@ -164,33 +158,20 @@ export default function UserPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* 프로필 정보 */}
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans text-xl sm:text-2xl font-bold shadow-md">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans text-xl sm:text-2xl font-bold">
               {username[0]?.toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                {equippedBadgeId && (
-                  <BadgeIcon
-                    id={equippedBadgeId}
-                    size={24}
-                    title={equippedDef ? `${equippedDef.name} — ${equippedDef.description}` : undefined}
-                  />
-                )}
-                <h1 className="font-sans text-lg sm:text-xl font-bold">
+                <h1 className="headline text-lg sm:text-xl font-bold">
                   {username}
                 </h1>
-                {equippedDef && (
-                  <span className="font-sans text-xs px-2 py-0.5 border-2 border-[var(--theme-accent)] text-[var(--theme-accent)] rounded-[6px] font-bold">
-                    {equippedDef.name}
-                  </span>
-                )}
+                <UserLevelInline points={levelPoints} size="md" />
               </div>
               <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
                 <span>{totalReports}개 리포트</span>
                 <span>·</span>
                 <span>승률 {winRate}%</span>
-                <span>·</span>
-                <span>업적 {unlockedIds.length}/{BADGES.length}</span>
               </div>
             </div>
           </div>
@@ -228,47 +209,11 @@ export default function UserPage() {
         </div>
       </Card>
 
-      {/* 배지 (해금 + 잠금 모두 표시, 카테고리별) */}
-      {totalReports > 0 && (
-        <Card variant="glass" padding="md" className="mb-6 sm:mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-sans text-base font-bold uppercase tracking-wider">업적</h2>
-            <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
-              {unlockedIds.length}/{BADGES.length} 해금
-            </span>
-          </div>
-          <div className="space-y-4">
-            {(['single', 'avg', 'activity'] as BadgeCategory[]).map((cat) => {
-              const inCat = BADGES.filter((b) => b.category === cat);
-              return (
-                <div key={cat}>
-                  <div className="font-sans text-[11px] font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-2">
-                    {CATEGORY_LABEL[cat]} · {inCat.filter((b) => unlockedSet.has(b.id)).length}/{inCat.length}
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {inCat.map((b) => {
-                      const unlocked = unlockedSet.has(b.id);
-                      return (
-                        <div
-                          key={b.id}
-                          className={`flex flex-col items-center p-2 rounded-[10px] border-2 ${
-                            unlocked
-                              ? 'border-[var(--theme-border-muted)]'
-                              : 'border-[var(--theme-border-muted)] opacity-30 grayscale'
-                          }`}
-                          title={`${b.name} — ${b.description}`}
-                        >
-                          <BadgeIcon id={b.id} size={72} />
-                          <div className="font-sans text-[10px] font-bold mt-1.5 text-center leading-tight">{b.name}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
+      {/* 레벨 (배지 시스템 대체) */}
+      {userInfo?.level && (
+        <div className="mb-6 sm:mb-8">
+          <LevelCard points={userInfo.level.points} breakdown={userInfo.level.breakdown} />
+        </div>
       )}
 
       {/* User Reports */}
@@ -288,7 +233,7 @@ export default function UserPage() {
             id={report.id}
             title={report.title}
             author={report.author}
-            equippedBadgeId={report.equippedBadgeId ?? null}
+            levelPoints={report.levelPoints}
             stockName={report.stockName}
             ticker={report.ticker}
             opinion={report.opinion}

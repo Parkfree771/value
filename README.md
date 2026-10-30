@@ -1,147 +1,40 @@
-# AntStreet - 개미 투자자들의 리포트 공유 플랫폼
+# AntStreet
 
-개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하는 리포트 플랫폼.
+개인 투자자가 쓰고, 시장이 채점하는 투자 리포트 사이트. 리포트를 쓰는 순간의 가격이 박제되고, 이후 수익률이 매일 자동으로 갱신된다.
 
 ## 주요 기능
 
-### 구현된 UI
-
-- **메인 페이지 (피드)**: 전체 리포트 피드, 필터링 기능
-- **랭킹 페이지**: 수익률 기준 상위 리포트 및 투자자 랭킹
-- **리포트 작성**: 종목 검색, 투자 의견 작성, 목표가 설정
-- **리포트 상세**: 수익률 추적, 종목 프로필, 댓글 기능
-- **마이페이지**: 포트폴리오 성과, 내 리포트 관리
-- **로그인/회원가입**: 이메일 인증, 소셜 로그인 UI
-
-### 예정된 기능 (백엔드 연동 필요)
-
-- 주식 API 연동 (실시간 주가, 기업 정보)
-- 수익률 자동 계산 및 업데이트
-- 사용자 인증 및 권한 관리
-- 댓글, 좋아요, 북마크 기능
-- 팔로우/팔로잉 시스템
+- **홈 1면** — 수익률 1·2·3위 + 4~15위(더보기 30위), 모닝 브리핑, 구루 포트폴리오, 최신 리포트, 전체 피드
+- **리포트** — 종목 검색(한·미·일·중·홍콩·코인), 작성가 자동 기록, 수익률 추적, 댓글·좋아요·북마크
+- **랭킹** — 누적·기간(1일/7일/한달) 수익률, 투자자 순위
+- **레벨** — 리포트 수·보유 기간·수익률로 쌓이는 점수 (`lib/levels.ts`, `db/migrations/0003_user_levels.sql`)
+- **구루 포트폴리오** — SEC 13F 분기 보유 종목
+- **경제지표** — FRED (VIX · 금리차 · CPI · M2)
 
 ## 기술 스택
 
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **Deployment**: Vercel
+- Next.js 16 (App Router) · TypeScript · Tailwind CSS
+- Neon — Postgres · Neon Auth · Object Storage
+- 가격: 한국투자증권 OpenAPI, Upbit
+- 배포: Vercel (`sin1`) · 가격 갱신: GitHub Actions `price-cron`
 
-## 시작하기
-
-### 환경 변수 설정
-
-1. `.env.example` 파일을 복사하여 `.env` 파일을 생성합니다:
-
-```bash
-cp .env.example .env
-```
-
-2. `.env` 파일을 열어 실제 값을 입력합니다:
-
-```env
-# Firebase 설정
-NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your-measurement-id
-
-# 사이트 URL
-NEXT_PUBLIC_SITE_URL=https://your-domain.com
-
-# Google Analytics (선택사항)
-NEXT_PUBLIC_GA_MEASUREMENT_ID=your-ga-id
-
-# Google AdSense (선택사항)
-# NEXT_PUBLIC_ADSENSE_CLIENT_ID=ca-pub-xxxxxxxxxxxxxxxx
-```
-
-**중요**: `.env` 파일은 Git에 커밋되지 않습니다. 민감한 정보가 포함되어 있으므로 절대 공개 저장소에 업로드하지 마세요.
-
-### 설치
+## 개발
 
 ```bash
 npm install
+npm run dev        # .env 에 DATABASE_URL · NEON_AUTH_* · AWS_*(Storage) · KIS_* 필요
+npx tsc --noEmit   # 타입 체크
 ```
 
-### 개발 서버 실행
+## 디자인
 
-```bash
-npm run dev
-```
+에디토리얼 테마 — 흰 바탕 · 잉크 · 얇은 괘선 · 명조 제목, 버튼은 검정, 포인트만 오렌지.
+토큰은 `app/globals.css` (`--theme-*`, `--color-up/down`), 공통 클래스는 `card-base`, `btn-primary`, `headline`, `kicker`, `section-rule`, `label-box`.
+파비콘은 `node scripts/build-favicon.mjs` 로 다시 만든다.
 
-브라우저에서 [http://localhost:3000](http://localhost:3000) 을 열어 확인하세요.
+## 폴더
 
-### 빌드
-
-```bash
-npm run build
-```
-
-### 프로덕션 실행
-
-```bash
-npm start
-```
-
-## 프로젝트 구조
-
-```
-value/
-├── app/                      # Next.js App Router 페이지
-│   ├── page.tsx             # 메인 페이지 (피드)
-│   ├── ranking/             # 랭킹 페이지
-│   ├── reports/             # 리포트 관련 페이지
-│   │   ├── new/            # 리포트 작성
-│   │   └── [id]/           # 리포트 상세
-│   ├── mypage/              # 마이페이지
-│   ├── login/               # 로그인
-│   └── signup/              # 회원가입
-├── components/               # 재사용 가능한 컴포넌트
-│   ├── Button.tsx
-│   ├── Card.tsx
-│   ├── Input.tsx
-│   ├── Navbar.tsx
-│   ├── Footer.tsx
-│   ├── ReportCard.tsx
-│   └── ...
-└── public/                   # 정적 파일
-
-```
-
-## Vercel 배포
-
-1. GitHub에 코드 푸시
-2. Vercel에서 저장소 연결
-3. 환경 변수 설정
-4. 배포 완료!
-
-## 다음 단계
-
-1. **백엔드 API 개발**
-   - 사용자 인증 (JWT, OAuth)
-   - 리포트 CRUD API
-   - 주식 데이터 API 연동
-
-2. **주가 추적 시스템**
-   - 주식 API 통합 (국내/해외)
-   - 배치 작업으로 수익률 자동 업데이트
-   - 종목 프로필 자동 저장
-
-3. **커뮤니티 기능**
-   - 댓글 시스템
-   - 좋아요/북마크
-   - 팔로우/팔로잉
-
-4. **고급 기능**
-   - 검색 및 추천 시스템
-   - 알림 시스템
-   - 리포트 공유 기능 (SNS)
-
-## 라이선스
-
-MIT License
+- `app/` 페이지·API · `components/` UI (`front/` 홈 1면, `loading/` 로딩)
+- `lib/` 서버 로직 (DB·가격·레벨·브리핑) · `utils/` 표시 헬퍼
+- `db/migrations/` SQL 마이그레이션 · `scripts/` 운영 스크립트 (`scripts/README.md`)
+- `design/legacy-ant/` 옛 개미 원본 보관

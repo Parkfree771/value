@@ -34,7 +34,7 @@
   max-width: 12rem;
   text-align: center;
   background: var(--theme-bg-card);
-  border: 2px solid var(--theme-border-muted);
+  border: 1px solid var(--theme-border-muted);
   transition: all 0.2s ease;
   cursor: pointer;
 }
@@ -47,7 +47,7 @@
 .cardFirst {
   border-color: var(--theme-accent);
   padding: 1.5rem 0.5rem 1.25rem;
-  box-shadow: 0 4px 12px rgba(153, 27, 27, 0.1);
+  box-shadow: none;
 }
 
 .cardFirst:hover {
@@ -62,20 +62,20 @@
 
 /* 2위 카드 - 골드 + 중간 높이 */
 .cardSecond {
-  border-color: #d97706;
+  border-color: var(--theme-border);
   padding: 1rem 0.5rem 0.75rem;
 }
 
 .cardSecond:hover {
-  border-color: #b45309;
+  border-color: var(--theme-border);
 }
 
 :global(.dark) .cardSecond {
-  border-color: #b45309;
+  border-color: var(--theme-border);
 }
 
 :global(.dark) .cardSecond:hover {
-  border-color: #d97706;
+  border-color: var(--theme-border);
 }
 
 @media (min-width: 640px) {
@@ -129,11 +129,11 @@
 
 .rankSecond {
   font-size: 1.25rem;
-  color: #d97706;
+  color: var(--theme-border);
 }
 
 :global(.dark) .rankSecond {
-  color: #fbbf24;
+  color: var(--foreground);
 }
 
 @media (min-width: 640px) {
@@ -203,17 +203,17 @@
 }
 
 .returnPositive {
-  color: #dc2626;
+  color: var(--color-up);
 }
 
 :global(.dark) .returnPositive {
-  color: #f87171;
+  color: var(--color-up);
 }
 
 .returnNegative {
-  color: #2563eb;
+  color: var(--color-down);
 }
 
 :global(.dark) .returnNegative {
-  color: #60a5fa;
+  color: var(--color-down);
 }

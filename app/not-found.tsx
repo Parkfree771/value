@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
       <div className="text-center">
-        <h1 className="text-8xl font-bold font-bold text-ant-red-500 ">404</h1>
+        <h1 className="headline text-8xl font-bold font-bold text-ant-red-500">404</h1>
         <h2 className="mt-4 text-2xl font-bold text-[var(--foreground)]">
           페이지를 찾을 수 없습니다
         </h2>

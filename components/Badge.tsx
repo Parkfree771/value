@@ -8,19 +8,20 @@ interface BadgeProps {
 }
 
 const variantStyles = {
-  buy: 'bg-ant-red-600 text-white',
-  sell: 'bg-blue-600 text-white',
-  hold: 'bg-gray-500 text-white',
-  default: 'bg-gray-500/15 text-gray-400 border-2 border-gray-600',
-  success: 'bg-green-500/15 text-green-400 border-2 border-green-500',
-  warning: 'bg-yellow-500/15 text-yellow-400 border-2 border-yellow-500',
-  danger: 'bg-red-500/15 text-red-400 border-2 border-red-500',
+  // 의견 배지 — 채움 대신 괘선 도장 (에디토리얼 테마)
+  buy: 'border border-[var(--color-buy)] text-[var(--color-buy)]',
+  sell: 'border border-[var(--color-sell)] text-[var(--color-sell)]',
+  hold: 'border border-[var(--color-hold)] text-[var(--color-hold)]',
+  default: 'bg-gray-500/15 text-gray-400 border border-gray-600',
+  success: 'bg-green-500/15 text-green-400 border border-green-500',
+  warning: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500',
+  danger: 'bg-red-500/15 text-red-400 border border-red-500',
 } as const;
 
 const sizeStyles = {
-  sm: 'px-2 py-0.5 text-xs rounded-md',
-  md: 'px-2 py-1 text-xs rounded-md',
-  lg: 'px-3 py-1.5 text-sm rounded-md',
+  sm: 'px-1.5 py-0.5 text-[11px] rounded-sm',
+  md: 'px-1.5 py-0.5 text-xs rounded-sm',
+  lg: 'px-2.5 py-1 text-sm rounded-sm',
 } as const;
 
 const Badge = memo(function Badge({

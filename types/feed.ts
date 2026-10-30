@@ -4,7 +4,7 @@ export interface FeedPost {
   author: string;
   authorId?: string;            // 실제 데이터엔 있으나 타입에 누락돼있던 것 — 백필·매핑용
   authorIsVirtual?: boolean;    // 작성자가 가상(시드) 사용자인지 — UI 배지 표시용
-  equippedBadgeId?: string | null; // 작성자가 장착한 배지 ID 스냅샷 (변경 시 일괄 갱신)
+  levelPoints?: number;         // 작성자 레벨 점수 (users.level_points, lib/levels.ts)
   stockName: string;
   ticker: string;
   exchange: string;
@@ -24,12 +24,20 @@ export interface FeedPost {
   category: string;
   targetPrice?: number;
   themes?: string[];
+  excerpt?: string;             // 본문 앞부분 텍스트 (투자 근거 미리보기) — 홈 SSR만 채움
+  thumbnail?: string | null;    // 첫 첨부 이미지 URL — 홈 SSR만 채움
+}
+
+export interface FeedStats {
+  totalPosts: number;
+  authors: number;
 }
 
 export interface FeedData {
   lastUpdated: string;
   totalPosts: number;
   posts: FeedPost[];
+  stats?: FeedStats;
   prices: Record<string, {
     currentPrice: number;
     exchange: string;

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { InlineLoading } from '@/components/loading/Loading';
 
 interface Stats {
   totalPosts: number;
@@ -33,9 +34,7 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ stats, loading }: AdminDashboardProps) {
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
-      </div>
+      <InlineLoading />
     );
   }
 
@@ -116,9 +115,9 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
             {stats.topPosts.slice(0, 5).map((post, index) => (
               <div
                 key={post.id}
-                className="flex items-center gap-3 p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
+                className="flex items-center gap-3 p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-[var(--theme-accent)] border-2 border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-bold text-sm">
+                <div className="flex-shrink-0 w-8 h-8 bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-bold text-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -170,9 +169,9 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
             {stats.topUsers.slice(0, 5).map((user, index) => (
               <div
                 key={user.userId}
-                className="flex items-center gap-3 p-3 border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
+                className="flex items-center gap-3 p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-purple-600 border-2 border-purple-900 flex items-center justify-center text-white font-bold text-sm">
+                <div className="flex-shrink-0 w-8 h-8 bg-purple-600 border border-purple-900 flex items-center justify-center text-white font-bold text-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">

@@ -107,9 +107,13 @@ interface MarketJsonForex {
   rate: { price: number; lastUpdated: string } | null;
 }
 interface MarketJson {
+  collected_at?: string;
   market: MarketJsonItem[];
   forex: MarketJsonForex[];
 }
+
+// market.json 은 브리핑 배치가 같이 만든다 — 배치가 멈추면 몇 달 전 지수가 "현재"로 보일 수 있어 3일 넘으면 버린다
+const MARKET_JSON_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000;
 
 async function fetchMarketJson(): Promise<MarketJson | null> {
   try {
@@ -117,7 +121,11 @@ async function fetchMarketJson(): Promise<MarketJson | null> {
     const url = publicUrl('briefing/market.json');
     const res = await fetch(url, { next: { revalidate: 900 } });
     if (!res.ok) return null;
-    return (await res.json()) as MarketJson;
+    const json = (await res.json()) as MarketJson;
+    if (!json.collected_at || Date.now() - new Date(json.collected_at).getTime() > MARKET_JSON_MAX_AGE_MS) {
+      return null;
+    }
+    return json;
   } catch (err) {
     console.error('[Ticker] market.json fetch failed:', err);
     return null;

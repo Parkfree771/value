@@ -343,7 +343,7 @@ const ChartTooltip = memo(function ChartTooltip({ active, payload, label, config
 
   return (
     <div
-      className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-xl px-3 py-2"
+      className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm px-3 py-2"
       style={{ boxShadow: 'var(--shadow-sm)' }}
     >
       <p className="font-heading text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">{label}</p>
@@ -360,17 +360,17 @@ function SkeletonCard() {
       <div className="animate-pulse space-y-4">
         <div className="flex justify-between">
           <div className="space-y-2">
-            <div className="h-5 w-32 bg-[var(--theme-border-muted)]/30 rounded-xl" />
-            <div className="h-4 w-44 bg-[var(--theme-border-muted)]/20 rounded-xl" />
+            <div className="h-5 w-32 bg-[var(--theme-border-muted)]/30 rounded-sm" />
+            <div className="h-4 w-44 bg-[var(--theme-border-muted)]/20 rounded-sm" />
           </div>
           <div className="flex gap-1">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-7 w-8 bg-[var(--theme-border-muted)]/20 rounded-xl" />
+              <div key={i} className="h-7 w-8 bg-[var(--theme-border-muted)]/20 rounded-sm" />
             ))}
           </div>
         </div>
-        <div className="h-4 w-full bg-[var(--theme-border-muted)]/15 rounded-xl" />
-        <div className="h-[300px] bg-[var(--theme-border-muted)]/10 rounded-xl" />
+        <div className="h-4 w-full bg-[var(--theme-border-muted)]/15 rounded-sm" />
+        <div className="h-[300px] bg-[var(--theme-border-muted)]/10 rounded-sm" />
       </div>
     </div>
   );
@@ -619,7 +619,7 @@ const IndicatorCard = memo(function IndicatorCard({
               key={range.key}
               onClick={() => handleRangeChange(range.key)}
               disabled={loading}
-              className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border border-transparent rounded-lg transition-colors duration-100
+              className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border border-transparent rounded-sm transition-colors duration-100
                 ${
                   timeRange === range.key
                     ? 'bg-[var(--theme-accent)] text-white'
@@ -633,7 +633,7 @@ const IndicatorCard = memo(function IndicatorCard({
           <button
             onClick={toggleMeasure}
             disabled={loading || observations.length === 0}
-            className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border border-transparent rounded-lg transition-colors duration-100 ml-1
+            className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border border-transparent rounded-sm transition-colors duration-100 ml-1
               ${
                 measureEnabled
                   ? 'bg-[var(--theme-accent)] text-white'
@@ -670,7 +670,7 @@ const IndicatorCard = memo(function IndicatorCard({
                   updateMeasure(Math.max(yRange[0], Math.min(yRange[1], val)));
                 }
               }}
-              className="font-mono text-[11px] sm:text-xs w-20 sm:w-24 px-2 py-1 sm:py-1.5 ml-1 border border-[var(--theme-border-muted)] rounded-lg bg-[var(--theme-bg-card)] text-[var(--foreground)] font-bold focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
+              className="font-mono text-[11px] sm:text-xs w-20 sm:w-24 px-2 py-1 sm:py-1.5 ml-1 border border-[var(--theme-border-muted)] rounded-sm bg-[var(--theme-bg-card)] text-[var(--foreground)] font-bold focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
               title="측정선 수치 직접 입력"
             />
           )}
@@ -684,7 +684,7 @@ const IndicatorCard = memo(function IndicatorCard({
 
       {/* 차트 */}
       {!inView || loading ? (
-        <div className="animate-pulse h-[300px] bg-[var(--theme-border-muted)]/10 rounded-xl" />
+        <div className="animate-pulse h-[300px] bg-[var(--theme-border-muted)]/10 rounded-sm" />
       ) : observations.length === 0 ? (
         <div className="h-[300px] flex items-center justify-center">
           <p className="font-heading text-sm font-bold text-gray-400">데이터를 불러올 수 없습니다.</p>
@@ -865,11 +865,11 @@ export default function EconomicClient() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 히어로 섹션 */}
       <section
-        className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border-2 border-[var(--theme-border)] rounded-2xl p-6 sm:p-8 relative overflow-hidden"
+        className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border border-[var(--theme-border)] rounded-sm p-6 sm:p-8 relative overflow-hidden"
         style={{ boxShadow: 'var(--shadow-lg)' }}
       >
         <div className="relative z-10 text-center">
-          <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 border-2 border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30 rounded-lg">
+          <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 border border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30 rounded-sm">
             <span className="font-heading text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">
               Economic Dashboard
             </span>
@@ -882,9 +882,9 @@ export default function EconomicClient() {
           <div className="flex justify-center gap-2 mt-3 sm:mt-4 mb-3 sm:mb-4">
             <button
               onClick={() => setCountry('US')}
-              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-2 rounded-xl transition-all duration-150 ${
+              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border rounded-sm transition-all duration-150 ${
                 country === 'US'
-                  ? 'bg-white text-ant-red-950 border-white shadow-md'
+                  ? 'bg-white text-ant-red-950 border-white'
                   : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
               }`}
             >
@@ -892,9 +892,9 @@ export default function EconomicClient() {
             </button>
             <button
               onClick={() => setCountry('KR')}
-              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border-2 rounded-xl transition-all duration-150 ${
+              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border rounded-sm transition-all duration-150 ${
                 country === 'KR'
-                  ? 'bg-white text-ant-red-950 border-white shadow-md'
+                  ? 'bg-white text-ant-red-950 border-white'
                   : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
               }`}
             >
@@ -925,7 +925,7 @@ export default function EconomicClient() {
 
       {/* 출처 표기 */}
       <section
-        className="p-5 sm:p-6 bg-pixel-card border-2 border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-xl"
+        className="p-5 sm:p-6 bg-pixel-card border border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-sm"
         style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}
       >
         <p className="font-heading text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 leading-relaxed">

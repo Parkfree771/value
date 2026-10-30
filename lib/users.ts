@@ -20,7 +20,6 @@ export interface UserProfile {
   termsVersion: string | null;
   privacyVersion: string | null;
   agreedAt: string | null;
-  equippedBadgeId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -97,7 +96,6 @@ type ProfileUpdate = Partial<{
   nickname: string;
   displayName: string | null;
   photoURL: string | null;
-  equippedBadgeId: string | null;
 }>;
 
 export async function updateUserProfile(_uid: string, updates: ProfileUpdate): Promise<void> {
@@ -105,7 +103,6 @@ export async function updateUserProfile(_uid: string, updates: ProfileUpdate): P
   if (updates.nickname !== undefined) payload.nickname = updates.nickname;
   if (updates.displayName !== undefined) payload.displayName = updates.displayName;
   if (updates.photoURL !== undefined) payload.photoURL = updates.photoURL;
-  if (updates.equippedBadgeId !== undefined) payload.equippedBadgeId = updates.equippedBadgeId;
 
   if (Object.keys(payload).length === 0) return;
 

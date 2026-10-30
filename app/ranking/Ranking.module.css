@@ -9,8 +9,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--theme-border-muted);
-  border-radius: 8px;
+  border: 1px solid var(--theme-border-muted);
+  border-radius: 4px;
   background: var(--theme-bg-card);
   flex-shrink: 0;
 }

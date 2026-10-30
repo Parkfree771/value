@@ -72,7 +72,7 @@ export default function PortfolioView({
             <button
               key={view.report_date_curr}
               onClick={() => setSelectedIdx(idx)}
-              className={`px-3 py-1.5 text-xs font-bold border-2 rounded-xl transition-colors ${
+              className={`px-3 py-1.5 text-xs font-bold border rounded-sm transition-colors ${
                 idx === selectedIdx
                   ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
                   : 'bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]'

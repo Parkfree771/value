@@ -11,8 +11,8 @@
 | `local-price-updater.ts` | 로컬 PC 상주형 가격 업데이트 스케줄러. 사장님 `.bat`에서 호출 (GitHub Actions price-cron과 중복 — 폐기 검토 중) | 로컬 (선택) |
 | `cron/update-stock-prices.mjs` | 게시글 종목 가격 갱신 (`--market=ASIA\|US\|CRYPTO\|ALL [--finalize]`, Neon) | GitHub Actions `price-cron` |
 | `cron/update-guru-prices.mjs` | 구루 포트폴리오 가격 갱신 (Neon) | GitHub Actions `price-cron` |
-| `recolor-favicon.js`, `recolor-favicons.js`, `recolor-logo.js` | 아이콘 색상 일괄 변경 | 로컬 (디자인 변경 시) |
-| `test-font.js` | 폰트 렌더링 검증 | 로컬 (디자인) |
+| `build-favicon.mjs` | 제호 글꼴로 파비콘·앱 아이콘 생성 (`app/favicon.ico`, `app/icon.png`, `public/icon-*.png`) | 로컬 (디자인 변경 시) |
+| `build-stock-name-kr.mjs` | `global-stocks.json` 의 한글명 → `utils/stockNameKr.json` (카드 종목 약칭) | 로컬 (한글명 보강 후) |
 | `video-maker/` | 영상 생성 도구 | 로컬 |
 
 13F 분기 갱신 프로세스는 `scripts/13F-UPDATE-GUIDE.md` 참조.

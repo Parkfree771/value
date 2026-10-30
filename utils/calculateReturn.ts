@@ -36,11 +36,12 @@ export function formatReturn(returnRate: number, decimalPlaces: number = 2): str
  * @returns Tailwind CSS 색상 클래스
  */
 export function getReturnColorClass(returnRate: number): string {
+  // 한국식 상승 빨강 / 하락 파랑 — 에디토리얼 테마 토큰(--color-up/down, 채도 낮춤)
   if (returnRate > 0) {
-    return 'text-red-600 dark:text-red-500'; // 수익: Red (Korean Standard)
+    return 'text-[var(--color-up)]';
   } else if (returnRate < 0) {
-    return 'text-blue-600 dark:text-blue-500'; // 손실: Blue (Korean Standard)
+    return 'text-[var(--color-down)]';
   } else {
-    return 'text-gray-500 dark:text-gray-400';
+    return 'text-[var(--color-hold)]';
   }
 }

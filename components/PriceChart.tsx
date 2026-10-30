@@ -139,7 +139,7 @@ function CustomTooltip({
       : 'text-gray-500 dark:text-gray-400';
 
   return (
-    <div className="rounded-md bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 shadow-lg px-3 py-2">
+    <div className="rounded-sm bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-3 py-2">
       <div className="text-[10px] font-mono text-gray-400 dark:text-gray-500 mb-1 tabular-nums">
         {formatDate(label)}
       </div>

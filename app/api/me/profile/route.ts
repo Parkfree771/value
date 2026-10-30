@@ -1,6 +1,6 @@
 // /api/me/profile — 본인 프로필 (세션 uid 고정)
-//   GET    — 본인 users row 전체(camelCase) + 해금 배지 id 목록
-//   PATCH  { nickname?, displayName?, photoURL?, equippedBadgeId? } — 본인 프로필 일부 수정
+//   GET    — 본인 users row 전체(camelCase) + 레벨 점수 내역
+//   PATCH  { nickname?, displayName?, photoURL? } — 본인 프로필 일부 수정
 //
 // 수정 가능한 컬럼을 화이트리스트로 고정 (is_admin/is_suspended/email/동의 컬럼 등은 절대 불가).
 
@@ -8,13 +8,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth/session';
 import { validateNickname } from '@/lib/validation';
-import { BADGES_BY_ID } from '@/lib/badges';
 
 // lib/users.ts의 UserProfile과 동일한 형태로 매핑
 const PROFILE_COLUMNS = `
   id, email, nickname, display_name, photo_url, is_admin, is_suspended, onboarding_completed,
   terms_agreed, privacy_agreed, investment_disclaimer_agreed, terms_version, privacy_version,
-  agreed_at, equipped_badge_id, created_at, updated_at
+  agreed_at, level_points, created_at, updated_at
 `;
 
 function toProfile(row: Record<string, any>) {
@@ -33,7 +32,7 @@ function toProfile(row: Record<string, any>) {
     termsVersion: row.terms_version,
     privacyVersion: row.privacy_version,
     agreedAt: row.agreed_at,
-    equippedBadgeId: row.equipped_badge_id,
+    levelPoints: Number(row.level_points ?? 0),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -46,14 +45,19 @@ export async function GET() {
       return NextResponse.json({ error: '로그인이 필요합니다.' }, { status: 401 });
     }
 
-    const [rows, badges] = await Promise.all([
+    const [rows, levelRows] = await Promise.all([
       sql.query(`select ${PROFILE_COLUMNS} from users where id = $1`, [authUser.id]),
-      sql`select badge_id from user_badges where user_id = ${authUser.id}`,
+      sql`select record_points, hold_points, profit_points from user_level_breakdown where user_id = ${authUser.id}`.catch(
+        () => [] as Record<string, any>[],
+      ),
     ]);
+    const levelRow = levelRows[0];
 
     return NextResponse.json({
       profile: rows[0] ? toProfile(rows[0]) : null,
-      unlockedBadgeIds: badges.map((b) => b.badge_id as string),
+      levelBreakdown: levelRow
+        ? { record: levelRow.record_points ?? 0, hold: levelRow.hold_points ?? 0, profit: levelRow.profit_points ?? 0 }
+        : null,
     });
   } catch (error) {
     console.error('[me/profile GET] error:', error);
@@ -109,20 +113,6 @@ export async function PATCH(request: NextRequest) {
       push('photo_url', body.photoURL);
     }
 
-    if (body.equippedBadgeId !== undefined) {
-      const badgeId = body.equippedBadgeId;
-      if (badgeId !== null) {
-        if (typeof badgeId !== 'string' || !BADGES_BY_ID[badgeId]) {
-          return NextResponse.json({ error: '존재하지 않는 배지입니다.' }, { status: 400 });
-        }
-        // 해금한 배지만 장착 가능 (/api/user/badge와 동일 규칙)
-        const owned = await sql`select 1 from user_badges where user_id = ${uid} and badge_id = ${badgeId} limit 1`;
-        if (owned.length === 0) {
-          return NextResponse.json({ error: '해당 배지를 아직 해금하지 않았습니다.' }, { status: 403 });
-        }
-      }
-      push('equipped_badge_id', badgeId);
-    }
 
     if (sets.length === 0) return NextResponse.json({ success: true });
 

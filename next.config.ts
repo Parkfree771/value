@@ -16,6 +16,12 @@ const nextConfig: NextConfig = {
         hostname: 'firebasestorage.googleapis.com',
         pathname: '/v0/b/**',
       },
+      // Neon Object Storage — 리포트 첨부 이미지 (피드 카드 썸네일)
+      {
+        protocol: 'https',
+        hostname: '**.neon.tech',
+        pathname: '/media/**',
+      },
     ],
   },
 

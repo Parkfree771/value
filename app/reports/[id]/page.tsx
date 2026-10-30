@@ -38,7 +38,8 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
                  p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.stock_data,
                  p.mode, p.content, p.css_content, p.images, p.files, p.views, p.likes, p.created_at,
                  to_json(p.updated_at) as updated_at, p.author_id,
-                 u.nickname as author_nickname, u.equipped_badge_id as author_equipped_badge_id
+                 u.nickname as author_nickname,
+                 u.level_points as author_level_points
           from posts p
           left join users u on u.id = p.author_id
           where p.id = ${id}
@@ -79,7 +80,7 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
       title: data.title ?? '',
       author: data.author_nickname ?? '익명',
       authorId: data.author_id,
-      equippedBadgeId: data.author_equipped_badge_id ?? null,
+      levelPoints: Number(data.author_level_points ?? 0),
       stockName: data.stock_name ?? '',
       ticker: data.ticker ?? '',
       opinion: data.opinion ?? 'hold',

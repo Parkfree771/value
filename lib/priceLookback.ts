@@ -20,6 +20,16 @@ function ymd(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** 1일/7일/30일 비교 기준일 (UTC 달력 기준, 휴장일이면 그 이전 마지막 거래일 종가를 씀) */
+function periodCutoffs(now = new Date()) {
+  const back = (days: number) => {
+    const d = new Date(now);
+    d.setUTCDate(d.getUTCDate() - days);
+    return ymd(d);
+  };
+  return { c1d: back(1), c7d: back(7), c30d: back(30) };
+}
+
 /**
  * Lookback 가격 조회.
  *
@@ -38,9 +48,6 @@ export async function getLookbackPrices(
 
   try {
     const today = new Date();
-    const cutoff1d = new Date(today); cutoff1d.setUTCDate(cutoff1d.getUTCDate() - 1);
-    const cutoff7d = new Date(today); cutoff7d.setUTCDate(cutoff7d.getUTCDate() - 7);
-    const cutoff30d = new Date(today); cutoff30d.setUTCDate(cutoff30d.getUTCDate() - 30);
     // 60일치만 가져옴 — 30일 cutoff 이전 거래일 fallback 여유분 포함
     const fromDate = new Date(today); fromDate.setUTCDate(fromDate.getUTCDate() - 60);
 
@@ -74,9 +81,7 @@ export async function getLookbackPrices(
       series.get(t)!.push({ date: row.date as string, close: Number(row.close) });
     }
 
-    const c1d = ymd(cutoff1d);
-    const c7d = ymd(cutoff7d);
-    const c30d = ymd(cutoff30d);
+    const { c1d, c7d, c30d } = periodCutoffs(today);
 
     const map: Record<string, LookbackPrice> = {};
     for (const [t, rows] of series.entries()) {
@@ -117,4 +122,31 @@ export function calcPeriodReturn(
   const dir = positionType === 'short' ? -1 : 1;
   const raw = ((currentPrice - lookbackClose) / lookbackClose) * 100 * dir;
   return Math.round(raw * 100) / 100;
+}
+
+export interface ReportPeriodReturns {
+  returnRate1D: number | null;
+  returnRate1W: number | null;
+  returnRate1M: number | null;
+}
+
+/**
+ * 리포트의 최근 1일/7일/30일 수익률.
+ * 기준가 = N일 전 종가. 단, 리포트가 그보다 최근에 작성됐으면 작성가(initialPrice) —
+ * 작성 전에 오른 주가는 그 리포트의 성과가 아니므로. (예: 3일 전 글의 "7일" = 작성 후 3일 수익률)
+ */
+export function calcReportPeriodReturns(
+  report: { currentPrice: number; initialPrice: number; createdAt: string; positionType?: 'long' | 'short' },
+  lookback: LookbackPrice | undefined,
+): ReportPeriodReturns {
+  const { c1d, c7d, c30d } = periodCutoffs();
+  const written = (report.createdAt || '').slice(0, 10);
+  const base = (cutoff: string, close: number | null | undefined) =>
+    written && written > cutoff ? report.initialPrice : close;
+  const pos = report.positionType ?? 'long';
+  return {
+    returnRate1D: calcPeriodReturn(report.currentPrice, base(c1d, lookback?.close1d), pos),
+    returnRate1W: calcPeriodReturn(report.currentPrice, base(c7d, lookback?.close7d), pos),
+    returnRate1M: calcPeriodReturn(report.currentPrice, base(c30d, lookback?.close30d), pos),
+  };
 }

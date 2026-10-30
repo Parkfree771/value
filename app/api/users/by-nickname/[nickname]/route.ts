@@ -2,16 +2,15 @@
  * GET /api/users/by-nickname/[nickname]
  *
  * 닉네임으로 사용자의 공개 정보를 반환.
- * 사용자 프로필 페이지(/user/[username])가 통계·해금배지를 즉시 받음.
+ * 사용자 프로필 페이지(/user/[username])가 통계·레벨을 즉시 받음.
  *
  * 응답
- *   { user: { uid, nickname, bio, equippedBadgeId, stats, unlockedBadgeIds, lastStatsUpdate } }
+ *   { user: { uid, nickname, bio, level, stats, lastStatsUpdate } }
  *   또는 404
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { BADGES_BY_ID } from '@/lib/badges';
 
 export async function GET(
   _request: NextRequest,
@@ -27,7 +26,7 @@ export async function GET(
     let user: Record<string, any> | null;
     try {
       const rows = await sql`
-        select id, nickname, bio, equipped_badge_id, is_suspended, updated_at
+        select id, nickname, bio, level_points, is_suspended, updated_at
         from users where nickname = ${nickname} limit 1
       `;
       user = rows[0] ?? null;
@@ -42,13 +41,9 @@ export async function GET(
       return NextResponse.json({ error: '존재하지 않습니다.' }, { status: 404 });
     }
 
-    const equippedBadgeId =
-      typeof user.equipped_badge_id === 'string' && BADGES_BY_ID[user.equipped_badge_id]
-        ? user.equipped_badge_id
-        : null;
 
-    // 통계 (VIEW) + 해금 배지(user_badges) — 실패해도 프로필은 반환 (기존 동작 유지)
-    const [statsRows, badgeRows] = await Promise.all([
+    // 통계 (VIEW) + 레벨 점수 내역 — 실패해도 프로필은 반환
+    const [statsRows, levelRows] = await Promise.all([
       sql`
         select total_reports, avg_return_rate, max_return_rate, min_return_rate, win_rate,
                total_likes, total_views, short_positions, short_avg_return_rate, unique_tickers, crypto_count
@@ -57,16 +52,11 @@ export async function GET(
         console.error('[users/by-nickname] user_stats select error:', e);
         return [] as Record<string, any>[];
       }),
-      sql`select badge_id from user_badges where user_id = ${user.id}`.catch((e) => {
-        console.error('[users/by-nickname] user_badges select error:', e);
-        return [] as Record<string, any>[];
-      }),
+      sql`select record_points, hold_points, profit_points from user_level_breakdown where user_id = ${user.id}`.catch(() => [] as Record<string, any>[]),
     ]);
+    const levelRow = levelRows[0];
     const stats = statsRows[0] ?? null;
 
-    const unlockedBadgeIds = badgeRows
-      .map((r) => r.badge_id as string)
-      .filter((id) => typeof id === 'string' && BADGES_BY_ID[id]);
 
     return NextResponse.json(
       {
@@ -74,7 +64,12 @@ export async function GET(
           uid: user.id,
           nickname: user.nickname,
           bio: user.bio || '',
-          equippedBadgeId,
+          level: {
+            points: Number(user.level_points ?? 0),
+            breakdown: levelRow
+              ? { record: levelRow.record_points ?? 0, hold: levelRow.hold_points ?? 0, profit: levelRow.profit_points ?? 0 }
+              : null,
+          },
           stats: stats
             ? {
                 totalReports: stats.total_reports ?? 0,
@@ -90,7 +85,6 @@ export async function GET(
                 cryptoCount: stats.crypto_count ?? 0,
               }
             : null,
-          unlockedBadgeIds,
           lastStatsUpdate: user.updated_at ?? null,
         },
       },

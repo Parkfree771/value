@@ -89,7 +89,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {}, show
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 text-xs font-bold border-2 rounded-xl transition-colors ${
+              className={`px-3 py-1.5 text-xs font-bold border rounded-sm transition-colors ${
                 filter === f.key
                   ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
                   : 'bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]'
@@ -171,7 +171,7 @@ export default function PortfolioTable({ holdings, filingDate, prices = {}, show
                   {/* 변동률 */}
                   <td className="px-3 py-3 text-right">
                     {h.status === 'NEW BUY' ? (
-                      <span className="inline-flex items-center justify-center bg-ant-red-600 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md whitespace-nowrap">NEW</span>
+                      <span className="inline-flex items-center justify-center bg-ant-red-600 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-sm whitespace-nowrap">NEW</span>
                     ) : h.status === 'SOLD OUT' ? (
                       <span className="text-sm font-bold text-blue-500">-100%</span>
                     ) : h.shares_change_pct !== null && h.shares_change_pct !== 0 ? (

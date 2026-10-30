@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -22,16 +21,6 @@ export default function LoginPage() {
     }
   }, [authLoading, user, router]);
 
-  // 걷는 애니메이션: 4프레임 스프라이트 순환
-  const spriteFrames = ['/sprite/logo.webp', '/sprite/1.webp', '/sprite/2.webp', '/sprite/3.webp', '/sprite/4.webp'];
-  const [frame, setFrame] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setFrame((prev) => (prev + 1) % spriteFrames.length);
-    }, 200);
-    return () => clearInterval(interval);
-  }, []);
 
   const handleGoogleLogin = async () => {
     try {
@@ -64,49 +53,10 @@ export default function LoginPage() {
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-[400px]">
-        {/* Header — 대표 로고 + 브랜드 타이틀 */}
-        <div className="text-center mb-10">
-          <div className="mx-auto w-full mb-5 overflow-hidden relative h-[140px] sm:h-[192px]">
-            {[0, 1, 2].map((antIndex) => (
-              <div
-                key={antIndex}
-                className="ant-walk absolute h-full w-[140px] sm:w-[192px]"
-                style={{
-                  animationDelay: `${antIndex * -2}s`,
-                }}
-              >
-                {spriteFrames.map((src, i) => (
-                  <Image
-                    key={src}
-                    src={src}
-                    alt="AntStreet"
-                    width={192}
-                    height={192}
-                    priority={antIndex === 0 && i === 0}
-                    style={{ visibility: i === frame ? 'visible' : 'hidden' }}
-                    className="absolute top-1/2 left-0 -translate-y-1/2 w-[140px] h-[140px] sm:w-[192px] sm:h-[192px]"
-                  />
-                ))}
-              </div>
-            ))}
-            <style>{`
-              @keyframes antWalk {
-                0% { left: -192px; }
-                100% { left: calc(100% + 192px); }
-              }
-              .ant-walk {
-                animation: antWalk 6s linear infinite;
-              }
-            `}</style>
-          </div>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <h1 className="brand-title text-3xl leading-none" data-text="AntStreet">
-              AntStreet
-            </h1>
-          </div>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            개미 투자자들의 리포트 공유 플랫폼
-          </p>
+        {/* Header — 제호 */}
+        <div className="text-center mb-8">
+          <h1 className="brand-title text-[56px] leading-none">AntStreet</h1>
+          <p className="mt-2 text-sm text-[var(--theme-ink-soft)]">개인 투자자가 쓰고, 시장이 채점한다</p>
         </div>
 
         {/* Login Card */}
@@ -116,7 +66,7 @@ export default function LoginPage() {
           </h2>
 
           {error && (
-            <div className="mb-5 p-3 rounded-xl border-2 border-red-500 bg-red-500/10 text-xs text-red-600 dark:text-red-400">
+            <div className="mb-5 p-3 rounded-sm border border-red-500 bg-red-500/10 text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -125,7 +75,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-xl bg-white border-2 border-[var(--theme-border-muted)] shadow-sm hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed font-[Roboto,Noto_Sans_KR,sans-serif]"
+            className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-sm bg-white border border-[var(--theme-border-muted)] hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed font-[Roboto,Noto_Sans_KR,sans-serif]"
           >
             {/* Google G Logo */}
             <svg className="w-[18px] h-[18px]" viewBox="0 0 48 48">
@@ -144,7 +94,7 @@ export default function LoginPage() {
           <button
             onClick={handleAppleLogin}
             disabled={loading}
-            className="mt-3 w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-xl bg-black border-2 border-black shadow-sm hover:opacity-85 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="mt-3 w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-sm bg-black border border-black hover:opacity-85 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {/* Apple Logo */}
             <svg className="w-[16px] h-[16px]" viewBox="0 0 814 1000" aria-hidden="true">
@@ -169,7 +119,7 @@ export default function LoginPage() {
               {/* Kakao - Disabled */}
               <button
                 disabled
-                className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 bg-[#FEE500] rounded-xl opacity-40 cursor-not-allowed"
+                className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 bg-[#FEE500] rounded-sm opacity-40 cursor-not-allowed"
               >
                 <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
                   <path fill="#000000" d="M12 3C6.477 3 2 6.463 2 10.69c0 2.806 1.867 5.273 4.667 6.67-.167.615-.606 2.23-.695 2.576-.11.42.154.414.324.302.134-.088 2.129-1.45 2.995-2.04A12.6 12.6 0 0012 18.38c5.523 0 10-3.463 10-7.69S17.523 3 12 3z"/>
@@ -180,7 +130,7 @@ export default function LoginPage() {
               {/* Naver - Disabled */}
               <button
                 disabled
-                className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 bg-[#03C75A] rounded-xl opacity-40 cursor-not-allowed"
+                className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 bg-[#03C75A] rounded-sm opacity-40 cursor-not-allowed"
               >
                 <svg className="w-[18px] h-[18px]" viewBox="0 0 24 24">
                   <path fill="#FFFFFF" d="M16.273 12.845L7.376 0H0v24h7.727V11.155L16.624 24H24V0h-7.727z"/>

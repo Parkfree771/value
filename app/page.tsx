@@ -3,8 +3,10 @@ import HomeClient from '@/components/HomeClient';
 import type { FeedData } from '@/types/feed';
 import { sql } from '@/lib/db';
 import { getLatestPrices } from '@/lib/priceCache';
-import { getLookbackPrices, calcPeriodReturn } from '@/lib/priceLookback';
+import { getLookbackPrices, calcReportPeriodReturns } from '@/lib/priceLookback';
 import { calculateReturn } from '@/utils/calculateReturn';
+import { getBriefing } from '@/lib/briefing';
+import { getTickerData } from '@/lib/ticker';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -41,7 +43,7 @@ export const metadata: Metadata = {
     description:
       '한·미·일·중·홍콩 주식 분석을 공유하고, 작성가 대비 현재가로 수익률이 자동 검증되는 투자 커뮤니티. 결과로 증명된 개미 투자자의 분석을 한곳에서.',
     url: SITE_URL,
-    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
+    images: [{ url: '/api/og/site', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: SITE_URL,
@@ -70,6 +72,64 @@ const homeJsonLd = {
   ],
 };
 
+// 카드용 본문 미리보기 — <style>/<script>/<head> 블록과 태그를 걷어낸 앞 240자.
+// 본문 평균 ~20KB(HTML 모드)라 원문을 내려받지 않고 DB에서 잘라 egress 를 줄인다.
+// (Postgres ARE: 첫 수량자가 non-greedy 여야 전체가 non-greedy 로 동작 → [^>]*?)
+const EXCERPT_SQL = `left(btrim(regexp_replace(regexp_replace(regexp_replace(
+      p.content,
+      '<(style|script|head)[^>]*?>.*?</(style|script|head)>', ' ', 'gi'),
+      '<[^>]*>|&[a-z]+;|&#[0-9]+;', ' ', 'gi'),
+      '\\s+', ' ', 'g')), 240)`;
+// 썸네일 — 첨부 이미지 우선, 없으면 본문 첫 <img> 중 Neon Storage 에 올린 것
+const THUMBNAIL_SQL = `coalesce(p.images->>0,
+      substring(p.content from '<img[^>]+src="(https://[^"]*\\.neon\\.tech/[^"]+)"'))`;
+
+/**
+ * 1일/7일/한달 각각 TOP30(홈 순위표 펼침까지) 에 들어갈 글 id — 같은 종목·방향은 한 묶음(기간 수익률이 같으므로)으로 보고,
+ * 묶음마다 기간 수익률이 가장 높은 글 하나만 (클라이언트 TopReturnSlider 의 중복 제거 규칙과 동일).
+ */
+// 홈 순위표: 1·2·3위 + 4~15위, 더보기로 30위까지
+const PERIOD_TOP_N = 30;
+
+function periodTopIds(
+  lightRows: Record<string, any>[],
+  lookback: Awaited<ReturnType<typeof getLookbackPrices>>,
+): string[] {
+  const rows = lightRows.map((r) => {
+    const ticker = (r.ticker || '').toUpperCase();
+    const positionType: 'long' | 'short' = r.position_type === 'short' ? 'short' : 'long';
+    return {
+      id: r.id as string,
+      group: `${ticker}:${positionType}`,
+      createdAt: typeof r.created_at === 'string' ? r.created_at : '',
+      ...calcReportPeriodReturns(
+        {
+          currentPrice: Number(r.current_price) || 0,
+          initialPrice: Number(r.initial_price) || 0,
+          createdAt: typeof r.created_at === 'string' ? r.created_at : '',
+          positionType,
+        },
+        lookback[ticker],
+      ),
+    };
+  });
+  const ids = new Set<string>();
+  for (const key of ['returnRate1D', 'returnRate1W', 'returnRate1M'] as const) {
+    const best = new Map<string, { id: string; rate: number; createdAt: string }>();
+    for (const r of rows) {
+      const rate = r[key];
+      if (rate === null) continue;
+      const cur = best.get(r.group);
+      // 동률이면 최신 글 (클라이언트와 같은 규칙)
+      if (!cur || rate > cur.rate || (rate === cur.rate && r.createdAt > cur.createdAt)) {
+        best.set(r.group, { id: r.id, rate, createdAt: r.createdAt });
+      }
+    }
+    [...best.values()].sort((a, b) => b.rate - a.rate).slice(0, PERIOD_TOP_N).forEach((x) => ids.add(x.id));
+  }
+  return [...ids];
+}
+
 // 서버에서 초기 피드 데이터 fetch — /api/feed/public 과 동일 형상으로 Postgres 합성
 async function getInitialFeed(): Promise<FeedData | null> {
   try {
@@ -89,18 +149,24 @@ async function getInitialFeed(): Promise<FeedData | null> {
       select p.id, p.title, p.ticker, p.exchange, p.opinion, p.position_type, p.initial_price,
              p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.views,
              p.likes, p.comment_count, p.category, p.created_at, p.author_id,
-             json_build_object('nickname', u.nickname, 'equipped_badge_id', u.equipped_badge_id,
-                               'is_virtual', u.is_virtual) as author
+             json_build_object('nickname', u.nickname, 'level_points', u.level_points,
+                               'is_virtual', u.is_virtual) as author,
+             ${EXCERPT_SQL} as excerpt,
+             ${THUMBNAIL_SQL} as thumbnail
       from posts p
       left join users u on u.id = p.author_id`;
 
-    const [latestRows, topRows] = await Promise.all([
+    const [latestRows, topRows, statsRows, lightRows] = await Promise.all([
       sql.query(`${SELECT_FROM} order by p.created_at desc limit 50`).catch((error) => {
         console.error('[getInitialFeed] posts query error:', error);
         return null;
       }),
       // 수익률 상위는 보조 데이터 — 실패해도 최신 50건만으로 렌더
       sql.query(`${SELECT_FROM} order by p.return_rate desc limit 30`).catch(() => []),
+      // 히어로 통계 — 피드는 최신 50건만 싣기 때문에 전체 글 수는 따로 센다
+      sql.query(`select count(*)::int as total_posts, count(distinct author_id)::int as authors from posts`).catch(() => []),
+      // 1일/7일/한달 TOP10 후보 계산용 — 전체 글의 가벼운 컬럼만 (최신 50 + 누적 상위 30 밖의 글도 기간 순위엔 들어갈 수 있음)
+      sql.query(`select id, ticker, position_type, initial_price, current_price, created_at from posts`).catch(() => []),
     ]);
 
     if (!latestRows) return null;
@@ -120,15 +186,25 @@ async function getInitialFeed(): Promise<FeedData | null> {
     }
 
     const tickers = Array.from(
-      new Set(rows.map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
+      new Set([...rows, ...lightRows].map((r) => (r.ticker || '').toUpperCase()).filter(Boolean)),
     );
     const [prices, lookback] = await Promise.all([
       getLatestPrices(),
       getLookbackPrices(tickers),
     ]);
 
+    // 기간 TOP10에 들어갈 글이 아직 없으면 추가로 불러온다
+    const missingIds = periodTopIds(lightRows, lookback).filter((id) => !seenIds.has(id));
+    if (missingIds.length > 0) {
+      const extra = await sql.query(`${SELECT_FROM} where p.id = any($1::uuid[])`, [missingIds]).catch(() => []);
+      for (const r of extra) {
+        seenIds.add(r.id);
+        rows.push(r);
+      }
+    }
+
     const posts = rows.map((r) => {
-      const author = (r as { author?: { nickname?: string; equipped_badge_id?: string | null; is_virtual?: boolean } | null }).author;
+      const author = (r as { author?: { nickname?: string; level_points?: number; is_virtual?: boolean } | null }).author;
       const ticker = (r.ticker || '').toUpperCase();
       const initialPrice = Number(r.initial_price ?? 0);
       // 글 row의 current_price를 우선 — 가격 갱신 배치/cron이 글마다 직접 UPDATE함.
@@ -143,9 +219,10 @@ async function getInitialFeed(): Promise<FeedData | null> {
 
       const lb = lookback[ticker];
       const createdAtIso = typeof r.created_at === 'string' ? r.created_at : '';
-      const returnRate1D = calcPeriodReturn(currentPrice, lb?.close1d, positionType);
-      const returnRate1W = calcPeriodReturn(currentPrice, lb?.close7d, positionType);
-      const returnRate1M = calcPeriodReturn(currentPrice, lb?.close30d, positionType);
+      const { returnRate1D, returnRate1W, returnRate1M } = calcReportPeriodReturns(
+        { currentPrice, initialPrice, createdAt: createdAtIso, positionType },
+        lb,
+      );
 
       return {
         id: r.id,
@@ -153,7 +230,7 @@ async function getInitialFeed(): Promise<FeedData | null> {
         author: author?.nickname ?? '익명',
         authorId: r.author_id,
         authorIsVirtual: author?.is_virtual ?? false,
-        equippedBadgeId: author?.equipped_badge_id ?? null,
+        levelPoints: author?.level_points ?? 0,
         stockName: r.stock_name ?? '',
         ticker: r.ticker ?? '',
         exchange: r.exchange ?? '',
@@ -172,6 +249,8 @@ async function getInitialFeed(): Promise<FeedData | null> {
         commentCount: (r as { comment_count?: number }).comment_count ?? 0,
         category: r.category ?? '',
         themes: r.themes ?? undefined,
+        excerpt: (r.excerpt as string | null) ?? '',
+        thumbnail: (r.thumbnail as string | null) ?? null,
       };
     });
 
@@ -185,9 +264,12 @@ async function getInitialFeed(): Promise<FeedData | null> {
       };
     }
 
+    const stats = statsRows[0] as { total_posts?: number; authors?: number } | undefined;
+
     return {
       lastUpdated: new Date().toISOString(),
-      totalPosts: posts.length,
+      totalPosts: stats?.total_posts ?? posts.length,
+      stats: stats ? { totalPosts: stats.total_posts ?? posts.length, authors: stats.authors ?? 0 } : undefined,
       posts: posts as FeedData['posts'],
       prices: pricesOut,
     };
@@ -238,7 +320,12 @@ const faqJsonLd = {
 
 // 서버 컴포넌트 - 초기 데이터를 서버에서 fetch하여 props로 전달
 export default async function HomePage() {
-  const initialData = await getInitialFeed();
+  // 피드 · 모닝 브리핑 · 지수 띠 — 모두 홈 ISR 재생성 때만 읽는다 (1시간 또는 cron/글쓰기 revalidate)
+  const [initialData, briefing, ticker] = await Promise.all([
+    getInitialFeed(),
+    getBriefing(),
+    getTickerData().catch(() => null),
+  ]);
 
   return (
     <>
@@ -250,7 +337,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <HomeClient initialData={initialData} />
+      <HomeClient initialData={initialData} briefing={briefing} ticker={ticker} />
     </>
   );
 }

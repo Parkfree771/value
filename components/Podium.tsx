@@ -2,7 +2,7 @@
 
 import { memo } from 'react';
 import Link from 'next/link';
-import UserBadgeInline from './UserBadgeInline';
+import UserLevelInline from './UserLevelInline';
 import styles from './Podium.module.css';
 
 interface Investor {
@@ -10,7 +10,7 @@ interface Investor {
   name: string;
   avgReturnRate: number;
   linkPath?: string;
-  equippedBadgeId?: string | null;
+  levelPoints?: number;
 }
 
 interface PodiumProps {
@@ -41,8 +41,8 @@ const Podium = memo(function Podium({ topThree }: PodiumProps) {
       >
         <div className={rankClass}>{rank}</div>
         <div className={nameClass}>
-          <UserBadgeInline badgeId={data.equippedBadgeId} nickname={data.name} size={rank === 1 ? 26 : 20} className="mr-1" />
           {data.name}
+          <UserLevelInline points={data.levelPoints} className="ml-1" />
         </div>
         <div className={returnClass}>
           <span className="font-mono">{data.avgReturnRate >= 0 ? '+' : ''}{data.avgReturnRate.toFixed(2)}%</span>

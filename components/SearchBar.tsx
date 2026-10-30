@@ -16,6 +16,8 @@ interface SearchBarProps {
   placeholder?: string;
   showStockSuggestions?: boolean;
   onSelectStock?: (stock: StockSuggestion) => void;
+  /** 바깥 래퍼 클래스 (기본: 아래 여백) */
+  className?: string;
 }
 
 const SearchBar = memo(function SearchBar({
@@ -23,7 +25,8 @@ const SearchBar = memo(function SearchBar({
   setSearchQuery,
   placeholder = '검색어를 입력하세요...',
   showStockSuggestions = true,
-  onSelectStock
+  onSelectStock,
+  className = 'mb-4 sm:mb-6',
 }: SearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -165,20 +168,20 @@ const SearchBar = memo(function SearchBar({
   };
 
   return (
-    <div className="mb-4 sm:mb-6" ref={searchRef}>
-      <div className="search-row flex items-center gap-2 w-full sm:max-w-md">
-        {/* 검색 버튼 (왼쪽) */}
-        <button
-          type="button"
-          className="btn-primary search-control flex-shrink-0 inline-flex items-center justify-center leading-none !px-3 sm:!px-5 !py-0 !my-0"
-          aria-label="검색"
-        >
-          <svg className="w-3.5 h-3.5 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+    <div className={className} ref={searchRef}>
+      {/* 검색 — 버튼 없이 입력창 하나: 왼쪽 돋보기, 아래 괘선(포커스 시 잉크색 굵게), 오른쪽 지우기 */}
+      <div className="w-full sm:max-w-md">
+        <div className="relative">
+          <svg
+            className="pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[var(--theme-ink-soft)]"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
           </svg>
-        </button>
-
-        <div className="relative flex-1">
           <input
             type="text"
             value={searchQuery}
@@ -193,7 +196,7 @@ const SearchBar = memo(function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             aria-label="검색어 입력"
-            className="pixel-input search-control !pl-3 !pr-8 sm:!pl-4 sm:!pr-10 !py-0 !my-0 text-xs sm:text-sm font-heading font-medium tracking-wide"
+            className="w-full h-11 bg-transparent pl-7 pr-8 text-[15px] text-[var(--foreground)] placeholder:text-[var(--theme-ink-soft)] border-0 border-b border-[var(--theme-border-muted)] rounded-none outline-none focus:border-b-2 focus:border-[var(--theme-border)] transition-colors"
           />
           {searchQuery && (
             <button
@@ -201,7 +204,7 @@ const SearchBar = memo(function SearchBar({
                 setSearchQuery('');
                 setShowSuggestions(false);
               }}
-              className="absolute right-2.5 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[var(--theme-accent)] transition-colors"
+              className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors"
               aria-label="검색어 지우기"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -216,7 +219,7 @@ const SearchBar = memo(function SearchBar({
 
           {/* 자동완성 드롭다운 */}
           {showStockSuggestions && showSuggestions && (isLoading || suggestions.length > 0) && (
-            <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] rounded-xl shadow-lg max-h-[50vh] sm:max-h-80 overflow-y-auto">
+            <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm max-h-[50vh] sm:max-h-80 overflow-y-auto">
               {isLoading ? (
                 <div className="px-4 py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
                   검색 중...
@@ -232,7 +235,7 @@ const SearchBar = memo(function SearchBar({
                     }`}
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <span className={`px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold border-2 rounded-md flex-shrink-0 ${getExchangeBadgeColor(stock.exchange)}`}>
+                      <span className={`px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-xs font-bold border rounded-sm flex-shrink-0 ${getExchangeBadgeColor(stock.exchange)}`}>
                         {getExchangeLabel(stock.exchange)}
                       </span>
                       <div className="flex-1 min-w-0">

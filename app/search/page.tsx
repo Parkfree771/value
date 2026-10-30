@@ -36,7 +36,7 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 };
 
 // 테마 칩 (라운드 테마)
-const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border-2 rounded-lg transition-colors';
+const THEME_CHIP = 'flex-shrink-0 px-3 py-1.5 text-xs font-bold border rounded-sm transition-colors';
 const THEME_ACTIVE = `${THEME_CHIP} bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400`;
 const THEME_INACTIVE = `${THEME_CHIP} bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]`;
 const THEME_MORE = `${THEME_CHIP} bg-transparent text-[var(--theme-accent)] border-[var(--theme-accent)]`;
@@ -154,7 +154,7 @@ export default function SearchPage() {
   return (
     <Container>
       {/* 1. Header + Search Bar */}
-      <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-wide mb-2">검색</h1>
+      <h1 className="headline text-xl sm:text-2xl font-bold mb-2">검색</h1>
       <SearchBar
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}

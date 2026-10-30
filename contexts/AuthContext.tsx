@@ -66,8 +66,14 @@ function mapSessionUser(u: SessionUser | null | undefined): AuthUser | null {
 // /login, /auth/* 페이지에서 로그인하면 next에 같은 페이지가 들어가
 // 로그인 후에도 그 페이지에 머무는 문제 발생 → 메인(/)으로 보낸다.
 function nextPathAfterLogin(): string {
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '/';
-  return pathname === '/login' || pathname.startsWith('/auth/') ? '/' : pathname;
+  if (typeof window === 'undefined') return '/';
+  const { pathname, search } = window.location;
+  if (pathname === '/login') {
+    // /login?next=/write — 글쓰기 안내 화면 등에서 넘어온 경우 원래 화면으로 복귀 (내부 경로만)
+    const next = new URLSearchParams(search).get('next');
+    return next && next.startsWith('/') && !next.startsWith('//') ? next : '/';
+  }
+  return pathname.startsWith('/auth/') ? '/' : pathname;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {

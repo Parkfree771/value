@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Card from '@/components/Card';
+import { InlineLoading } from '@/components/loading/Loading';
 
 interface Post {
   id: string;
@@ -68,9 +69,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
   // Loading state
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
-      </div>
+      <InlineLoading />
     );
   }
 

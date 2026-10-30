@@ -1,33 +1,27 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { Report } from '@/types/report';
 import { useAuth } from '@/contexts/AuthContext';
 import { useBookmark } from '@/contexts/BookmarkContext';
-import { useUserBadgesContext } from '@/contexts/UserBadgesContext';
 import { getUserProfile, processUserWithdrawal } from '@/lib/users';
-import {
-  BADGES,
-  BADGES_BY_ID,
-  CATEGORY_LABEL,
-  type BadgeCategory,
-} from '@/lib/badges';
-import BadgeIcon from '@/components/BadgeIcon';
+import UserLevelInline from '@/components/UserLevelInline';
+import LevelCard, { type LevelBreakdown } from '@/components/LevelCard';
 import styles from './MyPage.module.css';
+import { InlineLoading } from '@/components/loading/Loading';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
-  loading: () => <div className="animate-pulse h-48 bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] rounded-[14px]" />,
+  loading: () => <div className="skel h-48" />,
 });
 
 export default function MyPage() {
   const router = useRouter();
   const { user, authReady, signOut } = useAuth();
   const { bookmarkedIds, isLoading: bookmarkLoading } = useBookmark();
-  const [activeTab, setActiveTab] = useState<'reports' | 'bookmarks' | 'achievements' | 'settings'>('reports');
+  const [activeTab, setActiveTab] = useState<'reports' | 'bookmarks' | 'settings'>('reports');
   const [myReports, setMyReports] = useState<Report[]>([]);
   const [allPosts, setAllPosts] = useState<any[]>([]); // 전체 게시물 (북마크 필터링용)
   const [loading, setLoading] = useState(true);
@@ -38,9 +32,8 @@ export default function MyPage() {
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawConfirmText, setWithdrawConfirmText] = useState('');
-  const [equippedBadgeId, setEquippedBadgeId] = useState<string | null>(null);
-  const [isEquipping, setIsEquipping] = useState(false);
-  const { setBadge: setBadgeInCache } = useUserBadgesContext();
+  const [levelPoints, setLevelPoints] = useState<number | null>(null);
+  const [levelBreakdown, setLevelBreakdown] = useState<LevelBreakdown | null>(null);
 
   // 로그인 체크 (Auth가 준비된 후에만)
   useEffect(() => {
@@ -116,16 +109,16 @@ export default function MyPage() {
     };
   }, [activeTab, user, allPosts.length]);
 
-  // 본인 프로필(닉네임·장착 배지·해금 배지) 로드 — 게시글 없어도 정보 표시 필요
+  // 본인 프로필(닉네임·레벨) 로드 — 게시글 없어도 정보 표시 필요
   useEffect(() => {
     if (!user) return;
     let cancelled = false;
     (async () => {
       try {
-        // /api/me/profile — 세션 uid 기준 본인 프로필 + 해금 배지 목록
+        // /api/me/profile — 세션 uid 기준 본인 프로필 + 레벨 점수 내역
         const res = await fetch('/api/me/profile', { credentials: 'include', cache: 'no-store' });
         if (!res.ok) throw new Error(`프로필 조회 실패 (${res.status})`);
-        const { profile, unlockedBadgeIds } = await res.json();
+        const { profile, levelBreakdown: breakdown } = await res.json();
         if (cancelled || !profile) return;
 
         setUserProfile((prev: any) => ({
@@ -133,11 +126,9 @@ export default function MyPage() {
           nickname: profile.nickname,
           displayName: profile.displayName,
           photoURL: profile.photoURL,
-          equippedBadgeId: profile.equippedBadgeId,
-          unlockedBadgeIds: (unlockedBadgeIds ?? []) as string[],
         }));
-        const badgeId = profile.equippedBadgeId;
-        setEquippedBadgeId(typeof badgeId === 'string' && BADGES_BY_ID[badgeId] ? badgeId : null);
+        setLevelPoints(typeof profile.levelPoints === 'number' ? profile.levelPoints : 0);
+        setLevelBreakdown(breakdown ?? null);
       } catch (e) {
         console.error('프로필 로드 실패:', e);
       }
@@ -165,42 +156,6 @@ export default function MyPage() {
   const totalViews = savedStats?.totalViews ?? myReports.reduce((sum, r) => sum + r.views, 0);
   const totalLikes = savedStats?.totalLikes ?? myReports.reduce((sum, r) => sum + r.likes, 0);
 
-  // 해금 배지 — users.unlockedBadgeIds (sticky, 서버에서 누적 저장됨)
-  const unlockedIds: string[] = Array.isArray(userProfile?.unlockedBadgeIds)
-    ? userProfile.unlockedBadgeIds.filter((id: any) => typeof id === 'string' && BADGES_BY_ID[id])
-    : [];
-  const unlockedSet = useMemo(() => new Set(unlockedIds), [unlockedIds.join(',')]);
-
-  // 장착 배지 변경
-  const handleEquipBadge = async (badgeId: string | null) => {
-    if (!user || isEquipping) return;
-    // 해금 안 된 배지는 장착 불가
-    if (badgeId !== null && !unlockedSet.has(badgeId)) return;
-    // 이미 같은 상태면 무시
-    if (badgeId === equippedBadgeId) return;
-
-    setIsEquipping(true);
-    try {
-      const res = await fetch('/api/user/badge', {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ equippedBadgeId: badgeId }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || '배지 업데이트 실패');
-      setEquippedBadgeId(badgeId);
-      // 인라인 표시 캐시 갱신 — 닉네임 키 기반
-      const nickname = userProfile?.nickname;
-      if (nickname) setBadgeInCache(nickname, badgeId);
-    } catch (e: any) {
-      console.error('배지 변경 오류:', e);
-      alert(e?.message || '배지 변경 중 오류가 발생했습니다.');
-    } finally {
-      setIsEquipping(false);
-    }
-  };
-
   // 북마크된 게시물 필터링 (이미 로드된 allPosts에서)
   const bookmarkedReports: Report[] = allPosts
     .filter((post: any) => bookmarkedIds.includes(post.id))
@@ -209,7 +164,7 @@ export default function MyPage() {
       title: data.title || '',
       author: data.author || '익명',
       authorId: data.authorId || '',
-      equippedBadgeId: data.equippedBadgeId ?? null,
+      levelPoints: data.levelPoints,
       stockName: data.stockName || '',
       ticker: data.ticker || '',
       category: data.category || '',
@@ -331,31 +286,15 @@ export default function MyPage() {
       {/* 프로필 헤더 */}
       <div className={styles.profileHeader}>
         <div className={styles.profileCard}>
-          {/* 배경 로고 */}
-          <div className={styles.bgLogo}>
-            <Image src="/favicon.png" alt="" width={200} height={200} priority />
-          </div>
-
           <div className={styles.profileContent}>
             <div className={styles.profileInfo}>
               <div className={styles.avatar}>
-                <Image src="/favicon.png" alt="프로필" width={80} height={80} className={styles.avatarImg} />
+                <span className="font-serif text-3xl font-black text-white">{(userName || '?')[0]}</span>
               </div>
               <div className={styles.userDetails}>
                 <div className={styles.userNameRow}>
-                  {equippedBadgeId && BADGES_BY_ID[equippedBadgeId] && (
-                    <BadgeIcon
-                      id={equippedBadgeId}
-                      size={28}
-                      title={`${BADGES_BY_ID[equippedBadgeId].name} — ${BADGES_BY_ID[equippedBadgeId].description}`}
-                    />
-                  )}
                   <h1 className={styles.userName}>{userName}</h1>
-                  <span className={styles.userBadge}>
-                    {equippedBadgeId && BADGES_BY_ID[equippedBadgeId]
-                      ? BADGES_BY_ID[equippedBadgeId].name
-                      : 'INVESTOR'}
-                  </span>
+                  <UserLevelInline points={levelPoints} size="md" />
                 </div>
                 <p className={styles.userEmail}>{userEmail}</p>
                 <button onClick={handleOpenEditModal} className={styles.editButton}>
@@ -383,11 +322,18 @@ export default function MyPage() {
         </div>
       </div>
 
+      {/* 레벨 — 배지 시스템 대체 */}
+      {levelPoints !== null && (
+        <div className="mb-6 sm:mb-8">
+          <LevelCard points={levelPoints} breakdown={levelBreakdown} isMine />
+        </div>
+      )}
+
       {/* 상세 통계 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconGreen}`}>
+            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconGreen}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgGreen}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
@@ -403,7 +349,7 @@ export default function MyPage() {
 
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconRed}`}>
+            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconRed}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgRed}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
@@ -419,7 +365,7 @@ export default function MyPage() {
 
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconBlue}`}>
+            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconBlue}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgBlue}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -436,7 +382,7 @@ export default function MyPage() {
 
         <div className="pixel-stat-card">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border-2 rounded-[10px] flex items-center justify-center ${styles.statIconPink}`}>
+            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconPink}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgPink}`} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
@@ -464,12 +410,6 @@ export default function MyPage() {
           북마크 ({bookmarkedIds.length})
         </button>
         <button
-          onClick={() => setActiveTab('achievements')}
-          className={`pixel-tab ${activeTab === 'achievements' ? 'pixel-tab-active' : ''}`}
-        >
-          업적 ({unlockedIds.length}/{BADGES.length})
-        </button>
-        <button
           onClick={() => setActiveTab('settings')}
           className={`pixel-tab ${activeTab === 'settings' ? 'pixel-tab-active' : ''}`}
         >
@@ -481,10 +421,7 @@ export default function MyPage() {
       {activeTab === 'reports' && (
         <div className="space-y-4">
           {loading ? (
-            <div className="text-center py-12">
-              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
-            </div>
+            <InlineLoading label="불러오는 중" />
           ) : myReports.length > 0 ? (
             myReports.map((report) => (
               <ReportCard
@@ -496,7 +433,7 @@ export default function MyPage() {
             ))
           ) : (
             <div className="pixel-empty-state">
-              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 rounded-[12px] flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 border border-[var(--theme-border-muted)] bg-red-500/10 rounded-[4px] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
@@ -517,17 +454,14 @@ export default function MyPage() {
       {activeTab === 'bookmarks' && (
         <div className="space-y-4">
           {loading || bookmarkLoading ? (
-            <div className="text-center py-12">
-              <div className="w-8 h-8 border-2 border-[var(--theme-accent)] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400">로딩 중...</p>
-            </div>
+            <InlineLoading label="불러오는 중" />
           ) : bookmarkedReports.length > 0 ? (
             bookmarkedReports.map((report) => (
               <ReportCard key={report.id} {...report} />
             ))
           ) : (
             <div className="pixel-empty-state">
-              <div className="w-16 h-16 border-2 border-[var(--theme-border-muted)] bg-red-500/10 rounded-[12px] flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 border border-[var(--theme-border-muted)] bg-red-500/10 rounded-[4px] flex items-center justify-center mx-auto mb-4">
                 <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                 </svg>
@@ -542,84 +476,6 @@ export default function MyPage() {
               </Link>
             </div>
           )}
-        </div>
-      )}
-
-      {activeTab === 'achievements' && (
-        <div className="space-y-6">
-          {/* 장착 중 */}
-          <div className="card-base overflow-hidden">
-            <div className="px-5 py-4 border-b-2 border-[var(--theme-border-muted)] flex items-center justify-between">
-              <h3 className="font-sans text-base font-bold uppercase tracking-wider">장착 중인 배지</h3>
-              <span className="font-sans text-xs text-gray-500 dark:text-gray-400">닉네임 옆에 표시됩니다 · 1개만 장착 가능</span>
-            </div>
-            <div className="p-5 flex items-center gap-4">
-              {equippedBadgeId && BADGES_BY_ID[equippedBadgeId] ? (
-                <>
-                  <BadgeIcon id={equippedBadgeId} size={96} />
-                  <div className="flex-1">
-                    <div className="font-sans font-bold text-base">{BADGES_BY_ID[equippedBadgeId].name}</div>
-                    <div className="font-sans text-xs text-gray-600 dark:text-gray-300 mt-1">{BADGES_BY_ID[equippedBadgeId].description}</div>
-                  </div>
-                  <button
-                    onClick={() => handleEquipBadge(null)}
-                    disabled={isEquipping}
-                    className="btn-secondary text-xs disabled:opacity-50"
-                  >
-                    {isEquipping ? '처리 중...' : '해제'}
-                  </button>
-                </>
-              ) : (
-                <div className="text-sm text-gray-500 dark:text-gray-400">장착된 배지가 없습니다. 아래에서 해금된 배지를 클릭해 장착하세요.</div>
-              )}
-            </div>
-          </div>
-
-          {/* 카테고리별 그리드 */}
-          {(['single', 'avg', 'activity'] as BadgeCategory[]).map((cat) => {
-            const inCat = BADGES.filter((b) => b.category === cat);
-            return (
-              <div key={cat} className="card-base overflow-hidden">
-                <div className="px-5 py-4 border-b-2 border-[var(--theme-border-muted)] flex items-center justify-between">
-                  <h3 className="font-sans text-base font-bold uppercase tracking-wider">{CATEGORY_LABEL[cat]}</h3>
-                  <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
-                    {inCat.filter((b) => unlockedSet.has(b.id)).length}/{inCat.length} 해금
-                  </span>
-                </div>
-                <div className="p-4 grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {inCat.map((b) => {
-                    const unlocked = unlockedSet.has(b.id);
-                    const equipped = equippedBadgeId === b.id;
-                    return (
-                      <button
-                        key={b.id}
-                        onClick={() => unlocked && handleEquipBadge(equipped ? null : b.id)}
-                        disabled={!unlocked || isEquipping}
-                        className={`
-                          flex flex-col items-center p-3 rounded-[12px] border-2 transition-all
-                          ${equipped
-                            ? 'border-[var(--theme-accent)] bg-[var(--theme-accent)]/10'
-                            : unlocked
-                              ? 'border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)] cursor-pointer'
-                              : 'border-[var(--theme-border-muted)] opacity-40 cursor-not-allowed grayscale'}
-                        `}
-                        title={unlocked ? (equipped ? '클릭하여 장착 해제' : '클릭하여 장착') : '잠금'}
-                      >
-                        <BadgeIcon id={b.id} size={96} />
-                        <div className="font-sans text-xs font-bold mt-2 text-center">{b.name}</div>
-                        <div className="font-sans text-[10px] text-gray-500 dark:text-gray-400 mt-1 text-center leading-tight">
-                          {b.description}
-                        </div>
-                        {equipped && (
-                          <div className="font-sans text-[10px] font-bold text-[var(--theme-accent)] mt-1.5">장착 중</div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
         </div>
       )}
 
@@ -713,7 +569,7 @@ export default function MyPage() {
               >
                 {isUpdating ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" />
                     <span>저장 중...</span>
                   </>
                 ) : (
@@ -739,7 +595,7 @@ export default function MyPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="p-4 bg-red-500/10 border-2 border-red-500 rounded-[10px] mb-2">
+              <div className="p-4 bg-red-500/10 border border-red-500 rounded-[4px] mb-2">
                 <p className="font-sans text-xs text-red-600 dark:text-red-400 font-bold mb-2">
                   탈퇴 시 다음 사항에 유의해주세요:
                 </p>

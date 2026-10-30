@@ -103,7 +103,7 @@ export default function AdminSystem() {
                     >
                       {isLoading ? (
                         <span className="flex items-center gap-2">
-                          <span className="animate-spin inline-block w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full" />
+                          <span className="animate-spin inline-block w-3 h-3 border border-gray-400 border-t-transparent rounded-full" />
                           실행중...
                         </span>
                       ) : (

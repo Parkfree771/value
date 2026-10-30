@@ -4,7 +4,7 @@
  * 글 작성 후 호출되는 후처리 엔드포인트. feed.json 의존성 제거됨.
  * posts 자체는 이미 /write 페이지에서 Postgres로 INSERT. 여기서는:
  *   - 새 ticker면 current_prices에 행 추가
- *   - 사용자 통계·배지 재계산 (user_badges sticky INSERT)
+ *   - 작성자 레벨 점수 갱신 (refresh_level_points)
  *   - IndexNow 핑
  *
  * DELETE는 별도 처리 없음 (post 삭제 시 호출되어도 모든 작업은 이미 다른 곳에서 처리됨).
@@ -17,7 +17,6 @@ import { sql } from '@/lib/db';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
 import { pingIndexNow } from '@/lib/indexnow';
-import { recomputeAllUserStatsFromFeed } from '@/lib/userStats';
 
 const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr').replace(/\/$/, '');
 const POST_RATE_LIMIT = 10;
@@ -68,10 +67,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 비동기 후처리
-    recomputeAllUserStatsFromFeed([], { onlyAuthorId: userId }).catch((err) =>
-      console.warn('[Feed API] user stats recompute 실패:', err instanceof Error ? err.message : err),
-    );
+    // 작성자 레벨 점수 갱신 (배지 시스템 대체) — 단일 UPDATE 라 기다렸다가 아래 revalidate 에 반영
+    try {
+      await sql`select refresh_level_points(${userId}::uuid)`;
+    } catch (err) {
+      console.warn('[Feed API] level refresh 실패:', err instanceof Error ? err.message : err);
+    }
 
     const reportUrl = `${SITE_URL}/reports/${postId}`;
     pingIndexNow([reportUrl, `${SITE_URL}/`, `${SITE_URL}/sitemap.xml`, `${SITE_URL}/feed.xml`]).catch(

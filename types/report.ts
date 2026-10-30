@@ -10,7 +10,7 @@ export interface ReportSummary {
   title: string;
   author: string;
   authorId?: string;
-  equippedBadgeId?: string | null;
+  levelPoints?: number;
   stockName: string;
   ticker: string;
   category?: string;
@@ -34,6 +34,8 @@ export interface ReportSummary {
     [key: string]: any;
   };
   themes?: string[];
+  excerpt?: string;
+  thumbnail?: string | null;
 }
 
 export interface Report {
@@ -41,7 +43,7 @@ export interface Report {
   title: string;
   author: string;
   authorId: string;
-  equippedBadgeId?: string | null;
+  levelPoints?: number;
   stockName: string;
   ticker: string;
   category?: MarketCategory;

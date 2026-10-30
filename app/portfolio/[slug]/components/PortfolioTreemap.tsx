@@ -345,7 +345,7 @@ export default function PortfolioTreemap({
         {/* 데스크탑 툴팁 */}
         {hover && !isMobile && (
           <div
-            className="absolute pointer-events-none z-10 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border)] rounded-lg p-3 text-xs"
+            className="absolute pointer-events-none z-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm p-3 text-xs"
             style={{
               left: Math.min(hover.x + 12, Math.max(0, containerW - 220)),
               top: Math.min(hover.y + 12, H - 140),

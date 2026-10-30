@@ -17,10 +17,10 @@
 }
 
 .profileCard {
-  background: linear-gradient(135deg, #2d3e8f 0%, #3b50b5 50%, #2d3e8f 100%);
-  border: 2px solid var(--theme-accent-dark);
-  border-radius: 14px;
-  box-shadow: 0 4px 20px rgba(59, 80, 181, 0.3);
+  background: var(--theme-accent);
+  border: 1px solid var(--theme-accent-dark);
+  border-radius: 4px;
+  box-shadow: none;
   padding: 1.5rem;
   color: white;
   position: relative;
@@ -78,9 +78,9 @@
   width: 5rem;
   height: 5rem;
   background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,9 +137,9 @@
   padding: 2px 8px;
   background: var(--theme-accent);
   color: white;
-  border: 2px solid var(--theme-accent-dark);
-  border-radius: 6px;
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--theme-accent-dark);
+  border-radius: 4px;
+  box-shadow: none;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -169,9 +169,9 @@
   background: transparent;
   font-size: 0.75rem;
   font-weight: 700;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(59, 80, 181, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  box-shadow: none;
   transition: all 0.1s ease;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.8);
@@ -181,7 +181,7 @@
   border-color: var(--theme-accent);
   color: white;
   transform: translate(1px, 1px);
-  box-shadow: 0 1px 3px rgba(59, 80, 181, 0.1);
+  box-shadow: none;
 }
 
 .editButton:active {
@@ -211,8 +211,8 @@
 .mainStatCard {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
   padding: 0.75rem 1rem;
 }
 
@@ -241,7 +241,7 @@
 }
 
 .mainStatNegative {
-  color: #f87171;
+  color: var(--color-up);
 }
 
 /* ============================================
@@ -258,56 +258,56 @@
 
 .statIconRed {
   background: rgba(220, 38, 38, 0.15);
-  border-color: #dc2626;
+  border-color: var(--color-up);
 }
 :global(.dark) .statIconRed {
   background: rgba(248, 113, 113, 0.15);
-  border-color: #f87171;
+  border-color: var(--color-up);
 }
 
 .statIconBlue {
   background: rgba(37, 99, 235, 0.15);
-  border-color: #2563eb;
+  border-color: var(--color-down);
 }
 :global(.dark) .statIconBlue {
   background: rgba(96, 165, 250, 0.15);
-  border-color: #60a5fa;
+  border-color: var(--color-down);
 }
 
 .statIconPink {
   background: rgba(219, 39, 119, 0.15);
-  border-color: #db2777;
+  border-color: var(--theme-orange);
 }
 :global(.dark) .statIconPink {
   background: rgba(244, 114, 182, 0.15);
-  border-color: #f472b6;
+  border-color: var(--theme-orange);
 }
 
 .statIconSvgGreen { color: #16a34a; }
 :global(.dark) .statIconSvgGreen { color: #4ade80; }
 
-.statIconSvgRed { color: #dc2626; }
-:global(.dark) .statIconSvgRed { color: #f87171; }
+.statIconSvgRed { color: var(--color-up); }
+:global(.dark) .statIconSvgRed { color: var(--color-up); }
 
-.statIconSvgBlue { color: #2563eb; }
-:global(.dark) .statIconSvgBlue { color: #60a5fa; }
+.statIconSvgBlue { color: var(--color-down); }
+:global(.dark) .statIconSvgBlue { color: var(--color-down); }
 
-.statIconSvgPink { color: #db2777; }
-:global(.dark) .statIconSvgPink { color: #f472b6; }
+.statIconSvgPink { color: var(--theme-orange); }
+:global(.dark) .statIconSvgPink { color: var(--theme-orange); }
 
 .statValueGreen { color: #16a34a; }
 :global(.dark) .statValueGreen { color: #4ade80; }
 
-.statValueRed { color: #dc2626; }
-:global(.dark) .statValueRed { color: #f87171; }
+.statValueRed { color: var(--color-up); }
+:global(.dark) .statValueRed { color: var(--color-up); }
 
 /* ============================================
    경고 박스 (프로필 수정 모달 내부)
    ============================================ */
 .warningBox {
   background: rgba(245, 158, 11, 0.1);
-  border: 2px solid #f59e0b;
-  border-radius: 10px;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
   padding: 0.75rem;
   display: flex;
   gap: 0.75rem;

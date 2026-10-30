@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '문의하기',
     description: 'AntStreet 고객센터. 서비스 이용 관련 문의, 제안, 신고 등을 접수할 수 있습니다.',
     url: `${SITE_URL}/contact`,
-    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
+    images: [{ url: '/api/og/site', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/contact`,
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="font-sans text-2xl font-bold mb-8">
+      <h1 className="headline text-2xl font-bold mb-8">
         문의하기
       </h1>
 
@@ -77,19 +77,19 @@ export default function ContactPage() {
           문의 유형
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+          <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">서비스 이용 문의</h3>
             <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">회원가입, 리포트 작성, 기능 사용 관련</p>
           </div>
-          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+          <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">버그 및 오류 신고</h3>
             <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">서비스 오류, 데이터 오류 등</p>
           </div>
-          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+          <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">제안 및 피드백</h3>
             <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">새로운 기능, 서비스 개선 아이디어</p>
           </div>
-          <div className="p-4 border-2 border-[var(--theme-border-muted)]">
+          <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">신고</h3>
             <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">부적절한 콘텐츠, 저작권 침해 등</p>
           </div>

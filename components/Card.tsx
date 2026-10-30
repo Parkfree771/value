@@ -24,7 +24,7 @@ const Card = memo(function Card({
 
     glass: 'card-base',
 
-    elevated: 'card-base shadow-lg',
+    elevated: 'card-base',
   };
 
   const paddingStyles = {

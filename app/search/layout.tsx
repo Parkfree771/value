@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     description:
       '종목명·티커·작성자로 투자 리포트 검색. 한·미·일·중·홍콩 종목 컨센서스와 13F 구루 보유 여부 확인.',
     url: `${SITE_URL}/search`,
-    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
+    images: [{ url: '/api/og/site', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/search`,

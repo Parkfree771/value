@@ -1,5 +1,7 @@
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { shortStockName } from '@/utils/reportDisplay';
+import { loadGoogleFont as loadSubsetFont, MASTHEAD_FONT } from '@/lib/ogFonts';
 
 export const runtime = 'edge';
 
@@ -79,36 +81,47 @@ export async function GET(req: NextRequest) {
   const currentPrice = parseFloat(searchParams.get('currentPrice') || '0');
   const returnRate = parseFloat(searchParams.get('returnRate') || '0');
   const author = (searchParams.get('author') || '익명').slice(0, 16);
-  const date = formatDate(searchParams.get('date') || '');
+  const rawDate = searchParams.get('date') || '';
+  const date = formatDate(rawDate);
+  // 투자 근거 한 줄 (본문 앞부분) — "왜 샀는지"가 이 사이트의 핵심이라 미리보기에도 노출
+  const excerpt = (searchParams.get('excerpt') || '').slice(0, 80);
+  // 현재가 기준일 — 카톡 등은 미리보기를 오래 캐시하므로 "언제 기준 가격인지" 명시
+  const rawAsOf = searchParams.get('asOf') || '';
+  const asOf = formatDate(rawAsOf);
+  const heldDays =
+    rawDate && rawAsOf
+      ? Math.max(0, Math.floor((new Date(rawAsOf).getTime() - new Date(rawDate).getTime()) / 86400000))
+      : null;
   // positionType: 매수(long) 시 +녹/−빨, 숏(short) 시 그대로 (수익 관점은 동일)
   void searchParams.get('positionType');
 
   const isPositive = returnRate >= 0;
-  const goodColor = '#059669'; // emerald-600
-  const badColor = '#dc2626';  // red-600
+  // 한국식 — 상승 빨강 / 하락 파랑 (사이트 getReturnColorClass 와 동일)
+  const goodColor = '#b8322a'; // 사이트 --color-up
+  const badColor = '#2b5ba8';  // 사이트 --color-down
   const rateColor = isPositive ? goodColor : badColor;
   const rateSign = isPositive ? '+' : '';
   const rateText = `${rateSign}${returnRate.toFixed(1)}%`;
 
-  // 로고 이미지 — 동일 오리진에서 가져와 base64로 임베드 (satori가 절대 URL을 안정적으로
-  // 처리하지 못하는 경우가 있어 인라인이 가장 robust).
-  const origin = new URL(req.url).origin;
-  let logoDataUrl = '';
-  try {
-    const buf = await fetch(`${origin}/og-antstreet-logo.png`, {
-      next: { revalidate: 60 * 60 * 24 * 30, tags: ['og-logo'] },
-    }).then((r) => r.arrayBuffer());
-    logoDataUrl = `data:image/png;base64,${Buffer.from(buf).toString('base64')}`;
-  } catch {
-    // 폴백: 텍스트 로고 (이미지 로드 실패 시)
-    logoDataUrl = '';
-  }
+
+  // 미국 ETF/ADR 원문명은 "PROSHARES TRUST II ULTA BLOMBERG CRUD OIL(POST REV SPLT)" 처럼 길고 시끄러움
+  const cleanName = shortStockName(stockName, ticker);
+  const displayStockName = cleanName.length > 32 ? `${cleanName.slice(0, 30).trim()}…` : cleanName;
+  // 본문 폭 936px 기준: 52px 제목은 ~18자, 44px 은 ~21자에서 줄바꿈.
+  // 제목이 두 줄이면 근거는 한 줄(~36자)로 줄여 하단 수익률 영역을 밀어내지 않게 한다.
+  const titleFontSize = title.length > 18 ? 44 : 52;
+  const titleTwoLines = title.length > 21;
+  const excerptMax = titleTwoLines ? 36 : 70;
+  const shownExcerpt = excerpt.length > excerptMax ? `${excerpt.slice(0, excerptMax).trim()}…` : excerpt;
 
   // 폰트 로드 — Google Fonts CSS API로 최신 woff2 URL 동적 조회
   // (정적 fonts.gstatic.com 직접 URL은 hash 변경 시 404)
-  const [notoFont, barlowFont] = await Promise.all([
+  const [notoFont, barlowFont, mastheadFont, serifTitleFont] = await Promise.all([
     loadGoogleFont('Noto+Sans+KR', 700),
     loadGoogleFont('Barlow', 700),
+    loadSubsetFont(MASTHEAD_FONT, { text: 'AntStreet' }),
+    // 제목은 사이트처럼 명조 — 제목 글자만 담은 작은 폰트
+    loadSubsetFont('Noto+Serif+KR:wght@700', { text: `${title}…` }),
   ]);
 
   return new ImageResponse(
@@ -135,29 +148,18 @@ export async function GET(req: NextRequest) {
             justifyContent: 'space-between',
           }}
         >
-          {logoDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logoDataUrl}
-              alt="AntStreet"
-              width={260}
-              height={71}
-              style={{ display: 'flex' }}
-            />
-          ) : (
-            <div
-              style={{
-                fontSize: '40px',
-                fontWeight: 700,
-                color: '#1e293b',
-                fontFamily: 'Barlow',
-                letterSpacing: '-0.02em',
-                display: 'flex',
-              }}
-            >
-              AntStreet
-            </div>
-          )}
+          <div
+            style={{
+              fontSize: '46px',
+              color: '#111111',
+              fontFamily: 'Masthead',
+              letterSpacing: '-0.01em',
+              lineHeight: 1,
+              display: 'flex',
+            }}
+          >
+            AntStreet
+          </div>
           {date && (
             <div
               style={{
@@ -180,7 +182,7 @@ export async function GET(req: NextRequest) {
             height: '1px',
             background: '#e2e8f0',
             marginTop: '20px',
-            marginBottom: '36px',
+            marginBottom: '28px',
             display: 'flex',
           }}
         />
@@ -209,7 +211,7 @@ export async function GET(req: NextRequest) {
                 gap: '10px',
               }}
             >
-              <span style={{ color: '#1e293b', display: 'flex' }}>{stockName}</span>
+              <span style={{ color: '#1e293b', display: 'flex' }}>{displayStockName}</span>
               <span style={{ color: '#cbd5e1', display: 'flex' }}>·</span>
               <span style={{ fontFamily: 'Barlow', letterSpacing: '0.02em', display: 'flex' }}>{ticker}</span>
               {exchange && (
@@ -223,30 +225,36 @@ export async function GET(req: NextRequest) {
             {/* 제목 (메인) — 패딩 늘어난 만큼 폰트 약간 다운스케일 */}
             <div
               style={{
-                fontSize: title.length > 30 ? '46px' : '54px',
+                fontSize: `${titleFontSize}px`,
                 fontWeight: 700,
                 color: '#0f172a',
                 lineHeight: 1.25,
                 letterSpacing: '-0.02em',
-                fontFamily: 'NotoSansKR',
+                fontFamily: 'SerifTitle',
                 display: 'flex',
                 maxWidth: '100%',
               }}
             >
-              {title.length > 60 ? title.slice(0, 60) + '…' : title}
+              {title.length > 48 ? title.slice(0, 48) + '…' : title}
             </div>
 
-            {/* brand color underline */}
-            <div
-              style={{
-                width: '72px',
-                height: '4px',
-                background: '#3b50b5',
-                borderRadius: '2px',
-                marginTop: '24px',
-                display: 'flex',
-              }}
-            />
+            {/* 투자 근거 한 줄 */}
+            {excerpt && (
+              <div
+                style={{
+                  fontSize: '24px',
+                  fontWeight: 700,
+                  color: '#64748b',
+                  lineHeight: 1.4,
+                  marginTop: '18px',
+                  paddingLeft: '18px',
+                  borderLeft: '4px solid #111111',
+                  display: 'flex',
+                }}
+              >
+                {shownExcerpt}
+              </div>
+            )}
           </div>
 
           {/* 하단 메트릭: (좌) 작성가→현재가  /  (우) 수익률 텍스트만 */}
@@ -272,7 +280,7 @@ export async function GET(req: NextRequest) {
                 <div style={{ fontSize: '32px', color: '#cbd5e1', fontFamily: 'Barlow', display: 'flex' }}>→</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   <div style={{ fontSize: '16px', color: '#94a3b8', fontFamily: 'NotoSansKR', fontWeight: 700, display: 'flex' }}>
-                    현재가
+                    {asOf ? `${asOf} 기준` : '현재가'}
                   </div>
                   <div style={{ fontSize: '32px', color: '#0f172a', fontFamily: 'Barlow', fontWeight: 700, display: 'flex' }}>
                     {formatPrice(currentPrice, currency)}
@@ -283,18 +291,26 @@ export async function GET(req: NextRequest) {
               <div style={{ display: 'flex' }} />
             )}
 
-            {/* 수익률 (우측) — 뱃지/화살표 제거, 숫자만 큰 폰트로 */}
-            <div
-              style={{
-                fontSize: '64px',
-                color: rateColor,
-                fontFamily: 'Barlow',
-                fontWeight: 700,
-                letterSpacing: '-0.02em',
-                display: 'flex',
-              }}
-            >
-              {rateText}
+            {/* 수익률 (우측) — 보유 기간을 함께 보여줘 "시간이 증명했다"는 맥락을 준다 */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              {heldDays !== null && (
+                <div style={{ fontSize: '18px', color: '#94a3b8', fontFamily: 'NotoSansKR', fontWeight: 700, display: 'flex' }}>
+                  작성 후 {heldDays.toLocaleString('ko-KR')}일
+                </div>
+              )}
+              <div
+                style={{
+                  fontSize: '64px',
+                  color: rateColor,
+                  fontFamily: 'Barlow',
+                  fontWeight: 700,
+                  letterSpacing: '-0.02em',
+                  lineHeight: 1.05,
+                  display: 'flex',
+                }}
+              >
+                {rateText}
+              </div>
             </div>
           </div>
         </div>
@@ -305,8 +321,8 @@ export async function GET(req: NextRequest) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            marginTop: '32px',
-            paddingTop: '20px',
+            marginTop: '28px',
+            paddingTop: '16px',
             borderTop: '1px solid #e2e8f0',
           }}
         >
@@ -321,17 +337,19 @@ export async function GET(req: NextRequest) {
           >
             작성자: {author}
           </div>
-          <div
-            style={{
-              fontSize: '18px',
-              fontWeight: 700,
-              color: '#94a3b8',
-              fontFamily: 'Barlow',
-              letterSpacing: '0.02em',
-              display: 'flex',
-            }}
-          >
-            antstreet.kr
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div
+              style={{
+                fontSize: '18px',
+                fontWeight: 700,
+                color: '#94a3b8',
+                fontFamily: 'Barlow',
+                letterSpacing: '0.02em',
+                display: 'flex',
+              }}
+            >
+              antstreet.kr
+            </div>
           </div>
         </div>
       </div>
@@ -342,6 +360,8 @@ export async function GET(req: NextRequest) {
       fonts: [
         { name: 'NotoSansKR', data: notoFont, weight: 700, style: 'normal' },
         { name: 'Barlow', data: barlowFont, weight: 700, style: 'normal' },
+        { name: 'Masthead', data: mastheadFont, weight: 800, style: 'normal' },
+        { name: 'SerifTitle', data: serifTitleFont, weight: 700, style: 'normal' },
       ],
     },
   );

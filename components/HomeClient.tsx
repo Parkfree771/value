@@ -1,21 +1,25 @@
 'use client';
 
-import { useState, useMemo, memo, useEffect, useRef, useCallback } from 'react';
+import { useState, useMemo, memo, useEffect, useRef, useCallback, Fragment } from 'react';
 import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
 import type { FeedPost, FeedData } from '@/types/feed';
 import ReportCard from '@/components/ReportCard';
+import WriteCtaCard from '@/components/WriteCtaCard';
+import { HomeSkeleton } from '@/components/loading/Loading';
+import FrontPage from '@/components/front/FrontPage';
+import MarketStrip from '@/components/front/MarketStrip';
+import FeedSidebar from '@/components/front/FeedSidebar';
+import type { Briefing } from '@/lib/briefing';
+import type { TickerResponse } from '@/lib/ticker';
 import { useBookmark } from '@/contexts/BookmarkContext';
 import { loadThemes, getSymbolsForThemes } from '@/lib/themeStocks';
 import type { Theme } from '@/types/theme';
 
 // SSR 활성화: ReportCard는 직접 import (가장 중요한 콘텐츠)
 // 덜 중요한 컴포넌트만 dynamic import
-const TopReturnSlider = dynamic(() => import('@/components/TopReturnSlider'), {
-  loading: () => <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-4 sm:mb-8" />,
-});
 const SearchBar = dynamic(() => import('@/components/SearchBar'), {
-  loading: () => <div className="animate-pulse h-[48px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />,
+  loading: () => <div className="skel h-11 w-full sm:w-72" />,
 });
 
 type FeedTab = 'all' | 'following' | 'popular' | 'return';
@@ -48,11 +52,22 @@ function measureFirstRow(container: HTMLElement | null): number {
   return count >= children.length ? Infinity : Math.max(count - 1, 1);
 }
 
+// 날짜 줄 — "2026년 10월 30일 금요일" (한국 시간)
+const DATELINE = new Intl.DateTimeFormat('ko-KR', {
+  timeZone: 'Asia/Seoul',
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long',
+});
+
 // feed.json API 엔드포인트 (클라이언트 재검증용)
 const FEED_API = '/api/feed/public';
 
 interface HomeClientProps {
   initialData: FeedData | null;
+  briefing?: Briefing | null;
+  ticker?: TickerResponse | null;
 }
 
 // FeedPost를 ReportSummary로 매핑하는 함수
@@ -61,7 +76,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     id: post.id,
     title: post.title,
     author: post.author,
-    equippedBadgeId: post.equippedBadgeId ?? null,
+    levelPoints: post.levelPoints,
     stockName: post.stockName,
     ticker: post.ticker,
     opinion: post.opinion,
@@ -81,11 +96,13 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
     category: post.category,
     positionType: post.positionType,
     themes: post.themes,
+    excerpt: post.excerpt,
+    thumbnail: post.thumbnail,
     stockData: undefined,
   }));
 }
 
-const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
+const HomeClient = memo(function HomeClient({ initialData, briefing = null, ticker = null }: HomeClientProps) {
   // 서버에서 받은 initialData로 초기 상태 설정
   const [reports, setReports] = useState<ReportSummary[]>(() =>
     initialData?.posts ? mapPostsToReports(initialData.posts) : []
@@ -240,41 +257,50 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
     return filteredReports.slice(start, start + pageSize);
   }, [filteredReports, safePage, pageSize]);
 
+  // 기본 피드(필터·검색 없음) 첫 페이지에서만 3번째 카드 뒤에 글쓰기 유도 카드
+  const showWriteCta =
+    safePage === 1 && activeTab === 'all' && marketFilter === 'all' && !selectedTheme && !searchQuery.trim();
+
   // 로딩 중 스켈레톤 UI
   if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-3 sm:pb-12">
-        {/* TOP 10 스켈레톤 */}
-        <div className="animate-pulse h-[200px] sm:h-[280px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-4 sm:mb-8" />
-
-        {/* 검색바 + 탭 스켈레톤 */}
-        <div className="mb-4">
-          <div className="animate-pulse h-[40px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)] mb-3" />
-          <div className="flex gap-2">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="animate-pulse h-[20px] w-[50px] bg-[var(--theme-border-muted)]/30" />
-            ))}
-          </div>
-        </div>
-
-        {/* 카드 스켈레톤 */}
-        <div className="space-y-3 sm:space-y-6">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="animate-pulse h-[140px] sm:h-[180px] bg-[var(--theme-border-muted)]/30 border-2 border-[var(--theme-border-muted)]" />
-          ))}
-        </div>
-      </div>
-    );
+    return <HomeSkeleton />;
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-3 sm:pb-12">
-      <h1 className="sr-only">AntStreet - 투자 리포트 피드</h1>
-      {/* TOP 10 Return Rate Slider */}
-      <TopReturnSlider reports={reports} />
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-0 pb-3 sm:pb-12">
+      <h1 className="sr-only">AntStreet - 개미 가치투자자의 투자 리포트 기록장</h1>
+      {/* 지수 띠 */}
+      <MarketStrip ticker={ticker} />
+      {/* 신문 날짜 줄 — 슬로건 · 날짜 · 리포트 수 */}
+      <div className="md:hidden mt-3 mb-5 flex items-baseline justify-between gap-3 border-b border-[var(--theme-border-muted)] pb-2">
+        <p className="font-serif font-bold text-[13px] sm:text-[15px] text-[var(--foreground)] break-keep">
+          개인 투자자가 쓰고, 시장이 채점한다
+        </p>
+        <p suppressHydrationWarning className="flex-shrink-0 text-[11px] sm:text-xs text-muted tabular-nums">
+          <span className="hidden sm:inline">{DATELINE.format(new Date())} · </span>리포트 {total.toLocaleString('ko-KR')}편
+        </p>
+      </div>
 
-      {/* 검색바 */}
-      <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} placeholder="" showStockSuggestions={false} />
+      {/* 1면 — 수익률 1·2·3위 + 4~10위 / 모닝 브리핑 · 구루 / 최신 리포트 */}
+      <div className="mt-5 md:mt-7">
+        <FrontPage reports={reports} briefing={briefing} />
+      </div>
+
+
+      {/* 아래: 모든 리포트 (왼쪽) + 고정 사이드 (오른쪽) */}
+      <div className="mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10">
+      <div className="lg:col-span-8 min-w-0">
+      {/* 제목 줄 — 왼쪽 "모든 리포트", 오른쪽 검색 */}
+      <div className="section-rule flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-3 sm:mb-4">
+        <h2 id="feed" className="text-xl sm:text-2xl text-heading scroll-mt-20">모든 리포트</h2>
+        <SearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          placeholder="종목·작성자·제목으로 찾기"
+          showStockSuggestions={false}
+          className="w-full sm:w-72"
+        />
+      </div>
 
       {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 (한 줄 유지, 모바일 축소) */}
       <div className="mb-3 sm:mb-4 flex justify-between items-center gap-1 overflow-x-auto scrollbar-hide">
@@ -306,11 +332,18 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
         </div>
       </div>
 
-      {/* Reports Grid */}
-      <div className="space-y-3 sm:space-y-6">
+      {/* Reports — 상자 없이 괘선으로 구분된 기사 목록 */}
+      <div className="border-t border-[var(--theme-border-muted)]">
         {filteredReports.length > 0 ? (
-          paginatedReports.map((report) => (
-            <ReportCard key={report.id} {...report} />
+          paginatedReports.map((report, index) => (
+            <Fragment key={report.id}>
+              <ReportCard {...report} />
+              {showWriteCta && index === 2 && (
+                <div className="lg:hidden">
+                  <WriteCtaCard />
+                </div>
+              )}
+            </Fragment>
           ))
         ) : (
           <div className="pixel-empty-state">
@@ -330,7 +363,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={safePage === 1}
-            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] rounded-sm text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             이전
           </button>
@@ -340,10 +373,10 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-lg transition-all ${
+                className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-sm transition-all ${
                   safePage === page
-                    ? 'border-2 pixel-chip-active'
-                    : 'bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
+                    ? 'border pixel-chip-active'
+                    : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] hover:border-[var(--theme-accent)]'
                 }`}
               >
                 {page}
@@ -354,7 +387,7 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={safePage === totalPages}
-            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border-2 border-[var(--theme-border-muted)] rounded-lg text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] rounded-sm text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
           >
             다음
           </button>
@@ -369,6 +402,14 @@ const HomeClient = memo(function HomeClient({ initialData }: HomeClientProps) {
           </span>
         </div>
       )}
+      </div>
+
+      <aside className="hidden lg:block lg:col-span-4">
+        <div className="sticky top-16">
+          <FeedSidebar totalPosts={total} />
+        </div>
+      </aside>
+      </div>
     </div>
   );
 });

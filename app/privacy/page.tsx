@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '개인정보처리방침',
     description: 'AntStreet 개인정보처리방침입니다. 수집하는 개인정보 항목, 이용 목적, 보유 기간, 이용자 권리 등을 안내합니다.',
     url: `${SITE_URL}/privacy`,
-    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
+    images: [{ url: '/api/og/site', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/privacy`,
@@ -21,7 +21,7 @@ export default function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="p-8">
-        <h1 className="font-sans text-2xl font-bold mb-8">개인정보처리방침</h1>
+        <h1 className="headline text-2xl font-bold mb-8">개인정보처리방침</h1>
 
         <div className="space-y-6 font-sans text-xs text-gray-700 dark:text-gray-300">
           <section>
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
             </ul>
 
             <h3 className="text-xs font-bold mb-2 mt-4">다. 회원 탈퇴 시 정보 처리</h3>
-            <div className="ml-6 p-4 bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)]">
+            <div className="ml-6 p-4 bg-[var(--theme-bg)] border border-[var(--theme-border-muted)]">
               <p className="mb-2">회원 탈퇴 시 개인정보는 다음과 같이 처리됩니다:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>닉네임, 프로필 사진, 자기소개 등: <strong>즉시 삭제 또는 익명화</strong></li>
@@ -200,7 +200,7 @@ export default function PrivacyPage() {
               회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및
               피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다:
             </p>
-            <div className="bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)] p-4 mt-3">
+            <div className="bg-[var(--theme-bg)] border border-[var(--theme-border-muted)] p-4 mt-3">
               <p><strong>개인정보 보호책임자</strong></p>
               <ul className="mt-2 space-y-1">
                 <li>이름: 박유로</li>

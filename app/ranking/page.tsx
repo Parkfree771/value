@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     description:
       '작성가 vs 현재가로 자동 검증되는 리포트·투자자 랭킹. 결과로 증명된 개미 투자자를 한눈에.',
     url: `${SITE_URL}/ranking`,
-    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
+    images: [{ url: '/api/og/site', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/ranking`,
@@ -67,7 +67,7 @@ type FeedPost = {
   title: string;
   author: string;
   authorId?: string;
-  equippedBadgeId?: string | null;
+  levelPoints?: number;
   stockName: string;
   ticker: string;
   exchange?: string;
@@ -116,7 +116,7 @@ export default async function RankingPage() {
   });
 
   // 투자자 데이터 (작성자별 평균 수익률)
-  const authorMap = new Map<string, { totalReturn: number; count: number; author: string }>();
+  const authorMap = new Map<string, { totalReturn: number; count: number; author: string; levelPoints?: number }>();
   reportsWithDays.forEach((report) => {
     const existing = authorMap.get(report.author);
     if (existing) {
@@ -127,14 +127,16 @@ export default async function RankingPage() {
         totalReturn: report.returnRate,
         count: 1,
         author: report.author,
+        levelPoints: report.levelPoints,
       });
     }
   });
 
   const investorsData = Array.from(authorMap.values())
-    .map(({ author, totalReturn, count }) => ({
+    .map(({ author, totalReturn, count, levelPoints }) => ({
       rank: 0,
       name: author,
+      levelPoints,
       avgReturnRate: totalReturn / count,
       totalReports: count,
       totalLikes: reportsWithDays

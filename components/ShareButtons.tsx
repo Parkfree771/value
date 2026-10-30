@@ -151,7 +151,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
             type="button"
             onClick={btn.onClick}
             aria-label={`${btn.label}로 공유`}
-            className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all ${btn.bg}`}
+            className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 rounded-sm text-[11px] sm:text-xs font-bold transition-all ${btn.bg}`}
           >
             {btn.icon}
             <span className="hidden sm:inline">{btn.label}</span>
@@ -164,7 +164,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
         <button
           type="button"
           onClick={handleNativeShare}
-          className="w-full sm:hidden flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs font-medium transition-all"
+          className="w-full sm:hidden flex items-center justify-center gap-1.5 px-3 py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs font-medium transition-all"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -179,7 +179,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
       )}
 
       {kakaoNotice && (
-        <div className="text-[11px] sm:text-xs text-center text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-md py-1.5 px-2">
+        <div className="text-[11px] sm:text-xs text-center text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm py-1.5 px-2">
           링크가 복사되었습니다. 카카오톡 채팅창에 붙여넣기 하세요.
         </div>
       )}

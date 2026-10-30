@@ -205,7 +205,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
       </label>
 
       {selectedStock ? (
-        <div className={`flex items-center justify-between p-3 sm:p-4 rounded-xl border-2 ${
+        <div className={`flex items-center justify-between p-3 sm:p-4 rounded-sm border ${
           selectedStock.exchange === 'CRYPTO'
             ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800'
             : 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-700'
@@ -263,7 +263,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
             />
             {isLoading && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-red-500"></div>
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-border)]"></div>
               </div>
             )}
           </div>
@@ -271,7 +271,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
           {/* 검색 결과 드롭다운 */}
           {showResults && results.length > 0 && (
             <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
-                          border-2 border-[var(--theme-border-muted)] rounded-xl shadow-lg
+                          border border-[var(--theme-border-muted)] rounded-sm
                           max-h-[50vh] sm:max-h-96 overflow-y-auto">
               {results.map((stock, index) => (
                 <button
@@ -319,7 +319,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
           {/* 검색 결과 없음 */}
           {showResults && !isLoading && query.length > 0 && results.length === 0 && (
             <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
-                          border-2 border-[var(--theme-border-muted)] rounded-xl shadow-lg p-4">
+                          border border-[var(--theme-border-muted)] rounded-sm p-4">
               <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
                 검색 결과가 없습니다
               </p>

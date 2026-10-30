@@ -101,6 +101,8 @@ if (tickers.length > 0) {
   // 각자의 initial_price로 return_rate를 계산하므로 ticker 수만큼만 처리.
   const priceMap = Object.fromEntries(tickers.map((t, i) => [t, prices[i]]));
   await sql`select update_posts_prices_batch(${JSON.stringify(priceMap)}::jsonb)`;
+  // 수익률이 바뀌었으니 레벨 점수도 갱신 (최고점만 올라감 — db/migrations/0003_user_levels.sql)
+  await sql`select refresh_level_points()`;
   const postsUpdated = posts.filter(
     (p) => priceMap[(p.ticker ?? '').toString().toUpperCase()] !== undefined && Number(p.initial_price ?? 0) > 0,
   ).length;

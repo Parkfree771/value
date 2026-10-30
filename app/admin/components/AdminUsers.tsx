@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Card from '@/components/Card';
+import { InlineLoading } from '@/components/loading/Loading';
 
 interface User {
   id: string;
@@ -52,9 +53,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
   // Loading state
   if (loading) {
     return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin h-12 w-12 border-2 border-[var(--theme-border-muted)] border-t-[var(--theme-accent)]" />
-      </div>
+      <InlineLoading />
     );
   }
 
@@ -91,7 +90,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
           <button
             key={tab.key}
             onClick={() => setFilterTab(tab.key)}
-            className={`px-4 py-2 text-xs font-bold border-2 transition-all ${
+            className={`px-4 py-2 text-xs font-bold border transition-all ${
               filterTab === tab.key
                 ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)] shadow-[2px_2px_0px_var(--theme-accent-dark)]'
                 : 'bg-[var(--theme-bg-card)] text-[var(--foreground)] border-[var(--theme-border-muted)] shadow-[2px_2px_0px_rgba(0,0,0,0.3)] hover:border-[var(--theme-accent)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.3)]'
@@ -154,11 +153,11 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
                   </td>
                   <td className="px-4 py-3">
                     {user.isSuspended ? (
-                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/10 border-2 border-red-500">
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500">
                         정지됨
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-500/10 border-2 border-green-500">
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-500/10 border border-green-500">
                         활성
                       </span>
                     )}
@@ -168,7 +167,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
                       onClick={() =>
                         onToggleSuspend(user.id, user.nickname, user.isSuspended)
                       }
-                      className={`px-3 py-1 text-xs font-bold border-2 transition-all ${
+                      className={`px-3 py-1 text-xs font-bold border transition-all ${
                         user.isSuspended
                           ? 'bg-green-600 text-white border-green-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)]'
                           : 'bg-orange-600 text-white border-orange-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)]'

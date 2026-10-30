@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     title: '이용약관',
     description: 'AntStreet 서비스 이용약관입니다. 서비스 이용 조건, 투자 리포트 작성 규정, 면책 조항 등을 확인하세요.',
     url: `${SITE_URL}/terms`,
-    images: [{ url: '/og-v2.jpg', width: 1200, height: 630, alt: 'AntStreet' }],
+    images: [{ url: '/api/og/site', width: 1200, height: 630, alt: 'AntStreet' }],
   },
   alternates: {
     canonical: `${SITE_URL}/terms`,
@@ -21,7 +21,7 @@ export default function TermsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <Card className="p-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">이용약관</h1>
+        <h1 className="headline text-3xl font-bold mb-8">이용약관</h1>
 
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
           <section>

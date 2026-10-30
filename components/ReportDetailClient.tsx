@@ -7,7 +7,8 @@ import Card from '@/components/Card';
 import Button from '@/components/Button';
 import { OpinionBadge } from '@/components/Badge';
 import ShareButtons from '@/components/ShareButtons';
-import UserBadgeInline from '@/components/UserBadgeInline';
+import UserLevelInline from '@/components/UserLevelInline';
+import { shortStockName } from '@/utils/reportDisplay';
 
 // recharts 번들이 무거우므로 lazy load (스켈레톤은 차트 카드 높이 유지)
 const PriceChart = dynamic(() => import('@/components/PriceChart'), {
@@ -225,13 +226,13 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 제목 + 메타 정보 (전체 너비) */}
       <div className="mb-4 sm:mb-6">
-        <h1 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 leading-tight">
+        <h1 className="headline text-lg sm:text-2xl font-bold mb-2 sm:mb-3 leading-tight">
           {report.title}
         </h1>
         <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-400 flex-wrap">
           <span className="font-medium text-gray-700 dark:text-gray-300 inline-flex items-center gap-1">
-            <UserBadgeInline badgeId={report.equippedBadgeId} nickname={report.author} size={24} />
             {report.author}
+            <UserLevelInline points={report.levelPoints} />
           </span>
           <span>{report.createdAt}</span>
           <span>조회 {report.views}</span>
@@ -247,7 +248,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
             {/* 1행: 종목명 · 티커 · 거래소 · 의견배지 | 수익률 */}
             <div className="flex items-center justify-between p-3 sm:px-4 sm:py-3">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0 flex-wrap">
-                <span className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white truncate max-w-[35vw] sm:max-w-[360px]">{report.stockName}</span>
+                <span className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white">{shortStockName(report.stockName, report.ticker)}</span>
                 <span className="font-mono text-[10px] sm:text-xs text-gray-400">{report.ticker}</span>
                 {report.stockData?.exchange && (
                   <span className={report.stockData.exchange === 'CRYPTO' ? 'text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 font-medium' : 'text-[10px] sm:text-xs text-gray-400'}>
@@ -322,13 +323,13 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
               <>
                 <button
                   onClick={handleEdit}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs sm:text-sm transition-all"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs sm:text-sm transition-all"
                 >
                   수정
                 </button>
                 <button
                   onClick={handleDelete}
-                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs sm:text-sm transition-all"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs sm:text-sm transition-all"
                 >
                   삭제
                 </button>
@@ -337,10 +338,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
             {/* 일반 버튼 */}
             <button
               onClick={handleLike}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm transition-all ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-sm text-xs sm:text-sm transition-all ${
                 isLiked
-                  ? 'bg-blue-500/10 text-[var(--theme-accent)] border-2 border-[var(--theme-accent)]'
-                  : 'border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-gray-600 dark:text-gray-400'
+                  ? 'bg-blue-500/10 text-[var(--theme-accent)] border border-[var(--theme-accent)]'
+                  : 'border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-gray-600 dark:text-gray-400'
               }`}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 20 20">
@@ -353,10 +354,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                 if (!user) { alert('로그인이 필요합니다.'); router.push('/login'); return; }
                 toggleBookmark(report.id);
               }}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm transition-all ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-sm text-xs sm:text-sm transition-all ${
                 isBookmarked(report.id)
-                  ? 'bg-yellow-500/10 text-yellow-600 border-2 border-yellow-500'
-                  : 'border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)]'
+                  ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500'
+                  : 'border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)]'
               }`}
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill={isBookmarked(report.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -373,7 +374,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                   alert('링크가 복사되었습니다.');
                 }
               }}
-              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs sm:text-sm transition-all"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs sm:text-sm transition-all"
             >
               <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -489,7 +490,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                   const ext = fileName.split('.').pop()?.toLowerCase() || '';
 
                   return (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
+                    <div key={index} className="flex items-center justify-between p-3 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <svg className="w-6 h-6 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -530,7 +531,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                   {comments.filter(c => !c.parentId).map((comment) => (
                     <div key={comment.id}>
                       {/* 부모 댓글 */}
-                      <div className="p-3 sm:p-4 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
+                      <div className="p-3 sm:p-4 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
                         <div className="flex items-center justify-between mb-2">
                           <div className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white truncate">{comment.author}</div>
                           <div className="flex items-center gap-2">
@@ -676,7 +677,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
 
                       {/* 대댓글 (자식 댓글) */}
                       {comments.filter(c => c.parentId === comment.id).map((reply) => (
-                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 rounded-lg bg-[var(--theme-bg)] border-2 border-[var(--theme-border-muted)] border-l-2 border-l-[var(--theme-accent)]">
+                        <div key={reply.id} className="ml-3 sm:ml-6 mt-2 p-3 sm:p-4 rounded-sm bg-[var(--theme-bg)] border border-[var(--theme-border-muted)] border-l-2 border-l-[var(--theme-accent)]">
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-xs font-bold truncate">{reply.author}</div>
                             <div className="flex items-center gap-2">
@@ -856,10 +857,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
               <div className="space-y-2">
                 <button
                   onClick={handleLike}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm text-sm font-bold transition-all ${
                     isLiked
-                      ? 'border-2 border-[var(--theme-accent)] bg-blue-500/10 text-[var(--theme-accent)]'
-                      : 'border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
+                      ? 'border border-[var(--theme-accent)] bg-blue-500/10 text-[var(--theme-accent)]'
+                      : 'border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
                   }`}
                 >
                   <svg className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} stroke={isLiked ? "none" : "currentColor"} viewBox="0 0 20 20">
@@ -872,10 +873,10 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                     if (!user) { alert('로그인이 필요합니다.'); router.push('/login'); return; }
                     toggleBookmark(report.id);
                   }}
-                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold transition-all ${
+                  className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm text-sm font-bold transition-all ${
                     isBookmarked(report.id)
-                      ? 'border-2 border-yellow-500 bg-yellow-500/10 text-yellow-600'
-                      : 'border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
+                      ? 'border border-yellow-500 bg-yellow-500/10 text-yellow-600'
+                      : 'border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)]'
                   }`}
                 >
                   <svg className="w-5 h-5" fill={isBookmarked(report.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -892,7 +893,7 @@ export default function ReportDetailClient({ report, relatedReports }: ReportDet
                       alert('링크가 복사되었습니다.');
                     }
                   }}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)] text-sm font-bold transition-all"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] hover:text-[var(--theme-accent)] text-sm font-bold transition-all"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
