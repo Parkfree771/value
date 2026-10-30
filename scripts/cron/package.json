@@ -1,0 +1,8 @@
+{
+  "name": "antstreet-cron",
+  "private": true,
+  "description": "GitHub Actions price-cron 전용 의존성 — 사이트 전체 npm install 없이 이것만 설치",
+  "dependencies": {
+    "@neondatabase/serverless": "1.2.0"
+  }
+}

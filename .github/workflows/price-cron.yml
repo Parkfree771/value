@@ -66,8 +66,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # 스크립트는 @neondatabase/serverless 하나만 씀 — 전체 npm ci 대신 그것만 설치
-      - run: npm install --no-save --no-package-lock @neondatabase/serverless@1
+          cache: npm
+          cache-dependency-path: scripts/cron/package-lock.json
+      # 스크립트 의존성은 scripts/cron/package.json 에만 (@neondatabase/serverless 하나).
+      # 루트에서 npm install 하면 사이트 전체 의존성을 풀어 80초씩 걸렸음.
+      - run: npm ci --prefix scripts/cron --no-audit --no-fund
       - name: Run
         env:
           SCHEDULE: ${{ github.event.schedule }}
