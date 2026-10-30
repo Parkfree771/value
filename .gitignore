@@ -3,6 +3,8 @@
 # dependencies
 /node_modules
 /scripts/cron/node_modules
+/scripts/news/node_modules
+/scripts/news/out
 /.pnp
 .pnp.js
 .yarn/install-state.gz

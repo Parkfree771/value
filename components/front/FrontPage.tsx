@@ -246,6 +246,9 @@ function BriefingColumn({ briefing }: { briefing: Briefing | null }) {
               </li>
             ))}
           </ol>
+          <Link href="/briefing" className="mt-2 inline-block text-xs font-bold hover:underline">
+            {briefing.issues.length}개 전체 보기 →
+          </Link>
         </>
       ) : (
         <p className="mt-2 text-sm text-[var(--theme-ink-soft)]">

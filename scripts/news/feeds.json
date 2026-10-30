@@ -1,0 +1,29 @@
+{
+  "settings": {
+    "maxAgeHours": 24
+  },
+  "feeds": [
+    {"name": "Bloomberg (Markets)", "url": "https://feeds.bloomberg.com/markets/news.rss"},
+    {"name": "Bloomberg (Technology)", "url": "https://feeds.bloomberg.com/technology/news.rss"},
+    {"name": "WSJ (Markets)", "url": "https://feeds.content.dowjones.io/public/rss/RSSMarketsMain"},
+    {"name": "WSJ (World)", "url": "https://feeds.content.dowjones.io/public/rss/RSSWorldNews"},
+    {"name": "WSJ (Tech)", "url": "https://feeds.content.dowjones.io/public/rss/RSSWSJD"},
+    {"name": "CNBC (Top)", "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"},
+    {"name": "CNBC (World)", "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100727362"},
+    {"name": "MarketWatch (Top)", "url": "https://feeds.marketwatch.com/marketwatch/topstories"},
+    {"name": "MarketWatch (Markets)", "url": "https://feeds.marketwatch.com/marketwatch/marketpulse"},
+    {"name": "FT (Home)", "url": "https://www.ft.com/rss/home"},
+    {"name": "FT (Markets)", "url": "https://www.ft.com/markets?format=rss"},
+    {"name": "NYT (Business)", "url": "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml"},
+    {"name": "CNN (Business)", "url": "http://rss.cnn.com/rss/money_latest.rss"},
+    {"name": "Fox Business", "url": "https://moxie.foxbusiness.com/google-publisher/latest.xml"},
+    {"name": "Seeking Alpha", "url": "https://seekingalpha.com/market_currents.xml"},
+    {"name": "Yahoo Finance", "url": "https://finance.yahoo.com/news/rssindex"},
+    {"name": "Nasdaq", "url": "https://www.nasdaq.com/feed/rssoutbound"},
+    {"name": "BBC (Business)", "url": "https://feeds.bbci.co.uk/news/business/rss.xml"},
+    {"name": "BBC (World)", "url": "https://feeds.bbci.co.uk/news/world/rss.xml"},
+    {"name": "The Economist (Finance)", "url": "https://www.economist.com/finance-and-economics/rss.xml"},
+    {"name": "Guardian (Business)", "url": "https://www.theguardian.com/uk/business/rss"},
+    {"name": "Reuters (via Google News)", "url": "https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&ceid=US:en&hl=en-US&gl=US"}
+  ]
+}

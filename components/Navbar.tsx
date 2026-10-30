@@ -19,6 +19,7 @@ const DATELINE = new Intl.DateTimeFormat('ko-KR', {
 const SECTIONS: { href: string; label: string; match?: string[] }[] = [
   { href: '/', label: '홈' },
   { href: '/ranking', label: '랭킹' },
+  { href: '/briefing', label: '모닝 브리핑' },
   { href: '/search', label: '종목 검색' },
   { href: '/guru-tracker', label: '구루 포트폴리오', match: ['/portfolio'] },
   { href: '/indicators', label: '경제지표' },

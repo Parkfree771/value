@@ -40,3 +40,14 @@ npx tsx scripts/<파일명>.ts
 거래소 현지 기준 "마지막으로 마감된 거래일"(`shared.mjs lastSessionDate`)로 저장하고, 장중이면 쓰지 않는다(`isMarketOpen`).
 예비 실행이 같은 날짜를 다시 써도 값이 같아 안전하다.
 `local-price-updater.ts` 계열은 PC `.bat` 호환용 백업 경로. GitHub Actions `price-cron`만으로 충분.
+
+## 모닝 브리핑 (`news/`)
+
+GitHub Actions **`news-briefing`** (`.github/workflows/news-briefing.yml`)이 매일 05:40 KST(예비 06:40 · 08:00)에 `news/run.mjs` 실행.
+
+1. `collect.mjs` — `feeds.json`의 해외 메이저 매체 22곳 RSS, 최근 24시간
+2. `prompts.mjs` — Claude(Claude Code CLI, `CLAUDE_CODE_OAUTH_TOKEN` 구독 토큰)가 경제 이슈 10개 선정·새로 작성 → `briefing/briefing.json` + `briefing/archive/{날짜}.json` → 사이트 `/briefing`
+   (프롬프트는 project7/news-bots 원문 그대로 — 선정 기준은 손대지 말 것)
+3. 그중 가장 핫한 5개 → `render.mjs`가 카드 5장(1080×1350) + 같은 5장 릴스(1080×1920, 15.5초) + 캡션 → `instagram/{날짜}/` (게시는 직접)
+
+로컬 미리보기: `node --env-file=.env scripts/news/run.mjs --dry-run` → `scripts/news/out/{날짜}/` (업로드 없음)
