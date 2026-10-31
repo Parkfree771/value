@@ -32,8 +32,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
  *  릴스는 위 200px · 아래 330px 를 비운다 (인스타 화면 글자·버튼이 덮는 자리). */
 function cardHtml({ card, n, reel, theme }) {
   const s = reel
-    ? { h: 1920, pad: '200px 96px 330px', brand: 120, num: 120, title: 92, body: 44 }
-    : { h: 1350, pad: '72px 96px 96px', brand: 104, num: 104, title: 84, body: 40 };
+    ? { h: 1920, pad: '200px 96px 330px', brand: 120, num: 120, title: 72, body: 44 }
+    : { h: 1350, pad: '72px 96px 96px', brand: 104, num: 104, title: 64, body: 40 };
   return `<!doctype html><html data-theme="${theme}"><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --paper: #fff; --ink: #111; --ink2: #3a3a3a; }
