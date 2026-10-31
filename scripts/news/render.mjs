@@ -14,7 +14,7 @@ import puppeteer from 'puppeteer-core';
 const run = promisify(execFile);
 
 const FONTS =
-  'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;900&family=Noto+Serif+Display:wdth,wght@70,800&display=block';
+  'https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@900&family=Noto+Sans+KR:wght@500;900&family=Noto+Serif+Display:wdth,wght@70,800&display=block';
 
 const CHROME_CANDIDATES = [
   process.env.CHROME_PATH,
@@ -32,19 +32,20 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
  *  릴스는 위 200px · 아래 330px 를 비운다 (인스타 화면 글자·버튼이 덮는 자리). */
 function cardHtml({ card, n, reel, theme }) {
   const s = reel
-    ? { h: 1920, pad: '200px 96px 330px', brand: 120, num: 120, title: 72, body: 44 }
-    : { h: 1350, pad: '72px 96px 96px', brand: 104, num: 104, title: 64, body: 40 };
+    ? { h: 1920, pad: '190px 84px 330px', brand: 150, num: 40, title: 80, body: 46 }
+    : { h: 1350, pad: '64px 84px 84px', brand: 128, num: 36, title: 72, body: 42 };
+  // 사이트와 같은 문법: 가운데 제호 + 이중 괘선, 오렌지 번호, 명조 제목, 고딕 본문
   return `<!doctype html><html data-theme="${theme}"><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root { --paper: #fff; --ink: #111; --ink2: #3a3a3a; }
-  :root[data-theme='dark'] { --paper: #0c0b0a; --ink: #f3eee4; --ink2: #bdb6aa; }
+  :root { --paper: #fff; --ink: #111; --ink2: #222; --hair: #dedede; --orange: #d9560b; }
+  :root[data-theme='dark'] { --paper: #0c0b0a; --ink: #f3eee4; --ink2: #e4ded3; --hair: #34302b; --orange: #fb923c; }
   body { background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; word-break: keep-all; }
   .page { --k: 1; width: 1080px; height: ${s.h}px; padding: ${s.pad}; display: flex; flex-direction: column; }
-  .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${s.brand}px; line-height: 1; letter-spacing: -0.01em; text-align: center; }
-  .num { font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.num}px * var(--k)); line-height: 1; margin-bottom: ${reel ? 40 : 32}px; }
+  .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${s.brand}px; line-height: 0.95; letter-spacing: -0.01em; text-align: center; padding-bottom: ${reel ? 26 : 22}px; border-bottom: 9px double var(--ink); }
   .main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-  .title { font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.title}px * var(--k)); line-height: 1.25; letter-spacing: -0.025em; text-wrap: balance; }
-  .body { margin-top: ${reel ? 64 : 52}px; font-family: 'Noto Serif KR', serif; font-weight: 500; font-size: calc(${s.body}px * var(--k)); line-height: 1.75; color: var(--ink2); }
+  .num { font-family: 'Noto Sans KR', sans-serif; font-weight: 900; font-size: ${s.num}px; line-height: 1; letter-spacing: 0.12em; color: var(--orange); }
+  .title { margin-top: ${reel ? 30 : 24}px; font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.title}px * var(--k)); line-height: 1.24; letter-spacing: -0.03em; text-wrap: balance; }
+  .body { margin-top: ${reel ? 48 : 40}px; padding-top: ${reel ? 48 : 40}px; border-top: 2px solid var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 500; font-size: calc(${s.body}px * var(--k)); line-height: 1.62; letter-spacing: -0.01em; color: var(--ink2); }
   </style></head><body><div class="page">
     <div class="brand">AntStreet</div>
     <div class="main">
