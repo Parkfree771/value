@@ -1,7 +1,7 @@
 // 모닝 브리핑 배치 — 매일 새벽 GitHub Actions (news-briefing.yml)
 //   1) 해외 메이저 매체 RSS 수집 (최근 24시간)
 //   2) Claude 가 중요도 판단 → 경제 이슈 10개를 자기 말로 새로 작성 → 사이트 (briefing/briefing.json)
-//   3) 그중 가장 핫한 5개 → 인스타 캐러셀(표지 + 카드 5장) + 세로 릴스 + 캡션 → Neon Storage instagram/{날짜}/
+//   3) 그중 가장 핫한 5개 → 인스타 카드 5장 + 같은 카드로 세로 릴스 + 캡션 → Neon Storage instagram/{날짜}/
 //
 //   node scripts/news/run.mjs              # 오늘(KST) 이미 발행됐으면 건너뜀
 //   node scripts/news/run.mjs --force      # 그래도 다시 발행
@@ -21,7 +21,7 @@ const args = new Set(process.argv.slice(2));
 const force = args.has('--force');
 const dryRun = args.has('--dry-run');
 const skipInsta = args.has('--skip-insta');
-// 카드·릴스 지면 — light(흰 지면) | dark(먹색 · 골드) | both(light 를 올리고 dark 는 out/dark 에 비교용으로만)
+// 카드·릴스 지면 — light(흰 지면) | dark(먹색) | both(light 를 올리고 dark 는 out/dark 에 비교용으로만)
 const theme = ['light', 'dark', 'both'].includes(process.env.INSTA_THEME) ? process.env.INSTA_THEME : 'light';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -82,25 +82,24 @@ if (!dryRun) {
   note(`사이트 발행: ${SITE_URL}/briefing`);
 }
 
-// ─── 3. 인스타 표지 + 카드 5장 + 릴스 + 캡션 ───
+// ─── 3. 인스타 카드 5장 + 릴스 + 캡션 ───
 if (!skipInsta) {
-  console.log('\n[3/3] 인스타 표지 · 카드 5장 · 릴스 · 캡션');
+  console.log('\n[3/3] 인스타 카드 5장 · 릴스 · 캡션');
   const hooks = parseJsonObject(await callClaude(buildHooksPrompt(briefing), 'instagram-cards'));
   const cards = (hooks.cards || [])
     .filter((c) => c && c.headline && c.summary && issues[c.index - 1])
     .slice(0, 5)
-    .map((c) => ({ ...c, figure: cleanFigure(c.figure), covered_by: issues[c.index - 1].covered_by }));
+    .map((c) => ({ ...c, covered_by: issues[c.index - 1].covered_by }));
   if (cards.length !== 5) throw new Error(`카드가 ${cards.length}장 — 응답 확인`);
 
   const caption = (await callClaude(buildCaptionPrompt(cards, today.dot, `${SITE_URL}/briefing`), 'instagram-caption'))
     .replace(/^```[a-z]*\n?|```$/g, '').trim();
 
-  const coverHook = hooks.cover_hook || cards[0].headline;
-  const files = await renderInstagram({ cards, coverHook, dateDot: today.dot, outDir, theme: theme === 'dark' ? 'dark' : 'light' });
+  const files = await renderInstagram({ cards, outDir, theme: theme === 'dark' ? 'dark' : 'light' });
   if (theme === 'both') {
     const darkDir = join(outDir, 'dark');
     mkdirSync(darkDir, { recursive: true });
-    await renderInstagram({ cards, coverHook, dateDot: today.dot, outDir: darkDir, theme: 'dark' });
+    await renderInstagram({ cards, outDir: darkDir, theme: 'dark' });
     note('비교용 다크 지면: out/dark (업로드 안 함)');
   }
   writeFileSync(join(outDir, 'caption.txt'), caption + '\n');
@@ -110,17 +109,15 @@ if (!skipInsta) {
   if (!dryRun) {
     const prefix = `instagram/${today.ymd}`;
     const urls = [];
-    const coverUrl = await putObject(`${prefix}/cover.png`, readFileSync(files.cover), 'image/png');
     for (let i = 0; i < files.cards.length; i++) {
       urls.push(await putObject(`${prefix}/card-${i + 1}.png`, readFileSync(files.cards[i]), 'image/png'));
     }
     const reelUrl = await putObject(`${prefix}/reel.mp4`, readFileSync(files.reel), 'video/mp4');
     const captionUrl = await putObject(`${prefix}/caption.txt`, caption, 'text/plain; charset=utf-8');
-    const manifest = { date: today.ymd, generated_at: now.toISOString(), cover_hook: hooks.cover_hook, cover: coverUrl, cards: cards.map((c, i) => ({ ...c, image: urls[i] })), reel: reelUrl, caption };
+    const manifest = { date: today.ymd, generated_at: now.toISOString(), cover_hook: hooks.cover_hook, cards: cards.map((c, i) => ({ ...c, image: urls[i] })), reel: reelUrl, caption };
     await putObject(`${prefix}/manifest.json`, JSON.stringify(manifest), 'application/json; charset=utf-8');
     note('');
     note('### 인스타 (직접 게시)');
-    note(`- 표지: ${coverUrl}`);
     urls.forEach((u, i) => note(`- 카드 ${i + 1}: ${u}`));
     note(`- 릴스: ${reelUrl}`);
     note(`- 캡션: ${captionUrl}`);
@@ -132,12 +129,6 @@ if (!skipInsta) {
 }
 
 writeSummary();
-
-/** 카드 큰 숫자 — 모양이 이상하면 빼고 그린다 */
-function cleanFigure(f) {
-  if (!f || typeof f.value !== 'string' || !f.value.trim() || f.value.length > 10) return null;
-  return { value: f.value.trim(), label: String(f.label || '').slice(0, 20), dir: f.dir === 'up' || f.dir === 'down' ? f.dir : '' };
-}
 
 function writeSummary() {
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## 모닝 브리핑 ${today.ymd}\n\n${summary.join('\n')}\n`);

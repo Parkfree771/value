@@ -1,6 +1,6 @@
 'use client';
 
-// 모닝 브리핑 — 관리자에게만 보이는 인스타 게시용 묶음. 표지 + 카드 5장(캐러셀) · 세로 릴스 · 캡션 복사.
+// 모닝 브리핑 — 관리자에게만 보이는 인스타 게시용 묶음. 카드 5장(캐러셀) · 같은 카드 릴스 · 캡션 복사.
 // 휴대폰에서 열어 카드를 길게 눌러 사진첩에 저장 → 인스타 앱에서 바로 게시하는 용도.
 
 import { useEffect, useState } from 'react';
@@ -97,7 +97,7 @@ export default function InstagramKit() {
 
           <div className="grid sm:grid-cols-[200px_1fr] gap-4">
             <div>
-              <p className="text-xs font-bold text-[var(--theme-ink-soft)]">릴스 (세로 · 약 30초)</p>
+              <p className="text-xs font-bold text-[var(--theme-ink-soft)]">릴스 (같은 5장 · 약 23초)</p>
               <video src={manifest.reel} controls playsInline preload="metadata" className="mt-2 w-[50vw] sm:w-full aspect-[9/16] bg-black" />
               <a href={manifest.reel} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-bold hover:underline">
                 영상 파일 열기 →
