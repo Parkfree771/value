@@ -46,7 +46,11 @@ function cardHtml({ card, n, date, reel, theme }) {
   return `<!doctype html><html data-theme="${theme}"><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --paper: #fff; --ink: #111; --ink2: #222; --hair: #dedede; --orange: #d9560b; }
-  :root[data-theme='dark'] { --paper: #0c0b0a; --ink: #f3eee4; --ink2: #e4ded3; --hair: #34302b; --orange: #fb923c; }
+  :root[data-theme='dark'] { --paper: #030303; --ink: #fffaf2; --ink2: #f4efe6; --hair: #34302b; --orange: #ff9b45; }
+  /* 다크 — 거의 검정 바탕 위 글자가 은은하게 빛나 보이게 */
+  :root[data-theme='dark'] .brand, :root[data-theme='dark'] .title, :root[data-theme='dark'] .foot b { text-shadow: 0 0 22px rgba(255, 244, 224, 0.28), 0 0 2px rgba(255, 250, 242, 0.35); }
+  :root[data-theme='dark'] .num { text-shadow: 0 0 28px rgba(255, 155, 69, 0.45); }
+  :root[data-theme='dark'] .body, :root[data-theme='dark'] .foot span { text-shadow: 0 0 14px rgba(255, 244, 224, 0.16); }
   body { background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; word-break: keep-all; }
   .page { --k: 1; width: 1080px; height: ${s.h}px; padding: ${s.pad}; display: flex; flex-direction: column; }
   .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${s.brand}px; line-height: 0.95; letter-spacing: -0.01em; text-align: center; padding-bottom: ${reel ? 26 : 22}px; border-bottom: 9px double var(--ink); }
