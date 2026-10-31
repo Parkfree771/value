@@ -1,6 +1,6 @@
 // 인스타 카드 5장(1080×1350, 캐러셀) + 같은 카드로 세로 릴스(1080×1920 mp4)
 // puppeteer-core + 시스템 Chrome 으로 HTML → PNG, ffmpeg-static 으로 크로스페이드 슬라이드.
-// 모든 장이 같은 형식: 위에 AntStreet, 제목, 내용. 그 밖의 장식은 넣지 않는다.
+// 모든 장이 같은 형식: 위 가운데 AntStreet, 번호, 제목, 내용. 그 밖의 장식은 넣지 않는다.
 // 지면 두 가지: light — 흰 지면 · 잉크 검정 / dark — 먹색 지면 · 아이보리 글자.
 // 기사 사진은 쓰지 않는다 (저작권). 글자만으로 만든다.
 
@@ -30,23 +30,25 @@ const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<
 
 /** 카드(1080×1350)와 릴스(1080×1920)가 같은 지면을 크기만 바꿔 쓴다.
  *  릴스는 위 200px · 아래 330px 를 비운다 (인스타 화면 글자·버튼이 덮는 자리). */
-function cardHtml({ card, reel, theme }) {
+function cardHtml({ card, n, reel, theme }) {
   const s = reel
-    ? { h: 1920, pad: '200px 96px 330px', brand: 64, title: 92, body: 44 }
-    : { h: 1350, pad: '88px 96px 96px', brand: 56, title: 84, body: 40 };
+    ? { h: 1920, pad: '200px 96px 330px', brand: 120, num: 120, title: 92, body: 44 }
+    : { h: 1350, pad: '72px 96px 96px', brand: 104, num: 104, title: 84, body: 40 };
   return `<!doctype html><html data-theme="${theme}"><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --paper: #fff; --ink: #111; --ink2: #3a3a3a; }
   :root[data-theme='dark'] { --paper: #0c0b0a; --ink: #f3eee4; --ink2: #bdb6aa; }
   body { background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; word-break: keep-all; }
   .page { --k: 1; width: 1080px; height: ${s.h}px; padding: ${s.pad}; display: flex; flex-direction: column; }
-  .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${s.brand}px; line-height: 1; letter-spacing: -0.01em; }
+  .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${s.brand}px; line-height: 1; letter-spacing: -0.01em; text-align: center; }
+  .num { font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.num}px * var(--k)); line-height: 1; margin-bottom: ${reel ? 40 : 32}px; }
   .main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
   .title { font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.title}px * var(--k)); line-height: 1.25; letter-spacing: -0.025em; text-wrap: balance; }
   .body { margin-top: ${reel ? 64 : 52}px; font-family: 'Noto Serif KR', serif; font-weight: 500; font-size: calc(${s.body}px * var(--k)); line-height: 1.75; color: var(--ink2); }
   </style></head><body><div class="page">
     <div class="brand">AntStreet</div>
     <div class="main">
+      <div class="num">${String(n).padStart(2, '0')}</div>
       <h1 class="title">${esc(card.headline)}</h1>
       <p class="body">${esc(card.summary)}</p>
     </div>
@@ -82,10 +84,10 @@ export async function renderInstagram({ cards, outDir, theme = 'light' }) {
   try {
     for (let i = 0; i < cards.length; i++) {
       const cardFile = join(outDir, `card-${i + 1}.png`);
-      await shoot(browser, cardHtml({ card: cards[i], reel: false, theme }), 1080, 1350, cardFile);
+      await shoot(browser, cardHtml({ card: cards[i], n: i + 1, reel: false, theme }), 1080, 1350, cardFile);
       cardFiles.push(cardFile);
       const frameFile = join(outDir, `reel-frame-${i + 1}.png`);
-      await shoot(browser, cardHtml({ card: cards[i], reel: true, theme }), 1080, 1920, frameFile);
+      await shoot(browser, cardHtml({ card: cards[i], n: i + 1, reel: true, theme }), 1080, 1920, frameFile);
       frameFiles.push(frameFile);
     }
   } finally {
