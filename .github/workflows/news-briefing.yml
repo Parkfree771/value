@@ -1,5 +1,5 @@
 # 모닝 브리핑 — 해외 매체 RSS → Claude 가 경제 이슈 10개 작성 → 사이트(/briefing) 발행
-#             + 가장 핫한 5개로 인스타 카드 5장 · 릴스 · 캡션 생성 (Neon Storage instagram/{날짜}/, 게시는 직접)
+#             + 가장 핫한 5개로 인스타 표지 + 카드 5장 · 릴스 · 캡션 생성 (Neon Storage instagram/{날짜}/, 게시는 직접)
 # 스크립트: scripts/news/run.mjs
 #
 # 목표 발행 시각은 06:00 KST. GitHub 예약 실행은 몇 시간씩 늦거나 빠지므로 예비 실행을 둔다.

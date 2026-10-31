@@ -48,6 +48,6 @@ GitHub Actions **`news-briefing`** (`.github/workflows/news-briefing.yml`)이 �
 1. `collect.mjs` — `feeds.json`의 해외 메이저 매체 22곳 RSS, 최근 24시간
 2. `prompts.mjs` — Claude(Claude Code CLI, `CLAUDE_CODE_OAUTH_TOKEN` 구독 토큰)가 경제 이슈 10개 선정·새로 작성 → `briefing/briefing.json` + `briefing/archive/{날짜}.json` → 사이트 `/briefing`
    (프롬프트는 project7/news-bots 원문 그대로 — 선정 기준은 손대지 말 것)
-3. 그중 가장 핫한 5개 → `render.mjs`가 카드 5장(1080×1350) + 같은 5장 릴스(1080×1920, 15.5초) + 캡션 → `instagram/{날짜}/` (게시는 직접)
+3. 그중 가장 핫한 5개 → `render.mjs`가 표지 + 카드 5장(1080×1350, 신문 1면 톱 형식) + 세로 릴스(1080×1920, 약 30초) + 캡션 → `instagram/{날짜}/` (게시는 직접)
 
 로컬 미리보기: `node --env-file=.env scripts/news/run.mjs --dry-run` → `scripts/news/out/{날짜}/` (업로드 없음)
