@@ -7,6 +7,7 @@
 //   node scripts/news/run.mjs --force      # 그래도 다시 발행
 //   node scripts/news/run.mjs --dry-run    # 업로드 없이 scripts/news/out/ 에만 (로컬 미리보기)
 //   node scripts/news/run.mjs --skip-insta # 사이트 브리핑만
+//   INSTA_THEME=dark node scripts/news/run.mjs  # 카드·릴스 다크 지면 (light | dark | both)
 
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -20,6 +21,8 @@ const args = new Set(process.argv.slice(2));
 const force = args.has('--force');
 const dryRun = args.has('--dry-run');
 const skipInsta = args.has('--skip-insta');
+// 카드·릴스 지면 — light(흰 지면) | dark(먹색 · 골드) | both(light 를 올리고 dark 는 out/dark 에 비교용으로만)
+const theme = ['light', 'dark', 'both'].includes(process.env.INSTA_THEME) ? process.env.INSTA_THEME : 'light';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const today = kstParts();
@@ -92,7 +95,14 @@ if (!skipInsta) {
   const caption = (await callClaude(buildCaptionPrompt(cards, today.dot, `${SITE_URL}/briefing`), 'instagram-caption'))
     .replace(/^```[a-z]*\n?|```$/g, '').trim();
 
-  const files = await renderInstagram({ cards, coverHook: hooks.cover_hook || cards[0].headline, dateDot: today.dot, outDir });
+  const coverHook = hooks.cover_hook || cards[0].headline;
+  const files = await renderInstagram({ cards, coverHook, dateDot: today.dot, outDir, theme: theme === 'dark' ? 'dark' : 'light' });
+  if (theme === 'both') {
+    const darkDir = join(outDir, 'dark');
+    mkdirSync(darkDir, { recursive: true });
+    await renderInstagram({ cards, coverHook, dateDot: today.dot, outDir: darkDir, theme: 'dark' });
+    note('비교용 다크 지면: out/dark (업로드 안 함)');
+  }
   writeFileSync(join(outDir, 'caption.txt'), caption + '\n');
   writeFileSync(join(outDir, 'cards.json'), JSON.stringify({ cover_hook: hooks.cover_hook, cards }, null, 2));
   cards.forEach((c, i) => note(`카드 ${i + 1}: [${c.tag}] ${c.headline} (원래 ${c.index}번)`));

@@ -26,6 +26,11 @@ on:
         description: '사이트 브리핑만 (인스타 파일 생략)'
         type: boolean
         default: false
+      theme:
+        description: '카드·릴스 지면 — light 흰 지면 · dark 먹색+골드 · both 흰 지면 게시 + 다크 비교본(Artifacts)'
+        type: choice
+        options: [light, dark, both]
+        default: light
       dry_run:
         description: '시험 실행 — 업로드·사이트 갱신 없이 결과물만 (Artifacts 로 받기)'
         type: boolean
@@ -47,6 +52,8 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
       SITE_URL: ${{ secrets.SITE_URL || 'https://antstreet.kr' }}
+      # 예약 실행은 저장소 변수 INSTA_THEME (없으면 light)
+      INSTA_THEME: ${{ inputs.theme || vars.INSTA_THEME || 'light' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

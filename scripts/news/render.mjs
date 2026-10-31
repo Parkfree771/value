@@ -1,7 +1,8 @@
 // 인스타 캐러셀 6장(표지 + 이슈 5장, 1080×1350) + 세로 릴스(1080×1920 mp4)
 // puppeteer-core + 시스템 Chrome 으로 HTML → PNG, ffmpeg-static 으로 크로스페이드 슬라이드.
 // 디자인은 신문 1면 문법: 마스트헤드 · 이중 괘선 · 섹션 키커 · 큰 명조 헤드라인 · 핵심 숫자 · 명조 본문.
-// 색은 잉크 검정 하나에 포인트만 AntStreet 오렌지, 숫자 방향은 사이트와 같은 빨강(상승)·파랑(하락).
+// 지면 두 가지: light — 흰 지면 · 잉크 검정 · 포인트 AntStreet 오렌지 / dark — 먹색 지면 · 아이보리 글자 · 샴페인 골드.
+// 숫자 방향은 사이트와 같은 빨강(상승)·파랑(하락).
 // 기사 사진은 쓰지 않는다 (저작권). 글자만으로 만든다.
 
 import { execFile } from 'node:child_process';
@@ -46,15 +47,19 @@ function sourcesLine(coveredBy) {
 
 const BASE_CSS = `
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root { --paper: #fbfaf7; --ink: #111; --ink2: #2b2b2b; --mute: #6e6e6e; --hair: #d9d5cc; --orange: #d9560b; --up: #b8322a; --down: #2b5ba8; }
+  :root { --paper: #fbfaf7; --ink: #111; --ink2: #2b2b2b; --mute: #6e6e6e; --hair: #d9d5cc; --rule: #111; --accent: #d9560b; --up: #b8322a; --down: #2b5ba8; --panel: #f1eee7;
+    --o-bg: #111; --o-fg: #fff; --o-accent: #f2a26b; --o-mute: #aaa; }
+  /* 다크 — 먹색 바탕 · 아이보리 글자 · 샴페인 골드 포인트 */
+  :root[data-theme='dark'] { --paper: #0c0b0a; --ink: #f3eee4; --ink2: #d6d0c4; --mute: #8e877b; --hair: #2c2925; --rule: #c9a86a; --accent: #c9a86a; --up: #e2675b; --down: #6f9fe6; --panel: #171512;
+    --o-bg: #0c0b0a; --o-fg: #f3eee4; --o-accent: #c9a86a; --o-mute: #8e877b; }
   body { background: var(--paper); color: var(--ink); font-family: 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased; word-break: keep-all; }
   .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; letter-spacing: -0.01em; line-height: 1; }
   .serif { font-family: 'Noto Serif KR', serif; text-wrap: balance; }
   .page { position: relative; display: flex; flex-direction: column; background: var(--paper); }
-  .double { border-top: 4px solid var(--ink); }
-  .double::after { content: ''; display: block; margin-top: 5px; border-top: 1px solid var(--ink); }
+  .double { border-top: 4px solid var(--rule); }
+  .double::after { content: ''; display: block; margin-top: 5px; border-top: 1px solid var(--rule); }
   .hair { border-top: 1px solid var(--hair); }
-  .kicker { font-size: 26px; font-weight: 900; letter-spacing: 0.08em; color: var(--orange); }
+  .kicker { font-size: 26px; font-weight: 900; letter-spacing: 0.08em; color: var(--accent); }
   .spacer { flex: 1; }
   .foot { display: flex; justify-content: space-between; align-items: baseline; padding-top: 20px; border-top: 1px solid var(--ink); font-size: 23px; color: var(--mute); }
   .foot b { color: var(--ink); font-weight: 700; letter-spacing: 0.02em; }
@@ -84,8 +89,8 @@ function storyCss(reel) {
   .rule { margin-top: ${s.gap}px; }
   .body { margin-top: ${s.gap - 6}px; font-family: 'Noto Serif KR', serif; font-weight: 500; font-size: calc(${s.body}px * var(--k)); line-height: 1.72; color: var(--ink2); }
   .page { --k: 1; }
-  .next { display: flex; align-items: baseline; gap: 18px; margin-bottom: 26px; padding: 22px 26px; background: #f1eee7; }
-  .next .k { flex: none; font-size: 22px; font-weight: 900; letter-spacing: 0.08em; color: var(--orange); }
+  .next { display: flex; align-items: baseline; gap: 18px; margin-bottom: 26px; padding: 22px 26px; background: var(--panel); }
+  .next .k { flex: none; font-size: 22px; font-weight: 900; letter-spacing: 0.08em; color: var(--accent); }
   .next .t { text-wrap: balance; font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: ${reel ? 32 : 29}px; line-height: 1.4; color: var(--ink); }
   .hide .reveal { opacity: 0; }
   .progress { position: absolute; left: 84px; right: 84px; top: 110px; display: flex; gap: 10px; }
@@ -131,14 +136,14 @@ function coverHtml({ cards, coverHook, dates, reel = false }) {
   return `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>${BASE_CSS}
   .page { width: 1080px; height: ${reel ? 1920 : 1350}px; padding: ${s.pad}; }
   .top { display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); font-size: 22px; font-weight: 700; letter-spacing: 0.02em; }
-  .top span:last-child { color: var(--orange); }
+  .top span:last-child { color: var(--accent); }
   .mast { text-align: center; font-size: ${s.mast}px; margin-top: ${reel ? 44 : 26}px; }
   .sub { text-align: center; margin: ${reel ? 18 : 12}px 0 ${reel ? 22 : 16}px; font-size: 22px; font-weight: 700; letter-spacing: 0.42em; color: var(--ink2); }
   .lead-k { margin-top: ${s.gap}px; }
   .lead { margin-top: 14px; font-size: ${s.lead}px; line-height: 1.22; font-weight: 900; letter-spacing: -0.025em; }
   .idx { list-style: none; margin-top: ${s.gap}px; border-top: 1px solid var(--ink); }
   .idx li { display: flex; align-items: baseline; gap: 22px; padding: ${reel ? 28 : 20}px 0; border-bottom: 1px solid var(--hair); }
-  .idx .n { flex: none; width: 40px; font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: ${s.item + 6}px; color: var(--orange); }
+  .idx .n { flex: none; width: 40px; font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: ${s.item + 6}px; color: var(--accent); }
   .idx .t { text-wrap: balance; flex: 1; font-family: 'Noto Serif KR', serif; font-weight: 700; font-size: ${s.item}px; line-height: 1.38; }
   .idx .k { flex: none; font-size: 20px; font-weight: 700; color: var(--mute); letter-spacing: 0.04em; }
   </style></head><body><div class="page">
@@ -157,14 +162,14 @@ function coverHtml({ cards, coverHook, dates, reel = false }) {
 /** 릴스 마지막 장 — 사이트로 */
 function outroHtml({ dates }) {
   return `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>${BASE_CSS}
-  .page { width: 1080px; height: 1920px; padding: 0 84px; justify-content: center; align-items: center; text-align: center; background: var(--ink); color: #fff; }
+  .page { width: 1080px; height: 1920px; padding: 0 84px; justify-content: center; align-items: center; text-align: center; background: var(--o-bg); color: var(--o-fg); }
   .brand { font-size: 150px; }
-  .rule { width: 520px; margin: 40px 0; border-top: 4px solid #fff; }
-  .rule::after { content: ''; display: block; margin-top: 5px; border-top: 1px solid #fff; }
-  .k { font-size: 30px; font-weight: 900; letter-spacing: 0.1em; color: #f2a26b; }
+  .rule { width: 520px; margin: 40px 0; border-top: 4px solid var(--o-accent); }
+  .rule::after { content: ''; display: block; margin-top: 5px; border-top: 1px solid var(--o-accent); }
+  .k { font-size: 30px; font-weight: 900; letter-spacing: 0.1em; color: var(--o-accent); }
   .t { margin-top: 22px; font-size: 64px; line-height: 1.3; font-weight: 900; }
-  .u { margin-top: 56px; font-size: 52px; font-weight: 700; padding: 18px 40px; border: 2px solid #fff; }
-  .d { margin-top: 30px; font-size: 26px; color: #aaa; }
+  .u { margin-top: 56px; font-size: 52px; font-weight: 700; padding: 18px 40px; border: 2px solid var(--o-fg); }
+  .d { margin-top: 30px; font-size: 26px; color: var(--o-mute); }
   </style></head><body><div class="page">
     <div class="brand">AntStreet</div>
     <div class="rule"></div>
@@ -175,8 +180,9 @@ function outroHtml({ dates }) {
   </div></body></html>`;
 }
 
-async function shoot(browser, html, width, height, file) {
+async function shoot(browser, html, width, height, file, theme) {
   const page = await browser.newPage();
+  html = html.replace('<html>', `<html data-theme="${theme}">`);
   await page.setViewport({ width, height, deviceScaleFactor: 1 });
   await page.setContent(html, { waitUntil: 'networkidle0', timeout: 60_000 });
   await page.evaluate(() => document.fonts.ready);
@@ -192,9 +198,10 @@ async function shoot(browser, html, width, height, file) {
 }
 
 /**
+ * @param theme 'light'(흰 지면) | 'dark'(먹색 지면 · 골드)
  * @returns {{ cover: string, cards: string[], reel: string }} 로컬 파일 경로 — 캐러셀은 cover 다음 cards 순서
  */
-export async function renderInstagram({ cards, coverHook, dateDot, outDir }) {
+export async function renderInstagram({ cards, coverHook, dateDot, outDir, theme = 'light' }) {
   const executablePath = CHROME_CANDIDATES.find((p) => existsSync(p));
   if (!executablePath) throw new Error('Chrome 을 찾을 수 없음 (CHROME_PATH 로 지정)');
   const browser = await puppeteer.launch({ executablePath, headless: true, args: ['--no-sandbox', '--font-render-hinting=none'] });
@@ -205,25 +212,25 @@ export async function renderInstagram({ cards, coverHook, dateDot, outDir }) {
   // 릴스: [파일, 초] — 표지 → (헤드라인만 → 본문까지) × 5 → 사이트 안내
   const segments = [];
   try {
-    await shoot(browser, coverHtml({ cards, coverHook, dates }), 1080, 1350, cover);
+    await shoot(browser, coverHtml({ cards, coverHook, dates }), 1080, 1350, cover, theme);
     const reelCover = join(outDir, 'reel-cover.png');
-    await shoot(browser, coverHtml({ cards, coverHook, dates, reel: true }), 1080, 1920, reelCover);
+    await shoot(browser, coverHtml({ cards, coverHook, dates, reel: true }), 1080, 1920, reelCover, theme);
     segments.push([reelCover, 3.2]);
 
     for (let i = 0; i < total; i++) {
       const n = i + 1;
       const cardFile = join(outDir, `card-${n}.png`);
-      await shoot(browser, storyHtml({ card: cards[i], next: cards[i + 1], n, total, dates }), 1080, 1350, cardFile);
+      await shoot(browser, storyHtml({ card: cards[i], next: cards[i + 1], n, total, dates }), 1080, 1350, cardFile, theme);
       cardFiles.push(cardFile);
       const a = join(outDir, `reel-${n}a.png`);
       const b = join(outDir, `reel-${n}b.png`);
-      await shoot(browser, storyHtml({ card: cards[i], next: cards[i + 1], n, total, dates, reel: true, hidden: true }), 1080, 1920, a);
-      await shoot(browser, storyHtml({ card: cards[i], next: cards[i + 1], n, total, dates, reel: true }), 1080, 1920, b);
+      await shoot(browser, storyHtml({ card: cards[i], next: cards[i + 1], n, total, dates, reel: true, hidden: true }), 1080, 1920, a, theme);
+      await shoot(browser, storyHtml({ card: cards[i], next: cards[i + 1], n, total, dates, reel: true }), 1080, 1920, b, theme);
       segments.push([a, 1.4], [b, 4.2]);
     }
 
     const outro = join(outDir, 'reel-outro.png');
-    await shoot(browser, outroHtml({ dates }), 1080, 1920, outro);
+    await shoot(browser, outroHtml({ dates }), 1080, 1920, outro, theme);
     segments.push([outro, 2.8]);
   } finally {
     await browser.close();
