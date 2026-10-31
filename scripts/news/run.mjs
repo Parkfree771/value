@@ -1,7 +1,7 @@
 // 모닝 브리핑 배치 — 매일 새벽 GitHub Actions (news-briefing.yml)
 //   1) 해외 메이저 매체 RSS 수집 (최근 24시간)
 //   2) Claude 가 중요도 판단 → 경제 이슈 10개를 자기 말로 새로 작성 → 사이트 (briefing/briefing.json)
-//   3) 그중 가장 핫한 5개 → 인스타 카드 5장 + 같은 카드로 세로 릴스 + 캡션 → Neon Storage instagram/{날짜}/
+//   3) 그중 가장 핫한 5개 → 인스타 카드 5장 + 사이트 안내 1장 + 같은 6장으로 세로 릴스 + 캡션 → Neon Storage instagram/{날짜}/
 //
 //   node scripts/news/run.mjs              # 오늘(KST) 이미 발행됐으면 건너뜀
 //   node scripts/news/run.mjs --force      # 그래도 다시 발행
@@ -89,7 +89,7 @@ if (!skipInsta) {
   const cards = (hooks.cards || [])
     .filter((c) => c && c.headline && c.summary && issues[c.index - 1])
     .slice(0, 5)
-    .map((c) => ({ ...c, covered_by: issues[c.index - 1].covered_by }));
+    .map((c) => ({ ...c, ...cleanMove(c), covered_by: issues[c.index - 1].covered_by }));
   if (cards.length !== 5) throw new Error(`카드가 ${cards.length}장 — 응답 확인`);
 
   const caption = (await callClaude(buildCaptionPrompt(cards, today.dot, `${SITE_URL}/briefing`), 'instagram-caption'))
@@ -112,13 +112,15 @@ if (!skipInsta) {
     for (let i = 0; i < files.cards.length; i++) {
       urls.push(await putObject(`${prefix}/card-${i + 1}.png`, readFileSync(files.cards[i]), 'image/png'));
     }
+    const outroUrl = await putObject(`${prefix}/card-6.png`, readFileSync(files.outro), 'image/png');
     const reelUrl = await putObject(`${prefix}/reel.mp4`, readFileSync(files.reel), 'video/mp4');
     const captionUrl = await putObject(`${prefix}/caption.txt`, caption, 'text/plain; charset=utf-8');
-    const manifest = { date: today.ymd, generated_at: now.toISOString(), cover_hook: hooks.cover_hook, cards: cards.map((c, i) => ({ ...c, image: urls[i] })), reel: reelUrl, caption };
+    const manifest = { date: today.ymd, generated_at: now.toISOString(), cover_hook: hooks.cover_hook, cards: cards.map((c, i) => ({ ...c, image: urls[i] })), outro: outroUrl, reel: reelUrl, caption };
     await putObject(`${prefix}/manifest.json`, JSON.stringify(manifest), 'application/json; charset=utf-8');
     note('');
     note('### 인스타 (직접 게시)');
     urls.forEach((u, i) => note(`- 카드 ${i + 1}: ${u}`));
+    note(`- 카드 6 (사이트 안내): ${outroUrl}`);
     note(`- 릴스: ${reelUrl}`);
     note(`- 캡션: ${captionUrl}`);
   }
@@ -129,6 +131,13 @@ if (!skipInsta) {
 }
 
 writeSummary();
+
+/** 헤드라인 색칠 — 방향이 이상하거나 구절이 헤드라인에 없으면 칠하지 않는다 */
+function cleanMove(c) {
+  const move = c.move === 'up' || c.move === 'down' ? c.move : '';
+  const highlight = move && typeof c.highlight === 'string' && c.highlight && c.headline.includes(c.highlight) ? c.highlight : '';
+  return { move: highlight ? move : '', highlight };
+}
 
 function writeSummary() {
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `## 모닝 브리핑 ${today.ymd}\n\n${summary.join('\n')}\n`);

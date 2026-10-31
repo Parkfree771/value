@@ -1,6 +1,6 @@
 'use client';
 
-// 모닝 브리핑 — 관리자에게만 보이는 인스타 게시용 묶음. 카드 5장(캐러셀) · 같은 카드 릴스 · 캡션 복사.
+// 모닝 브리핑 — 관리자에게만 보이는 인스타 게시용 묶음. 카드 5장 + 사이트 안내(캐러셀) · 같은 6장 릴스 · 캡션 복사.
 // 휴대폰에서 열어 카드를 길게 눌러 사진첩에 저장 → 인스타 앱에서 바로 게시하는 용도.
 
 import { useEffect, useState } from 'react';
@@ -16,7 +16,8 @@ interface KitCard {
 interface Manifest {
   date: string;
   cover_hook?: string;
-  cover?: string; // 표지 — 예전 manifest 에는 없음
+  cover?: string; // 표지 — 예전 manifest 에만 있음
+  outro?: string; // 마지막 사이트 안내 장
   cards: KitCard[];
   reel: string;
   caption: string;
@@ -50,11 +51,12 @@ export default function InstagramKit() {
     }
   };
 
-  // 캐러셀 순서 그대로: 표지 → 카드 1~5
+  // 캐러셀 순서 그대로: (예전 표지) → 카드 1~5 → 사이트 안내
   const slides = manifest
     ? [
         ...(manifest.cover ? [{ image: manifest.cover, label: `표지: ${manifest.cover_hook ?? ''}` }] : []),
         ...manifest.cards.map((c, i) => ({ image: c.image, label: `${i + 1}. ${c.headline}` })),
+        ...(manifest.outro ? [{ image: manifest.outro, label: '사이트 안내' }] : []),
       ]
     : [];
 
@@ -97,7 +99,7 @@ export default function InstagramKit() {
 
           <div className="grid sm:grid-cols-[200px_1fr] gap-4">
             <div>
-              <p className="text-xs font-bold text-[var(--theme-ink-soft)]">릴스 (같은 5장 · 약 23초)</p>
+              <p className="text-xs font-bold text-[var(--theme-ink-soft)]">릴스 (같은 6장 · 약 28초)</p>
               <video src={manifest.reel} controls playsInline preload="metadata" className="mt-2 w-[50vw] sm:w-full aspect-[9/16] bg-black" />
               <a href={manifest.reel} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs font-bold hover:underline">
                 영상 파일 열기 →
