@@ -95,11 +95,11 @@ if (!skipInsta) {
   const caption = (await callClaude(buildCaptionPrompt(cards, today.dot, `${SITE_URL}/briefing`), 'instagram-caption'))
     .replace(/^```[a-z]*\n?|```$/g, '').trim();
 
-  const files = await renderInstagram({ cards, outDir, theme: theme === 'dark' ? 'dark' : 'light' });
+  const files = await renderInstagram({ cards, dateDot: today.dot, outDir, theme: theme === 'dark' ? 'dark' : 'light' });
   if (theme === 'both') {
     const darkDir = join(outDir, 'dark');
     mkdirSync(darkDir, { recursive: true });
-    await renderInstagram({ cards, outDir: darkDir, theme: 'dark' });
+    await renderInstagram({ cards, dateDot: today.dot, outDir: darkDir, theme: 'dark' });
     note('비교용 다크 지면: out/dark (업로드 안 함)');
   }
   writeFileSync(join(outDir, 'caption.txt'), caption + '\n');

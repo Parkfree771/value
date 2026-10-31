@@ -1,6 +1,6 @@
 // 인스타 카드 5장(1080×1350, 캐러셀) + 같은 카드로 세로 릴스(1080×1920 mp4)
 // puppeteer-core + 시스템 Chrome 으로 HTML → PNG, ffmpeg-static 으로 크로스페이드 슬라이드.
-// 모든 장이 같은 형식: 위 가운데 AntStreet, 번호, 제목, 내용. 그 밖의 장식은 넣지 않는다.
+// 모든 장이 같은 형식: 위 가운데 AntStreet, 번호, 제목, 내용, 아래 날짜 · antstreet.kr.
 // 지면 두 가지: light — 흰 지면 · 잉크 검정 / dark — 먹색 지면 · 아이보리 글자.
 // 기사 사진은 쓰지 않는다 (저작권). 글자만으로 만든다.
 
@@ -28,13 +28,21 @@ const CHROME_CANDIDATES = [
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+/** '2026.10.31' → '2026년 10월 31일 토요일' */
+function dateLong(dateDot) {
+  const [y, m, d] = dateDot.split('.').map(Number);
+  return `${y}년 ${m}월 ${d}일 ${WEEKDAYS[new Date(Date.UTC(y, m - 1, d)).getUTCDay()]}요일`;
+}
+
 /** 카드(1080×1350)와 릴스(1080×1920)가 같은 지면을 크기만 바꿔 쓴다.
  *  릴스는 위 200px · 아래 330px 를 비운다 (인스타 화면 글자·버튼이 덮는 자리). */
-function cardHtml({ card, n, reel, theme }) {
+function cardHtml({ card, n, date, reel, theme }) {
   const s = reel
-    ? { h: 1920, pad: '190px 84px 330px', brand: 150, num: 40, title: 80, body: 46 }
-    : { h: 1350, pad: '64px 84px 84px', brand: 128, num: 36, title: 72, body: 42 };
-  // 사이트와 같은 문법: 가운데 제호 + 이중 괘선, 오렌지 번호, 명조 제목, 고딕 본문
+    ? { h: 1920, pad: '190px 84px 330px', brand: 150, num: 170, title: 82, body: 46, top: 120 }
+    : { h: 1350, pad: '64px 84px 64px', brand: 128, num: 150, title: 76, body: 42, top: 72 };
+  // 사이트와 같은 문법: 가운데 제호 + 이중 괘선, 큰 오렌지 번호, 명조 제목, 고딕 본문, 아래 괘선 + 날짜 · 주소(제호 글꼴)
   return `<!doctype html><html data-theme="${theme}"><head><meta charset="utf-8"><link rel="stylesheet" href="${FONTS}"><style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --paper: #fff; --ink: #111; --ink2: #222; --hair: #dedede; --orange: #d9560b; }
@@ -42,10 +50,12 @@ function cardHtml({ card, n, reel, theme }) {
   body { background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; word-break: keep-all; }
   .page { --k: 1; width: 1080px; height: ${s.h}px; padding: ${s.pad}; display: flex; flex-direction: column; }
   .brand { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${s.brand}px; line-height: 0.95; letter-spacing: -0.01em; text-align: center; padding-bottom: ${reel ? 26 : 22}px; border-bottom: 9px double var(--ink); }
-  .main { flex: 1; display: flex; flex-direction: column; justify-content: center; }
-  .num { font-family: 'Noto Sans KR', sans-serif; font-weight: 900; font-size: ${s.num}px; line-height: 1; letter-spacing: 0.12em; color: var(--orange); }
-  .title { margin-top: ${reel ? 30 : 24}px; font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.title}px * var(--k)); line-height: 1.24; letter-spacing: -0.03em; text-wrap: balance; }
+  .main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: ${s.top / 2}px 0 ${s.top * 1.6}px; } /* 가운데보다 살짝 위 */
+  .num { font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.num}px * var(--k)); line-height: 0.9; letter-spacing: -0.02em; color: var(--orange); }
+  .title { margin-top: ${reel ? 40 : 32}px; font-family: 'Noto Serif KR', serif; font-weight: 900; font-size: calc(${s.title}px * var(--k)); line-height: 1.24; letter-spacing: -0.03em; text-wrap: balance; }
   .body { margin-top: ${reel ? 48 : 40}px; padding-top: ${reel ? 48 : 40}px; border-top: 2px solid var(--ink); font-family: 'Noto Sans KR', sans-serif; font-weight: 500; font-size: calc(${s.body}px * var(--k)); line-height: 1.62; letter-spacing: -0.01em; color: var(--ink2); }
+  .foot { display: flex; justify-content: space-between; align-items: baseline; padding-top: ${reel ? 26 : 22}px; border-top: 9px double var(--ink); font-family: 'Noto Serif KR', serif; font-size: ${reel ? 30 : 27}px; font-weight: 900; color: var(--ink2); }
+  .foot b { font-family: 'Noto Serif Display', serif; font-weight: 800; font-stretch: 70%; font-variation-settings: 'wdth' 70; font-size: ${reel ? 46 : 42}px; line-height: 1; letter-spacing: -0.005em; color: var(--ink); }
   </style></head><body><div class="page">
     <div class="brand">AntStreet</div>
     <div class="main">
@@ -53,6 +63,7 @@ function cardHtml({ card, n, reel, theme }) {
       <h1 class="title">${esc(card.headline)}</h1>
       <p class="body">${esc(card.summary)}</p>
     </div>
+    <footer class="foot"><span>${esc(date)}</span><b>antstreet.kr</b></footer>
   </div></body></html>`;
 }
 
@@ -76,7 +87,8 @@ async function shoot(browser, html, width, height, file) {
  * @param theme 'light'(흰 지면) | 'dark'(먹색 지면)
  * @returns {{ cards: string[], reel: string }} 로컬 파일 경로
  */
-export async function renderInstagram({ cards, outDir, theme = 'light' }) {
+export async function renderInstagram({ cards, dateDot, outDir, theme = 'light' }) {
+  const date = dateLong(dateDot);
   const executablePath = CHROME_CANDIDATES.find((p) => existsSync(p));
   if (!executablePath) throw new Error('Chrome 을 찾을 수 없음 (CHROME_PATH 로 지정)');
   const browser = await puppeteer.launch({ executablePath, headless: true, args: ['--no-sandbox', '--font-render-hinting=none'] });
@@ -85,10 +97,10 @@ export async function renderInstagram({ cards, outDir, theme = 'light' }) {
   try {
     for (let i = 0; i < cards.length; i++) {
       const cardFile = join(outDir, `card-${i + 1}.png`);
-      await shoot(browser, cardHtml({ card: cards[i], n: i + 1, reel: false, theme }), 1080, 1350, cardFile);
+      await shoot(browser, cardHtml({ card: cards[i], n: i + 1, date, reel: false, theme }), 1080, 1350, cardFile);
       cardFiles.push(cardFile);
       const frameFile = join(outDir, `reel-frame-${i + 1}.png`);
-      await shoot(browser, cardHtml({ card: cards[i], n: i + 1, reel: true, theme }), 1080, 1920, frameFile);
+      await shoot(browser, cardHtml({ card: cards[i], n: i + 1, date, reel: true, theme }), 1080, 1920, frameFile);
       frameFiles.push(frameFile);
     }
   } finally {
