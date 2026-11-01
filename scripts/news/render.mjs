@@ -72,13 +72,13 @@ function frameHtml({ s, reel, theme, main, footRight }) {
   </div></body></html>`;
 }
 
-/** 헤드라인에서 상승·하락 구절만 색칠 — ▲ 초록 상승 · ▼ 파랑 하락 */
+/** 헤드라인에서 상승·하락 구절만 색칠 (초록 상승 · 파랑 하락) */
 function titleHtml(card) {
   const h = String(card.headline ?? '');
   const hl = card.highlight;
   const at = hl && (card.move === 'up' || card.move === 'down') ? h.indexOf(hl) : -1;
   if (at < 0) return esc(h);
-  return `${esc(h.slice(0, at))}<span class="${card.move}">${card.move === 'up' ? '▲' : '▼'}${esc(hl)}</span>${esc(h.slice(at + hl.length))}`;
+  return `${esc(h.slice(0, at))}<span class="${card.move}">${esc(hl)}</span>${esc(h.slice(at + hl.length))}`;
 }
 
 /** 이슈 한 장 — 번호 · 제목 · 본문 자리가 고정돼 있어 글 길이가 달라도 위치가 같다.
