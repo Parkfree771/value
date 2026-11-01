@@ -5,6 +5,7 @@ import { PortfolioHolding } from '@/lib/sec13f/types';
 import { formatShares, formatUsd } from '@/lib/sec13f/format';
 import { returnColorClass } from '@/components/front/ranking';
 import { shortStockName } from '@/utils/reportDisplay';
+import TrendIcon from '@/components/TrendIcon';
 
 type FilterStatus = 'ALL' | 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM' | 'BUY_ALL' | 'SELL_ALL';
 type SortType = 'default' | 'weightChange';
@@ -78,16 +79,15 @@ function WeightBar({ holding, scale }: { holding: PortfolioHolding; scale: numbe
   );
 }
 
-/** 이번 분기에 한 일을 말로 — 비중이 함께 움직였으면 비중 변화, 아니면 주식 수 변화 */
-function actionLabel(h: PortfolioHolding, delta: number): string {
-  if (h.status === 'NEW BUY') return '신규매수';
-  if (h.status === 'SOLD OUT') return '전량매도';
-  if (delta !== 0) return `${Math.abs(delta).toFixed(2)}%p ${delta > 0 ? '늘림' : '줄임'}`;
-  if (h.status === 'ADD' || h.status === 'TRIM') {
-    const verb = h.status === 'ADD' ? '늘림' : '줄임';
-    return h.shares_change_pct ? `주식 ${Math.abs(h.shares_change_pct).toFixed(1)}% ${verb}` : verb;
-  }
-  return '유지';
+/** 이번 분기에 한 일 — 비중이 함께 움직였으면 비중 변화, 아니면 주식 수 변화 */
+function ActionLabel({ holding: h, delta }: { holding: PortfolioHolding; delta: number }) {
+  if (h.status === 'NEW BUY' || h.status === 'SOLD OUT' || h.status === 'HOLD') return <>{STATUS_LABEL[h.status]}</>;
+  const shares = h.shares_change_pct ? `주식 ${Math.abs(h.shares_change_pct).toFixed(1)}%` : '주식';
+  return (
+    <span className="font-mono tabular-nums">
+      <TrendIcon direction={h.status === 'ADD' ? 'up' : 'down'} /> {delta !== 0 ? `${Math.abs(delta).toFixed(2)}%p` : shares}
+    </span>
+  );
 }
 
 function filingPrice(h: PortfolioHolding): string {
@@ -217,7 +217,9 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
                     )}
                     <span className="text-[15px] font-black">{`${h.weight_curr.toFixed(2)}%`}</span>
                   </p>
-                  <p className={`text-xs font-bold ${STATUS_COLOR[h.status]}`}>{actionLabel(h, delta)}</p>
+                  <p className={`text-[13px] font-extrabold ${STATUS_COLOR[h.status]}`}>
+                    <ActionLabel holding={h} delta={delta} />
+                  </p>
                 </div>
                 <span role="cell" className={`${NUM} hidden lg:block`}>{h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}</span>
                 <span role="cell" className={`${NUM} hidden sm:block`}>{h.value_curr > 0 ? formatUsd(h.value_curr) : '—'}</span>
