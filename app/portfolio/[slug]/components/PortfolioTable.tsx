@@ -8,7 +8,7 @@ import { shortStockName } from '@/utils/reportDisplay';
 import TrendIcon from '@/components/TrendIcon';
 
 type FilterStatus = 'ALL' | 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM' | 'BUY_ALL' | 'SELL_ALL';
-type SortType = 'default' | 'weightChange';
+type SortType = 'default' | 'tradeSize';
 
 interface PriceData {
   [ticker: string]: { currentPrice: number; returnRate: number };
@@ -20,7 +20,7 @@ interface PortfolioTableProps {
   showPrices?: boolean; // false면 공시일 가격 · 현재가 · 수익률 숨김 (과거 분기용)
 }
 
-const SORT_LABELS: Record<SortType, string> = { default: '비중순', weightChange: '비중 변화순' };
+const SORT_LABELS: Record<SortType, string> = { default: '비중순', tradeSize: '매매 규모순' };
 const SORT_KEYS = Object.keys(SORT_LABELS) as SortType[];
 
 const STATUS_LABEL: Record<PortfolioHolding['status'], string> = {
@@ -54,39 +54,52 @@ const BAR_UP = 'color-mix(in srgb, var(--color-up) 42%, transparent)';
 const BAR_DOWN = 'color-mix(in srgb, var(--color-down) 38%, transparent)';
 
 /**
- * 막대 구간 — 실제로 사고판 종목만 변화분을 색칠한다.
- * 비중은 주가만으로도 움직이므로 유지 종목이나, 사고판 방향과 비중 변화가 반대인 종목은 현재 비중만 그린다.
+ * 이번 분기 매매 — 주식 수 변화를 분기 말 가격으로 환산한다 (비중 변화는 주가 영향이 섞이므로 쓰지 않는다).
+ * amount: 산 금액(+) · 판 금액(-) / base · change: 막대의 기존 구간과 매매 구간 (비중 %)
  */
-function barParts(h: PortfolioHolding) {
-  const prev = h.weight_prev ?? 0;
-  const curr = h.weight_curr;
-  const bought = (h.status === 'NEW BUY' || h.status === 'ADD') && curr > prev;
-  const sold = (h.status === 'TRIM' || h.status === 'SOLD OUT') && curr < prev;
-  if (bought) return { base: prev, change: curr - prev, color: BAR_UP, delta: curr - prev };
-  if (sold) return { base: curr, change: prev - curr, color: BAR_DOWN, delta: curr - prev };
-  return { base: curr, change: 0, color: BAR_BASE, delta: 0 };
+function tradeOf(h: PortfolioHolding) {
+  const prevShares = h.shares_prev ?? 0;
+  if (h.status === 'NEW BUY') return { amount: h.value_curr, base: 0, change: h.weight_curr };
+  if (h.status === 'SOLD OUT') return { amount: -(h.value_prev ?? 0), base: 0, change: h.weight_prev ?? 0 };
+  if (h.status === 'HOLD' || h.shares_curr <= 0) return { amount: 0, base: h.weight_curr, change: 0 };
+
+  const ratio = Math.abs(h.shares_curr - prevShares) / h.shares_curr; // 현재 보유분 대비 매매 수량
+  const amount = (h.shares_curr - prevShares) * (h.value_curr / h.shares_curr);
+  const change = h.weight_curr * ratio;
+  return h.status === 'ADD'
+    ? { amount, base: Math.max(0, h.weight_curr - change), change: Math.min(change, h.weight_curr) }
+    : { amount, base: h.weight_curr, change };
 }
 
 function WeightBar({ holding, scale }: { holding: PortfolioHolding; scale: number }) {
-  const { base, change, color } = barParts(holding);
+  const { base, change, amount } = tradeOf(holding);
   // 제곱근 눈금 — 비중이 1% 안팎인 종목도 길이가 보이도록
   const reach = (v: number) => Math.sqrt(v / scale) * 100;
   return (
     <div aria-hidden="true" className="absolute inset-0 -z-10 flex">
       <span style={{ width: `${reach(base)}%`, background: BAR_BASE }} />
-      {change > 0 && <span style={{ width: `${reach(base + change) - reach(base)}%`, background: color }} />}
+      {change > 0 && <span style={{ width: `${reach(base + change) - reach(base)}%`, background: amount > 0 ? BAR_UP : BAR_DOWN }} />}
     </div>
   );
 }
 
-/** 이번 분기에 한 일 — 비중이 함께 움직였으면 비중 변화, 아니면 주식 수 변화 */
-function ActionLabel({ holding: h, delta }: { holding: PortfolioHolding; delta: number }) {
-  if (h.status === 'NEW BUY' || h.status === 'SOLD OUT' || h.status === 'HOLD') return <>{STATUS_LABEL[h.status]}</>;
-  const shares = h.shares_change_pct ? `주식 ${Math.abs(h.shares_change_pct).toFixed(1)}%` : '주식';
+const TRADE_LABEL: Record<PortfolioHolding['status'], string> = {
+  'NEW BUY': '신규매수',
+  ADD: '매수',
+  HOLD: '유지',
+  TRIM: '매도',
+  'SOLD OUT': '전량매도',
+};
+
+/** 이번 분기에 사고판 금액 */
+function TradeLabel({ holding }: { holding: PortfolioHolding }) {
+  const { amount } = tradeOf(holding);
+  if (amount === 0) return <>{TRADE_LABEL[holding.status]}</>;
   return (
-    <span className="font-mono tabular-nums">
-      <TrendIcon direction={h.status === 'ADD' ? 'up' : 'down'} /> {delta !== 0 ? `${Math.abs(delta).toFixed(2)}%p` : shares}
-    </span>
+    <>
+      <TrendIcon direction={amount > 0 ? 'up' : 'down'} /> <span className="font-mono tabular-nums">{formatUsd(Math.abs(amount))}</span>{' '}
+      {TRADE_LABEL[holding.status]}
+    </>
   );
 }
 
@@ -136,15 +149,14 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
   const filtered = useMemo(() => {
     const list = holdings.filter(matches[filter]);
     if (sortType === 'default') return list;
-    const change = (h: PortfolioHolding) => (h.status === 'HOLD' ? 0 : Math.abs(h.weight_curr - (h.weight_prev ?? 0)));
-    return [...list].sort((a, b) => change(b) - change(a));
+    return [...list].sort((a, b) => Math.abs(tradeOf(b).amount) - Math.abs(tradeOf(a).amount));
     // matches 는 상수 조건이라 filter 만 보면 된다
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [holdings, filter, sortType]);
 
   // 막대 길이 기준 — 필터를 바꿔도 같은 비중이면 같은 길이
   const scale = useMemo(
-    () => Math.max(1, ...holdings.map((h) => Math.max(h.weight_curr, h.weight_prev ?? 0))),
+    () => Math.max(1, ...holdings.map((h) => tradeOf(h).base + tradeOf(h).change)),
     [holdings],
   );
   const grid = showPrices ? GRID_PRICES : GRID_PLAIN;
@@ -176,8 +188,8 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
       {/* 막대 범례 */}
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--theme-ink-soft)]">
         <span>막대는 비중</span>
-        <span className="inline-flex items-center gap-1"><i className="inline-block h-2.5 w-4" style={{ background: BAR_UP }} />이번 분기에 늘린 만큼</span>
-        <span className="inline-flex items-center gap-1"><i className="inline-block h-2.5 w-4" style={{ background: BAR_DOWN }} />이번 분기에 줄인 만큼</span>
+        <span className="inline-flex items-center gap-1"><i className="inline-block h-2.5 w-4" style={{ background: BAR_UP }} />이번 분기에 산 만큼</span>
+        <span className="inline-flex items-center gap-1"><i className="inline-block h-2.5 w-4" style={{ background: BAR_DOWN }} />이번 분기에 판 만큼</span>
       </div>
 
       {filtered.length === 0 ? (
@@ -198,8 +210,6 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
           {filtered.map((h, i) => {
             const sold = h.status === 'SOLD OUT';
             const current = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
-            const { delta } = barParts(h);
-            const moved = delta !== 0 && h.status !== 'NEW BUY'; // 전 분기 비중이 있을 때만 "이전 → 지금"
             return (
               <div key={h.cusip} role="row" className={`${ROW} ${grid} min-h-[3rem] border-b border-[var(--theme-border-muted)] py-1`}>
                 <span role="cell" className="font-mono text-xs tabular-nums text-[var(--theme-ink-soft)]">{i + 1}</span>
@@ -209,16 +219,9 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
                   <p className="truncate text-xs text-[var(--theme-ink-soft)]">{shortStockName(h.name_of_issuer, h.ticker ?? undefined)}</p>
                 </div>
                 <div role="cell" title={STATUS_LABEL[h.status]} className="text-right whitespace-nowrap">
-                  <p className="font-mono tabular-nums">
-                    {moved && (
-                      <span className="text-xs text-[var(--theme-ink-soft)]">
-                        {(h.weight_prev ?? 0).toFixed(2)}% →{' '}
-                      </span>
-                    )}
-                    <span className="text-[15px] font-black">{`${h.weight_curr.toFixed(2)}%`}</span>
-                  </p>
+                  <p className="font-mono text-[15px] font-black tabular-nums">{h.weight_curr > 0 ? `${h.weight_curr.toFixed(2)}%` : '—'}</p>
                   <p className={`text-[13px] font-extrabold ${STATUS_COLOR[h.status]}`}>
-                    <ActionLabel holding={h} delta={delta} />
+                    <TradeLabel holding={h} />
                   </p>
                 </div>
                 <span role="cell" className={`${NUM} hidden lg:block`}>{h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}</span>
