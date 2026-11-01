@@ -145,17 +145,28 @@ ${(issue.leads || []).map((l) => `- ${l}`).join("\n")}
 - "~습니다" 체로 씁니다.
 
 ## 출력
-조사를 마친 뒤 마지막에 아래 JSON 만 출력하세요. 다른 텍스트 없이:
-
-{
-  "status": "ok | unverified",
-  "headline": "헤드라인",
-  "summary": "요약 2~3문장",
-  "sources": [{ "title": "자료 이름", "url": "실제로 열어 확인한 주소" }]
+조사를 마치면 지정된 구조로 답하세요.
+- status: 확인되면 "ok", 충분히 확인되지 않으면 "unverified".
+- sources: 조사에서 실제로 확인한 자료의 이름(title)과 전체 주소(url)를 2개 이상. **이 배열을 비우면 기사가 버려집니다.** 없는 주소를 지어내면 안 됩니다.`;
 }
 
-sources 는 실제로 확인한 자료만 2개 이상 적으세요. 없는 주소를 지어내면 안 됩니다.`;
-}
+export const ISSUE_SCHEMA = {
+  type: "object",
+  required: ["status", "headline", "summary", "sources"],
+  properties: {
+    status: { type: "string", enum: ["ok", "unverified"] },
+    headline: { type: "string" },
+    summary: { type: "string" },
+    sources: {
+      type: "array",
+      items: {
+        type: "object",
+        required: ["title", "url"],
+        properties: { title: { type: "string" }, url: { type: "string" } },
+      },
+    },
+  },
+};
 
 // ─── 2) 인스타 카드 5장 카피 (project7 apps/2.instagram/rewrite_hooks.js 기반, 10개 → 가장 핫한 5개) ───
 export function buildHooksPrompt(briefing) {

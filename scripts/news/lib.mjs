@@ -24,11 +24,15 @@ const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
 const RESEARCH_IDLE_TIMEOUT_MS = 12 * 60 * 1000;
 const WEB_TOOLS = 'WebSearch,WebFetch';
 
-function callClaudeOnce(prompt, research) {
+function callClaudeOnce(prompt, research, schema) {
   return new Promise((resolve, reject) => {
     const idleLimit = research ? RESEARCH_IDLE_TIMEOUT_MS : IDLE_TIMEOUT_MS;
     const tools = research ? ['--tools', WEB_TOOLS, '--allowedTools', WEB_TOOLS] : ['--tools', ''];
-    const args = ['-p', '--output-format', 'text', '--model', process.env.CLAUDE_MODEL || 'opus', ...tools, '--no-session-persistence'];
+    // schema 를 주면 CLI 가 검증한 결과만 받는다. Windows 는 shell 을 거치므로 인자를 한 번 더 감싼다
+    const output = schema
+      ? ['--output-format', 'json', '--json-schema', process.platform === 'win32' ? JSON.stringify(JSON.stringify(schema)) : JSON.stringify(schema)]
+      : ['--output-format', 'text'];
+    const args = ['-p', ...output, '--model', process.env.CLAUDE_MODEL || 'opus', ...tools, '--no-session-persistence'];
     const proc = spawn('claude', args, { shell: process.platform === 'win32', stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     let err = '';
@@ -52,13 +56,15 @@ function callClaudeOnce(prompt, research) {
   });
 }
 
-export async function callClaude(prompt, label, { attempts = 2, research = false } = {}) {
+export async function callClaude(prompt, label, { attempts = 2, research = false, schema = null } = {}) {
   for (let i = 1; i <= attempts; i++) {
     try {
       const t = Date.now();
-      const text = await callClaudeOnce(prompt, research);
-      console.log(`[claude] ${label}: ${((Date.now() - t) / 1000).toFixed(1)}s`);
-      return text;
+      const text = await callClaudeOnce(prompt, research, schema);
+      const reply = schema ? JSON.parse(text) : null;
+      if (schema && !reply.structured_output) throw new Error(`구조화 결과 없음: ${text.slice(0, 300)}`);
+      console.log(`[claude] ${label}: ${((Date.now() - t) / 1000).toFixed(1)}s${reply ? ` · ${reply.num_turns}턴` : ''}`);
+      return schema ? reply.structured_output : text;
     } catch (e) {
       console.warn(`[claude] ${label} 시도 ${i}/${attempts} 실패: ${e.message}`);
       if (i === attempts) throw e;

@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { collect } from './collect.mjs';
 import { callClaude, getPublicJson, kstLabel, kstParts, parseJsonObject, putObject, revalidate, SITE_URL } from './lib.mjs';
-import { buildCaptionPrompt, buildHooksPrompt, buildIssuePrompt, buildRankPrompt } from './prompts.mjs';
+import { buildCaptionPrompt, buildHooksPrompt, buildIssuePrompt, buildRankPrompt, ISSUE_SCHEMA } from './prompts.mjs';
 import { renderInstagram } from './render.mjs';
 
 const args = new Set(process.argv.slice(2));
@@ -160,7 +160,8 @@ async function writeIssues(candidates) {
 async function writeIssue(candidate, rank) {
   const label = `issue-${rank + 1}`;
   try {
-    const r = parseJsonObject(await callClaude(buildIssuePrompt(candidate, today.dot), label, { research: true }));
+    const r = await callClaude(buildIssuePrompt(candidate, today.dot), label, { research: true, schema: ISSUE_SCHEMA });
+    writeFileSync(join(outDir, `${label}.json`), JSON.stringify({ candidate, result: r }, null, 2));
     const sources = (Array.isArray(r.sources) ? r.sources : []).filter((s) => /^https?:\/\//.test(s?.url ?? ''));
     if (r.status !== 'ok' || !r.headline?.trim() || !r.summary?.trim() || sources.length < MIN_SOURCES) {
       note(`제외 ${rank + 1}위: ${candidate.event} (status=${r.status}, 출처 ${sources.length}개)`);
