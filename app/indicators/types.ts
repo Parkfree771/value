@@ -19,11 +19,10 @@ export interface FredIndicatorConfig {
   nameEn: string;
   description: string;
   unit: string;
-  color: string;
   decimals: number;
   format?: (value: number) => string;
   /** 기준선 (예: 장단기금리차의 0%) */
-  referenceLine?: { value: number; label: string; color: string; strokeWidth?: number };
+  referenceLine?: { value: number; label: string };
   /** true이면 원본 지수 대신 전년 대비 변화율(YoY %)로 표시 */
   yoyChange?: boolean;
 }
@@ -42,10 +41,9 @@ export interface EcosIndicatorConfig {
   nameEn: string;
   description: string;
   unit: string;
-  color: string;
   decimals: number;
   format?: (value: number) => string;
-  referenceLine?: { value: number; label: string; color: string; strokeWidth?: number };
+  referenceLine?: { value: number; label: string };
   yoyChange?: boolean;
 }
 

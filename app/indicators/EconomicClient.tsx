@@ -9,7 +9,6 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-  Brush,
   ReferenceLine,
 } from 'recharts';
 import type { FredIndicatorConfig, FredObservation, FredApiResponse, TimeRange, EcosIndicatorConfig, Country } from './types';
@@ -24,7 +23,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: 'CBOE Volatility Index',
     description: '시장의 공포와 탐욕을 측정하는 변동성 지수. 20 이하면 안정, 30 이상이면 공포 구간.',
     unit: '',
-    color: '#e94560',
     decimals: 2,
   },
   {
@@ -33,9 +31,8 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: '10Y-2Y Treasury Spread',
     description: '10년물과 2년물 국채 금리 차이. 마이너스 전환(역전) 시 경기침체 신호로 해석.',
     unit: '%',
-    color: '#f59e0b',
     decimals: 2,
-    referenceLine: { value: 0, label: '역전 기준선', color: '#f59e0b' },
+    referenceLine: { value: 0, label: '역전 기준선' },
   },
   {
     seriesId: 'UNRATE',
@@ -43,7 +40,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: 'Unemployment Rate',
     description: '미국 실업률. 경기 과열/침체를 판단하는 가장 기본적인 고용 지표.',
     unit: '%',
-    color: '#3b82f6',
     decimals: 1,
   },
   {
@@ -52,7 +48,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: 'PCE Price Index (YoY %)',
     description: '연준(Fed)이 가장 중시하는 인플레이션 지표. 전년 대비 변화율로, 연준 목표치는 2%.',
     unit: '%',
-    color: '#10b981',
     decimals: 1,
     yoyChange: true,
   },
@@ -62,7 +57,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: 'Consumer Price Index (YoY %)',
     description: '소비자가 체감하는 물가 상승률. 뉴스에서 "물가 X% 올랐다"가 이 수치.',
     unit: '%',
-    color: '#8b5cf6',
     decimals: 1,
     yoyChange: true,
   },
@@ -72,7 +66,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: 'M2 Money Supply',
     description: '시중에 풀린 돈의 총량. 증가하면 유동성 확대(돈풀기), 감소하면 긴축.',
     unit: '',
-    color: '#06b6d4',
     decimals: 1,
     format: (v: number) => `$${(v / 1000).toFixed(1)}T`,
   },
@@ -82,7 +75,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: "Moody's Baa Corporate Bond - 10Y Treasury Spread",
     description: 'Baa등급(투자적격 최하단) 회사채와 10년 국채 금리 차이. 평소 2% 내외, 3% 이상이면 주의, 5% 이상이면 위기 수준.',
     unit: '%',
-    color: '#ef4444',
     decimals: 2,
   },
   {
@@ -91,7 +83,6 @@ const INDICATORS: FredIndicatorConfig[] = [
     nameEn: "Moody's Aaa Corporate Bond - 10Y Treasury Spread",
     description: '최우량(Aaa) 회사채와 10년 국채 금리 차이. Baa보다 안정적이나, 이것마저 벌어지면 심각한 금융 불안 신호.',
     unit: '%',
-    color: '#f97316',
     decimals: 2,
   },
 ];
@@ -106,7 +97,6 @@ const KR_INDICATORS: EcosIndicatorConfig[] = [
     nameEn: 'Consumer Price Index',
     description: '소비자가 체감하는 물가 수준. 전년 대비 상승률이 한은 목표치(2%)를 크게 벗어나면 금리 조정 신호.',
     unit: '',
-    color: '#8b5cf6',
     decimals: 1,
     yoyChange: true,
     format: (v: number) => `${v.toFixed(1)}%`,
@@ -118,7 +108,6 @@ const KR_INDICATORS: EcosIndicatorConfig[] = [
     nameEn: 'M2 Money Supply',
     description: '광의통화(M2). 시중 유동성의 크기를 나타내며, 급증 시 인플레이션 압력.',
     unit: '',
-    color: '#06b6d4',
     decimals: 1,
     format: (v: number) => `${(v / 10000).toFixed(0)}조원`,
   },
@@ -129,7 +118,6 @@ const KR_INDICATORS: EcosIndicatorConfig[] = [
     nameEn: 'Producer Price Index',
     description: '기업이 생산한 상품의 출하 시점 가격. CPI의 선행 지표로, PPI 상승 → 소비자물가 상승 압력.',
     unit: '',
-    color: '#a855f7',
     decimals: 1,
     yoyChange: true,
     format: (v: number) => `${v.toFixed(1)}%`,
@@ -141,7 +129,6 @@ const KR_INDICATORS: EcosIndicatorConfig[] = [
     nameEn: 'Current Account Balance',
     description: '무역·서비스·소득 수지의 합계. 흑자가 지속되면 원화 강세 요인, 적자 전환 시 경고 신호.',
     unit: '',
-    color: '#14b8a6',
     decimals: 0,
     format: (v: number) => `${(v / 100).toFixed(1)}억달러`,
   },
@@ -152,7 +139,6 @@ const KR_INDICATORS: EcosIndicatorConfig[] = [
     nameEn: 'Housing Price Index (KB)',
     description: 'KB부동산에서 집계하는 전국 주택매매가격지수. 부동산 시장의 과열·침체를 판단하는 핵심 지표.',
     unit: '',
-    color: '#f43f5e',
     decimals: 1,
   },
   {
@@ -162,9 +148,8 @@ const KR_INDICATORS: EcosIndicatorConfig[] = [
     nameEn: 'Consumer Sentiment Index',
     description: '소비자가 느끼는 경기 체감 지수. 100 이상이면 낙관, 100 미만이면 비관. 소비 지출 전망에 직결.',
     unit: '',
-    color: '#0ea5e9',
     decimals: 0,
-    referenceLine: { value: 100, label: '기준선 (100)', color: '#0ea5e9' },
+    referenceLine: { value: 100, label: '기준선 (100)' },
   },
 ];
 
@@ -328,7 +313,17 @@ function useInView() {
 
 /* ─── 차트 축 폰트 ─── */
 
-const AXIS_FONT = { fontFamily: 'var(--font-body), Inter, sans-serif', fontWeight: 700 };
+const AXIS_TICK = { fontSize: 11, fill: 'var(--theme-ink-soft)' };
+const AXIS_FONT = 'var(--font-body), Inter, sans-serif';
+
+// 차트 색은 사이트 포인트색 하나
+const LINE_COLOR = 'var(--theme-orange)';
+const GUIDE_COLOR = 'var(--theme-ink-soft)';
+const CHART_HEIGHT = 240;
+const X_AXIS_HEIGHT = 30;
+
+const TAB_ACTIVE = 'font-bold text-[var(--foreground)] border-b-2 border-[var(--theme-border)]';
+const TAB_INACTIVE = 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] border-b-2 border-transparent';
 
 /* ─── 커스텀 툴팁 ─── */
 
@@ -343,41 +338,14 @@ const ChartTooltip = memo(function ChartTooltip({ active, payload, label, config
   const formatted = config.format ? config.format(value) : `${value.toFixed(config.decimals)}${config.unit}`;
 
   return (
-    <div
-      className="bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm px-3 py-2"
-      style={{ boxShadow: 'var(--shadow-sm)' }}
-    >
-      <p className="font-heading text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-      <p className="font-heading text-sm font-bold text-[var(--foreground)]">{formatted}</p>
+    <div className="bg-[var(--background)] border border-[var(--theme-border)] px-3 py-2">
+      <p className="text-xs text-[var(--theme-ink-soft)]">{label}</p>
+      <p className="font-mono text-sm font-bold tabular-nums">{formatted}</p>
     </div>
   );
 });
 
-/* ─── 로딩 스켈레톤 ─── */
-
-function SkeletonCard() {
-  return (
-    <div className="card-base p-5 sm:p-7">
-      <div className="animate-pulse space-y-4">
-        <div className="flex justify-between">
-          <div className="space-y-2">
-            <div className="h-5 w-32 bg-[var(--theme-border-muted)]/30 rounded-sm" />
-            <div className="h-4 w-44 bg-[var(--theme-border-muted)]/20 rounded-sm" />
-          </div>
-          <div className="flex gap-1">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-7 w-8 bg-[var(--theme-border-muted)]/20 rounded-sm" />
-            ))}
-          </div>
-        </div>
-        <div className="h-4 w-full bg-[var(--theme-border-muted)]/15 rounded-sm" />
-        <div className="h-[300px] bg-[var(--theme-border-muted)]/10 rounded-sm" />
-      </div>
-    </div>
-  );
-}
-
-/* ─── 지표 카드 ─── */
+/* ─── 지표 한 칸 ─── */
 
 const IndicatorCard = memo(function IndicatorCard({
   config,
@@ -500,7 +468,6 @@ const IndicatorCard = memo(function IndicatorCard({
   const wideYAxis = ['M2SL', '101Y018', '301Y017', '161Y005'].includes(configId);
   const yAxisWidth = wideYAxis ? 72 : 48;
   const tickInterval = Math.max(1, Math.floor(observations.length / 6) - 1);
-  const showBrush = observations.length > 30;
 
   const formatMeasureValue = useCallback((val: number) => {
     return config.format
@@ -534,9 +501,8 @@ const IndicatorCard = memo(function IndicatorCard({
   }, [measureEnabled, observations, yRange, updateMeasure]);
 
   // 차트 영역에서 마우스 Y → 값 변환 (측정 모드 드래그용)
-  const chartHeight = showBrush ? 360 : 300;
   const plotTop = 5; // margin.top
-  const plotBottom = chartHeight - (showBrush ? 35 : 0); // brush 영역 제외
+  const plotBottom = CHART_HEIGHT - X_AXIS_HEIGHT;
 
   const pixelToValue = useCallback((relY: number) => {
     const ratio = (relY - plotTop) / (plotBottom - plotTop);
@@ -578,55 +544,18 @@ const IndicatorCard = memo(function IndicatorCard({
   }, [pixelToValue]);
 
   return (
-    <div
-      ref={ref}
-      className="card-base p-5 sm:p-7 transition-[border-color] duration-200 hover:border-[var(--theme-accent)]"
-      style={{ boxShadow: 'var(--shadow-md)' }}
-    >
-      {/* 헤더 + 기간 버튼 */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-4">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h3 className="font-heading text-base sm:text-lg font-bold text-[var(--foreground)] tracking-wide">
-              {config.name}
-            </h3>
-            {latest && (
-              <span className="font-heading text-xl sm:text-2xl font-bold text-[var(--foreground)]">
-                {latestFormatted}
-              </span>
-            )}
-            {previous && (
-              <span
-                className={`font-heading text-xs sm:text-sm font-bold ${
-                  change >= 0 ? 'text-red-500' : 'text-blue-500'
-                }`}
-              >
-                <TrendIcon direction={change >= 0 ? 'up' : 'down'} />{' '}
-                {config.format
-                  ? config.format(Math.abs(change))
-                  : `${Math.abs(change).toFixed(config.decimals)}${config.unit}`}
-              </span>
-            )}
-          </div>
-          <p className="font-heading text-xs sm:text-sm font-medium text-gray-500 dark:text-gray-400 mt-0.5">
-            {config.nameEn}
-          </p>
-        </div>
-
-        {/* 기간 선택 버튼 + 측정 토글 */}
-        <div className="flex flex-wrap gap-1 flex-shrink-0 items-center">
+    <article ref={ref} className="min-w-0">
+      {/* 지표 이름 + 기간 */}
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b-2 border-[var(--theme-border)] pb-1.5">
+        <h2 className="headline text-[20px] leading-tight" title={config.nameEn}>{config.name}</h2>
+        <div className="flex items-center gap-2.5 text-xs">
           {availableRanges.map((range) => (
             <button
               key={range.key}
               onClick={() => handleRangeChange(range.key)}
               disabled={loading}
-              className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border border-transparent rounded-sm transition-colors duration-100
-                ${
-                  timeRange === range.key
-                    ? 'bg-[var(--theme-accent)] text-white'
-                    : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-control)] hover:border-[var(--theme-border)] hover:text-[var(--foreground)]'
-                }
-                ${loading ? 'opacity-50 cursor-wait' : ''}`}
+              aria-pressed={timeRange === range.key}
+              className={`pb-0.5 ${timeRange === range.key ? TAB_ACTIVE : TAB_INACTIVE} ${loading ? 'opacity-50 cursor-wait' : ''}`}
             >
               {range.label}
             </button>
@@ -634,226 +563,188 @@ const IndicatorCard = memo(function IndicatorCard({
           <button
             onClick={toggleMeasure}
             disabled={loading || observations.length === 0}
-            className={`font-heading text-[11px] sm:text-xs px-2 sm:px-2.5 py-1 sm:py-1.5 font-bold border border-transparent rounded-sm transition-colors duration-100 ml-1
-              ${
-                measureEnabled
-                  ? 'bg-[var(--theme-accent)] text-white'
-                  : 'bg-[var(--theme-bg-card)] text-gray-500 dark:text-gray-400 border-[var(--theme-border-control)] hover:border-[var(--theme-border)] hover:text-[var(--foreground)]'
-              }`}
+            aria-pressed={measureEnabled}
+            className={`ml-1 pb-0.5 ${measureEnabled ? TAB_ACTIVE : TAB_INACTIVE}`}
           >
             측정
           </button>
-          {measureEnabled && (
-            <input
-              type="text"
-              inputMode="decimal"
-              value={measureInput}
-              onFocus={() => setMeasureInput(measureValue.toFixed(config.decimals))}
-              onChange={(e) => {
-                const raw = e.target.value;
-                if (raw === '' || raw === '-' || raw === '.' || raw === '-.') {
-                  setMeasureInput(raw);
-                  return;
-                }
-                if (/^-?\d*\.?\d*$/.test(raw)) {
-                  setMeasureInput(raw);
-                  const val = parseFloat(raw);
-                  if (!isNaN(val)) {
-                    setMeasureValue(Math.max(yRange[0], Math.min(yRange[1], val)));
-                  }
-                }
-              }}
-              onBlur={() => {
-                const val = parseFloat(measureInput);
-                if (isNaN(val) || measureInput === '') {
-                  updateMeasure(0);
-                } else {
-                  updateMeasure(Math.max(yRange[0], Math.min(yRange[1], val)));
-                }
-              }}
-              className="font-mono text-[11px] sm:text-xs w-20 sm:w-24 px-2 py-1 sm:py-1.5 ml-1 border border-[var(--theme-border-muted)] rounded-sm bg-[var(--theme-bg-card)] text-[var(--foreground)] font-bold focus:border-[var(--theme-accent)] focus:outline-none transition-colors"
-              title="측정선 수치 직접 입력"
-            />
-          )}
         </div>
       </div>
 
-      {/* 설명 */}
-      <p className="font-heading text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 leading-relaxed">
-        {config.description}
-      </p>
+      {/* 최신 값 */}
+      <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="font-mono text-[30px] font-black leading-none tabular-nums">{latest ? latestFormatted : '—'}</span>
+        {previous && (
+          <span className={`font-mono text-sm font-bold tabular-nums ${change >= 0 ? 'text-[var(--color-up)]' : 'text-[var(--color-down)]'}`}>
+            <TrendIcon direction={change >= 0 ? 'up' : 'down'} />{' '}
+            {config.format ? config.format(Math.abs(change)) : `${Math.abs(change).toFixed(config.decimals)}${config.unit}`}
+          </span>
+        )}
+        {measureEnabled && (
+          <input
+            type="text"
+            inputMode="decimal"
+            value={measureInput}
+            onFocus={() => setMeasureInput(measureValue.toFixed(config.decimals))}
+            onChange={(e) => {
+              const raw = e.target.value;
+              if (raw === '' || raw === '-' || raw === '.' || raw === '-.') {
+                setMeasureInput(raw);
+                return;
+              }
+              if (/^-?\d*\.?\d*$/.test(raw)) {
+                setMeasureInput(raw);
+                const val = parseFloat(raw);
+                if (!isNaN(val)) {
+                  setMeasureValue(Math.max(yRange[0], Math.min(yRange[1], val)));
+                }
+              }
+            }}
+            onBlur={() => {
+              const val = parseFloat(measureInput);
+              if (isNaN(val) || measureInput === '') {
+                updateMeasure(0);
+              } else {
+                updateMeasure(Math.max(yRange[0], Math.min(yRange[1], val)));
+              }
+            }}
+            className="ml-auto w-24 border-b border-[var(--theme-border)] bg-transparent px-1 py-0.5 text-right font-mono text-xs font-bold focus:outline-none"
+            aria-label="측정선 수치"
+            title="측정선 수치 직접 입력"
+          />
+        )}
+      </div>
+
+      <p className="mt-2 min-h-[2.75em] text-[13px] leading-relaxed text-[var(--theme-ink-soft)] break-keep">{config.description}</p>
 
       {/* 차트 */}
-      {!inView || loading ? (
-        <div className="animate-pulse h-[300px] bg-[var(--theme-border-muted)]/10 rounded-sm" />
-      ) : observations.length === 0 ? (
-        <div className="h-[300px] flex items-center justify-center">
-          <p className="font-heading text-sm font-bold text-gray-400">데이터를 불러올 수 없습니다.</p>
-        </div>
-      ) : (
-        <div
-          ref={chartContainerRef}
-          style={{
-            height: chartHeight,
-            position: 'relative',
-          }}
-        >
-          <ResponsiveContainer>
-            <AreaChart data={observations} margin={{ top: 5, right: 5, left: 0, bottom: showBrush ? 5 : 0 }}>
-              <defs>
-                <linearGradient id={`gradient-${configId}-${timeRange}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={config.color} stopOpacity={0.25} />
-                  <stop offset="95%" stopColor={config.color} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--theme-border-muted)"
-                opacity={0.4}
-              />
-              <XAxis
-                dataKey="date"
-                tick={{ fontSize: 12, ...AXIS_FONT, fill: 'var(--foreground)' }}
-                tickLine={{ stroke: 'var(--theme-border-muted)' }}
-                axisLine={{ stroke: 'var(--theme-border-muted)', strokeWidth: 2 }}
-                tickFormatter={formatXAxis}
-                interval={tickInterval}
-              />
-              <YAxis
-                tick={{ fontSize: 12, ...AXIS_FONT, fill: 'var(--foreground)' }}
-                tickLine={{ stroke: 'var(--theme-border-muted)' }}
-                axisLine={{ stroke: 'var(--theme-border-muted)', strokeWidth: 2 }}
-                width={yAxisWidth}
-                tickFormatter={(v: number) =>
-                  config.format ? config.format(v) : `${v}`
-                }
-                domain={['auto', 'auto']}
-              />
-              <Tooltip content={<ChartTooltip config={config} />} />
-              {config.referenceLine && (
-                <ReferenceLine
-                  y={config.referenceLine.value}
-                  stroke={config.referenceLine.color}
-                  strokeWidth={config.referenceLine.strokeWidth ?? 1.5}
-                  label={{
-                    value: config.referenceLine.label,
-                    position: 'right',
-                    fill: config.referenceLine.color,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: 'var(--font-body), Inter, sans-serif',
-                  }}
-                />
-              )}
-              {/* 측정선: recharts ReferenceLine → 차트 안에서만 표시 + 왼쪽에 숫자 */}
-              {measureEnabled && (
-                <ReferenceLine
-                  y={measureValue}
-                  stroke={config.color}
-                  strokeDasharray="6 4"
-                  strokeWidth={2}
-                  strokeOpacity={0.7}
-                  ifOverflow="hidden"
-                  label={{
-                    value: formatMeasureValue(measureValue),
-                    position: 'left',
-                    fill: config.color,
-                    fontSize: 11,
-                    fontWeight: 700,
-                    fontFamily: 'var(--font-body), Inter, sans-serif',
-                  }}
-                />
-              )}
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke={config.color}
-                strokeWidth={2}
-                fill={`url(#gradient-${configId}-${timeRange})`}
-                dot={false}
-                activeDot={{
-                  r: 5,
-                  stroke: config.color,
-                  strokeWidth: 2,
-                  fill: 'var(--theme-bg-card)',
-                }}
-                isAnimationActive={false}
-              />
-              {showBrush && (
-                <Brush
+      <div className="mt-2" style={{ height: CHART_HEIGHT }}>
+        {!inView || loading ? (
+          <div className="h-full animate-pulse bg-[var(--theme-border-muted)]/10" />
+        ) : observations.length === 0 ? (
+          <p className="flex h-full items-center justify-center text-sm text-[var(--theme-ink-soft)]">데이터를 불러올 수 없습니다.</p>
+        ) : (
+          <div ref={chartContainerRef} className="relative h-full">
+            <ResponsiveContainer>
+              <AreaChart data={observations} margin={{ top: plotTop, right: 16, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id={`gradient-${configId}-${timeRange}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" style={{ stopColor: LINE_COLOR, stopOpacity: 0.18 }} />
+                    <stop offset="95%" style={{ stopColor: LINE_COLOR, stopOpacity: 0 }} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke="var(--theme-border-muted)" />
+                <XAxis
                   dataKey="date"
-                  height={30}
-                  stroke="var(--theme-accent)"
-                  fill="var(--theme-bg)"
-                  travellerWidth={10}
+                  height={X_AXIS_HEIGHT}
+                  tick={AXIS_TICK}
+                  fontFamily={AXIS_FONT}
+                  tickLine={false}
+                  axisLine={{ stroke: 'var(--theme-border-muted)' }}
                   tickFormatter={formatXAxis}
-                >
-                  <AreaChart>
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke={config.color}
-                      fill={config.color}
-                      fillOpacity={0.15}
-                      dot={false}
-                      isAnimationActive={false}
-                    />
-                  </AreaChart>
-                </Brush>
-              )}
-            </AreaChart>
-          </ResponsiveContainer>
+                  interval={tickInterval}
+                />
+                <YAxis
+                  tick={AXIS_TICK}
+                  fontFamily={AXIS_FONT}
+                  tickLine={false}
+                  axisLine={false}
+                  width={yAxisWidth}
+                  tickFormatter={(v: number) => (config.format ? config.format(v) : `${v}`)}
+                  domain={['auto', 'auto']}
+                />
+                <Tooltip content={<ChartTooltip config={config} />} cursor={{ stroke: 'var(--theme-border)', strokeWidth: 1 }} />
+                {config.referenceLine && (
+                  <ReferenceLine
+                    y={config.referenceLine.value}
+                    stroke={GUIDE_COLOR}
+                    strokeDasharray="3 3"
+                    label={{
+                      value: config.referenceLine.label,
+                      position: 'insideTopRight',
+                      fill: GUIDE_COLOR,
+                      fontSize: 11,
+                      fontFamily: AXIS_FONT,
+                    }}
+                  />
+                )}
+                {/* 측정선: 차트 안에서만 표시 + 왼쪽에 숫자 */}
+                {measureEnabled && (
+                  <ReferenceLine
+                    y={measureValue}
+                    stroke="var(--foreground)"
+                    strokeDasharray="6 4"
+                    ifOverflow="hidden"
+                    label={{
+                      value: formatMeasureValue(measureValue),
+                      position: 'insideTopLeft',
+                      fill: 'var(--foreground)',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      fontFamily: AXIS_FONT,
+                    }}
+                  />
+                )}
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke={LINE_COLOR}
+                  strokeWidth={1.75}
+                  fill={`url(#gradient-${configId}-${timeRange})`}
+                  dot={false}
+                  activeDot={{ r: 4, stroke: LINE_COLOR, strokeWidth: 2, fill: 'var(--background)' }}
+                  isAnimationActive={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
 
-          {/* 측정 모드: 차트 위 투명 오버레이 (클릭+드래그로 선 이동) */}
-          {measureEnabled && (
-            <div
-              onMouseDown={handleMeasureStart}
-              onTouchStart={handleMeasureStart}
-              style={{
-                position: 'absolute',
-                top: 0,
-                left: yAxisWidth,
-                right: 0,
-                bottom: showBrush ? 35 : 0,
-                cursor: 'ns-resize',
-                zIndex: 15,
-                touchAction: 'none',
-              }}
-            />
-          )}
-        </div>
-      )}
+            {/* 측정 모드: 차트 위 투명 오버레이 (클릭+드래그로 선 이동) */}
+            {measureEnabled && (
+              <div
+                onMouseDown={handleMeasureStart}
+                onTouchStart={handleMeasureStart}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: yAxisWidth,
+                  right: 0,
+                  bottom: X_AXIS_HEIGHT,
+                  cursor: 'ns-resize',
+                  zIndex: 15,
+                  touchAction: 'none',
+                }}
+              />
+            )}
+          </div>
+        )}
+      </div>
 
-      {/* 마지막 업데이트 */}
-      {latest && !loading && (
-        <div className="mt-2 text-right">
-          <p className="font-heading text-xs font-bold text-gray-400 dark:text-gray-500">
-            최종 데이터: {latest.date}
-          </p>
-          {releasedAt && (
-            <p className="font-heading text-[11px] font-bold text-gray-400 dark:text-gray-500">
-              발표일: {releasedAt.slice(0, 10)}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+      {/* 데이터 기준일 */}
+      <p className="mt-1 min-h-[1.25em] text-right text-[11px] tabular-nums text-[var(--theme-ink-soft)]">
+        {latest && !loading && (
+          <>
+            {latest.date} 기준{releasedAt && ` · ${releasedAt.slice(0, 10)} 발표`}
+          </>
+        )}
+      </p>
+    </article>
   );
 });
 
 /* ─── 메인 컴포넌트 ─── */
 
-const COUNTRY_INFO = {
+const COUNTRY_LABEL: Record<Country, string> = { US: '미국', KR: '한국' };
+const COUNTRIES = Object.keys(COUNTRY_LABEL) as Country[];
+
+const COUNTRY_INFO: Record<Country, { deck: string; source: string; notice: string }> = {
   US: {
-    subtitle: 'FRED 데이터로 보는 미국 핵심 매크로 지표',
-    detail: 'VIX 공포지수, 장단기금리차, 실업률, PCE, CPI, M2 통화량까지.\n투자 판단에 필요한 거시경제 데이터를 한눈에 확인하세요.',
+    deck: '공포지수와 금리차, 물가, 고용, 통화량, 크레딧 스프레드로 미국 경기를 읽습니다.',
     source: 'Federal Reserve Economic Data (FRED), Federal Reserve Bank of St. Louis',
     notice: 'This product uses the FRED® API but is not endorsed or certified by the Federal Reserve Bank of St. Louis.',
   },
   KR: {
-    subtitle: 'ECOS 데이터로 보는 한국 핵심 매크로 지표',
-    detail: '기준금리, 국고채, 실업률, CPI, GDP, M2, 원/달러 환율까지.\n한국 경제의 흐름을 한눈에 확인하세요.',
-    source: '자료: 한국은행 경제통계시스템(ECOS)',
+    deck: '물가와 통화량, 경상수지, 주택가격, 소비심리로 한국 경기를 읽습니다.',
+    source: '한국은행 경제통계시스템(ECOS)',
     notice: '본 서비스는 한국은행 Open API를 활용하며, 한국은행의 공식 인증을 받은 서비스가 아닙니다.',
   },
 };
@@ -863,79 +754,37 @@ export default function EconomicClient() {
   const info = COUNTRY_INFO[country];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-      {/* 히어로 섹션 */}
-      <section
-        className="mb-6 sm:mb-8 bg-ant-red-950 dark:bg-ant-red-950 border border-[var(--theme-border)] rounded-sm p-6 sm:p-8 relative overflow-hidden"
-        style={{ boxShadow: 'var(--shadow-lg)' }}
-      >
-        <div className="relative z-10 text-center">
-          <div className="inline-block mb-2 sm:mb-3 px-4 py-1.5 border border-ant-red-600 dark:border-ant-red-400 bg-ant-red-50 dark:bg-ant-red-950/30 rounded-sm">
-            <span className="font-heading text-xs font-bold tracking-widest text-ant-red-600 dark:text-ant-red-400 uppercase">
-              Economic Dashboard
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-1.5 sm:mb-2 tracking-tight leading-tight text-shadow-md">
-            경제 지표
-          </h1>
-
-          {/* 미국 / 한국 토글 */}
-          <div className="flex justify-center gap-2 mt-3 sm:mt-4 mb-3 sm:mb-4">
-            <button
-              onClick={() => setCountry('US')}
-              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border rounded-sm transition-all duration-150 ${
-                country === 'US'
-                  ? 'bg-white text-ant-red-950 border-white'
-                  : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
-              }`}
-            >
-              미국
-            </button>
-            <button
-              onClick={() => setCountry('KR')}
-              className={`font-heading text-sm sm:text-base px-5 sm:px-6 py-2 sm:py-2.5 font-bold border rounded-sm transition-all duration-150 ${
-                country === 'KR'
-                  ? 'bg-white text-ant-red-950 border-white'
-                  : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
-              }`}
-            >
-              한국
-            </button>
-          </div>
-
-          <p className="font-heading text-sm sm:text-base font-bold text-ant-red-300 tracking-wide">
-            {info.subtitle}
-          </p>
-          <p className="font-heading text-xs sm:text-sm text-gray-400 mt-2 sm:mt-3 max-w-xl mx-auto leading-relaxed whitespace-pre-line">
-            {info.detail}
-          </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b-2 border-[var(--theme-border)] pb-3">
+        <div>
+          <h1 className="headline text-[32px] sm:text-[40px] leading-tight">경제지표</h1>
+          <p className="mt-1 text-sm text-[var(--theme-ink-soft)] break-keep">{info.deck}</p>
         </div>
-      </section>
+        <div className="flex items-center gap-4">
+          {COUNTRIES.map((c) => (
+            <button
+              key={c}
+              onClick={() => setCountry(c)}
+              aria-pressed={country === c}
+              className={`pb-0.5 text-[15px] ${country === c ? TAB_ACTIVE : TAB_INACTIVE}`}
+            >
+              {COUNTRY_LABEL[c]}
+            </button>
+          ))}
+        </div>
+      </header>
 
-      {/* 지표 목록 */}
-      <section className="space-y-4 sm:space-y-6 mb-8 sm:mb-12">
+      {/* 지표 — 2단 지면 */}
+      <section aria-label={`${COUNTRY_LABEL[country]} 경제지표`} className="mt-7 grid gap-x-10 gap-y-9 lg:grid-cols-2">
         {country === 'US'
-          ? INDICATORS.map((config) => (
-              <IndicatorCard key={config.seriesId} config={config} apiType="fred" />
-            ))
-          : KR_INDICATORS.map((config) => (
-              <IndicatorCard key={config.statCode} config={config} apiType="ecos" />
-            ))
-        }
+          ? INDICATORS.map((config) => <IndicatorCard key={config.seriesId} config={config} apiType="fred" />)
+          : KR_INDICATORS.map((config) => <IndicatorCard key={config.statCode} config={config} apiType="ecos" />)}
       </section>
 
-      {/* 출처 표기 */}
-      <section
-        className="p-5 sm:p-6 bg-pixel-card border border-[var(--theme-border-muted)] border-l-ant-red-600 dark:border-l-ant-red-400 rounded-sm"
-        style={{ borderLeftWidth: '6px', boxShadow: 'var(--shadow-md)' }}
-      >
-        <p className="font-heading text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 leading-relaxed">
-          {info.notice}
-        </p>
-        <p className="font-heading text-xs font-medium text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-          데이터 출처: {info.source}
-        </p>
-      </section>
+      <footer className="mt-12 border-t-2 border-[var(--theme-border)] pt-3 text-xs leading-relaxed text-[var(--theme-ink-soft)]">
+        <p>데이터 출처: {info.source}</p>
+        <p className="mt-1">{info.notice}</p>
+      </footer>
     </div>
   );
 }
