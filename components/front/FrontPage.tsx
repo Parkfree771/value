@@ -16,7 +16,7 @@ import {
   type RankedReport,
 } from '@/components/front/ranking';
 import { GURU_LIST } from '@/app/guru-tracker/types';
-import { shortStockName, heldDaysLabel, exchangeLabel } from '@/utils/reportDisplay';
+import { stockLabel, heldDaysLabel, exchangeLabel } from '@/utils/reportDisplay';
 import { inferCurrency, formatPrice } from '@/utils/currency';
 
 // 홈 1면 — 주인공은 "수익률 1·2·3위" (AntStreet 만의 지면).
@@ -30,7 +30,7 @@ function Kicker({ report }: { report: ReportSummary }) {
   const ex = exchangeLabel(report.exchange);
   return (
     <p className="kicker truncate">
-      {shortStockName(report.stockName, report.ticker)}
+      {stockLabel(report.stockName, report.ticker)}
       {ex && <span className="text-[var(--theme-ink-soft)]"> · {ex}</span>} · {OPINION_LABEL[report.opinion] ?? ''}
     </p>
   );
@@ -93,7 +93,7 @@ function Leaderboard({ items, period }: { items: RankedReport[]; period: Period 
               <span className="min-w-0">
                 <span className="block truncate headline text-[15px] leading-snug group-hover:underline underline-offset-4">{r.title}</span>
                 <span className="mt-0.5 flex items-center gap-x-1.5 text-xs text-[var(--theme-ink-soft)] whitespace-nowrap overflow-hidden">
-                  <span className="truncate font-bold text-[var(--foreground)]">{shortStockName(r.stockName, r.ticker)}</span>
+                  <span className="truncate font-bold text-[var(--foreground)]">{stockLabel(r.stockName, r.ticker)}</span>
                   {ex && <span>{ex}</span>}
                   <span className="hidden sm:inline">· {r.author}</span>
                   <span className="hidden sm:inline-flex"><UserLevelInline points={r.levelPoints} /></span>

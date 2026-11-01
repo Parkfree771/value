@@ -49,6 +49,11 @@ function titleCase(s: string): string {
     .join(' ');
 }
 
+/** 홈 1면 종목 표기 — 영문 티커는 티커(MU), 숫자 티커(한국·일본·홍콩)는 종목명(SK하이닉스) */
+export function stockLabel(name: string, ticker: string): string {
+  return /[A-Za-z]/.test(ticker) ? ticker.toUpperCase() : shortStockName(name, ticker);
+}
+
 /**
  * 카드용 짧은 종목명 — 말줄임(…) 대신 알아볼 수 있는 약칭
  *   1. 한글 약칭이 있는 해외 종목: MU → "마이크론", BABA → "알리바바"
