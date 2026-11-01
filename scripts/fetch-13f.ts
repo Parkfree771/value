@@ -30,7 +30,7 @@ import {
 // === 가져올 분기 목록 (오래된→최신 순) ===
 // 매 실행마다 이 리스트의 분기들을 SEC에서 새로 가져옴.
 // 기존 quarters 맵에 머지되므로 더 옛 분기는 이전 실행에서 누적된 그대로 보존됨.
-const DEFAULT_QUARTERS = ['2025-12-31', '2026-03-31'];
+const DEFAULT_QUARTERS = ['2026-03-31', '2026-06-30'];
 
 const QUARTERS = (process.env.QUARTERS
   ? process.env.QUARTERS.split(',').map(s => s.trim())

@@ -22,21 +22,18 @@
 
 ## 갱신 순서
 
-### 1) `scripts/fetch-13f.ts` 의 분기 상수 변경
+### 1) `scripts/fetch-13f.ts` 의 분기 목록 변경
 
 ```ts
-// scripts/fetch-13f.ts 상단
-const Q3_END = '2025-09-30';  // ← 직전 분기말 (비교 기준)
-const Q4_END = '2025-12-31';  // ← 신규 분기말
+// scripts/fetch-13f.ts 상단 — (이전 분기, 신규 분기)
+const DEFAULT_QUARTERS = ['2026-03-31', '2026-06-30'];
 ```
 
-변수명이 `Q3`/`Q4`이지만 실제로는 **이전 분기 / 현재 분기** 의미. 새 분기로 갱신할 때 두 값 모두 한 분기씩 미루면 됨.
+새 분기로 갱신할 때 두 값 모두 한 분기씩 미룬다. 옛 분기는 JSON 에 누적돼 있으므로 사라지지 않는다.
+`QUARTERS=2026-06-30 npx tsx scripts/fetch-13f.ts --all` 처럼 신규 분기만 받아도 된다.
 
-**예시 — Q1 2026 갱신 시**
-```ts
-const Q3_END = '2025-12-31';  // (이전) Q4 2025
-const Q4_END = '2026-03-31';  // (신규) Q1 2026
-```
+**공시를 찾을 수 없다고 나오면** SEC 전문 검색으로 운용사를 확인한다. 13F-NT 만 낸 경우 다른 법인이 대신 제출한 것이다.
+(예: 2026년 2분기부터 Pershing Square Capital 은 13F-NT, 보유 내역은 Pershing Square Inc. CIK 0002026053)
 
 ### 2) 전체 그루 13F 다시 받기
 
@@ -60,7 +57,7 @@ OpenFIGI API로 자동 매핑한 코드 스니펫을 콘솔에 출력. 출력 �
 
 **검증 포인트**
 - **티커**: OpenFIGI 결과 신뢰. 학습 지식과 다르면 OpenFIGI가 맞을 가능성 높음 (티커 변경 사례: 2026-01-14 MMC → MRSH)
-- **거래소**: OpenFIGI 결과 신뢰하지 말 것 (NASDAQ 종목에 NYSE 표기 등 일관성 떨어짐). `public/data/global-stocks.json`에서 ticker로 검색해 확인하는 게 정확
+- **거래소**: OpenFIGI 결과 신뢰하지 말 것 (NASDAQ 종목에 NYSE 표기 등 일관성 떨어짐). `public/data/global-stocks.json`에 없는 신규 상장은 SEC `company_tickers_exchange.json`으로 확인
 
 매핑 추가 후 `npx tsx scripts/fetch-13f.ts --all` 다시 돌려서 미매핑 0건 확인.
 
@@ -78,7 +75,16 @@ npx tsx scripts/update-filing-prices.ts
 - 약 5분 소요 (그루별 보유 종목 수에 따라 달라짐)
 - 실패 종목이 있으면 콘솔에 출력 — KIS 데이터 누락이거나 티커 변경 케이스. 후자는 cusipMap 보정
 
-### 5) 검증
+### 5) 현재가 크론 목록 동기화 (필수)
+
+```powershell
+node --env-file=.env.local scripts/sync-guru-tickers.mjs
+node --env-file=.env.local scripts/cron/update-guru-prices.mjs
+```
+
+크론은 DB `settings.guru_tickers` 목록만 조회한다. 동기화하지 않으면 새 종목의 현재가·수익률이 비어 나온다.
+
+### 6) 검증
 
 ```powershell
 # 그루별 매핑/가격 카운트 확인

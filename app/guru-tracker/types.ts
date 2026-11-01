@@ -53,7 +53,7 @@ export const GURU_LIST: GuruInfo[] = [
     name_kr: '빌 애크먼',
     name_en: 'Bill Ackman',
     filing_name: 'Pershing Square Capital',
-    cik: '0001336528',
+    cik: '0002026053',
     style: '집중 투자',
     catchphrase: '확신이 없다면 배팅하지 않는다. 소수 정예 종목에 집중하는 행동주의 거물.',
     image_filename: 'GURU/Ackman.webp',

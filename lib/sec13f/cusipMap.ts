@@ -93,7 +93,7 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
 
   // 버핏 주요 보유 종목 추가
   '210518100': { ticker: 'CB', exchange: 'NYS' },   // Chubb
-  '500754106': { ticker: 'KHC', exchange: 'NAS' },  // Kraft Heinz
+  '500754106': { ticker: 'KHC', exchange: 'NYS' },  // Kraft Heinz
   '256135203': { ticker: 'DVA', exchange: 'NYS' },  // DaVita
   '171340102': { ticker: 'CHTR', exchange: 'NAS' }, // Charter Communications
   // '549271106' 제거됨: invalid CUSIP (체크섬 불일치). 진짜 LOW는 548661107로 매핑.
@@ -268,7 +268,7 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '009158106': { ticker: 'APD', exchange: 'NYS' },   // Air Products & Chemicals
   'L8681T102': { ticker: 'SPOT', exchange: 'NYS' },  // Spotify Technology (ADR)
   '784117103': { ticker: 'SEIC', exchange: 'NAS' },  // SEI Investments
-  '064058100': { ticker: 'BK', exchange: 'NYS' },    // Bank of New York Mellon
+  '064058100': { ticker: 'BNY', exchange: 'NYS' },    // Bank of New York Mellon
   '199908104': { ticker: 'FIX', exchange: 'NYS' },   // Comfort Systems USA
   '169905106': { ticker: 'CHH', exchange: 'NYS' },   // Choice Hotels International
   '12503M108': { ticker: 'CBOE', exchange: 'AMS' },  // Cboe Global Markets
@@ -294,6 +294,22 @@ const MANUAL_CUSIP_MAP: Record<string, { ticker: string; exchange: string; name?
   '984245100': { ticker: 'YPF', exchange: 'NYS' },   // YPF Sociedad Anónima (ADR, Marks/Druckenmiller)
   'D18190898': { ticker: 'DB', exchange: 'NYS' },    // Deutsche Bank AG (CINS=독일 보통주, US ADR 가격 추적용, Tepper)
   '866966104': { ticker: 'SUNB', exchange: 'NYS' },  // Sunbelt Rentals Holdings (2026 IPO, Gayner)
+  // Q2 2026 미매핑 해결 (2026-11-01 추가, 거래소는 SEC company_tickers_exchange 기준)
+  '149568107': { ticker: 'CVCO', exchange: 'NAS' },  // Cavco Industries
+  '24477V105': { ticker: 'DFTX', exchange: 'NAS' },  // Definium Therapeutics
+  '77311W101': { ticker: 'RKT', exchange: 'NYS' },   // Rocket Companies
+  '315616102': { ticker: 'FFIV', exchange: 'NAS' },  // F5
+  '91823B109': { ticker: 'UWMC', exchange: 'NYS' },  // UWM Holdings
+  '399909100': { ticker: 'GGAL', exchange: 'NAS' },  // Grupo Financiero Galicia (ADR)
+  '71531T105': { ticker: 'PSUS', exchange: 'NYS' },  // Pershing Square USA (Ackman)
+  '71531U102': { ticker: 'PS', exchange: 'NYS' },    // Pershing Square Inc (Klarman)
+  '778920306': { ticker: 'SHAZ', exchange: 'NAS' },  // SharonAI Holdings
+  '57808L305': { ticker: 'MINE', exchange: 'NYS' },  // Mayfair Gold
+  '09570Q509': { ticker: 'BMM', exchange: 'NAS' },   // Blue Moon Metals
+  '629337106': { ticker: 'NNBR', exchange: 'NAS' },  // NN Inc
+  '67623C307': { ticker: 'OPI', exchange: 'NAS' },   // Office Properties Income Trust
+  '84615Q103': { ticker: 'SPCX', exchange: 'NAS' },  // SpaceX (Tepper)
+  'G2R11M108': { ticker: 'DPC', exchange: 'NYS' },   // DPC Holdings (Marks)
 };
 
 // global-stocks.json 로드 (이름 매칭용)
