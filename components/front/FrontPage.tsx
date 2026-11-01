@@ -26,13 +26,19 @@ import { inferCurrency, formatPrice } from '@/utils/currency';
 const OPINION_LABEL: Record<string, string> = { buy: '매수', sell: '매도', hold: '보유' };
 const DATE_KR = new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'long', day: 'numeric' });
 
-function Kicker({ report }: { report: ReportSummary }) {
+const OPINION_COLOR: Record<string, string> = { buy: 'text-[var(--color-up)]', sell: 'text-[var(--color-down)]' };
+
+/** 종목 줄 — 종목(본문색 굵게) · 상장사(작은 회색) · 매수 빨강 / 매도 파랑 */
+function StockLine({ report }: { report: ReportSummary }) {
   const ex = exchangeLabel(report.exchange);
   return (
-    <p className="kicker truncate">
-      {stockLabel(report.stockName, report.ticker)}
-      {ex && <span className="text-[var(--theme-ink-soft)]"> · {ex}</span>} · {OPINION_LABEL[report.opinion] ?? ''}
-    </p>
+    <>
+      <span className="truncate text-[13px] font-bold text-[var(--foreground)]">{stockLabel(report.stockName, report.ticker)}</span>
+      {ex && <span className="flex-shrink-0 text-xs text-[var(--theme-ink-soft)]">{ex}</span>}
+      <span className={`flex-shrink-0 text-xs font-bold ${OPINION_COLOR[report.opinion] ?? 'text-[var(--theme-ink-soft)]'}`}>
+        {OPINION_LABEL[report.opinion] ?? ''}
+      </span>
+    </>
   );
 }
 
@@ -52,9 +58,9 @@ function PodiumCard({ item }: { item: RankedReport }) {
       <h3 className="headline mt-3 text-[18px] leading-snug line-clamp-2 min-h-[2.75em] break-keep">
         <Link href={`/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
       </h3>
-      <div className="mt-2">
-        <Kicker report={item} />
-      </div>
+      <p className="mt-2 flex items-baseline gap-x-1.5 whitespace-nowrap overflow-hidden">
+        <StockLine report={item} />
+      </p>
       <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-[var(--theme-ink-soft)]">
         <span suppressHydrationWarning className="tabular-nums">{item.createdAt}</span>
         <span className="flex items-center gap-x-1.5 min-w-0">
@@ -85,7 +91,6 @@ function Leaderboard({ items, period }: { items: RankedReport[]; period: Period 
   return (
     <ol className="mt-6 border-t-2 border-[var(--theme-border)]">
       {items.map((r) => {
-        const ex = exchangeLabel(r.exchange);
         return (
           <li key={r.id} className="border-b border-[var(--theme-border-muted)]">
             <Link href={`/reports/${r.id}`} className="group grid grid-cols-[1.5rem_minmax(0,1fr)_auto] items-center gap-x-3 py-2.5">
@@ -93,8 +98,7 @@ function Leaderboard({ items, period }: { items: RankedReport[]; period: Period 
               <span className="min-w-0">
                 <span className="block truncate headline text-[15px] leading-snug group-hover:underline underline-offset-4">{r.title}</span>
                 <span className="mt-0.5 flex items-center gap-x-1.5 text-xs text-[var(--theme-ink-soft)] whitespace-nowrap overflow-hidden">
-                  <span className="truncate font-bold text-[var(--foreground)]">{stockLabel(r.stockName, r.ticker)}</span>
-                  {ex && <span>{ex}</span>}
+                  <StockLine report={r} />
                   <span className="hidden sm:inline">· {r.author}</span>
                   <span className="hidden sm:inline-flex"><UserLevelInline points={r.levelPoints} /></span>
                 </span>
