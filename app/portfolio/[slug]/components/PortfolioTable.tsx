@@ -40,11 +40,11 @@ const STATUS_COLOR: Record<PortfolioHolding['status'], string> = {
 const TAB_ACTIVE = 'font-bold text-[var(--foreground)] border-b-2 border-[var(--theme-border)]';
 const TAB_INACTIVE = 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] border-b-2 border-transparent';
 
-// 열: 번호 · 종목 · 변동 · 주식 수(lg) · 평가액(sm) · 비중 · 공시일 가격(md) · 현재가(md) · 수익률
+// 열: 번호 · 종목 · 비중과 변동 · 주식 수(lg) · 평가액(sm) · 공시일 가격(md) · 현재가(md) · 수익률
 const GRID_PRICES =
-  'grid-cols-[1.25rem_minmax(0,1fr)_4.5rem_4.25rem_4.25rem] sm:grid-cols-[1.75rem_minmax(0,1fr)_6rem_5.5rem_5rem_5rem] md:grid-cols-[1.75rem_minmax(0,1fr)_6rem_5.5rem_5rem_6rem_6rem_5rem] lg:grid-cols-[1.75rem_minmax(0,1fr)_6rem_6rem_5.5rem_5rem_6rem_6rem_5rem]';
+  'grid-cols-[1.25rem_minmax(0,1fr)_8.75rem_4rem] sm:grid-cols-[1.75rem_minmax(0,1fr)_11.5rem_5.5rem_5rem] md:grid-cols-[1.75rem_minmax(0,1fr)_11.5rem_5.5rem_6rem_6rem_5rem] lg:grid-cols-[1.75rem_minmax(0,1fr)_11.5rem_6rem_5.5rem_6rem_6rem_5rem]';
 const GRID_PLAIN =
-  'grid-cols-[1.25rem_minmax(0,1fr)_4.5rem_4.25rem] sm:grid-cols-[1.75rem_minmax(0,1fr)_6rem_5.5rem_5rem] lg:grid-cols-[1.75rem_minmax(0,1fr)_6rem_6rem_5.5rem_5rem]';
+  'grid-cols-[1.25rem_minmax(0,1fr)_8.75rem] sm:grid-cols-[1.75rem_minmax(0,1fr)_11.5rem_5.5rem] lg:grid-cols-[1.75rem_minmax(0,1fr)_11.5rem_6rem_5.5rem]';
 const ROW = 'grid items-center gap-x-2';
 const NUM = 'text-right font-mono text-sm tabular-nums whitespace-nowrap';
 
@@ -68,19 +68,26 @@ function barParts(h: PortfolioHolding) {
 
 function WeightBar({ holding, scale }: { holding: PortfolioHolding; scale: number }) {
   const { base, change, color } = barParts(holding);
-  const pct = (v: number) => `${(v / scale) * 100}%`;
+  // 제곱근 눈금 — 비중이 1% 안팎인 종목도 길이가 보이도록
+  const reach = (v: number) => Math.sqrt(v / scale) * 100;
   return (
     <div aria-hidden="true" className="absolute inset-0 -z-10 flex">
-      <span style={{ width: pct(base), background: BAR_BASE }} />
-      {change > 0 && <span style={{ width: pct(change), background: color }} />}
+      <span style={{ width: `${reach(base)}%`, background: BAR_BASE }} />
+      {change > 0 && <span style={{ width: `${reach(base + change) - reach(base)}%`, background: color }} />}
     </div>
   );
 }
 
-function changeLabel(h: PortfolioHolding): string | null {
-  if (h.status === 'NEW BUY' || h.status === 'SOLD OUT') return null;
-  if (!h.shares_change_pct) return null;
-  return `${h.shares_change_pct > 0 ? '+' : ''}${h.shares_change_pct.toFixed(1)}%`;
+/** 이번 분기에 한 일을 말로 — 비중이 함께 움직였으면 비중 변화, 아니면 주식 수 변화 */
+function actionLabel(h: PortfolioHolding, delta: number): string {
+  if (h.status === 'NEW BUY') return '신규매수';
+  if (h.status === 'SOLD OUT') return '전량매도';
+  if (delta !== 0) return `${Math.abs(delta).toFixed(2)}%p ${delta > 0 ? '늘림' : '줄임'}`;
+  if (h.status === 'ADD' || h.status === 'TRIM') {
+    const verb = h.status === 'ADD' ? '늘림' : '줄임';
+    return h.shares_change_pct ? `주식 ${Math.abs(h.shares_change_pct).toFixed(1)}% ${verb}` : verb;
+  }
+  return '유지';
 }
 
 function filingPrice(h: PortfolioHolding): string {
@@ -168,7 +175,7 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
 
       {/* 막대 범례 */}
       <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--theme-ink-soft)]">
-        <span>막대 길이는 비중</span>
+        <span>막대는 비중</span>
         <span className="inline-flex items-center gap-1"><i className="inline-block h-2.5 w-4" style={{ background: BAR_UP }} />이번 분기에 늘린 만큼</span>
         <span className="inline-flex items-center gap-1"><i className="inline-block h-2.5 w-4" style={{ background: BAR_DOWN }} />이번 분기에 줄인 만큼</span>
       </div>
@@ -180,10 +187,9 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
           <div role="row" className={`${ROW} ${grid} border-b border-[var(--theme-border-muted)] py-1.5 text-xs text-[var(--theme-ink-soft)]`}>
             <span role="columnheader">#</span>
             <span role="columnheader" className="pl-1.5">종목</span>
-            <span role="columnheader">변동</span>
+            <span role="columnheader" className="text-right">비중</span>
             <span role="columnheader" className="hidden lg:block text-right">주식 수</span>
             <span role="columnheader" className="hidden sm:block text-right">평가액</span>
-            <span role="columnheader" className="text-right">비중</span>
             {showPrices && <span role="columnheader" className="hidden md:block text-right">공시일 가격</span>}
             {showPrices && <span role="columnheader" className="hidden md:block text-right">현재가</span>}
             {showPrices && <span role="columnheader" className="text-right">수익률</span>}
@@ -191,9 +197,9 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
 
           {filtered.map((h, i) => {
             const sold = h.status === 'SOLD OUT';
-            const change = changeLabel(h);
             const current = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
             const { delta } = barParts(h);
+            const moved = delta !== 0 && h.status !== 'NEW BUY'; // 전 분기 비중이 있을 때만 "이전 → 지금"
             return (
               <div key={h.cusip} role="row" className={`${ROW} ${grid} min-h-[3rem] border-b border-[var(--theme-border-muted)] py-1`}>
                 <span role="cell" className="font-mono text-xs tabular-nums text-[var(--theme-ink-soft)]">{i + 1}</span>
@@ -202,21 +208,19 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
                   <p className={`font-mono text-sm font-bold ${sold ? 'text-[var(--theme-ink-soft)]' : ''}`}>{h.ticker || '—'}</p>
                   <p className="truncate text-xs text-[var(--theme-ink-soft)]">{shortStockName(h.name_of_issuer, h.ticker ?? undefined)}</p>
                 </div>
-                <div role="cell" className="whitespace-nowrap">
-                  <p className={`text-xs font-bold ${STATUS_COLOR[h.status]}`}>{STATUS_LABEL[h.status]}</p>
-                  {change && <p className={`font-mono text-xs tabular-nums ${STATUS_COLOR[h.status]}`}>{change}</p>}
+                <div role="cell" title={STATUS_LABEL[h.status]} className="text-right whitespace-nowrap">
+                  <p className="font-mono tabular-nums">
+                    {moved && (
+                      <span className="text-xs text-[var(--theme-ink-soft)]">
+                        {(h.weight_prev ?? 0).toFixed(2)}% →{' '}
+                      </span>
+                    )}
+                    <span className="text-[15px] font-black">{`${h.weight_curr.toFixed(2)}%`}</span>
+                  </p>
+                  <p className={`text-xs font-bold ${STATUS_COLOR[h.status]}`}>{actionLabel(h, delta)}</p>
                 </div>
                 <span role="cell" className={`${NUM} hidden lg:block`}>{h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}</span>
                 <span role="cell" className={`${NUM} hidden sm:block`}>{h.value_curr > 0 ? formatUsd(h.value_curr) : '—'}</span>
-                <div role="cell" className="text-right whitespace-nowrap">
-                  <p className="font-mono text-sm font-bold tabular-nums">{h.weight_curr > 0 ? `${h.weight_curr.toFixed(2)}%` : '—'}</p>
-                  {delta !== 0 && (
-                    <p className={`font-mono text-xs tabular-nums ${delta > 0 ? 'text-[var(--color-up)]' : 'text-[var(--color-down)]'}`}>
-                      {delta > 0 ? '+' : ''}
-                      {delta.toFixed(2)}%p
-                    </p>
-                  )}
-                </div>
                 {showPrices && <span role="cell" className={`${NUM} hidden md:block`}>{filingPrice(h)}</span>}
                 {showPrices && <span role="cell" className={`${NUM} hidden md:block`}>{current != null ? `$${current.toFixed(2)}` : '—'}</span>}
                 {showPrices && (
