@@ -3,7 +3,7 @@ import Link from 'next/link';
 import InstagramKit from '@/components/briefing/InstagramKit';
 import { getBriefing } from '@/lib/briefing';
 
-// 모닝 브리핑 — 매일 새벽 scripts/news 배치가 해외 매체 RSS 를 모아 경제 이슈 10개로 새로 쓴 결과.
+// 모닝 브리핑 — 매일 새벽 scripts/news 배치가 해외 매체 헤드라인으로 이슈를 고르고, AI 가 직접 조사해 새로 쓴 결과.
 // 배치가 끝나면 /api/revalidate 로 이 페이지를 갱신한다. 그 사이엔 15분 ISR.
 export const revalidate = 900;
 
@@ -26,8 +26,8 @@ export default async function BriefingPage() {
         <h1 className="headline text-4xl sm:text-5xl mt-1">모닝 브리핑</h1>
         {briefing ? (
           <p suppressHydrationWarning className="mt-3 text-sm text-[var(--theme-ink-soft)]">
-            {DATE_KR.format(new Date(briefing.generatedAt))} · {TIME_KR.format(new Date(briefing.generatedAt))} 발행 · 해외 기사{' '}
-            {briefing.sourceArticles.toLocaleString('ko-KR')}건 종합
+            {DATE_KR.format(new Date(briefing.generatedAt))} · {TIME_KR.format(new Date(briefing.generatedAt))} 발행 · 해외 헤드라인{' '}
+            {briefing.sourceArticles.toLocaleString('ko-KR')}건 검토
             {briefing.isStale && ' · 지난 호'}
           </p>
         ) : null}
@@ -60,13 +60,13 @@ export default async function BriefingPage() {
         </ol>
       ) : (
         <p className="py-16 text-center text-[var(--theme-ink-soft)]">
-          밤사이 해외 주요 매체 기사를 모아 아침 6시에 경제 이슈 10개로 정리해 드립니다. 첫 호를 준비하고 있어요.
+          밤사이 해외 주요 매체가 다룬 이슈를 골라 아침 6시에 경제 이슈 10개로 정리해 드립니다. 첫 호를 준비하고 있어요.
         </p>
       )}
 
       <footer className="mt-8 text-xs leading-relaxed text-[var(--theme-ink-soft)]">
         <p>
-          해외 주요 매체의 보도에서 사실만 모아 AntStreet 가 새로 쓴 요약입니다. 원문 기사를 옮긴 것이 아니며, 투자 권유가 아닙니다.
+          해외 주요 매체 헤드라인으로 오늘의 이슈를 고르고, AI가 공개 자료를 직접 조사해 새로 쓴 브리핑입니다. AI 작성 특성상 오류가 있을 수 있으며, 투자 권유가 아닙니다.
         </p>
         <p className="mt-3">
           <Link href="/" className="font-bold hover:underline">← 홈으로</Link>

@@ -45,9 +45,9 @@ npx tsx scripts/<파일명>.ts
 
 GitHub Actions **`news-briefing`** (`.github/workflows/news-briefing.yml`)이 매일 05:40 KST(예비 06:40 · 08:00)에 `news/run.mjs` 실행.
 
-1. `collect.mjs` — `feeds.json`의 해외 메이저 매체 22곳 RSS, 최근 24시간
-2. `prompts.mjs` — Claude(Claude Code CLI, `CLAUDE_CODE_OAUTH_TOKEN` 구독 토큰)가 경제 이슈 10개 선정·새로 작성 → `briefing/briefing.json` + `briefing/archive/{날짜}.json` → 사이트 `/briefing`
-   (프롬프트는 project7/news-bots 원문 그대로 — 선정 기준은 손대지 말 것)
+1. `collect.mjs` — `feeds.json`의 해외 메이저 매체 22곳 RSS **헤드라인만**, 최근 24시간
+2. `prompts.mjs` — Claude(Claude Code CLI, `CLAUDE_CODE_OAUTH_TOKEN` 구독 토큰)가 헤드라인으로 후보 12개 순위 → 순위대로 이슈마다 웹 조사 후 헤드라인·요약을 자기 말로 작성(출처 2개 미만·미확인은 제외, 다음 순위로 채움) → 10개 → `briefing/briefing.json` + `briefing/archive/{날짜}.json` → 사이트 `/briefing`
+   (선정 기준은 project7/news-bots 에서 검증된 것 — 손대지 말 것)
 3. 그중 가장 핫한 5개 → `render.mjs`가 카드 5장 + 사이트 안내 1장(1080×1350, 제호 · 번호 · 제목 · 본문 · 날짜, 상승 초록 · 하락 파랑) + 같은 6장 세로 릴스(1080×1920, 약 28초) + 캡션 → `instagram/{날짜}/` (게시는 직접), 지면은 `INSTA_THEME` = light(흰) · dark(검정) · both(비교본)
 
 로컬 미리보기: `node --env-file=.env scripts/news/run.mjs --dry-run` → `scripts/news/out/{날짜}/` (업로드 없음)

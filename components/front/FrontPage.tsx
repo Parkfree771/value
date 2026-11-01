@@ -220,7 +220,7 @@ function RankingFront({ reports }: { reports: ReportSummary[] }) {
   );
 }
 
-/** 오른쪽 — 모닝 브리핑 (해외 매체 RSS 를 모아 다시 쓴 헤드라인) */
+/** 오른쪽 — 모닝 브리핑 (해외 매체 헤드라인으로 고르고 AI 가 조사해 새로 쓴 헤드라인) */
 function BriefingColumn({ briefing }: { briefing: Briefing | null }) {
   return (
     <section aria-label="모닝 브리핑">
@@ -229,7 +229,7 @@ function BriefingColumn({ briefing }: { briefing: Briefing | null }) {
       {briefing ? (
         <>
           <p suppressHydrationWarning className="mt-2 text-xs text-[var(--theme-ink-soft)]">
-            {DATE_KR.format(new Date(briefing.generatedAt))} 자 · 해외 기사 {briefing.sourceArticles.toLocaleString('ko-KR')}건 종합
+            {DATE_KR.format(new Date(briefing.generatedAt))} 자 · 해외 헤드라인 {briefing.sourceArticles.toLocaleString('ko-KR')}건 검토
             {briefing.isStale && ' · 지난 호'}
           </p>
           <ol className="mt-1">

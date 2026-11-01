@@ -1,4 +1,5 @@
 // RSS 수집 — feeds.json 의 글로벌 메이저 매체 헤드라인 (최근 24시간). project7 collect_rss.js 이식.
+// 제목만 쓴다. 본문·요약은 받지 않는다 (이슈 선정에만 쓰고, 기사는 prompts.mjs 의 직접 조사로 새로 쓴다).
 
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -22,7 +23,6 @@ async function fetchFeed({ name, url }, cutoff) {
         title: (item.title || '').trim(),
         link: item.link || '',
         published: item.isoDate || item.pubDate || '',
-        summary: (item.contentSnippet || item.content || '').trim().slice(0, 500),
         source: name,
       }))
       .filter((a) => a.title && a.published && new Date(a.published).getTime() >= cutoff && !PROMO.test(a.title.toLowerCase()));

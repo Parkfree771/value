@@ -1,5 +1,5 @@
 // 모닝 브리핑 — scripts/news 배치(GitHub Actions news-briefing)가 만든 briefing/briefing.json (Neon Storage 공개 버킷)
-// 해외 매체 RSS 를 모아 매일 아침 경제 이슈 10개로 새로 쓴 결과. 날짜별 사본은 briefing/archive/{YYYY-MM-DD}.json
+// 해외 매체 헤드라인으로 이슈를 고르고 AI 가 직접 조사해 매일 아침 10개로 새로 쓴 결과. 날짜별 사본은 briefing/archive/{YYYY-MM-DD}.json
 // 서버 전용. 홈 ISR 재생성 때 읽는다.
 
 import { publicUrl } from '@/lib/storage';

@@ -1,4 +1,4 @@
-# 모닝 브리핑 — 해외 매체 RSS → Claude 가 경제 이슈 10개 작성 → 사이트(/briefing) 발행
+# 모닝 브리핑 — 해외 매체 RSS 헤드라인으로 순위 → Claude 가 이슈 10개를 직접 조사·작성 → 사이트(/briefing) 발행
 #             + 가장 핫한 5개로 인스타 카드 5장 · 릴스 · 캡션 생성 (Neon Storage instagram/{날짜}/, 게시는 직접)
 # 스크립트: scripts/news/run.mjs
 #
@@ -47,7 +47,7 @@ concurrency:
 jobs:
   briefing:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       AWS_ENDPOINT_URL_S3: ${{ secrets.AWS_ENDPOINT_URL_S3 }}

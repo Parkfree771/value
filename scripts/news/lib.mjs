@@ -18,21 +18,26 @@ export const kstLabel = (d = new Date()) => d.toLocaleString('ko-KR', { timeZone
 
 // ─── Claude Code CLI ─────────────────────────────────────────
 // GitHub Actions 에서는 CLAUDE_CODE_OAUTH_TOKEN (claude setup-token, Claude 구독) 으로 인증.
-// 도구 없이 텍스트만 — 프롬프트는 stdin. 5분간 출력이 없으면 죽은 것으로 보고 끊는다.
+// 기본은 도구 없이 텍스트만 — 프롬프트는 stdin. research 호출만 웹 검색·읽기를 허용한다.
+// 출력은 끝날 때 한 번에 나오므로, 무응답 한도는 조사 시간까지 감안한다.
 const IDLE_TIMEOUT_MS = 5 * 60 * 1000;
+const RESEARCH_IDLE_TIMEOUT_MS = 12 * 60 * 1000;
+const WEB_TOOLS = 'WebSearch,WebFetch';
 
-function callClaudeOnce(prompt) {
+function callClaudeOnce(prompt, research) {
   return new Promise((resolve, reject) => {
-    const args = ['-p', '--output-format', 'text', '--model', process.env.CLAUDE_MODEL || 'opus', '--tools', '', '--no-session-persistence'];
+    const idleLimit = research ? RESEARCH_IDLE_TIMEOUT_MS : IDLE_TIMEOUT_MS;
+    const tools = research ? ['--tools', WEB_TOOLS, '--allowedTools', WEB_TOOLS] : ['--tools', ''];
+    const args = ['-p', '--output-format', 'text', '--model', process.env.CLAUDE_MODEL || 'opus', ...tools, '--no-session-persistence'];
     const proc = spawn('claude', args, { shell: process.platform === 'win32', stdio: ['pipe', 'pipe', 'pipe'] });
     let out = '';
     let err = '';
     let last = Date.now();
     const watchdog = setInterval(() => {
-      if (Date.now() - last > IDLE_TIMEOUT_MS) {
+      if (Date.now() - last > idleLimit) {
         clearInterval(watchdog);
         proc.kill('SIGKILL');
-        reject(new Error('claude CLI 5분 무응답 — 강제 종료'));
+        reject(new Error(`claude CLI ${idleLimit / 60000}분 무응답 — 강제 종료`));
       }
     }, 10_000);
     proc.stdout.on('data', (c) => { last = Date.now(); out += c.toString('utf-8'); });
@@ -47,11 +52,11 @@ function callClaudeOnce(prompt) {
   });
 }
 
-export async function callClaude(prompt, label, attempts = 2) {
+export async function callClaude(prompt, label, { attempts = 2, research = false } = {}) {
   for (let i = 1; i <= attempts; i++) {
     try {
       const t = Date.now();
-      const text = await callClaudeOnce(prompt);
+      const text = await callClaudeOnce(prompt, research);
       console.log(`[claude] ${label}: ${((Date.now() - t) / 1000).toFixed(1)}s`);
       return text;
     } catch (e) {

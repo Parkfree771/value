@@ -1,6 +1,6 @@
 // 모닝 브리핑 배치 — 매일 새벽 GitHub Actions (news-briefing.yml)
 //   1) 해외 메이저 매체 RSS 수집 (최근 24시간)
-//   2) Claude 가 중요도 판단 → 경제 이슈 10개를 자기 말로 새로 작성 → 사이트 (briefing/briefing.json)
+//   2) 헤드라인만 보고 중요도 순위 → 이슈마다 Claude 가 직접 조사해 자기 말로 작성 (10개) → 사이트 (briefing/briefing.json)
 //   3) 그중 가장 핫한 5개 → 인스타 카드 5장 + 사이트 안내 1장 + 같은 6장으로 세로 릴스 + 캡션 → Neon Storage instagram/{날짜}/
 //
 //   node scripts/news/run.mjs              # 오늘(KST) 이미 발행됐으면 건너뜀
@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { collect } from './collect.mjs';
 import { callClaude, getPublicJson, kstLabel, kstParts, parseJsonObject, putObject, revalidate, SITE_URL } from './lib.mjs';
-import { buildBriefingPrompt, buildCaptionPrompt, buildHooksPrompt } from './prompts.mjs';
+import { buildCaptionPrompt, buildHooksPrompt, buildIssuePrompt, buildRankPrompt } from './prompts.mjs';
 import { renderInstagram } from './render.mjs';
 
 const args = new Set(process.argv.slice(2));
@@ -26,6 +26,10 @@ const instaOnly = args.has('--insta-only');
 if (instaOnly && skipInsta) throw new Error('--insta-only 와 --skip-insta 는 같이 못 씀');
 // 카드·릴스 지면 — light(흰 지면) | dark(먹색) | both(light 를 올리고 dark 는 out/dark 에 비교용으로만)
 const theme = ['light', 'dark', 'both'].includes(process.env.INSTA_THEME) ? process.env.INSTA_THEME : 'light';
+
+const ISSUE_COUNT = 10;
+const RESEARCH_CONCURRENCY = 3;
+const MIN_SOURCES = 2;
 
 const here = dirname(fileURLToPath(import.meta.url));
 const today = kstParts();
@@ -63,19 +67,11 @@ if (instaOnly) {
   if (data.total_articles < 40) throw new Error(`수집 기사가 너무 적음 (${data.total_articles}건) — 피드 상태 확인`);
 
   // ─── 2. 사이트용 10개 ───
-  console.log('\n[2/3] 이슈 10개 선정·작성');
-  const analysis = parseJsonObject(await callClaude(buildBriefingPrompt(data, prev?.issues?.length ? prev : null), 'briefing'));
-  issues = (analysis.issues || [])
-    .filter((i) => i && typeof i.headline === 'string' && typeof i.summary === 'string')
-    .slice(0, 10)
-    .map((i) => ({
-      headline: i.headline.trim(),
-      summary: i.summary.trim(),
-      tags: Array.isArray(i.tags) ? i.tags.slice(0, 4) : [],
-      covered_by: Array.isArray(i.covered_by) ? i.covered_by : [],
-      sources: i.sources ?? '',
-      importance: i.importance ?? 'medium',
-    }));
+  console.log('\n[2/3] 헤드라인으로 순위 → 이슈별 조사·작성');
+  const ranked = parseJsonObject(await callClaude(buildRankPrompt(data, prev?.issues?.length ? prev : null), 'rank'));
+  const candidates = (ranked.issues || []).filter((i) => i && typeof i.event === 'string' && i.event.trim());
+  note(`후보 ${candidates.length}개 선정`);
+  issues = await writeIssues(candidates);
   if (issues.length < 8) throw new Error(`이슈가 ${issues.length}개뿐 — 응답 확인`);
 
   briefing = {
@@ -147,6 +143,43 @@ if (!skipInsta) {
 }
 
 writeSummary();
+
+/** 순위대로 조사·작성해 10개를 채운다. 사실이 확인되지 않은 이슈는 버리고 다음 순위로 넘어간다 */
+async function writeIssues(candidates) {
+  const written = [];
+  let next = 0;
+  while (written.length < ISSUE_COUNT && next < candidates.length) {
+    const batch = candidates.slice(next, next + Math.min(RESEARCH_CONCURRENCY, ISSUE_COUNT - written.length));
+    const results = await Promise.all(batch.map((c, i) => writeIssue(c, next + i)));
+    next += batch.length;
+    written.push(...results.filter(Boolean));
+  }
+  return written.sort((a, b) => a.rank - b.rank).map(({ rank, ...issue }) => issue);
+}
+
+async function writeIssue(candidate, rank) {
+  const label = `issue-${rank + 1}`;
+  try {
+    const r = parseJsonObject(await callClaude(buildIssuePrompt(candidate, today.dot), label, { research: true }));
+    const sources = (Array.isArray(r.sources) ? r.sources : []).filter((s) => /^https?:\/\//.test(s?.url ?? ''));
+    if (r.status !== 'ok' || !r.headline?.trim() || !r.summary?.trim() || sources.length < MIN_SOURCES) {
+      note(`제외 ${rank + 1}위: ${candidate.event} (status=${r.status}, 출처 ${sources.length}개)`);
+      return null;
+    }
+    return {
+      rank,
+      headline: r.headline.trim(),
+      summary: r.summary.trim(),
+      tags: Array.isArray(candidate.tags) ? candidate.tags.slice(0, 4) : [],
+      covered_by: Array.isArray(candidate.covered_by) ? candidate.covered_by : [],
+      sources,
+      importance: candidate.importance ?? 'medium',
+    };
+  } catch (e) {
+    note(`제외 ${rank + 1}위: ${candidate.event} (${e.message.slice(0, 120)})`);
+    return null;
+  }
+}
 
 /** 헤드라인 색칠 — 방향이 이상하거나 구절이 헤드라인에 없으면 칠하지 않는다 */
 function cleanMove(c) {
