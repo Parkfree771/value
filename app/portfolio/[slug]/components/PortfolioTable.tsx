@@ -70,7 +70,7 @@ function WeightBar({ holding, scale }: { holding: PortfolioHolding; scale: numbe
   const { base, change, color } = barParts(holding);
   const pct = (v: number) => `${(v / scale) * 100}%`;
   return (
-    <div aria-hidden="true" className="absolute inset-y-0.5 left-7 right-0 -z-10 flex sm:left-9">
+    <div aria-hidden="true" className="absolute inset-0 -z-10 flex">
       <span style={{ width: pct(base), background: BAR_BASE }} />
       {change > 0 && <span style={{ width: pct(change), background: color }} />}
     </div>
@@ -195,10 +195,10 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
             const current = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
             const { delta } = barParts(h);
             return (
-              <div key={h.cusip} role="row" className={`${ROW} ${grid} relative isolate min-h-[3rem] border-b border-[var(--theme-border-muted)] py-1.5`}>
-                <WeightBar holding={h} scale={scale} />
+              <div key={h.cusip} role="row" className={`${ROW} ${grid} min-h-[3rem] border-b border-[var(--theme-border-muted)] py-1`}>
                 <span role="cell" className="font-mono text-xs tabular-nums text-[var(--theme-ink-soft)]">{i + 1}</span>
-                <div role="cell" className="min-w-0 pl-1.5">
+                <div role="cell" className="relative isolate min-w-0 py-1 pl-1.5">
+                  <WeightBar holding={h} scale={scale} />
                   <p className={`font-mono text-sm font-bold ${sold ? 'text-[var(--theme-ink-soft)]' : ''}`}>{h.ticker || '—'}</p>
                   <p className="truncate text-xs text-[var(--theme-ink-soft)]">{shortStockName(h.name_of_issuer, h.ticker ?? undefined)}</p>
                 </div>
