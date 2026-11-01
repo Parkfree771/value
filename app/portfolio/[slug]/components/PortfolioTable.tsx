@@ -1,265 +1,178 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { PortfolioHolding } from '@/lib/sec13f/types';
-import StatusBadge from './StatusBadge';
+import { formatShares, formatUsd } from '@/lib/sec13f/format';
+import { returnColorClass } from '@/components/front/ranking';
+import { shortStockName } from '@/utils/reportDisplay';
 
 type FilterStatus = 'ALL' | 'NEW BUY' | 'SOLD OUT' | 'ADD' | 'TRIM' | 'BUY_ALL' | 'SELL_ALL';
 type SortType = 'default' | 'weightChange';
 
-function formatValue(value: number): string {
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-  if (value >= 1e3) return `$${(value / 1e3).toFixed(0)}K`;
-  return `$${value.toLocaleString()}`;
-}
-
-function formatShares(shares: number): string {
-  if (shares >= 1e6) return `${(shares / 1e6).toFixed(2)}M`;
-  if (shares >= 1e3) return `${(shares / 1e3).toFixed(0)}K`;
-  return shares.toLocaleString();
-}
-
-const thClass = 'px-3 py-3 text-xs sm:text-sm font-bold text-gray-500 dark:text-gray-400 whitespace-nowrap';
-
 interface PriceData {
-  [ticker: string]: {
-    currentPrice: number;
-    returnRate: number;
-  };
+  [ticker: string]: { currentPrice: number; returnRate: number };
 }
 
 interface PortfolioTableProps {
   holdings: PortfolioHolding[];
-  filingDate?: string; // "2026-02-17" 형식
-  prices?: PriceData; // Storage JSON에서 가져온 가격 데이터
-  showPrices?: boolean; // false면 공시일 가격/현재가/수익률 컬럼 숨김 (과거 분기용)
+  prices?: PriceData;
+  showPrices?: boolean; // false면 공시일 가격 · 현재가 · 수익률 숨김 (과거 분기용)
 }
 
-const sortLabels: Record<SortType, string> = {
-  default: '기본순',
-  weightChange: '비중변화순',
+const SORT_LABELS: Record<SortType, string> = { default: '비중순', weightChange: '비중 변화순' };
+const SORT_KEYS = Object.keys(SORT_LABELS) as SortType[];
+
+const STATUS_LABEL: Record<PortfolioHolding['status'], string> = {
+  'NEW BUY': '신규매수',
+  ADD: '비중확대',
+  HOLD: '유지',
+  TRIM: '비중축소',
+  'SOLD OUT': '전량매도',
 };
-const sortKeys = Object.keys(sortLabels) as SortType[];
+const STATUS_COLOR: Record<PortfolioHolding['status'], string> = {
+  'NEW BUY': 'text-[var(--color-up)]',
+  ADD: 'text-[var(--color-up)]',
+  HOLD: 'text-[var(--theme-ink-soft)]',
+  TRIM: 'text-[var(--color-down)]',
+  'SOLD OUT': 'text-[var(--color-down)]',
+};
 
-const SORT_BASE = 'flex-shrink-0 font-heading tracking-wide text-[10px] sm:text-xs px-1 py-0.5 sm:px-2 sm:py-1 transition-all';
-const SORT_ACTIVE = `${SORT_BASE} font-bold text-ant-red-600 dark:text-ant-red-400 border-b-2 border-ant-red-600 dark:border-ant-red-400`;
-const SORT_INACTIVE = `${SORT_BASE} font-medium text-gray-400 dark:text-gray-500 hover:text-[var(--foreground)]`;
+const TAB_ACTIVE = 'font-bold text-[var(--foreground)] border-b-2 border-[var(--theme-border)]';
+const TAB_INACTIVE = 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] border-b-2 border-transparent';
+const TH = 'py-2 px-2 first:pl-0 last:pr-0 text-xs font-normal text-[var(--theme-ink-soft)] whitespace-nowrap';
+const TD = 'py-2.5 px-2 first:pl-0 last:pr-0 font-mono text-sm tabular-nums text-right whitespace-nowrap';
 
-export default function PortfolioTable({ holdings, filingDate, prices = {}, showPrices = true }: PortfolioTableProps) {
+function changeLabel(h: PortfolioHolding): string | null {
+  if (h.status === 'NEW BUY' || h.status === 'SOLD OUT') return null;
+  if (!h.shares_change_pct) return null;
+  return `${h.shares_change_pct > 0 ? '+' : ''}${h.shares_change_pct.toFixed(1)}%`;
+}
+
+function filingPrice(h: PortfolioHolding): string {
+  if (h.price_at_filing != null) return `$${h.price_at_filing.toFixed(2)}`;
+  return h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—';
+}
+
+/** 공시일 가격 대비 현재가 */
+function ReturnCell({ holding, currentPrice }: { holding: PortfolioHolding; currentPrice?: number }) {
+  const base = holding.price_at_filing;
+  if (base == null || currentPrice == null || base <= 0) {
+    return <span className="text-[var(--theme-ink-soft)]">—</span>;
+  }
+  const rate = Math.round(((currentPrice - base) / base) * 1000) / 10;
+  return (
+    <span className={`font-bold ${returnColorClass(rate)}`}>
+      {rate > 0 ? '+' : ''}
+      {rate.toFixed(1)}%
+    </span>
+  );
+}
+
+export default function PortfolioTable({ holdings, prices = {}, showPrices = true }: PortfolioTableProps) {
   const [filter, setFilter] = useState<FilterStatus>('ALL');
   const [sortType, setSortType] = useState<SortType>('default');
 
-  const filters: { key: FilterStatus; label: string; count: number }[] = [
-    { key: 'ALL', label: '전체', count: holdings.length },
-    { key: 'BUY_ALL', label: '매수', count: holdings.filter(h => h.status === 'NEW BUY' || h.status === 'ADD').length },
-    { key: 'SELL_ALL', label: '매도', count: holdings.filter(h => h.status === 'SOLD OUT' || h.status === 'TRIM').length },
-    { key: 'NEW BUY', label: '신규매수', count: holdings.filter(h => h.status === 'NEW BUY').length },
-    { key: 'ADD', label: '비중확대', count: holdings.filter(h => h.status === 'ADD').length },
-    { key: 'SOLD OUT', label: '전량매도', count: holdings.filter(h => h.status === 'SOLD OUT').length },
-    { key: 'TRIM', label: '비중축소', count: holdings.filter(h => h.status === 'TRIM').length },
+  const matches: Record<FilterStatus, (h: PortfolioHolding) => boolean> = {
+    ALL: () => true,
+    BUY_ALL: (h) => h.status === 'NEW BUY' || h.status === 'ADD',
+    SELL_ALL: (h) => h.status === 'SOLD OUT' || h.status === 'TRIM',
+    'NEW BUY': (h) => h.status === 'NEW BUY',
+    ADD: (h) => h.status === 'ADD',
+    'SOLD OUT': (h) => h.status === 'SOLD OUT',
+    TRIM: (h) => h.status === 'TRIM',
+  };
+  const filters: { key: FilterStatus; label: string }[] = [
+    { key: 'ALL', label: '전체' },
+    { key: 'BUY_ALL', label: '매수' },
+    { key: 'SELL_ALL', label: '매도' },
+    { key: 'NEW BUY', label: '신규매수' },
+    { key: 'ADD', label: '비중확대' },
+    { key: 'TRIM', label: '비중축소' },
+    { key: 'SOLD OUT', label: '전량매도' },
   ];
 
-  const filteredList = filter === 'ALL'
-    ? holdings
-    : filter === 'BUY_ALL'
-    ? holdings.filter(h => h.status === 'NEW BUY' || h.status === 'ADD')
-    : filter === 'SELL_ALL'
-    ? holdings.filter(h => h.status === 'SOLD OUT' || h.status === 'TRIM')
-    : holdings.filter(h => h.status === filter);
-
   const filtered = useMemo(() => {
-    if (sortType === 'default') return filteredList;
-
-    const isActive = (h: PortfolioHolding) => h.status !== 'HOLD';
-
-    return [...filteredList].sort((a, b) => {
-      const aChange = isActive(a) ? Math.abs(a.weight_curr - (a.weight_prev ?? 0)) : 0;
-      const bChange = isActive(b) ? Math.abs(b.weight_curr - (b.weight_prev ?? 0)) : 0;
-      return bChange - aChange;
-    });
-  }, [filteredList, sortType]);
+    const list = holdings.filter(matches[filter]);
+    if (sortType === 'default') return list;
+    const change = (h: PortfolioHolding) => (h.status === 'HOLD' ? 0 : Math.abs(h.weight_curr - (h.weight_prev ?? 0)));
+    return [...list].sort((a, b) => change(b) - change(a));
+    // matches 는 상수 조건이라 filter 만 보면 된다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [holdings, filter, sortType]);
 
   return (
-    <div>
-      {/* 필터 + 정렬 */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="flex flex-wrap gap-2">
-          {filters.map(f => (
+    <section aria-label="보유 종목" className="mt-8">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b-2 border-[var(--theme-border)]">
+        <div className="flex gap-3 overflow-x-auto scrollbar-hide text-sm">
+          {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
-              className={`px-3 py-1.5 text-xs font-bold border rounded-sm transition-colors ${
-                filter === f.key
-                  ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
-                  : 'bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]'
-              }`}
-              style={{ boxShadow: filter === f.key ? 'var(--shadow-sm)' : 'none' }}
+              aria-pressed={filter === f.key}
+              className={`flex-shrink-0 pb-1.5 ${filter === f.key ? TAB_ACTIVE : TAB_INACTIVE}`}
             >
-              {f.label} ({f.count})
+              {f.label} <span className="font-mono text-xs">{holdings.filter(matches[f.key]).length}</span>
             </button>
           ))}
         </div>
-
-        <div className="flex gap-0.5 sm:gap-1 items-center flex-shrink-0">
-        {sortKeys.map((s) => (
-          <button
-            key={s}
-            onClick={() => setSortType(s)}
-            className={sortType === s ? SORT_ACTIVE : SORT_INACTIVE}
-          >
-            {sortLabels[s]}
-          </button>
-        ))}
+        <div className="flex flex-shrink-0 gap-3 text-xs">
+          {SORT_KEYS.map((s) => (
+            <button key={s} onClick={() => setSortType(s)} aria-pressed={sortType === s} className={`pb-1.5 ${sortType === s ? 'font-bold text-[var(--foreground)]' : 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)]'}`}>
+              {SORT_LABELS[s]}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* 테이블 */}
-      <div className="card-base overflow-hidden" style={{ boxShadow: 'var(--shadow-md)' }}>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-[var(--theme-bg)] border-b-3 border-[var(--theme-border)]">
-                <th className={`${thClass} text-left w-8`}>#</th>
-                <th className={`${thClass} text-left`}>티커</th>
-                <th className={`${thClass} text-left hidden sm:table-cell`}>종목명</th>
-                <th className={`${thClass} text-center`}>상태</th>
-                <th className={`${thClass} text-right`}>변동</th>
-                <th className={`${thClass} text-right hidden md:table-cell`}>주식수</th>
-                <th className={`${thClass} text-right`}>평가액</th>
-                <th className={`${thClass} text-right`}>비중</th>
-                {showPrices && <th className={`${thClass} text-right hidden sm:table-cell`}>공시일 가격</th>}
-                {showPrices && <th className={`${thClass} text-right hidden sm:table-cell`}>현재가</th>}
-                {showPrices && <th className={`${thClass} text-right hidden sm:table-cell`}>수익률</th>}
-              </tr>
-            </thead>
-            <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
-              {filtered.map((h, i) => (
-                <tr
-                  key={h.cusip}
-                  className={`hover:bg-ant-red-50/50 dark:hover:bg-ant-red-950/20 transition-colors ${
-                    h.status === 'SOLD OUT' ? 'opacity-50' : ''
-                  }`}
-                >
-                  {/* 순위 */}
-                  <td className="px-3 py-3 text-sm text-gray-400 font-bold">
-                    {i + 1}
+      {filtered.length === 0 ? (
+        <p className="py-10 text-center text-sm text-[var(--theme-ink-soft)]">해당 종목이 없습니다.</p>
+      ) : (
+        <table className="w-full table-fixed sm:table-auto">
+          <thead>
+            <tr className="border-b border-[var(--theme-border-muted)]">
+              <th className={`${TH} hidden sm:table-cell w-8 text-left`}>#</th>
+              <th className={`${TH} text-left`}>종목</th>
+              <th className={`${TH} text-left w-[5.5rem] sm:w-auto`}>변동</th>
+              <th className={`${TH} text-right hidden lg:table-cell`}>주식 수</th>
+              <th className={`${TH} text-right hidden sm:table-cell`}>평가액</th>
+              <th className={`${TH} text-right w-[4.25rem] sm:w-auto`}>비중</th>
+              {showPrices && <th className={`${TH} text-right hidden md:table-cell`}>공시일 가격</th>}
+              {showPrices && <th className={`${TH} text-right hidden md:table-cell`}>현재가</th>}
+              {showPrices && <th className={`${TH} text-right w-[4.5rem] sm:w-auto`}>수익률</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((h, i) => {
+              const sold = h.status === 'SOLD OUT';
+              const change = changeLabel(h);
+              const current = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
+              return (
+                <tr key={h.cusip} className="border-b border-[var(--theme-border-muted)] hover:bg-[var(--theme-bg-card)]">
+                  <td className={`${TD} hidden sm:table-cell !text-left text-xs text-[var(--theme-ink-soft)]`}>{i + 1}</td>
+                  <td className="py-2.5 px-2 first:pl-0 sm:max-w-[16rem]">
+                    <p className={`font-mono text-sm font-bold ${sold ? 'text-[var(--theme-ink-soft)]' : ''}`}>{h.ticker || '—'}</p>
+                    <p className="truncate text-xs text-[var(--theme-ink-soft)]">{shortStockName(h.name_of_issuer, h.ticker ?? undefined)}</p>
                   </td>
-
-                  {/* 티커 */}
-                  <td className="px-3 py-3">
-                    <span className="text-sm font-bold text-foreground">
-                      {h.ticker || '—'}
-                    </span>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 sm:hidden">
-                      {h.name_of_issuer}
-                    </p>
+                  <td className="py-2.5 px-2 whitespace-nowrap">
+                    <p className={`text-xs font-bold ${STATUS_COLOR[h.status]}`}>{STATUS_LABEL[h.status]}</p>
+                    {change && <p className={`font-mono text-xs tabular-nums ${STATUS_COLOR[h.status]}`}>{change}</p>}
                   </td>
-
-                  {/* 종목명 */}
-                  <td className="px-3 py-3 hidden sm:table-cell">
-                    <span className="text-sm text-foreground">
-                      {h.name_of_issuer}
-                    </span>
-                  </td>
-
-                  {/* 상태 배지 */}
-                  <td className="px-3 py-3 text-center">
-                    <StatusBadge status={h.status} />
-                  </td>
-
-                  {/* 변동률 */}
-                  <td className="px-3 py-3 text-right">
-                    {h.status === 'NEW BUY' ? (
-                      <span className="inline-flex items-center justify-center bg-ant-red-600 text-white text-[9px] sm:text-[10px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-sm whitespace-nowrap">NEW</span>
-                    ) : h.status === 'SOLD OUT' ? (
-                      <span className="text-sm font-bold text-blue-500">-100%</span>
-                    ) : h.shares_change_pct !== null && h.shares_change_pct !== 0 ? (
-                      <span className={`text-sm font-bold ${
-                        h.shares_change_pct > 0 ? 'text-red-500' : 'text-blue-500'
-                      }`}>
-                        <span className="font-mono">{h.shares_change_pct > 0 ? '+' : ''}{h.shares_change_pct.toFixed(1)}%</span>
-                      </span>
-                    ) : (
-                      <span className="text-sm text-gray-400">0%</span>
-                    )}
-                  </td>
-
-                  {/* 주식수 */}
-                  <td className="px-3 py-3 text-right hidden md:table-cell">
-                    <span className="text-sm text-foreground font-mono">
-                      {h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}
-                    </span>
-                  </td>
-
-                  {/* 평가액 */}
-                  <td className="px-3 py-3 text-right">
-                    <span className="text-sm text-foreground font-bold font-mono">
-                      {h.value_curr > 0 ? formatValue(h.value_curr) : '—'}
-                    </span>
-                  </td>
-
-                  {/* 비중 */}
-                  <td className="px-3 py-3 text-right">
-                    <span className="text-sm text-foreground font-bold font-mono">
-                      {h.weight_curr > 0 ? `${h.weight_curr.toFixed(2)}%` : '—'}
-                    </span>
-                  </td>
-
+                  <td className={`${TD} hidden lg:table-cell`}>{h.shares_curr > 0 ? formatShares(h.shares_curr) : '—'}</td>
+                  <td className={`${TD} hidden sm:table-cell`}>{h.value_curr > 0 ? formatUsd(h.value_curr) : '—'}</td>
+                  <td className={`${TD} font-bold`}>{h.weight_curr > 0 ? `${h.weight_curr.toFixed(2)}%` : '—'}</td>
+                  {showPrices && <td className={`${TD} hidden md:table-cell`}>{filingPrice(h)}</td>}
+                  {showPrices && <td className={`${TD} hidden md:table-cell`}>{current != null ? `$${current.toFixed(2)}` : '—'}</td>}
                   {showPrices && (
-                    <>
-                      {/* 공시일 가격 (KIS API 과거 종가) */}
-                      <td className="px-3 py-3 text-right hidden sm:table-cell">
-                        <span className="text-sm text-foreground font-mono">
-                          {h.price_at_filing != null
-                            ? `$${h.price_at_filing.toFixed(2)}`
-                            : h.shares_curr > 0 ? `$${(h.value_curr / h.shares_curr).toFixed(2)}` : '—'}
-                        </span>
-                      </td>
-
-                      {/* 현재가 (Storage JSON) */}
-                      <td className="px-3 py-3 text-right hidden sm:table-cell">
-                        <span className="text-sm text-foreground font-bold font-mono">
-                          {h.ticker && prices[h.ticker]?.currentPrice != null
-                            ? `$${prices[h.ticker].currentPrice.toFixed(2)}`
-                            : '—'}
-                        </span>
-                      </td>
-
-                      {/* 수익률 (공시일 가격 대비 현재가) */}
-                      <td className="px-3 py-3 text-right hidden sm:table-cell">
-                        {(() => {
-                          const filingPrice = h.price_at_filing;
-                          const currentPrice = h.ticker ? prices[h.ticker]?.currentPrice : undefined;
-                          if (filingPrice == null || currentPrice == null || filingPrice <= 0) {
-                            return <span className="text-sm text-gray-400">—</span>;
-                          }
-                          const rate = Math.round(((currentPrice - filingPrice) / filingPrice) * 1000) / 10;
-                          return (
-                            <span className={`text-sm font-bold ${
-                              rate > 0 ? 'text-red-500' : rate < 0 ? 'text-blue-500' : 'text-gray-400'
-                            } font-mono`}>
-                              {rate > 0 ? '+' : ''}{rate.toFixed(1)}%
-                            </span>
-                          );
-                        })()}
-                      </td>
-                    </>
+                    <td className={TD}>
+                      <ReturnCell holding={h} currentPrice={current} />
+                    </td>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {filtered.length === 0 && (
-          <div className="p-8 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              해당 상태의 종목이 없습니다.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </section>
   );
 }

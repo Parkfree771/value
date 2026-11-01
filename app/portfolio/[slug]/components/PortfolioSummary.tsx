@@ -1,105 +1,55 @@
-'use client';
+import type { QuarterView } from './PortfolioView';
+import { dotDate, formatUsd, quarterLabel } from '@/lib/sec13f/format';
 
-import { GuruPortfolioDoc } from '@/lib/sec13f/types';
-
-function formatValue(value: number): string {
-  if (value >= 1e9) return `$${(value / 1e9).toFixed(2)}B`;
-  if (value >= 1e6) return `$${(value / 1e6).toFixed(1)}M`;
-  return `$${value.toLocaleString()}`;
+function Stat({ label, value, note }: { label: string; value: React.ReactNode; note: React.ReactNode }) {
+  return (
+    <div className="py-3 pr-4 sm:px-5 sm:first:pl-0 sm:border-l sm:first:border-l-0 border-[var(--theme-border-muted)]">
+      <dt className="text-xs text-[var(--theme-ink-soft)]">{label}</dt>
+      <dd className="mt-1 font-mono text-[22px] font-black leading-none tabular-nums">{value}</dd>
+      <dd className="mt-1.5 text-xs text-[var(--theme-ink-soft)]">{note}</dd>
+    </div>
+  );
 }
 
-function formatDate(dateStr: string): string {
-  const [year, month, day] = dateStr.split('-');
-  return `${year}.${month}.${day}`;
-}
-
-function dateToQuarter(dateStr: string): string {
-  const [yStr, mStr] = dateStr.split('-');
-  const q = Math.floor((Number(mStr) - 1) / 3) + 1;
-  return `${yStr} Q${q}`;
-}
-
-function dateToQuarterKr(dateStr: string): string {
-  const [yStr, mStr] = dateStr.split('-');
-  const q = Math.floor((Number(mStr) - 1) / 3) + 1;
-  return `${yStr}년 ${q}분기`;
-}
-
-interface PortfolioSummaryProps {
-  portfolio: GuruPortfolioDoc;
-}
-
-export default function PortfolioSummary({ portfolio }: PortfolioSummaryProps) {
-  const valueChange = portfolio.total_value_curr - portfolio.total_value_prev;
-  const valueChangePct = portfolio.total_value_prev > 0
-    ? (valueChange / portfolio.total_value_prev) * 100
-    : 0;
-
-  const newBuyCount = portfolio.holdings.filter(h => h.status === 'NEW BUY').length;
-  const soldOutCount = portfolio.holdings.filter(h => h.status === 'SOLD OUT').length;
+/** 분기 요약 — 운용 규모 · 보유 종목 · 신규/전량매도 · 공시일 */
+export default function PortfolioSummary({ view }: { view: QuarterView }) {
+  const { total_value_curr: curr, total_value_prev: prev, holdings } = view;
+  const changePct = prev > 0 ? ((curr - prev) / prev) * 100 : 0;
+  const newBuys = holdings.filter((h) => h.status === 'NEW BUY').length;
+  const soldOut = holdings.filter((h) => h.status === 'SOLD OUT').length;
 
   return (
-    <div className="card-base p-4 sm:p-6 mb-4 sm:mb-6" style={{ boxShadow: 'var(--shadow-md)' }}>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
-        {/* 총 포트폴리오 가치 */}
-        <div>
-          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold tracking-wider mb-1">
-            포트폴리오 가치
-          </p>
-          <p className="text-lg sm:text-xl font-black font-mono text-foreground">
-            {formatValue(portfolio.total_value_curr)}
-          </p>
-          <p className={`text-xs font-bold font-mono ${valueChange >= 0 ? 'text-red-500' : 'text-blue-500'}`}>
-            {valueChange >= 0 ? '+' : ''}{valueChangePct.toFixed(1)}% vs {dateToQuarter(portfolio.report_date_prev)}
-          </p>
-        </div>
-
-        {/* 보유 종목 수 */}
-        <div>
-          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold tracking-wider mb-1">
-            보유 종목
-          </p>
-          <p className="text-lg sm:text-xl font-black font-mono text-foreground">
-            {portfolio.holdings_count}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            종목 보유중
-          </p>
-        </div>
-
-        {/* 신규 매수 */}
-        <div>
-          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold tracking-wider mb-1">
-            신규 / 매도
-          </p>
-          <p className="text-lg sm:text-xl font-black text-foreground">
-            <span className="text-ant-red-600 dark:text-ant-red-400 font-mono">{newBuyCount}</span>
-            <span className="text-gray-400 mx-1">/</span>
-            <span className="text-blue-600 dark:text-blue-400 font-mono">{soldOutCount}</span>
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            신규매수 / 전량매도
-          </p>
-        </div>
-
-        {/* 보고 기간 */}
-        <div>
-          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold tracking-wider mb-1">
-            보고 기간
-          </p>
-          <p className="text-sm sm:text-base font-bold text-foreground">
-            {dateToQuarterKr(portfolio.report_date_curr)}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            기준일 {formatDate(portfolio.report_date_curr)}
-          </p>
-          {portfolio.filing_date_curr && (
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              공시일 {formatDate(portfolio.filing_date_curr)}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
+    <dl className="grid grid-cols-2 sm:grid-cols-4 border-b border-[var(--theme-border-muted)]">
+      <Stat
+        label="운용 규모"
+        value={formatUsd(curr)}
+        note={
+          <>
+            전분기 대비{' '}
+            <span className={`font-mono font-bold ${changePct >= 0 ? 'text-[var(--color-up)]' : 'text-[var(--color-down)]'}`}>
+              {changePct >= 0 ? '+' : ''}
+              {changePct.toFixed(1)}%
+            </span>
+          </>
+        }
+      />
+      <Stat label="보유 종목" value={view.holdings_count} note={`${quarterLabel(view.report_date_curr)} 말 기준`} />
+      <Stat
+        label="신규매수 · 전량매도"
+        value={
+          <>
+            <span className="text-[var(--color-up)]">{newBuys}</span>
+            <span className="mx-1.5 text-base font-normal text-[var(--theme-ink-soft)]">·</span>
+            <span className="text-[var(--color-down)]">{soldOut}</span>
+          </>
+        }
+        note="전분기 대비"
+      />
+      <Stat
+        label="공시일"
+        value={<span className="text-lg">{view.filing_date_curr ? dotDate(view.filing_date_curr) : '—'}</span>}
+        note={`기준일 ${dotDate(view.report_date_curr)}`}
+      />
+    </dl>
   );
 }

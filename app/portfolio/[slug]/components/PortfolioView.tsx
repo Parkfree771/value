@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { GuruPortfolioDoc, PortfolioHolding } from '@/lib/sec13f/types';
+import { PortfolioHolding } from '@/lib/sec13f/types';
+import { quarterLabel } from '@/lib/sec13f/format';
 import PortfolioSummary from './PortfolioSummary';
 import PortfolioTreemap from './PortfolioTreemap';
 import PortfolioTable from './PortfolioTable';
@@ -23,85 +24,41 @@ interface PriceData {
 interface Props {
   quarterViews: QuarterView[]; // 오래된 → 최신 순
   prices: PriceData;
-  guruNameKr: string;
-  filingName: string;
 }
 
-function dateToQuarterKr(dateStr: string): string {
-  const [yStr, mStr] = dateStr.split('-');
-  const q = Math.floor((Number(mStr) - 1) / 3) + 1;
-  return `${yStr}년 ${q}분기`;
-}
-
-export default function PortfolioView({
-  quarterViews,
-  prices,
-  guruNameKr,
-  filingName,
-}: Props) {
+export default function PortfolioView({ quarterViews, prices }: Props) {
   // UI 순서는 최신부터. 초기 선택은 가장 최신.
   const ordered = [...quarterViews].reverse();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const selected = ordered[selectedIdx];
 
-  // Summary는 GuruPortfolioDoc 셰이프를 받으므로 분기별 합성 doc 구성.
-  const summaryDoc: GuruPortfolioDoc = {
-    guru_name_en: '',
-    guru_name_kr: guruNameKr,
-    cik: '',
-    filing_name: filingName,
-    report_date_curr: selected.report_date_curr,
-    report_date_prev: selected.report_date_prev,
-    filing_date_curr: selected.filing_date_curr,
-    total_value_curr: selected.total_value_curr,
-    total_value_prev: selected.total_value_prev,
-    holdings_count: selected.holdings_count,
-    holdings: selected.holdings,
-    updated_at: '',
-  };
-
   return (
     <>
-      {/* 분기 셀렉터 */}
-      {ordered.length > 1 && (
-        <div className="mb-4 sm:mb-6 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold tracking-wider text-gray-700 dark:text-gray-300 mr-1">
-            분기
-          </span>
-          {ordered.map((view, idx) => (
-            <button
-              key={view.report_date_curr}
-              onClick={() => setSelectedIdx(idx)}
-              className={`px-3 py-1.5 text-xs font-bold border rounded-sm transition-colors ${
-                idx === selectedIdx
-                  ? 'bg-ant-red-600 text-white border-ant-red-800 dark:bg-ant-red-600 dark:border-ant-red-400'
-                  : 'bg-[var(--theme-bg-card)] text-foreground border-[var(--theme-border)] hover:bg-[var(--theme-bg)]'
-              }`}
-              style={{
-                boxShadow: idx === selectedIdx ? 'var(--shadow-sm)' : 'none',
-              }}
-            >
-              {dateToQuarterKr(view.report_date_curr)}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b-2 border-[var(--theme-border)] pb-2">
+        <h2 className="headline text-[22px] leading-tight">{quarterLabel(selected.report_date_curr)} 포트폴리오</h2>
+        {ordered.length > 1 && (
+          <div className="flex items-center gap-3 text-sm">
+            {ordered.map((view, idx) => (
+              <button
+                key={view.report_date_curr}
+                onClick={() => setSelectedIdx(idx)}
+                aria-pressed={idx === selectedIdx}
+                className={
+                  idx === selectedIdx
+                    ? 'font-bold text-[var(--foreground)] border-b-2 border-[var(--theme-border)] pb-0.5'
+                    : 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] pb-0.5 border-b-2 border-transparent'
+                }
+              >
+                {quarterLabel(view.report_date_curr)}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <PortfolioSummary portfolio={summaryDoc} />
-      <PortfolioTreemap
-        holdings={selected.holdings}
-        guruNameKr={guruNameKr}
-        filingName={filingName}
-        reportDate={selected.report_date_curr}
-        totalValue={selected.total_value_curr}
-        holdingsCount={selected.holdings_count}
-      />
-      <PortfolioTable
-        holdings={selected.holdings}
-        filingDate={selected.filing_date_curr}
-        prices={prices}
-        showPrices={selectedIdx === 0}
-      />
+      <PortfolioSummary view={selected} />
+      <PortfolioTreemap holdings={selected.holdings} />
+      <PortfolioTable holdings={selected.holdings} prices={prices} showPrices={selectedIdx === 0} />
     </>
   );
 }

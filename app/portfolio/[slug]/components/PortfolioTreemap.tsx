@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { hierarchy, treemap } from 'd3-hierarchy';
 import { PortfolioHolding } from '@/lib/sec13f/types';
+import { formatUsd } from '@/lib/sec13f/format';
 
 type StatusKr = '신규매수' | '비중확대' | '유지' | '비중축소';
 
@@ -38,12 +39,12 @@ function getCellColors(
   // 중립 (유지 or 거의 변동 없음)
   if (status === '유지' || Math.abs(deltaWeight) < 0.05) {
     return isDark
-      ? { fill: 'hsl(220, 8%, 28%)', text: '#ffffff' }
-      : { fill: 'hsl(220, 8%, 92%)', text: '#000000' };
+      ? { fill: 'hsl(0, 0%, 22%)', text: '#ffffff' }
+      : { fill: 'hsl(0, 0%, 93%)', text: '#111111' };
   }
   const isBuy = status === '신규매수' || status === '비중확대';
   const t = Math.min(1, Math.sqrt(Math.abs(deltaWeight) / MAX_DELTA));
-  const hue = isBuy ? 0 : 218;
+  const hue = isBuy ? 3 : 217; // --color-up · --color-down 과 같은 색상
   if (isDark) {
     const L = 26 + 22 * t; // 26 → 48
     const S = 45 + 20 * t; // 45 → 65
@@ -53,21 +54,8 @@ function getCellColors(
   const S = 50 + 28 * t; // 50 → 78
   return {
     fill: `hsl(${hue}, ${S}%, ${L}%)`,
-    text: L < 60 ? '#ffffff' : '#000000',
+    text: L < 60 ? '#ffffff' : '#111111',
   };
-}
-
-function formatValue(v: number): string {
-  if (v >= 1e9) return `$${(v / 1e9).toFixed(2)}B`;
-  if (v >= 1e6) return `$${(v / 1e6).toFixed(1)}M`;
-  if (v >= 1e3) return `$${(v / 1e3).toFixed(0)}K`;
-  return `$${v.toLocaleString()}`;
-}
-
-function dateToQuarter(dateStr: string): string {
-  const [y, m] = dateStr.split('-');
-  const q = Math.floor((Number(m) - 1) / 3) + 1;
-  return `${y} Q${q}`;
 }
 
 function formatChange(change: number | null, status: StatusKr): string {
@@ -78,23 +66,12 @@ function formatChange(change: number | null, status: StatusKr): string {
 
 interface Props {
   holdings: PortfolioHolding[];
-  guruNameKr: string;
-  filingName: string;
-  reportDate: string;
-  totalValue: number;
-  holdingsCount: number;
 }
 
 type HoverState = { cell: Cell; x: number; y: number } | null;
 
-export default function PortfolioTreemap({
-  holdings,
-  guruNameKr,
-  filingName,
-  reportDate,
-  totalValue,
-  holdingsCount,
-}: Props) {
+/** 트리맵 칸 크기 = 비중, 색 = 전분기 대비 비중 변동 */
+export default function PortfolioTreemap({ holdings }: Props) {
   const [isMobile, setIsMobile] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const [containerW, setContainerW] = useState(680);
@@ -134,34 +111,22 @@ export default function PortfolioTreemap({
   const W = Math.max(280, containerW);
   const H = isMobile ? 460 : 520;
 
-  const { cells, newBuyCount, soldOutCount } = useMemo(() => {
-    const cellsRaw: Cell[] = [];
-    let newCount = 0;
-    let soldCount = 0;
+  const cells = useMemo(() => {
+    const out: Cell[] = [];
     for (const h of holdings) {
-      if (h.status === 'NEW BUY') newCount += 1;
-      if (h.status === 'SOLD OUT') {
-        soldCount += 1;
-        continue;
-      }
       const statusKr = STATUS_MAP[h.status];
       if (!statusKr || h.weight_curr <= 0) continue;
-      const change = h.status === 'NEW BUY' ? null : h.shares_change_pct;
-      const deltaWeight =
-        h.status === 'NEW BUY'
-          ? h.weight_curr
-          : Math.abs((h.weight_curr ?? 0) - (h.weight_prev ?? 0));
-      cellsRaw.push({
+      out.push({
         ticker: h.ticker || h.cusip.slice(0, 6),
         name: h.name_of_issuer,
         weight: h.weight_curr,
-        marketValue: formatValue(h.value_curr),
+        marketValue: formatUsd(h.value_curr),
         status: statusKr,
-        change,
-        deltaWeight,
+        change: h.status === 'NEW BUY' ? null : h.shares_change_pct,
+        deltaWeight: h.status === 'NEW BUY' ? h.weight_curr : Math.abs((h.weight_curr ?? 0) - (h.weight_prev ?? 0)),
       });
     }
-    return { cells: cellsRaw, newBuyCount: newCount, soldOutCount: soldCount };
+    return out;
   }, [holdings]);
 
   const leaves = useMemo(() => {
@@ -194,74 +159,23 @@ export default function PortfolioTreemap({
   };
 
   return (
-    <div className="mb-4 sm:mb-6">
-      {/* 헤더 */}
-      <div
-        className="card-base p-4 sm:p-5 mb-3"
-        style={{ boxShadow: 'var(--shadow-sm)' }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-3">
-          <div className="text-sm sm:text-base text-foreground">
-            <span className="font-bold">{guruNameKr}</span>
-            <span className="text-gray-600 dark:text-gray-400 mx-2">·</span>
-            <span className="text-gray-700 dark:text-gray-300 font-medium">
-              {filingName}
-            </span>
-            <span className="text-gray-600 dark:text-gray-400 mx-2">·</span>
-            <span className="font-mono text-foreground">
-              {dateToQuarter(reportDate)}
-            </span>
-          </div>
-          <div className="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
-            <span className="font-bold font-mono text-foreground">
-              {formatValue(totalValue)}
-            </span>
-            <span className="text-gray-600 dark:text-gray-400 mx-2">·</span>
-            <span>
-              <span className="font-mono text-foreground">{holdingsCount}</span>
-              <span>개</span>
-            </span>
-            <span className="text-gray-600 dark:text-gray-400 mx-2">·</span>
-            <span className="font-mono">
-              <span className="text-red-600 dark:text-red-400 font-bold">
-                {newBuyCount}
-              </span>
-              <span className="text-gray-500 mx-0.5">/</span>
-              <span className="text-blue-600 dark:text-blue-400 font-bold">
-                {soldOutCount}
-              </span>
-            </span>
-          </div>
-        </div>
-
-        {/* 범례 — 연속 heat map. 한 축으로 매도(짙은 파랑)↔유지(회색)↔매수(짙은 빨강). */}
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
-            매도
-          </span>
-          <span
-            className="inline-block h-3 rounded-sm flex-1 max-w-[280px]"
-            style={{
-              background: isDark
-                ? 'linear-gradient(to right, hsl(218,65%,48%), hsl(218,45%,26%), hsl(220,8%,28%), hsl(0,45%,26%), hsl(0,65%,48%))'
-                : 'linear-gradient(to right, hsl(218,78%,56%), hsl(218,50%,94%), hsl(220,8%,92%), hsl(0,50%,94%), hsl(0,78%,56%))',
-            }}
-          />
-          <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300">
-            매수
-          </span>
-          <span className="text-[10px] text-gray-600 dark:text-gray-400 ml-1">
-            전분기 대비 비중 변동
-          </span>
-        </div>
+    <section aria-label="보유 비중 지도" className="mt-5">
+      {/* 범례 — 매도(파랑) · 유지(회색) · 매수(빨강) */}
+      <div className="mb-2 flex items-center justify-end gap-2 text-xs text-[var(--theme-ink-soft)]">
+        <span className="hidden sm:inline mr-1">칸 크기는 비중, 색은 전분기 대비 비중 변동</span>
+        <span className="font-bold text-[var(--color-down)]">매도</span>
+        <span
+          className="inline-block h-2 w-28 sm:w-40"
+          style={{
+            background: isDark
+              ? 'linear-gradient(to right, hsl(217,65%,48%), hsl(217,45%,26%), hsl(0,0%,22%), hsl(3,45%,26%), hsl(3,65%,48%))'
+              : 'linear-gradient(to right, hsl(217,78%,56%), hsl(217,50%,94%), hsl(0,0%,93%), hsl(3,50%,94%), hsl(3,78%,56%))',
+          }}
+        />
+        <span className="font-bold text-[var(--color-up)]">매수</span>
       </div>
 
-      {/* 트리맵 */}
-      <div
-        ref={containerRef}
-        className="card-base p-2 sm:p-3 relative overflow-hidden"
-        style={{ boxShadow: 'var(--shadow-md)' }}
-      >
+      <div ref={containerRef} className="relative overflow-hidden">
         <svg
           width={W}
           height={H}
@@ -287,11 +201,7 @@ export default function PortfolioTreemap({
                 <rect
                   width={w}
                   height={h}
-                  style={{
-                    fill: colors.fill,
-                    stroke: 'var(--theme-bg-card)',
-                  }}
-                  strokeWidth={1}
+                  style={{ fill: colors.fill }}
                 />
                 {showFull && (
                   <>
@@ -302,8 +212,7 @@ export default function PortfolioTreemap({
                       style={{
                         fill: colors.text,
                         fontSize: 15,
-                        fontWeight: 900,
-                        letterSpacing: '-0.02em',
+                        fontWeight: 800,
                       }}
                     >
                       {d.ticker}
@@ -330,8 +239,7 @@ export default function PortfolioTreemap({
                     style={{
                       fill: colors.text,
                       fontSize: 11,
-                      fontWeight: 900,
-                      letterSpacing: '-0.02em',
+                      fontWeight: 800,
                     }}
                   >
                     {d.ticker}
@@ -345,34 +253,33 @@ export default function PortfolioTreemap({
         {/* 데스크탑 툴팁 */}
         {hover && !isMobile && (
           <div
-            className="absolute pointer-events-none z-10 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm p-3 text-xs"
+            className="absolute pointer-events-none z-10 bg-[var(--background)] border border-[var(--theme-border)] p-3 text-xs"
             style={{
               left: Math.min(hover.x + 12, Math.max(0, containerW - 220)),
               top: Math.min(hover.y + 12, H - 140),
-              boxShadow: 'var(--shadow-lg)',
               minWidth: 200,
             }}
           >
             <div className="font-bold text-foreground text-sm">
               {hover.cell.ticker}
             </div>
-            <div className="text-[11px] text-gray-600 dark:text-gray-400 mb-2 truncate">
+            <div className="text-[11px] text-[var(--theme-ink-soft)] mb-2 truncate">
               {hover.cell.name}
             </div>
             <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
-              <span className="text-gray-600 dark:text-gray-400">평가액</span>
+              <span className="text-[var(--theme-ink-soft)]">평가액</span>
               <span className="font-mono text-foreground text-right font-bold">
                 {hover.cell.marketValue}
               </span>
-              <span className="text-gray-600 dark:text-gray-400">비중</span>
+              <span className="text-[var(--theme-ink-soft)]">비중</span>
               <span className="font-mono text-foreground text-right font-bold">
                 {hover.cell.weight.toFixed(2)}%
               </span>
-              <span className="text-gray-600 dark:text-gray-400">상태</span>
+              <span className="text-[var(--theme-ink-soft)]">상태</span>
               <span className="text-foreground text-right font-medium">
                 {hover.cell.status}
               </span>
-              <span className="text-gray-600 dark:text-gray-400">변동</span>
+              <span className="text-[var(--theme-ink-soft)]">변동</span>
               <span className="font-mono text-foreground text-right font-bold">
                 {formatChange(hover.cell.change, hover.cell.status)}
               </span>
@@ -383,47 +290,44 @@ export default function PortfolioTreemap({
 
       {/* 모바일 카드 */}
       {hover && isMobile && (
-        <div
-          className="mt-2 card-base p-3"
-          style={{ boxShadow: 'var(--shadow-sm)' }}
-        >
+        <div className="mt-2 border-y border-[var(--theme-border-muted)] py-3">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="font-bold text-foreground text-sm">
                 {hover.cell.ticker}
               </div>
-              <div className="text-[11px] text-gray-600 dark:text-gray-400 truncate">
+              <div className="text-[11px] text-[var(--theme-ink-soft)] truncate">
                 {hover.cell.name}
               </div>
             </div>
             <button
               onClick={() => setHover(null)}
-              className="text-base leading-none text-gray-500 dark:text-gray-400 px-1"
+              className="text-base leading-none text-[var(--theme-ink-soft)] px-1"
               aria-label="닫기"
             >
               ×
             </button>
           </div>
           <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 mt-2 text-xs">
-            <span className="text-gray-600 dark:text-gray-400">평가액</span>
+            <span className="text-[var(--theme-ink-soft)]">평가액</span>
             <span className="font-mono text-foreground text-right font-bold">
               {hover.cell.marketValue}
             </span>
-            <span className="text-gray-600 dark:text-gray-400">비중</span>
+            <span className="text-[var(--theme-ink-soft)]">비중</span>
             <span className="font-mono text-foreground text-right font-bold">
               {hover.cell.weight.toFixed(2)}%
             </span>
-            <span className="text-gray-600 dark:text-gray-400">상태</span>
+            <span className="text-[var(--theme-ink-soft)]">상태</span>
             <span className="text-foreground text-right font-medium">
               {hover.cell.status}
             </span>
-            <span className="text-gray-600 dark:text-gray-400">변동</span>
+            <span className="text-[var(--theme-ink-soft)]">변동</span>
             <span className="font-mono text-foreground text-right font-bold">
               {formatChange(hover.cell.change, hover.cell.status)}
             </span>
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
