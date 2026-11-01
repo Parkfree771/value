@@ -98,6 +98,7 @@ export default function PortfolioTreemap({ holdings }: Props) {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    if (el.clientWidth > 0) setContainerW(el.clientWidth); // 관찰 콜백을 기다리지 않고 첫 화면부터 실제 폭으로
     const ro = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const w = Math.round(entry.contentRect.width);
