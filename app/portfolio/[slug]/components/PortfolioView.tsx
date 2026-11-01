@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { PortfolioHolding } from '@/lib/sec13f/types';
 import { quarterLabel } from '@/lib/sec13f/format';
 import PortfolioSummary from './PortfolioSummary';
-import PortfolioTreemap from './PortfolioTreemap';
 import PortfolioTable from './PortfolioTable';
 
 export interface QuarterView {
@@ -57,7 +56,6 @@ export default function PortfolioView({ quarterViews, prices }: Props) {
       </div>
 
       <PortfolioSummary view={selected} />
-      <PortfolioTreemap holdings={selected.holdings} />
       <PortfolioTable holdings={selected.holdings} prices={prices} showPrices={selectedIdx === 0} />
     </>
   );
