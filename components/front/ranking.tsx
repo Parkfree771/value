@@ -13,13 +13,6 @@ export const PERIOD_LABELS: Record<Period, string> = {
 };
 export const PERIOD_KEYS: Period[] = ['all', '1d', '1w', '1m'];
 
-export const PERIOD_HINT: Record<Period, string> = {
-  all: '작성일부터 지금까지 수익률',
-  '1d': '직전 거래일 대비 수익률 · 종목당 1개',
-  '1w': '최근 7일 수익률 · 종목당 1개',
-  '1m': '최근 30일 수익률 · 종목당 1개',
-};
-
 // 직전 가격 업데이트 대비 랭킹 변동 (양수: 상승, 음수: 하락, 0: 변동 없음)
 export function RankChangeIndicator({ change, className = '' }: { change: number; className?: string }) {
   if (change === 0) return null;

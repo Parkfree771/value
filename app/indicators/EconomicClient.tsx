@@ -13,6 +13,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import type { FredIndicatorConfig, FredObservation, FredApiResponse, TimeRange, EcosIndicatorConfig, Country } from './types';
+import TrendIcon from '@/components/TrendIcon';
 
 /* ─── 지표 설정 (미국 FRED) ─── */
 
@@ -600,7 +601,7 @@ const IndicatorCard = memo(function IndicatorCard({
                   change >= 0 ? 'text-red-500' : 'text-blue-500'
                 }`}
               >
-                {change >= 0 ? '▲' : '▼'}{' '}
+                <TrendIcon direction={change >= 0 ? 'up' : 'down'} />{' '}
                 {config.format
                   ? config.format(Math.abs(change))
                   : `${Math.abs(change).toFixed(config.decimals)}${config.unit}`}

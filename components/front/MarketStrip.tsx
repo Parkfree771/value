@@ -1,4 +1,5 @@
 import type { TickerResponse } from '@/lib/ticker';
+import TrendIcon from '@/components/TrendIcon';
 
 // 지수 띠 — WSJ 상단 지수 줄처럼 한 줄로 (모바일은 가로 스크롤).
 // 값이 없는 항목(API 실패 · 오래된 market.json)은 빼고 보여준다.
@@ -33,7 +34,8 @@ export default function MarketStrip({ ticker }: { ticker: TickerResponse | null 
               )}
               {pct !== null && (
                 <span className={`tabular-nums font-semibold ${color}`}>
-                  {up ? '▲' : down ? '▼' : ''}
+                  {up && <TrendIcon direction="up" />}
+                  {down && <TrendIcon direction="down" />}{' '}
                   {pct > 0 ? '+' : ''}
                   {pct.toFixed(2)}%
                 </span>

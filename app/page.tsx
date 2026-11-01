@@ -85,11 +85,11 @@ const THUMBNAIL_SQL = `coalesce(p.images->>0,
       substring(p.content from '<img[^>]+src="(https://[^"]*\\.neon\\.tech/[^"]+)"'))`;
 
 /**
- * 1일/7일/한달 각각 TOP30(홈 순위표 펼침까지) 에 들어갈 글 id — 같은 종목·방향은 한 묶음(기간 수익률이 같으므로)으로 보고,
+ * 1일/7일/한달 각각 TOP10(홈 순위표) 에 들어갈 글 id — 같은 종목·방향은 한 묶음(기간 수익률이 같으므로)으로 보고,
  * 묶음마다 기간 수익률이 가장 높은 글 하나만 (클라이언트 TopReturnSlider 의 중복 제거 규칙과 동일).
  */
-// 홈 순위표: 1·2·3위 + 4~15위, 더보기로 30위까지
-const PERIOD_TOP_N = 30;
+// 홈 순위표: 1·2·3위 + 4~10위
+const PERIOD_TOP_N = 10;
 
 function periodTopIds(
   lightRows: Record<string, any>[],
