@@ -7,6 +7,7 @@
 //   node scripts/news/run.mjs --force      # 그래도 다시 발행
 //   node scripts/news/run.mjs --dry-run    # 업로드 없이 scripts/news/out/ 에만 (로컬 미리보기)
 //   node scripts/news/run.mjs --skip-insta # 사이트 브리핑만
+//   node scripts/news/run.mjs --insta-only # 발행된 오늘 브리핑 그대로 두고 인스타만 다시 (디자인 수정 반영용)
 //   INSTA_THEME=dark node scripts/news/run.mjs  # 카드·릴스 다크 지면 (light | dark | both)
 
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -21,6 +22,8 @@ const args = new Set(process.argv.slice(2));
 const force = args.has('--force');
 const dryRun = args.has('--dry-run');
 const skipInsta = args.has('--skip-insta');
+const instaOnly = args.has('--insta-only');
+if (instaOnly && skipInsta) throw new Error('--insta-only 와 --skip-insta 는 같이 못 씀');
 // 카드·릴스 지면 — light(흰 지면) | dark(먹색) | both(light 를 올리고 dark 는 out/dark 에 비교용으로만)
 const theme = ['light', 'dark', 'both'].includes(process.env.INSTA_THEME) ? process.env.INSTA_THEME : 'light';
 
@@ -34,52 +37,63 @@ const note = (line) => { console.log(line); summary.push(line); };
 
 // ─── 0. 오늘 이미 발행됐나 (예비 실행용) ───
 const prev = await getPublicJson('briefing/briefing.json');
-if (!force && !dryRun && prev?.generated_at && kstParts(new Date(prev.generated_at)).ymd === today.ymd) {
+if (!force && !dryRun && !instaOnly && prev?.generated_at && kstParts(new Date(prev.generated_at)).ymd === today.ymd) {
   note(`오늘(${today.ymd}) 브리핑은 이미 발행됨 (${prev.generated_at_kr}) — 건너뜀`);
   writeSummary();
   process.exit(0);
 }
 
-// ─── 1. RSS ───
-console.log(`\n[1/3] RSS 수집 (${kstLabel()})`);
-const data = await collect();
-writeFileSync(join(outDir, 'articles.json'), JSON.stringify(data, null, 2));
-const failed = data.sources.filter((s) => s.error).map((s) => s.name);
-note(`RSS: 기사 ${data.total_articles}건 · 매체 ${data.sources.length - failed.length}/${data.sources.length}${failed.length ? ` (실패: ${failed.join(', ')})` : ''}`);
-if (data.total_articles < 40) throw new Error(`수집 기사가 너무 적음 (${data.total_articles}건) — 피드 상태 확인`);
-
-// ─── 2. 사이트용 10개 ───
-console.log('\n[2/3] 이슈 10개 선정·작성');
-const analysis = parseJsonObject(await callClaude(buildBriefingPrompt(data, prev?.issues?.length ? prev : null), 'briefing'));
-const issues = (analysis.issues || [])
-  .filter((i) => i && typeof i.headline === 'string' && typeof i.summary === 'string')
-  .slice(0, 10)
-  .map((i) => ({
-    headline: i.headline.trim(),
-    summary: i.summary.trim(),
-    tags: Array.isArray(i.tags) ? i.tags.slice(0, 4) : [],
-    covered_by: Array.isArray(i.covered_by) ? i.covered_by : [],
-    sources: i.sources ?? '',
-    importance: i.importance ?? 'medium',
-  }));
-if (issues.length < 8) throw new Error(`이슈가 ${issues.length}개뿐 — 응답 확인`);
-
 const now = new Date();
-const briefing = {
-  generated_at: now.toISOString(),
-  generated_at_kr: kstLabel(now),
-  source_articles: data.total_articles,
-  issues,
-};
-writeFileSync(join(outDir, 'briefing.json'), JSON.stringify(briefing, null, 2));
-issues.forEach((i, n) => note(`${String(n + 1).padStart(2)}. [${i.importance}] ${i.headline} — 매체 ${i.covered_by.length}곳`));
+let briefing;
+let issues;
 
-if (!dryRun) {
-  const body = JSON.stringify(briefing);
-  await putObject(`briefing/archive/${today.ymd}.json`, body, 'application/json; charset=utf-8', 'public, max-age=31536000, immutable');
-  await putObject('briefing/briefing.json', body, 'application/json; charset=utf-8', 'public, max-age=300');
-  await revalidate(['/', '/briefing']);
-  note(`사이트 발행: ${SITE_URL}/briefing`);
+if (instaOnly) {
+  // 다시 발행하면 차별화 규칙 때문에 오늘 이슈가 바뀌므로 사이트 쪽은 건드리지 않는다
+  if (!prev?.issues?.length) throw new Error('발행된 브리핑이 없음');
+  briefing = prev;
+  issues = prev.issues;
+  note(`인스타만 다시 — 브리핑 ${prev.generated_at_kr} 기준 (사이트 그대로)`);
+} else {
+  // ─── 1. RSS ───
+  console.log(`\n[1/3] RSS 수집 (${kstLabel()})`);
+  const data = await collect();
+  writeFileSync(join(outDir, 'articles.json'), JSON.stringify(data, null, 2));
+  const failed = data.sources.filter((s) => s.error).map((s) => s.name);
+  note(`RSS: 기사 ${data.total_articles}건 · 매체 ${data.sources.length - failed.length}/${data.sources.length}${failed.length ? ` (실패: ${failed.join(', ')})` : ''}`);
+  if (data.total_articles < 40) throw new Error(`수집 기사가 너무 적음 (${data.total_articles}건) — 피드 상태 확인`);
+
+  // ─── 2. 사이트용 10개 ───
+  console.log('\n[2/3] 이슈 10개 선정·작성');
+  const analysis = parseJsonObject(await callClaude(buildBriefingPrompt(data, prev?.issues?.length ? prev : null), 'briefing'));
+  issues = (analysis.issues || [])
+    .filter((i) => i && typeof i.headline === 'string' && typeof i.summary === 'string')
+    .slice(0, 10)
+    .map((i) => ({
+      headline: i.headline.trim(),
+      summary: i.summary.trim(),
+      tags: Array.isArray(i.tags) ? i.tags.slice(0, 4) : [],
+      covered_by: Array.isArray(i.covered_by) ? i.covered_by : [],
+      sources: i.sources ?? '',
+      importance: i.importance ?? 'medium',
+    }));
+  if (issues.length < 8) throw new Error(`이슈가 ${issues.length}개뿐 — 응답 확인`);
+
+  briefing = {
+    generated_at: now.toISOString(),
+    generated_at_kr: kstLabel(now),
+    source_articles: data.total_articles,
+    issues,
+  };
+  writeFileSync(join(outDir, 'briefing.json'), JSON.stringify(briefing, null, 2));
+  issues.forEach((i, n) => note(`${String(n + 1).padStart(2)}. [${i.importance}] ${i.headline} — 매체 ${i.covered_by.length}곳`));
+
+  if (!dryRun) {
+    const body = JSON.stringify(briefing);
+    await putObject(`briefing/archive/${today.ymd}.json`, body, 'application/json; charset=utf-8', 'public, max-age=31536000, immutable');
+    await putObject('briefing/briefing.json', body, 'application/json; charset=utf-8', 'public, max-age=300');
+    await revalidate(['/', '/briefing']);
+    note(`사이트 발행: ${SITE_URL}/briefing`);
+  }
 }
 
 // ─── 3. 인스타 카드 5장 + 릴스 + 캡션 ───
@@ -108,12 +122,14 @@ if (!skipInsta) {
 
   if (!dryRun) {
     const prefix = `instagram/${today.ymd}`;
+    // 같은 날 다시 만들면 파일 이름이 같으므로 하루 캐시를 피한다
+    const version = `?v=${now.getTime()}`;
     const urls = [];
     for (let i = 0; i < files.cards.length; i++) {
-      urls.push(await putObject(`${prefix}/card-${i + 1}.png`, readFileSync(files.cards[i]), 'image/png'));
+      urls.push((await putObject(`${prefix}/card-${i + 1}.png`, readFileSync(files.cards[i]), 'image/png')) + version);
     }
-    const outroUrl = await putObject(`${prefix}/card-6.png`, readFileSync(files.outro), 'image/png');
-    const reelUrl = await putObject(`${prefix}/reel.mp4`, readFileSync(files.reel), 'video/mp4');
+    const outroUrl = (await putObject(`${prefix}/card-6.png`, readFileSync(files.outro), 'image/png')) + version;
+    const reelUrl = (await putObject(`${prefix}/reel.mp4`, readFileSync(files.reel), 'video/mp4')) + version;
     const captionUrl = await putObject(`${prefix}/caption.txt`, caption, 'text/plain; charset=utf-8');
     const manifest = { date: today.ymd, generated_at: now.toISOString(), cover_hook: hooks.cover_hook, cards: cards.map((c, i) => ({ ...c, image: urls[i] })), outro: outroUrl, reel: reelUrl, caption };
     await putObject(`${prefix}/manifest.json`, JSON.stringify(manifest), 'application/json; charset=utf-8');

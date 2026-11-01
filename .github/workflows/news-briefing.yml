@@ -26,6 +26,10 @@ on:
         description: '사이트 브리핑만 (인스타 파일 생략)'
         type: boolean
         default: false
+      insta_only:
+        description: '인스타만 다시 — 사이트 브리핑은 그대로 (디자인 수정 반영용)'
+        type: boolean
+        default: false
       theme:
         description: '카드·릴스 지면 — light 흰 지면 · dark 먹색 · both 흰 지면 게시 + 다크 비교본(Artifacts)'
         type: choice
@@ -68,6 +72,7 @@ jobs:
           node scripts/news/run.mjs \
             $([ "${{ inputs.force }}" = true ] && echo --force) \
             $([ "${{ inputs.skip_insta }}" = true ] && echo --skip-insta) \
+            $([ "${{ inputs.insta_only }}" = true ] && echo --insta-only) \
             $([ "${{ inputs.dry_run }}" = true ] && echo --dry-run)
       # 카드·릴스·캡션을 Actions 화면에서도 바로 받을 수 있게
       - uses: actions/upload-artifact@v4
