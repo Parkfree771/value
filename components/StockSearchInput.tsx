@@ -231,7 +231,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
             <button
               type="button"
               onClick={() => onStockSelect(null as any)}
-              className="flex-shrink-0 text-sm font-bold underline underline-offset-4 hover:text-[var(--theme-ink-soft)]"
+              className="flex-shrink-0 min-h-[36px] sm:min-h-0 text-sm font-bold underline underline-offset-4 hover:text-[var(--theme-ink-soft)]"
             >
               변경
             </button>
@@ -274,7 +274,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
                 if (query) setShowResults(true);
               }}
               onKeyDown={handleKeyDown}
-              placeholder="기업명 · 티커 · 초성 (예: 삼성전자, 하닉, NVDA, ㅅㅅㅈㅈ)"
+              placeholder="종목 검색"
               aria-label="종목 검색"
               autoComplete="off"
               disabled={!!pending}
@@ -333,7 +333,7 @@ const StockSearchInput = memo(function StockSearchInput({ onStockSelect, selecte
             <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)]
                           border border-[var(--theme-border-muted)] rounded-sm p-4">
               <p className="text-sm text-center">&lsquo;{query}&rsquo;에 맞는 종목이 없어요</p>
-              <p className="mt-1 text-xs text-[var(--theme-ink-soft)] text-center">영문 이름이나 티커(예: TSLA, 005930)로도 찾아보세요</p>
+              <p className="mt-1 text-xs text-[var(--theme-ink-soft)] text-center">영문 이름이나 티커로도 찾아보세요</p>
             </div>
           )}
         </>

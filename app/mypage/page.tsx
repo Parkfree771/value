@@ -331,65 +331,65 @@ export default function MyPage() {
 
       {/* 상세 통계 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-        <div className="pixel-stat-card">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconGreen}`}>
+        <div className="pixel-stat-card !p-3 sm:!p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconGreen}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgGreen}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">최고 수익</div>
-              <div className={`text-xl font-bold font-mono tabular-nums ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
+              <div className={`text-base sm:text-xl font-bold font-mono tabular-nums ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
                 {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
               </div>
             </div>
           </div>
         </div>
 
-        <div className="pixel-stat-card">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconRed}`}>
+        <div className="pixel-stat-card !p-3 sm:!p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconRed}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgRed}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">최저 수익</div>
-              <div className={`text-xl font-bold font-mono tabular-nums ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
+              <div className={`text-base sm:text-xl font-bold font-mono tabular-nums ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
                 {parseFloat(minReturnRate) >= 0 ? '+' : ''}{minReturnRate}%
               </div>
             </div>
           </div>
         </div>
 
-        <div className="pixel-stat-card">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconBlue}`}>
+        <div className="pixel-stat-card !p-3 sm:!p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconBlue}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgBlue}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">총 조회수</div>
-              <div className="text-xl font-bold font-mono tabular-nums">
+              <div className="text-base sm:text-xl font-bold font-mono tabular-nums">
                 {totalViews > 999 ? (totalViews / 1000).toFixed(1) + 'K' : totalViews}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="pixel-stat-card">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 border rounded-[4px] flex items-center justify-center ${styles.statIconPink}`}>
+        <div className="pixel-stat-card !p-3 sm:!p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconPink}`}>
               <svg className={`w-5 h-5 ${styles.statIconSvgPink}`} fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">총 좋아요</div>
-              <div className="text-xl font-bold font-mono tabular-nums">{totalLikes}</div>
+              <div className="text-base sm:text-xl font-bold font-mono tabular-nums">{totalLikes}</div>
             </div>
           </div>
         </div>
@@ -487,7 +487,7 @@ export default function MyPage() {
           <div className="p-4 sm:p-6">
             <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
               <h4 className="font-sans text-sm font-bold mb-1">이메일</h4>
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400">{userEmail}</p>
+              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 break-all sm:break-normal">{userEmail}</p>
             </div>
 
             <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
@@ -518,11 +518,11 @@ export default function MyPage() {
       {/* 프로필 수정 모달 */}
       {isEditModalOpen && (
         <div className="pixel-modal-overlay">
-          <div className="pixel-modal">
+          <div className="pixel-modal max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-h-none sm:overflow-visible">
             <div className="pixel-modal-header">
               <h3 className="pixel-modal-title">프로필 수정</h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="pixel-modal-close">
-                <svg className="w-4.5 h-4.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button onClick={() => setIsEditModalOpen(false)} className="pixel-modal-close min-h-[36px] min-w-[36px] sm:min-h-0 sm:min-w-0">
+                <svg className="w-[18px] h-[18px] sm:w-auto sm:h-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -541,7 +541,7 @@ export default function MyPage() {
                   maxLength={20}
                   disabled={isUpdating}
                 />
-                <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">{newNickname.length}/20자</p>
+                <p className="font-sans text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">{newNickname.length}/20자</p>
               </div>
 
               <div className={styles.warningBox}>
@@ -584,11 +584,11 @@ export default function MyPage() {
       {/* 회원 탈퇴 확인 모달 */}
       {isWithdrawModalOpen && (
         <div className="pixel-modal-overlay">
-          <div className="pixel-modal">
+          <div className="pixel-modal max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-h-none sm:overflow-visible">
             <div className="pixel-modal-header">
               <h3 className="pixel-modal-title">회원 탈퇴</h3>
-              <button onClick={() => setIsWithdrawModalOpen(false)} className="pixel-modal-close">
-                <svg className="w-4.5 h-4.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button onClick={() => setIsWithdrawModalOpen(false)} className="pixel-modal-close min-h-[36px] min-w-[36px] sm:min-h-0 sm:min-w-0">
+                <svg className="w-[18px] h-[18px] sm:w-auto sm:h-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>

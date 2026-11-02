@@ -5,11 +5,13 @@ import dynamic from 'next/dynamic';
 import type { ReportSummary } from '@/types/report';
 import type { FeedPost, FeedData } from '@/types/feed';
 import ReportCard from '@/components/ReportCard';
+import Pagination from '@/components/Pagination';
 import WriteCtaCard from '@/components/WriteCtaCard';
 import { HomeSkeleton } from '@/components/loading/Loading';
 import { matchesReport } from '@/utils/reportSearch';
 import FrontPage from '@/components/front/FrontPage';
 import MarketStrip from '@/components/front/MarketStrip';
+import SectionBand from '@/components/front/SectionBand';
 import FeedSidebar from '@/components/front/FeedSidebar';
 import type { Briefing } from '@/lib/briefing';
 import type { TickerResponse } from '@/lib/ticker';
@@ -35,7 +37,7 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 
 // 필터 (텍스트 스타일 - 검색 페이지와 동일)
-const FILTER_BASE = 'flex-shrink-0 font-heading tracking-tight sm:tracking-wide text-[10px] sm:text-sm px-1 py-0.5 sm:px-3 sm:py-1.5 transition-all';
+const FILTER_BASE = 'flex-shrink-0 font-heading tracking-tight sm:tracking-wide text-[13px] sm:text-sm px-2 py-1.5 sm:px-3 transition-all';
 const FILTER_ACTIVE = `${FILTER_BASE} font-black text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
 const FILTER_INACTIVE = `${FILTER_BASE} font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)]`;
 
@@ -52,15 +54,6 @@ function measureFirstRow(container: HTMLElement | null): number {
   }
   return count >= children.length ? Infinity : Math.max(count - 1, 1);
 }
-
-// 날짜 줄 — "2026년 10월 30일 금요일" (한국 시간)
-const DATELINE = new Intl.DateTimeFormat('ko-KR', {
-  timeZone: 'Asia/Seoul',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-  weekday: 'long',
-});
 
 // feed.json API 엔드포인트 (클라이언트 재검증용)
 const FEED_API = '/api/feed/public';
@@ -288,16 +281,6 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
       <h1 className="sr-only">AntStreet - 개미 가치투자자의 투자 리포트 기록장</h1>
       {/* 지수 띠 */}
       <MarketStrip ticker={ticker} />
-      {/* 신문 날짜 줄 — 슬로건 · 날짜 · 리포트 수 */}
-      <div className="md:hidden mt-3 mb-5 flex items-baseline justify-between gap-3 border-b border-[var(--theme-border-muted)] pb-2">
-        <p className="font-serif font-bold text-[13px] sm:text-[15px] text-[var(--foreground)] break-keep">
-          개인 투자자가 쓰고, 시장이 채점한다
-        </p>
-        <p suppressHydrationWarning className="flex-shrink-0 text-[11px] sm:text-xs text-muted tabular-nums">
-          <span className="hidden sm:inline">{DATELINE.format(new Date())} · </span>리포트 {total.toLocaleString('ko-KR')}편
-        </p>
-      </div>
-
       {/* 1면 — 수익률 1·2·3위 + 4~10위 / 모닝 브리핑 · 구루 / 최신 리포트 */}
       <div className="mt-5 md:mt-7">
         <FrontPage reports={reports} briefing={briefing} />
@@ -308,20 +291,21 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
       <div className="mt-10 lg:grid lg:grid-cols-12 lg:gap-x-10">
       <div className="lg:col-span-8 min-w-0">
       {/* 제목 줄 — 왼쪽 "모든 리포트", 오른쪽 검색 */}
-      <div className="section-rule flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-3 sm:mb-4">
-        <h2 id="feed" className="text-xl sm:text-2xl text-heading scroll-mt-20">모든 리포트</h2>
+      <SectionBand label="ALL REPORTS" right={`${total.toLocaleString('ko-KR')}편`} />
+      <div id="feed" className="section-rule scroll-mt-20 border-t-0 md:border-t-2 mt-1 md:mt-0 flex-col md:flex-row md:items-end md:justify-between gap-2 mb-3 sm:mb-4">
+        <h2 className="hidden md:block text-2xl text-heading">모든 리포트</h2>
         <SearchBar
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           placeholder="종목·작성자·제목으로 찾기"
           showStockSuggestions={false}
-          className="w-full sm:w-72"
+          className="w-full md:w-72"
         />
       </div>
 
-      {/* 필터: 왼쪽 상장사 | 오른쪽 정렬탭 (한 줄 유지, 모바일 축소) */}
-      <div className="mb-3 sm:mb-4 flex justify-between items-center gap-1 overflow-x-auto scrollbar-hide">
-        <div className="flex gap-0 sm:gap-1 flex-nowrap items-center">
+      {/* 필터: 데스크탑은 한 줄(왼쪽 상장사 | 오른쪽 정렬탭), 모바일은 두 줄 */}
+      <div className="mb-3 sm:mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-0.5 sm:gap-1">
+        <div className="flex gap-0 sm:gap-1 flex-nowrap items-center overflow-x-auto scrollbar-hide">
           {marketKeys.map((m) => (
             <button
               key={m}
@@ -332,7 +316,7 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
             </button>
           ))}
         </div>
-        <div className="flex gap-0 sm:gap-1 flex-nowrap sm:ml-2 items-center">
+        <div className="flex gap-0 sm:gap-1 flex-nowrap sm:ml-2 items-center overflow-x-auto scrollbar-hide">
           {(['all', 'following', 'popular', 'return'] as FeedTab[]).map((tab) => {
             const label = { all: '전체', following: '북마크', popular: '인기순', return: '수익률순' }[tab];
             const showArrow = tab === 'return' && activeTab === 'return';
@@ -375,40 +359,8 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
       </div>
 
       {/* 페이지네이션 (랭킹 페이지와 동일 스타일) */}
-      {filteredReports.length > 0 && totalPages > 1 && (
-        <div className="flex justify-center items-center gap-1.5 sm:gap-2 mt-6 sm:mt-8">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={safePage === 1}
-            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] rounded-sm text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            이전
-          </button>
-
-          <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => setCurrentPage(page)}
-                className={`font-sans px-2.5 py-1.5 sm:px-3 sm:py-2 text-xs sm:text-sm font-bold rounded-sm transition-all ${
-                  safePage === page
-                    ? 'border pixel-chip-active'
-                    : 'bg-[var(--theme-bg-card)] border border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={safePage === totalPages}
-            className="font-sans px-3 py-1.5 sm:px-4 sm:py-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border-muted)] rounded-sm text-xs sm:text-sm font-bold hover:border-[var(--theme-accent)] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-          >
-            다음
-          </button>
-        </div>
+      {filteredReports.length > 0 && (
+        <Pagination page={safePage} totalPages={totalPages} onChange={setCurrentPage} />
       )}
 
       {/* 게시물 수 표시 */}

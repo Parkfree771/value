@@ -150,9 +150,9 @@ const ReportCard = memo(function ReportCard({
           <div className="flex-1 min-w-0">
             <h2 className="headline text-[18px] sm:text-[22px] leading-snug line-clamp-2 break-keep mb-1 sm:mb-1.5 group-hover:underline underline-offset-4 decoration-1">{title}</h2>
             <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
-              <h3 className="text-xs sm:text-base font-semibold text-gray-700 dark:text-gray-300 font-heading tracking-wide truncate">{shortStockName(stockName, ticker)}</h3>
+              <h3 className="text-[13px] sm:text-base font-semibold text-gray-700 dark:text-gray-300 font-heading tracking-wide truncate">{shortStockName(stockName, ticker)}</h3>
               {shortStockName(stockName, ticker).toUpperCase() !== ticker.toUpperCase() && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>}
-              {exchangeLabel(exchange) && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">· {exchangeLabel(exchange)}</span>}
+              {exchangeLabel(exchange) && <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">· {exchangeLabel(exchange)}</span>}
               {themes && themes.length > 0 && themes.slice(0, 2).map(themeId => (
                 <span key={themeId} className="text-[10px] px-1 sm:px-1.5 py-0.5 border border-[var(--theme-border-muted)] rounded text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">
                   #{THEME_NAMES[themeId] || themeId}
@@ -164,7 +164,7 @@ const ReportCard = memo(function ReportCard({
             </div>
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
-            <div className="text-base sm:text-2xl font-black font-heading font-mono tracking-tight">
+            <div className="text-lg sm:text-2xl font-black font-heading font-mono tracking-tight">
               {formatReturn(returnRate)}
             </div>
             <div className="mt-1 flex items-center justify-end gap-1">
@@ -184,16 +184,16 @@ const ReportCard = memo(function ReportCard({
 
         {/* 매수 이유 미리보기 + 썸네일 — "왜 샀는지"가 이 사이트의 본론 */}
         {(excerpt || thumbSrc) && (
-          // 모바일: 이미지를 카드 폭 전체로 위에 / 데스크탑: 본문 오른쪽에 큼직하게
-          <div className="mb-2 sm:mb-3 flex flex-col-reverse gap-2 sm:flex-row sm:items-start sm:gap-4">
+          // 본문 오른쪽에 썸네일 — 모바일은 작은 정사각형, 데스크탑은 큼직하게
+          <div className="mb-2 sm:mb-3 flex items-start gap-3 sm:gap-4">
             {excerpt && (
-              <p className={`flex-1 min-w-0 text-xs sm:text-sm leading-relaxed text-gray-600 dark:text-gray-400 ${thumbSrc ? 'line-clamp-2 sm:line-clamp-5' : 'line-clamp-2'}`}>
+              <p className={`flex-1 min-w-0 text-[13px] sm:text-sm leading-relaxed text-gray-600 dark:text-gray-400 ${thumbSrc ? 'line-clamp-3 sm:line-clamp-5' : 'line-clamp-2'}`}>
                 {excerpt}
               </p>
             )}
             {thumbSrc && (
-              <div className="relative w-full aspect-[2/1] sm:w-56 sm:aspect-[16/10] flex-shrink-0 overflow-hidden rounded-sm border border-[var(--theme-border-muted)] bg-gray-100 dark:bg-gray-800">
-                <Image src={thumbSrc} alt="" fill sizes="(max-width: 640px) 100vw, 224px" className="object-cover" />
+              <div className="relative w-20 aspect-square sm:w-56 sm:aspect-[16/10] flex-shrink-0 overflow-hidden rounded-sm border border-[var(--theme-border-muted)] bg-gray-100 dark:bg-gray-800">
+                <Image src={thumbSrc} alt="" fill sizes="(max-width: 640px) 80px, 224px" className="object-cover" />
               </div>
             )}
           </div>
@@ -213,7 +213,7 @@ const ReportCard = memo(function ReportCard({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
+        <div className="flex items-center text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
           <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(author)}`; }}
           >
@@ -227,8 +227,8 @@ const ReportCard = memo(function ReportCard({
           <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
             {!showActions && (
               <>
-                <span>조회 {views}</span>
-                <span>·</span>
+                <span className="hidden sm:inline">조회 {views}</span>
+                <span className="hidden sm:inline">·</span>
                 <span>좋아요 {likes}</span>
                 <span>·</span>
                 <span>댓글 {commentCount}</span>

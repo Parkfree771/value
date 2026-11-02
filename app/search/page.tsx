@@ -5,6 +5,7 @@ import Link from 'next/link';
 import ReportCard from '@/components/ReportCard';
 import SearchBar, { type StockSuggestion } from '@/components/SearchBar';
 import Container from '@/components/Container';
+import FilterTabs from '@/components/FilterTabs';
 import { InlineLoading } from '@/components/loading/Loading';
 import { loadThemes, getSymbolsForThemes } from '@/lib/themeStocks';
 import type { Theme } from '@/types/theme';
@@ -26,14 +27,9 @@ const MARKET_EXCHANGES: Record<string, string[]> = {
 };
 const PAGE = 20;
 
-const TAB = (active: boolean) =>
-  `flex-shrink-0 px-2 py-1 text-[13px] border-b-2 transition-colors ${
-    active ? 'font-bold border-[var(--theme-border)]' : 'border-transparent text-[var(--theme-ink-soft)] hover:text-[var(--foreground)]'
-  }`;
-const CHIP = (active: boolean) =>
-  `flex-shrink-0 px-2.5 py-1 text-xs border rounded-[2px] transition-colors ${
-    active ? 'pixel-chip-active font-bold' : 'border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
-  }`;
+const MARKETS = Object.keys(MARKET_LABELS) as MarketFilter[];
+const SORTS = Object.keys(SORT_LABELS) as SortType[];
+const ALL_THEMES = '__all';
 
 interface FeedReport {
   id: string;
@@ -144,11 +140,16 @@ export default function SearchPage() {
 
   const isFiltering = !!(query.trim() || picked || selectedTheme || market !== 'all');
 
+  const themeOptions = useMemo(() => [ALL_THEMES, ...allThemes.map((t) => t.id)], [allThemes]);
+  const themeLabel = useCallback(
+    (id: string) => allThemes.find((t) => t.id === id)?.name ?? '모든 테마',
+    [allThemes],
+  );
+
   return (
     <Container>
-      <div className="border-b-2 border-[var(--theme-border)] pb-3 mb-5">
-        <p className="kicker">종목 · 리포트 검색</p>
-        <h1 className="headline text-2xl sm:text-3xl font-bold">어떤 종목이 궁금하세요?</h1>
+      <div className="border-b-2 border-[var(--theme-border)] pb-2 mb-4">
+        <h1 className="headline text-[26px] sm:text-[30px] leading-tight">어떤 종목이 궁금하세요?</h1>
       </div>
 
       <SearchBar
@@ -157,7 +158,7 @@ export default function SearchPage() {
           setQuery(v);
           if (v) setPicked(null);
         }}
-        placeholder="종목·티커·초성·제목·작성자 (예: 하닉, NVDA, ㅅㅅㅈㅈ)"
+        placeholder="종목 검색"
         showStockSuggestions
         onSelectStock={handlePick}
         onSuggestions={handleSuggestions}
@@ -199,42 +200,37 @@ export default function SearchPage() {
 
       {/* 검색 전 — 리포트가 많은 종목 */}
       {!isFiltering && topStocks.length > 0 && (
-        <section className="mb-6">
-          <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">리포트가 많은 종목</p>
-          <div className="flex flex-wrap gap-1.5">
-            {topStocks.map((s) => (
-              <button key={s.ticker} type="button" onClick={() => pickFromReports(s.ticker, s.name, s.exchange)} className={CHIP(false)}>
-                <span className="font-bold">{s.name}</span>
-                <span className="ml-1 text-[var(--theme-ink-soft)]">{s.n}</span>
-              </button>
+        <section className="mb-7">
+          <h2 className="headline text-[18px] border-b border-[var(--theme-border)] pb-1.5">리포트가 많은 종목</h2>
+          <ol className="grid grid-cols-2 lg:grid-cols-3 gap-x-6">
+            {topStocks.map((s, i) => (
+              <li key={s.ticker} className="min-w-0 border-b border-[var(--theme-border-muted)]">
+                <button type="button" onClick={() => pickFromReports(s.ticker, s.name, s.exchange)} className="group w-full flex items-baseline gap-2 py-2 text-left">
+                  <span className="flex-shrink-0 w-5 font-serif font-black text-[var(--theme-ink-soft)]">{i + 1}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-bold text-[var(--foreground)] group-hover:underline underline-offset-4">{s.name}</span>
+                  <span className="flex-shrink-0 text-xs tabular-nums text-[var(--theme-ink-soft)]">{s.n}편</span>
+                </button>
+              </li>
             ))}
-          </div>
+          </ol>
         </section>
       )}
 
       {/* 필터 — 시장 · 정렬 · 테마 */}
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-y-1 border-b border-[var(--theme-border-muted)]">
-        <div className="flex overflow-x-auto scrollbar-hide">
-          {(Object.keys(MARKET_LABELS) as MarketFilter[]).map((m) => (
-            <button key={m} onClick={() => setMarket(m)} className={TAB(market === m)}>{MARKET_LABELS[m]}</button>
-          ))}
+      <div className="mb-3 border-b border-[var(--theme-border-muted)]">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+          <FilterTabs options={MARKETS} value={market} onChange={setMarket} label={(m) => MARKET_LABELS[m]} />
+          <FilterTabs options={SORTS} value={sortType} onChange={setSortType} label={(t) => SORT_LABELS[t]} />
         </div>
-        <div className="flex overflow-x-auto scrollbar-hide">
-          {(Object.keys(SORT_LABELS) as SortType[]).map((t) => (
-            <button key={t} onClick={() => setSortType(t)} className={TAB(sortType === t)}>{SORT_LABELS[t]}</button>
-          ))}
-        </div>
+        {allThemes.length > 0 && (
+          <FilterTabs
+            options={themeOptions}
+            value={selectedTheme ?? ALL_THEMES}
+            onChange={(id) => setSelectedTheme(id === ALL_THEMES || id === selectedTheme ? null : id)}
+            label={themeLabel}
+          />
+        )}
       </div>
-      {allThemes.length > 0 && (
-        <div className="mb-4 flex gap-1.5 overflow-x-auto scrollbar-hide pb-1">
-          <button onClick={() => setSelectedTheme(null)} className={CHIP(selectedTheme === null)}>모든 테마</button>
-          {allThemes.map((t) => (
-            <button key={t.id} onClick={() => setSelectedTheme(t.id === selectedTheme ? null : t.id)} className={CHIP(selectedTheme === t.id)} title={t.description}>
-              {t.name}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* 결과 */}
       {loading ? (

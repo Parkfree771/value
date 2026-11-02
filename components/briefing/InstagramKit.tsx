@@ -108,7 +108,7 @@ export default function InstagramKit() {
             <div className="min-w-0">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-[var(--theme-ink-soft)]">캡션</p>
-                <button type="button" onClick={copyCaption} className="btn-primary text-xs px-3 py-1.5">
+                <button type="button" onClick={copyCaption} className="btn-primary text-xs px-3 py-2.5 sm:py-1.5">
                   {copied ? '복사됨' : '캡션 복사'}
                 </button>
               </div>

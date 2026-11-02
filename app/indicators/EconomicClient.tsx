@@ -555,7 +555,7 @@ const IndicatorCard = memo(function IndicatorCard({
               onClick={() => handleRangeChange(range.key)}
               disabled={loading}
               aria-pressed={timeRange === range.key}
-              className={`pb-0.5 ${timeRange === range.key ? TAB_ACTIVE : TAB_INACTIVE} ${loading ? 'opacity-50 cursor-wait' : ''}`}
+              className={`min-h-9 min-w-8 pb-0.5 sm:min-h-0 sm:min-w-0 ${timeRange === range.key ? TAB_ACTIVE : TAB_INACTIVE} ${loading ? 'opacity-50 cursor-wait' : ''}`}
             >
               {range.label}
             </button>
@@ -564,7 +564,7 @@ const IndicatorCard = memo(function IndicatorCard({
             onClick={toggleMeasure}
             disabled={loading || observations.length === 0}
             aria-pressed={measureEnabled}
-            className={`ml-1 pb-0.5 ${measureEnabled ? TAB_ACTIVE : TAB_INACTIVE}`}
+            className={`ml-1 min-h-9 min-w-8 pb-0.5 sm:min-h-0 sm:min-w-0 ${measureEnabled ? TAB_ACTIVE : TAB_INACTIVE}`}
           >
             측정
           </button>
@@ -608,7 +608,7 @@ const IndicatorCard = memo(function IndicatorCard({
                 updateMeasure(Math.max(yRange[0], Math.min(yRange[1], val)));
               }
             }}
-            className="ml-auto w-24 border-b border-[var(--theme-border)] bg-transparent px-1 py-0.5 text-right font-mono text-xs font-bold focus:outline-none"
+            className="ml-auto w-24 border-b border-[var(--theme-border)] bg-transparent px-1 py-1.5 text-right font-mono text-base font-bold sm:py-0.5 sm:text-xs focus:outline-none"
             aria-label="측정선 수치"
             title="측정선 수치 직접 입력"
           />
@@ -766,7 +766,7 @@ export default function EconomicClient() {
               key={c}
               onClick={() => setCountry(c)}
               aria-pressed={country === c}
-              className={`pb-0.5 text-[15px] ${country === c ? TAB_ACTIVE : TAB_INACTIVE}`}
+              className={`min-h-9 pb-0.5 text-[15px] sm:min-h-0 ${country === c ? TAB_ACTIVE : TAB_INACTIVE}`}
             >
               {COUNTRY_LABEL[c]}
             </button>

@@ -14,7 +14,7 @@ import { sql } from '@/lib/db';
 
 export async function GET(
   _request: NextRequest,
-  context: { params: { nickname: string } | Promise<{ nickname: string }> },
+  context: { params: Promise<{ nickname: string }> },
 ) {
   try {
     const params = await context.params;

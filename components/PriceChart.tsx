@@ -140,12 +140,12 @@ function CustomTooltip({
 
   return (
     <div className="rounded-sm bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-3 py-2">
-      <div className="text-[10px] font-mono text-gray-400 dark:text-gray-500 mb-1 tabular-nums">
+      <div className="text-[11px] sm:text-[10px] font-mono text-gray-400 dark:text-gray-500 mb-1 tabular-nums">
         {formatDate(label)}
       </div>
       <div className="text-sm font-bold font-mono tabular-nums text-gray-900 dark:text-white">
         {close.toLocaleString()}
-        {currency ? <span className="text-[10px] ml-1 font-normal text-gray-400">{currency}</span> : null}
+        {currency ? <span className="text-[11px] sm:text-[10px] ml-1 font-normal text-gray-400">{currency}</span> : null}
       </div>
       <div className={`text-xs font-bold font-mono tabular-nums mt-0.5 ${retColor}`}>
         {ret > 0 ? '+' : ''}
@@ -234,7 +234,7 @@ export default function PriceChart({
   if (loading || data.length < 2) {
     return (
       <Card padding="none" className="px-4 py-4 sm:px-6 sm:py-5 animate-pulse">
-        <div className="flex items-start justify-between mb-4 sm:mb-5">
+        <div className="flex items-start justify-between gap-3 mb-4 sm:mb-5">
           <div className="space-y-2">
             <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
             <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
@@ -274,8 +274,8 @@ export default function PriceChart({
   return (
     <Card padding="none" className="px-4 py-4 sm:px-6 sm:py-5 overflow-hidden">
       {/* Header */}
-      <div className="flex items-start justify-between mb-4 sm:mb-5">
-        <div className="flex flex-col gap-0.5">
+      <div className="flex items-start justify-between gap-3 mb-4 sm:mb-5">
+        <div className="flex flex-col gap-0.5 min-w-0">
           <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
             수익률 추이
           </span>
@@ -283,7 +283,7 @@ export default function PriceChart({
             {formatDate(startDate)} – {formatDate(endDate)}
           </span>
         </div>
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end flex-shrink-0">
           <span
             className={`text-2xl sm:text-3xl font-black font-mono tabular-nums leading-none ${
               isPositive
@@ -301,10 +301,10 @@ export default function PriceChart({
               {currentPrice.toLocaleString()}
             </span>
             {currency && (
-              <span className="text-[10px] text-gray-500 dark:text-gray-400">{currency}</span>
+              <span className="text-[11px] sm:text-[10px] text-gray-500 dark:text-gray-400">{currency}</span>
             )}
             <span
-              className={`text-[10px] sm:text-xs font-bold ${
+              className={`text-[11px] sm:text-xs font-bold ${
                 isPositive
                   ? 'text-red-600 dark:text-red-400'
                   : isNegative
@@ -406,7 +406,7 @@ export default function PriceChart({
       </div>
 
       {/* Footer — 작성가 기준선 안내 */}
-      <div className="flex items-center gap-1.5 mt-3 text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">
+      <div className="flex items-center gap-1.5 mt-3 text-[11px] sm:text-xs text-gray-400 dark:text-gray-500">
         <span className="inline-block w-3 h-px border-t border-dashed border-gray-400 dark:border-gray-500" />
         <span className="font-mono tabular-nums">
           작성가 {initialPrice.toLocaleString()}

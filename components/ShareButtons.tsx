@@ -151,10 +151,10 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
             type="button"
             onClick={btn.onClick}
             aria-label={`${btn.label}로 공유`}
-            className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 rounded-sm text-[11px] sm:text-xs font-bold transition-all ${btn.bg}`}
+            className={`flex items-center justify-center gap-1 sm:gap-1.5 min-h-[40px] sm:min-h-0 px-2 py-2 rounded-sm text-[11px] sm:text-xs font-bold transition-all ${btn.bg}`}
           >
             {btn.icon}
-            <span className="hidden sm:inline">{btn.label}</span>
+            <span>{btn.label}</span>
           </button>
         ))}
       </div>
@@ -164,7 +164,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
         <button
           type="button"
           onClick={handleNativeShare}
-          className="w-full sm:hidden flex items-center justify-center gap-1.5 px-3 py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs font-medium transition-all"
+          className="w-full sm:hidden flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs font-medium transition-all"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

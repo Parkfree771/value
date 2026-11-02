@@ -164,11 +164,11 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-      <Link href="/guru-tracker" className="text-xs font-bold hover:underline underline-offset-4">
+      <Link href="/guru-tracker" className="inline-flex min-h-9 items-center text-xs font-bold hover:underline underline-offset-4 sm:inline sm:min-h-0">
         ← 구루 목록
       </Link>
 
-      <header className="mt-4 mb-8">
+      <header className="mt-2 mb-8 sm:mt-4">
         <p className="kicker">{guruInfo.style}</p>
         <h1 className="headline mt-1 text-[36px] sm:text-[46px] leading-tight">{guruInfo.name_kr}</h1>
         <p className="mt-1 text-sm text-[var(--theme-ink-soft)]">

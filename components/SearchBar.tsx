@@ -190,7 +190,7 @@ const SearchBar = memo(function SearchBar({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             aria-label="검색어 입력"
-            className="w-full h-11 bg-transparent pl-7 pr-8 text-[15px] text-[var(--foreground)] placeholder:text-[var(--theme-ink-soft)] border-0 border-b-2 border-[var(--theme-border-control)] rounded-none outline-none focus:border-b-2 focus:border-[var(--theme-border)] transition-colors"
+            className="w-full h-11 bg-transparent pl-7 pr-8 text-base sm:text-[15px] text-[var(--foreground)] placeholder:text-[var(--theme-ink-soft)] border-0 border-b-2 border-[var(--theme-border-control)] rounded-none outline-none focus:border-b-2 focus:border-[var(--theme-border)] transition-colors"
           />
           {searchQuery && (
             <button

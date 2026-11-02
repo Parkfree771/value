@@ -121,9 +121,9 @@ export default function UserPage() {
 
   if (notFound) {
     return (
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="p-12 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <Card className="p-6 text-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
             사용자를 찾을 수 없습니다
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -141,11 +141,11 @@ export default function UserPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-ant-red-600 dark:text-ant-red-400 hover:text-ant-red-700 dark:hover:text-ant-red-300 mb-6 transition-colors"
+        className="inline-flex items-center gap-2 text-ant-red-600 dark:text-ant-red-400 hover:text-ant-red-700 dark:hover:text-ant-red-300 min-h-[36px] sm:min-h-0 mb-3 sm:mb-6 transition-colors"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -154,16 +154,16 @@ export default function UserPage() {
       </button>
 
       {/* User Profile Header */}
-      <Card variant="glass" padding="lg" className="mb-6 sm:mb-8">
+      <Card variant="glass" padding="lg" className="!p-4 sm:!p-8 mb-6 sm:mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           {/* 프로필 정보 */}
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans text-xl sm:text-2xl font-bold">
+          <div className="flex items-center gap-4 min-w-0">
+            <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans text-xl sm:text-2xl font-bold">
               {username[0]?.toUpperCase()}
             </div>
-            <div>
+            <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="headline text-lg sm:text-xl font-bold">
+                <h1 className="headline text-lg sm:text-xl font-bold min-w-0 break-words sm:break-normal">
                   {username}
                 </h1>
                 <UserLevelInline points={levelPoints} size="md" />
@@ -226,7 +226,7 @@ export default function UserPage() {
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {userReports.map((report) => (
           <ReportCard
             key={report.id}

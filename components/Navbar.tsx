@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, memo, useCallback } from 'react';
+import { useState, useEffect, useRef, memo, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -19,7 +19,7 @@ const DATELINE = new Intl.DateTimeFormat('ko-KR', {
 const SECTIONS: { href: string; label: string; match?: string[] }[] = [
   { href: '/', label: '홈' },
   { href: '/ranking', label: '랭킹' },
-  { href: '/briefing', label: '모닝 브리핑' },
+  { href: '/briefing', label: '헤드라인' },
   { href: '/search', label: '종목 검색' },
   { href: '/guru-tracker', label: '구루 포트폴리오', match: ['/portfolio'] },
   { href: '/indicators', label: '경제지표' },
@@ -47,6 +47,70 @@ function Avatar({ photoURL, name, size }: { photoURL?: string | null; name: stri
     <span style={style} className="rounded-full bg-[var(--theme-accent)] flex items-center justify-center text-white font-serif text-sm font-bold">
       {name[0]}
     </span>
+  );
+}
+
+// 모바일 하단 탭 — 엄지로 닿는 자리에 자주 쓰는 5개. 나머지 섹션은 햄버거 메뉴
+const TAB_ICONS = {
+  home: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10',
+  ranking: 'M5 20v-7M12 20V5M19 20v-10',
+  write: 'M12 5v14M5 12h14',
+  guru: 'M3 20h18M6 16.5l4.5-5 3.5 3L20 7.5',
+  me: 'M16 8a4 4 0 11-8 0 4 4 0 018 0zM4.5 20.5c1-3.8 3.9-5.5 7.5-5.5s6.5 1.7 7.5 5.5',
+};
+
+function TabIcon({ path }: { path: string }) {
+  return (
+    <svg className="w-[22px] h-[22px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={path} />
+    </svg>
+  );
+}
+
+const MENU_ITEM ='block w-full px-3 py-2 text-left text-[13px] text-[var(--foreground)] hover:bg-[var(--theme-border-muted)]/40 transition-colors';
+
+/** 내 계정 메뉴 (데스크탑) — 평소엔 프로필 사진만, 누르면 마이페이지 · 관리자 · 로그아웃 */
+function AccountMenu({ photoURL, name, isAdmin, onSignOut }: {
+  photoURL?: string | null;
+  name: string;
+  isAdmin: boolean;
+  onSignOut: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onMouseDown = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', onMouseDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={rootRef} className="relative flex">
+      <button onClick={() => setOpen(!open)} aria-label="내 계정 메뉴" aria-expanded={open} className="rounded-full">
+        <Avatar photoURL={photoURL} name={name} size={30} />
+      </button>
+      {open && (
+        <div className="absolute right-0 top-full mt-2 z-[60] w-44 py-1 text-left bg-[var(--background)] border border-[var(--theme-border)] shadow-md">
+          <p className="truncate px-3 py-2 text-xs font-bold text-[var(--foreground)] border-b border-[var(--theme-border-muted)] mb-1">{name}</p>
+          <Link href="/mypage" onClick={() => setOpen(false)} className={MENU_ITEM}>마이페이지</Link>
+          {isAdmin && (
+            <Link href="/admin" onClick={() => setOpen(false)} className={MENU_ITEM}>관리자</Link>
+          )}
+          <button onClick={onSignOut} className={MENU_ITEM}>로그아웃</button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -90,8 +154,37 @@ const Navbar = memo(function Navbar() {
   const accountLink = (href: string) =>
     `text-[13px] transition-colors hover:text-[var(--foreground)] ${pathname.startsWith(href) ? 'font-bold text-[var(--foreground)]' : 'text-[var(--theme-ink-soft)]'}`;
 
+  const meHref = user ? '/mypage' : '/login';
+  const tabs = [
+    { href: '/', label: '홈', icon: TAB_ICONS.home, active: pathname === '/' },
+    { href: '/ranking', label: '랭킹', icon: TAB_ICONS.ranking, active: pathname.startsWith('/ranking') },
+    { href: '/write', label: '글쓰기', icon: TAB_ICONS.write, active: false, onClick: handleWriteClick },
+    { href: '/guru-tracker', label: '구루', icon: TAB_ICONS.guru, active: pathname.startsWith('/guru-tracker') || pathname.startsWith('/portfolio') },
+    { href: meHref, label: user ? '내 정보' : '로그인', icon: TAB_ICONS.me, active: pathname.startsWith(meHref) },
+  ];
+
   return (
     <>
+      {/* 모바일 하단 탭 — 글쓰기 화면은 자체 하단 바가 있어 뺀다 */}
+      {!pathname.startsWith('/write') && (
+        <nav aria-label="하단 메뉴" className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-[var(--background)] border-t border-[var(--theme-border-muted)] pb-[var(--sab,0px)]">
+          <div className="grid grid-cols-5 h-14">
+            {tabs.map((t) => (
+              <Link
+                key={t.label}
+                href={t.href}
+                onClick={t.onClick ?? closeMobileMenu}
+                aria-current={t.active ? 'page' : undefined}
+                className={`flex flex-col items-center justify-center gap-0.5 text-[11px] ${t.active ? 'font-bold text-[var(--foreground)]' : 'text-[var(--theme-ink-soft)]'}`}
+              >
+                <TabIcon path={t.icon} />
+                {t.label}
+              </Link>
+            ))}
+          </div>
+        </nav>
+      )}
+
       {/* Overlay */}
       {mobileMenuOpen && (
         <div
@@ -117,18 +210,7 @@ const Navbar = memo(function Navbar() {
                 <Link href="/write" onClick={handleWriteClick} className="btn-primary !py-1.5 !px-3 !text-sm">
                   리포트 쓰기
                 </Link>
-                <Link href="/mypage" className={`flex items-center gap-1.5 ${accountLink('/mypage')}`}>
-                  <Avatar photoURL={user.photoURL} name={userName} size={26} />
-                  마이페이지
-                </Link>
-                {isAdmin && (
-                  <Link href="/admin" className={accountLink('/admin')}>
-                    관리자
-                  </Link>
-                )}
-                <button onClick={handleSignOut} className="text-[13px] text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors">
-                  로그아웃
-                </button>
+                <AccountMenu photoURL={user.photoURL} name={userName} isAdmin={isAdmin} onSignOut={handleSignOut} />
               </>
             ) : (
               <>

@@ -163,14 +163,14 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
 
   return (
     <section aria-label="보유 종목" className="mt-8">
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b-2 border-[var(--theme-border)]">
+      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-0 sm:gap-y-2 border-b-2 border-[var(--theme-border)]">
         <div className="flex gap-3 overflow-x-auto scrollbar-hide text-sm">
           {filters.map((f) => (
             <button
               key={f.key}
               onClick={() => setFilter(f.key)}
               aria-pressed={filter === f.key}
-              className={`flex-shrink-0 pb-1.5 ${filter === f.key ? TAB_ACTIVE : TAB_INACTIVE}`}
+              className={`min-h-9 sm:min-h-0 flex-shrink-0 pb-1.5 ${filter === f.key ? TAB_ACTIVE : TAB_INACTIVE}`}
             >
               {f.label} <span className="font-mono text-xs">{holdings.filter(matches[f.key]).length}</span>
             </button>
@@ -178,7 +178,7 @@ export default function PortfolioTable({ holdings, prices = {}, showPrices = tru
         </div>
         <div className="flex flex-shrink-0 gap-3 text-xs">
           {SORT_KEYS.map((s) => (
-            <button key={s} onClick={() => setSortType(s)} aria-pressed={sortType === s} className={`pb-1.5 ${sortType === s ? 'font-bold text-[var(--foreground)]' : 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)]'}`}>
+            <button key={s} onClick={() => setSortType(s)} aria-pressed={sortType === s} className={`min-h-9 sm:min-h-0 pb-1.5 ${sortType === s ? 'font-bold text-[var(--foreground)]' : 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)]'}`}>
               {SORT_LABELS[s]}
             </button>
           ))}

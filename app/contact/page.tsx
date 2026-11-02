@@ -19,38 +19,38 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
       <h1 className="headline text-2xl font-bold mb-8">
         문의하기
       </h1>
 
       {/* 운영 정보 */}
-      <div className="card-base p-6 mb-8">
+      <div className="card-base p-4 sm:p-6 mb-4 sm:mb-8">
         <h2 className="font-sans text-base font-bold mb-4">
           운영 정보
         </h2>
         <div className="space-y-3 text-sm font-sans">
           <div className="flex">
-            <span className="w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">상호명</span>
+            <span className="w-28 sm:w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">상호명</span>
             <span className="font-bold">부자FARM</span>
           </div>
           <div className="flex">
-            <span className="w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">대표</span>
+            <span className="w-28 sm:w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">대표</span>
             <span>박유로</span>
           </div>
           <div className="flex">
-            <span className="w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">사업자등록번호</span>
+            <span className="w-28 sm:w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">사업자등록번호</span>
             <span>326-23-01856</span>
           </div>
           <div className="flex">
-            <span className="w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">주소</span>
+            <span className="w-28 sm:w-32 flex-shrink-0 text-gray-500 dark:text-gray-400">주소</span>
             <span>경기도 고양시 일산서구 킨텍스로 240</span>
           </div>
         </div>
       </div>
 
       {/* 이메일 문의 */}
-      <div className="card-base p-6 mb-8">
+      <div className="card-base p-4 sm:p-6 mb-4 sm:mb-8">
         <h2 className="font-sans text-base font-bold mb-4">
           이메일 문의
         </h2>
@@ -66,32 +66,32 @@ export default function ContactPage() {
           </svg>
           dbfh1498@gmail.com
         </a>
-        <p className="font-sans mt-3 text-[0.625rem] text-gray-500 dark:text-gray-400">
+        <p className="font-sans mt-3 text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">
           영업일 기준 1~2일 내에 답변드립니다.
         </p>
       </div>
 
       {/* 문의 유형 안내 */}
-      <div className="card-base p-6 mb-8">
+      <div className="card-base p-4 sm:p-6 mb-4 sm:mb-8">
         <h2 className="font-sans text-base font-bold mb-4">
           문의 유형
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">서비스 이용 문의</h3>
-            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">회원가입, 리포트 작성, 기능 사용 관련</p>
+            <p className="font-sans text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">회원가입, 리포트 작성, 기능 사용 관련</p>
           </div>
           <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">버그 및 오류 신고</h3>
-            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">서비스 오류, 데이터 오류 등</p>
+            <p className="font-sans text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">서비스 오류, 데이터 오류 등</p>
           </div>
           <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">제안 및 피드백</h3>
-            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">새로운 기능, 서비스 개선 아이디어</p>
+            <p className="font-sans text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">새로운 기능, 서비스 개선 아이디어</p>
           </div>
           <div className="p-4 border border-[var(--theme-border-muted)]">
             <h3 className="font-sans text-sm font-bold mb-1">신고</h3>
-            <p className="font-sans text-[0.625rem] text-gray-500 dark:text-gray-400">부적절한 콘텐츠, 저작권 침해 등</p>
+            <p className="font-sans text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">부적절한 콘텐츠, 저작권 침해 등</p>
           </div>
         </div>
       </div>

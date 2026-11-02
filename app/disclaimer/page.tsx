@@ -19,12 +19,12 @@ export const metadata: Metadata = {
 
 export default function DisclaimerPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-4xl mx-auto px-4 py-6 sm:py-12">
       <h1 className="headline text-2xl font-bold mb-8">
-        투자 면책 조항 (Investment Disclaimer)
+        투자 면책 조항 <span className="block text-base sm:inline sm:text-2xl">(Investment Disclaimer)</span>
       </h1>
 
-      <div className="card-base p-6 sm:p-8">
+      <div className="card-base p-4 sm:p-8">
         <div className="space-y-6 font-sans text-xs text-gray-700 dark:text-gray-300">
           {/* 중요 공지 */}
           <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--theme-accent)]">
@@ -166,7 +166,7 @@ export default function DisclaimerPage() {
 
           {/* 최종 업데이트 */}
           <div className="pt-6 border-t-[3px] border-[var(--theme-border-muted)]">
-            <p className="text-[0.625rem] text-gray-500 dark:text-gray-400">
+            <p className="text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">
               최종 업데이트: 2026년 2월 1일
             </p>
           </div>

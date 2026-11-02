@@ -46,7 +46,7 @@ function ReportLinkRow({ post, anchorPrefix }: { post: FeedPost; anchorPrefix?: 
         <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
           {post.title}
         </div>
-        <div className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
+        <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
           {post.stockName && (
             <>
               <span className="truncate">{shortStockName(post.stockName, post.ticker)}</span>

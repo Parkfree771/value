@@ -137,8 +137,8 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
   if (!report) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <Card className="p-6 text-center">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
             리포트를 찾을 수 없습니다
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-6">

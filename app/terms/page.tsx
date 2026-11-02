@@ -19,8 +19,8 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <Card className="p-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+      <Card className="p-4">
         <h1 className="headline text-3xl font-bold mb-8">이용약관</h1>
 
         <div className="space-y-6 text-gray-700 dark:text-gray-300">
@@ -55,7 +55,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제4조 (서비스의 제공)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회사는 다음과 같은 서비스를 제공합니다:
-                <ul className="list-disc list-inside ml-6 mt-2">
+                <ul className="list-disc list-inside ml-2 sm:ml-6 mt-2">
                   <li>투자 리포트 작성 및 공유</li>
                   <li>리포트 수익률 자동 계산 및 랭킹</li>
                   <li>회원 간 소통 기능 (댓글, 좋아요 등)</li>
@@ -119,7 +119,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제6조 (회원의 의무)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회원은 다음 행위를 하여서는 안 됩니다:
-                <ul className="list-disc list-inside ml-6 mt-2">
+                <ul className="list-disc list-inside ml-2 sm:ml-6 mt-2">
                   <li>허위 정보 또는 타인의 정보를 도용하는 행위</li>
                   <li>불법적이거나 부당한 내용의 리포트 작성</li>
                   <li>타인의 명예를 훼손하거나 모욕하는 행위</li>
@@ -147,7 +147,7 @@ export default function TermsPage() {
               <li>회사는 회원이 이 약관을 위반한 경우 사전 통지 없이 이용계약을 해지할 수 있습니다.</li>
               <li>
                 <strong>회원 탈퇴 시 정보 처리:</strong>
-                <ul className="list-disc list-inside ml-6 mt-2">
+                <ul className="list-disc list-inside ml-2 sm:ml-6 mt-2">
                   <li>닉네임, 프로필 등 개인정보는 즉시 삭제 또는 익명화 처리됩니다.</li>
                   <li>단, 관련 법령 및 개인정보처리방침에 따라 일부 정보(이메일, 약관 동의 기록)는 법적 분쟁 대비를 위해 탈퇴 후 5년간 별도 보관됩니다.</li>
                   <li>작성한 리포트 및 댓글은 회원 요청 시 삭제하거나, 작성자 정보를 익명화하여 유지할 수 있습니다.</li>

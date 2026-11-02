@@ -269,7 +269,7 @@ export default function OnboardingPage() {
                   value={formData.nickname}
                   onChange={handleChange}
                   placeholder="닉네임을 입력하세요"
-                  className="pixel-input !py-3"
+                  className="pixel-input !py-3 text-base sm:text-sm"
                   maxLength={12}
                 />
                 <div className="mt-2 flex items-center justify-between">
@@ -322,7 +322,7 @@ export default function OnboardingPage() {
                     <button
                       type="button"
                       onClick={() => toggleSection('terms')}
-                      className="text-gray-400 hover:text-[var(--theme-accent)] p-1 transition-colors"
+                      className="text-gray-400 hover:text-[var(--theme-accent)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
                     >
                       <svg className={`w-5 h-5 transition-transform ${expandedSection === 'terms' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -358,7 +358,7 @@ export default function OnboardingPage() {
                     <button
                       type="button"
                       onClick={() => toggleSection('privacy')}
-                      className="text-gray-400 hover:text-[var(--theme-accent)] p-1 transition-colors"
+                      className="text-gray-400 hover:text-[var(--theme-accent)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
                     >
                       <svg className={`w-5 h-5 transition-transform ${expandedSection === 'privacy' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -408,7 +408,7 @@ export default function OnboardingPage() {
                     <button
                       type="button"
                       onClick={() => toggleSection('disclaimer')}
-                      className="text-gray-400 hover:text-[var(--theme-accent)] p-1 transition-colors"
+                      className="text-gray-400 hover:text-[var(--theme-accent)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
                     >
                       <svg className={`w-5 h-5 transition-transform ${expandedSection === 'disclaimer' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />

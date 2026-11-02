@@ -134,6 +134,7 @@
   --theme-accent-light: #444444;
   --theme-orange: #d9560b;    /* AntStreet 오렌지 — 흰 바탕 글자 대비용으로 약간 진하게 */
   --theme-orange-dark: #b84708;
+  --theme-press-red: #8b1a1a; /* 신문 지면 머리띠 — 흰 글자용 어두운 빨강 */
   --theme-ink-soft: #555555;  /* 보조 글자 */
 
   /* 상태 색상 */
@@ -181,6 +182,7 @@
   --theme-accent-light: #bdbdbd;
   --theme-orange: #fb923c;
   --theme-orange-dark: #f97316;
+  --theme-press-red: #9b2424;
   --theme-ink-soft: #a3a3a3;
 
   --color-buy: #e0685d;
@@ -437,7 +439,8 @@ body {
   /* 폼 입력 필드 */
   .pixel-input {
     width: 100%;
-    @apply px-3 py-2 text-sm;
+    /* 모바일 16px — iOS 는 그보다 작은 입력칸을 누르면 화면을 확대한다 */
+    @apply px-3 py-2 text-base sm:text-sm;
     background: var(--theme-bg-input);
     color: var(--foreground);
     border: 1px solid var(--theme-border-control);
@@ -484,7 +487,7 @@ body {
   /* 셀렉트 */
   .pixel-select {
     width: 100%;
-    @apply px-3 py-2 text-sm;
+    @apply px-3 py-2 text-base sm:text-sm;
     background: var(--theme-bg-input);
     color: var(--foreground);
     border: 1px solid var(--theme-border-control);

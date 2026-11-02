@@ -545,7 +545,7 @@ function WritePageContent() {
     return (
       <div className="write-page w-full px-4 sm:px-6 py-4 sm:py-6" style={{ maxWidth: '100%' }}>
         {/* 상단 바: 제목 + 모드 전환 + 액션 */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-wrap items-center justify-between gap-y-2 mb-4">
           <h1 className="headline text-lg font-bold">
             {isEditMode ? '리포트 수정' : '리포트 작성'}
             <span className="ml-2 text-xs font-normal px-2 py-0.5 bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)]">HTML</span>
@@ -554,7 +554,7 @@ function WritePageContent() {
             <button
               type="button"
               onClick={() => setEditorMode('text')}
-              className="px-3 py-1 text-xs font-bold border bg-[var(--theme-bg-card)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] transition-all"
+              className="min-h-[36px] sm:min-h-0 px-3 py-1 text-xs font-bold border bg-[var(--theme-bg-card)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] transition-all"
             >
               텍스트 모드
             </button>
@@ -562,7 +562,7 @@ function WritePageContent() {
               type="submit"
               form="write-form"
               disabled={isUploading}
-              className="px-4 py-1 text-xs font-bold bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)] transition-all disabled:opacity-50"
+              className="min-h-[36px] sm:min-h-0 px-4 py-1 text-xs font-bold bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)] transition-all disabled:opacity-50"
             >
               {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}
             </button>
@@ -570,7 +570,7 @@ function WritePageContent() {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-3 py-1 text-xs font-bold border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 transition-all"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1 text-xs font-bold border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 transition-all"
               >
                 삭제
               </button>
@@ -579,13 +579,13 @@ function WritePageContent() {
         </div>
 
         <form id="write-form" onSubmit={handleSubmit}>
-          <div className="flex gap-4" style={{ height: 'calc(100vh - 140px)' }}>
+          <div className="flex flex-col md:flex-row gap-4 md:h-[calc(100vh-140px)]">
             {/* ── 왼쪽 ── */}
-            <div className="flex flex-col gap-4 w-[760px] flex-shrink-0 min-h-0">
+            <div className="flex flex-col gap-4 w-full md:w-[760px] flex-shrink-0 min-h-0">
               {/* 왼쪽 상단: 폼 입력 — 좌(필드) / 우(이미지 첨부) 가로 분할 */}
-              <div className="card-base p-3 flex gap-3 flex-shrink-0 overflow-hidden" style={{ maxHeight: '42%' }}>
+              <div className="card-base p-3 flex flex-col md:flex-row gap-3 flex-shrink-0 md:overflow-hidden md:max-h-[42%]">
                 {/* 좌측: 입력 필드 */}
-                <div className="flex-1 min-w-0 space-y-2 overflow-y-auto pr-1">
+                <div className="flex-1 min-w-0 space-y-2 md:overflow-y-auto pr-1">
                   <input
                     type="text"
                     value={title}
@@ -621,7 +621,7 @@ function WritePageContent() {
                                 : [...prev, theme.id]
                             )
                           }
-                          className={`px-2 py-0.5 text-[10px] border rounded-sm transition-all ${
+                          className={`px-2 py-2 text-[11px] sm:py-0.5 sm:text-[10px] border rounded-sm transition-all ${
                             selectedThemes.includes(theme.id)
                               ? 'pixel-chip-active font-bold'
                               : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)]'
@@ -635,10 +635,10 @@ function WritePageContent() {
                 </div>
 
                 {/* 세로 디바이더 */}
-                <div className="w-0.5 bg-[var(--theme-border-muted)] flex-shrink-0" />
+                <div className="h-0.5 md:h-auto md:w-0.5 bg-[var(--theme-border-muted)] flex-shrink-0" />
 
                 {/* 우측: 이미지 첨부 전용 영역 */}
-                <div className="w-[320px] flex-shrink-0 flex flex-col min-h-0">
+                <div className="w-full md:w-[320px] flex-shrink-0 flex flex-col min-h-0">
                   <div className="flex items-center justify-between gap-2 mb-1.5 flex-shrink-0">
                     <span className="text-xs font-bold">
                       이미지 첨부
@@ -647,7 +647,7 @@ function WritePageContent() {
                       )}
                     </span>
                     <label
-                      className={`text-[10px] px-2 py-0.5 border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] bg-[var(--theme-bg-card)] transition-all ${
+                      className={`text-[11px] sm:text-[10px] px-2 py-2 sm:py-0.5 border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] bg-[var(--theme-bg-card)] transition-all ${
                         isUploading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                       }`}
                     >
@@ -664,7 +664,7 @@ function WritePageContent() {
                   </div>
 
                   {uploadedImageUrls.length > 0 ? (
-                    <div className="flex-1 overflow-y-auto pr-1">
+                    <div className="flex-1 md:overflow-y-auto pr-1">
                       <div
                         className="grid gap-1.5"
                         style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
@@ -682,7 +682,7 @@ function WritePageContent() {
                               <button
                                 type="button"
                                 onClick={() => insertImageSnippetToHtml(url)}
-                                className="flex-1 text-[11px] py-1 bg-[var(--theme-accent)] text-white font-bold hover:opacity-90 transition-opacity"
+                                className="flex-1 text-[11px] py-2.5 sm:py-1 bg-[var(--theme-accent)] text-white font-bold hover:opacity-90 transition-opacity"
                                 title="에디터 커서 위치에 <img> 삽입"
                               >
                                 삽입
@@ -690,7 +690,7 @@ function WritePageContent() {
                               <button
                                 type="button"
                                 onClick={() => copyImageSnippet(url)}
-                                className="flex-1 text-[11px] py-1 border-l-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg)] transition-colors"
+                                className="flex-1 text-[11px] py-2.5 sm:py-1 border-l-2 border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:bg-[var(--theme-bg)] transition-colors"
                                 title="<img> 태그 코드 복사"
                               >
                                 복사
@@ -699,7 +699,7 @@ function WritePageContent() {
                             <button
                               type="button"
                               onClick={() => removeImage(idx)}
-                              className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs leading-none rounded-full flex items-center justify-center font-bold shadow"
+                              className="absolute top-1 right-1 w-7 h-7 md:-top-2 md:-right-2 md:w-5 md:h-5 bg-red-500 text-white text-xs leading-none rounded-full flex items-center justify-center font-bold shadow"
                               title="목록에서 제거"
                             >
                               ×
@@ -709,8 +709,8 @@ function WritePageContent() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center justify-center border border-dashed border-[var(--theme-border-muted)] rounded">
-                      <p className="text-[10px] text-gray-400 text-center px-2">
+                    <div className="flex-1 flex items-center justify-center py-3 md:py-0 border border-dashed border-[var(--theme-border-muted)] rounded">
+                      <p className="text-[11px] sm:text-[10px] text-gray-400 text-center px-2">
                         PNG/JPG/GIF · 최대 10MB<br />
                         업로드 후 [삽입] 또는 [복사]
                       </p>
@@ -720,7 +720,7 @@ function WritePageContent() {
               </div>
 
               {/* 왼쪽 하단: 코드 에디터 */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-none h-[60vh] md:flex-1 md:h-auto min-h-0">
                 <HtmlCodeEditor
                   value={htmlContent}
                   onChange={setHtmlContent}
@@ -733,7 +733,7 @@ function WritePageContent() {
             </div>
 
             {/* ── 오른쪽: 프리뷰 전체 ── */}
-            <div className="flex-1 min-w-0 min-h-0">
+            <div className="flex-none h-[60vh] md:flex-1 md:h-auto min-w-0 min-h-0">
               <HtmlPreviewPanel html={previewHtml} css={previewCss} />
             </div>
           </div>
@@ -764,21 +764,21 @@ function WritePageContent() {
                 type="submit"
                 form="write-form"
                 disabled={isUploading}
-                className="px-3 py-1.5 bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)] font-sans text-xs sm:text-sm transition-all disabled:opacity-50"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)] font-sans text-xs sm:text-sm transition-all disabled:opacity-50"
               >
                 {isUploading ? '업로드 중...' : '수정 완료'}
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-3 py-1.5 border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 font-sans text-xs sm:text-sm transition-all"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 font-sans text-xs sm:text-sm transition-all"
               >
                 삭제
               </button>
               <button
                 type="button"
                 onClick={() => router.push(`/reports/${editId}`)}
-                className="px-3 py-1.5 border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] font-sans text-xs sm:text-sm transition-all"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] font-sans text-xs sm:text-sm transition-all"
               >
                 글 보기
               </button>
@@ -848,7 +848,7 @@ function WritePageContent() {
               굵게·색상·정렬은 툴바로. 다른 곳에서 복사해 붙여넣어도 서식이 유지돼요.
             </p>
 
-            <div className="mt-6 grid gap-6 md:grid-cols-2">
+            <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
             {/* 이미지 첨부 */}
             <div>
               <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">이미지 첨부 <span className="font-normal">· 올린 뒤 &lsquo;이미지 삽입&rsquo;을 누르면 본문에 들어가요</span></p>
@@ -896,7 +896,7 @@ function WritePageContent() {
                                   <button
                                     type="button"
                                     onClick={() => insertImageToEditor(uploadedImageUrls[index])}
-                                    className="mt-2 text-xs px-3 py-1 btn-primary !py-1 !px-3 !text-xs"
+                                    className="mt-2 text-xs px-3 py-1 btn-primary !py-2.5 sm:!py-1 !px-3 !text-xs"
                                   >
                                     이미지 삽입
                                   </button>
@@ -910,7 +910,7 @@ function WritePageContent() {
                             <button
                               type="button"
                               onClick={() => removeImage(index)}
-                              className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              className="-m-2 p-2 sm:m-0 sm:p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -973,7 +973,7 @@ function WritePageContent() {
                         <button
                           type="button"
                           onClick={() => removeFile(index)}
-                          className="ml-3 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                          className="ml-3 -mr-2 -my-2 p-2 sm:mr-0 sm:my-0 sm:p-0 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1019,7 +1019,7 @@ function WritePageContent() {
                           : [...prev, theme.id]
                       )
                     }
-                    className={`font-sans px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border rounded-sm transition-all ${
+                    className={`font-sans min-h-[36px] sm:min-h-0 px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs border rounded-sm transition-all ${
                       selectedThemes.includes(theme.id)
                         ? 'pixel-chip-active font-bold'
                         : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'

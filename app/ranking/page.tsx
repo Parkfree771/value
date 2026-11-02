@@ -142,6 +142,7 @@ export default async function RankingPage() {
       totalLikes: reportsWithDays
         .filter((r) => r.author === author)
         .reduce((sum, r) => sum + (r.likes || 0), 0),
+      winCount: reportsWithDays.filter((r) => r.author === author && r.returnRate > 0).length,
     }))
     .sort((a, b) => b.avgReturnRate - a.avgReturnRate)
     .map((investor, index) => ({ ...investor, rank: index + 1 }));

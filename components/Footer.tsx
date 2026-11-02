@@ -7,20 +7,20 @@ const Footer = memo(function Footer() {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <footer className="bg-[var(--theme-bg)] text-[var(--foreground)] border-t-[3px] border-double border-[var(--theme-border)] mt-auto pb-[var(--sab,0px)]">
+    <footer className="bg-[var(--theme-bg)] text-[var(--foreground)] border-t-[3px] border-double border-[var(--theme-border)] mt-auto pb-[calc(3.5rem+var(--sab,0px))] md:pb-[var(--sab,0px)]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         {/* 기본 정보 (항상 표시) */}
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-[var(--theme-ink-soft)] flex-wrap justify-center">
+        <div className="flex flex-col items-center gap-1 sm:gap-3 text-center">
+          <div className="flex items-center gap-x-3 gap-y-0 sm:gap-4 text-xs sm:text-sm text-[var(--theme-ink-soft)] flex-wrap justify-center">
             <span className="brand-title text-sm" data-text="AntStreet">AntStreet</span>
-            <Link href="/terms" className="hover:text-[var(--foreground)] transition-colors">이용약관</Link>
-            <Link href="/privacy" className="hover:text-[var(--foreground)] transition-colors">개인정보</Link>
-            <Link href="/disclaimer" className="font-bold hover:text-[var(--foreground)] transition-colors">면책조항</Link>
-            <Link href="/contact" className="hover:text-[var(--foreground)] transition-colors">문의</Link>
+            <Link href="/terms" className="py-2.5 sm:py-0 hover:text-[var(--foreground)] transition-colors">이용약관</Link>
+            <Link href="/privacy" className="py-2.5 sm:py-0 hover:text-[var(--foreground)] transition-colors">개인정보</Link>
+            <Link href="/disclaimer" className="py-2.5 sm:py-0 font-bold hover:text-[var(--foreground)] transition-colors">면책조항</Link>
+            <Link href="/contact" className="py-2.5 sm:py-0 hover:text-[var(--foreground)] transition-colors">문의</Link>
           </div>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-sm text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors flex items-center gap-1"
+            className="min-h-9 sm:min-h-0 text-sm text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors flex items-center gap-1"
           >
             {expanded ? '접기' : '사업자 정보'}
             <svg

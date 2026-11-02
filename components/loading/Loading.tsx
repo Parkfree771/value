@@ -158,15 +158,11 @@ export function RankingSkeleton() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
       <PressBar label="순위를 집계하는 중" />
-      <div className="mt-6 flex flex-col items-center">
-        <Skel className="h-7 w-24" />
-        <div className="mt-4 flex gap-4">
-          <Skel className="h-6 w-16" />
-          <Skel className="h-6 w-16" />
-          <Skel className="h-6 w-16" />
-        </div>
+      <div className="mt-6 flex items-end justify-between border-b-2 border-[var(--theme-border)] pb-2">
+        <Skel className="h-8 w-20" />
+        <Skel className="h-6 w-40" />
       </div>
-      <div className="mt-8">
+      <div className="mt-6">
         <RowSkel count={8} />
       </div>
     </div>

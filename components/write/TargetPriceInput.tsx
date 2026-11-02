@@ -24,7 +24,7 @@ export function OpinionPicker({ value, onChange, compact = false }: { value: Opi
             role="radio"
             aria-checked={active}
             onClick={() => onChange(o.value)}
-            className={`${compact ? 'py-1.5' : 'py-2.5'} text-center transition-colors ${i > 0 ? 'border-l border-[var(--theme-border)]' : ''} ${
+            className={`${compact ? 'py-2.5 sm:py-1.5' : 'py-2.5'} text-center transition-colors ${i > 0 ? 'border-l border-[var(--theme-border)]' : ''} ${
               active ? 'text-white' : 'hover:bg-[var(--theme-bg)]'
             }`}
             style={active ? { backgroundColor: color } : undefined}
@@ -104,10 +104,10 @@ export default function TargetPriceInput({ value, onChange, currentPrice, curren
           required
           aria-label="목표 가격"
           placeholder={cur ? formatPriceInput(cur, currency) : '종목을 먼저 고르세요'}
-          className={`pixel-input tabular-nums ${compact ? '!py-1 !text-xs' : '!py-3 !text-lg font-bold'} pr-14`}
+          className={`pixel-input tabular-nums ${compact ? '!py-2.5 sm:!py-1 !text-xs' : '!py-3 !text-lg font-bold'} pr-14`}
         />
         {currency && (
-          <span className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-ink-soft)] ${compact ? 'text-[10px]' : 'text-xs font-bold'}`}>
+          <span className={`pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-ink-soft)] ${compact ? 'text-[11px] sm:text-[10px]' : 'text-xs font-bold'}`}>
             {currency}
           </span>
         )}
@@ -121,7 +121,7 @@ export default function TargetPriceInput({ value, onChange, currentPrice, curren
             type="button"
             disabled={!cur}
             onClick={() => apply(p)}
-            className={`border rounded-[2px] tabular-nums font-bold transition-colors disabled:opacity-40 ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'} ${
+            className={`border rounded-[2px] tabular-nums font-bold transition-colors disabled:opacity-40 ${compact ? 'px-2 py-2 text-[11px] sm:px-1.5 sm:py-0.5 sm:text-[10px]' : 'min-h-[36px] sm:min-h-0 px-2.5 py-1 text-xs'} ${
               activeStep === p
                 ? 'bg-[var(--theme-border)] border-[var(--theme-border)] text-[var(--background)]'
                 : 'border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
@@ -135,7 +135,7 @@ export default function TargetPriceInput({ value, onChange, currentPrice, curren
           type="button"
           disabled={!cur}
           onClick={() => apply(0)}
-          className={`border rounded-[2px] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] text-[var(--theme-ink-soft)] transition-colors disabled:opacity-40 ${compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs'}`}
+          className={`border rounded-[2px] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] text-[var(--theme-ink-soft)] transition-colors disabled:opacity-40 ${compact ? 'px-2 py-2 text-[11px] sm:px-1.5 sm:py-0.5 sm:text-[10px]' : 'min-h-[36px] sm:min-h-0 px-2.5 py-1 text-xs'}`}
         >
           현재가
         </button>

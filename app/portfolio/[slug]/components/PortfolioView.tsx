@@ -36,17 +36,17 @@ export default function PortfolioView({ quarterViews, prices }: Props) {
       <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1 border-b-2 border-[var(--theme-border)] pb-2">
         <h2 className="headline text-[22px] leading-tight">{quarterLabel(selected.report_date_curr)} 포트폴리오</h2>
         {ordered.length > 1 && (
-          <div className="flex items-center gap-3 text-sm">
+          <div className="flex max-w-full items-center gap-3 overflow-x-auto scrollbar-hide text-sm sm:overflow-visible">
             {ordered.map((view, idx) => (
               <button
                 key={view.report_date_curr}
                 onClick={() => setSelectedIdx(idx)}
                 aria-pressed={idx === selectedIdx}
-                className={
+                className={`min-h-9 flex-shrink-0 whitespace-nowrap sm:min-h-0 ${
                   idx === selectedIdx
                     ? 'font-bold text-[var(--foreground)] border-b-2 border-[var(--theme-border)] pb-0.5'
                     : 'text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] pb-0.5 border-b-2 border-transparent'
-                }
+                }`}
               >
                 {quarterLabel(view.report_date_curr)}
               </button>

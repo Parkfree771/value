@@ -8,7 +8,6 @@ export interface BriefingIssue {
   headline: string;
   summary: string;
   tags?: string[];
-  covered_by?: string[];
   importance?: 'high' | 'medium' | 'low' | string;
 }
 
@@ -40,7 +39,6 @@ export async function getBriefing(): Promise<Briefing | null> {
         headline: i.headline,
         summary: i.summary,
         tags: i.tags?.slice(0, 3),
-        covered_by: i.covered_by,
         importance: i.importance,
       })),
       isStale: Date.now() - new Date(json.generated_at).getTime() > STALE_MS,
