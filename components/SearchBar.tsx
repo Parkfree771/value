@@ -216,7 +216,7 @@ const SearchBar = memo(function SearchBar({
             <div className="absolute z-50 left-0 right-0 mt-2 bg-[var(--theme-bg-card)] border border-[var(--theme-border)] rounded-sm max-h-[50vh] sm:max-h-80 overflow-y-auto shadow-[0_8px_24px_rgba(0,0,0,0.12)]">
               <p className="px-3 sm:px-4 pt-2 pb-1 text-[11px] font-bold text-[var(--theme-ink-soft)]">종목으로 보기</p>
               {isLoading ? (
-                <div className="px-4 py-3 text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
+                <div className="px-4 py-3 text-xs sm:text-sm text-[var(--theme-ink-soft)] text-center">
                   검색 중...
                 </div>
               ) : suggestions.length > 0 ? (

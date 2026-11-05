@@ -3,6 +3,7 @@
 // 서버 전용. 홈 ISR 재생성 때 읽는다.
 
 import { publicUrl } from '@/lib/storage';
+import { SAFETY_TTL, TAG } from '@/lib/cache';
 
 export interface BriefingIssue {
   headline: string;
@@ -24,7 +25,7 @@ const STALE_MS = 36 * 60 * 60 * 1000;
 export async function getBriefing(): Promise<Briefing | null> {
   try {
     if (!process.env.AWS_ENDPOINT_URL_S3) return null;
-    const res = await fetch(publicUrl('briefing/briefing.json'), { next: { revalidate: 900 } });
+    const res = await fetch(publicUrl('briefing/briefing.json'), { next: { tags: [TAG.briefing], revalidate: SAFETY_TTL } });
     if (!res.ok) return null;
     const json = (await res.json()) as {
       generated_at?: string;

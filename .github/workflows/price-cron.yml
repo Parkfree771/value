@@ -9,16 +9,20 @@ name: price-cron
 
 on:
   schedule:
-    - cron: '0 0 * * 1-5'    # ASIA 장중 09:00 KST
-    - cron: '0 3 * * 1-5'    # ASIA 장중 12:00 KST
-    # GitHub 예약 실행은 몇 시간씩 늦거나 빠질 수 있다 → 종가 확정은 예비 실행을 한 번 더 둔다.
-    # 종가 날짜는 스크립트가 거래소 현지 "마지막 마감 거래일"로 계산하므로 두 번 돌아도 같은 행을 덮어쓸 뿐.
-    - cron: '40 8 * * 1-5'   # ASIA 장 마감 17:40 KST (finalize — 홍콩 16:10 HKT 마감 이후)
-    - cron: '40 10 * * 1-5'  # ASIA finalize 예비 19:40 KST
-    - cron: '30 13 * * 1-5'  # US 장중 22:30 KST
-    - cron: '0 16 * * 1-5'   # US 장중 01:00 KST
-    - cron: '15 21 * * 1-5'  # US 장 마감 06:15 KST (finalize)
-    - cron: '45 23 * * 1-5'  # US finalize 예비 08:45 KST
+    # 장 마감 종가만 — 종목마다 하루 한 번. 장중 갱신은 하지 않는다.
+    # 예약 실행이 밀리거나 빠질 수 있어 마감 뒤 몇 번 걸어 둔다. 스크립트가 "이번 마감 이후 아직 갱신 안 된 종목"만
+    # 20종목씩 끊어 묶음마다 저장하므로, 앞 실행이 다 끝냈으면 뒤 실행은 바로 끝난다.
+    # 아시아(한국·일본 15:30, 중국 16:00, 홍콩 17:10 KST 마감) — 16:00~18:40 KST
+    - cron: '0 7 * * 1-5'
+    - cron: '40 7 * * 1-5'
+    - cron: '20 8 * * 1-5'
+    - cron: '0 9 * * 1-5'
+    - cron: '40 9 * * 1-5'
+    # 미국(정규장 16:00 ET = 05:00~06:00 KST 마감) — 06:15~08:30 KST
+    - cron: '15 21 * * 1-5'
+    - cron: '0 22 * * 1-5'
+    - cron: '45 22 * * 1-5'
+    - cron: '30 23 * * 1-5'
     - cron: '30 21 * * 1-5'  # 구루 포트폴리오 06:30 KST
     - cron: '*/20 * * * *'   # ISR keep-warm (홈/랭킹)
   workflow_dispatch:
@@ -31,12 +35,13 @@ on:
         description: 'stock 전용: ASIA | US | ALL'
         default: ALL
       finalize:
-        description: 'stock 전용: 종가를 price_history에 기록'
+        description: 'stock 전용: 이미 오늘 종가가 반영된 종목도 다시 조회 (--force)'
         type: boolean
         default: false
 
 concurrency:
-  group: price-cron-${{ github.event.schedule || inputs.job }}
+  # 가격 갱신은 예약이 여러 개여도 한 줄로 세운다 — 밀린 실행끼리 겹쳐 같은 종목을 두 번 조회하지 않게
+  group: price-cron-${{ github.event.schedule == '*/20 * * * *' && 'keepwarm' || github.event.schedule == '30 21 * * 1-5' && 'guru' || inputs.job || 'stock' }}
   cancel-in-progress: false
 
 env:
@@ -79,15 +84,13 @@ jobs:
           FINALIZE: ${{ inputs.finalize }}
         run: |
           case "$SCHEDULE" in
-            '0 0 * * 1-5'|'0 3 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=ASIA ;;
-            '40 8 * * 1-5'|'40 10 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=ASIA --finalize ;;
-            '30 13 * * 1-5'|'0 16 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=US ;;
-            '15 21 * * 1-5'|'45 23 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=US --finalize ;;
+            '0 7 * * 1-5'|'40 7 * * 1-5'|'20 8 * * 1-5'|'0 9 * * 1-5'|'40 9 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=ASIA ;;
+            '15 21 * * 1-5'|'0 22 * * 1-5'|'45 22 * * 1-5'|'30 23 * * 1-5') node scripts/cron/update-stock-prices.mjs --market=US ;;
             '30 21 * * 1-5')             node scripts/cron/update-guru-prices.mjs ;;
             '')
               if [ "$JOB" = guru ]; then
                 node scripts/cron/update-guru-prices.mjs
               else
-                node scripts/cron/update-stock-prices.mjs --market="$MARKET" $([ "$FINALIZE" = true ] && echo --finalize)
+                node scripts/cron/update-stock-prices.mjs --market="$MARKET" $([ "$FINALIZE" = true ] && echo --force)
               fi ;;
           esac

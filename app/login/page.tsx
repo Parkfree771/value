@@ -60,13 +60,13 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="card-base p-6">
-          <h2 className="text-base font-bold text-[var(--foreground)] mb-6 text-center">
+        <div className="border-t-2 border-[var(--theme-border)] pt-5">
+          <h2 className="headline text-[20px] mb-5 text-center">
             로그인
           </h2>
 
           {error && (
-            <div className="mb-5 p-3 rounded-sm border border-red-500 bg-red-500/10 text-xs text-red-600 dark:text-red-400">
+            <div className="mb-5 px-3 py-2.5 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)] text-xs text-[var(--color-error)]">
               {error}
             </div>
           )}
@@ -75,7 +75,7 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-sm bg-white border border-[var(--theme-border-muted)] hover:border-[var(--brand-primary)] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed font-[Roboto,Noto_Sans_KR,sans-serif]"
+            className="w-full h-[48px] sm:h-[44px] flex items-center justify-center gap-3 rounded-sm bg-white border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] transition-colors duration-150 disabled:opacity-60 disabled:cursor-not-allowed font-[Roboto,Noto_Sans_KR,sans-serif]"
           >
             {/* Google G Logo */}
             <svg className="w-[18px] h-[18px]" viewBox="0 0 48 48">
@@ -110,8 +110,8 @@ export default function LoginPage() {
           )}
 
           {/* Coming Soon Section */}
-          <div className="mt-6 pt-6 border-t-2 border-[var(--theme-border-muted)]">
-            <p className="text-xs text-gray-500 dark:text-gray-400 text-center mb-4">
+          <div className="mt-6 pt-5 border-t border-[var(--theme-border-muted)]">
+            <p className="text-xs text-[var(--theme-ink-soft)] text-center mb-4">
               추가 로그인 옵션 (준비 중)
             </p>
 
@@ -142,24 +142,24 @@ export default function LoginPage() {
         </div>
 
         {/* Terms */}
-        <p className="mt-6 text-center text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+        <p className="mt-6 text-center text-xs text-[var(--theme-ink-soft)] leading-relaxed">
           로그인 시{' '}
-          <Link href="/terms" className="text-[var(--theme-accent)] hover:underline">
+          <Link href="/terms" className="font-bold text-[var(--foreground)] underline underline-offset-4">
             이용약관
           </Link>
           ,{' '}
-          <Link href="/privacy" className="text-[var(--theme-accent)] hover:underline">
+          <Link href="/privacy" className="font-bold text-[var(--foreground)] underline underline-offset-4">
             개인정보처리방침
           </Link>
           ,{' '}
-          <Link href="/disclaimer" className="text-[var(--theme-accent)] hover:underline">
+          <Link href="/disclaimer" className="font-bold text-[var(--foreground)] underline underline-offset-4">
             투자 면책조항
           </Link>
           에 동의하게 됩니다.
         </p>
 
         {/* Security Notice */}
-        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-[var(--theme-ink-soft)]">
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>

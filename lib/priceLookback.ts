@@ -4,17 +4,15 @@
  * price_history(ticker, exchange, date, close) 기반.
  */
 
+import { unstable_cache } from 'next/cache';
 import { sql } from './db';
+import { SAFETY_TTL, TAG } from './cache';
 
 export interface LookbackPrice {
   close1d: number | null;
   close7d: number | null;
   close30d: number | null;
 }
-
-let cached: Record<string, LookbackPrice> | null = null;
-let cachedAt = 0;
-const TTL = 60 * 60 * 1000;
 
 function ymd(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -31,80 +29,53 @@ function periodCutoffs(now = new Date()) {
 }
 
 /**
- * Lookback 가격 조회.
- *
- * @param tickers 조회할 ticker 목록(대소문자 무관). 비우면 전체 조회 + 1h 글로벌 캐시.
- *                목록을 주면 ticker = any(...) 로 필터 → SSR TTFB 단축.
- *                필터드 조회는 글로벌 캐시를 쓰지 않음 (캐시키가 ticker 집합마다 달라지므로).
+ * 종목마다 기준일 3개(1일·7일·30일 전)의 "그날 이하 마지막 종가" 만 읽는다.
+ * (예전엔 60일치 전 행을 가져와 서버에서 골랐다 — 종목 80개면 200KB+, 지금은 종목당 1행)
+ * 휴장일이면 그 이전 마지막 거래일 종가. 30일 cutoff 에서 30일 넘게 거슬러 가지는 않는다.
  */
-export async function getLookbackPrices(
-  tickers?: string[],
-): Promise<Record<string, LookbackPrice>> {
-  const filtered = tickers && tickers.length > 0;
-  const now = Date.now();
-
-  // 글로벌 캐시는 "전체" 호출만 사용
-  if (!filtered && cached && now - cachedAt < TTL) return cached;
-
-  try {
-    const today = new Date();
-    // 60일치만 가져옴 — 30일 cutoff 이전 거래일 fallback 여유분 포함
-    const fromDate = new Date(today); fromDate.setUTCDate(fromDate.getUTCDate() - 60);
-
-    let data: Record<string, any>[];
-    try {
-      if (filtered) {
-        // DB 측에서 정규화된 ticker 비교를 위해 대문자 통일
-        const uniq = Array.from(new Set(tickers!.map((t) => t.toUpperCase()).filter(Boolean)));
-        data = await sql`
-          select ticker, date, close from price_history
-          where date >= ${ymd(fromDate)} and ticker = any(${uniq}::text[])
-          order by date desc
-        `;
-      } else {
-        data = await sql`
-          select ticker, date, close from price_history
-          where date >= ${ymd(fromDate)}
-          order by date desc
-        `;
-      }
-    } catch (error) {
-      console.error('[priceLookback] error:', error);
-      return cached || {};
-    }
-
-    // ticker 별 series (date desc 정렬 유지)
-    const series = new Map<string, { date: string; close: number }[]>();
-    for (const row of data) {
-      const t = String(row.ticker).toUpperCase();
-      if (!series.has(t)) series.set(t, []);
-      series.get(t)!.push({ date: row.date as string, close: Number(row.close) });
-    }
-
-    const { c1d, c7d, c30d } = periodCutoffs(today);
-
+const readLookback = unstable_cache(
+  async (tickers: string[], c1d: string, c7d: string, c30d: string): Promise<Record<string, LookbackPrice>> => {
+    const rows = await sql`
+      select t.ticker,
+        (select close from price_history h where h.ticker = t.ticker and h.date <= ${c1d}::date
+           and h.date > ${c1d}::date - 30 order by h.date desc limit 1) as close1d,
+        (select close from price_history h where h.ticker = t.ticker and h.date <= ${c7d}::date
+           and h.date > ${c7d}::date - 30 order by h.date desc limit 1) as close7d,
+        (select close from price_history h where h.ticker = t.ticker and h.date <= ${c30d}::date
+           and h.date > ${c30d}::date - 30 order by h.date desc limit 1) as close30d
+      from unnest(${tickers}::text[]) as t(ticker)`;
     const map: Record<string, LookbackPrice> = {};
-    for (const [t, rows] of series.entries()) {
-      const find = (cutoff: string): number | null => {
-        const hit = rows.find((r) => r.date <= cutoff);
-        return hit ? hit.close : null;
+    for (const r of rows) {
+      if (r.close1d == null && r.close7d == null && r.close30d == null) continue;
+      map[String(r.ticker).toUpperCase()] = {
+        close1d: r.close1d == null ? null : Number(r.close1d),
+        close7d: r.close7d == null ? null : Number(r.close7d),
+        close30d: r.close30d == null ? null : Number(r.close30d),
       };
-      map[t] = {
-        close1d: find(c1d),
-        close7d: find(c7d),
-        close30d: find(c30d),
-      };
-    }
-
-    // 글로벌 캐시 갱신은 "전체" 호출만 (필터드 조회 결과를 캐시에 박으면 다음 전체 요청이 결손됨)
-    if (!filtered) {
-      cached = map;
-      cachedAt = now;
     }
     return map;
+  },
+  ['lookback-prices'],
+  { tags: [TAG.prices], revalidate: SAFETY_TTL },
+);
+
+/**
+ * Lookback 가격 조회 — 1일/7일/30일 전 종가.
+ * @param tickers 조회할 ticker 목록(대소문자 무관). 비우면 price_history 의 전 종목.
+ * 캐시: 인스턴스 공유 데이터 캐시 · 태그 prices (장 마감 수집 완료 시 비움). 기준일이 키에 들어가 날짜가 바뀌면 새로 읽는다.
+ */
+export async function getLookbackPrices(tickers?: string[]): Promise<Record<string, LookbackPrice>> {
+  try {
+    let list = Array.from(new Set((tickers ?? []).map((t) => t.toUpperCase()).filter(Boolean))).sort();
+    if (list.length === 0) {
+      list = (await sql`select distinct ticker from price_history`).map((r) => String(r.ticker).toUpperCase()).sort();
+    }
+    if (list.length === 0) return {};
+    const { c1d, c7d, c30d } = periodCutoffs();
+    return await readLookback(list, c1d, c7d, c30d);
   } catch (err) {
-    console.error('[priceLookback] exception:', err);
-    return cached || {};
+    console.error('[priceLookback] error:', err);
+    return {};
   }
 }
 

@@ -4,7 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import ReportCard from '@/components/ReportCard';
 import Link from 'next/link';
-import Card from '@/components/Card';
 import UserLevelInline from '@/components/UserLevelInline';
 import LevelCard, { type LevelBreakdown } from '@/components/LevelCard';
 import { PageLoading } from '@/components/loading/Loading';
@@ -122,92 +121,79 @@ export default function UserPage() {
   if (notFound) {
     return (
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <Card className="p-6 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="border-t-2 border-[var(--theme-border)] py-14 text-center">
+          <h2 className="headline text-xl sm:text-2xl mb-3">
             사용자를 찾을 수 없습니다
           </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-sm text-[var(--theme-ink-soft)] mb-6">
             해당 사용자가 존재하지 않거나 작성한 리포트가 없습니다.
           </p>
           <button
             onClick={() => router.back()}
-            className="btn-primary font-sans"
+            className="btn-primary text-sm"
           >
             돌아가기
           </button>
-        </Card>
+        </div>
       </div>
     );
   }
+
+  const avg = parseFloat(avgReturnRate);
+  const max = parseFloat(maxReturnRate);
+  const rateClass = (v: number) => (v > 0 ? 'return-positive' : v < 0 ? 'return-negative' : 'return-neutral');
+  const stats: { label: string; value: string; className?: string }[] = [
+    { label: '평균 수익률', value: `${avg >= 0 ? '+' : ''}${avgReturnRate}%`, className: rateClass(avg) },
+    { label: '최고 수익률', value: `${max >= 0 ? '+' : ''}${maxReturnRate}%`, className: rateClass(max) },
+    { label: '승률', value: `${winRate}%` },
+    { label: '조회 · 좋아요', value: `${totalViews.toLocaleString()} · ${totalLikes.toLocaleString()}` },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* Back Button */}
       <button
         onClick={() => router.back()}
-        className="inline-flex items-center gap-2 text-ant-red-600 dark:text-ant-red-400 hover:text-ant-red-700 dark:hover:text-ant-red-300 min-h-[36px] sm:min-h-0 mb-3 sm:mb-6 transition-colors"
+        className="inline-flex items-center gap-1 text-sm font-bold text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] min-h-9 mb-2 sm:mb-4 transition-colors"
       >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
         돌아가기
       </button>
 
       {/* User Profile Header */}
-      <Card variant="glass" padding="lg" className="!p-4 sm:!p-8 mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          {/* 프로필 정보 */}
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-sans text-xl sm:text-2xl font-bold">
-              {username[0]?.toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="headline text-lg sm:text-xl font-bold min-w-0 break-words sm:break-normal">
-                  {username}
-                </h1>
-                <UserLevelInline points={levelPoints} size="md" />
-              </div>
-              <div className="flex items-center gap-3 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                <span>{totalReports}개 리포트</span>
-                <span>·</span>
-                <span>승률 {winRate}%</span>
-              </div>
-            </div>
+      <header className="border-t-2 border-[var(--theme-border)] pt-4 mb-8">
+        <p className="kicker">투자자</p>
+        <div className="mt-2 flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 border border-[var(--theme-border)] flex items-center justify-center">
+            <span className="headline text-2xl sm:text-3xl">{username[0]?.toUpperCase()}</span>
           </div>
-
-          {/* 핵심 통계 */}
-          <div className="flex items-center gap-6 sm:gap-8">
-            <div className="text-center">
-              <div className={`text-xl sm:text-2xl font-black ${
-                parseFloat(avgReturnRate) > 0 ? 'text-red-500' :
-                parseFloat(avgReturnRate) < 0 ? 'text-blue-500' :
-                'text-gray-500'
-              }`}>
-                {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">평균 수익률</div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="headline text-[24px] sm:text-[30px] leading-tight min-w-0 break-words sm:break-normal">
+                {username}
+              </h1>
+              <UserLevelInline points={levelPoints} size="md" />
             </div>
-            <div className="text-center">
-              <div className={`text-xl sm:text-2xl font-black ${
-                parseFloat(maxReturnRate) > 0 ? 'text-red-500' :
-                parseFloat(maxReturnRate) < 0 ? 'text-blue-500' :
-                'text-gray-500'
-              }`}>
-                {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">최고 수익률</div>
-            </div>
+            <p className="mt-0.5 text-sm text-[var(--theme-ink-soft)] tabular-nums">
+              리포트 {totalReports}개 · 승률 {winRate}%
+            </p>
           </div>
         </div>
 
-        {/* 하단 통계 */}
-        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
-          <span>조회 {totalViews.toLocaleString()}</span>
-          <span>·</span>
-          <span>좋아요 {totalLikes.toLocaleString()}</span>
-        </div>
-      </Card>
+        {/* 핵심 통계 — 얇은 괘선으로 나눈 숫자 칸 */}
+        <dl className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-px bg-[var(--theme-border-muted)] border-y border-[var(--theme-border-muted)]">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-[var(--background)] py-3 px-3 sm:px-4 min-w-0">
+              <dt className="text-xs text-[var(--theme-ink-soft)]">{s.label}</dt>
+              <dd className={`mt-1.5 truncate font-mono font-black tabular-nums text-lg sm:text-2xl leading-none ${s.className ?? 'text-[var(--foreground)]'}`}>
+                {s.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </header>
 
       {/* 레벨 (배지 시스템 대체) */}
       {userInfo?.level && (
@@ -217,16 +203,16 @@ export default function UserPage() {
       )}
 
       {/* User Reports */}
-      <div className="mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+      <div className="section-rule">
+        <h2 className="headline text-[20px] sm:text-[22px]">
           작성한 리포트
         </h2>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-sm text-[var(--theme-ink-soft)] tabular-nums">
           총 {userReports.length}개의 리포트
         </p>
       </div>
 
-      <div className="space-y-4 sm:space-y-6">
+      <div>
         {userReports.map((report) => (
           <ReportCard
             key={report.id}

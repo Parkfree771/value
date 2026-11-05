@@ -7,6 +7,7 @@ import { sql } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth/session';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
 import { getClientIP, setRateLimitHeaders } from '@/lib/rate-limit';
+import { invalidatePost } from '@/lib/cache';
 
 const LIKE_RATE_LIMIT = 30;
 const LIKE_RATE_WINDOW = 60 * 1000;
@@ -75,6 +76,9 @@ export async function POST(
     } else {
       isLiked = true;
     }
+
+    // 상세 페이지의 좋아요 수 — 그 글 캐시만 비운다
+    invalidatePost(id);
 
     // 트리거가 갱신한 likes 카운트 다시 읽기
     const updated = await sql`select likes from posts where id = ${id}`;

@@ -1,38 +1,22 @@
 /**
- * 최신 가격 캐시 — Postgres public.current_prices 테이블 기반.
- * 가격 cron이 UPSERT, 페이지·라우트가 이 헬퍼로 읽음.
+ * 최신 가격 — Postgres public.current_prices 테이블 기반.
+ * 가격 cron이 장 마감 후 UPSERT, 페이지·라우트가 이 헬퍼로 읽음.
+ *
+ * 캐시: Next 데이터 캐시(인스턴스 공유) · 태그 prices — 수집 완료 시 invalidateMarket() 이 비운다 (lib/cache.ts)
  */
 
+import { unstable_cache } from 'next/cache';
 import { sql } from './db';
+import { SAFETY_TTL, TAG } from './cache';
 
 export interface CachedPriceData {
   currentPrice: number;
   exchange: string;
 }
 
-// 서버 인스턴스 내 메모리 캐시 (1분)
-let cachedPrices: Record<string, CachedPriceData> | null = null;
-let cacheTimestamp = 0;
-const CACHE_DURATION = 60 * 1000;
-
-/**
- * 모든 티커의 최신 가격을 가져옴. 1분간 메모리 캐시.
- */
-export async function getLatestPrices(): Promise<Record<string, CachedPriceData>> {
-  const now = Date.now();
-  if (cachedPrices && now - cacheTimestamp < CACHE_DURATION) {
-    return cachedPrices;
-  }
-
-  try {
-    let data: Record<string, any>[];
-    try {
-      data = await sql`select ticker, exchange, current_price from current_prices`;
-    } catch (error) {
-      console.error('[priceCache] DB error:', error);
-      return cachedPrices || {};
-    }
-
+const readLatestPrices = unstable_cache(
+  async (): Promise<Record<string, CachedPriceData>> => {
+    const data = await sql`select ticker, exchange, current_price from current_prices`;
     const map: Record<string, CachedPriceData> = {};
     for (const row of data) {
       map[row.ticker.toUpperCase()] = {
@@ -40,12 +24,20 @@ export async function getLatestPrices(): Promise<Record<string, CachedPriceData>
         exchange: row.exchange,
       };
     }
-    cachedPrices = map;
-    cacheTimestamp = now;
     return map;
+  },
+  ['latest-prices'],
+  { tags: [TAG.prices], revalidate: SAFETY_TTL },
+);
+
+/** 모든 티커의 최신 가격 (장 마감 종가) */
+export async function getLatestPrices(): Promise<Record<string, CachedPriceData>> {
+  try {
+    return await readLatestPrices();
   } catch (err) {
+    // 캐시가 실패를 저장하지 않도록 예외는 캐시 함수 밖에서 처리
     console.error('[priceCache] error:', err);
-    return cachedPrices || {};
+    return {};
   }
 }
 
@@ -59,4 +51,3 @@ export function getCurrencyFromExchange(exchange: string): string {
     default: return 'USD';
   }
 }
-

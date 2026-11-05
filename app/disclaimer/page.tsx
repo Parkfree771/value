@@ -20,18 +20,18 @@ export const metadata: Metadata = {
 export default function DisclaimerPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 sm:py-12">
-      <h1 className="headline text-2xl font-bold mb-8">
-        투자 면책 조항 <span className="block text-base sm:inline sm:text-2xl">(Investment Disclaimer)</span>
+      <h1 className="headline text-[26px] sm:text-[32px] pb-3 mb-6 sm:mb-8 border-b-2 border-[var(--theme-border)]">
+        투자 면책 조항 <span className="block text-base font-normal text-[var(--theme-ink-soft)] sm:inline sm:text-xl">(Investment Disclaimer)</span>
       </h1>
 
-      <div className="card-base p-4 sm:p-8">
-        <div className="space-y-6 font-sans text-xs text-gray-700 dark:text-gray-300">
+      <div>
+        <div className="space-y-8 text-sm leading-relaxed text-[var(--foreground)]">
           {/* 중요 공지 */}
-          <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--theme-accent)]">
-            <h2 className="text-base font-bold text-[var(--theme-accent)] mb-2">
+          <div className="p-4 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)]">
+            <h2 className="headline text-[18px] text-[var(--color-error)] mb-2">
               [중요 공지]
             </h2>
-            <p className="text-red-600 dark:text-red-300 font-bold">
+            <p className="font-bold">
               본 웹사이트에 게시된 모든 투자 정보, 리포트, 의견 및 분석은 투자 권유 또는 매매 추천이 아닙니다.
               투자로 인한 모든 손실과 이익에 대한 책임은 전적으로 투자자 본인에게 있습니다.
             </p>
@@ -39,7 +39,7 @@ export default function DisclaimerPage() {
 
           {/* 1. 정보의 성격 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               1. 정보의 성격
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -51,7 +51,7 @@ export default function DisclaimerPage() {
 
           {/* 2. 투자 책임 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               2. 투자 책임
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -63,7 +63,7 @@ export default function DisclaimerPage() {
 
           {/* 3. 정보의 정확성 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               3. 정보의 정확성 및 완전성
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -75,7 +75,7 @@ export default function DisclaimerPage() {
 
           {/* 4. 수익률 정보 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               4. 수익률 정보
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -87,7 +87,7 @@ export default function DisclaimerPage() {
 
           {/* 5. 전문 자문의 필요성 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               5. 전문 자문의 필요성
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -99,10 +99,10 @@ export default function DisclaimerPage() {
 
           {/* 6. 투자 위험 고지 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               6. 투자 위험 고지
             </h2>
-            <div className="p-4 bg-yellow-500/10 border-l-[4px] border-yellow-500">
+            <div className="p-4 border-l-2 border-[var(--color-warning)] bg-[var(--theme-bg)]">
               <ul className="list-disc pl-6 space-y-2">
                 <li><strong>주식 투자는 원금 손실의 위험</strong>이 있습니다.</li>
                 <li>투자 자산의 가치는 시장 상황에 따라 <strong>크게 변동</strong>될 수 있습니다.</li>
@@ -115,7 +115,7 @@ export default function DisclaimerPage() {
 
           {/* 7. 사용자 생성 콘텐츠 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               7. 사용자 생성 콘텐츠
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -127,7 +127,7 @@ export default function DisclaimerPage() {
 
           {/* 8. 법적 준수 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               8. 법적 준수
             </h2>
             <ul className="list-disc pl-6 space-y-2">
@@ -139,10 +139,10 @@ export default function DisclaimerPage() {
 
           {/* 9. 면책 동의 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               9. 면책 동의
             </h2>
-            <div className="p-4 bg-red-500/10 border-l-[4px] border-[var(--theme-accent)]">
+            <div className="p-4 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)]">
               <p className="font-bold">
                 본 사이트를 이용함으로써, 사용자는 위의 모든 면책 조항을 이해하고 동의한 것으로 간주됩니다.
                 투자로 인한 모든 결과는 사용자 본인의 책임임을 인지하고 있음을 확인합니다.
@@ -152,12 +152,12 @@ export default function DisclaimerPage() {
 
           {/* 10. 연락처 */}
           <section>
-            <h2 className="text-sm font-bold mb-3">
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">
               10. 문의
             </h2>
             <p>
               본 면책 조항에 대한 질문이나 문의사항이 있으시면{' '}
-              <Link href="/terms" className="text-[var(--theme-accent)] hover:underline">
+              <Link href="/terms" className="font-bold text-[var(--foreground)] underline underline-offset-4">
                 이용약관
               </Link>
               을 참조하거나 고객센터로 연락주시기 바랍니다.
@@ -165,8 +165,8 @@ export default function DisclaimerPage() {
           </section>
 
           {/* 최종 업데이트 */}
-          <div className="pt-6 border-t-[3px] border-[var(--theme-border-muted)]">
-            <p className="text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">
+          <div className="pt-6 border-t border-[var(--theme-border-muted)]">
+            <p className="text-xs text-[var(--theme-ink-soft)]">
               최종 업데이트: 2026년 2월 1일
             </p>
           </div>

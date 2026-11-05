@@ -95,6 +95,34 @@ export async function getStockPrice(token, ticker, exchange) {
   return getOverseaStockPrice(token, ticker, exchange);
 }
 
+/**
+ * 캐시 갱신 신호 — 수집이 끝나면 한 번 (scope: 'market' = 가격이 들어간 모든 캐시, lib/cache.ts invalidateMarket)
+ * 시간 기준이 아니라 "끝났을 때" 부르므로 예약 실행이 밀려도 끝나는 순간 반영된다.
+ */
+export async function revalidateScope(scope) {
+  const siteUrl = (process.env.SITE_URL ?? '').replace(/\/$/, '');
+  const secret = process.env.REVALIDATE_SECRET ?? '';
+  if (!siteUrl || !secret) {
+    console.log('[CRON] SITE_URL/REVALIDATE_SECRET 미설정 — revalidate 스킵');
+    return null;
+  }
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const res = await fetch(`${siteUrl}/api/revalidate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-revalidate-secret': secret },
+        body: JSON.stringify({ scope }),
+      });
+      if (res.ok) return res.status;
+      console.warn(`[CRON] revalidate ${scope} 응답 ${res.status} (시도 ${attempt}/3)`);
+    } catch (err) {
+      console.warn(`[CRON] revalidate ${scope} 실패 (시도 ${attempt}/3):`, err instanceof Error ? err.message : err);
+    }
+    await sleep(3000);
+  }
+  return -1;
+}
+
 export async function revalidateSite(paths) {
   const siteUrl = (process.env.SITE_URL ?? '').replace(/\/$/, '');
   const secret = process.env.REVALIDATE_SECRET ?? '';
@@ -162,6 +190,24 @@ export function lastSessionDate(exchange, now = new Date()) {
     return d.toISOString().slice(0, 10);
   }
   return ymd;
+}
+
+/** tz 의 UTC 오프셋(분) — 그 시각 기준 (미국 서머타임 반영) */
+function tzOffsetMinutes(tz, date) {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
+    }).formatToParts(date).map((x) => [x.type, x.value]),
+  );
+  const asUtc = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+  return Math.round((asUtc - date.getTime()) / 60000);
+}
+
+/** 그 거래일(YYYY-MM-DD, 현지)의 장 마감 시각 — 이 시각 이후 갱신된 가격이면 그날 종가로 본다 */
+export function sessionCloseInstant(exchange, ymd) {
+  const clock = MARKET_CLOCK[exchange] ?? MARKET_CLOCK.NYS;
+  const naive = Date.parse(`${ymd}T00:00:00Z`) + clock.close * 60000;
+  return new Date(naive - tzOffsetMinutes(clock.tz, new Date(naive)) * 60000);
 }
 
 /** 지금 장중인가 — 장중엔 KIS 가 주는 값이 종가가 아니므로 price_history 에 쓰지 않는다 */

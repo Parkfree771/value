@@ -1,13 +1,14 @@
 ﻿import type { Metadata } from 'next';
 import { getFeedData } from '@/lib/feedData';
 import RankingClient from './RankingClient';
+import { formatRate, ogCardUrl, seoStockName } from '@/lib/metadata';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
-export const metadata: Metadata = {
-  title: '실시간 수익률 랭킹 · 검증된 투자자 랭킹',
+const baseMetadata: Metadata = {
+  title: '수익률 랭킹 · 검증된 투자자 랭킹',
   description:
-    '작성가 vs 현재가로 검증되는 투자 리포트 수익률 랭킹. 최고 수익률 리포트, 누적 수익률 상위 투자자, 인기 리포트를 실시간으로 확인하세요. 한·미·일·중·홍콩 종목 모두 같은 기준으로 비교됩니다. 결과로 증명된 개미 투자자를 찾는 가장 빠른 방법.',
+    '작성가 vs 현재가로 검증되는 투자 리포트 수익률 랭킹. 최고 수익률 리포트, 누적 수익률 상위 투자자, 인기 리포트를 매일 장 마감 종가 기준으로 확인하세요. 한·미·일·중·홍콩 종목 모두 같은 기준으로 비교됩니다. 결과로 증명된 개미 투자자를 찾는 가장 빠른 방법.',
   keywords: [
     '주식 수익률 랭킹', '실시간 수익률 랭킹', '리포트 수익률 랭킹',
     '투자자 랭킹', '인기 투자자', '검증된 투자자', '실력 투자자',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
     'AntStreet', '앤트스트릿',
   ],
   openGraph: {
-    title: '실시간 수익률 랭킹 · 검증된 투자자 랭킹 - AntStreet',
+    title: 'AntStreet | 수익률 랭킹 · 검증된 투자자 랭킹',
     description:
       '작성가 vs 현재가로 자동 검증되는 리포트·투자자 랭킹. 결과로 증명된 개미 투자자를 한눈에.',
     url: `${SITE_URL}/ranking`,
@@ -28,6 +29,53 @@ export const metadata: Metadata = {
   },
 };
 
+// 지금 1위 수익률을 제목·설명·OG 카드에 — 검색결과에서 "얼마나 벌었나"가 바로 보이게
+export async function generateMetadata(): Promise<Metadata> {
+  const data = await getFeedData();
+  const top = [...((data?.posts ?? []) as unknown as FeedPost[])]
+    .filter((p) => Number.isFinite(p.returnRate))
+    .sort((a, b) => b.returnRate - a.returnRate)
+    .slice(0, 3);
+  if (top.length === 0) return baseMetadata;
+
+  const best = top[0];
+  const title = `수익률 랭킹 · 1위 ${formatRate(best.returnRate)} ${seoStockName(best.stockName, best.ticker)}`;
+  const description = [
+    `지금 수익률 1위 리포트는 ${seoStockName(best.stockName, best.ticker)} ${formatRate(best.returnRate)}(${best.author}).`,
+    top.length > 1
+      ? `이어서 ${top
+          .slice(1)
+          .map((p) => `${seoStockName(p.stockName, p.ticker)} ${formatRate(p.returnRate)}`)
+          .join(', ')}.`
+      : '',
+    '작성가 대비 현재가로 자동 검증되는 리포트·투자자 랭킹. 한·미·일·중·홍콩 종목을 같은 기준으로 비교합니다.',
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const ogImage = ogCardUrl({
+    kicker: '수익률 랭킹 · 장 마감 기준',
+    title: '수익률 랭킹',
+    sub: '작성가 대비 현재가 · 자동 검증',
+    metrics: top.map((p, i) => ({ label: `${i + 1}위 ${seoStockName(p.stockName, p.ticker)}`, value: formatRate(p.returnRate) })),
+  });
+
+  return {
+    ...baseMetadata,
+    title,
+    description,
+    openGraph: {
+      type: 'website',
+      title,
+      description,
+      url: `${SITE_URL}/ranking`,
+      siteName: 'AntStreet',
+      locale: 'ko_KR',
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
+  };
+}
+
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -37,15 +85,15 @@ const faqJsonLd = {
       name: 'AntStreet 랭킹은 어떻게 산정되나요?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '리포트 작성 시점의 주가 대비 현재 주가를 기준으로 실시간 수익률을 계산합니다. 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 제공합니다.',
+        text: '리포트 작성 시점의 주가 대비 장 마감 종가를 기준으로 매일 수익률을 계산합니다. 수익률 랭킹, 투자자 랭킹, 인기글 랭킹을 제공합니다.',
       },
     },
     {
       '@type': 'Question',
-      name: '수익률은 실시간으로 업데이트되나요?',
+      name: '수익률은 언제 업데이트되나요?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '네, 실시간 시세를 기반으로 수익률이 자동 계산됩니다. 한국, 미국, 일본, 중국, 홍콩 주식을 지원합니다.',
+        text: '각 시장이 마감한 뒤 종가로 하루 한 번 갱신됩니다. 한국·일본·중국·홍콩은 오후 4~7시, 미국은 오전 6~9시(한국 시간)에 반영되며, 장중 시세는 반영하지 않습니다.',
       },
     },
     {
@@ -59,8 +107,7 @@ const faqJsonLd = {
   ],
 };
 
-// 1분마다 재검증
-export const revalidate = 60;
+export const revalidate = 86400; // 하루짜리 안전장치 — 실제 갱신은 데이터가 바뀔 때 신호로 (lib/cache.ts)
 
 type FeedPost = {
   id: string;
@@ -147,11 +194,29 @@ export default async function RankingPage() {
     .sort((a, b) => b.avgReturnRate - a.avgReturnRate)
     .map((investor, index) => ({ ...investor, rank: index + 1 }));
 
+  // 수익률 상위 20 리포트 — 검색엔진에 랭킹 목록을 구조화해 넘긴다
+  const topListJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: '수익률 랭킹',
+    itemListOrder: 'https://schema.org/ItemListOrderDescending',
+    itemListElement: reportsWithDays.slice(0, 20).map((r, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${SITE_URL}/reports/${r.id}`,
+      name: `${seoStockName(r.stockName, r.ticker)} ${formatRate(r.returnRate)} · ${r.title}`.slice(0, 110),
+    })),
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(topListJsonLd) }}
       />
       <RankingClient
         initialReports={reportsWithDays}

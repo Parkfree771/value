@@ -7,21 +7,23 @@ import { getLookbackPrices, calcReportPeriodReturns } from '@/lib/priceLookback'
 import { calculateReturn } from '@/utils/calculateReturn';
 import { getBriefing } from '@/lib/briefing';
 import { getTickerData } from '@/lib/ticker';
+import { listBrokerReports } from '@/lib/brokerReports';
+import type { ReportSummary } from '@/types/report';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
-// ISR — 1시간 캐시 (그러나 실제로는 가격 cron 완료 / 글 작성/삭제 시 /api/revalidate · revalidatePath('/')로 즉시 무효화)
-// 가격 cron이 하루 6번 (아시아 3 + 미국 3) 트리거하므로 그 외엔 캐시 유지 → egress 최소.
+// ISR — 장 마감 수집 완료 · 글 작성/수정/삭제 · 전문가 추적 등록 때 revalidatePath("/") 로 즉시 다시 만든다 (lib/cache.ts)
+// 가격 수집은 아시아·미국 장 마감 후 각각 끝날 때 한 번씩 신호 → 그 외엔 캐시 유지 → egress 최소.
 // ※ cookies() 호출이 있으면 페이지가 자동으로 dynamic 으로 강제됨 → revalidate 무의미.
 //   그래서 세션 없이 서버 DB 클라이언트(lib/db)로 공개 데이터만 읽어 진짜 ISR 가능하도록 유지한다.
-export const revalidate = 3600;
+export const revalidate = 86400; // 하루짜리 안전장치 — 실제 갱신은 데이터가 바뀔 때 신호로 (lib/cache.ts)
 
 export const metadata: Metadata = {
   title: {
-    absolute: '주식 리포트 공유 · 작성가 대비 실시간 수익률 검증 | AntStreet',
+    absolute: 'AntStreet | 주식 리포트 공유 · 작성가 대비 수익률 매일 검증',
   },
   description:
-    '한·미·일·중·홍콩 주식 분석을 공유하고, 작성가 대비 현재가로 수익률이 자동 검증되는 투자 커뮤니티. 매수·매도 의견의 결과가 실시간으로 추적되며, 검증된 실력의 투자자 리포트를 찾을 수 있습니다.',
+    '한·미·일·중·홍콩 주식 분석을 공유하고, 작성가 대비 현재가로 수익률이 자동 검증되는 투자 커뮤니티. 매수·매도 의견의 결과가 매일 장 마감 종가로 추적되며, 검증된 실력의 투자자 리포트를 찾을 수 있습니다.',
   keywords: [
     // 메인 진입 키워드
     '주식 리포트', '주식 분석', '주식 SNS', '투자 커뮤니티', '투자 의견 공유',
@@ -39,7 +41,7 @@ export const metadata: Metadata = {
     'AntStreet', '앤트스트릿', '앤트스트리트',
   ],
   openGraph: {
-    title: '주식 리포트 공유 · 작성가 대비 실시간 수익률 검증',
+    title: '주식 리포트 공유 · 작성가 대비 수익률 매일 검증',
     description:
       '한·미·일·중·홍콩 주식 분석을 공유하고, 작성가 대비 현재가로 수익률이 자동 검증되는 투자 커뮤니티. 결과로 증명된 개미 투자자의 분석을 한곳에서.',
     url: SITE_URL,
@@ -59,13 +61,13 @@ const homeJsonLd = {
       '@id': `${SITE_URL}/#homepage`,
       url: SITE_URL,
       name: 'AntStreet',
-      description: '13F 구루 포트폴리오 · 개미 투자자 리포트 · 실시간 수익률 검증',
+      description: '13F 구루 포트폴리오 · 개미 투자자 리포트 · 수익률 매일 검증',
       inLanguage: 'ko-KR',
       isPartOf: { '@id': `${SITE_URL}/#website` },
       hasPart: [
         { '@type': 'SiteNavigationElement', name: '구루 포트폴리오 (13F)', url: `${SITE_URL}/guru-tracker`, description: '워렌 버핏·빌 애크먼·하워드 막스 SEC 13F 분기별 포트폴리오 추적' },
         { '@type': 'SiteNavigationElement', name: '경제 지표 (FRED)', url: `${SITE_URL}/indicators`, description: 'VIX·장단기금리차·CPI·M2 등 미국 매크로 지표' },
-        { '@type': 'SiteNavigationElement', name: '투자 리포트', url: `${SITE_URL}/ranking`, description: '개미 투자자 리포트 + 작성가 대비 실시간 수익률 검증' },
+        { '@type': 'SiteNavigationElement', name: '투자 리포트', url: `${SITE_URL}/ranking`, description: '개미 투자자 리포트 + 작성가 대비 수익률 매일 검증' },
         { '@type': 'SiteNavigationElement', name: '종목 검색', url: `${SITE_URL}/search`, description: '한·미·일·중·홍콩 종목별 리포트와 컨센서스' },
       ],
     },
@@ -279,6 +281,39 @@ async function getInitialFeed(): Promise<FeedData | null> {
   }
 }
 
+/**
+ * 홈 통합 순위용 — 전문가 추적(증권사 리포트)을 회원 리포트와 같은 모양으로.
+ * 기간 수익률(1일·7일·한달)도 회원 글과 같은 규칙: 발간일 이후만, 그 전 등락은 리포트 성과가 아니다.
+ * 제목 = 한 줄 요약, 작성자 자리 = 증권사, 작성가 = 작성 당시(발간일 종가).
+ */
+async function getBrokerSummaries(): Promise<ReportSummary[]> {
+  const reports = await listBrokerReports();
+  if (reports.length === 0) return [];
+  const lookback = await getLookbackPrices([...new Set(reports.map((r) => r.ticker))]).catch(() => ({}) as Record<string, never>);
+  return reports.map((r) => ({
+    id: r.id,
+    href: `/expert/${r.id}`,
+    source: 'broker' as const,
+    title: r.headline,
+    author: r.broker,
+    stockName: r.stockName,
+    ticker: r.ticker,
+    exchange: r.exchange,
+    opinion: r.opinion,
+    returnRate: r.returnRate,
+    initialPrice: r.basePrice,
+    currentPrice: r.currentPrice,
+    createdAt: r.reportDate,
+    views: 0,
+    likes: 0,
+    stockData: { currency: r.currency },
+    ...calcReportPeriodReturns(
+      { currentPrice: r.currentPrice, initialPrice: r.basePrice, createdAt: r.reportDate },
+      lookback[r.ticker.toUpperCase()],
+    ),
+  }));
+}
+
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -288,7 +323,7 @@ const faqJsonLd = {
       name: 'AntStreet는 어떤 서비스인가요?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'AntStreet는 개미 투자자들이 투자 리포트를 작성하고 실시간 수익률을 추적할 수 있는 플랫폼입니다. 한국, 미국, 일본, 중국, 홍콩 주식을 지원합니다.',
+        text: 'AntStreet는 개미 투자자들이 투자 리포트를 작성하고 그 뒤 수익률을 매일 추적할 수 있는 플랫폼입니다. 한국, 미국, 일본, 중국, 홍콩 주식을 지원합니다.',
       },
     },
     {
@@ -296,7 +331,7 @@ const faqJsonLd = {
       name: '수익률은 어떻게 계산되나요?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '리포트 작성 시점의 주가를 기준으로 현재 실시간 주가와 비교하여 수익률을 자동 계산합니다. 매수(Long)와 매도(Short) 포지션 모두 지원합니다.',
+        text: '리포트 작성 시점의 주가를 기준으로, 각 시장 장 마감 후 종가와 비교해 수익률을 하루 한 번 자동 계산합니다. 매수(Long)와 매도(Short) 포지션 모두 지원합니다.',
       },
     },
     {
@@ -312,7 +347,7 @@ const faqJsonLd = {
       name: 'AntStreet에서만 볼 수 있는 차별화된 기능은?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: '① SEC 13F 공시 기반 워렌 버핏·빌 애크먼·하워드 막스 등 투자 대가 포트폴리오 한국어 추적, ② DART 공시 기반 한국 기업 재무제표 핵심 지표 시각화, ③ FRED 경제 지표(VIX·금리차·CPI·M2) 대시보드, ④ 매일 아침 글로벌 경제 헤드라인, ⑤ 작성 시점 vs 현재 주가 실시간 비교로 검증되는 투자 리포트 — 이 다섯 가지를 한곳에서 제공합니다.',
+        text: '① SEC 13F 공시 기반 워렌 버핏·빌 애크먼·하워드 막스 등 투자 대가 포트폴리오 한국어 추적, ② DART 공시 기반 한국 기업 재무제표 핵심 지표 시각화, ③ FRED 경제 지표(VIX·금리차·CPI·M2) 대시보드, ④ 매일 아침 글로벌 경제 헤드라인, ⑤ 작성 시점 vs 장 마감 종가 비교로 매일 검증되는 투자 리포트 — 이 다섯 가지를 한곳에서 제공합니다.',
       },
     },
   ],
@@ -321,10 +356,11 @@ const faqJsonLd = {
 // 서버 컴포넌트 - 초기 데이터를 서버에서 fetch하여 props로 전달
 export default async function HomePage() {
   // 피드 · 모닝 브리핑 · 지수 띠 — 모두 홈 ISR 재생성 때만 읽는다 (1시간 또는 cron/글쓰기 revalidate)
-  const [initialData, briefing, ticker] = await Promise.all([
+  const [initialData, briefing, ticker, brokerReports] = await Promise.all([
     getInitialFeed(),
     getBriefing(),
     getTickerData().catch(() => null),
+    getBrokerSummaries().catch(() => []),
   ]);
 
   return (
@@ -337,7 +373,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <HomeClient initialData={initialData} briefing={briefing} ticker={ticker} />
+      <HomeClient initialData={initialData} briefing={briefing} ticker={ticker} brokerReports={brokerReports} />
     </>
   );
 }

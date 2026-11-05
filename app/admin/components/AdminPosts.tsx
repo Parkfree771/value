@@ -95,7 +95,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
       </div>
 
       {/* Results count */}
-      <div className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-xs text-[var(--theme-ink-soft)]">
         전체 {filteredPosts.length}건
         {searchQuery.trim() && ` (검색: "${searchQuery.trim()}")`}
       </div>
@@ -133,7 +133,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
               {paginatedPosts.map((post) => (
                 <tr
                   key={post.id}
-                  className="hover:bg-red-50 dark:hover:bg-red-900/10"
+                  className="hover:bg-[var(--theme-bg)]"
                 >
                   <td className="px-4 py-3 max-w-[240px]">
                     <Link
@@ -153,8 +153,8 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
                     <span
                       className={`text-xs font-bold ${
                         post.returnRate >= 0
-                          ? 'text-red-600 dark:text-red-400'
-                          : 'text-blue-600 dark:text-blue-400'
+                          ? 'text-[var(--color-up)]'
+                          : 'text-[var(--color-down)]'
                       }`}
                     >
                       {post.returnRate >= 0 ? '+' : ''}
@@ -164,7 +164,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
                   <td className="px-4 py-3 text-xs whitespace-nowrap">
                     {post.views.toLocaleString()}
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-xs text-[var(--theme-ink-soft)] whitespace-nowrap">
                     {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3 text-center">
@@ -184,7 +184,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
         {/* Empty state */}
         {filteredPosts.length === 0 && (
           <div className="pixel-empty-state">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-[var(--theme-ink-soft)]">
               {searchQuery.trim()
                 ? `"${searchQuery.trim()}" 검색 결과가 없습니다.`
                 : '게시글이 없습니다.'}
@@ -203,7 +203,7 @@ export default function AdminPosts({ posts, loading, onDelete, onRefresh }: Admi
           >
             Previous
           </button>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-[var(--theme-ink-soft)]">
             {currentPage} / {totalPages}
           </span>
           <button

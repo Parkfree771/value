@@ -39,7 +39,7 @@ const marketKeys = Object.keys(marketLabels) as MarketFilter[];
 // 필터 (텍스트 스타일 - 검색 페이지와 동일)
 const FILTER_BASE = 'flex-shrink-0 font-heading tracking-tight sm:tracking-wide text-[13px] sm:text-sm px-2 py-1.5 sm:px-3 transition-all';
 const FILTER_ACTIVE = `${FILTER_BASE} font-black text-[var(--theme-accent)] border-b-2 border-[var(--theme-accent)]`;
-const FILTER_INACTIVE = `${FILTER_BASE} font-bold text-gray-700 dark:text-gray-300 hover:text-[var(--theme-accent)]`;
+const FILTER_INACTIVE = `${FILTER_BASE} font-bold text-[var(--theme-ink-soft)] border-b-2 border-transparent hover:text-[var(--foreground)]`;
 
 /** 측정 컨테이너에서 첫 줄에 들어가는 아이템 수 계산 */
 function measureFirstRow(container: HTMLElement | null): number {
@@ -62,6 +62,8 @@ interface HomeClientProps {
   initialData: FeedData | null;
   briefing?: Briefing | null;
   ticker?: TickerResponse | null;
+  /** 홈 통합 순위에 섞을 전문가 추적(증권사) 리포트 — 아래 "모든 리포트" 피드에는 넣지 않는다 */
+  brokerReports?: ReportSummary[];
 }
 
 // FeedPost를 ReportSummary로 매핑하는 함수
@@ -96,7 +98,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
   }));
 }
 
-const HomeClient = memo(function HomeClient({ initialData, briefing = null, ticker = null }: HomeClientProps) {
+const HomeClient = memo(function HomeClient({ initialData, briefing = null, ticker = null, brokerReports = [] }: HomeClientProps) {
   // 서버에서 받은 initialData로 초기 상태 설정
   const [reports, setReports] = useState<ReportSummary[]>(() =>
     initialData?.posts ? mapPostsToReports(initialData.posts) : []
@@ -283,7 +285,7 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
       <MarketStrip ticker={ticker} />
       {/* 1면 — 수익률 1·2·3위 + 4~10위 / 모닝 브리핑 · 구루 / 최신 리포트 */}
       <div className="mt-5 md:mt-7">
-        <FrontPage reports={reports} briefing={briefing} />
+        <FrontPage reports={reports} brokerReports={brokerReports} briefing={briefing} />
       </div>
 
 
@@ -351,7 +353,7 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
             <p className="font-sans text-sm mb-2">
               {searchQuery ? '검색 결과가 없습니다.' : '아직 작성된 리포트가 없습니다.'}
             </p>
-            <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
+            <p className="font-sans text-xs text-[var(--theme-ink-soft)]">
               {searchQuery ? '다른 검색어를 입력해보세요.' : '첫 번째 리포트를 작성해보세요!'}
             </p>
           </div>
@@ -366,7 +368,7 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
       {/* 게시물 수 표시 */}
       {filteredReports.length > 0 && (
         <div className="flex justify-center mt-4 sm:mt-6">
-          <span className="font-sans text-xs text-gray-500 dark:text-gray-400">
+          <span className="font-sans text-xs text-[var(--theme-ink-soft)]">
             총 {total}개의 리포트
           </span>
         </div>

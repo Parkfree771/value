@@ -1,30 +1,35 @@
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { connection } from 'next/server';
+import { unstable_cache } from 'next/cache';
+import { SAFETY_TTL, TAG } from '@/lib/cache';
 import { sql } from '@/lib/db';
 import { Report } from '@/types/report';
 import { generateReportMetadata, generateReportJsonLd } from '@/lib/metadata';
 import ReportDetailClient from '@/components/ReportDetailClient';
 import RelatedReports from '@/components/RelatedReports';
-import Card from '@/components/Card';
-import Button from '@/components/Button';
-import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { getLatestPrices } from '@/lib/priceCache';
 import { calculateReturn } from '@/utils/calculateReturn';
 
 /**
  * 리포트 데이터를 가져옵니다.
  * - Postgres posts (트리거가 likes/views 카운트 자동 유지)
- * - feed.json은 가격 캐시 (cron이 갱신)
+ * 캐시: 글마다 데이터 캐시 · 태그 posts + post:{id} (lib/cache.ts)
+ *   수정·삭제 → invalidatePosts(id) 로 즉시 비움 / 좋아요·댓글 → invalidatePost(id) / 장 마감 수집 → invalidateMarket()
+ *   예전엔 connection() 으로 조회마다 DB 를 읽었다 (본문 평균 20KB + 관련 리포트용 피드 전체).
  * React cache()로 generateMetadata와 페이지 간 중복 호출 방지.
  */
 const getReportData = cache(async (id: string): Promise<Report | null> => {
-  // 요청 시점 렌더링 유지 — 옛 코드는 cookies() 호출로 동적 렌더링이었음.
-  // 이게 없으면 revalidate=3600 ISR로 바뀌어 삭제/수정된 글이 최대 1시간 캐시됨.
-  // (try 밖에서 호출 — Next의 dynamic 신호 에러를 catch가 삼키지 않도록)
-  await connection();
+  // 옛 Firestore id 등 uuid가 아닌 값은 조회 없이 not found (Postgres 22P02 방지)
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
+  return unstable_cache(() => loadReport(id), ['report', id], {
+    tags: [TAG.posts, TAG.post(id)],
+    revalidate: SAFETY_TTL,
+  })();
+});
 
-  try {
+async function loadReport(id: string): Promise<Report | null> {
+  {
     // 옛 Firestore id 등 uuid가 아닌 값은 조회 없이 not found (Postgres 22P02 방지)
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return null;
 
@@ -47,8 +52,9 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
         getLatestPrices(),
       ]);
     } catch (error) {
+      // 실패는 캐시에 남기지 않는다 — throw 해서 이번 요청만 에러 페이지
       console.error('리포트 조회 오류:', error);
-      return null;
+      throw error;
     }
     const data = rows[0];
     if (!data) return null;
@@ -103,11 +109,8 @@ const getReportData = cache(async (id: string): Promise<Report | null> => {
     };
 
     return report;
-  } catch (error) {
-    console.error('리포트 가져오기 실패:', error);
-    return null;
   }
-});
+}
 
 /**
  * 동적 메타데이터 생성 (SEO)
@@ -120,6 +123,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     return {
       title: '리포트를 찾을 수 없습니다',
       description: '요청하신 리포트가 존재하지 않거나 삭제되었습니다.',
+      robots: { index: false, follow: true },
     };
   }
 
@@ -133,24 +137,8 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
   const resolvedParams = await params;
   const report = await getReportData(resolvedParams.id);
 
-  // 리포트를 찾지 못한 경우
-  if (!report) {
-    return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Card className="p-6 text-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            리포트를 찾을 수 없습니다
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            요청하신 리포트가 존재하지 않거나 삭제되었습니다.
-          </p>
-          <Link href="/">
-            <Button>홈으로 돌아가기</Button>
-          </Link>
-        </Card>
-      </div>
-    );
-  }
+  // 없거나 삭제된 리포트 — 진짜 404 상태로 응답해야 검색엔진이 색인에서 뺀다 (200 + 안내문은 soft 404)
+  if (!report) notFound();
 
   // JSON-LD 구조화된 데이터 생성
   const jsonLd = generateReportJsonLd(report, report.returnRate);
@@ -184,4 +172,11 @@ export default async function ReportDetailPage({ params }: { params: Promise<{ i
  * 정적 생성을 위한 설정 (옵션)
  * revalidate: 3600 => 1시간마다 페이지 재생성 (ISR)
  */
-export const revalidate = 3600; // 1시간
+// 하루짜리 안전장치 — 실제 갱신은 수정·삭제·가격 수집 때 태그로 (lib/cache.ts)
+export const revalidate = 86400;
+
+// 미리 만들어 두지 않고 처음 방문 때 만든 뒤 캐시 (ISR) — 빈 목록이어야 동적 URL 도 캐시된다.
+// 갱신은 데이터가 바뀔 때 신호로 (lib/cache.ts)
+export function generateStaticParams() {
+  return [];
+}

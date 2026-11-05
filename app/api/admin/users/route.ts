@@ -5,6 +5,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { sql } from '@/lib/db';
+import { invalidatePosts } from '@/lib/cache';
 
 interface AdminUserRow {
   id: string;
@@ -91,6 +92,8 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: '사용자를 찾을 수 없습니다.' }, { status: 404 });
     }
 
+    // 정지된 사용자의 프로필은 404 — 프로필 캐시(태그 posts) 비움
+    invalidatePosts();
     console.log(`[Admin] 사용자 ${isSuspended ? '정지' : '정지 해제'}: ${userId} by ${admin.email}`);
     return NextResponse.json({
       success: true,

@@ -17,12 +17,15 @@ const DATELINE = new Intl.DateTimeFormat('ko-KR', {
 
 // 섹션 바 — 콘텐츠 섹션만. 글쓰기·마이페이지 같은 내 계정 기능은 오른쪽 위(로그인 시)로 분리 (WSJ 방식)
 const SECTIONS: { href: string; label: string; match?: string[] }[] = [
+  // 리포트 둘(개인 · 전문가 추적) → 랭킹 → 정보 지면(구루 · 헤드라인 · 경제지표) → 검색
   { href: '/', label: '홈' },
+  { href: '/reports', label: '개인 리포트' },
+  { href: '/expert', label: '전문가 추적' },
   { href: '/ranking', label: '랭킹' },
-  { href: '/briefing', label: '헤드라인' },
-  { href: '/search', label: '종목 검색' },
   { href: '/guru-tracker', label: '구루 포트폴리오', match: ['/portfolio'] },
+  { href: '/briefing', label: '헤드라인' },
   { href: '/indicators', label: '경제지표' },
+  { href: '/search', label: '종목 검색' },
 ];
 
 function ThemeIcon({ theme, mounted }: { theme: string; mounted: boolean }) {
@@ -44,7 +47,7 @@ function Avatar({ photoURL, name, size }: { photoURL?: string | null; name: stri
     // eslint-disable-next-line @next/next/no-img-element
     <img src={photoURL} alt="" style={style} className="rounded-full border border-[var(--theme-border-muted)]" referrerPolicy="no-referrer" />
   ) : (
-    <span style={style} className="rounded-full bg-[var(--theme-accent)] flex items-center justify-center text-white font-serif text-sm font-bold">
+    <span style={style} className="rounded-full bg-[var(--theme-accent)] flex items-center justify-center text-[var(--background)] font-serif text-sm font-bold">
       {name[0]}
     </span>
   );
@@ -56,6 +59,8 @@ const TAB_ICONS = {
   ranking: 'M5 20v-7M12 20V5M19 20v-10',
   write: 'M12 5v14M5 12h14',
   guru: 'M3 20h18M6 16.5l4.5-5 3.5 3L20 7.5',
+  reports: 'M7 3.5h7l4 4V20.5H7zM14 3.5v4h4M9.5 12h6M9.5 15.5h6',
+  expert: 'M4 8h16v11H4zM9 8V5.5h6V8M4 13h16',
   me: 'M16 8a4 4 0 11-8 0 4 4 0 018 0zM4.5 20.5c1-3.8 3.9-5.5 7.5-5.5s6.5 1.7 7.5 5.5',
 };
 
@@ -157,9 +162,10 @@ const Navbar = memo(function Navbar() {
   const meHref = user ? '/mypage' : '/login';
   const tabs = [
     { href: '/', label: '홈', icon: TAB_ICONS.home, active: pathname === '/' },
-    { href: '/ranking', label: '랭킹', icon: TAB_ICONS.ranking, active: pathname.startsWith('/ranking') },
+    // 랭킹 · 구루 · 헤드라인 등은 위 메뉴(☰)에 — 하단 탭은 가장 많이 쓰는 다섯 개
+    { href: '/reports', label: '리포트', icon: TAB_ICONS.reports, active: pathname.startsWith('/reports') },
     { href: '/write', label: '글쓰기', icon: TAB_ICONS.write, active: false, onClick: handleWriteClick },
-    { href: '/guru-tracker', label: '구루', icon: TAB_ICONS.guru, active: pathname.startsWith('/guru-tracker') || pathname.startsWith('/portfolio') },
+    { href: '/expert', label: '전문가', icon: TAB_ICONS.expert, active: pathname.startsWith('/expert') },
     { href: meHref, label: user ? '내 정보' : '로그인', icon: TAB_ICONS.me, active: pathname.startsWith(meHref) },
   ];
 

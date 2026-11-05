@@ -12,7 +12,6 @@ import {
   ReferenceDot,
   ResponsiveContainer,
 } from 'recharts';
-import Card from '@/components/Card';
 
 interface PriceChartProps {
   ticker: string;
@@ -22,6 +21,8 @@ interface PriceChartProps {
   returnRate: number;
   positionType?: 'long' | 'short';
   currency?: string;
+  /** 기준선 이름 — 회원 리포트는 '작성가', 증권사 리포트는 '발간일 종가' */
+  baseLabel?: string;
 }
 
 interface PricePoint {
@@ -133,19 +134,19 @@ function CustomTooltip({
       : ((close - initialPrice) / initialPrice) * 100;
   const retColor =
     ret > 0.001
-      ? 'text-red-500 dark:text-red-400'
+      ? 'text-[var(--color-up)]'
       : ret < -0.001
-      ? 'text-blue-500 dark:text-blue-400'
-      : 'text-gray-500 dark:text-gray-400';
+      ? 'text-[var(--color-down)]'
+      : 'text-[var(--theme-ink-soft)]';
 
   return (
-    <div className="rounded-sm bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border border-gray-200 dark:border-gray-700 px-3 py-2">
-      <div className="text-[11px] sm:text-[10px] font-mono text-gray-400 dark:text-gray-500 mb-1 tabular-nums">
+    <div className="bg-[var(--background)] border border-[var(--theme-border)] px-3 py-2">
+      <div className="text-[11px] sm:text-[10px] font-mono text-[var(--theme-ink-soft)] mb-1 tabular-nums">
         {formatDate(label)}
       </div>
-      <div className="text-sm font-bold font-mono tabular-nums text-gray-900 dark:text-white">
+      <div className="text-sm font-bold font-mono tabular-nums text-[var(--foreground)]">
         {close.toLocaleString()}
-        {currency ? <span className="text-[11px] sm:text-[10px] ml-1 font-normal text-gray-400">{currency}</span> : null}
+        {currency ? <span className="text-[11px] sm:text-[10px] ml-1 font-normal text-[var(--theme-ink-soft)]">{currency}</span> : null}
       </div>
       <div className={`text-xs font-bold font-mono tabular-nums mt-0.5 ${retColor}`}>
         {ret > 0 ? '+' : ''}
@@ -163,6 +164,7 @@ export default function PriceChart({
   returnRate,
   positionType = 'long',
   currency,
+  baseLabel = '작성가',
 }: PriceChartProps) {
   const [history, setHistory] = useState<PricePoint[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -233,16 +235,16 @@ export default function PriceChart({
   if (!initialPrice || !currentPrice) return null;
   if (loading || data.length < 2) {
     return (
-      <Card padding="none" className="px-4 py-4 sm:px-6 sm:py-5 animate-pulse">
+      <section className="border-t-2 border-[var(--theme-border)] pt-3">
         <div className="flex items-start justify-between gap-3 mb-4 sm:mb-5">
           <div className="space-y-2">
-            <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
-            <div className="h-3 w-32 bg-gray-200 dark:bg-gray-700 rounded" />
+            <div className="h-4 w-24 skel" />
+            <div className="h-3 w-32 skel" />
           </div>
-          <div className="h-7 w-24 bg-gray-200 dark:bg-gray-700 rounded" />
+          <div className="h-7 w-24 skel" />
         </div>
-        <div className="h-[180px] sm:h-[220px] bg-gray-100 dark:bg-gray-800 rounded" />
-      </Card>
+        <div className="h-[180px] sm:h-[220px] skel" />
+      </section>
     );
   }
 
@@ -250,7 +252,7 @@ export default function PriceChart({
   const isNegative = returnRate < -0.001;
 
   // 한국 주식 컨벤션: 양수=빨강 / 음수=파랑
-  const accentColor = isPositive ? '#dc2626' : isNegative ? '#2563eb' : '#6b7280';
+  const accentColor = isPositive ? 'var(--color-up)' : isNegative ? 'var(--color-down)' : 'var(--color-hold)';
   const gradientId = `priceGradient-${isPositive ? 'pos' : isNegative ? 'neg' : 'flat'}`;
 
   // Y축은 차트에 실제 그려지는 값(plot) 기준
@@ -272,14 +274,14 @@ export default function PriceChart({
   const endDate = data[data.length - 1].date;
 
   return (
-    <Card padding="none" className="px-4 py-4 sm:px-6 sm:py-5 overflow-hidden">
+    <section className="border-t-2 border-[var(--theme-border)] pt-3 overflow-hidden">
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4 sm:mb-5">
         <div className="flex flex-col gap-0.5 min-w-0">
-          <span className="text-sm sm:text-base font-bold text-gray-900 dark:text-white">
+          <span className="headline text-[16px] sm:text-[17px]">
             수익률 추이
           </span>
-          <span className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-300 font-mono tabular-nums">
+          <span className="text-[11px] sm:text-xs text-[var(--theme-ink-soft)] font-mono tabular-nums">
             {formatDate(startDate)} – {formatDate(endDate)}
           </span>
         </div>
@@ -287,29 +289,29 @@ export default function PriceChart({
           <span
             className={`text-2xl sm:text-3xl font-black font-mono tabular-nums leading-none ${
               isPositive
-                ? 'text-red-600 dark:text-red-500'
+                ? 'text-[var(--color-up)]'
                 : isNegative
-                ? 'text-blue-600 dark:text-blue-500'
-                : 'text-gray-900 dark:text-white'
+                ? 'text-[var(--color-down)]'
+                : 'text-[var(--foreground)]'
             }`}
           >
             {isPositive ? '+' : ''}
             {returnRate.toFixed(2)}%
           </span>
           <div className="flex items-baseline gap-1.5 mt-1.5 font-mono tabular-nums">
-            <span className="text-xs sm:text-sm font-bold text-gray-900 dark:text-white">
+            <span className="text-xs sm:text-sm font-bold text-[var(--foreground)]">
               {currentPrice.toLocaleString()}
             </span>
             {currency && (
-              <span className="text-[11px] sm:text-[10px] text-gray-500 dark:text-gray-400">{currency}</span>
+              <span className="text-[11px] sm:text-[10px] text-[var(--theme-ink-soft)]">{currency}</span>
             )}
             <span
               className={`text-[11px] sm:text-xs font-bold ${
                 isPositive
-                  ? 'text-red-600 dark:text-red-400'
+                  ? 'text-[var(--color-up)]'
                   : isNegative
-                  ? 'text-blue-600 dark:text-blue-400'
-                  : 'text-gray-600 dark:text-gray-400'
+                  ? 'text-[var(--color-down)]'
+                  : 'text-[var(--theme-ink-soft)]'
               }`}
             >
               {priceDelta >= 0 ? '+' : ''}
@@ -331,15 +333,14 @@ export default function PriceChart({
             </defs>
             <CartesianGrid
               strokeDasharray="2 4"
-              stroke="currentColor"
-              className="text-gray-300 dark:text-gray-700"
+              stroke="var(--theme-border-muted)"
               vertical={false}
             />
             <XAxis
               dataKey="date"
               tickFormatter={formatDate}
               tick={{ fontSize: 11, fill: 'currentColor', fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-              className="text-gray-600 dark:text-gray-300"
+              className="text-[var(--theme-ink-soft)]"
               axisLine={false}
               tickLine={false}
               ticks={[startDate, endDate]}
@@ -359,14 +360,14 @@ export default function PriceChart({
                 return raw.toFixed(2);
               }}
               tick={{ fontSize: 11, fill: 'currentColor', fontFamily: 'var(--font-mono), ui-monospace, monospace' }}
-              className="text-gray-600 dark:text-gray-300"
+              className="text-[var(--theme-ink-soft)]"
               axisLine={false}
               tickLine={false}
               width={52}
             />
             <Tooltip
               cursor={{
-                stroke: '#9ca3af',
+                stroke: 'var(--theme-border)',
                 strokeWidth: 1,
                 strokeDasharray: '3 3',
               }}
@@ -380,10 +381,10 @@ export default function PriceChart({
             />
             <ReferenceLine
               y={initialPrice}
-              stroke="#9ca3af"
+              stroke="var(--theme-ink-soft)"
               strokeDasharray="3 3"
               strokeWidth={1}
-              strokeOpacity={0.55}
+              strokeOpacity={0.7}
             />
             <Area
               type="monotone"
@@ -398,7 +399,7 @@ export default function PriceChart({
               y={toPlot(currentPrice)}
               r={4}
               fill={accentColor}
-              stroke="#ffffff"
+              stroke="var(--background)"
               strokeWidth={2}
             />
           </AreaChart>
@@ -406,13 +407,14 @@ export default function PriceChart({
       </div>
 
       {/* Footer — 작성가 기준선 안내 */}
-      <div className="flex items-center gap-1.5 mt-3 text-[11px] sm:text-xs text-gray-400 dark:text-gray-500">
-        <span className="inline-block w-3 h-px border-t border-dashed border-gray-400 dark:border-gray-500" />
+      <div className="flex items-center gap-1.5 mt-3 text-[11px] sm:text-xs text-[var(--theme-ink-soft)]">
+        <span className="inline-block w-3 h-px border-t border-dashed border-[var(--theme-ink-soft)]" />
         <span className="font-mono tabular-nums">
-          작성가 {initialPrice.toLocaleString()}
+          {baseLabel} {initialPrice.toLocaleString()}
           {currency ? ` ${currency}` : ''}
         </span>
+        <span className="ml-auto">장 마감 종가 기준 · 매일 갱신</span>
       </div>
-    </Card>
+    </section>
   );
 }

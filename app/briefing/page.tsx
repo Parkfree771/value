@@ -5,8 +5,8 @@ import { getBriefing } from '@/lib/briefing';
 
 // 헤드라인 (/briefing) — 매일 새벽 scripts/news 배치가 해외 매체 헤드라인으로 이슈를 고르고, AI 가 직접 조사해 새로 쓴 결과.
 // 홈 HEADLINES 지면과 같은 모양: 빨간 띠 + 첫 기사 크게 + 나머지 기사.
-// 배치가 끝나면 /api/revalidate 로 이 페이지를 갱신한다. 그 사이엔 15분 ISR.
-export const revalidate = 900;
+// 배치가 발행을 끝내면 /api/revalidate 로 이 페이지와 브리핑 파일 캐시를 비운다 (lib/cache.ts invalidateBriefing).
+export const revalidate = 86400; // 하루짜리 안전장치
 
 export const metadata: Metadata = {
   title: '오늘의 헤드라인 — 오늘 아침 꼭 알아야 할 경제 이슈 10',

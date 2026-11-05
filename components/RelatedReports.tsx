@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { getRelatedReports } from '@/lib/feedData';
-import Card from '@/components/Card';
 import type { FeedPost } from '@/types/feed';
 import { shortStockName } from '@/utils/reportDisplay';
 
@@ -29,10 +28,10 @@ function ReportLinkRow({ post, anchorPrefix }: { post: FeedPost; anchorPrefix?: 
   const rate = post.returnRate || 0;
   const rateColor =
     rate > 0
-      ? 'text-red-600 dark:text-red-500'
+      ? 'text-[var(--color-up)]'
       : rate < 0
-      ? 'text-blue-600 dark:text-blue-500'
-      : 'text-gray-500 dark:text-gray-400';
+      ? 'text-[var(--color-down)]'
+      : 'text-[var(--theme-ink-soft)]';
 
   const anchorTitle = anchorPrefix ? `${anchorPrefix} - ${post.title}` : post.title;
 
@@ -40,18 +39,18 @@ function ReportLinkRow({ post, anchorPrefix }: { post: FeedPost; anchorPrefix?: 
     <Link
       href={`/reports/${post.id}`}
       title={anchorTitle}
-      className="flex items-center justify-between gap-3 py-2.5 border-b border-[var(--theme-border-muted)] last:border-b-0 hover:bg-[var(--theme-bg)] -mx-3 px-3 rounded transition-colors"
+      className="group flex items-center justify-between gap-3 py-2.5 border-b border-[var(--theme-border-muted)] last:border-b-0"
     >
       <div className="flex-1 min-w-0">
-        <div className="text-xs sm:text-sm font-medium text-gray-900 dark:text-white truncate">
+        <div className="text-[13px] sm:text-sm font-semibold text-[var(--foreground)] truncate group-hover:underline underline-offset-4">
           {post.title}
         </div>
-        <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex items-center gap-1.5">
+        <div className="text-[11px] sm:text-xs text-[var(--theme-ink-soft)] mt-0.5 flex items-center gap-1.5">
           {post.stockName && (
             <>
               <span className="truncate">{shortStockName(post.stockName, post.ticker)}</span>
-              {post.ticker && <span className="font-mono text-gray-400">{post.ticker}</span>}
-              <span className="text-gray-400">·</span>
+              {post.ticker && <span className="font-mono text-[var(--theme-ink-soft)]">{post.ticker}</span>}
+              <span className="text-[var(--theme-ink-soft)]">·</span>
             </>
           )}
           <span className="truncate">{post.author}</span>
@@ -90,10 +89,10 @@ export default async function RelatedReports({
   const themeLabel = themes && themes.length > 0 ? THEME_NAMES[themes[0]] || themes[0] : null;
 
   return (
-    <nav aria-label="관련 리포트" className="space-y-4 sm:space-y-6">
+    <nav aria-label="관련 리포트" className="space-y-6 sm:space-y-8">
       {sameTicker.length > 0 && stockName && (
-        <Card className="px-3 py-3 sm:px-5 sm:py-4">
-          <h2 className="text-sm sm:text-base font-bold mb-3 text-gray-900 dark:text-white">
+        <section className="border-t-2 border-[var(--theme-border)] pt-2.5">
+          <h2 className="headline text-[16px] sm:text-[18px] mb-1">
             {stockName} 관련 다른 리포트
           </h2>
           <div className="space-y-0">
@@ -101,12 +100,12 @@ export default async function RelatedReports({
               <ReportLinkRow key={post.id} post={post} anchorPrefix={stockName} />
             ))}
           </div>
-        </Card>
+        </section>
       )}
 
       {sameAuthor.length > 0 && author && (
-        <Card className="px-3 py-3 sm:px-5 sm:py-4">
-          <h2 className="text-sm sm:text-base font-bold mb-3 text-gray-900 dark:text-white">
+        <section className="border-t-2 border-[var(--theme-border)] pt-2.5">
+          <h2 className="headline text-[16px] sm:text-[18px] mb-1">
             {author}님의 다른 분석 글
           </h2>
           <div className="space-y-0">
@@ -114,12 +113,12 @@ export default async function RelatedReports({
               <ReportLinkRow key={post.id} post={post} anchorPrefix={author} />
             ))}
           </div>
-        </Card>
+        </section>
       )}
 
       {sameTheme.length > 0 && themeLabel && (
-        <Card className="px-3 py-3 sm:px-5 sm:py-4">
-          <h2 className="text-sm sm:text-base font-bold mb-3 text-gray-900 dark:text-white">
+        <section className="border-t-2 border-[var(--theme-border)] pt-2.5">
+          <h2 className="headline text-[16px] sm:text-[18px] mb-1">
             #{themeLabel} 테마 리포트
           </h2>
           <div className="space-y-0">
@@ -127,12 +126,12 @@ export default async function RelatedReports({
               <ReportLinkRow key={post.id} post={post} anchorPrefix={themeLabel} />
             ))}
           </div>
-        </Card>
+        </section>
       )}
 
       {popular.length > 0 && (
-        <Card className="px-3 py-3 sm:px-5 sm:py-4">
-          <h2 className="text-sm sm:text-base font-bold mb-3 text-gray-900 dark:text-white">
+        <section className="border-t-2 border-[var(--theme-border)] pt-2.5">
+          <h2 className="headline text-[16px] sm:text-[18px] mb-1">
             지금 인기 있는 리포트
           </h2>
           <div className="space-y-0">
@@ -140,7 +139,7 @@ export default async function RelatedReports({
               <ReportLinkRow key={post.id} post={post} />
             ))}
           </div>
-        </Card>
+        </section>
       )}
     </nav>
   );

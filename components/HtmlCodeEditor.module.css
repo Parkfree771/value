@@ -1,8 +1,8 @@
 /* ── 기본 split 모드 (fallback) ── */
 .container {
   display: flex;
-  border: 2px solid var(--theme-border-muted);
-  border-radius: 12px;
+  border: 1px solid var(--theme-border-control);
+  border-radius: 3px;
   background: var(--theme-bg-card);
   overflow: hidden;
   height: 600px;
@@ -26,7 +26,7 @@
 }
 
 .divider {
-  width: 2px;
+  width: 1px;
   background: var(--theme-border-muted);
   flex-shrink: 0;
 }
@@ -35,8 +35,8 @@
 .editorStandalone {
   display: flex;
   flex-direction: column;
-  border: 2px solid var(--theme-border-muted);
-  border-radius: 12px;
+  border: 1px solid var(--theme-border-control);
+  border-radius: 3px;
   background: var(--theme-bg-card);
   overflow: hidden;
   height: 100%;
@@ -47,8 +47,8 @@
 .previewStandalone {
   display: flex;
   flex-direction: column;
-  border: 2px solid var(--theme-border-muted);
-  border-radius: 12px;
+  border: 1px solid var(--theme-border-control);
+  border-radius: 3px;
   background: var(--theme-bg-card);
   overflow: hidden;
   height: 100%;
@@ -61,7 +61,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 8px 12px;
-  border-bottom: 2px solid var(--theme-border-muted);
+  border-bottom: 1px solid var(--theme-border-muted);
   background: var(--theme-bg);
   flex-shrink: 0;
 }
@@ -76,11 +76,7 @@
 
 .panelHint {
   font-size: 10px;
-  color: #9ca3af;
-}
-
-:global(.dark) .panelHint {
-  color: #6b7280;
+  color: var(--theme-ink-soft);
 }
 
 .editorMount {
@@ -98,11 +94,11 @@
 }
 
 .editorMount :global(.cm-editor .cm-gutters) {
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--theme-border-muted);
 }
 
 :global(.dark) .editorMount :global(.cm-editor .cm-gutters) {
-  border-right: 1px solid #374151;
+  border-right: 1px solid var(--theme-border-muted);
 }
 
 .previewContent {

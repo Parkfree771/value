@@ -286,12 +286,12 @@ export default function AdminPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
       {/* 헤더 */}
       <div className="mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2">관리자 대시보드</h1>
-        <p className="text-xs text-gray-500 dark:text-gray-400">시스템 관리 및 모니터링</p>
+        <h1 className="headline text-2xl sm:text-3xl mb-2">관리자 대시보드</h1>
+        <p className="text-xs text-[var(--theme-ink-soft)]">시스템 관리 및 모니터링</p>
       </div>
 
       {/* 탭 네비게이션 */}
-      <div className="flex gap-2 sm:gap-3 mb-6 overflow-x-auto pb-2">
+      <div className="flex gap-1 mb-6 overflow-x-auto scrollbar-hide border-b border-[var(--theme-border-muted)]">
         {TABS.map((tab) => (
           <button
             key={tab.key}
@@ -342,7 +342,7 @@ export default function AdminPage() {
             <div className="pixel-modal-header">
               <h3 className="pixel-modal-title">{confirmModal.title}</h3>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-sm text-[var(--theme-ink-soft)] mb-6">
               {confirmModal.message}
             </p>
             <div className="flex gap-3 justify-end">

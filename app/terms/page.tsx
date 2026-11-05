@@ -1,5 +1,4 @@
 ﻿import type { Metadata } from 'next';
-import Card from '@/components/Card';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -20,12 +19,12 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-      <Card className="p-4">
-        <h1 className="headline text-3xl font-bold mb-8">이용약관</h1>
+      <article>
+        <h1 className="headline text-[28px] sm:text-[32px] pb-3 mb-6 sm:mb-8 border-b-2 border-[var(--theme-border)]">이용약관</h1>
 
-        <div className="space-y-6 text-gray-700 dark:text-gray-300">
+        <div className="space-y-8 text-[15px] leading-relaxed text-[var(--foreground)]">
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제1조 (목적)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제1조 (목적)</h2>
             <p>
               이 약관은 AntStreet(이하 &ldquo;회사&rdquo;)가 제공하는 투자 리포트 공유 플랫폼 서비스(이하 &ldquo;서비스&rdquo;)의
               이용과 관련하여 회사와 이용자의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.
@@ -33,7 +32,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제2조 (정의)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제2조 (정의)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>&ldquo;서비스&rdquo;라 함은 회원이 투자 리포트를 작성, 공유하고 다른 회원의 리포트를 열람할 수 있는 플랫폼을 말합니다.</li>
               <li>&ldquo;회원&rdquo;이라 함은 회사의 서비스에 접속하여 이 약관에 따라 회사와 이용계약을 체결하고 회사가 제공하는 서비스를 이용하는 고객을 말합니다.</li>
@@ -43,7 +42,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제3조 (약관의 효력 및 변경)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제3조 (약관의 효력 및 변경)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>이 약관은 서비스를 이용하고자 하는 모든 회원에 대하여 그 효력을 발생합니다.</li>
               <li>회사는 필요한 경우 관련 법령을 위배하지 않는 범위에서 이 약관을 변경할 수 있습니다.</li>
@@ -52,7 +51,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제4조 (서비스의 제공)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제4조 (서비스의 제공)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회사는 다음과 같은 서비스를 제공합니다:
                 <ul className="list-disc list-inside ml-2 sm:ml-6 mt-2">
@@ -68,29 +67,29 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제5조 (투자 면책 조항)</h2>
-            <div className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded mb-4">
-              <p className="font-bold text-red-700 dark:text-red-400 mb-2">
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제5조 (투자 면책 조항)</h2>
+            <div className="p-4 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)] mb-4">
+              <p className="font-bold text-[var(--color-error)] mb-2">
                 [중요] 본 서비스는 투자 자문 또는 투자 권유를 제공하지 않습니다.
               </p>
-              <p className="text-red-600 dark:text-red-300">
+              <p>
                 자세한 투자 면책 조항은{' '}
-                <a href="/disclaimer" target="_blank" className="underline font-semibold hover:text-red-700 dark:hover:text-red-200">
+                <a href="/disclaimer" target="_blank" className="font-bold text-[var(--foreground)] underline underline-offset-4">
                   여기
                 </a>
                 에서 확인하실 수 있습니다.
               </p>
             </div>
             <ol className="list-decimal list-inside space-y-2">
-              <li className="font-bold text-red-600 dark:text-red-400">
+              <li className="font-bold text-[var(--color-error)]">
                 본 서비스에서 제공되는 모든 투자 리포트, 의견, 분석은 작성자 개인의 의견이며,
                 <strong className="underline"> 특정 종목의 매수 또는 매도를 권유하는 것이 아닙니다</strong>.
               </li>
-              <li className="font-bold text-red-600 dark:text-red-400">
+              <li className="font-bold text-[var(--color-error)]">
                 회사 및 콘텐츠 작성자는 회원이 서비스를 이용하여 투자한 결과로 발생하는
                 <strong className="underline"> 모든 손실, 이익 및 결과에 대해 어떠한 법적 책임도 지지 않습니다</strong>.
               </li>
-              <li className="font-bold text-red-600 dark:text-red-400">
+              <li className="font-bold text-[var(--color-error)]">
                 투자의 최종 결정은 전적으로 투자자 본인의 판단과 책임 하에 이루어져야 하며,
                 투자 전 반드시 공식 공시 자료 및 전문가 상담을 통해 정보를 확인하시기 바랍니다.
               </li>
@@ -116,7 +115,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제6조 (회원의 의무)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제6조 (회원의 의무)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회원은 다음 행위를 하여서는 안 됩니다:
                 <ul className="list-disc list-inside ml-2 sm:ml-6 mt-2">
@@ -132,7 +131,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제7조 (저작권)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제7조 (저작권)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회원이 작성한 리포트의 저작권은 해당 회원에게 귀속됩니다.</li>
               <li>회원은 리포트를 게시함으로써 회사가 서비스 운영, 홍보 등의 목적으로 해당 리포트를 사용할 수 있도록 허락합니다.</li>
@@ -141,7 +140,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제8조 (계약 해지 및 회원 탈퇴)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제8조 (계약 해지 및 회원 탈퇴)</h2>
             <ol className="list-decimal list-inside space-y-2">
               <li>회원은 언제든지 서비스 이용을 중단하고 회원 탈퇴를 요청할 수 있습니다.</li>
               <li>회사는 회원이 이 약관을 위반한 경우 사전 통지 없이 이용계약을 해지할 수 있습니다.</li>
@@ -158,23 +157,23 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">제9조 (분쟁 해결)</h2>
+            <h2 className="headline text-[18px] sm:text-[20px] mb-2">제9조 (분쟁 해결)</h2>
             <p>
               서비스 이용과 관련하여 발생한 분쟁에 대해서는 대한민국 법을 적용하며,
               관할법원은 민사소송법에 따른 법원으로 합니다.
             </p>
           </section>
 
-          <section className="pt-6 border-t dark:border-gray-700">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <section className="pt-6 border-t border-[var(--theme-border-muted)]">
+            <p className="text-sm text-[var(--theme-ink-soft)]">
               <strong>시행일:</strong> 2026년 2월 1일
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-sm text-[var(--theme-ink-soft)] mt-2">
               본 이용약관은 위 시행일부터 적용됩니다.
             </p>
           </section>
         </div>
-      </Card>
+      </article>
     </div>
   );
 }

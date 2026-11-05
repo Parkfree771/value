@@ -58,7 +58,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
           className="pixel-input w-full sm:w-72 text-xs"
         />
         <div className="flex items-center gap-3">
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-[var(--theme-ink-soft)]">
             총 {filtered.length}건
           </span>
           <button onClick={onRefresh} className="btn-secondary !text-xs !py-1.5 !px-3">
@@ -82,7 +82,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
             </thead>
             <tbody className="divide-y-[2px] divide-[var(--theme-border-muted)]">
               {paginated.map((comment) => (
-                <tr key={`${comment.postId}-${comment.id}`} className="hover:bg-red-50 dark:hover:bg-red-900/10">
+                <tr key={`${comment.postId}-${comment.id}`} className="hover:bg-[var(--theme-bg)]">
                   <td className="px-4 py-3 text-xs max-w-xs">
                     <p className="truncate">{comment.content.replace(/<[^>]*>/g, '')}</p>
                   </td>
@@ -95,7 +95,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
                       보기
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400">
+                  <td className="px-4 py-3 text-xs text-[var(--theme-ink-soft)]">
                     {comment.createdAt ? new Date(comment.createdAt).toLocaleDateString('ko-KR') : '-'}
                   </td>
                   <td className="px-4 py-3 text-center">
@@ -112,7 +112,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
           </table>
         </div>
         {paginated.length === 0 && (
-          <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+          <div className="p-8 text-center text-sm text-[var(--theme-ink-soft)]">
             {search ? '검색 결과가 없습니다.' : '댓글이 없습니다.'}
           </div>
         )}
@@ -128,7 +128,7 @@ export default function AdminComments({ comments, loading, onDelete, onRefresh }
           >
             이전
           </button>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
+          <span className="text-xs text-[var(--theme-ink-soft)]">
             {page} / {totalPages}
           </span>
           <button

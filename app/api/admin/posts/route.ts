@@ -3,7 +3,7 @@
 //   DELETE - 게시글 삭제 (CASCADE로 likes/comments 자동 삭제)
 
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { invalidatePosts } from '@/lib/cache';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { sql } from '@/lib/db';
 import { calculateReturn } from '@/utils/calculateReturn';
@@ -117,9 +117,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: '게시글을 찾을 수 없습니다.' }, { status: 404 });
     }
 
-    revalidatePath('/');
-    revalidatePath('/ranking');
-    revalidatePath('/search');
+    invalidatePosts(postId);
 
     console.log(`[Admin] 게시글 삭제: ${postId} by ${admin.email}`);
     return NextResponse.json({ success: true, message: '게시글이 성공적으로 삭제되었습니다.' });

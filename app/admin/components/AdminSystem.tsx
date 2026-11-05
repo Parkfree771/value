@@ -87,11 +87,11 @@ export default function AdminSystem() {
                   >
                     <div className="flex-1">
                       <h4 className="text-xs font-bold text-foreground">{action.title}</h4>
-                      <p className="text-[0.625rem] text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-[0.625rem] text-[var(--theme-ink-soft)] mt-1">
                         {action.description}
                       </p>
                       {result && (
-                        <div className={`text-[0.625rem] mt-2 ${result.success ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                        <div className={`text-[0.625rem] mt-2 ${result.success ? 'text-[var(--color-success)]' : 'text-[var(--color-error)]'}`}>
                           [{result.timestamp}] {result.message}
                         </div>
                       )}
@@ -103,7 +103,7 @@ export default function AdminSystem() {
                     >
                       {isLoading ? (
                         <span className="flex items-center gap-2">
-                          <span className="animate-spin inline-block w-3 h-3 border border-gray-400 border-t-transparent rounded-full" />
+                          <span className="animate-spin inline-block w-3 h-3 border border-current border-t-transparent rounded-full" />
                           실행중...
                         </span>
                       ) : (

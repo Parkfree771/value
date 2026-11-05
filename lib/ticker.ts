@@ -19,6 +19,7 @@
 import { getKISDomesticIndex } from '@/lib/kis';
 import { sql } from '@/lib/db';
 import { publicUrl } from '@/lib/storage';
+import { SAFETY_TTL, TAG } from '@/lib/cache';
 
 export type TickerCategory = 'site' | 'kr_index' | 'us_index' | 'forex';
 
@@ -117,7 +118,8 @@ async function fetchMarketJson(): Promise<MarketJson | null> {
   try {
     if (!process.env.AWS_ENDPOINT_URL_S3) return null;
     const url = publicUrl('briefing/market.json');
-    const res = await fetch(url, { next: { revalidate: 900 } });
+    // 브리핑 배치가 같이 만든다 — 발행 완료 신호(invalidateBriefing)로 갱신
+    const res = await fetch(url, { next: { tags: [TAG.briefing], revalidate: SAFETY_TTL } });
     if (!res.ok) return null;
     const json = (await res.json()) as MarketJson;
     if (!json.collected_at || Date.now() - new Date(json.collected_at).getTime() > MARKET_JSON_MAX_AGE_MS) {

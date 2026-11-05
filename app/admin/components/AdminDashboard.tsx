@@ -41,7 +41,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
   if (!stats) {
     return (
       <div className="card-base text-center p-8">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-[var(--theme-ink-soft)]">
           통계 데이터를 불러올 수 없습니다.
         </p>
       </div>
@@ -53,7 +53,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <div className="pixel-stat-card">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-[var(--theme-ink-soft)] mb-1">
             전체 게시글
           </div>
           <div className="text-2xl font-bold text-[var(--theme-accent)]">
@@ -62,43 +62,43 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
         </div>
 
         <div className="pixel-stat-card">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-[var(--theme-ink-soft)] mb-1">
             전체 사용자
           </div>
-          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[var(--foreground)]">
             {stats.totalUsers.toLocaleString()}
           </div>
         </div>
 
         <div className="pixel-stat-card">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-[var(--theme-ink-soft)] mb-1">
             오늘 게시글
           </div>
-          <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[var(--foreground)]">
             {stats.todayPosts.toLocaleString()}
           </div>
         </div>
 
         <div className="pixel-stat-card">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-[var(--theme-ink-soft)] mb-1">
             주간 게시글
           </div>
-          <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[var(--foreground)]">
             {stats.weekPosts.toLocaleString()}
           </div>
         </div>
 
         <div className="pixel-stat-card">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-[var(--theme-ink-soft)] mb-1">
             총 조회수
           </div>
-          <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[var(--foreground)]">
             {stats.totalViews.toLocaleString()}
           </div>
         </div>
 
         <div className="pixel-stat-card">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+          <div className="text-xs text-[var(--theme-ink-soft)] mb-1">
             총 좋아요
           </div>
           <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">
@@ -117,7 +117,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
                 key={post.id}
                 className="flex items-center gap-3 p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-[var(--theme-accent)] border border-[var(--theme-accent-dark)] flex items-center justify-center text-white font-bold text-sm">
+                <div className="flex-shrink-0 w-8 h-8 border border-[var(--theme-border)] flex items-center justify-center font-mono font-bold text-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -127,7 +127,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
                   >
                     {post.title}
                   </Link>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-[var(--theme-ink-soft)]">
                     {post.authorName}
                   </div>
                 </div>
@@ -135,7 +135,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
                   <div className="text-xs font-bold">
                     조회 {post.views.toLocaleString()}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-[var(--theme-ink-soft)]">
                     좋아요 {post.likes.toLocaleString()}
                   </div>
                 </div>
@@ -143,8 +143,8 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
                   <div
                     className={`text-sm font-bold ${
                       post.returnRate >= 0
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-blue-600 dark:text-blue-400'
+                        ? 'text-[var(--color-up)]'
+                        : 'text-[var(--color-down)]'
                     }`}
                   >
                     {post.returnRate >= 0 ? '+' : ''}
@@ -155,7 +155,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+          <p className="text-sm text-[var(--theme-ink-soft)] text-center py-4">
             게시글 데이터가 없습니다.
           </p>
         )}
@@ -171,14 +171,14 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
                 key={user.userId}
                 className="flex items-center gap-3 p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
               >
-                <div className="flex-shrink-0 w-8 h-8 bg-purple-600 border border-purple-900 flex items-center justify-center text-white font-bold text-sm">
+                <div className="flex-shrink-0 w-8 h-8 border border-[var(--theme-border)] flex items-center justify-center font-mono font-bold text-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-bold truncate">
                     {user.nickname}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                  <div className="text-xs text-[var(--theme-ink-soft)] truncate">
                     {user.email}
                   </div>
                 </div>
@@ -191,7 +191,7 @@ export default function AdminDashboard({ stats, loading }: AdminDashboardProps) 
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+          <p className="text-sm text-[var(--theme-ink-soft)] text-center py-4">
             사용자 데이터가 없습니다.
           </p>
         )}

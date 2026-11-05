@@ -6,13 +6,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
 }
 
-const baseStyles = "font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-150 active:translate-x-[3px] active:translate-y-[3px] active:shadow-none";
+const baseStyles = "font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors duration-150";
 
 const variantStyles = {
   primary: 'btn-primary',
   secondary: 'btn-secondary',
-  outline: 'bg-transparent border border-ant-red-500 text-ant-red-500 hover:bg-ant-red-500/10',
-  danger: 'bg-red-700 text-white border border-red-900 hover:bg-red-600',
+  outline: 'bg-transparent border border-[var(--theme-border-control)] text-[var(--foreground)] rounded-sm hover:border-[var(--theme-border)]',
+  danger: 'btn-danger',
 } as const;
 
 const sizeStyles = {

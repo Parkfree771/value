@@ -90,10 +90,10 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
           <button
             key={tab.key}
             onClick={() => setFilterTab(tab.key)}
-            className={`px-4 py-2 text-xs font-bold border transition-all ${
+            className={`px-4 py-2 text-xs font-bold border rounded-sm transition-colors ${
               filterTab === tab.key
-                ? 'bg-[var(--theme-accent)] text-white border-[var(--theme-accent-dark)] shadow-[2px_2px_0px_var(--theme-accent-dark)]'
-                : 'bg-[var(--theme-bg-card)] text-[var(--foreground)] border-[var(--theme-border-muted)] shadow-[2px_2px_0px_rgba(0,0,0,0.3)] hover:border-[var(--theme-accent)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.3)]'
+                ? 'bg-[var(--foreground)] text-[var(--background)] border-[var(--foreground)]'
+                : 'text-[var(--theme-ink-soft)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)] hover:text-[var(--foreground)]'
             }`}
           >
             {tab.label}
@@ -102,7 +102,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
       </div>
 
       {/* Results count */}
-      <div className="text-xs text-gray-500 dark:text-gray-400">
+      <div className="text-xs text-[var(--theme-ink-soft)]">
         전체 {filteredUsers.length}명
         {searchQuery.trim() && ` (검색: "${searchQuery.trim()}")`}
       </div>
@@ -137,7 +137,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
               {filteredUsers.map((user) => (
                 <tr
                   key={user.id}
-                  className="hover:bg-red-50 dark:hover:bg-red-900/10"
+                  className="hover:bg-[var(--theme-bg)]"
                 >
                   <td className="px-4 py-3 text-xs max-w-[200px] truncate">
                     {user.email}
@@ -148,16 +148,16 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
                   <td className="px-4 py-3 text-xs whitespace-nowrap">
                     {user.postCount}개
                   </td>
-                  <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                  <td className="px-4 py-3 text-xs text-[var(--theme-ink-soft)] whitespace-nowrap">
                     {new Date(user.createdAt).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
                     {user.isSuspended ? (
-                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/10 border border-red-500">
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-[var(--color-error)] border border-[var(--color-error)]">
                         정지됨
                       </span>
                     ) : (
-                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-green-600 dark:text-green-400 bg-green-500/10 border border-green-500">
+                      <span className="inline-flex items-center px-2 py-1 text-xs font-bold text-[var(--color-success)] border border-[var(--color-success)]">
                         활성
                       </span>
                     )}
@@ -167,10 +167,10 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
                       onClick={() =>
                         onToggleSuspend(user.id, user.nickname, user.isSuspended)
                       }
-                      className={`px-3 py-1 text-xs font-bold border transition-all ${
+                      className={`min-h-9 px-3 py-1 text-xs font-bold border rounded-sm transition-colors ${
                         user.isSuspended
-                          ? 'bg-green-600 text-white border-green-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)]'
-                          : 'bg-orange-600 text-white border-orange-800 shadow-[2px_2px_0px_rgba(0,0,0,0.5)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0px_rgba(0,0,0,0.5)]'
+                          ? 'text-[var(--color-success)] border-[var(--color-success)] hover:bg-[var(--theme-bg)]'
+                          : 'text-[var(--color-error)] border-[var(--color-error)] hover:bg-[var(--theme-bg)]'
                       }`}
                     >
                       {user.isSuspended ? '정지 해제' : '정지'}
@@ -185,7 +185,7 @@ export default function AdminUsers({ users, loading, onToggleSuspend, onRefresh 
         {/* Empty state */}
         {filteredUsers.length === 0 && (
           <div className="pixel-empty-state">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-[var(--theme-ink-soft)]">
               {searchQuery.trim()
                 ? `"${searchQuery.trim()}" 검색 결과가 없습니다.`
                 : filterTab === 'suspended'

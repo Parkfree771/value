@@ -14,7 +14,7 @@ export default function SignUpPage() {
   return (
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4">
       <div className="text-center">
-        <p className="text-gray-600 dark:text-gray-400">로그인 페이지로 이동 중...</p>
+        <p className="text-[var(--theme-ink-soft)]">로그인 페이지로 이동 중...</p>
       </div>
     </div>
   );

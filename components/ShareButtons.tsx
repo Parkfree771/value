@@ -64,7 +64,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
     {
       key: 'x',
       label: 'X',
-      bg: 'bg-black hover:bg-gray-800 text-white',
+      bg: 'border border-[var(--theme-border-control)] text-[var(--foreground)] hover:border-[var(--theme-border)] [&>svg]:text-[var(--foreground)]',
       onClick: () =>
         openShare(
           `https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}${
@@ -80,7 +80,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
     {
       key: 'facebook',
       label: 'Facebook',
-      bg: 'bg-[#1877F2] hover:bg-[#0d65d9] text-white',
+      bg: 'border border-[var(--theme-border-control)] text-[var(--foreground)] hover:border-[var(--theme-border)] [&>svg]:text-[#1877F2]',
       onClick: () => openShare(`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`),
       icon: (
         <svg className={ICON_SIZE} viewBox="0 0 24 24" fill="currentColor">
@@ -91,7 +91,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
     {
       key: 'band',
       label: '밴드',
-      bg: 'bg-[#00C73C] hover:bg-[#00a833] text-white',
+      bg: 'border border-[var(--theme-border-control)] text-[var(--foreground)] hover:border-[var(--theme-border)] [&>svg]:text-[#00C73C]',
       onClick: () =>
         openShare(`https://www.band.us/plugin/share?body=${encodedTitle}%0A${encodedUrl}&route=${encodedUrl}`),
       icon: (
@@ -103,7 +103,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
     {
       key: 'line',
       label: '라인',
-      bg: 'bg-[#06C755] hover:bg-[#05b34c] text-white',
+      bg: 'border border-[var(--theme-border-control)] text-[var(--foreground)] hover:border-[var(--theme-border)] [&>svg]:text-[#06C755]',
       onClick: () => openShare(`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`),
       icon: (
         <svg className={ICON_SIZE} viewBox="0 0 24 24" fill="currentColor">
@@ -114,7 +114,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
     {
       key: 'kakao',
       label: '카카오톡',
-      bg: 'bg-[#FEE500] hover:bg-[#fdd800] text-[#3C1E1E]',
+      bg: 'border border-[var(--theme-border-control)] text-[var(--foreground)] hover:border-[var(--theme-border)] [&>svg]:text-[#e0c600]',
       onClick: handleKakao,
       icon: (
         <svg className={ICON_SIZE} viewBox="0 0 24 24" fill="currentColor">
@@ -126,8 +126,8 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
       key: 'copy',
       label: copied ? '복사됨' : '링크복사',
       bg: copied
-        ? 'bg-green-500 text-white'
-        : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200',
+        ? 'border border-[var(--color-success)] text-[var(--color-success)]'
+        : 'border border-[var(--theme-border-control)] text-[var(--foreground)] hover:border-[var(--theme-border)]',
       onClick: handleCopy,
       icon: (
         <svg className={ICON_SIZE} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -151,7 +151,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
             type="button"
             onClick={btn.onClick}
             aria-label={`${btn.label}로 공유`}
-            className={`flex items-center justify-center gap-1 sm:gap-1.5 min-h-[40px] sm:min-h-0 px-2 py-2 rounded-sm text-[11px] sm:text-xs font-bold transition-all ${btn.bg}`}
+            className={`flex items-center justify-center gap-1 sm:gap-1.5 min-h-[40px] sm:min-h-0 px-2 py-2 rounded-sm text-[11px] sm:text-xs font-bold transition-colors ${btn.bg}`}
           >
             {btn.icon}
             <span>{btn.label}</span>
@@ -164,7 +164,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
         <button
           type="button"
           onClick={handleNativeShare}
-          className="w-full sm:hidden flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-[var(--theme-accent)] text-xs font-medium transition-all"
+          className="w-full sm:hidden flex items-center justify-center gap-1.5 min-h-[40px] px-3 py-2 rounded-sm border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] text-xs font-bold transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -179,7 +179,7 @@ export default function ShareButtons({ url, title, hashTags = [] }: Props) {
       )}
 
       {kakaoNotice && (
-        <div className="text-[11px] sm:text-xs text-center text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 rounded-sm py-1.5 px-2">
+        <div className="text-[11px] sm:text-xs text-center text-[var(--foreground)] bg-[var(--theme-bg)] border-l-2 border-[var(--theme-orange)] py-1.5 px-2">
           링크가 복사되었습니다. 카카오톡 채팅창에 붙여넣기 하세요.
         </div>
       )}

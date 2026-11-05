@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     'AntStreet', '앤트스트릿',
   ],
   openGraph: {
-    title: '글로벌 종목·리포트 검색 - AntStreet',
+    title: 'AntStreet | 글로벌 종목·리포트 검색',
     description:
       '종목명·티커·작성자로 투자 리포트 검색. 한·미·일·중·홍콩 종목 컨센서스와 13F 구루 보유 여부 확인.',
     url: `${SITE_URL}/search`,

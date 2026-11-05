@@ -150,21 +150,21 @@ const ReportCard = memo(function ReportCard({
           <div className="flex-1 min-w-0">
             <h2 className="headline text-[18px] sm:text-[22px] leading-snug line-clamp-2 break-keep mb-1 sm:mb-1.5 group-hover:underline underline-offset-4 decoration-1">{title}</h2>
             <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
-              <h3 className="text-[13px] sm:text-base font-semibold text-gray-700 dark:text-gray-300 font-heading tracking-wide truncate">{shortStockName(stockName, ticker)}</h3>
-              {shortStockName(stockName, ticker).toUpperCase() !== ticker.toUpperCase() && <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-mono flex-shrink-0">{ticker}</span>}
-              {exchangeLabel(exchange) && <span className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">· {exchangeLabel(exchange)}</span>}
+              <h3 className="text-[13px] sm:text-base font-semibold text-[var(--foreground)] font-heading tracking-wide truncate">{shortStockName(stockName, ticker)}</h3>
+              {shortStockName(stockName, ticker).toUpperCase() !== ticker.toUpperCase() && <span className="text-[10px] sm:text-xs text-[var(--theme-ink-soft)] font-mono flex-shrink-0">{ticker}</span>}
+              {exchangeLabel(exchange) && <span className="text-[11px] sm:text-xs text-[var(--theme-ink-soft)] flex-shrink-0">· {exchangeLabel(exchange)}</span>}
               {themes && themes.length > 0 && themes.slice(0, 2).map(themeId => (
-                <span key={themeId} className="text-[10px] px-1 sm:px-1.5 py-0.5 border border-[var(--theme-border-muted)] rounded text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">
+                <span key={themeId} className="text-[10px] px-1 sm:px-1.5 py-0.5 border border-[var(--theme-border-muted)] rounded-sm text-[var(--theme-ink-soft)] flex-shrink-0 hidden sm:inline">
                   #{THEME_NAMES[themeId] || themeId}
                 </span>
               ))}
               {themes && themes.length > 2 && (
-                <span className="text-[10px] text-gray-500 dark:text-gray-400 flex-shrink-0 hidden sm:inline">+{themes.length - 2}</span>
+                <span className="text-[10px] text-[var(--theme-ink-soft)] flex-shrink-0 hidden sm:inline">+{themes.length - 2}</span>
               )}
             </div>
           </div>
           <div className={`text-right flex-shrink-0 ${getReturnColorClass(returnRate)}`}>
-            <div className="text-lg sm:text-2xl font-black font-heading font-mono tracking-tight">
+            <div className="text-lg sm:text-2xl font-black font-mono tabular-nums tracking-tight">
               {formatReturn(returnRate)}
             </div>
             <div className="mt-1 flex items-center justify-end gap-1">
@@ -172,7 +172,7 @@ const ReportCard = memo(function ReportCard({
                 <span
                   suppressHydrationWarning
                   title={`작성 후 ${held.replace('D+', '')}일`}
-                  className="rounded-sm border border-[var(--theme-border-muted)] px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-bold text-gray-600 dark:text-gray-300"
+                  className="rounded-sm border border-[var(--theme-border-muted)] px-1.5 py-0.5 font-mono text-[10px] sm:text-[11px] font-bold text-[var(--theme-ink-soft)]"
                 >
                   {held}
                 </span>
@@ -187,12 +187,12 @@ const ReportCard = memo(function ReportCard({
           // 본문 오른쪽에 썸네일 — 모바일은 작은 정사각형, 데스크탑은 큼직하게
           <div className="mb-2 sm:mb-3 flex items-start gap-3 sm:gap-4">
             {excerpt && (
-              <p className={`flex-1 min-w-0 text-[13px] sm:text-sm leading-relaxed text-gray-600 dark:text-gray-400 ${thumbSrc ? 'line-clamp-3 sm:line-clamp-5' : 'line-clamp-2'}`}>
+              <p className={`flex-1 min-w-0 text-[13px] sm:text-sm leading-relaxed text-[var(--theme-ink-soft)] ${thumbSrc ? 'line-clamp-3 sm:line-clamp-5' : 'line-clamp-2'}`}>
                 {excerpt}
               </p>
             )}
             {thumbSrc && (
-              <div className="relative w-20 aspect-square sm:w-56 sm:aspect-[16/10] flex-shrink-0 overflow-hidden rounded-sm border border-[var(--theme-border-muted)] bg-gray-100 dark:bg-gray-800">
+              <div className="relative w-20 aspect-square sm:w-56 sm:aspect-[16/10] flex-shrink-0 overflow-hidden rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
                 <Image src={thumbSrc} alt="" fill sizes="(max-width: 640px) 80px, 224px" className="object-cover" />
               </div>
             )}
@@ -200,12 +200,12 @@ const ReportCard = memo(function ReportCard({
         )}
 
         {/* Price Info - 한 줄 */}
-        <div className="mb-1 sm:mb-2 text-[11px] sm:text-sm flex items-center gap-1.5 sm:gap-3 overflow-hidden whitespace-nowrap text-gray-500 dark:text-gray-400">
+        <div className="mb-1 sm:mb-2 text-[11px] sm:text-sm flex items-center gap-1.5 sm:gap-3 overflow-hidden whitespace-nowrap text-[var(--theme-ink-soft)]">
           <span>
             매수{' '}
-            <span className="font-semibold font-mono text-gray-900 dark:text-white">{formatPrice(initialPrice, currency)}</span>
+            <span className="font-semibold font-mono text-[var(--foreground)]">{formatPrice(initialPrice, currency)}</span>
           </span>
-          <span className="text-gray-300 dark:text-gray-600">|</span>
+          <span className="text-[var(--theme-border-control)]">|</span>
           <span>
             현재{' '}
             <span className={`font-semibold font-mono ${getReturnColorClass(returnRate)}`}>{formatPrice(currentPrice, currency)}</span>
@@ -213,8 +213,8 @@ const ReportCard = memo(function ReportCard({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
-          <span className="font-medium text-gray-700 dark:text-gray-300 truncate min-w-0 flex-shrink"
+        <div className="flex items-center text-[11px] sm:text-xs text-[var(--theme-ink-soft)] pt-1 sm:pt-2 gap-0.5 sm:gap-1 overflow-hidden whitespace-nowrap leading-none">
+          <span className="font-medium text-[var(--foreground)] truncate min-w-0 flex-shrink"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.location.href = `/user/${encodeURIComponent(author)}`; }}
           >
             {author}
@@ -242,7 +242,7 @@ const ReportCard = memo(function ReportCard({
                       <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   ) : (
-                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-300 dark:text-gray-500 group-hover/bm:text-[var(--theme-orange)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[var(--theme-border-control)] group-hover/bm:text-[var(--theme-orange)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
                   )}
@@ -254,14 +254,14 @@ const ReportCard = memo(function ReportCard({
                 <button
                   onClick={handleEdit}
                   disabled={isDeleting}
-                  className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
+                  className="px-3 py-2 text-xs font-bold text-[var(--foreground)] hover:underline underline-offset-4 transition-colors disabled:opacity-50"
                 >
                   수정
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors disabled:opacity-50"
+                  className="px-3 py-2 text-xs font-bold text-[var(--color-error)] hover:underline underline-offset-4 transition-colors disabled:opacity-50"
                 >
                   {isDeleting ? '삭제 중...' : '삭제'}
                 </button>

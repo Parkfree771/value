@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { invalidatePosts } from '@/lib/cache';
 import { getAuthUser } from '@/lib/auth/session';
 import { sql } from '@/lib/db';
 import { checkRateLimitRedis } from '@/lib/rate-limit-redis';
@@ -74,15 +74,26 @@ export async function POST(request: NextRequest) {
       console.warn('[Feed API] level refresh 실패:', err instanceof Error ? err.message : err);
     }
 
+    // 작성자 프로필 — 메타데이터(리포트 수·평균 수익률)가 바뀌므로 함께 갱신·색인 통보
+    const nickname: string | null = await sql`select nickname from users where id = ${userId}`
+      .then((rows) => (rows[0]?.nickname as string | undefined) ?? null)
+      .catch(() => null);
+    const profilePath = nickname ? `/user/${encodeURIComponent(nickname)}` : null;
+
     const reportUrl = `${SITE_URL}/reports/${postId}`;
-    pingIndexNow([reportUrl, `${SITE_URL}/`, `${SITE_URL}/sitemap.xml`, `${SITE_URL}/feed.xml`]).catch(
+    pingIndexNow([
+      reportUrl,
+      ...(profilePath ? [`${SITE_URL}${profilePath}`] : []),
+      `${SITE_URL}/`,
+      `${SITE_URL}/ranking`,
+      `${SITE_URL}/sitemap.xml`,
+      `${SITE_URL}/feed.xml`,
+    ]).catch(
       (err) => console.warn('[Feed API] IndexNow 핑 실패:', err instanceof Error ? err.message : err),
     );
 
-    // ISR 즉시 무효화 — 메인 페이지 SSR 캐시 및 작성자 페이지
-    revalidatePath('/');
-    revalidatePath('/ranking');
-    revalidatePath('/search');
+    // 레벨 점수가 바뀌었으니 목록·프로필 캐시를 한 번 더 비운다 (글 저장 때 이미 비웠지만 점수 반영 후)
+    invalidatePosts(postId);
 
     return NextResponse.json({ success: true, message: '후처리 완료' });
   } catch (error) {

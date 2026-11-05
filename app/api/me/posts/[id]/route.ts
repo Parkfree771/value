@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth/session';
 import { parseEditablePostFields } from '../payload';
+import { invalidatePosts } from '@/lib/cache';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -105,6 +106,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         : NextResponse.json({ error: '수정 권한이 없습니다.' }, { status: 403 });
     }
 
+    invalidatePosts(id); // 상세·목록·홈 즉시 반영
     return NextResponse.json({ success: true, id });
   } catch (error) {
     console.error('[me/posts PUT] error:', error);

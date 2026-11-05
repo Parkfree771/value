@@ -23,9 +23,11 @@ interface PriceData {
 interface Props {
   quarterViews: QuarterView[]; // 오래된 → 최신 순
   prices: PriceData;
+  /** 최신 분기 공시 후 수익률 (비중 가중) — 없으면 null */
+  returnSinceFiling?: number | null;
 }
 
-export default function PortfolioView({ quarterViews, prices }: Props) {
+export default function PortfolioView({ quarterViews, prices, returnSinceFiling = null }: Props) {
   // UI 순서는 최신부터. 초기 선택은 가장 최신.
   const ordered = [...quarterViews].reverse();
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -55,7 +57,7 @@ export default function PortfolioView({ quarterViews, prices }: Props) {
         )}
       </div>
 
-      <PortfolioSummary view={selected} />
+      <PortfolioSummary view={selected} returnSinceFiling={selectedIdx === 0 ? returnSinceFiling : null} />
       <PortfolioTable holdings={selected.holdings} prices={prices} showPrices={selectedIdx === 0} />
     </>
   );

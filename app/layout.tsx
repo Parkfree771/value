@@ -29,11 +29,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
-    // 페이지명을 앞에 두는 한국 검색결과 관행 (CTR 유리)
-    template: '%s | AntStreet',
+    default: 'AntStreet | 개미 투자자들의 리포트 공유 플랫폼',
+    // 브랜드를 앞에 — "AntStreet | 페이지명" (운영 결정 2026-11-05)
+    template: 'AntStreet | %s',
   },
-  description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요. 실시간 수익률 랭킹, 투자자 랭킹, 투자 분석 리포트를 확인하세요.',
+  description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요. 수익률 랭킹, 투자자 랭킹, 투자 분석 리포트를 확인하세요.',
   keywords: [
     'AntStreet', '앤트스트릿', '개미투자자', '투자 커뮤니티',
     '주식 리포트', '주식 분석', '투자 분석', '주식 SNS',
@@ -52,8 +52,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr',
-    title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
+    title: 'AntStreet | 개미 투자자들의 리포트 공유 플랫폼',
     description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
     siteName: 'AntStreet',
     images: [
@@ -67,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'AntStreet - 개미 투자자들의 리포트 공유 플랫폼',
+    title: 'AntStreet | 개미 투자자들의 리포트 공유 플랫폼',
     description: '개미 투자자들의 집단 지혜를 모으는 곳. 투자 아이디어를 공유하고 수익률을 추적하세요.',
     images: ['/api/og/site'],
   },
@@ -82,9 +81,8 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr',
-  },
+  // canonical·og:url 은 여기 두지 않는다 — 루트에 두면 자체 값이 없는 모든 하위 페이지가
+  // "홈이 원본"이라고 선언하게 돼 색인에서 빠진다. 각 페이지가 자기 주소를 지정한다.
 };
 
 const inter = Inter({

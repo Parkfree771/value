@@ -50,10 +50,14 @@ function Leaderboard({ items, period }: { items: RankedReport[]; period: Period 
 // 1면 순위 — 1·2·3위 + 4~10위. 그 뒤는 랭킹 페이지
 const RANK_LIMIT = 10;
 
-/** 1면 주인공 — 수익률 1·2·3위 + 4~10위 */
-function RankingFront({ reports }: { reports: ReportSummary[] }) {
+/** 1면 주인공 — 수익률 1·2·3위 + 4~10위. 회원 리포트와 증권사 리포트(전문가 추적)를 한 순위로, 개인/증권사 표시 */
+function RankingFront({ reports, brokerReports }: { reports: ReportSummary[]; brokerReports: ReportSummary[] }) {
   const [period, setPeriod] = useState<Period>('all');
-  const top = useMemo(() => computeTopReturns(reports, period, RANK_LIMIT), [reports, period]);
+  const merged = useMemo(
+    () => [...reports.map((r) => ({ ...r, source: 'member' as const })), ...brokerReports],
+    [reports, brokerReports],
+  );
+  const top = useMemo(() => computeTopReturns(merged, period, RANK_LIMIT), [merged, period]);
 
   return (
     <section aria-label="수익률 순위">
@@ -77,9 +81,16 @@ function RankingFront({ reports }: { reports: ReportSummary[] }) {
         <>
           <Podium items={top.slice(0, 3)} />
           <Leaderboard items={top.slice(3)} period={period} />
-          <Link href="/ranking" className="mt-3 inline-block text-sm font-bold hover:underline underline-offset-4">
-            전체 랭킹 보기 →
-          </Link>
+          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm font-bold">
+            <Link href="/reports" className="inline-flex min-h-9 items-center hover:underline underline-offset-4 sm:min-h-0">
+              개인 리포트 전체 순위 →
+            </Link>
+            {brokerReports.length > 0 && (
+              <Link href="/expert" className="inline-flex min-h-9 items-center hover:underline underline-offset-4 sm:min-h-0">
+                전문가 추적 전체 순위 →
+              </Link>
+            )}
+          </div>
         </>
       ) : (
         <p className="py-8 text-center text-sm text-[var(--theme-ink-soft)]">해당 기간 수익률 데이터가 충분하지 않습니다.</p>
@@ -163,16 +174,17 @@ function GuruColumn() {
 
 interface FrontPageProps {
   reports: ReportSummary[];
+  brokerReports?: ReportSummary[];
   briefing: Briefing | null;
 }
 
-const FrontPage = memo(function FrontPage({ reports, briefing }: FrontPageProps) {
+const FrontPage = memo(function FrontPage({ reports, brokerReports = [], briefing }: FrontPageProps) {
   if (reports.length === 0) return null;
 
   return (
     <div className="grid gap-y-10 lg:grid-cols-12 lg:gap-x-0">
       <div className="min-w-0 lg:col-span-8 lg:pr-8">
-        <RankingFront reports={reports} />
+        <RankingFront reports={reports} brokerReports={brokerReports} />
       </div>
       <aside className="min-w-0 lg:col-span-4 lg:pl-8 lg:border-l lg:border-[var(--theme-border-muted)] space-y-10">
         <BriefingColumn briefing={briefing} />

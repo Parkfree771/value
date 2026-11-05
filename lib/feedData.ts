@@ -1,4 +1,6 @@
 import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
+import { SAFETY_TTL, TAG } from '@/lib/cache';
 import type { FeedData, FeedPost } from '@/types/feed';
 import { sql } from '@/lib/db';
 import { getLatestPrices } from '@/lib/priceCache';
@@ -6,16 +8,18 @@ import { getLookbackPrices, calcReportPeriodReturns } from '@/lib/priceLookback'
 import { calculateReturn } from '@/utils/calculateReturn';
 
 // 피드 데이터를 Postgres에서 조립한다. app/page.tsx의 getInitialFeed와 동일 패턴.
-// ranking 페이지·RelatedReports·관련 SSR 컴포넌트가 공통 사용.
-export const getFeedData = cache(async (): Promise<FeedData | null> => {
-  try {
+// ranking · 개인 리포트 · RelatedReports · 프로필 등이 공통 사용.
+// 캐시: 인스턴스 공유 데이터 캐시 · 태그 posts/prices — 글 작성·수정·삭제, 장 마감 수집 완료 때만 비운다 (lib/cache.ts).
+// 실패는 캐시에 남기지 않도록 안에서는 throw, 밖(getFeedData)에서 null 로 바꾼다.
+async function buildFeedData(): Promise<FeedData> {
+  {
     // ranking / related SSR 용 — 최신 500건. posts 조회를 먼저 끝낸 뒤 ticker 만
     // 골라 lookback 필터로 넘긴다 (무필터 조회 회피).
     let rows: Record<string, any>[];
     try {
       rows = await sql`
         select p.id, p.title, p.ticker, p.exchange, p.opinion, p.position_type, p.initial_price,
-               p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name, p.stock_data,
+               p.current_price, p.target_price, p.return_rate, p.themes, p.stock_name,
                p.views, p.likes, p.comment_count, p.category, p.created_at, p.author_id,
                json_build_object('nickname', u.nickname, 'level_points', u.level_points,
                                  'is_virtual', u.is_virtual) as author
@@ -26,7 +30,7 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
       `;
     } catch (error) {
       console.error('[feedData] posts query error:', error);
-      return null;
+      throw error;
     }
 
     const tickers = Array.from(
@@ -100,6 +104,17 @@ export const getFeedData = cache(async (): Promise<FeedData | null> => {
       posts,
       prices: pricesOut,
     };
+  }
+}
+
+const readFeedData = unstable_cache(buildFeedData, ['feed-data-v2'], {
+  tags: [TAG.posts, TAG.prices],
+  revalidate: SAFETY_TTL,
+});
+
+export const getFeedData = cache(async (): Promise<FeedData | null> => {
+  try {
+    return await readFeedData();
   } catch (error) {
     console.error('[feedData] fetch failed:', error);
     return null;

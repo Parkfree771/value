@@ -1,5 +1,4 @@
 ﻿import type { Metadata } from 'next';
-import Card from '@/components/Card';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -20,10 +19,10 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-      <Card className="p-4">
-        <h1 className="headline text-2xl font-bold mb-8">개인정보처리방침</h1>
+      <article>
+        <h1 className="headline text-[28px] sm:text-[32px] pb-3 mb-6 sm:mb-8 border-b-2 border-[var(--theme-border)]">개인정보처리방침</h1>
 
-        <div className="space-y-6 font-sans text-xs text-gray-700 dark:text-gray-300">
+        <div className="space-y-8 text-sm leading-relaxed text-[var(--foreground)]">
           <section>
             <p className="mb-4">
               AntStreet(이하 &ldquo;회사&rdquo;)는 이용자의 개인정보를 중요시하며, &ldquo;개인정보 보호법&rdquo;, &ldquo;정보통신망 이용촉진 및
@@ -40,9 +39,9 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">1. 수집하는 개인정보의 항목 및 수집 방법</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">1. 수집하는 개인정보의 항목 및 수집 방법</h2>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">가. 수집하는 개인정보 항목</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">가. 수집하는 개인정보 항목</h3>
             <p className="mb-2">회사는 회원가입, 서비스 이용 등을 위해 아래와 같은 개인정보를 수집하고 있습니다:</p>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li><strong>필수항목:</strong> 이메일 주소, 닉네임</li>
@@ -50,7 +49,7 @@ export default function PrivacyPage() {
               <li><strong>자동수집항목:</strong> IP 주소, 쿠키, 서비스 이용 기록, 접속 로그</li>
             </ul>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">나. 개인정보 수집 방법</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">나. 개인정보 수집 방법</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>회원가입 및 서비스 이용 과정에서 이용자가 직접 입력</li>
               <li>소셜 로그인 (Google) 연동</li>
@@ -59,10 +58,10 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">2. 개인정보의 수집 및 이용 목적</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">2. 개인정보의 수집 및 이용 목적</h2>
             <p className="mb-2">회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다:</p>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">가. 서비스 제공</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">가. 서비스 제공</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>회원 식별 및 회원제 서비스 제공</li>
               <li>투자 리포트 작성 및 공유</li>
@@ -70,14 +69,14 @@ export default function PrivacyPage() {
               <li>맞춤형 서비스 제공</li>
             </ul>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">나. 회원 관리</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">나. 회원 관리</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>본인확인, 개인 식별, 불량회원의 부정 이용 방지</li>
               <li>가입 의사 확인, 연령확인</li>
               <li>불만처리 등 민원처리, 고지사항 전달</li>
             </ul>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">다. 서비스 개선 및 마케팅</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">다. 서비스 개선 및 마케팅</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>신규 서비스 개발 및 맞춤 서비스 제공</li>
               <li>통계학적 특성에 따른 서비스 제공 및 광고 게재</li>
@@ -86,20 +85,20 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">3. 개인정보의 보유 및 이용 기간</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">3. 개인정보의 보유 및 이용 기간</h2>
             <p className="mb-2">
               회사는 원칙적으로 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.
               단, 다음의 정보에 대해서는 아래의 이유로 명시한 기간 동안 보존합니다:
             </p>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">가. 회사 내부 방침</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">가. 회사 내부 방침</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>부정 이용 방지: 1년</li>
               <li>서비스 이용 기록: 회원 탈퇴 시까지</li>
               <li><strong>약관 동의 기록 (동의 시점, 동의 내용, 동의 버전): 회원 탈퇴 후 5년</strong></li>
             </ul>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">나. 관련 법령에 의한 정보 보유</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">나. 관련 법령에 의한 정보 보유</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>계약 또는 청약철회 등에 관한 기록: 5년 (전자상거래법)</li>
               <li>대금결제 및 재화 등의 공급에 관한 기록: 5년 (전자상거래법)</li>
@@ -108,7 +107,7 @@ export default function PrivacyPage() {
               <li>웹사이트 방문 기록: 3개월 (통신비밀보호법)</li>
             </ul>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">다. 회원 탈퇴 시 정보 처리</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">다. 회원 탈퇴 시 정보 처리</h3>
             <div className="ml-2 sm:ml-6 p-4 bg-[var(--theme-bg)] border border-[var(--theme-border-muted)]">
               <p className="mb-2">회원 탈퇴 시 개인정보는 다음과 같이 처리됩니다:</p>
               <ul className="list-disc list-inside space-y-1">
@@ -117,14 +116,14 @@ export default function PrivacyPage() {
                 <li>약관 동의 기록: 동의 입증을 위해 <strong>별도 분리 보관 후 5년 경과 시 파기</strong></li>
                 <li>작성한 리포트/댓글: 회원 요청 시 삭제 또는 익명화 처리</li>
               </ul>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <p className="mt-2 text-sm text-[var(--theme-ink-soft)]">
                 * 분리 보관된 정보는 법적 분쟁 대응 목적으로만 사용되며, 다른 목적으로 이용되지 않습니다.
               </p>
             </div>
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">4. 개인정보의 파기 절차 및 방법</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">4. 개인정보의 파기 절차 및 방법</h2>
 
             <h3 className="text-xs font-bold mb-2">가. 파기 절차</h3>
             <p className="ml-2 sm:ml-6">
@@ -132,7 +131,7 @@ export default function PrivacyPage() {
               법령에 따라 일정기간 저장된 후 혹은 즉시 파기됩니다.
             </p>
 
-            <h3 className="text-xs font-bold mb-2 mt-4">나. 파기 방법</h3>
+            <h3 className="text-sm font-bold mb-1.5 mt-4">나. 파기 방법</h3>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>전자적 파일 형태: 복구 및 재생되지 않도록 안전하게 삭제</li>
               <li>종이에 출력된 개인정보: 분쇄기로 분쇄하거나 소각</li>
@@ -140,7 +139,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">5. 개인정보의 제3자 제공</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">5. 개인정보의 제3자 제공</h2>
             <p>
               회사는 원칙적으로 이용자의 개인정보를 제3자에게 제공하지 않습니다.
               다만, 아래의 경우에는 예외로 합니다:
@@ -152,7 +151,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">6. 개인정보 처리의 위탁</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">6. 개인정보 처리의 위탁</h2>
             <p className="mb-2">
               회사는 서비스 향상을 위해서 아래와 같이 개인정보를 위탁하고 있으며, 관계 법령에 따라 위탁계약 시
               개인정보가 안전하게 관리될 수 있도록 필요한 사항을 규정하고 있습니다:
@@ -163,13 +162,13 @@ export default function PrivacyPage() {
               <li>Google OAuth 인증 제공: <strong>Google LLC</strong> — 위탁 업무: 소셜 로그인 인증 정보(이메일, 프로필) 제공</li>
               <li>이메일 발송 서비스: (추후 업데이트)</li>
             </ul>
-            <p className="mt-3 text-[11px] text-gray-500 dark:text-gray-500">
+            <p className="mt-3 text-[11px] text-[var(--theme-ink-soft)]">
               * 이용자의 개인정보(이메일, 닉네임, 게시물, 동의 기록)는 Neon 싱가포르 리전(AWS ap-southeast-1) 데이터센터에 저장되며, 별도 국외 이전 동의가 필요한 경우 사전에 고지합니다.
             </p>
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">7. 이용자 및 법정대리인의 권리</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">7. 이용자 및 법정대리인의 권리</h2>
             <p className="mb-2">이용자는 언제든지 다음 각 호의 개인정보 보호 관련 권리를 행사할 수 있습니다:</p>
             <ul className="list-disc list-inside ml-2 sm:ml-6 space-y-1">
               <li>개인정보 열람 요구</li>
@@ -184,7 +183,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">8. 개인정보 자동 수집 장치의 설치/운영 및 거부</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">8. 개인정보 자동 수집 장치의 설치/운영 및 거부</h2>
             <p className="mb-2">
               회사는 쿠키(Cookie)를 통해 이용자에게 최적화된 서비스를 제공합니다. 이용자는 쿠키 설치에 대한 선택권을 가지고 있습니다.
             </p>
@@ -195,44 +194,44 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">9. 개인정보 보호책임자</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">9. 개인정보 보호책임자</h2>
             <p className="mb-2">
               회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 이용자의 불만처리 및
               피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다:
             </p>
-            <div className="bg-[var(--theme-bg)] border border-[var(--theme-border-muted)] p-4 mt-3">
+            <div className="bg-[var(--theme-bg)] p-4 mt-3">
               <p><strong>개인정보 보호책임자</strong></p>
               <ul className="mt-2 space-y-1">
                 <li>이름: 박유로</li>
                 <li>이메일: dbfh1498@gmail.com</li>
               </ul>
-              <p className="mt-3 text-xs text-gray-500 dark:text-gray-500">
+              <p className="mt-3 text-xs text-[var(--theme-ink-soft)]">
                 * 개인정보 관련 문의사항은 위 이메일로 연락주시기 바랍니다.
               </p>
             </div>
           </section>
 
           <section>
-            <h2 className="text-sm font-bold mb-3">10. 개인정보 처리방침의 변경</h2>
+            <h2 className="headline text-[17px] sm:text-[19px] mb-2">10. 개인정보 처리방침의 변경</h2>
             <p>
               이 개인정보처리방침은 시행일로부터 적용되며, 법령 및 방침에 따른 변경내용의 추가, 삭제 및 정정이 있는 경우에는
               변경사항의 시행 7일 전부터 공지사항을 통하여 고지할 것입니다.
             </p>
           </section>
 
-          <section className="pt-6 border-t-[3px] border-[var(--theme-border-muted)]">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+          <section className="pt-6 border-t border-[var(--theme-border-muted)]">
+            <p className="text-sm text-[var(--theme-ink-soft)]">
               <strong>시행일:</strong> 2026년 2월 1일
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-sm text-[var(--theme-ink-soft)] mt-2">
               <strong>최종 개정일:</strong> 2026년 10월 29일 (데이터 보관 위탁사 Neon·싱가포르 리전으로 변경, Apple 로그인 중단)
             </p>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            <p className="text-sm text-[var(--theme-ink-soft)] mt-2">
               본 개인정보처리방침은 위 시행일부터 적용됩니다.
             </p>
           </section>
         </div>
-      </Card>
+      </article>
     </div>
   );
 }

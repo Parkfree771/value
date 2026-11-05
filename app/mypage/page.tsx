@@ -10,7 +10,6 @@ import { useBookmark } from '@/contexts/BookmarkContext';
 import { getUserProfile, processUserWithdrawal } from '@/lib/users';
 import UserLevelInline from '@/components/UserLevelInline';
 import LevelCard, { type LevelBreakdown } from '@/components/LevelCard';
-import styles from './MyPage.module.css';
 import { InlineLoading } from '@/components/loading/Loading';
 
 const ReportCard = dynamic(() => import('@/components/ReportCard'), {
@@ -281,145 +280,91 @@ export default function MyPage() {
 
   if (!authReady || !user) return null;
 
+  const avg = parseFloat(avgReturnRate);
+  const max = parseFloat(maxReturnRate);
+  const min = parseFloat(minReturnRate);
+  const rateClass = (v: number) => (v > 0 ? 'return-positive' : v < 0 ? 'return-negative' : 'return-neutral');
+  const stats: { label: string; value: string; className?: string }[] = [
+    { label: '평균 수익률', value: `${avg >= 0 ? '+' : ''}${avgReturnRate}%`, className: rateClass(avg) },
+    { label: '승률', value: `${winRate}%` },
+    { label: '최고 수익', value: `${max >= 0 ? '+' : ''}${maxReturnRate}%`, className: rateClass(max) },
+    { label: '최저 수익', value: `${min >= 0 ? '+' : ''}${minReturnRate}%`, className: rateClass(min) },
+    { label: '총 조회수', value: totalViews > 999 ? (totalViews / 1000).toFixed(1) + 'K' : String(totalViews) },
+    { label: '총 좋아요', value: String(totalLikes) },
+  ];
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-      {/* 프로필 헤더 */}
-      <div className={styles.profileHeader}>
-        <div className={styles.profileCard}>
-          <div className={styles.profileContent}>
-            <div className={styles.profileInfo}>
-              <div className={styles.avatar}>
-                <span className="font-serif text-3xl font-black text-white">{(userName || '?')[0]}</span>
-              </div>
-              <div className={styles.userDetails}>
-                <div className={styles.userNameRow}>
-                  <h1 className={styles.userName}>{userName}</h1>
-                  <UserLevelInline points={levelPoints} size="md" />
-                </div>
-                <p className={styles.userEmail}>{userEmail}</p>
-                <button onClick={handleOpenEditModal} className={styles.editButton}>
-                  <svg className={styles.editButtonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                  </svg>
-                  프로필 수정
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.mainStats}>
-              <div className={styles.mainStatCard}>
-                <div className={styles.mainStatLabel}>평균 수익률</div>
-                <div className={`${styles.mainStatValue} ${parseFloat(avgReturnRate) >= 0 ? styles.mainStatPositive : styles.mainStatNegative}`}>
-                  {parseFloat(avgReturnRate) >= 0 ? '+' : ''}{avgReturnRate}%
-                </div>
-              </div>
-              <div className={styles.mainStatCard}>
-                <div className={styles.mainStatLabel}>승률</div>
-                <div className={styles.mainStatValue}>{winRate}%</div>
-              </div>
-            </div>
+      {/* 프로필 머리 — 이름 · 이메일 · 수정 */}
+      <header className="border-t-2 border-[var(--theme-border)] pt-4">
+        <p className="kicker">마이페이지</p>
+        <div className="mt-2 flex items-center gap-3 sm:gap-4 min-w-0">
+          <div className="w-14 h-14 sm:w-16 sm:h-16 flex-shrink-0 border border-[var(--theme-border)] flex items-center justify-center">
+            <span className="headline text-2xl sm:text-3xl">{(userName || '?')[0]}</span>
           </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="headline truncate text-[24px] sm:text-[30px] leading-tight">{userName}</h1>
+              <UserLevelInline points={levelPoints} size="md" />
+            </div>
+            <p className="mt-0.5 truncate text-xs sm:text-sm text-[var(--theme-ink-soft)]">{userEmail}</p>
+          </div>
+          <button
+            onClick={handleOpenEditModal}
+            className="btn-secondary flex-shrink-0 inline-flex items-center gap-1.5 min-h-9 !px-3 !py-1.5 text-xs"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            프로필 수정
+          </button>
         </div>
-      </div>
+
+        {/* 기록 — 얇은 괘선으로 나눈 숫자 칸 (gap-px 사이로 괘선 색이 비친다) */}
+        <dl className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-px bg-[var(--theme-border-muted)] border-y border-[var(--theme-border-muted)]">
+          {stats.map((s) => (
+            <div key={s.label} className="bg-[var(--background)] py-3 px-3 sm:px-4">
+              <dt className="text-xs text-[var(--theme-ink-soft)]">{s.label}</dt>
+              <dd className={`mt-1.5 font-mono font-black tabular-nums text-lg sm:text-2xl leading-none ${s.className ?? 'text-[var(--foreground)]'}`}>
+                {s.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </header>
 
       {/* 레벨 — 배지 시스템 대체 */}
       {levelPoints !== null && (
-        <div className="mb-6 sm:mb-8">
+        <div className="mt-8">
           <LevelCard points={levelPoints} breakdown={levelBreakdown} isMine />
         </div>
       )}
 
-      {/* 상세 통계 */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
-        <div className="pixel-stat-card !p-3 sm:!p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconGreen}`}>
-              <svg className={`w-5 h-5 ${styles.statIconSvgGreen}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">최고 수익</div>
-              <div className={`text-base sm:text-xl font-bold font-mono tabular-nums ${parseFloat(maxReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
-                {parseFloat(maxReturnRate) >= 0 ? '+' : ''}{maxReturnRate}%
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="pixel-stat-card !p-3 sm:!p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconRed}`}>
-              <svg className={`w-5 h-5 ${styles.statIconSvgRed}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">최저 수익</div>
-              <div className={`text-base sm:text-xl font-bold font-mono tabular-nums ${parseFloat(minReturnRate) >= 0 ? styles.statValueGreen : styles.statValueRed}`}>
-                {parseFloat(minReturnRate) >= 0 ? '+' : ''}{minReturnRate}%
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="pixel-stat-card !p-3 sm:!p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconBlue}`}>
-              <svg className={`w-5 h-5 ${styles.statIconSvgBlue}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">총 조회수</div>
-              <div className="text-base sm:text-xl font-bold font-mono tabular-nums">
-                {totalViews > 999 ? (totalViews / 1000).toFixed(1) + 'K' : totalViews}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="pixel-stat-card !p-3 sm:!p-4">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className={`w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 border rounded-[4px] flex items-center justify-center ${styles.statIconPink}`}>
-              <svg className={`w-5 h-5 ${styles.statIconSvgPink}`} fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-            </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-gray-500 dark:text-gray-400 tracking-wide">총 좋아요</div>
-              <div className="text-base sm:text-xl font-bold font-mono tabular-nums">{totalLikes}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* 탭 네비게이션 */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+      <div className="mt-8 flex gap-1 overflow-x-auto scrollbar-hide border-b border-[var(--theme-border-muted)]">
         <button
           onClick={() => setActiveTab('reports')}
-          className={`pixel-tab ${activeTab === 'reports' ? 'pixel-tab-active' : ''}`}
+          className={`pixel-tab min-h-9 ${activeTab === 'reports' ? 'pixel-tab-active' : ''}`}
         >
           내 리포트 ({totalReports})
         </button>
         <button
           onClick={() => setActiveTab('bookmarks')}
-          className={`pixel-tab ${activeTab === 'bookmarks' ? 'pixel-tab-active' : ''}`}
+          className={`pixel-tab min-h-9 ${activeTab === 'bookmarks' ? 'pixel-tab-active' : ''}`}
         >
           북마크 ({bookmarkedIds.length})
         </button>
         <button
           onClick={() => setActiveTab('settings')}
-          className={`pixel-tab ${activeTab === 'settings' ? 'pixel-tab-active' : ''}`}
+          className={`pixel-tab min-h-9 ${activeTab === 'settings' ? 'pixel-tab-active' : ''}`}
         >
           설정
         </button>
       </div>
 
-      {/* 탭 컨텐츠 */}
+      {/* 탭 컨텐츠 — ReportCard 가 아래 괘선을 갖고 있어 목록은 그대로 쌓는다 */}
       {activeTab === 'reports' && (
-        <div className="space-y-4">
+        <div>
           {loading ? (
             <InlineLoading label="불러오는 중" />
           ) : myReports.length > 0 ? (
@@ -432,16 +377,11 @@ export default function MyPage() {
               />
             ))
           ) : (
-            <div className="pixel-empty-state">
-              <div className="w-16 h-16 border border-[var(--theme-border-muted)] bg-red-500/10 rounded-[4px] flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="font-sans text-base font-bold mb-2">아직 작성한 리포트가 없습니다</h3>
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-6">첫 번째 투자 리포트를 작성해보세요!</p>
-              <Link href="/write" className="btn-primary inline-flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="py-14 text-center">
+              <h3 className="headline text-lg">아직 작성한 리포트가 없습니다</h3>
+              <p className="mt-2 mb-5 text-sm text-[var(--theme-ink-soft)]">첫 번째 투자 리포트를 작성해보세요!</p>
+              <Link href="/write" className="btn-primary inline-flex items-center gap-2 text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
                 첫 리포트 작성하기
@@ -452,7 +392,7 @@ export default function MyPage() {
       )}
 
       {activeTab === 'bookmarks' && (
-        <div className="space-y-4">
+        <div>
           {loading || bookmarkLoading ? (
             <InlineLoading label="불러오는 중" />
           ) : bookmarkedReports.length > 0 ? (
@@ -460,16 +400,11 @@ export default function MyPage() {
               <ReportCard key={report.id} {...report} />
             ))
           ) : (
-            <div className="pixel-empty-state">
-              <div className="w-16 h-16 border border-[var(--theme-border-muted)] bg-red-500/10 rounded-[4px] flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </div>
-              <h3 className="font-sans text-base font-bold mb-2">북마크한 리포트가 없습니다</h3>
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-6">관심있는 리포트를 북마크해보세요!</p>
-              <Link href="/" className="btn-primary inline-flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="py-14 text-center">
+              <h3 className="headline text-lg">북마크한 리포트가 없습니다</h3>
+              <p className="mt-2 mb-5 text-sm text-[var(--theme-ink-soft)]">관심있는 리포트를 북마크해보세요!</p>
+              <Link href="/" className="btn-primary inline-flex items-center gap-2 text-sm">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 리포트 둘러보기
@@ -480,39 +415,37 @@ export default function MyPage() {
       )}
 
       {activeTab === 'settings' && (
-        <div className="card-base overflow-hidden">
-          <div className="px-5 py-4 border-b-2 border-[var(--theme-border-muted)]">
-            <h3 className="font-sans text-base font-bold uppercase tracking-wider">계정 설정</h3>
-          </div>
-          <div className="p-4 sm:p-6">
-            <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
-              <h4 className="font-sans text-sm font-bold mb-1">이메일</h4>
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 break-all sm:break-normal">{userEmail}</p>
-            </div>
-
-            <div className="py-4 border-b-2 border-[var(--theme-border-muted)]">
-              <h4 className="font-sans text-sm font-bold mb-1">알림 설정</h4>
-              <div className="card-base p-4">
-                <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
-                  알림 기능은 준비 중입니다. 곧 제공될 예정입니다.
-                </p>
-              </div>
+        <section className="pt-6">
+          <h3 className="headline text-[18px]">계정 설정</h3>
+          <dl className="mt-3 border-t border-[var(--theme-border)] divide-y divide-[var(--theme-border-muted)]">
+            <div className="py-4">
+              <dt className="text-sm font-bold">이메일</dt>
+              <dd className="mt-1 text-sm text-[var(--theme-ink-soft)] break-all sm:break-normal">{userEmail}</dd>
             </div>
 
             <div className="py-4">
-              <h4 className="font-sans text-sm font-bold text-red-600 dark:text-red-400 mb-4">위험 영역</h4>
-              <p className="font-sans text-xs text-gray-500 dark:text-gray-400 mb-3">
-                회원 탈퇴 시 작성한 리포트와 댓글은 익명화되며, 일부 정보는 법적 의무에 따라 5년간 보관됩니다.
-              </p>
-              <button
-                onClick={() => setIsWithdrawModalOpen(true)}
-                className="btn-danger"
-              >
-                회원 탈퇴
-              </button>
+              <dt className="text-sm font-bold">알림 설정</dt>
+              <dd className="mt-1 text-sm text-[var(--theme-ink-soft)]">
+                알림 기능은 준비 중입니다. 곧 제공될 예정입니다.
+              </dd>
             </div>
-          </div>
-        </div>
+
+            <div className="py-4">
+              <dt className="text-sm font-bold text-[var(--color-error)]">위험 영역</dt>
+              <dd>
+                <p className="mt-1 mb-3 text-sm text-[var(--theme-ink-soft)]">
+                  회원 탈퇴 시 작성한 리포트와 댓글은 익명화되며, 일부 정보는 법적 의무에 따라 5년간 보관됩니다.
+                </p>
+                <button
+                  onClick={() => setIsWithdrawModalOpen(true)}
+                  className="btn-danger min-h-9"
+                >
+                  회원 탈퇴
+                </button>
+              </dd>
+            </div>
+          </dl>
+        </section>
       )}
 
       {/* 프로필 수정 모달 */}
@@ -522,7 +455,7 @@ export default function MyPage() {
             <div className="pixel-modal-header">
               <h3 className="pixel-modal-title">프로필 수정</h3>
               <button onClick={() => setIsEditModalOpen(false)} className="pixel-modal-close min-h-[36px] min-w-[36px] sm:min-h-0 sm:min-w-0">
-                <svg className="w-[18px] h-[18px] sm:w-auto sm:h-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-[18px] h-[18px] sm:w-auto sm:h-auto text-[var(--theme-ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -541,14 +474,14 @@ export default function MyPage() {
                   maxLength={20}
                   disabled={isUpdating}
                 />
-                <p className="font-sans text-[11px] sm:text-[0.625rem] text-gray-500 dark:text-gray-400">{newNickname.length}/20자</p>
+                <p className="text-[11px] font-mono tabular-nums text-[var(--theme-ink-soft)]">{newNickname.length}/20자</p>
               </div>
 
-              <div className={styles.warningBox}>
-                <svg className={styles.warningIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex gap-2.5 border-l-2 border-[var(--theme-orange)] bg-[var(--theme-bg)] px-3 py-2.5">
+                <svg className="w-4 h-4 mt-0.5 flex-shrink-0 text-[var(--theme-orange)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <p className={styles.warningText}>
+                <p className="text-xs leading-relaxed text-[var(--foreground)]">
                   닉네임을 변경하면 이미 작성한 모든 게시글의 작성자 이름도 함께 변경됩니다.
                 </p>
               </div>
@@ -569,7 +502,7 @@ export default function MyPage() {
               >
                 {isUpdating ? (
                   <>
-                    <div className="w-4 h-4 border border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border border-current border-t-transparent rounded-full animate-spin" />
                     <span>저장 중...</span>
                   </>
                 ) : (
@@ -588,18 +521,18 @@ export default function MyPage() {
             <div className="pixel-modal-header">
               <h3 className="pixel-modal-title">회원 탈퇴</h3>
               <button onClick={() => setIsWithdrawModalOpen(false)} className="pixel-modal-close min-h-[36px] min-w-[36px] sm:min-h-0 sm:min-w-0">
-                <svg className="w-[18px] h-[18px] sm:w-auto sm:h-auto text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-[18px] h-[18px] sm:w-auto sm:h-auto text-[var(--theme-ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             <div className="flex flex-col gap-4">
-              <div className="p-4 bg-red-500/10 border border-red-500 rounded-[4px] mb-2">
-                <p className="font-sans text-xs text-red-600 dark:text-red-400 font-bold mb-2">
+              <div className="mb-2 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)] px-3 py-3">
+                <p className="text-xs font-bold text-[var(--color-error)] mb-2">
                   탈퇴 시 다음 사항에 유의해주세요:
                 </p>
-                <ul className="font-sans text-xs text-red-600 dark:text-red-400 space-y-1 list-disc list-inside">
+                <ul className="text-xs text-[var(--foreground)] space-y-1 list-disc list-inside">
                   <li>작성한 리포트와 댓글은 익명화 처리됩니다</li>
                   <li>이메일, 동의 기록은 법적 의무에 따라 5년간 보관됩니다</li>
                   <li>탈퇴 후 동일 계정으로 재가입해도 이전 데이터는 복구되지 않습니다</li>
@@ -608,7 +541,7 @@ export default function MyPage() {
 
               <div className="flex flex-col gap-2">
                 <label htmlFor="withdrawConfirm" className="pixel-label">
-                  탈퇴를 원하시면 아래에 <strong className="text-red-600">&quot;탈퇴합니다&quot;</strong>를 입력해주세요
+                  탈퇴를 원하시면 아래에 <strong className="text-[var(--color-error)]">&quot;탈퇴합니다&quot;</strong>를 입력해주세요
                 </label>
                 <input
                   id="withdrawConfirm"

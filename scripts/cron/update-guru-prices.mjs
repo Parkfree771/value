@@ -5,7 +5,7 @@
 //
 // 실패가 성공보다 많으면 exit 1.
 
-import { getKISToken, getOverseaStockPrice, makeDb, sleep } from './shared.mjs';
+import { getKISToken, getOverseaStockPrice, makeDb, revalidateScope, sleep } from './shared.mjs';
 
 const BATCH_SIZE = 5; // KIS 20 req/s 한도 안에서 안전
 const BATCH_DELAY_MS = 100;
@@ -93,6 +93,9 @@ if (rows.length > 0) {
   console.log(`[GURU-CRON] guru_prices: ${rows.length} 행 UPSERT`);
 }
 
+// 수집이 끝났으니 구루 페이지 갱신 신호 한 번 (lib/cache.ts — scope guru)
+const revalidated = rows.length > 0 ? await revalidateScope('guru') : null;
+
 console.log(
   '[GURU-CRON] result',
   JSON.stringify({
@@ -101,6 +104,7 @@ console.log(
     fail,
     skipped,
     upserted: rows.length,
+    revalidated,
     duration_seconds: Number(((Date.now() - startTime) / 1000).toFixed(1)),
     failed_tickers: failedTickers.slice(0, 20),
   }),

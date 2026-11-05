@@ -39,34 +39,34 @@ const Footer = memo(function Footer() {
           <div className="mt-4 pt-4 border-t border-[var(--theme-border-muted)]">
             <div className="max-w-md mx-auto text-center">
               {/* 사업자 정보 */}
-              <div className="text-xs text-gray-400 space-y-1 mb-4">
+              <div className="text-xs text-[var(--theme-ink-soft)] space-y-1 mb-4">
                 <p>
-                  <span className="text-gray-500">상호명:</span> 부자FARM
-                  <span className="mx-2 text-gray-600">|</span>
-                  <span className="text-gray-500">대표:</span> 박유로
+                  <span className="text-[var(--theme-ink-soft)]">상호명:</span> 부자FARM
+                  <span className="mx-2 text-[var(--theme-border-control)]">|</span>
+                  <span className="text-[var(--theme-ink-soft)]">대표:</span> 박유로
                 </p>
                 <p>
-                  <span className="text-gray-500">사업자등록번호:</span> 326-23-01856
+                  <span className="text-[var(--theme-ink-soft)]">사업자등록번호:</span> 326-23-01856
                 </p>
                 <p>
-                  <span className="text-gray-500">주소:</span> 경기도 고양시 일산서구 킨텍스로 240
+                  <span className="text-[var(--theme-ink-soft)]">주소:</span> 경기도 고양시 일산서구 킨텍스로 240
                 </p>
                 <p>
-                  <span className="text-gray-500">이메일:</span> dbfh1498@gmail.com
+                  <span className="text-[var(--theme-ink-soft)]">이메일:</span> dbfh1498@gmail.com
                 </p>
               </div>
 
               {/* 링크 */}
               <div className="flex justify-center gap-4 text-sm mb-4">
-                <Link href="/" className="text-gray-400 hover:text-[var(--foreground)] transition-colors">피드</Link>
-                <Link href="/ranking" className="text-gray-400 hover:text-[var(--foreground)] transition-colors">랭킹</Link>
-                <Link href="/write" className="text-gray-400 hover:text-[var(--foreground)] transition-colors">글쓰기</Link>
+                <Link href="/" className="text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors">피드</Link>
+                <Link href="/ranking" className="text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors">랭킹</Link>
+                <Link href="/write" className="text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] transition-colors">글쓰기</Link>
               </div>
 
               {/* 투자 경고 */}
               <div className="p-3 border border-[var(--theme-border)]">
                 <p className="text-xs text-[var(--theme-orange)] font-medium mb-1">[투자 위험 고지]</p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[var(--theme-ink-soft)]">
                   본 사이트의 투자 리포트는 작성자 개인의 의견이며, 투자 권유가 아닙니다.
                   투자 손실의 책임은 전적으로 투자자 본인에게 있습니다.
                 </p>
@@ -75,8 +75,9 @@ const Footer = memo(function Footer() {
           </div>
         )}
 
-        {/* 저작권 */}
-        <div className="mt-3 pt-3 border-t border-[var(--theme-border-muted)] text-center text-xs text-gray-500">
+        {/* 저작권 · 가격 갱신 안내 */}
+        <div className="mt-3 pt-3 border-t border-[var(--theme-border-muted)] text-center text-xs text-[var(--theme-ink-soft)]">
+          <p className="mb-1.5 break-keep">현재가·수익률은 장 마감 종가 기준으로 하루 한 번 갱신됩니다 (한국·일본·중국·홍콩 오후 4~7시, 미국 오전 6~9시)</p>
           &copy; 2026 AntStreet. All rights reserved.
         </div>
       </div>

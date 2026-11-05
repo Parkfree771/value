@@ -433,18 +433,7 @@ function WritePageContent() {
           console.error('feed.json 업데이트 실패:', feedError);
         }
 
-        await Promise.all([
-          fetch('/api/revalidate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: '/' }),
-          }),
-          fetch('/api/revalidate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: `/reports/${editId}` }),
-          }),
-        ]);
+        // 캐시 갱신은 저장 API(/api/me/posts/[id])가 직접 한다 (lib/cache.ts invalidatePosts)
 
         alert('리포트가 성공적으로 수정되었습니다!');
         router.push(`/reports/${editId}`);
@@ -475,11 +464,7 @@ function WritePageContent() {
           console.error('feed.json 업데이트 실패:', feedError);
         }
 
-        await fetch('/api/revalidate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ path: '/' }),
-        });
+        // 캐시 갱신은 저장 API(/api/me/posts)가 직접 한다 (lib/cache.ts invalidatePosts)
 
         alert('리포트가 성공적으로 작성되었습니다!');
         router.push('/');
@@ -505,15 +490,15 @@ function WritePageContent() {
     }
     return (
       <div className="write-page max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="card-base p-6 sm:p-10 text-center">
+        <div className="border-t-2 border-[var(--theme-border)] pt-6 sm:pt-8 text-center">
           <p className="kicker">개인 투자자 리포트</p>
           <h1 className="headline mt-2 text-xl sm:text-2xl font-black">
             오늘의 매수 이유를 기록해두세요
           </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="mt-2 text-sm text-[var(--theme-ink-soft)] leading-relaxed">
             작성하는 순간의 가격이 박제되고, 이후 수익률이 매일 자동으로 채점됩니다.
           </p>
-          <ul className="mt-5 mx-auto max-w-sm text-left space-y-2 text-sm text-gray-700 dark:text-gray-300">
+          <ul className="mt-5 mx-auto max-w-sm text-left space-y-2 text-sm text-[var(--foreground)]">
             <li className="flex gap-2"><span className="text-[var(--theme-orange)] font-bold">1</span>종목을 고르면 지금 가격이 자동으로 들어가요</li>
             <li className="flex gap-2"><span className="text-[var(--theme-orange)] font-bold">2</span>왜 샀는지 몇 줄만 적어도 충분해요</li>
             <li className="flex gap-2"><span className="text-[var(--theme-orange)] font-bold">3</span>몇 달 뒤, 내 판단이 맞았는지 숫자로 확인해요</li>
@@ -548,7 +533,7 @@ function WritePageContent() {
         <div className="flex flex-wrap items-center justify-between gap-y-2 mb-4">
           <h1 className="headline text-lg font-bold">
             {isEditMode ? '리포트 수정' : '리포트 작성'}
-            <span className="ml-2 text-xs font-normal px-2 py-0.5 bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)]">HTML</span>
+            <span className="ml-2 text-xs font-normal px-2 py-0.5 bg-[var(--foreground)] text-[var(--background)] border border-[var(--foreground)]">HTML</span>
           </h1>
           <div className="flex items-center gap-2">
             <button
@@ -562,7 +547,7 @@ function WritePageContent() {
               type="submit"
               form="write-form"
               disabled={isUploading}
-              className="min-h-[36px] sm:min-h-0 px-4 py-1 text-xs font-bold bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)] transition-all disabled:opacity-50"
+              className="min-h-[36px] sm:min-h-0 px-4 py-1 text-xs font-bold bg-[var(--foreground)] text-[var(--background)] border border-[var(--foreground)] transition-all disabled:opacity-50"
             >
               {isUploading ? '업로드 중...' : (isEditMode ? '수정 완료' : '작성 완료')}
             </button>
@@ -570,7 +555,7 @@ function WritePageContent() {
               <button
                 type="button"
                 onClick={handleDelete}
-                className="min-h-[36px] sm:min-h-0 px-3 py-1 text-xs font-bold border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 transition-all"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1 text-xs font-bold border border-[var(--theme-border-control)] hover:border-[var(--color-error)] hover:text-[var(--color-error)] transition-all"
               >
                 삭제
               </button>
@@ -624,7 +609,7 @@ function WritePageContent() {
                           className={`px-2 py-2 text-[11px] sm:py-0.5 sm:text-[10px] border rounded-sm transition-all ${
                             selectedThemes.includes(theme.id)
                               ? 'pixel-chip-active font-bold'
-                              : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-muted)]'
+                              : 'bg-[var(--theme-bg-card)] border-[var(--theme-border-control)] hover:border-[var(--theme-border)]'
                           }`}
                         >
                           {theme.name}
@@ -643,7 +628,7 @@ function WritePageContent() {
                     <span className="text-xs font-bold">
                       이미지 첨부
                       {uploadedImageUrls.length > 0 && (
-                        <span className="ml-1 text-gray-500 font-normal">({uploadedImageUrls.length})</span>
+                        <span className="ml-1 text-[var(--theme-ink-soft)] font-normal">({uploadedImageUrls.length})</span>
                       )}
                     </span>
                     <label
@@ -682,7 +667,7 @@ function WritePageContent() {
                               <button
                                 type="button"
                                 onClick={() => insertImageSnippetToHtml(url)}
-                                className="flex-1 text-[11px] py-2.5 sm:py-1 bg-[var(--theme-accent)] text-white font-bold hover:opacity-90 transition-opacity"
+                                className="flex-1 text-[11px] py-2.5 sm:py-1 bg-[var(--foreground)] text-[var(--background)] font-bold hover:opacity-90 transition-opacity"
                                 title="에디터 커서 위치에 <img> 삽입"
                               >
                                 삽입
@@ -699,7 +684,7 @@ function WritePageContent() {
                             <button
                               type="button"
                               onClick={() => removeImage(idx)}
-                              className="absolute top-1 right-1 w-7 h-7 md:-top-2 md:-right-2 md:w-5 md:h-5 bg-red-500 text-white text-xs leading-none rounded-full flex items-center justify-center font-bold shadow"
+                              className="absolute top-1 right-1 w-7 h-7 md:-top-2 md:-right-2 md:w-5 md:h-5 bg-[var(--foreground)] text-[var(--background)] text-xs leading-none rounded-full flex items-center justify-center font-bold"
                               title="목록에서 제거"
                             >
                               ×
@@ -709,8 +694,8 @@ function WritePageContent() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex-1 flex items-center justify-center py-3 md:py-0 border border-dashed border-[var(--theme-border-muted)] rounded">
-                      <p className="text-[11px] sm:text-[10px] text-gray-400 text-center px-2">
+                    <div className="flex-1 flex items-center justify-center py-3 md:py-0 border border-dashed border-[var(--theme-border-control)] rounded-sm">
+                      <p className="text-[11px] sm:text-[10px] text-[var(--theme-ink-soft)] text-center px-2">
                         PNG/JPG/GIF · 최대 10MB<br />
                         업로드 후 [삽입] 또는 [복사]
                       </p>
@@ -764,21 +749,21 @@ function WritePageContent() {
                 type="submit"
                 form="write-form"
                 disabled={isUploading}
-                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 bg-[var(--theme-accent)] text-white border border-[var(--theme-accent-dark)] font-sans text-xs sm:text-sm transition-all disabled:opacity-50"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 bg-[var(--foreground)] text-[var(--background)] border border-[var(--foreground)] font-sans text-xs sm:text-sm transition-all disabled:opacity-50"
               >
                 {isUploading ? '업로드 중...' : '수정 완료'}
               </button>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] hover:border-red-500 hover:text-red-500 font-sans text-xs sm:text-sm transition-all"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 border border-[var(--theme-border-control)] hover:border-[var(--color-error)] hover:text-[var(--color-error)] font-sans text-xs sm:text-sm transition-all"
               >
                 삭제
               </button>
               <button
                 type="button"
                 onClick={() => router.push(`/reports/${editId}`)}
-                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] font-sans text-xs sm:text-sm transition-all"
+                className="min-h-[36px] sm:min-h-0 px-3 py-1.5 border border-[var(--theme-border-control)] hover:border-[var(--theme-border)] font-sans text-xs sm:text-sm transition-all"
               >
                 글 보기
               </button>
@@ -853,12 +838,12 @@ function WritePageContent() {
             <div>
               <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">이미지 첨부 <span className="font-normal">· 올린 뒤 &lsquo;이미지 삽입&rsquo;을 누르면 본문에 들어가요</span></p>
               <div className="space-y-3">
-                <label className="inline-flex items-center gap-2 px-4 py-2 border border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)]">
-                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-[var(--theme-border-control)] cursor-pointer hover:border-[var(--theme-border)] transition-colors text-sm font-semibold">
+                  <svg className="w-5 h-5 text-[var(--theme-ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                   <span className="text-sm">이미지 선택</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">(PNG, JPG, GIF - 최대 10MB)</span>
+                  <span className="text-xs text-[var(--theme-ink-soft)]">(PNG, JPG, GIF - 최대 10MB)</span>
                   <input
                     type="file"
                     className="hidden"
@@ -890,7 +875,7 @@ function WritePageContent() {
                               </div>
                               {uploadedImageUrls[index] ? (
                                 <>
-                                  <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                                  <div className="text-xs text-[var(--color-success)] mt-1">
                                     업로드 완료
                                   </div>
                                   <button
@@ -902,7 +887,7 @@ function WritePageContent() {
                                   </button>
                                 </>
                               ) : (
-                                <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                                <div className="text-xs text-[var(--theme-ink-soft)] mt-1">
                                   업로드 중...
                                 </div>
                               )}
@@ -910,7 +895,7 @@ function WritePageContent() {
                             <button
                               type="button"
                               onClick={() => removeImage(index)}
-                              className="-m-2 p-2 sm:m-0 sm:p-0 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                              className="-m-2 p-2 sm:m-0 sm:p-0 text-[var(--color-error)] hover:opacity-80"
                             >
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -929,12 +914,12 @@ function WritePageContent() {
             <div>
               <p className="text-xs font-bold text-[var(--theme-ink-soft)] mb-2">PDF 첨부</p>
               <div className="space-y-3">
-                <label className="inline-flex items-center gap-2 px-4 py-2 border border-[var(--theme-border-muted)] cursor-pointer hover:border-[var(--theme-accent)] transition-all bg-[var(--theme-bg-card)]">
-                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label className="inline-flex items-center gap-2 px-4 py-2 rounded-sm border border-[var(--theme-border-control)] cursor-pointer hover:border-[var(--theme-border)] transition-colors text-sm font-semibold">
+                  <svg className="w-5 h-5 text-[var(--theme-ink-soft)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                   </svg>
                   <span className="text-sm">PDF 첨부</span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">(최대 20MB)</span>
+                  <span className="text-xs text-[var(--theme-ink-soft)]">(최대 20MB)</span>
                   <input
                     type="file"
                     className="hidden"
@@ -953,7 +938,7 @@ function WritePageContent() {
                         className="flex items-center justify-between p-3 border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]"
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <svg className="w-8 h-8 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <svg className="w-8 h-8 text-[var(--theme-ink-soft)] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -965,7 +950,7 @@ function WritePageContent() {
                             <p className="text-sm font-bold truncate">
                               {file.name}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-[var(--theme-ink-soft)]">
                               {(file.size / 1024 / 1024).toFixed(2)} MB
                             </p>
                           </div>
@@ -973,7 +958,7 @@ function WritePageContent() {
                         <button
                           type="button"
                           onClick={() => removeFile(index)}
-                          className="ml-3 -mr-2 -my-2 p-2 sm:mr-0 sm:my-0 sm:p-0 text-red-500 hover:text-red-700 dark:hover:text-red-400 transition-colors"
+                          className="ml-3 -mr-2 -my-2 p-2 sm:mr-0 sm:my-0 sm:p-0 text-[var(--color-error)] hover:opacity-80 transition-opacity"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -989,11 +974,11 @@ function WritePageContent() {
             {/* 업로드 진행 상태 */}
             {isUploading && (
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                <div className="flex justify-between text-xs text-[var(--theme-ink-soft)]">
                   <span>이미지 업로드 중...</span>
                   <span>{Math.round(uploadProgress)}%</span>
                 </div>
-                <div className="w-full bg-[var(--theme-border-muted)] h-3 border border-[var(--theme-border-muted)]">
+                <div className="w-full bg-[var(--theme-border-muted)] h-1.5">
                   <div
                     className="bg-[var(--theme-accent)] h-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}

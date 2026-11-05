@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth/session';
 import { parseEditablePostFields } from './payload';
+import { invalidatePosts } from '@/lib/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -41,6 +42,8 @@ export async function POST(request: NextRequest) {
       returning id
     `;
 
+    // 목록·홈·프로필 캐시 즉시 비움 (lib/cache.ts) — 화면이 따로 갱신 요청을 보내지 않아도 된다
+    invalidatePosts(rows[0].id as string);
     return NextResponse.json({ success: true, id: rows[0].id as string });
   } catch (error) {
     console.error('[me/posts POST] error:', error);

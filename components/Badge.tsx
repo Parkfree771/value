@@ -12,10 +12,10 @@ const variantStyles = {
   buy: 'border border-[var(--color-buy)] text-[var(--color-buy)]',
   sell: 'border border-[var(--color-sell)] text-[var(--color-sell)]',
   hold: 'border border-[var(--color-hold)] text-[var(--color-hold)]',
-  default: 'bg-gray-500/15 text-gray-400 border border-gray-600',
-  success: 'bg-green-500/15 text-green-400 border border-green-500',
-  warning: 'bg-yellow-500/15 text-yellow-400 border border-yellow-500',
-  danger: 'bg-red-500/15 text-red-400 border border-red-500',
+  default: 'border border-[var(--theme-border-control)] text-[var(--theme-ink-soft)]',
+  success: 'border border-[var(--color-success)] text-[var(--color-success)]',
+  warning: 'border border-[var(--color-warning)] text-[var(--color-warning)]',
+  danger: 'border border-[var(--color-error)] text-[var(--color-error)]',
 } as const;
 
 const sizeStyles = {

@@ -1,9 +1,47 @@
-﻿import { Metadata } from 'next';
+import { Metadata } from 'next';
 import { Report } from '@/types/report';
-import { formatReturnRate } from './stockPrice';
+import { shortStockName } from '@/utils/reportDisplay';
 
-const SITE_NAME = 'AntStreet';
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
+/**
+ * 검색결과·공유용 종목명 — 사이트 카드와 같은 약칭
+ *   "MICRON TECHNOLOGY INC" → "마이크론", "FUTU HOLDINGS LIMITED SPON ADS…" → "Futu", "…ETF0000" → "…ETF"
+ */
+export function seoStockName(name: string, ticker?: string): string {
+  return shortStockName((name || '').replace(/(ETF|ETN)0+$/, '$1'), ticker) || ticker || '';
+}
+
+export const SITE_NAME = 'AntStreet';
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr').replace(/\/$/, '');
+
+/** 수익률 표기 (+12.3% / -4.5%) — 검색결과·카드에선 소수 한 자리가 읽기 좋다 */
+export function formatRate(rate: number, digits = 1): string {
+  if (!Number.isFinite(rate)) return '-';
+  const fixed = rate.toFixed(digits);
+  // -0.0% 방지
+  if (Number(fixed) === 0) return `${(0).toFixed(digits)}%`;
+  return `${rate > 0 ? '+' : ''}${fixed}%`;
+}
+
+/**
+ * 리포트 외 페이지(구루·프로필·랭킹) 공용 OG 카드 URL — /api/og/card
+ * metrics 첫 항목이 가장 크게 그려지므로 수익률을 맨 앞에 둔다.
+ */
+// v1: 첫 버전 (2026-11-05)
+const OG_CARD_VERSION = 'v1';
+export function ogCardUrl(opts: {
+  kicker?: string;
+  title: string;
+  sub?: string;
+  metrics?: { label: string; value: string }[];
+}): string {
+  const params = new URLSearchParams();
+  if (opts.kicker) params.set('k', opts.kicker);
+  params.set('t', opts.title);
+  if (opts.sub) params.set('s', opts.sub);
+  for (const m of opts.metrics ?? []) params.append('m', `${m.label}~${m.value}`);
+  params.set('v', OG_CARD_VERSION);
+  return `${SITE_URL}/api/og/card?${params.toString()}`;
+}
 
 const THEME_NAMES: Record<string, string> = {
   'physical-ai': '피지컬AI',
@@ -82,6 +120,7 @@ function buildKeywords(report: Report): string[] {
 
   const baseKeywords = [
     report.stockName,
+    seoStockName(report.stockName, report.ticker),
     ...tickers,
     // 종목명 + 의도 (한국 개미가 실제로 치는 패턴)
     `${report.stockName} 주가`,
@@ -125,26 +164,45 @@ function buildContentPreview(content: string, maxLen = 90): string {
     .substring(0, maxLen);
 }
 
-function relativeTimeLabel(createdAt: string): string {
-  const created = new Date(createdAt);
-  const now = new Date();
-  const days = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24));
-  if (days <= 0) return '오늘';
-  if (days === 1) return '어제';
-  if (days < 30) return `${days}일 전`;
-  if (days < 365) return `${Math.floor(days / 30)}개월 전`;
-  return `${Math.floor(days / 365)}년 전`;
+/** 작성일(YYYY-MM-DD) 이후 경과 일수 (KST 기준 오늘) */
+function daysSince(createdAt: string): number {
+  const created = new Date(`${createdAt.split('T')[0]}T00:00:00+09:00`).getTime();
+  if (Number.isNaN(created)) return 0;
+  return Math.max(0, Math.floor((Date.now() - created) / 86400000));
 }
 
-function formatPrice(price: number): string {
+function heldLabel(days: number): string {
+  if (days <= 0) return '오늘 작성';
+  if (days < 365) return `작성 후 ${days}일`;
+  const years = Math.floor(days / 365);
+  const months = Math.floor((days % 365) / 30);
+  return months > 0 ? `작성 후 ${years}년 ${months}개월` : `작성 후 ${years}년`;
+}
+
+function reportCurrency(report: Report): string {
+  return (report.stockData?.currency || (report.exchange === 'KRX' ? 'KRW' : 'USD')).toUpperCase();
+}
+
+function formatPrice(price: number, currency = 'KRW'): string {
   if (!price) return '-';
-  return price.toLocaleString();
+  switch (currency) {
+    case 'KRW':
+      return `${Math.round(price).toLocaleString('ko-KR')}원`;
+    case 'JPY':
+      return `¥${Math.round(price).toLocaleString('en-US')}`;
+    case 'HKD':
+      return `HK$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+    case 'CNY':
+      return `¥${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+    default:
+      return `$${price.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+  }
 }
 
 /**
  * 리포트 상세 페이지의 동적 메타데이터를 생성합니다.
- * - 수익률은 매번 렌더 시 최신값 반영 (ISR 1시간)
- * - 종목명/티커/포지션/테마 키워드 폭넓게 포함
+ * - 수익률이 제목 맨 앞 — 검색결과·공유 미리보기에서 가장 먼저 읽히도록
+ * - 설명 첫 문장도 수익률 + 보유 기간 + 작성가→현재가 (결과로 검증된 리포트라는 게 이 사이트의 핵심)
  * - article:modified_time으로 검색엔진에 변경 알림
  */
 export function generateReportMetadata(
@@ -152,31 +210,33 @@ export function generateReportMetadata(
   currentReturnRate?: number,
 ): Metadata {
   const returnRate = currentReturnRate ?? report.returnRate;
-  const returnRateText = formatReturnRate(returnRate);
+  const rateText = formatRate(returnRate);
   const op = opinionLabel(report.opinion);
   const pos = positionLabel(report.positionType);
-  const timeAgo = relativeTimeLabel(report.createdAt);
+  const days = daysSince(report.createdAt);
+  const currency = reportCurrency(report);
+  const stock = seoStockName(report.stockName, report.ticker);
 
-  // 제목: layout template "%s | AntStreet" 가 브랜드를 뒤에 붙이므로 여기선 본문만
-  // 종목코드와 수익률을 포함하여 검색 매칭 강화 (한국 검색결과는 페이지명이 앞이어야 CTR↑)
-  const titleCore = `${report.title}`;
-  const titleSuffix =
-    report.stockName && !report.title.includes(report.stockName)
-      ? ` - ${report.stockName}(${report.ticker}) ${op}의견 ${returnRateText}`
-      : ` (${returnRateText})`;
-  const title = `${titleCore}${titleSuffix}`;
+  // 제목: layout template "AntStreet | %s" 가 브랜드를 앞에 붙이므로 여기선 본문만.
+  //   [+32.5%] 삼성전자 매수 · HBM 수혜 본격화
+  // 작성 당일(수익률 0)엔 숫자 대신 의견만 — "[0.0%]"는 정보가 없다.
+  const hasResult = days > 0 || Math.abs(returnRate) >= 0.05;
+  const head = stock && !report.title.includes(stock) ? `${stock} ${op} · ${report.title}` : report.title;
+  const title = hasResult ? `[${rateText}] ${head}` : head;
 
-  // 설명: 핵심 가격 정보 + 본문 미리보기
+  // 설명: 수익률 → 가격 → 근거 미리보기 → 작성자
   const priceLine = report.initialPrice
-    ? `작성가 ${formatPrice(report.initialPrice)} → 현재가 ${formatPrice(report.currentPrice)}`
+    ? `작성가 ${formatPrice(report.initialPrice, currency)} → 현재가 ${formatPrice(report.currentPrice, currency)}`
     : '';
-  const targetLine = report.targetPrice ? ` (목표 ${formatPrice(report.targetPrice)})` : '';
-  const preview = buildContentPreview(report.content, 80);
+  const targetLine = report.targetPrice ? `, 목표가 ${formatPrice(report.targetPrice, currency)}` : '';
+  const preview = buildContentPreview(report.content, 90);
+  const tickerPart = report.ticker && report.ticker !== stock ? `(${report.ticker})` : '';
   const description = [
-    `${report.stockName}(${report.ticker}) ${op} 리포트.`,
-    priceLine ? `${priceLine}${targetLine}, 수익률 ${returnRateText}.` : `수익률 ${returnRateText}.`,
-    preview ? `${preview}...` : '',
-    `| ${report.author} 작성, ${timeAgo}`,
+    hasResult ? `수익률 ${rateText} (${heldLabel(days)}).` : '오늘 작성 — 작성가 대비 수익률을 매일 추적합니다.',
+    priceLine ? `${priceLine}${targetLine}.` : '',
+    `${stock}${tickerPart} ${op} 의견 —`,
+    preview ? `${preview}…` : report.title,
+    `| ${report.author}`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -215,7 +275,7 @@ export function generateReportMetadata(
           url: ogImageUrl,
           width: 1200,
           height: 630,
-          alt: `${report.stockName}(${report.ticker}) ${op} ${returnRateText} - ${report.title}`,
+          alt: `${stock}(${report.ticker}) ${op} 리포트 수익률 ${rateText} - ${report.title}`,
           type: 'image/png',
         },
       ],
@@ -224,7 +284,6 @@ export function generateReportMetadata(
       card: 'summary_large_image',
       title,
       description,
-      creator: `@${report.author}`,
       images: [ogImageUrl],
     },
     robots: {
@@ -278,7 +337,8 @@ export function generateReportJsonLd(
   const returnRate = currentReturnRate ?? report.returnRate;
   const op = opinionLabel(report.opinion);
   const themeTags = (report.themes || []).map((t) => THEME_NAMES[t] || t);
-  const ogImageUrl = `${SITE_URL}/api/og/site`;
+  // 공유 미리보기와 같은 리포트 카드 (수익률이 크게 들어간 이미지)
+  const ogImageUrl = buildOgImageUrl(report, returnRate);
   const cleanContent = buildContentPreview(report.content, 5000);
   const lastModified =
     report.updatedAt && report.updatedAt.length > 0
@@ -290,8 +350,8 @@ export function generateReportJsonLd(
       '@type': 'NewsArticle',
       '@id': `${SITE_URL}/reports/${report.id}#article`,
       headline: report.title.substring(0, 110),
-      alternativeHeadline: `${report.stockName}(${report.ticker}) ${op} - 수익률 ${returnRate.toFixed(2)}%`,
-      description: buildContentPreview(report.content, 200),
+      alternativeHeadline: `${seoStockName(report.stockName, report.ticker)}(${report.ticker}) ${op} 리포트 · 수익률 ${formatRate(returnRate)}`,
+      description: `수익률 ${formatRate(returnRate)}. ${buildContentPreview(report.content, 180)}`,
       author: {
         '@type': 'Person',
         name: report.author,
@@ -310,7 +370,7 @@ export function generateReportJsonLd(
       datePublished: new Date(report.createdAt).toISOString(),
       dateModified: lastModified,
       inLanguage: 'ko-KR',
-      image: [ogImageUrl],
+      image: [{ '@type': 'ImageObject', url: ogImageUrl, width: 1200, height: 630 }],
       mainEntityOfPage: {
         '@type': 'WebPage',
         '@id': `${SITE_URL}/reports/${report.id}`,
@@ -399,7 +459,7 @@ export function generateHomeMetadata(): Metadata {
   return {
     title: `${SITE_NAME} - 주식 리포트 & 수익률 인증 플랫폼`,
     description:
-      '실시간 수익률 검증이 가능한 주식 리포트 플랫폼. 투자자들의 매수/매도 리포트와 실제 수익률을 확인하세요. 개미 투자자들의 집단 지혜로 함께 성장하세요.',
+      '작성가 대비 수익률이 매일 검증되는 주식 리포트 플랫폼. 투자자들의 매수/매도 리포트와 실제 수익률을 확인하세요. 개미 투자자들의 집단 지혜로 함께 성장하세요.',
     keywords: [
       '주식 투자',
       '주식 리포트',
@@ -414,7 +474,7 @@ export function generateHomeMetadata(): Metadata {
     openGraph: {
       type: 'website',
       title: `${SITE_NAME} - 주식 리포트 & 수익률 인증 플랫폼`,
-      description: '실시간 수익률 검증이 가능한 주식 리포트 플랫폼',
+      description: '작성가 대비 수익률이 매일 검증되는 주식 리포트 플랫폼',
       url: SITE_URL,
       siteName: SITE_NAME,
       locale: 'ko_KR',

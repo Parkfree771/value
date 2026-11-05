@@ -3,7 +3,7 @@
 // CASCADE로 post_likes, comments, comment_likes 자동 삭제.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
+import { invalidatePosts } from '@/lib/cache';
 import { sql } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth/session';
 
@@ -46,9 +46,7 @@ export async function DELETE(
       return NextResponse.json({ error: '리포트 삭제 중 오류가 발생했습니다.' }, { status: 500 });
     }
 
-    revalidatePath('/');
-    revalidatePath('/ranking');
-    revalidatePath('/search');
+    invalidatePosts(id); // 상세(→404)·목록·홈 즉시 반영
 
     return NextResponse.json({ success: true, message: '리포트가 삭제되었습니다.' });
   } catch (error) {

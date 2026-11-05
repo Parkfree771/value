@@ -195,13 +195,13 @@ export default function OnboardingPage() {
   const PixelCheck = ({ checked, size = 'sm' }: { checked: boolean; size?: 'sm' | 'lg' }) => {
     const sizeClass = size === 'lg' ? 'w-6 h-6' : 'w-5 h-5';
     return (
-      <div className={`${sizeClass} rounded-sm border flex items-center justify-center flex-shrink-0 transition-all ${
+      <div className={`${sizeClass} rounded-sm border flex items-center justify-center flex-shrink-0 transition-colors ${
         checked
-          ? 'bg-[var(--theme-accent)] border-[var(--theme-accent-dark)]'
-          : 'border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)]'
+          ? 'bg-[var(--foreground)] border-[var(--foreground)] text-[var(--background)]'
+          : 'border-[var(--theme-border-control)] bg-[var(--theme-bg-input)]'
       }`}>
         {checked && (
-          <svg className={size === 'lg' ? 'w-3.5 h-3.5' : 'w-3 h-3'} fill="none" viewBox="0 0 24 24" stroke="white" strokeWidth={3}>
+          <svg className={size === 'lg' ? 'w-3.5 h-3.5' : 'w-3 h-3'} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         )}
@@ -212,7 +212,7 @@ export default function OnboardingPage() {
   if (!authReady) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="font-sans text-sm text-gray-500 dark:text-gray-400">로딩 중...</div>
+        <div className="font-sans text-sm text-[var(--theme-ink-soft)]">로딩 중...</div>
       </div>
     );
   }
@@ -225,43 +225,44 @@ export default function OnboardingPage() {
     <div className="min-h-[calc(100vh-200px)] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-[480px]">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="headline text-2xl font-bold mb-2">
+        <div className="text-center mb-6">
+          <p className="kicker mb-1">AntStreet</p>
+          <h1 className="headline text-[26px] sm:text-[28px] mb-2">
             회원가입
           </h1>
-          <p className="font-sans text-xs text-gray-500 dark:text-gray-400">
+          <p className="font-sans text-xs text-[var(--theme-ink-soft)]">
             서비스 이용을 위해 정보를 입력해주세요
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="card-base">
+        <div className="border-t-2 border-[var(--theme-border)]">
           {error && (
-            <div className="mx-4 sm:mx-6 mt-4 sm:mt-6 p-3 rounded-sm border border-[var(--theme-accent)] bg-red-500/10 font-sans text-xs text-red-600 dark:text-red-400">
+            <div className="mt-4 px-3 py-2.5 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)] text-xs text-[var(--color-error)]">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             {/* 계정 정보 */}
-            <div className="p-4 sm:p-6 border-b-2 border-[var(--theme-border-muted)]">
-              <h2 className="pixel-label mb-4">계정 정보</h2>
+            <div className="py-5 border-b border-[var(--theme-border-muted)]">
+              <h2 className="pixel-label mb-3">계정 정보</h2>
               <div className="flex items-center gap-3 p-3 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)]">
-                <div className="w-10 h-10 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg-card)] flex items-center justify-center flex-shrink-0">
-                  <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="w-10 h-10 border border-[var(--theme-border-muted)] bg-[var(--background)] flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-[var(--theme-ink-soft)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-sans text-sm font-bold truncate">{user.email}</p>
-                  <p className="font-sans text-xs text-gray-500 dark:text-gray-400">소셜 로그인 계정</p>
+                  <p className="font-sans text-xs text-[var(--theme-ink-soft)]">소셜 로그인 계정</p>
                 </div>
               </div>
             </div>
 
             {/* 닉네임 */}
-            <div className="p-4 sm:p-6 border-b-2 border-[var(--theme-border-muted)]">
-              <h2 className="pixel-label mb-4">닉네임</h2>
+            <div className="py-5 border-b border-[var(--theme-border-muted)]">
+              <h2 className="pixel-label mb-3">닉네임</h2>
               <div>
                 <input
                   type="text"
@@ -275,30 +276,30 @@ export default function OnboardingPage() {
                 <div className="mt-2 flex items-center justify-between">
                   <div>
                     {nicknameChecking && (
-                      <p className="font-sans text-xs text-[var(--theme-accent)]">확인 중...</p>
+                      <p className="font-sans text-xs text-[var(--theme-ink-soft)]">확인 중...</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === true && (
-                      <p className="font-sans text-xs text-green-600 dark:text-green-400">사용 가능한 닉네임입니다</p>
+                      <p className="font-sans text-xs text-[var(--color-success)]">사용 가능한 닉네임입니다</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === false && nicknameError && (
-                      <p className="font-sans text-xs text-red-600 dark:text-red-400">{nicknameError}</p>
+                      <p className="font-sans text-xs text-[var(--color-error)]">{nicknameError}</p>
                     )}
                     {!nicknameChecking && nicknameAvailable === null && formData.nickname.length === 0 && (
-                      <p className="font-sans text-xs text-gray-400">한글, 영문, 숫자 2-12자</p>
+                      <p className="font-sans text-xs text-[var(--theme-ink-soft)]">한글, 영문, 숫자 2-12자</p>
                     )}
                   </div>
-                  <span className="font-sans text-xs text-gray-400">{formData.nickname.length}/12</span>
+                  <span className="font-mono text-xs tabular-nums text-[var(--theme-ink-soft)]">{formData.nickname.length}/12</span>
                 </div>
               </div>
             </div>
 
             {/* 약관 동의 */}
-            <div className="p-4 sm:p-6">
-              <h2 className="pixel-label mb-4">약관 동의</h2>
+            <div className="py-5">
+              <h2 className="pixel-label mb-3">약관 동의</h2>
 
               {/* 전체 동의 */}
               <div
-                className="flex items-center gap-3 p-3 sm:p-4 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)] mb-3 cursor-pointer"
+                className="flex items-center gap-3 p-3 sm:p-4 border border-[var(--theme-border)] mb-3 cursor-pointer"
                 onClick={() => handleAllAgree(!allAgreed)}
               >
                 <PixelCheck checked={allAgreed} size="lg" />
@@ -306,23 +307,23 @@ export default function OnboardingPage() {
               </div>
 
               {/* 개별 약관 */}
-              <div className="rounded-sm border border-[var(--theme-border-muted)] divide-y-[2px] divide-[var(--theme-border-muted)] overflow-hidden">
+              <div className="border-y border-[var(--theme-border-muted)] divide-y divide-[var(--theme-border-muted)]">
                 {/* 이용약관 */}
                 <div>
-                  <div className="flex items-center justify-between p-3 sm:p-4">
+                  <div className="flex items-center justify-between py-3 sm:py-3.5 px-1">
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
                       onClick={() => setFormData(prev => ({ ...prev, termsAgreed: !prev.termsAgreed }))}
                     >
                       <PixelCheck checked={formData.termsAgreed} />
                       <span className="font-sans text-xs">
-                        이용약관 동의 <span className="text-[var(--theme-accent)] font-bold">(필수)</span>
+                        이용약관 동의 <span className="text-[var(--theme-orange)] font-bold">(필수)</span>
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => toggleSection('terms')}
-                      className="text-gray-400 hover:text-[var(--theme-accent)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
+                      className="text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
                     >
                       <svg className={`w-5 h-5 transition-transform ${expandedSection === 'terms' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -330,12 +331,12 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                   {expandedSection === 'terms' && (
-                    <div className="px-4 pb-4 pt-0">
-                      <div className="p-3 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)] font-sans text-xs text-gray-600 dark:text-gray-400 space-y-1">
+                    <div className="px-1 pb-3 pt-0">
+                      <div className="p-3 bg-[var(--theme-bg)] font-sans text-xs text-[var(--theme-ink-soft)] space-y-1">
                         <p>- 투자 리포트 작성 및 공유 서비스 이용</p>
                         <p>- 허위 정보, 명예훼손, 시세조종 목적 게시물 금지</p>
                         <p>- 작성한 리포트의 저작권은 회원에게 귀속</p>
-                        <Link href="/terms" target="_blank" className="inline-block text-[var(--theme-accent)] hover:underline mt-2">
+                        <Link href="/terms" target="_blank" className="inline-block font-bold text-[var(--foreground)] underline underline-offset-4 mt-2">
                           전문 보기
                         </Link>
                       </div>
@@ -345,20 +346,20 @@ export default function OnboardingPage() {
 
                 {/* 개인정보 수집 및 이용 */}
                 <div>
-                  <div className="flex items-center justify-between p-3 sm:p-4">
+                  <div className="flex items-center justify-between py-3 sm:py-3.5 px-1">
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
                       onClick={() => setFormData(prev => ({ ...prev, privacyAgreed: !prev.privacyAgreed }))}
                     >
                       <PixelCheck checked={formData.privacyAgreed} />
                       <span className="font-sans text-xs">
-                        개인정보 수집 및 이용 동의 <span className="text-[var(--theme-accent)] font-bold">(필수)</span>
+                        개인정보 수집 및 이용 동의 <span className="text-[var(--theme-orange)] font-bold">(필수)</span>
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => toggleSection('privacy')}
-                      className="text-gray-400 hover:text-[var(--theme-accent)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
+                      className="text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
                     >
                       <svg className={`w-5 h-5 transition-transform ${expandedSection === 'privacy' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -366,26 +367,26 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                   {expandedSection === 'privacy' && (
-                    <div className="px-4 pb-4 pt-0">
-                      <div className="p-3 rounded-sm border border-[var(--theme-border-muted)] bg-[var(--theme-bg)] font-sans text-xs text-gray-600 dark:text-gray-400">
+                    <div className="px-1 pb-3 pt-0">
+                      <div className="p-3 bg-[var(--theme-bg)] font-sans text-xs text-[var(--theme-ink-soft)]">
                         <table className="w-full">
                           <tbody className="divide-y divide-[var(--theme-border-muted)]">
                             <tr>
-                              <td className="py-1.5 text-gray-500 dark:text-gray-500 w-20">수집 항목</td>
+                              <td className="py-1.5 text-[var(--theme-ink-soft)] w-20">수집 항목</td>
                               <td className="py-1.5">이메일, 닉네임, 프로필 사진(선택)</td>
                             </tr>
                             <tr>
-                              <td className="py-1.5 text-gray-500 dark:text-gray-500">수집 목적</td>
+                              <td className="py-1.5 text-[var(--theme-ink-soft)]">수집 목적</td>
                               <td className="py-1.5">회원 식별, 서비스 제공</td>
                             </tr>
                             <tr>
-                              <td className="py-1.5 text-gray-500 dark:text-gray-500">보유 기간</td>
+                              <td className="py-1.5 text-[var(--theme-ink-soft)]">보유 기간</td>
                               <td className="py-1.5">탈퇴 시까지 (일부 정보 5년 보관)</td>
                             </tr>
                           </tbody>
                         </table>
-                        <p className="text-[11px] text-gray-400 mt-2">* 동의 거부 시 서비스 이용이 제한됩니다.</p>
-                        <Link href="/privacy" target="_blank" className="inline-block text-[var(--theme-accent)] hover:underline mt-2">
+                        <p className="text-[11px] text-[var(--theme-ink-soft)] mt-2">* 동의 거부 시 서비스 이용이 제한됩니다.</p>
+                        <Link href="/privacy" target="_blank" className="inline-block font-bold text-[var(--foreground)] underline underline-offset-4 mt-2">
                           전문 보기
                         </Link>
                       </div>
@@ -395,20 +396,20 @@ export default function OnboardingPage() {
 
                 {/* 투자 면책 조항 */}
                 <div>
-                  <div className="flex items-center justify-between p-3 sm:p-4">
+                  <div className="flex items-center justify-between py-3 sm:py-3.5 px-1">
                     <div
                       className="flex items-center gap-3 flex-1 cursor-pointer"
                       onClick={() => setFormData(prev => ({ ...prev, investmentDisclaimerAgreed: !prev.investmentDisclaimerAgreed }))}
                     >
                       <PixelCheck checked={formData.investmentDisclaimerAgreed} />
                       <span className="font-sans text-xs">
-                        투자 면책 조항 동의 <span className="text-[var(--theme-accent)] font-bold">(필수)</span>
+                        투자 면책 조항 동의 <span className="text-[var(--theme-orange)] font-bold">(필수)</span>
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => toggleSection('disclaimer')}
-                      className="text-gray-400 hover:text-[var(--theme-accent)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
+                      className="text-[var(--theme-ink-soft)] hover:text-[var(--foreground)] -m-1 p-2 sm:m-0 sm:p-1 transition-colors"
                     >
                       <svg className={`w-5 h-5 transition-transform ${expandedSection === 'disclaimer' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -416,14 +417,14 @@ export default function OnboardingPage() {
                     </button>
                   </div>
                   {expandedSection === 'disclaimer' && (
-                    <div className="px-4 pb-4 pt-0">
-                      <div className="p-3 rounded-sm border border-[var(--theme-accent)] bg-red-500/10 font-sans text-xs text-red-700 dark:text-red-400 space-y-1">
-                        <p className="font-bold mb-2">[필독] 투자 책임 안내</p>
+                    <div className="px-1 pb-3 pt-0">
+                      <div className="p-3 border-l-2 border-[var(--color-error)] bg-[var(--theme-bg)] font-sans text-xs text-[var(--foreground)] space-y-1">
+                        <p className="font-bold mb-2 text-[var(--color-error)]">[필독] 투자 책임 안내</p>
                         <p>- 본 사이트의 정보는 투자 권유가 아닙니다</p>
                         <p>- 투자 손실의 책임은 전적으로 본인에게 있습니다</p>
                         <p>- 과거 수익률이 미래 수익을 보장하지 않습니다</p>
                         <p>- 투자 전 전문가 상담을 권장합니다</p>
-                        <Link href="/disclaimer" target="_blank" className="inline-block text-[var(--theme-accent)] hover:underline mt-2 font-bold">
+                        <Link href="/disclaimer" target="_blank" className="inline-block font-bold text-[var(--foreground)] underline underline-offset-4 mt-2 font-bold">
                           전문 보기
                         </Link>
                       </div>
@@ -432,14 +433,14 @@ export default function OnboardingPage() {
                 </div>
 
                 {/* 마케팅 정보 수신 */}
-                <div className="flex items-center justify-between p-3 sm:p-4">
+                <div className="flex items-center justify-between py-3 sm:py-3.5 px-1">
                   <div
                     className="flex items-center gap-3 flex-1 cursor-pointer"
                     onClick={() => setFormData(prev => ({ ...prev, marketingAgreed: !prev.marketingAgreed }))}
                   >
                     <PixelCheck checked={formData.marketingAgreed} />
                     <span className="font-sans text-xs">
-                      마케팅 정보 수신 동의 <span className="text-gray-400">(선택)</span>
+                      마케팅 정보 수신 동의 <span className="text-[var(--theme-ink-soft)]">(선택)</span>
                     </span>
                   </div>
                 </div>
@@ -447,13 +448,13 @@ export default function OnboardingPage() {
             </div>
 
             {/* 가입 버튼 */}
-            <div className="p-4 sm:p-6 pt-0">
+            <div className="pb-2">
               <button
                 type="submit"
                 disabled={loading || !allRequiredAgreed || nicknameAvailable !== true}
-                className={`w-full font-sans py-3.5 sm:py-3 font-bold text-sm rounded-sm transition-all ${
+                className={`w-full font-sans py-3.5 sm:py-3 font-bold text-sm rounded-sm transition-colors ${
                   loading || !allRequiredAgreed || nicknameAvailable !== true
-                    ? 'bg-[var(--theme-border-muted)] text-gray-500 border border-[var(--theme-border-muted)] cursor-not-allowed'
+                    ? 'bg-[var(--theme-bg)] text-[var(--theme-ink-soft)] border border-[var(--theme-border-muted)] cursor-not-allowed'
                     : 'btn-primary'
                 }`}
               >
@@ -464,7 +465,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center font-sans text-xs text-gray-400 dark:text-gray-500">
+        <p className="mt-6 text-center font-sans text-xs text-[var(--theme-ink-soft)]">
           가입 시 입력한 정보는 안전하게 암호화되어 보관됩니다
         </p>
       </div>

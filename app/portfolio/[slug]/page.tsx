@@ -9,6 +9,7 @@ import {
   Raw13FHolding,
 } from '@/lib/sec13f/types';
 import { compareHoldings } from '@/lib/sec13f/compareHoldings';
+import { summarizeGuruPortfolio } from '@/lib/sec13f/portfolioSummary';
 import PortfolioView, { QuarterView } from './components/PortfolioView';
 import GuruDisclaimer from '@/app/guru-tracker/GuruDisclaimer';
 
@@ -16,7 +17,12 @@ const PORTFOLIOS_PATH = path.join(process.cwd(), 'data', 'guru-portfolios.json')
 
 // ISR — guru-portfolios.json은 분기 1회 변경(git push로 새 빌드), guru_prices는 매일 06:30 KST cron 갱신.
 // 1시간 주기면 cron 직후 최대 1시간 안에 새 가격 반영. (예전엔 cookies() 호출 때문에 매 요청 동적 렌더였음)
-export const revalidate = 3600;
+export const revalidate = 86400; // 하루짜리 안전장치 — 실제 갱신은 데이터가 바뀔 때 신호로 (lib/cache.ts)
+
+// 구루 9명은 빌드 때 미리 만든다 — 이후 갱신은 구루 가격 수집 완료 신호로 (lib/cache.ts invalidateGuru)
+export function generateStaticParams() {
+  return GURU_LIST.map((g) => ({ slug: g.name_en.toLowerCase().replace(/\s+/g, '-') }));
+}
 
 // 누적 스냅샷 스키마 (scripts/fetch-13f.ts와 동일)
 interface QuarterHolding {
@@ -161,6 +167,13 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
   ]);
 
   const quarterViews = portfolio ? buildQuarterViews(portfolio) : [];
+  // 최신 분기 — 공시일 종가 대비 현재가, 비중 가중 (메타데이터 제목·설명과 같은 숫자)
+  const returnSinceFiling = portfolio
+    ? summarizeGuruPortfolio(
+        portfolio,
+        Object.fromEntries(Object.entries(prices).map(([t, p]) => [t, p.currentPrice])),
+      ).returnSinceFiling
+    : null;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
@@ -182,7 +195,7 @@ export default async function PortfolioPage({ params }: { params: Promise<{ slug
           {guruInfo.name_kr}의 13F 공시 데이터를 준비하고 있습니다.
         </p>
       ) : (
-        <PortfolioView quarterViews={quarterViews} prices={prices} />
+        <PortfolioView quarterViews={quarterViews} prices={prices} returnSinceFiling={returnSinceFiling} />
       )}
 
       <GuruDisclaimer />
