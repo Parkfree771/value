@@ -7,12 +7,10 @@ import { getLookbackPrices, calcReportPeriodReturns } from '@/lib/priceLookback'
 import { calculateReturn } from '@/utils/calculateReturn';
 import { getBriefing } from '@/lib/briefing';
 import { getTickerData } from '@/lib/ticker';
-import { listBrokerReports } from '@/lib/brokerReports';
-import type { ReportSummary } from '@/types/report';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
-// ISR — 장 마감 수집 완료 · 글 작성/수정/삭제 · 전문가 추적 등록 때 revalidatePath("/") 로 즉시 다시 만든다 (lib/cache.ts)
+// ISR — 장 마감 수집 완료 · 글 작성/수정/삭제 때 revalidatePath("/") 로 즉시 다시 만든다 (lib/cache.ts)
 // 가격 수집은 아시아·미국 장 마감 후 각각 끝날 때 한 번씩 신호 → 그 외엔 캐시 유지 → egress 최소.
 // ※ cookies() 호출이 있으면 페이지가 자동으로 dynamic 으로 강제됨 → revalidate 무의미.
 //   그래서 세션 없이 서버 DB 클라이언트(lib/db)로 공개 데이터만 읽어 진짜 ISR 가능하도록 유지한다.
@@ -281,39 +279,6 @@ async function getInitialFeed(): Promise<FeedData | null> {
   }
 }
 
-/**
- * 홈 통합 순위용 — 전문가 추적(증권사 리포트)을 회원 리포트와 같은 모양으로.
- * 기간 수익률(1일·7일·한달)도 회원 글과 같은 규칙: 발간일 이후만, 그 전 등락은 리포트 성과가 아니다.
- * 제목 = 한 줄 요약, 작성자 자리 = 증권사, 작성가 = 작성 당시(발간일 종가).
- */
-async function getBrokerSummaries(): Promise<ReportSummary[]> {
-  const reports = await listBrokerReports();
-  if (reports.length === 0) return [];
-  const lookback = await getLookbackPrices([...new Set(reports.map((r) => r.ticker))]).catch(() => ({}) as Record<string, never>);
-  return reports.map((r) => ({
-    id: r.id,
-    href: `/expert/${r.id}`,
-    source: 'broker' as const,
-    title: r.headline,
-    author: r.broker,
-    stockName: r.stockName,
-    ticker: r.ticker,
-    exchange: r.exchange,
-    opinion: r.opinion,
-    returnRate: r.returnRate,
-    initialPrice: r.basePrice,
-    currentPrice: r.currentPrice,
-    createdAt: r.reportDate,
-    views: 0,
-    likes: 0,
-    stockData: { currency: r.currency },
-    ...calcReportPeriodReturns(
-      { currentPrice: r.currentPrice, initialPrice: r.basePrice, createdAt: r.reportDate },
-      lookback[r.ticker.toUpperCase()],
-    ),
-  }));
-}
-
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
@@ -356,11 +321,10 @@ const faqJsonLd = {
 // 서버 컴포넌트 - 초기 데이터를 서버에서 fetch하여 props로 전달
 export default async function HomePage() {
   // 피드 · 모닝 브리핑 · 지수 띠 — 모두 홈 ISR 재생성 때만 읽는다 (1시간 또는 cron/글쓰기 revalidate)
-  const [initialData, briefing, ticker, brokerReports] = await Promise.all([
+  const [initialData, briefing, ticker] = await Promise.all([
     getInitialFeed(),
     getBriefing(),
     getTickerData().catch(() => null),
-    getBrokerSummaries().catch(() => []),
   ]);
 
   return (
@@ -373,7 +337,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <HomeClient initialData={initialData} briefing={briefing} ticker={ticker} brokerReports={brokerReports} />
+      <HomeClient initialData={initialData} briefing={briefing} ticker={ticker} />
     </>
   );
 }

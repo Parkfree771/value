@@ -15,32 +15,14 @@ const OPINION_COLOR: Record<string, string> = { buy: 'text-[var(--color-up)]', s
 export type PodiumReport = Pick<
   ReportSummary,
   'id' | 'title' | 'author' | 'levelPoints' | 'stockName' | 'ticker' | 'exchange' | 'category' | 'opinion' | 'initialPrice' | 'currentPrice' | 'createdAt'
->
-  // 회원 리포트가 아닌 항목(증권사 리포트 등)은 링크 주소를 직접 준다. source 가 있으면 개인/증권사 표시
-  & { href?: string; source?: 'member' | 'broker' };
+>;
 export type PodiumItem = PodiumReport & { rank: number; displayRate: number };
-
-/** 개인 / 증권사 표시 — 홈 통합 순위처럼 두 출처가 섞일 때만 (source 가 있을 때) */
-export function SourceTag({ source }: { source?: 'member' | 'broker' }) {
-  if (!source) return null;
-  const broker = source === 'broker';
-  return (
-    <span
-      className={`flex-shrink-0 rounded-sm border px-1 py-px text-[10px] font-bold leading-none ${
-        broker ? 'border-[var(--theme-border)] text-[var(--foreground)]' : 'border-[var(--theme-border-muted)] text-[var(--theme-ink-soft)]'
-      }`}
-    >
-      {broker ? '증권사' : '개인'}
-    </span>
-  );
-}
 
 /** 상장사 · 매수/매도 */
 function StockTags({ report }: { report: PodiumReport }) {
   const ex = exchangeLabel(report.exchange);
   return (
     <>
-      <SourceTag source={report.source} />
       {ex && <span className="flex-shrink-0 text-xs text-[var(--theme-ink-soft)]">{ex}</span>}
       <span className={`flex-shrink-0 text-xs font-bold ${OPINION_COLOR[report.opinion] ?? 'text-[var(--theme-ink-soft)]'}`}>
         {OPINION_LABEL[report.opinion] ?? ''}
@@ -111,7 +93,7 @@ function LeadCard({ item }: { item: PodiumItem }) {
         </span>
       </div>
       <h3 className="headline mt-3 text-[19px] leading-snug line-clamp-2 break-keep">
-        <Link href={item.href ?? `/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
+        <Link href={`/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
       </h3>
       <div className="mt-2"><ByLine item={item} /></div>
       <PriceBox item={item} />
@@ -131,7 +113,7 @@ function RunnerCard({ item }: { item: PodiumItem }) {
         </span>
       </div>
       <h3 className="mt-1.5 truncate text-[13px] text-[var(--theme-ink-soft)]">
-        <Link href={item.href ?? `/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
+        <Link href={`/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
       </h3>
       <div className="mt-1 flex items-baseline gap-x-1.5 whitespace-nowrap overflow-hidden">
         <StockTags report={item} />
@@ -188,7 +170,7 @@ export function Spotlight({ items }: { items: PodiumItem[] }) {
       {items.map((item) => (
         <SpotlightFrame key={item.id} rank={item.rank} rate={item.displayRate} head={<StockLine report={item} nameClass="text-[length:var(--name-size)]" />}>
           <h3 className="headline mt-3 text-[17px] leading-snug line-clamp-2 break-keep">
-            <Link href={item.href ?? `/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
+            <Link href={`/reports/${item.id}`} className="group-hover:underline underline-offset-4">{item.title}</Link>
           </h3>
           <div className="mt-2 mb-auto"><ByLine item={item} /></div>
           <PriceBox item={item} />
@@ -268,7 +250,7 @@ export function RankRow({ report, rank, rate, rankChange = 0, detail, className 
 }) {
   return (
     <li className={`border-b border-[var(--theme-border-muted)] ${className}`}>
-      <Link href={report.href ?? `/reports/${report.id}`} className="group grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 py-2.5">
+      <Link href={`/reports/${report.id}`} className="group grid grid-cols-[2rem_minmax(0,1fr)_auto] items-center gap-x-2 py-2.5">
         <span className="font-serif text-lg font-black text-[var(--theme-ink-soft)]">{rank}</span>
         <span className="min-w-0">
           <span className="flex items-baseline gap-x-1.5 whitespace-nowrap overflow-hidden">

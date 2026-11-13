@@ -5,10 +5,9 @@
 //
 //   사건                               비우는 태그
 //   ──────────────────────────────    ───────────────────────────────
-//   장 마감 가격 수집 완료 (cron)       posts · broker · prices  + 홈
+//   장 마감 가격 수집 완료 (cron)       posts · prices  + 홈
 //   글 작성 · 수정 · 삭제               posts · post:{id}        + 홈
 //   좋아요 · 댓글                       post:{id}
-//   전문가 추적 등록 · 수정 · 삭제      broker                   + 홈
 //   구루 가격 수집 완료 (guru cron)     구루 목록 · 상세 경로
 //   모닝 브리핑 발행 (news 배치)        briefing                 + 홈 · 브리핑
 //
@@ -22,7 +21,6 @@ export const SAFETY_TTL = 60 * 60 * 24; // 1일
 export const TAG = {
   posts: 'posts', // 회원 리포트 목록·상세·프로필 통계 (가격 포함)
   post: (id: string) => `post:${id}`, // 리포트 하나
-  broker: 'broker', // 전문가 추적
   prices: 'prices', // 현재가 · 차트 종가 · 기간 비교 종가
   briefing: 'briefing', // 모닝 브리핑 · 지수 띠 (Object Storage 의 briefing.json · market.json)
 } as const;
@@ -48,13 +46,6 @@ export function invalidatePost(id: string) {
   revalidateTag(TAG.post(id), NOW);
 }
 
-/** 전문가 추적 등록 · 수정 · 삭제 */
-export function invalidateBroker() {
-  revalidateTag(TAG.broker, NOW);
-  refreshHome();
-  revalidatePath('/sitemap.xml');
-}
-
 /** 모닝 브리핑 발행 완료 (news 배치) — 브리핑 파일 캐시 + 홈 · 브리핑 페이지 */
 export function invalidateBriefing() {
   revalidateTag(TAG.briefing, NOW);
@@ -72,6 +63,5 @@ export function invalidateGuru() {
 export function invalidateMarket() {
   revalidateTag(TAG.prices, NOW);
   revalidateTag(TAG.posts, NOW);
-  revalidateTag(TAG.broker, NOW);
   refreshHome();
 }

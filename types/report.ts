@@ -36,10 +36,6 @@ export interface ReportSummary {
   themes?: string[];
   excerpt?: string;
   thumbnail?: string | null;
-  /** 홈 통합 순위용 — 회원 리포트(member) / 전문가 추적 증권사 리포트(broker). 없으면 회원 리포트 */
-  source?: 'member' | 'broker';
-  /** 회원 리포트가 아닌 항목의 링크 (예: /expert/{id}) */
-  href?: string;
 }
 
 export interface Report {

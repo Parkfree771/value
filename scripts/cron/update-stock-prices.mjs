@@ -3,7 +3,7 @@
 //   node scripts/cron/update-stock-prices.mjs --market=ASIA|US|ALL [--max=100] [--chunk=20] [--force]
 //
 // 장중 갱신은 하지 않는다. 사이트의 현재가·수익률은 "마지막 장 마감 종가" 기준.
-//   - 대상: 회원 리포트(posts) + 전문가 추적(broker_reports) 종목. 같은 종목은 한 번만 조회한다.
+//   - 대상: 회원 리포트(posts) 종목. 같은 종목은 한 번만 조회한다.
 //   - 아직 장중인 거래소 종목은 건너뛴다 (홍콩은 한국보다 늦게 마감).
 //   - 이미 이번 마감 이후 갱신된 종목은 건너뛴다 → 하루에 여러 번 예약해 두면
 //     GitHub 예약 실행이 밀리거나 한 번 빠져도 다음 실행이 남은 종목을 이어받는다.
@@ -48,12 +48,10 @@ console.log(`[CRON] ===== update-stock-prices (MARKET: ${marketType}, max: ${MAX
 
 const sql = makeDb();
 const posts = await sql`select ticker, exchange from posts`;
-// 전문가 추적(증권사 리포트) 종목도 같은 목록에 — 테이블이 아직 없으면(마이그레이션 전) 건너뜀
-const brokerReports = await sql`select ticker, exchange from broker_reports`.catch(() => []);
 
 // 종목코드:거래소 기준으로 한 번만
 const uniqueTickers = new Map();
-for (const p of [...posts, ...brokerReports]) {
+for (const p of posts) {
   const t = (p.ticker ?? '').toString().toUpperCase().trim();
   const e = (p.exchange ?? '').toString().toUpperCase().trim();
   if (!t || !e || !shouldProcessExchange(e)) continue;
@@ -95,7 +93,7 @@ const token = await getKISToken(sql);
 const fetched = [];
 const errors = [];
 
-/** 한 묶음 저장 — 현재가 · 차트 종가 · 회원 리포트 · 전문가 추적 */
+/** 한 묶음 저장 — 현재가 · 차트 종가 · 회원 리포트 */
 async function saveChunk(rows) {
   const tickers = rows.map((r) => r.ticker);
   const exchanges = rows.map((r) => r.exchange);
@@ -114,7 +112,6 @@ async function saveChunk(rows) {
   // 같은 종목의 모든 글이 SQL 안에서 각자의 작성가로 수익률을 계산 — ticker 수만큼만 처리
   const priceMap = JSON.stringify(Object.fromEntries(rows.map((r) => [r.ticker, r.price])));
   await sql`select update_posts_prices_batch(${priceMap}::jsonb)`;
-  if (brokerReports.length > 0) await sql`select update_broker_reports_prices(${priceMap}::jsonb)`;
 }
 
 /** 묶음 하나 조회 → 성공분 저장. 실패한 종목은 돌려준다 */
@@ -160,7 +157,7 @@ for (const f of failed) errors.push(`${f.ticker}: ${f.error}`);
 if (fetched.length > 0) {
   // 수익률이 바뀌었으니 레벨 점수도 갱신 (최고점만 올라감 — db/migrations/0003_user_levels.sql)
   await sql`select refresh_level_points()`;
-  console.log(`[CRON] 갱신 ${fetched.length}종목 (현재가 · 종가 · 회원 리포트 · 전문가 추적)`);
+  console.log(`[CRON] 갱신 ${fetched.length}종목 (현재가 · 종가 · 회원 리포트)`);
 }
 
 // 수집이 끝났으니 캐시 갱신 신호 한 번 — 가격이 들어간 모든 페이지·API (lib/cache.ts invalidateMarket)

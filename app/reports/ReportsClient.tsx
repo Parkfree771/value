@@ -10,7 +10,7 @@ import type { FeedPost } from '@/types/feed';
 import { inferCurrency } from '@/utils/currency';
 import { shortStockName } from '@/utils/reportDisplay';
 
-// 개인 리포트 — 전문가 추적(/expert)과 같은 틀: 분류 버튼 · 정렬 · 1·2·3위 카드 · 4위부터 순위표.
+// 개인 리포트 — 분류 버튼 · 정렬 · 1·2·3위 카드 · 4위부터 순위표.
 // 낮은 순이면 가장 많이 잃은 리포트가 1위 (역순위). 최신순·인기순은 리포트 카드 목록.
 
 type Region = 'all' | 'domestic' | 'global';

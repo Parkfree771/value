@@ -21,8 +21,6 @@ interface PriceChartProps {
   returnRate: number;
   positionType?: 'long' | 'short';
   currency?: string;
-  /** 기준선 이름 — 회원 리포트는 '작성가', 증권사 리포트는 '발간일 종가' */
-  baseLabel?: string;
 }
 
 interface PricePoint {
@@ -164,7 +162,6 @@ export default function PriceChart({
   returnRate,
   positionType = 'long',
   currency,
-  baseLabel = '작성가',
 }: PriceChartProps) {
   const [history, setHistory] = useState<PricePoint[] | null>(null);
   const [loading, setLoading] = useState(true);
@@ -410,7 +407,7 @@ export default function PriceChart({
       <div className="flex items-center gap-1.5 mt-3 text-[11px] sm:text-xs text-[var(--theme-ink-soft)]">
         <span className="inline-block w-3 h-px border-t border-dashed border-[var(--theme-ink-soft)]" />
         <span className="font-mono tabular-nums">
-          {baseLabel} {initialPrice.toLocaleString()}
+          작성가 {initialPrice.toLocaleString()}
           {currency ? ` ${currency}` : ''}
         </span>
         <span className="ml-auto">장 마감 종가 기준 · 매일 갱신</span>

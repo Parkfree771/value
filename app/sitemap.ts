@@ -2,7 +2,6 @@ import { MetadataRoute } from 'next';
 import { sql } from '@/lib/db';
 import { GURU_LIST } from './guru-tracker/types';
 import { loadGuruPortfolios } from '@/lib/sec13f/portfolioSummary';
-import { listBrokerReports } from '@/lib/brokerReports';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://antstreet.kr';
 
@@ -17,7 +16,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/briefing`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/search`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/guru-tracker`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/expert`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/indicators`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/disclaimer`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
@@ -74,13 +72,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  // 전문가 추적 — 수익률이 매일 바뀌므로 daily
-  const expertPages: MetadataRoute.Sitemap = (await listBrokerReports()).map((r) => ({
-    url: `${SITE_URL}/expert/${r.id}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 0.7,
-  }));
-
-  return [...staticPages, ...guruPages, ...expertPages, ...reportPages, ...userPages];
+  return [...staticPages, ...guruPages, ...reportPages, ...userPages];
 }

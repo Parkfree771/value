@@ -3,9 +3,9 @@ import { formatReturn, getReturnColorClass } from '@/utils/calculateReturn';
 import { formatPrice } from '@/utils/currency';
 import { heldDaysLabel } from '@/utils/reportDisplay';
 
-// 1·2·3위 카드 — 개인 리포트(/reports)와 전문가 추적(/expert)이 같은 모양을 쓴다.
+// 1·2·3위 카드 — 개인 리포트(/reports).
 // 같은 크기 카드 세 장. 읽는 순서를 하나로:
-//   순위 → 수익률(가장 크게) → 종목 · 의견 → 작성자(증권사) · 날짜 → 작성 당시 → 현재 → 목표
+//   순위 → 수익률(가장 크게) → 종목 · 의견 → 작성자 · 날짜 → 작성 당시 → 현재 → 목표
 
 export interface TopThreeItem {
   id: string;
@@ -14,7 +14,7 @@ export interface TopThreeItem {
   stockName: string;
   opinion: 'buy' | 'hold' | 'sell';
   opinionLabel: string;
-  byline: string; // 작성자 닉네임 또는 증권사
+  byline: string; // 작성자 닉네임
   date: string; // YYYY-MM-DD
   basePrice: number; // 작성 당시
   currentPrice: number;

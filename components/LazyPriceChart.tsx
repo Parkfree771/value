@@ -3,7 +3,7 @@
 import dynamic from 'next/dynamic';
 
 // 수익률 차트 — recharts 번들이 무거우므로 첫 화면 JS 에서 빼고 따로 불러온다.
-// 회원 리포트 상세 · 전문가 추적 상세가 같이 쓴다. 스켈레톤은 차트 카드 높이를 유지해 레이아웃이 밀리지 않게.
+// 회원 리포트 상세에서 쓴다. 스켈레톤은 차트 카드 높이를 유지해 레이아웃이 밀리지 않게.
 const LazyPriceChart = dynamic(() => import('@/components/PriceChart'), {
   ssr: false,
   loading: () => (

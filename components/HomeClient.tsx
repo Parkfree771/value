@@ -62,8 +62,6 @@ interface HomeClientProps {
   initialData: FeedData | null;
   briefing?: Briefing | null;
   ticker?: TickerResponse | null;
-  /** 홈 통합 순위에 섞을 전문가 추적(증권사) 리포트 — 아래 "모든 리포트" 피드에는 넣지 않는다 */
-  brokerReports?: ReportSummary[];
 }
 
 // FeedPost를 ReportSummary로 매핑하는 함수
@@ -98,7 +96,7 @@ function mapPostsToReports(posts: FeedPost[]): ReportSummary[] {
   }));
 }
 
-const HomeClient = memo(function HomeClient({ initialData, briefing = null, ticker = null, brokerReports = [] }: HomeClientProps) {
+const HomeClient = memo(function HomeClient({ initialData, briefing = null, ticker = null }: HomeClientProps) {
   // 서버에서 받은 initialData로 초기 상태 설정
   const [reports, setReports] = useState<ReportSummary[]>(() =>
     initialData?.posts ? mapPostsToReports(initialData.posts) : []
@@ -285,7 +283,7 @@ const HomeClient = memo(function HomeClient({ initialData, briefing = null, tick
       <MarketStrip ticker={ticker} />
       {/* 1면 — 수익률 1·2·3위 + 4~10위 / 모닝 브리핑 · 구루 / 최신 리포트 */}
       <div className="mt-5 md:mt-7">
-        <FrontPage reports={reports} brokerReports={brokerReports} briefing={briefing} />
+        <FrontPage reports={reports} briefing={briefing} />
       </div>
 
 

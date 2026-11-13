@@ -2,7 +2,6 @@
 //
 //   POST { scope: 'market' }   장 마감 가격 수집 완료 (price cron 이 마지막에 한 번)
 //   POST { scope: 'posts' }    회원 리포트 전체 (수동)
-//   POST { scope: 'broker' }   전문가 추적 (수동)
 //   POST { scope: 'guru' }     구루 가격 수집 완료 (guru cron)
 //   POST { scope: 'briefing' } 모닝 브리핑 발행 완료 (news 배치는 { path: '/briefing' } 로 보내도 같다)
 //   POST { path: '/…' }       특정 경로
@@ -14,7 +13,7 @@ import { revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdmin } from '@/lib/admin/adminVerify';
 import { checkRateLimit, getClientIP } from '@/lib/rate-limit';
-import { invalidateBriefing, invalidateBroker, invalidateGuru, invalidateMarket, invalidatePosts } from '@/lib/cache';
+import { invalidateBriefing, invalidateGuru, invalidateMarket, invalidatePosts } from '@/lib/cache';
 
 export async function POST(request: NextRequest) {
   const secret = request.headers.get('x-revalidate-secret');
@@ -39,7 +38,6 @@ export async function POST(request: NextRequest) {
 
     if (body.scope === 'market') invalidateMarket();
     else if (body.scope === 'posts') invalidatePosts();
-    else if (body.scope === 'broker') invalidateBroker();
     else if (body.scope === 'guru') invalidateGuru();
     // 뉴스 배치는 발행 후 { path: '/' }, { path: '/briefing' } 를 보낸다 — 브리핑 파일 캐시까지 비운다
     else if (body.scope === 'briefing' || body.path === '/briefing') invalidateBriefing();

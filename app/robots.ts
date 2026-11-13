@@ -19,7 +19,6 @@ export default function robots(): MetadataRoute.Robots {
     '/signup/',
     // 리포트 편집 페이지 (동적 경로)
     '/reports/*/edit',
-    '/expert/write',
   ];
 
   return {
